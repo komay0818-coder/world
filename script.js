@@ -2141,7 +2141,7 @@ function battleTick() {
 }
 
 function enemyAttackTick() {
-  if (!fighting) return;
+  if (battleScreen.classList.contains('hidden') || battle.dungeonComplete) return;
   const progress = getProgress();
   const character = JSON.parse(localStorage.getItem('stardust-character'));
   if (!character) return;
@@ -2231,7 +2231,7 @@ function openBattle() {
   }
   logBattle(isDungeon ? `◆ 進入${currentMap.name}，第 1／10 波：3 名精英來襲。全滅後自動進入下一波。` : `進入${currentMap.name}，${character.name}開始自動戰鬥。怪物移動速度 200%，重生約 3 秒。`);
   fighting = true;
-  document.querySelector('#battle-toggle').textContent = 'Ⅱ 暫停';
+  document.querySelector('#battle-toggle').textContent = 'Ⅱ 暫停攻擊';
   updateBattleUI();
   clearInterval(battleTimer);
   clearInterval(skillTimer);
@@ -2305,7 +2305,7 @@ document.querySelector('#leave-battle').addEventListener('click', () => {
   battleScreen.classList.add('hidden');
   menuScreen.classList.remove('hidden');
 });
-document.querySelector('#battle-toggle').addEventListener('click', () => { if (battle.dungeonComplete) return; fighting = !fighting; document.querySelector('#battle-toggle').textContent = fighting ? 'Ⅱ 暫停' : '▶ 繼續'; logBattle(fighting ? '自動戰鬥已繼續。' : '自動戰鬥已暫停。'); });
+document.querySelector('#battle-toggle').addEventListener('click', () => { if (battle.dungeonComplete) return; fighting = !fighting; document.querySelector('#battle-toggle').textContent = fighting ? 'Ⅱ 暫停攻擊' : '▶ 繼續攻擊'; logBattle(fighting ? '玩家自動攻擊已繼續。' : '玩家自動攻擊已暫停；怪物仍會持續攻擊。'); });
 document.querySelector('#potion-button').addEventListener('click', () => usePotion(true));
 document.querySelector('#mana-potion-button').addEventListener('click', () => useManaPotion(true));
 document.querySelector('#skill-list').addEventListener('click', (event) => {
