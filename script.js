@@ -2100,14 +2100,16 @@ function enemyAttackTick() {
   battle.nextEnemyAttackAt = now + attackInterval;
   const stats = getCharacterStats(progress.level, progress, character);
   const dodged = Math.random() < stats.dodge;
-  const rawEnemyHit = getMonsterAttackPower(attackingEnemy, progress);
+  const monsterCritRate = attackingEnemy.isBoss ? .15 : attackingEnemy.isElite ? .10 : .05;
+  const monsterCritical = !dodged && Math.random() < monsterCritRate;
+  const rawEnemyHit = getMonsterAttackPower(attackingEnemy, progress) * (monsterCritical ? 1.5 : 1);
   let enemyHit = dodged ? 0 : Math.max(1, Math.ceil(rawEnemyHit * (100 / (100 + stats.defense * 8))));
   const absorbed = Math.min(battle.playerShield, enemyHit);
   battle.playerShield -= absorbed;
   enemyHit -= absorbed;
   battle.playerHp -= enemyHit;
   if (dodged) logBattle(`【${attackingEnemyName}】發動攻擊，你成功閃避。`, 'damage-taken');
-  else logBattle(`🩸【${attackingEnemyName}】對你造成 ${enemyHit} 傷害${absorbed ? `，護盾吸收 ${absorbed}` : ''}。`, 'damage-taken', { aggregateKey: `enemy-${battle.enemyTypes[attackingEnemyIndex]}`, damage: enemyHit, summary: `🩸【${attackingEnemyName}】攻擊你` });
+  else logBattle(`🩸【${attackingEnemyName}】對你造成 ${enemyHit} 傷害${monsterCritical ? '（暴擊）' : ''}${absorbed ? `，護盾吸收 ${absorbed}` : ''}。`, 'damage-taken', { aggregateKey: `enemy-${battle.enemyTypes[attackingEnemyIndex]}`, damage: enemyHit, summary: `🩸【${attackingEnemyName}】攻擊你${monsterCritical ? '（暴擊）' : ''}` });
   const maxHp = getMaxHp(progress.level, progress);
   if (battle.playerHp > 0 && battle.playerHp / maxHp < 0.35) usePotion();
   if (battle.playerHp <= 0) {
