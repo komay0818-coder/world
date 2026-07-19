@@ -171,7 +171,7 @@ let pendingOfflineReport = null;
 let creationSlotIndex = 0;
 let scrapSelection = new Set();
 let inventoryCategory = 'weapon';
-let battleLogMode = 'compact';
+let battleLogMode = 'player';
 let battleLogEntries = [];
 let battle = { enemyTypes: ['goblin', 'wolf', 'boar', 'goblin', 'wolf'], enemyHps: [45, 68, 82, 45, 68], playerHp: 100, playerMana: 100, playerShield: 0, manaExhausted: false, playerAttackCharge: 0, globalSkillReadyAt: 0, undeadRevived: false, skillCooldowns: {}, enemyRespawns: [null, null, null, null, null], enemySpawnedAt: [0, 1, 2, 3, 4], enemyDots: [[], [], [], [], []], monsterMoveSpeed: 200, targetIndexes: [], enemyDamages: [[], [], [], [], []], damageTimers: [] };
 let layoutEditMode = false;
@@ -964,25 +964,9 @@ function renderBattleLog() {
   const container = document.querySelector('#combat-log-lines');
   if (!container) return;
   let entries = battleLogEntries;
+  if (battleLogMode === 'player') entries = entries.filter((entry) => ['damage-dealt', 'pet-damage'].includes(entry.type));
+  if (battleLogMode === 'enemy') entries = entries.filter((entry) => entry.type === 'damage-taken');
   if (battleLogMode === 'loot') entries = entries.filter((entry) => ['loot', 'reward', 'progress'].includes(entry.type));
-  if (battleLogMode === 'compact') {
-    const grouped = new Map();
-    entries.forEach((entry) => {
-      if (!entry.aggregateKey || !entry.damage) {
-        grouped.set(`entry-${entry.id}`, { ...entry });
-        return;
-      }
-      const bucket = Math.floor(entry.timestamp / 3000);
-      const key = `${entry.aggregateKey}-${bucket}`;
-      const existing = grouped.get(key);
-      if (existing) {
-        existing.damage += entry.damage;
-        existing.count += 1;
-        existing.timestamp = Math.max(existing.timestamp, entry.timestamp);
-      } else grouped.set(key, { ...entry, count: 1 });
-    });
-    entries = [...grouped.values()].sort((a, b) => b.timestamp - a.timestamp);
-  }
   container.innerHTML = entries.slice(0, 100).map((entry) => {
     const message = entry.count > 1 ? `${entry.summary || entry.message}：${entry.damage} 總傷害 ×${entry.count}` : entry.message;
     return `<span class="combat-log-entry log-${entry.type}"><time>${formatBattleLogTime(entry.timestamp)}</time><b>${escapeBattleLogText(message)}</b></span>`;
@@ -1008,7 +992,7 @@ function setupBattleLogControls() {
   const header = document.createElement('header');
   header.className = 'combat-log-head';
   header.append(title);
-  header.insertAdjacentHTML('beforeend', '<nav aria-label="戰鬥紀錄篩選"><button type="button" data-log-mode="compact" class="selected">精簡</button><button type="button" data-log-mode="all">全部</button><button type="button" data-log-mode="loot">戰利品</button></nav>');
+  header.insertAdjacentHTML('beforeend', '<nav aria-label="戰鬥紀錄篩選"><button type="button" data-log-mode="player" class="selected">玩家</button><button type="button" data-log-mode="enemy">敵人</button><button type="button" data-log-mode="loot">戰利品</button></nav>');
   log.insertBefore(header, lines);
 }
 
