@@ -133,6 +133,7 @@ const maxSkillUpgradeLevel = 6;
 const skillUpgradeCosts = { 2: 5, 3: 10, 4: 15, 5: 25, 6: 40 };
 const skillBookCosts = { 2: 2, 3: 4, 4: 6, 5: 8, 6: 10 };
 const skillUpgradeSuccessRates = { 2: .85, 3: .70, 4: .55, 5: .40, 6: .35 };
+const skillUpgradeGoldCosts = { 2: 200, 3: 500, 4: 1000, 5: 2000, 6: 4000 };
 
 function getSkillUpgradeKey(job, skill) {
   return `${job}:${skill.id || `passive-${skill.level}`}`;
@@ -933,7 +934,7 @@ function claimOfflineRewards() {
       equipmentFound += 1;
     }
   }
-  const gainedGold = defeated * 4;
+  const gainedGold = defeated * 2;
   progress.gold += gainedGold;
   saveProgress(progress);
   pendingOfflineReport = { duration: formatOfflineDuration(offlineMs), defeated, gainedXp, gainedGold, levelsGained, equipmentFound, capped: now - lastActiveAt > offlineLimitMs };
@@ -1652,6 +1653,7 @@ function renderSkills(character, level) {
     const upgradeLevel = getSkillUpgradeLevel(progress, character.job, skill);
     const nextCost = skillUpgradeCosts[upgradeLevel + 1] || 0;
     const nextBookCost = skillBookCosts[upgradeLevel + 1] || 0;
+    const nextGoldCost = skillUpgradeGoldCosts[upgradeLevel + 1] || 0;
     const ownedBooks = Number(progress.skillBooks?.[upgradeLevel + 1]) || 0;
     const cooldown = skill.type === 'active' && unlocked ? Math.max(0, Math.ceil(((battle.skillCooldowns[skill.id] || 0) - Date.now()) / 1000)) : 0;
     const manaCost = skill.type === 'active' ? getSkillManaCost(skill) : 0;
@@ -1661,7 +1663,7 @@ function renderSkills(character, level) {
     const icon = skill.type === 'active' ? (skillIcons[skill.id] || '✦') : '◆';
     const priority = activeIndex >= 0 ? `<i class="skill-priority">${activeIndex + 1}</i>` : '';
     const detail = unlocked ? `${skill.detail}｜${skill.type === 'active' ? `消耗 ${manaCost} MP｜冷卻 ${Math.round(skill.cooldown * skillCooldownMultiplier)} 秒` : '被動技能'}` : `Lv.${skill.level} 解鎖`;
-    const upgradeButton = unlocked ? `<button class="skill-upgrade-button" type="button" data-upgrade-skill="${getSkillUpgradeKey(character.job, skill)}" ${upgradeLevel >= maxSkillUpgradeLevel || progress.magicCrystals < nextCost || ownedBooks < nextBookCost ? 'disabled' : ''}>${upgradeLevel >= maxSkillUpgradeLevel ? '已滿級' : `升階・💎${nextCost}＋${upgradeLevel + 1}階書×${nextBookCost}・${Math.round(skillUpgradeSuccessRates[upgradeLevel + 1] * 100)}%`}</button>` : '';
+    const upgradeButton = unlocked ? `<button class="skill-upgrade-button" type="button" data-upgrade-skill="${getSkillUpgradeKey(character.job, skill)}" ${upgradeLevel >= maxSkillUpgradeLevel || progress.magicCrystals < nextCost || ownedBooks < nextBookCost || progress.gold < nextGoldCost ? 'disabled' : ''}>${upgradeLevel >= maxSkillUpgradeLevel ? '已滿級' : `升階・💎${nextCost}＋${upgradeLevel + 1}階書×${nextBookCost}＋${nextGoldCost}金・${Math.round(skillUpgradeSuccessRates[upgradeLevel + 1] * 100)}%`}</button>` : '';
     return `<div class="skill-chip ${skill.type} ${stateClass}" data-skill-detail="${detail}">${priority}<span class="skill-icon">${icon}</span><b>${unlocked ? skill.name : '未解鎖'}</b><small>${metaText}</small><em class="skill-cooldown ${stateClass}">${statusText}</em>${upgradeButton}</div>`;
   };
   skillList.innerHTML = `<section class="skill-group active-group"><h3>主動技能</h3><div class="skill-row">${activeSkills.map((skill, index) => renderSkill(skill, index)).join('')}</div></section><section class="skill-group passive-group"><h3>被動技能</h3><div class="skill-row">${passiveSkills.map((skill) => renderSkill(skill)).join('')}</div></section><section class="race-talent-group"><h3>種族天賦</h3><article class="race-talent-card race-talent-${character.race}"><span>${raceTalent.icon}</span><div><b>${raceInfo?.name || character.race}・${raceTalent.name}</b><small>${raceTalent.detail}</small></div><em>永久生效</em></article></section>`;
@@ -1700,9 +1702,10 @@ function refreshSkills(character, level) {
     if (upgradeButton) {
       const nextCost = skillUpgradeCosts[upgradeLevel + 1] || 0;
       const nextBookCost = skillBookCosts[upgradeLevel + 1] || 0;
+      const nextGoldCost = skillUpgradeGoldCosts[upgradeLevel + 1] || 0;
       const ownedBooks = Number(progress.skillBooks?.[upgradeLevel + 1]) || 0;
-      upgradeButton.disabled = upgradeLevel >= maxSkillUpgradeLevel || progress.magicCrystals < nextCost || ownedBooks < nextBookCost;
-      upgradeButton.textContent = upgradeLevel >= maxSkillUpgradeLevel ? '已滿級' : `升階・💎${nextCost}＋${upgradeLevel + 1}階書×${nextBookCost}・${Math.round(skillUpgradeSuccessRates[upgradeLevel + 1] * 100)}%`;
+      upgradeButton.disabled = upgradeLevel >= maxSkillUpgradeLevel || progress.magicCrystals < nextCost || ownedBooks < nextBookCost || progress.gold < nextGoldCost;
+      upgradeButton.textContent = upgradeLevel >= maxSkillUpgradeLevel ? '已滿級' : `升階・💎${nextCost}＋${upgradeLevel + 1}階書×${nextBookCost}＋${nextGoldCost}金・${Math.round(skillUpgradeSuccessRates[upgradeLevel + 1] * 100)}%`;
     }
     if (skill.type !== 'active' || level < skill.level) return;
     const cooldown = Math.max(0, Math.ceil(((battle.skillCooldowns[skill.id] || 0) - Date.now()) / 1000));
@@ -1870,7 +1873,8 @@ function rewardVictory(index) {
   const currentMap = getActiveMap(progress);
   const earnedXp = enemy.isBoss ? currentMap.bossXp : enemy.isElite ? currentMap.eliteXp : currentMap.normalXp;
   progress.xp += earnedXp;
-  progress.gold += enemy.gold;
+  const earnedGold = Math.max(1, Math.floor(enemy.gold * .55));
+  progress.gold += earnedGold;
   const loot = addLoot(progress, enemy);
   const collectible = addCollectibleLoot(progress, enemy);
   const accountDrops = [];
@@ -1914,7 +1918,7 @@ function rewardVictory(index) {
     }
   }
   saveProgress(progress);
-  logBattle(`✦ 擊敗${enemy.name}！獲得 ${earnedXp} EXP、${enemy.gold} 金幣`, 'reward');
+  logBattle(`✦ 擊敗${enemy.name}！獲得 ${earnedXp} EXP、${earnedGold} 金幣`, 'reward');
   if (loot) logBattle(`🎁 掉落【${loot.name}】${loot.quantity ? ` ×${loot.quantity}` : ''}`);
   accountDrops.forEach((drop) => logBattle(`◆ BOSS掉落【${drop}】`, 'loot'));
   if (collectible) {
@@ -2257,10 +2261,13 @@ document.querySelector('#skill-list').addEventListener('click', (event) => {
   const cost = skillUpgradeCosts[currentLevel + 1];
   const targetTier = currentLevel + 1;
   const bookCost = skillBookCosts[targetTier];
+  const goldCost = skillUpgradeGoldCosts[targetTier];
   const ownedBooks = Number(progress.skillBooks?.[targetTier]) || 0;
   if ((progress.magicCrystals || 0) < cost) { showToast(`魔法結晶不足，需要 ${cost} 個。`); return; }
   if (ownedBooks < bookCost) { showToast(`${targetTier}階魔法書不足，需要 ${bookCost} 本。`); return; }
+  if ((progress.gold || 0) < goldCost) { showToast(`金幣不足，需要 ${goldCost} 金幣。`); return; }
   progress.magicCrystals -= cost;
+  progress.gold -= goldCost;
   progress.skillBooks = { ...(progress.skillBooks || {}), [targetTier]: ownedBooks - bookCost };
   const succeeded = Math.random() < skillUpgradeSuccessRates[targetTier];
   if (succeeded) progress.skillLevels = { ...(progress.skillLevels || {}), [getSkillUpgradeKey(character.job, skill)]: targetTier };
