@@ -147,6 +147,33 @@ function getSkillPowerMultiplier(progress, job, skill) {
   return 1 + (getSkillUpgradeLevel(progress, job, skill) - 1) * .12;
 }
 
+function getPassiveSkillUpgradeLevel(progress, job, name) {
+  const skill = (skillProgression[job] || []).find((entry) => entry.type === 'passive' && entry.name === name);
+  return skill ? getSkillUpgradeLevel(progress, job, skill) : 1;
+}
+
+function getHunterInstinctEffect(progress) {
+  const tier = getPassiveSkillUpgradeLevel(progress, 'hunter', '獵人本能');
+  return {
+    tier,
+    interval: tier >= 6 ? 3 : tier >= 4 ? 4 : tier >= 2 ? 5 : 6,
+    multiplier: tier >= 5 ? 2 : tier >= 3 ? 1.75 : 1.5,
+    extraAttack: tier >= 6
+  };
+}
+
+function getPassiveSkillDetail(progress, job, skill) {
+  const tier = getSkillUpgradeLevel(progress, job, skill);
+  if (job === 'hunter' && skill.name === '精準射擊') return `命中 +${10 + (tier - 1) * 2}%、暴擊 +${5 + (tier - 1)}%`;
+  if (job === 'hunter' && skill.name === '野性夥伴') return `戰寵生命提升、攻擊 +${15 + (tier - 1) * 10}%`;
+  if (job === 'hunter' && skill.name === '弓術專精') return `武器傷害 +${10 + (tier - 1) * 2}%`;
+  if (job === 'hunter' && skill.name === '獵人本能') {
+    const effect = getHunterInstinctEffect(progress);
+    return `每第 ${effect.interval} 次攻擊造成 ${Math.round(effect.multiplier * 100)}% 傷害${effect.extraAttack ? '，並額外攻擊 1 次' : ''}`;
+  }
+  return `${skill.detail}・效果強化 ${Math.round((tier - 1) * 12)}%`;
+}
+
 function syncSkillMaterialInventory(progress) {
   progress.inventory = Array.isArray(progress.inventory) ? progress.inventory : [];
   const upsert = (id, icon, name, description, quantity) => {
@@ -1117,18 +1144,17 @@ function getCharacterStats(level, progress = getProgress(), character = JSON.par
   const equipment = getEquipmentStats(progress);
   const collection = getCollectionStats(progress);
   const humanMultiplier = character?.race === 'human' ? 1.05 : 1;
-  const passiveUpgradeLevels = (skillProgression[character?.job] || [])
-    .filter((skill) => skill.type === 'passive' && level >= skill.level)
-    .reduce((total, skill) => total + getSkillUpgradeLevel(progress, character.job, skill) - 1, 0);
-  const passiveMultiplier = 1 + passiveUpgradeLevels * .015;
+  const hunterPrecisionTier = character?.job === 'hunter' && level >= 3 ? getPassiveSkillUpgradeLevel(progress, 'hunter', '精準射擊') : 0;
+  const hunterMasteryTier = character?.job === 'hunter' && level >= 15 ? getPassiveSkillUpgradeLevel(progress, 'hunter', '弓術專精') : 0;
+  const hunterWeaponMultiplier = hunterMasteryTier ? 1 + (.10 + (hunterMasteryTier - 1) * .02) : 1;
   return {
-    hp: Math.round((base.hp + race.hp + (level - 1) * 12 + equipment.hp + collection.hp) * humanMultiplier * passiveMultiplier),
+    hp: Math.round((base.hp + race.hp + (level - 1) * 12 + equipment.hp + collection.hp) * humanMultiplier),
     mana: Math.round((base.mana + race.mana + (level - 1) * 6 + collection.mana) * humanMultiplier),
-    attack: Math.round((base.attack + race.attack + (level - 1) + equipment.attack + collection.attack) * humanMultiplier * passiveMultiplier),
-    defense: Math.round((base.defense + race.defense + Math.floor((level - 1) / 5) + equipment.defense + collection.defense) * humanMultiplier * passiveMultiplier),
-    crit: Math.min(.60, base.crit + race.crit + collection.crit),
+    attack: Math.round((base.attack + race.attack + (level - 1) + equipment.attack + collection.attack) * humanMultiplier * hunterWeaponMultiplier),
+    defense: Math.round((base.defense + race.defense + Math.floor((level - 1) / 5) + equipment.defense + collection.defense) * humanMultiplier),
+    crit: Math.min(.60, base.crit + race.crit + collection.crit + (hunterPrecisionTier ? .05 + (hunterPrecisionTier - 1) * .01 : 0)),
     dodge: Math.min(.45, Math.max(0, base.dodge + race.dodge + collection.dodge)),
-    accuracy: Math.min(1.25, 1.05 + (character?.job === 'hunter' ? .05 : 0) + (character?.job === 'hunter' && level >= 3 ? .10 : 0)),
+    accuracy: Math.min(1.30, 1.05 + (character?.job === 'hunter' ? .05 : 0) + (hunterPrecisionTier ? .10 + (hunterPrecisionTier - 1) * .02 : 0)),
     attackSpeed: base.attackSpeed * 1.15,
     cooldownSpeed: character?.race === 'elf' ? 1.03 : 1,
     dotMultiplier: character?.race === 'undead' ? 1.20 : 1
@@ -1664,10 +1690,10 @@ function renderSkills(character, level) {
     const effectivePercent = skill.power ? Math.round(skill.power * upgradeMultiplier * 100) : skill.id === 'heal' ? Math.round(40 * upgradeMultiplier) : 0;
     const upgradedDetail = effectivePercent > 0
       ? (/\d+%/.test(skill.detail) ? skill.detail.replace(/\d+%/, `${effectivePercent}%`) : `${skill.detail}・效果 +${upgradeBonusPercent}%`)
-      : skill.type === 'passive' && upgradeLevel > 1 ? `${skill.detail}・升階全能力 +${((upgradeLevel - 1) * 1.5).toFixed(1)}%` : skill.detail;
+      : skill.type === 'passive' ? getPassiveSkillDetail(progress, character.job, skill) : skill.detail;
     const stateClass = !unlocked ? 'locked' : skill.type === 'passive' ? 'enabled' : battle.manaExhausted ? 'exhausted' : battle.playerMana < manaCost ? 'no-mana' : cooldown > 0 ? 'cooling' : 'ready';
     const statusText = !unlocked ? `Lv.${skill.level} 解鎖` : skill.type === 'passive' ? '已生效' : battle.manaExhausted ? '魔力枯竭' : battle.playerMana < manaCost ? '魔力不足' : cooldown > 0 ? `${cooldown} 秒` : '可施放';
-    const metaText = skill.type === 'active' ? `技能 ${upgradeLevel}/${maxSkillUpgradeLevel}・${effectivePercent ? `${effectivePercent}%・` : ''}${manaCost} MP` : `技能 ${upgradeLevel}/${maxSkillUpgradeLevel}・${upgradeLevel > 1 ? `全能力 +${((upgradeLevel - 1) * 1.5).toFixed(1)}%` : '被動'}`;
+    const metaText = skill.type === 'active' ? `技能 ${upgradeLevel}/${maxSkillUpgradeLevel}・${effectivePercent ? `${effectivePercent}%・` : ''}${manaCost} MP` : `技能 ${upgradeLevel}/${maxSkillUpgradeLevel}・專屬效果`;
     const icon = skill.type === 'active' ? (skillIcons[skill.id] || '✦') : '◆';
     const priority = activeIndex >= 0 ? `<i class="skill-priority">${activeIndex + 1}</i>` : '';
     const detail = unlocked ? `${upgradedDetail}｜${skill.type === 'active' ? `消耗 ${manaCost} MP｜冷卻 ${Math.round(skill.cooldown * skillCooldownMultiplier)} 秒` : '被動技能'}` : `Lv.${skill.level} 解鎖`;
@@ -2011,7 +2037,8 @@ function useAutoSkill(character, progress) {
     const hitTargets = targets.filter((target) => Math.random() >= getMonsterDodgeChance(getEnemyDefinition(target.index), stats));
     const missedTargets = targets.filter((target) => !hitTargets.includes(target));
     const critical = Math.random() < stats.crit;
-    const damage = Math.max(1, Math.ceil(stats.attack * skill.power * getSkillPowerMultiplier(progress, character.job, skill) * (critical ? 1.5 : 1)));
+    const companionPassiveMultiplier = skill.id === 'companion' && progress.level >= 8 ? 1.15 + (getPassiveSkillUpgradeLevel(progress, 'hunter', '野性夥伴') - 1) * .10 : 1;
+    const damage = Math.max(1, Math.ceil(stats.attack * skill.power * getSkillPowerMultiplier(progress, character.job, skill) * companionPassiveMultiplier * (critical ? 1.5 : 1)));
     hitTargets.forEach((enemy) => { battle.enemyHps[enemy.index] -= damage; });
     showEnemyDamage(hitTargets.map((enemy) => enemy.index), damage);
     missedTargets.forEach((enemy) => logBattle(`💨【${getEnemyDefinition(enemy.index).name}】閃避了你的【${skill.name}】。`, 'damage-dealt'));
@@ -2080,7 +2107,7 @@ function battleTick() {
   const stats = getCharacterStats(progress.level, progress, character);
   const orcRage = character.race === 'orc' && Math.random() < .10;
   const critical = Math.random() < stats.crit;
-  const playerHit = Math.max(1, Math.ceil(stats.attack * (orcRage ? 1.10 : 1) * (critical ? 1.5 : 1)));
+  const basePlayerHit = Math.max(1, Math.ceil(stats.attack * (orcRage ? 1.10 : 1) * (critical ? 1.5 : 1)));
   let targetIndex = oldestAliveEnemyIndex();
   if (targetIndex === -1) {
     updateBattleUI();
@@ -2089,6 +2116,10 @@ function battleTick() {
   battle.playerAttackCharge = (battle.playerAttackCharge || 0) + (battle.manaExhausted ? .8 : 1);
   if (battle.playerAttackCharge >= 1) {
     battle.playerAttackCharge -= 1;
+    battle.hunterAttackCount = (battle.hunterAttackCount || 0) + 1;
+    const hunterInstinct = character.job === 'hunter' && progress.level >= 20 ? getHunterInstinctEffect(progress) : null;
+    const instinctTriggered = Boolean(hunterInstinct && battle.hunterAttackCount % hunterInstinct.interval === 0);
+    const playerHit = Math.max(1, Math.ceil(basePlayerHit * (instinctTriggered ? hunterInstinct.multiplier : 1)));
     playPlayerAttackAnimation();
     playPlayerProjectile(targetIndex);
     const targetEnemy = getEnemyDefinition(targetIndex);
@@ -2097,7 +2128,12 @@ function battleTick() {
     } else {
       battle.enemyHps[targetIndex] -= playerHit;
       showEnemyDamage([targetIndex], playerHit);
-      logBattle(`⚔ 你對【${targetEnemy.name}】造成 ${playerHit} 傷害${critical ? '（暴擊）' : ''}${orcRage ? '（狂怒）' : ''}`, 'damage-dealt', { aggregateKey: `player-${battle.enemyTypes[targetIndex]}`, damage: playerHit, summary: `⚔ 你攻擊【${targetEnemy.name}】` });
+      logBattle(`⚔ 你對【${targetEnemy.name}】造成 ${playerHit} 傷害${critical ? '（暴擊）' : ''}${orcRage ? '（狂怒）' : ''}${instinctTriggered ? '（獵人本能）' : ''}`, 'damage-dealt', { aggregateKey: `player-${battle.enemyTypes[targetIndex]}`, damage: playerHit, summary: `⚔ 你攻擊【${targetEnemy.name}】` });
+      if (instinctTriggered && hunterInstinct.extraAttack && battle.enemyHps[targetIndex] > 0) {
+        battle.enemyHps[targetIndex] -= basePlayerHit;
+        showEnemyDamage([targetIndex], basePlayerHit);
+        logBattle(`➶【獵人本能】額外攻擊【${targetEnemy.name}】，造成 ${basePlayerHit} 傷害。`, 'damage-dealt');
+      }
     }
     queueDefeatedEnemies();
   }
@@ -2180,7 +2216,7 @@ function openBattle() {
   }
   const enemyTypes = isDungeon ? createDungeonWaveTypes(1) : createEnemyTypes(progress.level);
   const battleStart = Date.now();
-  battle = { enemyTypes, enemyHps: enemyTypes.map((type) => monsterTypes[type].maxHp), playerHp: getMaxHp(progress.level, progress), playerMana: getMaxMana(character.job, progress.level), playerShield: 0, manaExhausted: false, playerAttackCharge: 0, nextEnemyAttackAt: 0, globalSkillReadyAt: 0, undeadRevived: false, skillCooldowns: {}, enemyRespawns: enemyTypes.map(() => null), enemySpawnedAt: enemyTypes.map((_, index) => battleStart + index), enemyDots: enemyTypes.map(() => []), monsterMoveSpeed: 200, targetIndexes: [], enemyDamages: enemyTypes.map(() => []), damageTimers: [], isDungeon, dungeonWave: isDungeon ? 1 : 0, dungeonComplete: false, waveTransitioning: false };
+  battle = { enemyTypes, enemyHps: enemyTypes.map((type) => monsterTypes[type].maxHp), playerHp: getMaxHp(progress.level, progress), playerMana: getMaxMana(character.job, progress.level), playerShield: 0, manaExhausted: false, playerAttackCharge: 0, hunterAttackCount: 0, nextEnemyAttackAt: 0, globalSkillReadyAt: 0, undeadRevived: false, skillCooldowns: {}, enemyRespawns: enemyTypes.map(() => null), enemySpawnedAt: enemyTypes.map((_, index) => battleStart + index), enemyDots: enemyTypes.map(() => []), monsterMoveSpeed: 200, targetIndexes: [], enemyDamages: enemyTypes.map(() => []), damageTimers: [], isDungeon, dungeonWave: isDungeon ? 1 : 0, dungeonComplete: false, waveTransitioning: false };
   clearBattleLog();
   if (pendingOfflineReport) {
     logBattle(`☾ 離線掛機 ${pendingOfflineReport.duration}${pendingOfflineReport.capped ? '（已達 12 小時上限）' : ''}，擊敗約 ${pendingOfflineReport.defeated} 隻怪物。`, 'system');
