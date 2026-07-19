@@ -102,7 +102,12 @@
   .battle-field::before, .battle-field::after, .battle-field .terrain-one, .battle-field .terrain-two {
     display: none !important;
   }
-  .battle-status { left: 8px !important; right: 8px !important; bottom: 7px !important; width: auto !important; font-size: 10px !important; }
+  .battle-status {
+    top: auto !important; left: 8px !important; right: 8px !important; bottom: 7px !important;
+    width: auto !important; height: auto !important; min-height: 0 !important;
+    padding: 6px 9px !important; font-size: 10px !important;
+    backdrop-filter: none !important; -webkit-backdrop-filter: none !important;
+  }
   .battle-player-art { left: -18px !important; bottom: -5px !important; width: 150px !important; height: 205px !important; }
   .battle-player-art.undead-art { left: -30px !important; width: 230px !important; height: 205px !important; }
   .battle-player-art + .hunter-companion { left: 106px !important; bottom: 2px !important; transform: scale(.62) !important; }
