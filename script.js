@@ -133,7 +133,7 @@ const maxSkillUpgradeLevel = 6;
 const skillUpgradeCosts = { 2: 5, 3: 10, 4: 15, 5: 25, 6: 40 };
 const skillBookCosts = { 2: 2, 3: 4, 4: 6, 5: 8, 6: 10 };
 const skillUpgradeSuccessRates = { 2: .85, 3: .70, 4: .55, 5: .40, 6: .35 };
-const skillUpgradeGoldCosts = { 2: 200, 3: 500, 4: 1000, 5: 2000, 6: 4000 };
+const skillUpgradeGoldCosts = { 2: 2000, 3: 5000, 4: 10000, 5: 20000, 6: 40000 };
 
 function getSkillUpgradeKey(job, skill) {
   return `${job}:${skill.id || `passive-${skill.level}`}`;
@@ -811,9 +811,9 @@ function effectiveEquipmentStat(item, stat) {
 }
 
 const enhancementRules = {
-  1: { successRate: 1, starIron: 1, gold: 100 },
-  2: { successRate: .8, starIron: 2, gold: 250 },
-  3: { successRate: .6, starIron: 3, gold: 500 }
+  1: { successRate: 1, starIron: 1, gold: 1000 },
+  2: { successRate: .8, starIron: 2, gold: 2500 },
+  3: { successRate: .6, starIron: 3, gold: 5000 }
 };
 
 function enhanceEquipment(slot) {
