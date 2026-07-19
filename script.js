@@ -1128,6 +1128,7 @@ function getCharacterStats(level, progress = getProgress(), character = JSON.par
     defense: Math.round((base.defense + race.defense + Math.floor((level - 1) / 5) + equipment.defense + collection.defense) * humanMultiplier * passiveMultiplier),
     crit: Math.min(.60, base.crit + race.crit + collection.crit),
     dodge: Math.min(.45, Math.max(0, base.dodge + race.dodge + collection.dodge)),
+    accuracy: Math.min(1.25, 1.05 + (character?.job === 'hunter' ? .05 : 0) + (character?.job === 'hunter' && level >= 3 ? .10 : 0)),
     attackSpeed: base.attackSpeed * 1.15,
     cooldownSpeed: character?.race === 'elf' ? 1.03 : 1,
     dotMultiplier: character?.race === 'undead' ? 1.20 : 1
@@ -1389,6 +1390,7 @@ function renderCharacterAbilities() {
         <article><small>防禦</small><b>${stats.defense}</b><em>裝備 +${equipment.defense}・收藏 +${collection.defense}</em></article>
         <article><small>暴擊率</small><b>${(stats.crit * 100).toFixed(1)}%</b><em>上限 60%</em></article>
         <article><small>閃避率</small><b>${(stats.dodge * 100).toFixed(1)}%</b><em>上限 45%</em></article>
+        <article><small>命中能力</small><b>${Math.round(stats.accuracy * 100)}%</b><em>${character.job === 'hunter' && progress.level >= 3 ? '精準射擊加成' : '基礎命中加成'}</em></article>
         <article><small>攻擊速度</small><b>${stats.attackSpeed.toFixed(2)}</b><em>次／秒倍率</em></article>
         <article><small>技能冷卻速度</small><b>${Math.round(stats.cooldownSpeed * 100)}%</b><em>${character.race === 'elf' ? '種族加成' : '基礎值'}</em></article>
       </div>
