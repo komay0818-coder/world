@@ -1071,7 +1071,7 @@ function getMonsterAttackPower(enemy, progress = getProgress()) {
   const levelMultiplier = 1 + (monsterLevel - 1) * .10;
   const rankMultiplier = enemy.isBoss ? 2.4 : enemy.isElite ? 1.65 : 1;
   const randomMultiplier = .9 + Math.random() * .2;
-  return Math.max(1, Math.round((enemy.attack || 10) * levelMultiplier * rankMultiplier * randomMultiplier));
+  return Math.max(1, Math.round((enemy.attack || 10) * levelMultiplier * rankMultiplier * randomMultiplier * 1.25));
 }
 
 function aliveEnemyIndexesByAge() {
