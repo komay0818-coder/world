@@ -2002,23 +2002,26 @@ function useAutoSkill(character, progress) {
     const targets = aliveEnemyIndexesByAge().slice(0, skill.targets || 1).map((index) => ({ hp: battle.enemyHps[index], index }));
     if (!targets.length) continue;
     const stats = getCharacterStats(progress.level, progress, character);
+    const hitTargets = targets.filter((target) => Math.random() >= getMonsterDodgeChance(getEnemyDefinition(target.index), stats));
+    const missedTargets = targets.filter((target) => !hitTargets.includes(target));
     const critical = Math.random() < stats.crit;
     const damage = Math.max(1, Math.ceil(stats.attack * skill.power * getSkillPowerMultiplier(progress, character.job, skill) * (critical ? 1.5 : 1)));
-    targets.forEach((enemy) => { battle.enemyHps[enemy.index] -= damage; });
-    showEnemyDamage(targets.map((enemy) => enemy.index), damage);
+    hitTargets.forEach((enemy) => { battle.enemyHps[enemy.index] -= damage; });
+    showEnemyDamage(hitTargets.map((enemy) => enemy.index), damage);
+    missedTargets.forEach((enemy) => logBattle(`💨【${getEnemyDefinition(enemy.index).name}】閃避了你的【${skill.name}】。`, 'damage-dealt'));
     if (skill.id !== 'companion') playPlayerAttackAnimation();
-    if (skill.id === 'fireball') targets.forEach((enemy) => applyDot(enemy.index, 'burn', Math.max(1, Math.ceil(damage * .18 * stats.dotMultiplier)), 4));
-    if (skill.id === 'poison-blade') targets.forEach((enemy) => applyDot(enemy.index, 'poison', Math.max(1, Math.ceil(damage * .15 * stats.dotMultiplier)), 5));
+    if (skill.id === 'fireball') hitTargets.forEach((enemy) => applyDot(enemy.index, 'burn', Math.max(1, Math.ceil(damage * .18 * stats.dotMultiplier)), 4));
+    if (skill.id === 'poison-blade') hitTargets.forEach((enemy) => applyDot(enemy.index, 'poison', Math.max(1, Math.ceil(damage * .15 * stats.dotMultiplier)), 5));
     battle.playerMana -= manaCost;
     battle.skillCooldowns[skill.id] = now + skill.cooldown * skillCooldownMultiplier * 1000 / stats.cooldownSpeed;
     battle.globalSkillReadyAt = now + 1000;
     if (skill.id === 'companion') {
-      playCompanionAttackAnimation(targets.map((enemy) => enemy.index));
-      const targetNames = targets.map((enemy) => getEnemyDefinition(enemy.index).name).join('、');
-      logBattle(`🐺 戰寵攻擊【${targetNames}】，造成 ${damage} 傷害${critical ? '（暴擊）' : ''}。`, 'pet-damage', { aggregateKey: `pet-${targets.map((enemy) => enemy.index).join('-')}`, damage, summary: `🐺 戰寵攻擊【${targetNames}】` });
-    } else {
-      logBattle(`✦ 立即施放【${skill.name}】（-${manaCost} MP），造成 ${damage}${critical ? ' 暴擊' : ''}${targets.length > 1 ? ` × ${targets.length}` : ''} 傷害。`);
-    }
+      playCompanionAttackAnimation((hitTargets.length ? hitTargets : targets).map((enemy) => enemy.index));
+      if (hitTargets.length) {
+        const targetNames = hitTargets.map((enemy) => getEnemyDefinition(enemy.index).name).join('、');
+        logBattle(`🐺 戰寵攻擊【${targetNames}】，造成 ${damage} 傷害${critical ? '（暴擊）' : ''}。`, 'pet-damage', { aggregateKey: `pet-${hitTargets.map((enemy) => enemy.index).join('-')}`, damage, summary: `🐺 戰寵攻擊【${targetNames}】` });
+      }
+    } else if (hitTargets.length) logBattle(`✦ 立即施放【${skill.name}】（-${manaCost} MP），造成 ${damage}${critical ? ' 暴擊' : ''}${hitTargets.length > 1 ? ` × ${hitTargets.length}` : ''} 傷害。`, 'damage-dealt');
     casted = true;
     updateManaExhaustion(getMaxMana(character.job, progress.level));
     break;
@@ -2042,6 +2045,11 @@ function useAutoSkill(character, progress) {
   battle.skillCooldowns[healSkill.id] = now + healSkill.cooldown * skillCooldownMultiplier * 1000 / getCharacterStats(progress.level, progress, character).cooldownSpeed;
   logBattle(`✦ 立即施放【${healSkill.name}】（-${manaCost} MP），恢復 ${heal} 生命。`);
   return true;
+}
+
+function getMonsterDodgeChance(enemy, playerStats) {
+  const baseDodge = enemy.isBoss ? .10 : enemy.isElite ? .07 : .03;
+  return Math.max(0, baseDodge - Math.max(0, (playerStats.accuracy || 1) - 1));
 }
 
 function autoSkillTick() {
@@ -2075,11 +2083,16 @@ function battleTick() {
   battle.playerAttackCharge = (battle.playerAttackCharge || 0) + (battle.manaExhausted ? .8 : 1);
   if (battle.playerAttackCharge >= 1) {
     battle.playerAttackCharge -= 1;
-    battle.enemyHps[targetIndex] -= playerHit;
     playPlayerAttackAnimation();
     playPlayerProjectile(targetIndex);
-    showEnemyDamage([targetIndex], playerHit);
-    logBattle(`⚔ 你對【${getEnemyDefinition(targetIndex).name}】造成 ${playerHit} 傷害${critical ? '（暴擊）' : ''}${orcRage ? '（狂怒）' : ''}`, 'damage-dealt', { aggregateKey: `player-${battle.enemyTypes[targetIndex]}`, damage: playerHit, summary: `⚔ 你攻擊【${getEnemyDefinition(targetIndex).name}】` });
+    const targetEnemy = getEnemyDefinition(targetIndex);
+    if (Math.random() < getMonsterDodgeChance(targetEnemy, stats)) {
+      logBattle(`💨【${targetEnemy.name}】閃避了你的攻擊。`, 'damage-dealt');
+    } else {
+      battle.enemyHps[targetIndex] -= playerHit;
+      showEnemyDamage([targetIndex], playerHit);
+      logBattle(`⚔ 你對【${targetEnemy.name}】造成 ${playerHit} 傷害${critical ? '（暴擊）' : ''}${orcRage ? '（狂怒）' : ''}`, 'damage-dealt', { aggregateKey: `player-${battle.enemyTypes[targetIndex]}`, damage: playerHit, summary: `⚔ 你攻擊【${targetEnemy.name}】` });
+    }
     queueDefeatedEnemies();
   }
   updateBattleUI();
