@@ -506,7 +506,7 @@ const mapMonsterPools = {
   blackForest: { normal: ['nightGoblin', 'shadowWolf', 'thornBoar'], elite: ['forestShaman', 'moonfangAlpha', 'thornbackTyrant'], boss: ['forestGuardian'] }
 };
 const eliteSpawnChance = .08;
-const bossSpawnChance = .015;
+const bossSpawnChance = .03;
 const dungeonEliteIds = ['rootExecutioner', 'altarNightblade', 'moonboneSentinel', 'blightOracle'];
 const dungeonBossId = 'eclipseSovereign';
 
@@ -578,7 +578,7 @@ const potionDropRate = .10;
 const manaPotionDropRate = .07;
 const equipmentDropRate = .08;
 const eliteEquipmentDropRate = .25;
-const bossEquipmentDropRate = .35;
+const bossEquipmentDropRate = .20;
 
 function equipmentDropTier(source = '') {
   if (source === 'dungeonBoss' || source === 'dungeonElite') return 3;
