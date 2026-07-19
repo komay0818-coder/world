@@ -98,6 +98,10 @@
     border: 0 !important; border-radius: 0 !important;
     background-position: center 58% !important;
   }
+  /* Decorative ground overlays become an opaque grey block on some phones. */
+  .battle-field::after, .battle-field .terrain-one, .battle-field .terrain-two {
+    display: none !important;
+  }
   .battle-status { left: 8px !important; right: 8px !important; bottom: 7px !important; width: auto !important; font-size: 10px !important; }
   .battle-player-art { left: -18px !important; bottom: -5px !important; width: 150px !important; height: 205px !important; }
   .battle-player-art.undead-art { left: -30px !important; width: 230px !important; height: 205px !important; }
@@ -125,10 +129,14 @@
     width: 100% !important; height: auto !important; min-height: 0 !important;
     max-height: none !important; overflow: visible !important;
   }
-  .battle-bottom .combat-log { order: 2; }
-  .battle-bottom .skill-panel { order: 1; padding: 10px !important; }
-  .battle-bottom .skill-panel { min-height: 0 !important; }
-  .skill-list .skill-row, .skill-list .passive-group .skill-row { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
+  .battle-bottom .combat-log { order: 1; }
+  .battle-bottom .skill-panel {
+    order: 2; min-height: 0 !important;
+    width: calc(100% + 8px) !important;
+    margin-left: -4px !important; margin-right: -4px !important;
+    padding: 12px !important;
+  }
+  .skill-list .skill-row, .skill-list .passive-group .skill-row { grid-template-columns: repeat(3, minmax(0, 1fr)) !important; }
   .skill-list .skill-chip { min-height: 62px !important; }
   .potion-button { min-height: 40px !important; }
   .combat-log-head { flex-direction: row !important; align-items: center !important; }
