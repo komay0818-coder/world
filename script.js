@@ -1659,12 +1659,18 @@ function renderSkills(character, level) {
     const ownedBooks = Number(progress.skillBooks?.[upgradeLevel + 1]) || 0;
     const cooldown = skill.type === 'active' && unlocked ? Math.max(0, Math.ceil(((battle.skillCooldowns[skill.id] || 0) - Date.now()) / 1000)) : 0;
     const manaCost = skill.type === 'active' ? getSkillManaCost(skill) : 0;
+    const upgradeMultiplier = getSkillPowerMultiplier(progress, character.job, skill);
+    const upgradeBonusPercent = Math.round((upgradeMultiplier - 1) * 100);
+    const effectivePercent = skill.power ? Math.round(skill.power * upgradeMultiplier * 100) : skill.id === 'heal' ? Math.round(40 * upgradeMultiplier) : 0;
+    const upgradedDetail = effectivePercent > 0
+      ? (/\d+%/.test(skill.detail) ? skill.detail.replace(/\d+%/, `${effectivePercent}%`) : `${skill.detail}・效果 +${upgradeBonusPercent}%`)
+      : skill.type === 'passive' && upgradeLevel > 1 ? `${skill.detail}・升階全能力 +${((upgradeLevel - 1) * 1.5).toFixed(1)}%` : skill.detail;
     const stateClass = !unlocked ? 'locked' : skill.type === 'passive' ? 'enabled' : battle.manaExhausted ? 'exhausted' : battle.playerMana < manaCost ? 'no-mana' : cooldown > 0 ? 'cooling' : 'ready';
     const statusText = !unlocked ? `Lv.${skill.level} 解鎖` : skill.type === 'passive' ? '已生效' : battle.manaExhausted ? '魔力枯竭' : battle.playerMana < manaCost ? '魔力不足' : cooldown > 0 ? `${cooldown} 秒` : '可施放';
-    const metaText = skill.type === 'active' ? `技能 ${upgradeLevel}/${maxSkillUpgradeLevel}・${manaCost} MP` : `技能 ${upgradeLevel}/${maxSkillUpgradeLevel}・被動`;
+    const metaText = skill.type === 'active' ? `技能 ${upgradeLevel}/${maxSkillUpgradeLevel}・${effectivePercent ? `${effectivePercent}%・` : ''}${manaCost} MP` : `技能 ${upgradeLevel}/${maxSkillUpgradeLevel}・${upgradeLevel > 1 ? `全能力 +${((upgradeLevel - 1) * 1.5).toFixed(1)}%` : '被動'}`;
     const icon = skill.type === 'active' ? (skillIcons[skill.id] || '✦') : '◆';
     const priority = activeIndex >= 0 ? `<i class="skill-priority">${activeIndex + 1}</i>` : '';
-    const detail = unlocked ? `${skill.detail}｜${skill.type === 'active' ? `消耗 ${manaCost} MP｜冷卻 ${Math.round(skill.cooldown * skillCooldownMultiplier)} 秒` : '被動技能'}` : `Lv.${skill.level} 解鎖`;
+    const detail = unlocked ? `${upgradedDetail}｜${skill.type === 'active' ? `消耗 ${manaCost} MP｜冷卻 ${Math.round(skill.cooldown * skillCooldownMultiplier)} 秒` : '被動技能'}` : `Lv.${skill.level} 解鎖`;
     const upgradeButton = unlocked ? `<button class="skill-upgrade-button" type="button" data-upgrade-skill="${getSkillUpgradeKey(character.job, skill)}" ${upgradeLevel >= maxSkillUpgradeLevel || progress.magicCrystals < nextCost || ownedBooks < nextBookCost || progress.gold < nextGoldCost ? 'disabled' : ''}>${upgradeLevel >= maxSkillUpgradeLevel ? '已滿級' : `升階・💎${nextCost}＋${upgradeLevel + 1}階書×${nextBookCost}＋${nextGoldCost}金・${Math.round(skillUpgradeSuccessRates[upgradeLevel + 1] * 100)}%`}</button>` : '';
     return `<div class="skill-chip ${skill.type} ${stateClass}" data-skill-detail="${detail}">${priority}<span class="skill-icon">${icon}</span><b>${unlocked ? skill.name : '未解鎖'}</b><small>${metaText}</small><em class="skill-cooldown ${stateClass}">${statusText}</em>${upgradeButton}</div>`;
   };
