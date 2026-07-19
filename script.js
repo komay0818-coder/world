@@ -155,7 +155,10 @@ function syncSkillMaterialInventory(progress) {
   };
   upsert('magic-crystal', '💎', '魔法結晶', '技能升階的核心材料。', Math.max(0, Number(progress.magicCrystals) || 0));
   for (let tier = 2; tier <= 6; tier += 1) {
-    upsert(`magic-book-${tier}`, '📘', `${tier}階魔法書`, `技能升至 ${tier} 階時使用。`, Math.max(0, Number(progress.skillBooks?.[tier]) || 0));
+    const quantity = Math.max(0, Number(progress.skillBooks?.[tier]) || 0);
+    const itemId = `magic-book-${tier}`;
+    if (quantity > 0) upsert(itemId, '📘', `${tier}階魔法書`, `技能升至 ${tier} 階時使用。`, quantity);
+    else progress.inventory = progress.inventory.filter((item) => item.id !== itemId);
   }
 }
 let selection = { faction: 'light', race: 'human', job: 'warrior' };
