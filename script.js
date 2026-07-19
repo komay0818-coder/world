@@ -68,13 +68,13 @@ const raceTalents = {
   undead: { name: '不滅意志', icon: '☾', detail: '持續傷害 +20%；倒下時有 35% 機率以 35% 生命復活一次。' }
 };
 const mapProgression = [
-  { id: 'beginner-plains', min: 1, max: 5, name: '初心者平原', background: 'assets/beginner-plains-background.png', implemented: true, normalXp: 5, eliteXp: 25, bossXp: 100, recommended: { attack: 14, defense: 3, hp: 100 } },
-  { id: 'black-forest', min: 5, max: 10, name: '黑森林', background: 'assets/black-forest-background.png', implemented: true, normalXp: 5, eliteXp: 20, bossXp: 80, recommended: { attack: 26, defense: 8, hp: 180 } },
-  { id: 'black-forest-altar', min: 5, max: 10, name: '黑森林祭壇', background: 'assets/black-forest-background.png', implemented: true, dungeon: true, normalXp: 0, eliteXp: 32, bossXp: 180, recommended: { attack: 34, defense: 11, hp: 230 } },
-  { min: 10, max: 15, name: '石牙山谷', normalXp: 12, eliteXp: 50, bossXp: 200 },
-  { min: 15, max: 20, name: '荒蕪沙漠', normalXp: 25, eliteXp: 100, bossXp: 400 },
-  { min: 20, max: 25, name: '冰霜高原', normalXp: 50, eliteXp: 200, bossXp: 800 },
-  { min: 25, max: 30, name: '熔岩要塞', normalXp: 100, eliteXp: 400, bossXp: 1500 }
+  { id: 'beginner-plains', min: 1, max: 5, name: '初心者平原', background: 'assets/beginner-plains-background.png', implemented: true, normalXp: 4, eliteXp: 18, bossXp: 70, recommended: { attack: 14, defense: 3, hp: 100 } },
+  { id: 'black-forest', min: 5, max: 10, name: '黑森林', background: 'assets/black-forest-background.png', implemented: true, normalXp: 4, eliteXp: 14, bossXp: 56, recommended: { attack: 26, defense: 8, hp: 180 } },
+  { id: 'black-forest-altar', min: 5, max: 10, name: '黑森林祭壇', background: 'assets/black-forest-background.png', implemented: true, dungeon: true, normalXp: 0, eliteXp: 22, bossXp: 126, recommended: { attack: 34, defense: 11, hp: 230 } },
+  { min: 10, max: 15, name: '石牙山谷', normalXp: 8, eliteXp: 35, bossXp: 140 },
+  { min: 15, max: 20, name: '荒蕪沙漠', normalXp: 18, eliteXp: 70, bossXp: 280 },
+  { min: 20, max: 25, name: '冰霜高原', normalXp: 35, eliteXp: 140, bossXp: 560 },
+  { min: 25, max: 30, name: '熔岩要塞', normalXp: 70, eliteXp: 280, bossXp: 1050 }
 ];
 const skillCooldownMultiplier = 1.0;
 const skillProgression = {
@@ -1128,7 +1128,7 @@ function getCharacterStats(level, progress = getProgress(), character = JSON.par
     defense: Math.round((base.defense + race.defense + Math.floor((level - 1) / 5) + equipment.defense + collection.defense) * humanMultiplier * passiveMultiplier),
     crit: Math.min(.60, base.crit + race.crit + collection.crit),
     dodge: Math.min(.45, Math.max(0, base.dodge + race.dodge + collection.dodge)),
-    attackSpeed: base.attackSpeed,
+    attackSpeed: base.attackSpeed * 1.15,
     cooldownSpeed: character?.race === 'elf' ? 1.03 : 1,
     dotMultiplier: character?.race === 'undead' ? 1.20 : 1
   };
@@ -2056,7 +2056,7 @@ function battleTick() {
   processEnemyRespawns();
   processEnemyDots();
   const maxMana = getMaxMana(character.job, progress.level);
-  battle.playerMana = Math.min(maxMana, battle.playerMana + Math.max(.5, maxMana * .008));
+  battle.playerMana = Math.min(maxMana, battle.playerMana + Math.max(.625, maxMana * .01));
   if (battle.playerMana / maxMana <= .20) useManaPotion();
   updateManaExhaustion(maxMana);
   autoSkillTick();
