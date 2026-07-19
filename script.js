@@ -1887,7 +1887,7 @@ function rewardVictory(index) {
     accountDrops.push(`魔法結晶 ×${amount}`);
   }
   const bookTier = Math.min(6, Math.max(2, Math.floor(currentMap.min / 5) + 1));
-  const bookDropChance = currentMap.dungeon ? (enemy.isBoss ? .60 : .15) : currentMap.min >= 5 ? (enemy.isBoss ? .12 : enemy.isElite ? .04 : .01) : 0;
+  const bookDropChance = currentMap.dungeon ? (enemy.isBoss ? .60 : .15) : currentMap.min >= 5 ? (enemy.isBoss ? .06 : enemy.isElite ? .02 : .005) : 0;
   if (bookDropChance > 0 && Math.random() < bookDropChance) {
     progress.skillBooks = { ...(progress.skillBooks || {}), [bookTier]: (Number(progress.skillBooks?.[bookTier]) || 0) + 1 };
     accountDrops.push(`${bookTier}階魔法書 ×1`);
