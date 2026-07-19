@@ -129,6 +129,20 @@ const skillIcons = {
   backstab: '🗡', 'shadow-dance': '✦', 'poison-blade': '☠', 'power-shot': '➶', companion: '🐺', 'multi-shot': '≋',
   'holy-light': '☀', 'holy-nova': '✣', heal: '✚'
 };
+const maxSkillUpgradeLevel = 6;
+const skillUpgradeCosts = { 2: 1, 3: 2, 4: 3, 5: 5, 6: 8 };
+
+function getSkillUpgradeKey(job, skill) {
+  return `${job}:${skill.id || `passive-${skill.level}`}`;
+}
+
+function getSkillUpgradeLevel(progress, job, skill) {
+  return Math.max(1, Math.min(maxSkillUpgradeLevel, Number(progress.skillLevels?.[getSkillUpgradeKey(job, skill)]) || 1));
+}
+
+function getSkillPowerMultiplier(progress, job, skill) {
+  return 1 + (getSkillUpgradeLevel(progress, job, skill) - 1) * .12;
+}
 let selection = { faction: 'light', race: 'human', job: 'warrior' };
 let toastTimer;
 let battleTimer;
@@ -697,6 +711,8 @@ function getProgress() {
     gold: 0,
     potions: 5,
     manaPotions: 0,
+    skillEssence: 0,
+    skillLevels: {},
     selectedMapId: 'beginner-plains',
     inventory: [],
     equipment: emptyEquipment(),
@@ -1089,11 +1105,15 @@ function getCharacterStats(level, progress = getProgress(), character = JSON.par
   const equipment = getEquipmentStats(progress);
   const collection = getCollectionStats(progress);
   const humanMultiplier = character?.race === 'human' ? 1.05 : 1;
+  const passiveUpgradeLevels = (skillProgression[character?.job] || [])
+    .filter((skill) => skill.type === 'passive' && level >= skill.level)
+    .reduce((total, skill) => total + getSkillUpgradeLevel(progress, character.job, skill) - 1, 0);
+  const passiveMultiplier = 1 + passiveUpgradeLevels * .015;
   return {
-    hp: Math.round((base.hp + race.hp + (level - 1) * 12 + equipment.hp + collection.hp) * humanMultiplier),
+    hp: Math.round((base.hp + race.hp + (level - 1) * 12 + equipment.hp + collection.hp) * humanMultiplier * passiveMultiplier),
     mana: Math.round((base.mana + race.mana + (level - 1) * 6 + collection.mana) * humanMultiplier),
-    attack: Math.round((base.attack + race.attack + (level - 1) + equipment.attack + collection.attack) * humanMultiplier),
-    defense: Math.round((base.defense + race.defense + Math.floor((level - 1) / 5) + equipment.defense + collection.defense) * humanMultiplier),
+    attack: Math.round((base.attack + race.attack + (level - 1) + equipment.attack + collection.attack) * humanMultiplier * passiveMultiplier),
+    defense: Math.round((base.defense + race.defense + Math.floor((level - 1) / 5) + equipment.defense + collection.defense) * humanMultiplier * passiveMultiplier),
     crit: Math.min(.60, base.crit + race.crit + collection.crit),
     dodge: Math.min(.45, Math.max(0, base.dodge + race.dodge + collection.dodge)),
     attackSpeed: base.attackSpeed,
@@ -1608,6 +1628,7 @@ function updateManaExhaustion(maxMana) {
 
 function renderSkills(character, level) {
   const skillList = document.querySelector('#skill-list');
+  const progress = getProgress();
   const skills = skillProgression[character.job] || [];
   const activeSkills = skills.filter((skill) => skill.type === 'active');
   const passiveSkills = skills.filter((skill) => skill.type === 'passive');
@@ -1617,15 +1638,18 @@ function renderSkills(character, level) {
   const raceTalent = raceTalents[character.race] || raceTalents.human;
   const renderSkill = (skill, activeIndex = -1) => {
     const unlocked = level >= skill.level;
+    const upgradeLevel = getSkillUpgradeLevel(progress, character.job, skill);
+    const nextCost = skillUpgradeCosts[upgradeLevel + 1] || 0;
     const cooldown = skill.type === 'active' && unlocked ? Math.max(0, Math.ceil(((battle.skillCooldowns[skill.id] || 0) - Date.now()) / 1000)) : 0;
     const manaCost = skill.type === 'active' ? getSkillManaCost(skill) : 0;
     const stateClass = !unlocked ? 'locked' : skill.type === 'passive' ? 'enabled' : battle.manaExhausted ? 'exhausted' : battle.playerMana < manaCost ? 'no-mana' : cooldown > 0 ? 'cooling' : 'ready';
     const statusText = !unlocked ? `Lv.${skill.level} 解鎖` : skill.type === 'passive' ? '已生效' : battle.manaExhausted ? '魔力枯竭' : battle.playerMana < manaCost ? '魔力不足' : cooldown > 0 ? `${cooldown} 秒` : '可施放';
-    const metaText = skill.type === 'active' ? `Lv.${skill.level}・${manaCost} MP` : `Lv.${skill.level}・被動`;
+    const metaText = skill.type === 'active' ? `技能 ${upgradeLevel}/${maxSkillUpgradeLevel}・${manaCost} MP` : `技能 ${upgradeLevel}/${maxSkillUpgradeLevel}・被動`;
     const icon = skill.type === 'active' ? (skillIcons[skill.id] || '✦') : '◆';
     const priority = activeIndex >= 0 ? `<i class="skill-priority">${activeIndex + 1}</i>` : '';
     const detail = unlocked ? `${skill.detail}｜${skill.type === 'active' ? `消耗 ${manaCost} MP｜冷卻 ${Math.round(skill.cooldown * skillCooldownMultiplier)} 秒` : '被動技能'}` : `Lv.${skill.level} 解鎖`;
-    return `<div class="skill-chip ${skill.type} ${stateClass}" data-skill-detail="${detail}">${priority}<span class="skill-icon">${icon}</span><b>${unlocked ? skill.name : '未解鎖'}</b><small>${metaText}</small><em class="skill-cooldown ${stateClass}">${statusText}</em></div>`;
+    const upgradeButton = unlocked ? `<button class="skill-upgrade-button" type="button" data-upgrade-skill="${getSkillUpgradeKey(character.job, skill)}" ${upgradeLevel >= maxSkillUpgradeLevel || progress.skillEssence < nextCost ? 'disabled' : ''}>${upgradeLevel >= maxSkillUpgradeLevel ? '已滿級' : `升級・${nextCost} 結晶`}</button>` : '';
+    return `<div class="skill-chip ${skill.type} ${stateClass}" data-skill-detail="${detail}">${priority}<span class="skill-icon">${icon}</span><b>${unlocked ? skill.name : '未解鎖'}</b><small>${metaText}</small><em class="skill-cooldown ${stateClass}">${statusText}</em>${upgradeButton}</div>`;
   };
   skillList.innerHTML = `<section class="skill-group active-group"><h3>主動技能</h3><div class="skill-row">${activeSkills.map((skill, index) => renderSkill(skill, index)).join('')}</div></section><section class="skill-group passive-group"><h3>被動技能</h3><div class="skill-row">${passiveSkills.map((skill) => renderSkill(skill)).join('')}</div></section><section class="race-talent-group"><h3>種族天賦</h3><article class="race-talent-card race-talent-${character.race}"><span>${raceTalent.icon}</span><div><b>${raceInfo?.name || character.race}・${raceTalent.name}</b><small>${raceTalent.detail}</small></div><em>永久生效</em></article></section>`;
   skillList.dataset.level = String(level);
@@ -1639,11 +1663,12 @@ function renderSkills(character, level) {
   applySavedLayout();
   setupSkillTooltips();
   const resourceStatus = document.querySelector('#skill-resource-status');
-  if (resourceStatus) resourceStatus.textContent = battle.manaExhausted ? `枯竭中・${Math.ceil(maxMana * .45)} MP 恢復` : `${Math.ceil(battle.playerMana)} / ${maxMana} MP`;
+  if (resourceStatus) resourceStatus.textContent = `技能結晶 ${progress.skillEssence}・${battle.manaExhausted ? `枯竭中・${Math.ceil(maxMana * .45)} MP 恢復` : `${Math.ceil(battle.playerMana)} / ${maxMana} MP`}`;
 }
 
 function refreshSkills(character, level) {
   const skillList = document.querySelector('#skill-list');
+  const progress = getProgress();
   if (skillList.dataset.level !== String(level) || skillList.dataset.job !== character.job || skillList.dataset.race !== character.race || !skillList.querySelector('.skill-chip')) {
     renderSkills(character, level);
     return;
@@ -1653,10 +1678,18 @@ function refreshSkills(character, level) {
   const orderedSkills = [...skills.filter((skill) => skill.type === 'active'), ...skills.filter((skill) => skill.type === 'passive')];
   const maxMana = getMaxMana(character.job, level);
   const resourceStatus = document.querySelector('#skill-resource-status');
-  if (resourceStatus) resourceStatus.textContent = battle.manaExhausted ? `枯竭中・${Math.ceil(maxMana * .45)} MP 恢復` : `${Math.ceil(battle.playerMana)} / ${maxMana} MP`;
+  if (resourceStatus) resourceStatus.textContent = `技能結晶 ${progress.skillEssence}・${battle.manaExhausted ? `枯竭中・${Math.ceil(maxMana * .45)} MP 恢復` : `${Math.ceil(battle.playerMana)} / ${maxMana} MP`}`;
   orderedSkills.forEach((skill, index) => {
     const chip = document.querySelector(`#skill-${index}`);
-    if (!chip || skill.type !== 'active' || level < skill.level) return;
+    if (!chip) return;
+    const upgradeLevel = getSkillUpgradeLevel(progress, character.job, skill);
+    const upgradeButton = chip.querySelector('.skill-upgrade-button');
+    if (upgradeButton) {
+      const nextCost = skillUpgradeCosts[upgradeLevel + 1] || 0;
+      upgradeButton.disabled = upgradeLevel >= maxSkillUpgradeLevel || progress.skillEssence < nextCost;
+      upgradeButton.textContent = upgradeLevel >= maxSkillUpgradeLevel ? '已滿級' : `升級・${nextCost} 結晶`;
+    }
+    if (skill.type !== 'active' || level < skill.level) return;
     const cooldown = Math.max(0, Math.ceil(((battle.skillCooldowns[skill.id] || 0) - Date.now()) / 1000));
     const manaCost = getSkillManaCost(skill);
     const stateClass = battle.manaExhausted ? 'exhausted' : battle.playerMana < manaCost ? 'no-mana' : cooldown > 0 ? 'cooling' : 'ready';
@@ -1826,6 +1859,12 @@ function rewardVictory(index) {
   const loot = addLoot(progress, enemy);
   const collectible = addCollectibleLoot(progress, enemy);
   const accountDrops = [];
+  const skillMaterialChance = currentMap.dungeon ? (enemy.isBoss ? 1 : .24) : currentMap.id === 'black-forest' ? (enemy.isBoss ? .18 : enemy.isElite ? .08 : .03) : 0;
+  if (skillMaterialChance > 0 && Math.random() < skillMaterialChance) {
+    const amount = currentMap.dungeon && enemy.isBoss ? 2 : 1;
+    progress.skillEssence = (progress.skillEssence || 0) + amount;
+    accountDrops.push(`技能結晶 ×${amount}`);
+  }
   if (currentMap.dungeon) {
     const resources = getAccountResources();
     const ironChance = enemy.isBoss ? 1 : .22;
@@ -1937,7 +1976,7 @@ function useAutoSkill(character, progress) {
     if (!targets.length) continue;
     const stats = getCharacterStats(progress.level, progress, character);
     const critical = Math.random() < stats.crit;
-    const damage = Math.max(1, Math.ceil(stats.attack * skill.power * (critical ? 1.5 : 1)));
+    const damage = Math.max(1, Math.ceil(stats.attack * skill.power * getSkillPowerMultiplier(progress, character.job, skill) * (critical ? 1.5 : 1)));
     targets.forEach((enemy) => { battle.enemyHps[enemy.index] -= damage; });
     showEnemyDamage(targets.map((enemy) => enemy.index), damage);
     if (skill.id !== 'companion') playPlayerAttackAnimation();
@@ -1966,7 +2005,7 @@ function useAutoSkill(character, progress) {
   if (battle.playerMana < manaCost) return casted;
   const maxHp = getMaxHp(progress.level, progress);
   if (battle.playerHp / maxHp > .7) return casted;
-  const heal = Math.ceil(maxHp * .4);
+  const heal = Math.ceil(maxHp * .4 * getSkillPowerMultiplier(progress, character.job, healSkill));
   const missingHp = maxHp - battle.playerHp;
   battle.playerHp = Math.min(maxHp, battle.playerHp + heal);
   battle.playerShield += Math.max(0, heal - missingHp);
@@ -2185,6 +2224,24 @@ document.querySelector('#leave-battle').addEventListener('click', () => {
 document.querySelector('#battle-toggle').addEventListener('click', () => { if (battle.dungeonComplete) return; fighting = !fighting; document.querySelector('#battle-toggle').textContent = fighting ? 'Ⅱ 暫停' : '▶ 繼續'; logBattle(fighting ? '自動戰鬥已繼續。' : '自動戰鬥已暫停。'); });
 document.querySelector('#potion-button').addEventListener('click', () => usePotion(true));
 document.querySelector('#mana-potion-button').addEventListener('click', () => useManaPotion(true));
+document.querySelector('#skill-list').addEventListener('click', (event) => {
+  const button = event.target.closest('[data-upgrade-skill]');
+  if (!button) return;
+  const character = JSON.parse(localStorage.getItem('stardust-character') || 'null');
+  const progress = getProgress();
+  const skill = (skillProgression[character?.job] || []).find((entry) => getSkillUpgradeKey(character.job, entry) === button.dataset.upgradeSkill);
+  if (!skill || progress.level < skill.level) return;
+  const currentLevel = getSkillUpgradeLevel(progress, character.job, skill);
+  if (currentLevel >= maxSkillUpgradeLevel) return;
+  const cost = skillUpgradeCosts[currentLevel + 1];
+  if ((progress.skillEssence || 0) < cost) { showToast(`技能結晶不足，需要 ${cost} 個。`); return; }
+  progress.skillEssence -= cost;
+  progress.skillLevels = { ...(progress.skillLevels || {}), [getSkillUpgradeKey(character.job, skill)]: currentLevel + 1 };
+  saveProgress(progress);
+  renderSkills(character, progress.level);
+  showToast(`【${skill.name}】提升至技能 Lv.${currentLevel + 1}`);
+  logBattle(`◆ 技能升級【${skill.name}】→ Lv.${currentLevel + 1}`, 'progress');
+});
 document.querySelector('#layout-toggle').addEventListener('click', () => {
   layoutEditMode = !layoutEditMode;
   if (!layoutEditMode) saveVisibleAdjustedLayout();

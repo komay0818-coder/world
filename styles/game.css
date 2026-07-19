@@ -79,3 +79,6 @@
 @keyframes companionStrike{0%,100%{transform:translate(0,0) rotate(0) scale(1);filter:brightness(1)}18%{transform:translate(-12px,4px) rotate(-5deg) scale(.96)}48%{transform:translate(var(--pet-strike-x,120px),var(--pet-strike-y,-28px)) rotate(7deg) scale(1.12);filter:brightness(1.5) drop-shadow(0 0 13px #8deaff)}62%{transform:translate(calc(var(--pet-strike-x,120px) - 16px),calc(var(--pet-strike-y,-28px) + 7px)) rotate(-2deg) scale(1.04)}82%{transform:translate(-5px,1px) rotate(-2deg) scale(.98)}}
 @keyframes companionImpact{0%,38%{opacity:0;transform:translate(-50%,-50%) scale(.25) rotate(0)}49%{opacity:1;transform:translate(-50%,-50%) scale(1.35) rotate(25deg)}72%,100%{opacity:0;transform:translate(-50%,-50%) scale(2.1) rotate(75deg)}}
 @media(max-width:700px){.hunter-companion.attacking::after{font-size:27px}}
+
+/* Skill upgrade progression. */
+.skill-upgrade-button{grid-area:upgrade;width:100%;margin-top:5px;padding:5px 6px;border:1px solid #82d8ec;border-radius:7px;background:linear-gradient(135deg,#21677d,#174356);color:#effcff;font:800 9px "Noto Sans TC",sans-serif;cursor:pointer}.skill-upgrade-button:disabled{border-color:#566675;background:#25313b;color:#7f8b94;cursor:not-allowed}.skill-list .skill-chip{grid-template-areas:"icon name" "icon meta" "status status" "upgrade upgrade"!important}
