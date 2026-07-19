@@ -1718,7 +1718,10 @@ function updateBattleUI() {
   const mapName = document.querySelector('#battle-title');
   if (mapName) mapName.textContent = currentMap.dungeon ? `${currentMap.name}・第 ${battle.dungeonWave || 1} 波` : currentMap.name;
   const battleField = document.querySelector('.battle-field');
-  if (battleField) battleField.style.backgroundImage = `linear-gradient(rgba(13,29,36,.12),rgba(11,35,29,.22)), url('${currentMap.background || 'assets/beginner-plains-background.png'}')`;
+  if (battleField) {
+    battleField.dataset.mapId = currentMap.id;
+    battleField.style.backgroundImage = `linear-gradient(rgba(13,29,36,.12),rgba(11,35,29,.22)), url('${currentMap.background || 'assets/beginner-plains-background.png'}')`;
+  }
   const companion = document.querySelector('#hunter-companion');
   companion?.classList.toggle('hidden', character.job !== 'hunter' || progress.level < 5);
   const racialCompanion = racialCompanions[character.race] || racialCompanions.human;

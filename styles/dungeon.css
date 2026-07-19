@@ -12,5 +12,5 @@
 .dungeon-key-count{display:block;margin-top:7px;color:#ecd5ff;font-size:14px}
 .map-selection-card button:disabled{cursor:not-allowed;opacity:.48;filter:grayscale(.55)}
 @media(max-width:720px){.enemy-unit .enemy-art.dungeon-monster-art{width:92px!important;height:100px!important}.enemy-unit.boss .enemy-art.dungeon-boss{width:112px!important;height:120px!important}}
-.enemy-unit .enemy-art{scale:1 1!important}
-.enemy-unit .enemy-art::after{scale:1 1!important}
+.enemy-unit .enemy-art.dungeon-monster-art,.enemy-unit .enemy-art.dungeon-boss{scale:1 1!important}
+.enemy-unit .enemy-art.dungeon-monster-art::after,.enemy-unit .enemy-art.dungeon-boss::after{scale:1 1!important}
