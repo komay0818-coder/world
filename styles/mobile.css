@@ -1,0 +1,171 @@
+/* Dedicated portrait-phone layout. Desktop and tablet layouts are unchanged. */
+@media (max-width: 700px) {
+  html, body { width: 100%; min-width: 0; overflow-x: hidden; }
+  body { min-height: 100dvh; background: #07151f; }
+  .app-shell { width: 100%; max-width: none; min-height: 100dvh; padding: 0; }
+  .screen { min-height: 100dvh; }
+
+  .battle-screen {
+    display: flex !important;
+    flex-direction: column !important;
+    width: 100% !important;
+    height: 100dvh !important;
+    min-height: 100dvh !important;
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+    padding-bottom: calc(72px + env(safe-area-inset-bottom)) !important;
+    background: #081923 !important;
+  }
+  .battle-screen.hidden { display: none !important; }
+
+  /* Compact mobile HUD: map and resources sit above the battlefield. */
+  .battle-header {
+    position: relative !important;
+    z-index: 20 !important;
+    flex: 0 0 auto !important;
+    width: 100% !important;
+    height: auto !important;
+    min-height: 0 !important;
+    padding: calc(10px + env(safe-area-inset-top)) 12px 10px !important;
+    overflow: visible !important;
+    border: 0 !important;
+    border-bottom: 1px solid rgba(145, 215, 238, .2) !important;
+    background: linear-gradient(180deg, #0b2732, #091d27) !important;
+  }
+  .battle-header > div { display: block !important; width: 100% !important; }
+  .battle-header #battle-title {
+    margin: 0 112px 2px 0 !important;
+    font-size: 20px !important;
+    line-height: 1.2 !important;
+  }
+  .battle-header #map-level-text {
+    margin: 4px 112px 0 0 !important;
+    font-size: 11px !important;
+    line-height: 1.25 !important;
+    white-space: normal !important;
+  }
+  .battle-header .map-identity {
+    display: grid !important;
+    grid-template-columns: 45px minmax(0, 1fr) !important;
+    grid-template-rows: auto !important;
+    gap: 7px 10px !important;
+    margin-top: 9px !important;
+  }
+  .map-identity > .race-totem {
+    grid-column: 1 !important; grid-row: 1 !important;
+    width: 45px !important; height: 45px !important;
+    min-width: 45px !important; min-height: 45px !important;
+  }
+  .map-identity > .job-mark {
+    position: absolute !important;
+    left: 43px !important; top: 37px !important;
+    width: 22px !important; height: 22px !important;
+    min-width: 22px !important; min-height: 22px !important;
+    font-size: 15px !important;
+    border-radius: 7px !important;
+  }
+  .map-identity > .player-fighter { display: contents !important; }
+  .map-identity .player-details {
+    grid-column: 2 !important; grid-row: 1 !important;
+    align-self: center !important; margin: 0 !important; padding: 0 !important;
+  }
+  .map-identity .player-details strong { font-size: 15px !important; }
+  .map-identity .player-details small { margin-top: 2px !important; font-size: 10px !important; line-height: 1.3 !important; }
+  .map-identity .player-details .character-level { display: inline-block !important; margin: 0 0 0 5px !important; padding: 1px 5px !important; font-size: 10px !important; }
+  .map-identity .player-fighter > .hp-track { grid-column: 1 / -1 !important; grid-row: 2 !important; height: 7px !important; margin: 0 !important; }
+  .map-identity .player-fighter > #player-hp-text { grid-column: 1 / -1 !important; grid-row: 3 !important; margin: -3px 0 0 !important; font-size: 10px !important; }
+  .map-identity .player-fighter > .mana-track { grid-column: 1 / -1 !important; grid-row: 4 !important; height: 7px !important; margin: 0 !important; }
+  .map-identity .player-fighter > #player-mp-text { grid-column: 1 / -1 !important; grid-row: 5 !important; margin: -3px 0 0 !important; font-size: 10px !important; }
+  .map-identity .player-fighter > .experience-panel {
+    display: block !important; visibility: visible !important;
+    grid-column: 1 / -1 !important; grid-row: 6 !important;
+    min-height: 0 !important; margin: 1px 0 0 !important; padding: 5px 7px !important;
+  }
+  .map-identity .experience-panel div:first-child { font-size: 9px !important; }
+  .map-identity .experience-panel strong { font-size: 9px !important; }
+  .layout-button { display: none !important; }
+  .layout-button + .pause-button {
+    position: absolute !important; top: calc(10px + env(safe-area-inset-top)) !important; right: 10px !important;
+    min-width: 92px !important; padding: 8px 9px !important; font-size: 11px !important;
+  }
+
+  /* Battlefield gets the phone's full width. */
+  .battle-field {
+    position: relative !important;
+    flex: 0 0 clamp(270px, 43dvh, 390px) !important;
+    width: 100% !important; height: clamp(270px, 43dvh, 390px) !important;
+    min-height: 270px !important; margin: 0 !important;
+    border: 0 !important; border-radius: 0 !important;
+    background-position: center 58% !important;
+  }
+  .battle-status { left: 8px !important; right: 8px !important; bottom: 7px !important; width: auto !important; font-size: 10px !important; }
+  .battle-player-art { left: -18px !important; bottom: -5px !important; width: 150px !important; height: 205px !important; }
+  .battle-player-art.undead-art { left: -30px !important; width: 230px !important; height: 205px !important; }
+  .battle-player-art + .hunter-companion { left: 106px !important; bottom: 2px !important; transform: scale(.62) !important; }
+  .battle-player-art.undead-art + .hunter-companion { left: 132px !important; transform: scale(.56) !important; }
+  .enemy-squad { top: 12% !important; left: 53% !important; width: 70% !important; height: 70% !important; }
+  .enemy-unit { width: 72px !important; }
+  .enemy-unit .enemy-art, .enemy-unit .goblin-art { width: 72px !important; height: 80px !important; }
+  .enemy-unit:nth-child(1) { left: 0 !important; top: 3% !important; }
+  .enemy-unit:nth-child(2) { left: 28% !important; top: 28% !important; }
+  .enemy-unit:nth-child(3) { left: 57% !important; top: 1% !important; }
+  .enemy-unit:nth-child(4) { left: 75% !important; top: 35% !important; }
+  .enemy-unit:nth-child(5) { left: 47% !important; top: 52% !important; }
+  .enemy-unit small { max-width: 82px; overflow: hidden; min-height: 16px !important; font-size: 9px !important; text-overflow: ellipsis; }
+  .enemy-unit .hp-track { width: 62px !important; }
+
+  /* Logs and skills become touch-friendly cards below combat. */
+  .battle-bottom {
+    display: flex !important; flex-direction: column !important;
+    flex: 0 0 auto !important; width: 100% !important;
+    min-height: 0 !important; padding: 10px !important; gap: 10px !important;
+    overflow: visible !important; background: #081923 !important;
+  }
+  .battle-bottom .combat-log, .battle-bottom .skill-panel {
+    width: 100% !important; height: auto !important; min-height: 0 !important;
+    max-height: none !important; overflow: visible !important;
+  }
+  .battle-bottom .combat-log { order: 2; }
+  .battle-bottom .skill-panel { order: 1; padding: 10px !important; }
+  .battle-bottom .skill-panel { min-height: 0 !important; }
+  .skill-list .skill-row, .skill-list .passive-group .skill-row { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
+  .skill-list .skill-chip { min-height: 62px !important; }
+  .potion-button { min-height: 40px !important; }
+  .combat-log-head { flex-direction: row !important; align-items: center !important; }
+  .battle-bottom #combat-log-lines { max-height: 210px !important; overflow-y: auto !important; }
+
+  /* Persistent thumb menu, with safe-area padding on modern phones. */
+  .battle-menu {
+    position: fixed !important; z-index: 9000 !important;
+    left: 0 !important; right: 0 !important; bottom: 0 !important;
+    order: 3; display: grid !important;
+    grid-template-columns: repeat(5, minmax(0, 1fr)) !important;
+    width: 100% !important; height: auto !important;
+    margin: 0 !important; padding: 6px 6px calc(6px + env(safe-area-inset-bottom)) !important;
+    gap: 5px !important; overflow: visible !important;
+    border: 0 !important; border-top: 1px solid rgba(136, 220, 244, .42) !important;
+    border-radius: 0 !important; background: rgba(6, 23, 34, .97) !important;
+    box-shadow: 0 -8px 24px rgba(0, 0, 0, .42) !important;
+  }
+  .battle-menu-button { min-width: 0 !important; min-height: 54px !important; padding: 5px 2px !important; gap: 1px !important; }
+  .battle-menu-button span { font-size: 19px !important; }
+  .battle-menu-button b { font-size: 10px !important; }
+  .battle-menu-button small { display: none !important; }
+
+  .inventory-modal { align-items: end; padding: 0 !important; }
+  .inventory-window {
+    width: 100% !important; max-width: none !important;
+    max-height: 88dvh !important; padding: 14px 12px calc(16px + env(safe-area-inset-bottom)) !important;
+    border-width: 1px 0 0 !important; border-radius: 18px 18px 0 0 !important;
+  }
+  .inventory-window h2 { font-size: 20px !important; }
+  .equipment-compare-tooltip { display: none !important; }
+}
+
+@media (max-width: 390px) {
+  .battle-field { flex-basis: 255px !important; height: 255px !important; min-height: 255px !important; }
+  .battle-header #battle-title { font-size: 18px !important; }
+  .enemy-unit { width: 62px !important; }
+  .enemy-unit .enemy-art, .enemy-unit .goblin-art { width: 62px !important; height: 70px !important; }
+  .enemy-unit small { max-width: 68px; font-size: 8px !important; }
+}
