@@ -1520,6 +1520,27 @@ function playPlayerAttackAnimation() {
   setTimeout(() => art?.classList.remove('attack'), 520);
 }
 
+function playCompanionAttackAnimation(targetIndexes = []) {
+  const companion = document.querySelector('#hunter-companion');
+  const field = document.querySelector('.battle-field');
+  const target = document.querySelector(`#enemy-${targetIndexes[0]}`);
+  if (!companion || companion.classList.contains('hidden')) return;
+  let strikeX = Math.min(240, Math.max(82, (field?.clientWidth || 420) * .24));
+  let strikeY = -28;
+  if (field && target) {
+    const companionRect = companion.getBoundingClientRect();
+    const targetRect = target.getBoundingClientRect();
+    strikeX = Math.min(260, Math.max(76, targetRect.left - companionRect.right + targetRect.width * .32));
+    strikeY = Math.min(34, Math.max(-105, targetRect.top + targetRect.height * .55 - (companionRect.top + companionRect.height * .5)));
+  }
+  companion.style.setProperty('--pet-strike-x', `${strikeX}px`);
+  companion.style.setProperty('--pet-strike-y', `${strikeY}px`);
+  companion.classList.remove('attacking');
+  void companion.offsetWidth;
+  companion.classList.add('attacking');
+  setTimeout(() => companion.classList.remove('attacking'), 720);
+}
+
 function showEnemyDamage(indexes, damage, type = 'normal') {
   if (type === 'normal') battle.targetIndexes = indexes;
   indexes.forEach((index) => {
@@ -1923,6 +1944,7 @@ function useAutoSkill(character, progress) {
     battle.skillCooldowns[skill.id] = now + skill.cooldown * skillCooldownMultiplier * 1000 / stats.cooldownSpeed;
     battle.globalSkillReadyAt = now + 1000;
     if (skill.id === 'companion') {
+      playCompanionAttackAnimation(targets.map((enemy) => enemy.index));
       const targetNames = targets.map((enemy) => getEnemyDefinition(enemy.index).name).join('、');
       logBattle(`🐺 戰寵攻擊【${targetNames}】，造成 ${damage} 傷害${critical ? '（暴擊）' : ''}。`, 'pet-damage', { aggregateKey: `pet-${targets.map((enemy) => enemy.index).join('-')}`, damage, summary: `🐺 戰寵攻擊【${targetNames}】` });
     } else {
