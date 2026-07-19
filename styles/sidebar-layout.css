@@ -1,0 +1,28 @@
+/* Desktop sidebar owns the full viewport height; the log starts to its right. */
+.map-identity .player-details small{font-size:16px!important;line-height:1.45!important}.map-identity .player-details .character-level{display:block!important;width:max-content!important;margin:9px 0 0!important;padding:4px 9px;border:1px solid rgba(126,218,239,.38);border-radius:7px;background:rgba(20,101,124,.68);color:#d9f8ff;font-size:16px!important;line-height:1.2!important;letter-spacing:.03em;text-align:left!important}.map-identity .player-details #battle-level{display:inline!important;margin:0!important;padding:0!important;background:none!important;color:#fff!important;font-size:inherit!important}.battle-player-art+.hunter-companion{left:187px!important;bottom:1px!important;transform:scale(1.04)!important}.hunter-companion small{font-size:11px!important}.battle-player-art.attack{animation:hunterShoot .48s cubic-bezier(.2,.75,.25,1)!important}@keyframes hunterShoot{0%,100%{transform:translate(0,0) rotate(0);filter:drop-shadow(0 10px 9px rgba(0,0,0,.55))}20%{transform:translate(-5px,1px) rotate(-1deg)}48%{transform:translate(11px,-2px) rotate(.8deg);filter:brightness(1.28) drop-shadow(0 0 12px rgba(128,225,255,.7)) drop-shadow(0 10px 9px rgba(0,0,0,.55))}70%{transform:translate(4px,0) rotate(0)}}
+.battle-player-art.undead-art+.hunter-companion{left:285px!important;bottom:0!important;transform:scale(.82)!important}
+@media (min-width:1101px){
+  .battle-header{
+    z-index:7!important;
+    grid-column:1!important;
+    grid-row:1/-1!important;
+    height:100dvh!important;
+    overflow-y:auto!important;
+    overflow-x:hidden!important;
+    background:linear-gradient(180deg,#0a2329 0%,#0c2029 58%,#101d2b 100%)!important;
+    border-right:1px solid rgba(159,205,218,.18)!important;
+  }
+  .battle-bottom{
+    padding-left:303px!important;
+  }
+  .map-identity .player-fighter>.experience-panel{
+    display:block!important;
+    visibility:visible!important;
+    min-height:48px!important;
+    margin-top:8px!important;
+  }
+}
+@media (min-width:701px) and (max-width:1100px){
+  .battle-header{grid-row:1/-1!important;height:100dvh!important;overflow-y:auto!important;background:#0b222a!important}
+  .battle-bottom{padding-left:222px!important}
+}

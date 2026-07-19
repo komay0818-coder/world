@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#10192f" />
+  <title>星塵放置所</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&family=Press+Start+2P&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="styles/game.css?v=20260719-companion-2x" />
+  <link rel="stylesheet" href="styles/encounter.css" />
+  <link rel="stylesheet" href="styles/classic-hud.css" />
+  <link rel="stylesheet" href="styles/sidebar-v2.css" />
+  <link rel="stylesheet" href="styles/sidebar-layout.css" />
+  <link rel="stylesheet" href="styles/enhancement.css" />
+  <link rel="stylesheet" href="styles/dungeon.css?v=20260719-monsters-face-left-v2" />
+</head>
+<body>
+  <div class="sky" aria-hidden="true"></div>
+  <main class="app-shell">
+    <section id="login-screen" class="screen login-screen" aria-labelledby="game-title">
+      <div class="brand">
+        <span class="brand-orbit orbit-a"></span><span class="brand-orbit orbit-b"></span>
+        <div class="brand-icon">✦</div>
+        <p class="eyebrow">IDLE ADVENTURE</p>
+        <h1 id="game-title">星塵放置所</h1>
+        <p class="tagline">在閒暇之間，收集屬於你的整片星空。</p>
+      </div>
+
+      <form id="login-form" class="login-card">
+        <label for="player-name">冒險者名稱</label>
+        <div class="input-wrap"><span>✧</span><input id="player-name" name="playerName" type="text" maxlength="12" placeholder="輸入你的名字" autocomplete="nickname" required /></div>
+        <p class="hint">可隨時從設定中變更</p>
+        <button class="primary-button" type="submit"><span>開始旅程</span><b>→</b></button>
+      </form>
+      <p class="version">VER. 0.1.0　·　離線也會持續累積</p>
+    </section>
+
+    <section id="menu-screen" class="screen menu-screen hidden" aria-labelledby="menu-title">
+      <header class="topbar">
+        <button id="profile-button" class="profile" type="button" aria-label="變更冒險者名稱"><span class="avatar">✦</span><span><small>冒險者</small><strong id="display-name">旅人</strong></span></button>
+        <div class="currency"><span>✦</span><strong>1,240</strong><small>星塵</small></div>
+      </header>
+
+      <div class="menu-hero">
+        <p class="eyebrow">WELCOME BACK</p>
+        <h2 id="menu-title">今晚，要去哪裡？</h2>
+        <p>星光正在靜靜累積。下一趟旅程已準備就緒。</p>
+      </div>
+
+      <nav class="menu-grid" aria-label="主選單">
+        <button id="adventure-button" class="menu-card featured" type="button">
+          <span class="card-icon">⚔</span><span class="card-copy"><strong>開始冒險</strong><small>探索未知星域</small></span><span class="arrow">→</span>
+        </button>
+        <button id="character-roster-button" class="menu-card" type="button"><span class="card-icon violet">♟</span><span class="card-copy"><strong>我的角色</strong><small>建立或切換最多 2 名角色</small></span><span class="arrow">→</span></button>
+        <button class="menu-card" type="button" data-message="倉庫目前還沒有收藏品。"><span class="card-icon gold">▣</span><span class="card-copy"><strong>星塵倉庫</strong><small>整理你的珍貴收藏</small></span><span class="arrow">→</span></button>
+        <button class="menu-card" type="button" data-message="成就系統將記錄你的每個里程碑。"><span class="card-icon teal">✧</span><span class="card-copy"><strong>成就圖鑑</strong><small>解鎖旅程的每個瞬間</small></span><span class="arrow">→</span></button>
+      </nav>
+      <button id="reset-button" class="text-button" type="button">切換冒險者</button>
+    </section>
+
+    <section id="character-screen" class="screen character-screen hidden" aria-labelledby="character-title">
+      <header class="wizard-header">
+        <button id="back-to-menu" class="back-button" type="button" aria-label="返回主選單">←</button>
+        <div><p class="eyebrow">NEW ADVENTURER</p><h2 id="character-title">建立你的角色</h2></div>
+        <span class="step-count">1 / 3</span>
+      </header>
+      <div class="creation-card">
+        <p class="section-label">選擇陣營</p>
+        <div class="choice-grid faction-grid">
+          <button class="choice-card selected" type="button" data-faction="light"><span class="choice-icon">✦</span><strong>光明陣營</strong><small>人類與精靈的盟約</small></button>
+          <button class="choice-card" type="button" data-faction="dark"><span class="choice-icon dark-icon">☾</span><strong>暗影陣營</strong><small>半獸人與不死者的聯盟</small></button>
+        </div>
+        <p id="faction-lock-note" class="faction-lock-note hidden"></p>
+        <p class="section-label">選擇種族</p><div id="race-choices" class="choice-grid race-grid"></div>
+        <p class="section-label">選擇職業</p><div id="class-choices" class="class-list"></div>
+        <label class="character-name-label" for="character-name">角色名稱</label>
+        <input id="character-name" class="character-name" maxlength="12" placeholder="為角色取個名字" />
+        <button id="create-character" class="primary-button" type="button"><span>確認並開始冒險</span><b>→</b></button>
+      </div>
+    </section>
+
+    <section id="battle-screen" class="screen battle-screen hidden" aria-labelledby="battle-title">
+      <header class="battle-header">
+        <button id="leave-battle" class="back-button" type="button" aria-label="返回主選單">←</button>
+        <div><p id="map-level-text" class="eyebrow">怪物等級：Lv. 1–5</p><h2 id="battle-title" class="map-selector-trigger" role="button" tabindex="0" title="點擊選擇地圖">初心者平原</h2><div class="map-identity"><span id="race-totem" class="race-totem" title="種族圖騰"></span><span id="job-mark" class="job-mark" title="職業標記">⚔</span><div id="player-fighter" class="fighter player-fighter"><div class="player-details"><strong id="battle-player-name">冒險者</strong><small><span id="battle-race">人類</span> · <span id="battle-job">戰士</span><b class="character-level">Lv. <span id="battle-level">1</span></b></small></div><div class="hp-track"><i id="player-hp-bar"></i></div><em id="player-hp-text">100 / 100</em><div class="mana-track"><i id="player-mp-bar"></i></div><em id="player-mp-text" class="mana-text">100 / 100 MP</em><div class="experience-panel"><div><span>經驗值</span><strong id="exp-text">0 / 100</strong></div><div class="xp-track"><i id="xp-bar"></i></div></div></div></div></div>
+        <button id="layout-toggle" class="layout-button" type="button">✥ 調整版面</button><button id="battle-toggle" class="pause-button" type="button">Ⅱ 暫停</button>
+      </header>
+      <section id="layout-panel" class="layout-panel" aria-label="版面調整工具">
+        <strong>版面調整</strong>
+        <div class="layout-targets">
+          <button type="button" class="layout-target selected" data-layout-target="map">地圖</button>
+          <button type="button" class="layout-target" data-layout-target="back">返回箭頭</button>
+          <button type="button" class="layout-target" data-layout-target="title">地圖名稱</button>
+          <button type="button" class="layout-target" data-layout-target="monster-level">怪物等級</button>
+          <button type="button" class="layout-target" data-layout-target="identity">角色資訊</button>
+          <button type="button" class="layout-target" data-layout-target="race">種族圖案</button>
+          <button type="button" class="layout-target" data-layout-target="job">職業圖案</button>
+          <button type="button" class="layout-target" data-layout-target="log">戰鬥紀錄</button>
+          <button type="button" class="layout-target" data-layout-target="skills">技能區塊</button>
+          <button type="button" class="layout-target" data-layout-target="menu">功能框</button>
+          <button type="button" class="layout-target" data-layout-target="bag">背包按鈕</button>
+          <button type="button" class="layout-target" data-layout-target="equipment">裝備按鈕</button>
+          <button type="button" class="layout-target" data-layout-target="party">隊伍按鈕</button>
+        </div>
+        <select id="layout-skill-select" class="layout-skill-select" aria-label="選擇單一技能">
+          <option value="skill-0">單一技能：技能一</option><option value="skill-1">單一技能：技能二</option><option value="skill-2">單一技能：技能三</option><option value="skill-3">單一技能：技能四</option><option value="skill-4">單一技能：技能五</option><option value="skill-5">單一技能：技能六</option><option value="skill-6">單一技能：技能七</option>
+        </select>
+        <div class="layout-arrows" aria-label="移動選取區塊">
+          <span></span><button type="button" data-layout-move="up">↑</button><span></span>
+          <button type="button" data-layout-move="left">←</button><button type="button" data-layout-move="down">↓</button><button type="button" data-layout-move="right">→</button>
+        </div>
+        <div class="layout-size"><button type="button" data-layout-size="smaller">－ 等比縮小</button><button type="button" data-layout-size="larger">＋ 等比放大</button><button type="button" data-layout-size="larger" data-layout-axis="width">↔ 加寬</button><button type="button" data-layout-size="smaller" data-layout-axis="width">↔ 變窄</button><button type="button" data-layout-size="larger" data-layout-axis="height">↕ 加高</button><button type="button" data-layout-size="smaller" data-layout-axis="height">↕ 降低</button></div>
+        <div class="layout-size"><button type="button" data-layout-font="smaller">A－ 字體縮小</button><button type="button" data-layout-font="larger">A＋ 字體放大</button></div>
+        <button id="layout-skills-stack" class="layout-reset" type="button">技能統一由上往下排列</button>
+        <button id="layout-reset" class="layout-reset" type="button">回復預設位置</button>
+      </section>
+      <div class="battle-field">
+        <div class="terrain terrain-one"></div><div class="terrain terrain-two"></div>
+        <div id="damage-float" class="damage-float"></div>
+        <div id="battle-player-art" class="battle-player-art hidden" aria-label="人類獵人"></div>
+        <div id="hunter-companion" class="hunter-companion hidden" aria-label="獵人戰寵"><span></span><small>戰寵</small></div>
+        <div id="enemy-squad" class="enemy-squad" aria-label="哥布林小隊"></div>
+        <div class="battle-status"><span><b>⚔</b> 自動戰鬥中 · <strong id="enemy-count">5</strong> 隻敵人</span><span><b>✦</b> <strong id="gold-count">0</strong> 金幣</span></div>
+      </div>
+      <div class="battle-bottom"><div class="combat-log"><p>戰鬥紀錄</p><div id="combat-log-lines" aria-live="polite"></div></div><section class="skill-panel" aria-labelledby="skill-panel-title"><div class="skill-panel-head"><strong id="skill-panel-title">技能</strong><small id="skill-resource-status">自動施放</small></div><button id="potion-button" class="potion-button" type="button"><span>🧪</span><span>治癒藥水</span><b id="potion-count">5</b></button><button id="mana-potion-button" class="potion-button" type="button"><span>🔷</span><span>魔法藥水</span><b id="mana-potion-count">0</b></button><div id="skill-list" class="skill-list"></div></section><nav class="battle-menu" aria-label="遊戲選單"><button class="battle-menu-button ability-button" type="button" data-menu-action="能力"><span>◆</span><b>能力</b><small>數值</small></button><button class="battle-menu-button" type="button" data-menu-action="背包"><span>🎒</span><b>背包</b><small>道具</small></button><button class="battle-menu-button" type="button" data-menu-action="裝備"><span>⚔</span><b>裝備</b><small>角色</small></button><button class="battle-menu-button" type="button" data-menu-action="隊伍"><span>👥</span><b>隊伍</b><small>編組</small></button><button class="battle-menu-button collection-button" type="button" data-menu-action="收藏品"><span>♛</span><b>收藏品</b><small>永久能力</small></button></nav></div>
+    </section>
+  </main>
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <div id="skill-tooltip" class="skill-tooltip" role="tooltip"></div>
+  <div id="inventory-modal" class="inventory-modal hidden" role="dialog" aria-modal="true" aria-labelledby="inventory-title">
+    <section class="inventory-window">
+      <header><h2 id="inventory-title">背包</h2><button id="inventory-close" type="button" aria-label="關閉背包">×</button></header>
+      <div id="inventory-content"></div>
+    </section>
+  </div>
+  <div id="character-roster-modal" class="inventory-modal hidden" role="dialog" aria-modal="true" aria-labelledby="character-roster-title">
+    <section class="inventory-window character-roster-window">
+      <header><div><p class="eyebrow">CHARACTER SLOTS</p><h2 id="character-roster-title">我的角色</h2></div><button id="character-roster-close" type="button" aria-label="關閉">×</button></header>
+      <div id="character-roster-content" class="character-roster-content"></div>
+    </section>
+  </div>
+  <script src="script.js?v=20260719-hunter-companion-v7"></script>
+</body>
+</html>

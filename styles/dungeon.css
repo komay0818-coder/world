@@ -1,0 +1,16 @@
+.dungeon-root-executioner,.dungeon-nightblade,.dungeon-moonbone,.dungeon-oracle,.dungeon-boss{display:block;background-position:center;background-size:contain;background-repeat:no-repeat}
+.dungeon-root-executioner{background-image:url('../assets/dungeon-root-executioner.png')}
+.dungeon-nightblade{background-image:url('../assets/dungeon-nightblade.png')}
+.dungeon-moonbone{background-image:url('../assets/dungeon-moonbone.png')}
+.dungeon-oracle{background-image:url('../assets/dungeon-oracle.png')}
+.dungeon-boss{background-image:url('../assets/dungeon-boss.png')}
+.enemy-unit .enemy-art.dungeon-monster-art{width:142px!important;height:152px!important;scale:1 1}
+.enemy-unit .enemy-art.dungeon-monster-art::after{scale:1 1}
+.enemy-unit.boss .enemy-art.dungeon-boss{width:172px!important;height:182px!important}
+.map-selection-card.dungeon-card{border-color:#b67aff;background:linear-gradient(100deg,rgba(43,18,71,.94),rgba(10,24,37,.92)),var(--map-preview) center/cover}
+.map-selection-card.dungeon-card.selected{box-shadow:0 0 0 2px #c99aff,0 0 24px rgba(151,77,235,.42)}
+.dungeon-key-count{display:block;margin-top:7px;color:#ecd5ff;font-size:14px}
+.map-selection-card button:disabled{cursor:not-allowed;opacity:.48;filter:grayscale(.55)}
+@media(max-width:720px){.enemy-unit .enemy-art.dungeon-monster-art{width:92px!important;height:100px!important}.enemy-unit.boss .enemy-art.dungeon-boss{width:112px!important;height:120px!important}}
+.enemy-unit .enemy-art{scale:1 1!important}
+.enemy-unit .enemy-art::after{scale:1 1!important}
