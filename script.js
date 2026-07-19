@@ -130,7 +130,9 @@ const skillIcons = {
   'holy-light': '☀', 'holy-nova': '✣', heal: '✚'
 };
 const maxSkillUpgradeLevel = 6;
-const skillUpgradeCosts = { 2: 1, 3: 2, 4: 3, 5: 5, 6: 8 };
+const skillUpgradeCosts = { 2: 5, 3: 10, 4: 15, 5: 25, 6: 40 };
+const skillBookCosts = { 2: 2, 3: 4, 4: 6, 5: 8, 6: 10 };
+const skillUpgradeSuccessRates = { 2: .85, 3: .70, 4: .55, 5: .40, 6: .35 };
 
 function getSkillUpgradeKey(job, skill) {
   return `${job}:${skill.id || `passive-${skill.level}`}`;
@@ -142,6 +144,19 @@ function getSkillUpgradeLevel(progress, job, skill) {
 
 function getSkillPowerMultiplier(progress, job, skill) {
   return 1 + (getSkillUpgradeLevel(progress, job, skill) - 1) * .12;
+}
+
+function syncSkillMaterialInventory(progress) {
+  progress.inventory = Array.isArray(progress.inventory) ? progress.inventory : [];
+  const upsert = (id, icon, name, description, quantity) => {
+    const existing = progress.inventory.find((item) => item.id === id);
+    if (existing) Object.assign(existing, { kind: 'material', icon, name, description, quantity });
+    else progress.inventory.push({ id, kind: 'material', icon, name, description, quantity });
+  };
+  upsert('magic-crystal', '💎', '魔法結晶', '技能升階的核心材料。', Math.max(0, Number(progress.magicCrystals) || 0));
+  for (let tier = 2; tier <= 6; tier += 1) {
+    upsert(`magic-book-${tier}`, '📘', `${tier}階魔法書`, `技能升至 ${tier} 階時使用。`, Math.max(0, Number(progress.skillBooks?.[tier]) || 0));
+  }
 }
 let selection = { faction: 'light', race: 'human', job: 'warrior' };
 let toastTimer;
@@ -635,6 +650,10 @@ function applyEquipmentVisual(item) {
 
 function getProgress() {
   const saved = JSON.parse(localStorage.getItem('stardust-progress') || '{}');
+  if (saved.magicCrystals === undefined && saved.skillEssence !== undefined) {
+    saved.magicCrystals = Math.max(0, Number(saved.skillEssence) || 0);
+    delete saved.skillEssence;
+  }
   if (saved.starterGearVersion !== 'starter-gear-v1') {
     const character = JSON.parse(localStorage.getItem('stardust-character') || 'null');
     if (character?.job) {
@@ -705,13 +724,14 @@ function getProgress() {
   if ((saved.manaPotions ?? 0) > 0 && !inventory.some((item) => item.id === 'mana-potion')) {
     inventory.push({ id: 'mana-potion', kind: 'consumable', icon: '🔷', name: '魔法藥水', description: '恢復最大魔力 20%。', quantity: saved.manaPotions ?? 0 });
   }
-  return {
+  const normalizedProgress = {
     level: 1,
     xp: 0,
     gold: 0,
     potions: 5,
     manaPotions: 0,
-    skillEssence: 0,
+    magicCrystals: 0,
+    skillBooks: {},
     skillLevels: {},
     selectedMapId: 'beginner-plains',
     inventory: [],
@@ -720,8 +740,11 @@ function getProgress() {
     ...saved,
     inventory,
     equipment: { ...emptyEquipment(), ...(saved.equipment || {}) },
-    collection: saved.collection && typeof saved.collection === 'object' ? saved.collection : {}
+    collection: saved.collection && typeof saved.collection === 'object' ? saved.collection : {},
+    skillBooks: saved.skillBooks && typeof saved.skillBooks === 'object' ? saved.skillBooks : {}
   };
+  syncSkillMaterialInventory(normalizedProgress);
+  return normalizedProgress;
 }
 
 function getCharacterSlots() {
@@ -750,6 +773,7 @@ function syncActiveCharacterSlot(progressOverride = null) {
 }
 
 function saveProgress(progress) {
+  syncSkillMaterialInventory(progress);
   localStorage.setItem('stardust-progress', JSON.stringify(progress));
   syncActiveCharacterSlot(progress);
 }
@@ -1232,7 +1256,7 @@ function itemStatsText(item) {
 }
 
 function itemCategory(item) {
-  if (item.kind === 'consumable') return 'consumable';
+  if (item.kind === 'consumable' || item.kind === 'material') return 'consumable';
   if (item.kind === 'equipment' && ['weapon', 'offhand'].includes(item.slot)) return 'weapon';
   if (item.kind === 'equipment') return 'armor';
   return 'other';
@@ -1640,6 +1664,8 @@ function renderSkills(character, level) {
     const unlocked = level >= skill.level;
     const upgradeLevel = getSkillUpgradeLevel(progress, character.job, skill);
     const nextCost = skillUpgradeCosts[upgradeLevel + 1] || 0;
+    const nextBookCost = skillBookCosts[upgradeLevel + 1] || 0;
+    const ownedBooks = Number(progress.skillBooks?.[upgradeLevel + 1]) || 0;
     const cooldown = skill.type === 'active' && unlocked ? Math.max(0, Math.ceil(((battle.skillCooldowns[skill.id] || 0) - Date.now()) / 1000)) : 0;
     const manaCost = skill.type === 'active' ? getSkillManaCost(skill) : 0;
     const stateClass = !unlocked ? 'locked' : skill.type === 'passive' ? 'enabled' : battle.manaExhausted ? 'exhausted' : battle.playerMana < manaCost ? 'no-mana' : cooldown > 0 ? 'cooling' : 'ready';
@@ -1648,7 +1674,7 @@ function renderSkills(character, level) {
     const icon = skill.type === 'active' ? (skillIcons[skill.id] || '✦') : '◆';
     const priority = activeIndex >= 0 ? `<i class="skill-priority">${activeIndex + 1}</i>` : '';
     const detail = unlocked ? `${skill.detail}｜${skill.type === 'active' ? `消耗 ${manaCost} MP｜冷卻 ${Math.round(skill.cooldown * skillCooldownMultiplier)} 秒` : '被動技能'}` : `Lv.${skill.level} 解鎖`;
-    const upgradeButton = unlocked ? `<button class="skill-upgrade-button" type="button" data-upgrade-skill="${getSkillUpgradeKey(character.job, skill)}" ${upgradeLevel >= maxSkillUpgradeLevel || progress.skillEssence < nextCost ? 'disabled' : ''}>${upgradeLevel >= maxSkillUpgradeLevel ? '已滿級' : `升級・${nextCost} 結晶`}</button>` : '';
+    const upgradeButton = unlocked ? `<button class="skill-upgrade-button" type="button" data-upgrade-skill="${getSkillUpgradeKey(character.job, skill)}" ${upgradeLevel >= maxSkillUpgradeLevel || progress.magicCrystals < nextCost || ownedBooks < nextBookCost ? 'disabled' : ''}>${upgradeLevel >= maxSkillUpgradeLevel ? '已滿級' : `升階・💎${nextCost}＋${upgradeLevel + 1}階書×${nextBookCost}・${Math.round(skillUpgradeSuccessRates[upgradeLevel + 1] * 100)}%`}</button>` : '';
     return `<div class="skill-chip ${skill.type} ${stateClass}" data-skill-detail="${detail}">${priority}<span class="skill-icon">${icon}</span><b>${unlocked ? skill.name : '未解鎖'}</b><small>${metaText}</small><em class="skill-cooldown ${stateClass}">${statusText}</em>${upgradeButton}</div>`;
   };
   skillList.innerHTML = `<section class="skill-group active-group"><h3>主動技能</h3><div class="skill-row">${activeSkills.map((skill, index) => renderSkill(skill, index)).join('')}</div></section><section class="skill-group passive-group"><h3>被動技能</h3><div class="skill-row">${passiveSkills.map((skill) => renderSkill(skill)).join('')}</div></section><section class="race-talent-group"><h3>種族天賦</h3><article class="race-talent-card race-talent-${character.race}"><span>${raceTalent.icon}</span><div><b>${raceInfo?.name || character.race}・${raceTalent.name}</b><small>${raceTalent.detail}</small></div><em>永久生效</em></article></section>`;
@@ -1663,7 +1689,7 @@ function renderSkills(character, level) {
   applySavedLayout();
   setupSkillTooltips();
   const resourceStatus = document.querySelector('#skill-resource-status');
-  if (resourceStatus) resourceStatus.textContent = `技能結晶 ${progress.skillEssence}・${battle.manaExhausted ? `枯竭中・${Math.ceil(maxMana * .45)} MP 恢復` : `${Math.ceil(battle.playerMana)} / ${maxMana} MP`}`;
+  if (resourceStatus) resourceStatus.textContent = `魔法結晶 ${progress.magicCrystals}・${battle.manaExhausted ? `枯竭中・${Math.ceil(maxMana * .45)} MP 恢復` : `${Math.ceil(battle.playerMana)} / ${maxMana} MP`}`;
 }
 
 function refreshSkills(character, level) {
@@ -1678,7 +1704,7 @@ function refreshSkills(character, level) {
   const orderedSkills = [...skills.filter((skill) => skill.type === 'active'), ...skills.filter((skill) => skill.type === 'passive')];
   const maxMana = getMaxMana(character.job, level);
   const resourceStatus = document.querySelector('#skill-resource-status');
-  if (resourceStatus) resourceStatus.textContent = `技能結晶 ${progress.skillEssence}・${battle.manaExhausted ? `枯竭中・${Math.ceil(maxMana * .45)} MP 恢復` : `${Math.ceil(battle.playerMana)} / ${maxMana} MP`}`;
+  if (resourceStatus) resourceStatus.textContent = `魔法結晶 ${progress.magicCrystals}・${battle.manaExhausted ? `枯竭中・${Math.ceil(maxMana * .45)} MP 恢復` : `${Math.ceil(battle.playerMana)} / ${maxMana} MP`}`;
   orderedSkills.forEach((skill, index) => {
     const chip = document.querySelector(`#skill-${index}`);
     if (!chip) return;
@@ -1686,8 +1712,10 @@ function refreshSkills(character, level) {
     const upgradeButton = chip.querySelector('.skill-upgrade-button');
     if (upgradeButton) {
       const nextCost = skillUpgradeCosts[upgradeLevel + 1] || 0;
-      upgradeButton.disabled = upgradeLevel >= maxSkillUpgradeLevel || progress.skillEssence < nextCost;
-      upgradeButton.textContent = upgradeLevel >= maxSkillUpgradeLevel ? '已滿級' : `升級・${nextCost} 結晶`;
+      const nextBookCost = skillBookCosts[upgradeLevel + 1] || 0;
+      const ownedBooks = Number(progress.skillBooks?.[upgradeLevel + 1]) || 0;
+      upgradeButton.disabled = upgradeLevel >= maxSkillUpgradeLevel || progress.magicCrystals < nextCost || ownedBooks < nextBookCost;
+      upgradeButton.textContent = upgradeLevel >= maxSkillUpgradeLevel ? '已滿級' : `升階・💎${nextCost}＋${upgradeLevel + 1}階書×${nextBookCost}・${Math.round(skillUpgradeSuccessRates[upgradeLevel + 1] * 100)}%`;
     }
     if (skill.type !== 'active' || level < skill.level) return;
     const cooldown = Math.max(0, Math.ceil(((battle.skillCooldowns[skill.id] || 0) - Date.now()) / 1000));
@@ -1859,11 +1887,17 @@ function rewardVictory(index) {
   const loot = addLoot(progress, enemy);
   const collectible = addCollectibleLoot(progress, enemy);
   const accountDrops = [];
-  const skillMaterialChance = currentMap.dungeon ? (enemy.isBoss ? 1 : .24) : currentMap.id === 'black-forest' ? (enemy.isBoss ? .18 : enemy.isElite ? .08 : .03) : 0;
+  const skillMaterialChance = currentMap.dungeon ? (enemy.isBoss ? 1 : .24) : currentMap.min >= 5 ? (enemy.isBoss ? .18 : enemy.isElite ? .08 : .03) : 0;
   if (skillMaterialChance > 0 && Math.random() < skillMaterialChance) {
     const amount = currentMap.dungeon && enemy.isBoss ? 2 : 1;
-    progress.skillEssence = (progress.skillEssence || 0) + amount;
-    accountDrops.push(`技能結晶 ×${amount}`);
+    progress.magicCrystals = (progress.magicCrystals || 0) + amount;
+    accountDrops.push(`魔法結晶 ×${amount}`);
+  }
+  const bookTier = Math.min(6, Math.max(2, Math.floor(currentMap.min / 5) + 1));
+  const bookDropChance = currentMap.dungeon ? (enemy.isBoss ? .60 : .15) : currentMap.min >= 5 ? (enemy.isBoss ? .12 : enemy.isElite ? .04 : .01) : 0;
+  if (bookDropChance > 0 && Math.random() < bookDropChance) {
+    progress.skillBooks = { ...(progress.skillBooks || {}), [bookTier]: (Number(progress.skillBooks?.[bookTier]) || 0) + 1 };
+    accountDrops.push(`${bookTier}階魔法書 ×1`);
   }
   if (currentMap.dungeon) {
     const resources = getAccountResources();
@@ -2234,13 +2268,19 @@ document.querySelector('#skill-list').addEventListener('click', (event) => {
   const currentLevel = getSkillUpgradeLevel(progress, character.job, skill);
   if (currentLevel >= maxSkillUpgradeLevel) return;
   const cost = skillUpgradeCosts[currentLevel + 1];
-  if ((progress.skillEssence || 0) < cost) { showToast(`技能結晶不足，需要 ${cost} 個。`); return; }
-  progress.skillEssence -= cost;
-  progress.skillLevels = { ...(progress.skillLevels || {}), [getSkillUpgradeKey(character.job, skill)]: currentLevel + 1 };
+  const targetTier = currentLevel + 1;
+  const bookCost = skillBookCosts[targetTier];
+  const ownedBooks = Number(progress.skillBooks?.[targetTier]) || 0;
+  if ((progress.magicCrystals || 0) < cost) { showToast(`魔法結晶不足，需要 ${cost} 個。`); return; }
+  if (ownedBooks < bookCost) { showToast(`${targetTier}階魔法書不足，需要 ${bookCost} 本。`); return; }
+  progress.magicCrystals -= cost;
+  progress.skillBooks = { ...(progress.skillBooks || {}), [targetTier]: ownedBooks - bookCost };
+  const succeeded = Math.random() < skillUpgradeSuccessRates[targetTier];
+  if (succeeded) progress.skillLevels = { ...(progress.skillLevels || {}), [getSkillUpgradeKey(character.job, skill)]: targetTier };
   saveProgress(progress);
   renderSkills(character, progress.level);
-  showToast(`【${skill.name}】提升至技能 Lv.${currentLevel + 1}`);
-  logBattle(`◆ 技能升級【${skill.name}】→ Lv.${currentLevel + 1}`, 'progress');
+  showToast(succeeded ? `【${skill.name}】成功升至 ${targetTier} 階！` : `【${skill.name}】升階失敗，材料已消耗。`);
+  logBattle(succeeded ? `◆ 技能升階成功【${skill.name}】→ ${targetTier} 階` : `◇ 技能升階失敗【${skill.name}】・維持 ${currentLevel} 階`, 'progress');
 });
 document.querySelector('#layout-toggle').addEventListener('click', () => {
   layoutEditMode = !layoutEditMode;
