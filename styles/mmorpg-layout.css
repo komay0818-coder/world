@@ -1472,9 +1472,9 @@
   }
 }
 
-/* Larger human hunter and companion, scoped away from other race/job artwork. */
+/* Keep every human class at the established human-hunter artwork size. */
 @media (min-width: 701px) {
-  .battle-field #battle-player-art[aria-label="人類獵人"] {
+  .battle-field #battle-player-art[aria-label^="人類"] {
     width: 270px !important;
     height: 350px !important;
   }
@@ -1485,7 +1485,7 @@
 }
 
 @media (max-width: 700px) {
-  .battle-field #battle-player-art[aria-label="人類獵人"] {
+  .battle-field #battle-player-art[aria-label^="人類"] {
     width: 202px !important;
     height: 262px !important;
   }
