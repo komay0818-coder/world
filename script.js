@@ -236,7 +236,7 @@ for (let skillIndex = 0; skillIndex < 7; skillIndex += 1) layoutTargets.push([`s
 
 const defaultBattleLayout = {
   identity: { modified: true, left: 17, top: 69, width: 395, height: 209, fontSize: '', skillFontSize: '' },
-  hud: { modified: true, left: 4, top: 4, width: 421, height: 250, fontSize: '', skillFontSize: '' },
+  hud: { modified: true, left: 4, top: 4, width: 421, height: 290, fontSize: '', skillFontSize: '' },
   log: { modified: true, left: 4, top: 286, width: 410, height: 640, fontSize: '', skillFontSize: '' }
 };
 
@@ -268,9 +268,10 @@ function repairMenuLayoutOnce() {
 
 function repairHudLayoutOnce() {
   const saved = JSON.parse(localStorage.getItem('stardust-battle-layout') || '{}');
-  if (saved.hudLayoutVersion === 1) return;
-  ['back', 'title', 'monster-level', 'identity', 'race', 'job'].forEach((key) => delete saved[key]);
-  saved.hudLayoutVersion = 1;
+  if (saved.hudLayoutVersion === 2) return;
+  if (!saved.hud || saved.hud.height === 250) saved.hud = { ...defaultBattleLayout.hud };
+  if (!saved.identity) saved.identity = { ...defaultBattleLayout.identity };
+  saved.hudLayoutVersion = 2;
   localStorage.setItem('stardust-battle-layout', JSON.stringify(saved));
 }
 
@@ -449,8 +450,9 @@ function setupLayoutDrag() {
         element.style.top = `${activeLayoutDrag.startTop + event.clientY - activeLayoutDrag.startY}px`;
         return;
       }
-      const maxLeft = Math.max(0, window.innerWidth - element.offsetWidth);
-      const maxTop = Math.max(0, window.innerHeight - element.offsetHeight);
+      const isCombatLog = element.classList.contains('combat-log');
+      const maxLeft = Math.max(0, window.innerWidth - (isCombatLog ? 80 : element.offsetWidth));
+      const maxTop = Math.max(0, window.innerHeight - (isCombatLog ? 80 : element.offsetHeight));
       const left = Math.max(0, Math.min(maxLeft, event.clientX - activeLayoutDrag.offsetX));
       const top = Math.max(0, Math.min(maxTop, event.clientY - activeLayoutDrag.offsetY));
       element.style.setProperty('left', `${left}px`, element.classList.contains('combat-log') ? 'important' : '');

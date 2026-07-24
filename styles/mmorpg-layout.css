@@ -1271,6 +1271,11 @@
 
 /* Readability pass requested for the desktop battle HUD. */
 @media (min-width: 701px) {
+  .battle-screen > .battle-header {
+    height: 290px !important;
+    overflow: visible !important;
+  }
+
   .battle-header #battle-title {
     font-size: 25px !important;
   }
@@ -1297,13 +1302,21 @@
   }
 
   .battle-bottom .skill-panel > .potion-button {
-    display: grid !important;
+    display: inline-grid !important;
     grid-template-columns: 24px minmax(0, 1fr) !important;
     grid-template-rows: auto auto !important;
+    box-sizing: border-box !important;
+    width: calc(50% - 4px) !important;
+    margin: 0 4px 8px 0 !important;
     column-gap: 6px !important;
     row-gap: 1px !important;
     align-items: center !important;
     text-align: left !important;
+    vertical-align: top !important;
+  }
+
+  .battle-bottom .skill-panel > .potion-button + .potion-button {
+    margin-right: 0 !important;
   }
 
   .battle-bottom .skill-panel > .potion-button > span:first-child {
