@@ -1584,13 +1584,22 @@ function discardSelectedEquipment() {
 
 function renderEnemySquad() {
   const squad = document.querySelector('#enemy-squad');
-  squad.innerHTML = battle.enemyHps.map((hp, index) => {
+  const visibleIndexes = aliveEnemyIndexesByAge().slice(0, 3);
+  const focusIndex = visibleIndexes[0] ?? -1;
+  const reserveCount = Math.max(0, battle.enemyHps.filter((hp) => hp > 0).length - visibleIndexes.length);
+  const visibleEnemies = visibleIndexes.map((index, stageSlot) => {
+    const hp = battle.enemyHps[index];
     const enemy = getEnemyDefinition(index);
     const damageEvents = (battle.enemyDamages[index] || []).map((event, eventIndex) => `<b class="enemy-damage ${event.type || 'normal'}" style="--damage-offset:${eventIndex * 18}px">-${event.damage}</b>`).join('');
     const rankClass = enemy.isBoss ? 'boss' : enemy.isElite ? 'elite' : enemy.isRare ? 'rare' : '';
     const rankName = enemy.isBoss ? `♛ BOSS・${enemy.name}` : enemy.isElite ? `◆ 菁英・${enemy.name}` : enemy.isRare ? `✦ 稀有・${enemy.name}` : enemy.name;
-    return `<div id="enemy-${index}" class="enemy-unit ${rankClass} ${hp <= 0 ? 'defeated' : ''} ${battle.targetIndexes.includes(index) ? 'targeted hit' : ''}"><span class="enemy-art ${enemy.artClass}"></span>${damageEvents}<small>${rankName}</small><div class="hp-track enemy-track"><i style="width:${Math.max(0, hp / enemy.maxHp * 100)}%"></i></div></div>`;
+    const focusClass = index === focusIndex ? 'focus-target' : 'support-target';
+    return `<div id="enemy-${index}" class="enemy-unit stage-slot-${stageSlot} ${focusClass} ${rankClass} ${battle.targetIndexes.includes(index) ? 'targeted hit' : ''}"><span class="enemy-art ${enemy.artClass}"></span>${damageEvents}<small>${rankName}</small><div class="hp-track enemy-track"><i style="width:${Math.max(0, hp / enemy.maxHp * 100)}%"></i></div></div>`;
   }).join('');
+  const reserveLabel = reserveCount > 0
+    ? `<div class="reserve-indicator"><b>後備 ${reserveCount}</b><span>等待進場</span></div>`
+    : visibleIndexes.length ? '' : '<div class="reserve-indicator empty"><b>戰場暫空</b><span>怪物即將重生</span></div>';
+  squad.innerHTML = visibleEnemies + reserveLabel;
 }
 
 function playMonsterAttackAnimation(enemyIndex, playerWasHit) {

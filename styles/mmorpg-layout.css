@@ -1,0 +1,259 @@
+/* Final battlefield layout layer. Loaded last to replace legacy positioning rules. */
+@media (min-width: 701px) {
+  .battle-screen {
+    grid-template-columns: 285px minmax(0, 1fr) !important;
+    grid-template-rows: 58vh minmax(0, 1fr) !important;
+  }
+
+  .battle-field {
+    grid-column: 2 !important;
+    grid-row: 1 !important;
+    min-height: 0 !important;
+    height: 58vh !important;
+  }
+
+  .battle-field #battle-player-art {
+    left: 12px !important;
+    bottom: 0 !important;
+    width: 193px !important;
+    height: 250px !important;
+  }
+
+  .battle-field #battle-player-art.undead-art {
+    left: 8px !important;
+    width: 352px !important;
+    height: 270px !important;
+  }
+
+  .battle-field #hunter-companion {
+    left: 136px !important;
+    bottom: 2px !important;
+    width: 170px !important;
+    transform: scale(.72) !important;
+    transform-origin: left bottom !important;
+  }
+
+  .battle-field #hunter-companion span {
+    width: 164px !important;
+    height: 136px !important;
+  }
+
+  .battle-field #battle-player-art.undead-art + #hunter-companion {
+    left: 168px !important;
+    bottom: 0 !important;
+    transform: scale(.68) !important;
+  }
+
+  .battle-field #enemy-squad {
+    z-index: 6 !important;
+    top: 12% !important;
+    left: 63% !important;
+    width: min(64%, 620px) !important;
+    height: 76% !important;
+    transform: translateX(-50%) !important;
+  }
+
+  #enemy-squad .enemy-unit {
+    position: absolute !important;
+    width: 126px !important;
+    margin: 0 !important;
+    transform-origin: center bottom !important;
+  }
+
+  #enemy-squad .stage-slot-0 {
+    left: 20% !important;
+    top: 40% !important;
+    z-index: 8 !important;
+    transform: scale(1.04) !important;
+  }
+
+  #enemy-squad .stage-slot-1 {
+    left: 54% !important;
+    top: 5% !important;
+    z-index: 5 !important;
+    transform: scale(.82) !important;
+    opacity: .84 !important;
+  }
+
+  #enemy-squad .stage-slot-2 {
+    left: 67% !important;
+    top: 49% !important;
+    z-index: 7 !important;
+    transform: scale(.94) !important;
+    opacity: .93 !important;
+  }
+
+  #enemy-squad .focus-target .enemy-track {
+    display: block !important;
+    width: 104px !important;
+    height: 7px !important;
+    opacity: 1 !important;
+  }
+
+  #enemy-squad .support-target .enemy-track {
+    display: block !important;
+    width: 66px !important;
+    height: 3px !important;
+    opacity: .24 !important;
+  }
+
+  .battle-bottom {
+    grid-column: 1 / -1 !important;
+    grid-row: 2 !important;
+    grid-template-columns: minmax(240px, 1fr) minmax(310px, 350px) 92px !important;
+    gap: 10px !important;
+    padding-top: 10px !important;
+    padding-bottom: 10px !important;
+  }
+
+  .battle-bottom .combat-log {
+    align-self: start !important;
+    width: auto !important;
+    height: min(210px, 100%) !important;
+    padding: 9px 11px !important;
+    background: rgba(6, 18, 26, .56) !important;
+    opacity: .66 !important;
+    transition: opacity .18s ease !important;
+  }
+
+  .battle-bottom .combat-log:hover,
+  .battle-bottom .combat-log:focus-within {
+    opacity: .96 !important;
+  }
+
+  .battle-bottom #combat-log-lines {
+    gap: 3px !important;
+    padding: 5px !important;
+    background: rgba(239, 245, 247, .84) !important;
+  }
+
+  .battle-bottom #combat-log-lines .combat-log-entry {
+    grid-template-columns: 48px minmax(0, 1fr) !important;
+    padding: 4px 6px !important;
+    font-size: 10px !important;
+    line-height: 1.3 !important;
+  }
+
+  .battle-bottom .skill-panel {
+    align-self: start !important;
+    width: auto !important;
+    height: min(300px, 100%) !important;
+    padding: 9px !important;
+    background: rgba(7, 20, 29, .72) !important;
+  }
+
+  .battle-bottom .skill-panel > .potion-button {
+    position: relative !important;
+    inset: auto !important;
+    display: inline-flex !important;
+    width: calc(50% - 5px) !important;
+    min-height: 36px !important;
+    margin: 0 4px 6px 0 !important;
+    padding: 5px 7px !important;
+  }
+
+  .battle-bottom .skill-panel > .potion-button + button {
+    margin-right: 0 !important;
+  }
+
+  .battle-bottom .skill-list .skill-group {
+    margin-top: 5px !important;
+  }
+
+  .battle-bottom .skill-list .skill-group h3 {
+    margin-bottom: 3px !important;
+  }
+
+  .battle-bottom .skill-list .skill-row {
+    gap: 4px !important;
+  }
+
+  .battle-bottom .skill-list .skill-chip {
+    min-height: 56px !important;
+    padding: 5px !important;
+  }
+
+  .battle-bottom .skill-upgrade-button {
+    margin-top: 2px !important;
+    padding: 2px 3px !important;
+    font-size: 7px !important;
+  }
+
+  .battle-menu {
+    width: 92px !important;
+    padding: 5px !important;
+    gap: 5px !important;
+  }
+
+  .battle-menu-button {
+    min-height: 46px !important;
+  }
+}
+
+@media (min-width: 701px) and (max-width: 1100px) {
+  .battle-screen {
+    grid-template-columns: 210px minmax(0, 1fr) !important;
+    grid-template-rows: 54vh minmax(0, 1fr) !important;
+  }
+
+  .battle-field {
+    height: 54vh !important;
+  }
+
+  .battle-field #battle-player-art {
+    width: 174px !important;
+    height: 225px !important;
+  }
+
+  .battle-field #battle-player-art.undead-art {
+    width: 316px !important;
+    height: 243px !important;
+  }
+
+  .battle-field #enemy-squad {
+    left: 61% !important;
+    width: 70% !important;
+  }
+
+  .battle-bottom {
+    grid-template-columns: minmax(210px, 1fr) minmax(290px, 330px) 80px !important;
+  }
+}
+
+@media (max-width: 700px) {
+  #enemy-squad {
+    top: 11% !important;
+    left: 61% !important;
+    width: 76% !important;
+    height: 72% !important;
+  }
+
+  #enemy-squad .stage-slot-0 {
+    left: 4% !important;
+    top: 38% !important;
+    transform: scale(1) !important;
+  }
+
+  #enemy-squad .stage-slot-1 {
+    left: 47% !important;
+    top: 5% !important;
+    transform: scale(.78) !important;
+  }
+
+  #enemy-squad .stage-slot-2 {
+    left: 59% !important;
+    top: 50% !important;
+    transform: scale(.9) !important;
+  }
+
+  #enemy-squad .focus-target .enemy-track {
+    width: 68px !important;
+    height: 5px !important;
+  }
+
+  #enemy-squad .support-target .enemy-track {
+    width: 46px !important;
+    height: 2px !important;
+    opacity: .24 !important;
+  }
+}
