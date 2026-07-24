@@ -1719,20 +1719,6 @@ function playMonsterAttackAnimation(enemyIndex, playerWasHit) {
   });
 }
 
-function playPlayerProjectile(targetIndex) {
-  const field = document.querySelector('.battle-field');
-  const target = document.querySelector(`#enemy-${targetIndex}`);
-  if (!field || !target) return;
-  const fieldRect = field.getBoundingClientRect();
-  const targetRect = target.getBoundingClientRect();
-  const projectile = document.createElement('i');
-  projectile.className = 'player-projectile';
-  projectile.style.setProperty('--shot-x', `${targetRect.left + targetRect.width * .5 - fieldRect.left - 82}px`);
-  projectile.style.setProperty('--shot-y', `${targetRect.top + targetRect.height * .45 - fieldRect.top - (fieldRect.height - 72)}px`);
-  field.appendChild(projectile);
-  setTimeout(() => projectile.remove(), 520);
-}
-
 function playPlayerAttackAnimation() {
   const fighter = document.querySelector('#player-fighter');
   const art = document.querySelector('#battle-player-art');
@@ -2323,7 +2309,6 @@ function battleTick() {
     const instinctTriggered = Boolean(hunterInstinct && battle.hunterAttackCount % hunterInstinct.interval === 0);
     const playerHit = Math.max(1, Math.ceil(basePlayerHit * (instinctTriggered ? hunterInstinct.multiplier : 1)));
     playPlayerAttackAnimation();
-    playPlayerProjectile(targetIndex);
     const targetEnemy = getEnemyDefinition(targetIndex);
     const attackProfile = getPlayerAttackProfile(character);
     const attackResult = applyDamageToMonster(targetIndex, playerHit, attackProfile);
