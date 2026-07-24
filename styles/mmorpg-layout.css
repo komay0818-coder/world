@@ -1192,7 +1192,7 @@
 /* Desktop battle columns: wider player/log, fluid field, narrower skills. */
 @media (min-width: 1101px) {
   .battle-screen {
-    grid-template-columns: var(--battle-left-column, 30%) minmax(0, 1fr) var(--battle-right-column, 16%) !important;
+    grid-template-columns: var(--battle-left-column, 22%) minmax(0, 1fr) var(--battle-right-column, 15%) !important;
   }
 }
 

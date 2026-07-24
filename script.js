@@ -234,6 +234,12 @@ const layoutTargets = [
 ];
 for (let skillIndex = 0; skillIndex < 7; skillIndex += 1) layoutTargets.push([`skill-${skillIndex}`, `#skill-${skillIndex}`]);
 
+const defaultBattleLayout = {
+  identity: { modified: true, left: 17, top: 69, width: 395, height: 209, fontSize: '', skillFontSize: '' },
+  hud: { modified: true, left: 4, top: 4, width: 421, height: 250, fontSize: '', skillFontSize: '' },
+  log: { modified: true, left: 4, top: 254, width: 410, height: 700, fontSize: '', skillFontSize: '' }
+};
+
 function repairSkillLayoutOnce() {
   const saved = JSON.parse(localStorage.getItem('stardust-battle-layout') || '{}');
   if (saved.skillLayoutVersion === 6) return;
@@ -328,7 +334,7 @@ function resizeSelectedFont(sizeChange) {
 }
 
 function applySavedLayout() {
-  const saved = JSON.parse(localStorage.getItem('stardust-battle-layout') || '{}');
+  const saved = { ...defaultBattleLayout, ...JSON.parse(localStorage.getItem('stardust-battle-layout') || '{}') };
   layoutTargets.forEach(([key, selector]) => {
     const layout = saved[key];
     const element = document.querySelector(selector);
@@ -2561,9 +2567,9 @@ function applyBattleColumnWidths(left, right, persist = true) {
 
 try {
   const savedColumns = JSON.parse(localStorage.getItem(layoutColumnStorageKey) || '{}');
-  applyBattleColumnWidths(savedColumns.left, savedColumns.right, false);
+  applyBattleColumnWidths(savedColumns.left ?? 22, savedColumns.right ?? 15, false);
 } catch {
-  applyBattleColumnWidths(30, 16, false);
+  applyBattleColumnWidths(22, 15, false);
 }
 
 layoutLeftWidth.addEventListener('input', () => applyBattleColumnWidths(layoutLeftWidth.value, layoutRightWidth.value));
@@ -2585,10 +2591,9 @@ function applyCombatLogSize(width, height, persist = true) {
 
 try {
   const savedCombatLogSize = JSON.parse(localStorage.getItem(combatLogSizeStorageKey) || '{}');
-  const combatLogRect = document.querySelector('.combat-log').getBoundingClientRect();
-  applyCombatLogSize(savedCombatLogSize.width || combatLogRect.width, savedCombatLogSize.height || combatLogRect.height, false);
+  applyCombatLogSize(savedCombatLogSize.width ?? 410, savedCombatLogSize.height ?? 700, false);
 } catch {
-  applyCombatLogSize(360, 520, false);
+  applyCombatLogSize(410, 700, false);
 }
 
 layoutLogWidth.addEventListener('input', () => applyCombatLogSize(layoutLogWidth.value, layoutLogHeight.value));
