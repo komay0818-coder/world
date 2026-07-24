@@ -1189,9 +1189,9 @@
   }
 }
 
-/* Desktop battle columns: widen player/log, maximize field, narrow skills. */
+/* Desktop battle columns: wider player/log, fluid field, narrower skills. */
 @media (min-width: 1101px) {
   .battle-screen {
-    grid-template-columns: 26% minmax(0, 1fr) 18% !important;
+    grid-template-columns: 30% minmax(0, 1fr) 16% !important;
   }
 }
