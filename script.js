@@ -27,7 +27,7 @@ const battleCharacterArt = {
   'human:warrior': 'assets/human-warrior-v2.png',
   'human:assassin': 'assets/human-assassin-v2.png',
   'human:hunter': 'assets/human-hunter-v2.png',
-  'human:mage': 'assets/human-mage.png',
+  'human:mage': 'assets/human-mage-v2.png',
   'human:priest': 'assets/human-priest.png',
   'elf:warrior': 'assets/elf-warrior.png',
   'elf:assassin': 'assets/elf-assassin.png',
