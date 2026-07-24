@@ -508,6 +508,14 @@
   }
 }
 
+/* Permanently retire the legacy drag-and-resize editor from the battle HUD. */
+#layout-toggle,
+#layout-panel {
+  display: none !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
+
 /* Three-column MMORPG HUD: player/log rail, world stage, skill rail. */
 @media (min-width: 1101px) {
   .battle-screen {
