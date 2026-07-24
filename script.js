@@ -490,7 +490,7 @@ const monsterTypes = {
   plainsWolfPup: { id: 'plainsWolfPup', name: '幼狼', maxHp: 34, attack: 7, artClass: 'plains-wolf-pup-art', xp: 4, gold: 2 },
   plainsSlime: { id: 'plainsSlime', name: '小史萊姆', maxHp: 30, attack: 6, artClass: 'plains-slime-art', xp: 4, gold: 1 },
   plainsGoblinYoung: { id: 'plainsGoblinYoung', name: '幼年哥布林', maxHp: 40, attack: 8, artClass: 'plains-goblin-young-art', xp: 4, gold: 2 },
-  lostGoblin: { id: 'lostGoblin', name: '迷路的哥布林', maxHp: 62, attack: 10, artClass: 'monster-placeholder-art rare-placeholder-art', xp: 10, gold: 5, isRare: true },
+  lostGoblin: { id: 'lostGoblin', name: '迷路的哥布林', maxHp: 62, attack: 10, artClass: 'lost-goblin-art', xp: 10, gold: 5, isRare: true },
   goblin: { id: 'goblin', name: '哥布林', maxHp: 45, attack: 11, artClass: 'goblin-art', xp: 10, gold: 3 },
   wolf: { id: 'wolf', name: '森林狼', maxHp: 68, attack: 14, artClass: 'wolf-art', xp: 14, gold: 4 },
   boar: { id: 'boar', name: '野豬', maxHp: 82, attack: 17, artClass: 'boar-art', xp: 18, gold: 5 },
