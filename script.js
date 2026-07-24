@@ -2018,8 +2018,8 @@ function rewardVictory(index) {
 }
 
 function getMonsterRespawnTicks() {
-  // 移動速度越高，怪物越快回到戰場；100% 時為 6 秒。
-  return Math.max(2, Math.round(6 * (100 / battle.monsterMoveSpeed)));
+  // 移動速度越高，怪物越快回到戰場；100% 時為 4 秒。
+  return Math.max(1, Math.round(4 * (100 / battle.monsterMoveSpeed)));
 }
 
 function processEnemyRespawns() {
@@ -2288,7 +2288,7 @@ function openBattle() {
     showToast(`⚠ ${rank} 出現：${openingSpecial.name}`);
     logBattle(`⚠ ${rank}【${openingSpecial.name}】已出現在地圖！`);
   }
-  logBattle(isDungeon ? `◆ 進入${currentMap.name}，第 1／10 波：3 名精英來襲。全滅後自動進入下一波。` : `進入${currentMap.name}，${character.name}開始自動戰鬥。怪物移動速度 200%，重生約 3 秒。`);
+  logBattle(isDungeon ? `◆ 進入${currentMap.name}，第 1／10 波：3 名精英來襲。全滅後自動進入下一波。` : `進入${currentMap.name}，${character.name}開始自動戰鬥。怪物移動速度 200%，重生約 2 秒。`);
   fighting = true;
   document.querySelector('#battle-toggle').textContent = 'Ⅱ 暫停攻擊';
   updateBattleUI();
