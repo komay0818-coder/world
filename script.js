@@ -526,7 +526,7 @@ const monsterTypes = {
   plainsSlime: { id: 'plainsSlime', name: '小史萊姆', maxHp: 30, attack: 6, defense: 0, evasion: 0, parry: 0, damageReduction: 5, artClass: 'plains-slime-art', xp: 4, gold: 1 },
   plainsGoblinYoung: { id: 'plainsGoblinYoung', name: '幼年哥布林', maxHp: 40, attack: 8, defense: 2, evasion: 2, parry: 3, damageReduction: 0, artClass: 'plains-goblin-young-art', xp: 4, gold: 2 },
   lostGoblin: { id: 'lostGoblin', name: '迷路的哥布林', maxHp: 62, attack: 10, defense: 4, evasion: 5, parry: 6, damageReduction: 2, artClass: 'lost-goblin-art', xp: 10, gold: 5, isRare: true },
-  denForestWolf: { id: 'denForestWolf', name: '森林狼', maxHp: 58, attack: 11, defense: 3, evasion: 8, parry: 0, damageReduction: 0, artClass: 'wolf-art', xp: 6, gold: 3, lootSource: 'wolf' },
+  denForestWolf: { id: 'denForestWolf', name: '森林狼', maxHp: 58, attack: 11, defense: 3, evasion: 8, parry: 0, damageReduction: 0, artClass: 'den-forest-wolf-art', xp: 6, gold: 3, lootSource: 'wolf' },
   ragingWolf: { id: 'ragingWolf', name: '狂暴狼', maxHp: 125, attack: 16, defense: 6, evasion: 10, parry: 0, damageReduction: 4, artClass: 'wolf-art', xp: 16, gold: 9, isElite: true, lootSource: 'wolf' },
   greatfangWolf: { id: 'greatfangWolf', name: '巨牙狼', maxHp: 480, attack: 21, defense: 12, evasion: 8, parry: 0, damageReduction: 8, artClass: 'wolf-art', xp: 80, gold: 45, isBoss: true, lootSource: 'wolf' },
   goblin: { id: 'goblin', name: '哥布林', maxHp: 45, attack: 11, defense: 3, evasion: 2, parry: 5, damageReduction: 0, artClass: 'goblin-art', xp: 10, gold: 3 },
