@@ -2494,6 +2494,7 @@ document.querySelector('#layout-skills-stack').addEventListener('click', () => {
 document.querySelector('#layout-reset').addEventListener('click', () => {
   localStorage.removeItem('stardust-battle-layout');
   localStorage.removeItem('stardust-battle-columns');
+  localStorage.removeItem('stardust-combat-log-size');
   window.location.reload();
 });
 setupLayoutDrag();
@@ -2533,6 +2534,10 @@ const layoutLeftWidth = document.querySelector('#layout-left-width');
 const layoutRightWidth = document.querySelector('#layout-right-width');
 const layoutLeftValue = document.querySelector('#layout-left-value');
 const layoutRightValue = document.querySelector('#layout-right-value');
+const layoutLogWidth = document.querySelector('#layout-log-width');
+const layoutLogHeight = document.querySelector('#layout-log-height');
+const layoutLogWidthValue = document.querySelector('#layout-log-width-value');
+const layoutLogHeightValue = document.querySelector('#layout-log-height-value');
 const layoutToggleButton = document.querySelector('#layout-toggle');
 
 layoutToggleButton.hidden = false;
@@ -2563,6 +2568,31 @@ try {
 
 layoutLeftWidth.addEventListener('input', () => applyBattleColumnWidths(layoutLeftWidth.value, layoutRightWidth.value));
 layoutRightWidth.addEventListener('input', () => applyBattleColumnWidths(layoutLeftWidth.value, layoutRightWidth.value));
+
+const combatLogSizeStorageKey = 'stardust-combat-log-size';
+
+function applyCombatLogSize(width, height, persist = true) {
+  const safeWidth = Math.max(240, Math.min(600, Number(width) || 360));
+  const safeHeight = Math.max(220, Math.min(850, Number(height) || 520));
+  battleScreen.style.setProperty('--combat-log-width', `${safeWidth}px`);
+  battleScreen.style.setProperty('--combat-log-height', `${safeHeight}px`);
+  layoutLogWidth.value = String(safeWidth);
+  layoutLogHeight.value = String(safeHeight);
+  layoutLogWidthValue.value = `${safeWidth}px`;
+  layoutLogHeightValue.value = `${safeHeight}px`;
+  if (persist) localStorage.setItem(combatLogSizeStorageKey, JSON.stringify({ width: safeWidth, height: safeHeight }));
+}
+
+try {
+  const savedCombatLogSize = JSON.parse(localStorage.getItem(combatLogSizeStorageKey) || '{}');
+  const combatLogRect = document.querySelector('.combat-log').getBoundingClientRect();
+  applyCombatLogSize(savedCombatLogSize.width || combatLogRect.width, savedCombatLogSize.height || combatLogRect.height, false);
+} catch {
+  applyCombatLogSize(360, 520, false);
+}
+
+layoutLogWidth.addEventListener('input', () => applyCombatLogSize(layoutLogWidth.value, layoutLogHeight.value));
+layoutLogHeight.addEventListener('input', () => applyCombatLogSize(layoutLogWidth.value, layoutLogHeight.value));
 document.querySelector('#inventory-modal').addEventListener('change', (event) => {
   const selectAllCheckbox = event.target.closest('[data-select-all-scrap]');
   if (selectAllCheckbox) {

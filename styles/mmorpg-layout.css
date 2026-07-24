@@ -1255,3 +1255,10 @@
   outline-offset: -3px;
   cursor: grab;
 }
+
+@media (min-width: 701px) {
+  .battle-screen .battle-bottom .combat-log {
+    width: min(var(--combat-log-width, 100%), calc(100vw - 8px)) !important;
+    height: min(var(--combat-log-height, 100%), calc(100dvh - 8px)) !important;
+  }
+}
