@@ -531,7 +531,7 @@ const monsterTypes = {
   ragingWolf: { id: 'ragingWolf', name: '狂暴狼', maxHp: 125, attack: 16, defense: 6, evasion: 10, parry: 0, damageReduction: 4, artClass: 'den-raging-wolf-art', xp: 16, gold: 9, isElite: true, lootSource: 'wolf' },
   greatfangWolf: { id: 'greatfangWolf', name: '巨牙狼', maxHp: 480, attack: 21, defense: 12, evasion: 8, parry: 0, damageReduction: 8, artClass: 'den-greatfang-wolf-art', xp: 80, gold: 45, isBoss: true, lootSource: 'wolf' },
   boarPiglet: { id: 'boarPiglet', name: '小野豬', maxHp: 48, attack: 9, defense: 4, evasion: 3, parry: 0, damageReduction: 2, artClass: 'boar-woods-piglet-art', xp: 8, gold: 3, lootSource: 'boar' },
-  forestBoar: { id: 'forestBoar', name: '森林野豬', maxHp: 78, attack: 13, defense: 8, evasion: 2, parry: 0, damageReduction: 5, artClass: 'boar-art', xp: 8, gold: 5, lootSource: 'boar' },
+  forestBoar: { id: 'forestBoar', name: '森林野豬', maxHp: 78, attack: 13, defense: 8, evasion: 2, parry: 0, damageReduction: 5, artClass: 'boar-woods-forest-boar-art', xp: 8, gold: 5, lootSource: 'boar' },
   irritableBoar: { id: 'irritableBoar', name: '暴躁野豬', maxHp: 165, attack: 19, defense: 13, evasion: 2, parry: 0, damageReduction: 7, artClass: 'boar-art', xp: 20, gold: 12, isElite: true, lootSource: 'boar' },
   boarKing: { id: 'boarKing', name: '野豬王', maxHp: 620, attack: 24, defense: 20, evasion: 1, parry: 0, damageReduction: 10, artClass: 'boar-art', xp: 95, gold: 58, isBoss: true, lootSource: 'boar' },
   goblin: { id: 'goblin', name: '哥布林', maxHp: 45, attack: 11, defense: 3, evasion: 2, parry: 5, damageReduction: 0, artClass: 'goblin-art', xp: 10, gold: 3 },
