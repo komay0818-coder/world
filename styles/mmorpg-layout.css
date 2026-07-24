@@ -311,3 +311,221 @@
   #enemy-squad .focus-target .enemy-track { width: 68px !important; height: 5px !important; }
   #enemy-squad .support-target .enemy-track { width: 46px !important; height: 2px !important; opacity: .2 !important; }
 }
+
+/* Stage-first desktop HUD: a taller world view with compact peripheral tools. */
+@media (min-width: 1101px) {
+  .battle-screen {
+    grid-template-columns: 245px minmax(0, 1fr) !important;
+    grid-template-rows: 64dvh 36dvh !important;
+  }
+
+  .battle-header {
+    grid-column: 1 !important;
+    grid-row: 1 !important;
+    box-sizing: border-box !important;
+    width: 245px !important;
+    height: 64dvh !important;
+    padding: 22px 15px 14px !important;
+    overflow: hidden !important;
+    background: linear-gradient(180deg, rgba(5, 24, 31, .98), rgba(6, 28, 35, .94)) !important;
+    border-right: 1px solid rgba(129, 193, 205, .18);
+  }
+
+  .battle-header > div {
+    height: 100% !important;
+  }
+
+  .battle-header #battle-title {
+    margin: 0 0 26px 56px !important;
+    font-size: 24px !important;
+    line-height: 1.2 !important;
+  }
+
+  .battle-header .map-identity {
+    display: block !important;
+    margin-top: 0 !important;
+  }
+
+  .map-identity > .player-fighter {
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 14px 0 0 !important;
+    border-top: 1px solid rgba(138, 202, 211, .14);
+  }
+
+  .map-identity .player-details {
+    margin-bottom: 14px !important;
+  }
+
+  .map-identity .player-details strong {
+    font-size: 18px !important;
+  }
+
+  .map-identity .player-details small {
+    margin-top: 5px !important;
+    font-size: 13px !important;
+  }
+
+  .map-identity .player-fighter .hp-track,
+  .map-identity .player-fighter .mana-track {
+    height: 7px !important;
+    margin-top: 9px !important;
+  }
+
+  .map-identity .player-fighter em {
+    margin-top: 4px !important;
+    font-size: 12px !important;
+  }
+
+  .map-identity .player-fighter .experience-panel {
+    margin-top: 15px !important;
+    padding: 10px !important;
+    background: rgba(3, 15, 20, .42) !important;
+  }
+
+  .battle-field {
+    grid-column: 2 !important;
+    grid-row: 1 !important;
+    height: 64dvh !important;
+    min-height: 0 !important;
+    border-radius: 0 0 0 14px !important;
+  }
+
+  .battle-field #battle-player-art {
+    left: 2.4% !important;
+    bottom: 1.2% !important;
+    width: 205px !important;
+    height: 265px !important;
+  }
+
+  .battle-field #battle-player-art.undead-art {
+    left: 1.2% !important;
+    width: 365px !important;
+    height: 280px !important;
+  }
+
+  .battle-field #hunter-companion {
+    left: 15.5% !important;
+    bottom: 1.2% !important;
+  }
+
+  .player-grounding {
+    left: 1.5%;
+    bottom: -7px;
+    width: 310px;
+  }
+
+  .battle-bottom {
+    grid-column: 1 / -1 !important;
+    grid-row: 2 !important;
+    grid-template-columns: 240px minmax(0, 1fr) 86px !important;
+    grid-template-rows: minmax(0, 1fr) !important;
+    gap: 12px !important;
+    height: 36dvh !important;
+    min-height: 0 !important;
+    padding: 12px !important;
+    background: linear-gradient(180deg, rgba(8, 22, 29, .98), rgba(4, 16, 22, 1)) !important;
+    border-top: 1px solid rgba(131, 184, 199, .24);
+  }
+
+  .battle-bottom .combat-log {
+    grid-column: 1 !important;
+    grid-row: 1 !important;
+    align-self: stretch !important;
+    width: 240px !important;
+    height: 100% !important;
+    max-height: none !important;
+    padding: 10px !important;
+    opacity: .76 !important;
+    overflow: hidden !important;
+  }
+
+  .battle-bottom .combat-log .combat-log-head {
+    align-items: flex-start !important;
+    flex-direction: column !important;
+    gap: 7px !important;
+  }
+
+  .battle-bottom .combat-log .combat-log-head nav {
+    flex-wrap: wrap;
+  }
+
+  .battle-bottom #combat-log-lines {
+    height: calc(100% - 61px) !important;
+    overflow-y: auto !important;
+  }
+
+  .battle-bottom #combat-log-lines .combat-log-entry {
+    grid-template-columns: 1fr !important;
+    gap: 1px !important;
+    padding: 6px 7px !important;
+    font-size: 10px !important;
+    line-height: 1.35 !important;
+  }
+
+  .battle-bottom #combat-log-lines .combat-log-entry time {
+    font-size: 8px !important;
+    line-height: 1.2 !important;
+  }
+
+  .battle-bottom .skill-panel {
+    grid-column: 2 !important;
+    grid-row: 1 !important;
+    align-self: stretch !important;
+    width: 100% !important;
+    height: 100% !important;
+    max-height: none !important;
+    padding: 10px 12px !important;
+    overflow-y: auto !important;
+  }
+
+  .battle-bottom .skill-panel > .potion-button {
+    width: min(220px, calc(50% - 6px)) !important;
+    min-height: 38px !important;
+  }
+
+  .battle-bottom .skill-list .skill-row,
+  .battle-bottom .skill-list .passive-group .skill-row {
+    grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+    gap: 7px !important;
+  }
+
+  .battle-bottom .skill-list .skill-chip {
+    min-height: 62px !important;
+    padding: 6px !important;
+  }
+
+  .battle-menu {
+    grid-column: 3 !important;
+    grid-row: 1 !important;
+    width: 86px !important;
+    height: 100% !important;
+    overflow-y: auto !important;
+  }
+
+  .battle-menu-button {
+    min-height: 48px !important;
+  }
+}
+
+@media (min-width: 701px) and (max-width: 1100px) {
+  .battle-screen {
+    grid-template-rows: 60dvh 40dvh !important;
+  }
+  .battle-header,
+  .battle-field {
+    height: 60dvh !important;
+  }
+  .battle-bottom {
+    height: 40dvh !important;
+    grid-template-columns: 210px minmax(0, 1fr) 80px !important;
+  }
+  .battle-bottom .combat-log {
+    width: 210px !important;
+    height: 100% !important;
+  }
+  .battle-bottom .skill-panel {
+    width: 100% !important;
+    height: 100% !important;
+  }
+}
