@@ -25,7 +25,7 @@ const raceTotems = { human: '☀', elf: '❈', orc: '⛧', undead: '☾' };
 const jobMarks = { warrior: '⛨', assassin: '◈', hunter: '➶', mage: '✦', priest: '✥' };
 const battleCharacterArt = {
   'human:warrior': 'assets/human-warrior-v2.png',
-  'human:assassin': 'assets/human-assassin-v2.png',
+  'human:assassin': 'assets/human-assassin-v3.png',
   'human:hunter': 'assets/human-hunter-v2.png',
   'human:mage': 'assets/human-mage-v2.png',
   'human:priest': 'assets/human-priest.png',
