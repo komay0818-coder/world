@@ -1268,3 +1268,31 @@
     height: min(var(--combat-log-height, 100%), calc(100dvh - 8px)) !important;
   }
 }
+
+/* Readability pass requested for the desktop battle HUD. */
+@media (min-width: 701px) {
+  .battle-header #battle-title {
+    font-size: 25px !important;
+  }
+
+  .battle-bottom #combat-log-lines .combat-log-entry {
+    font-size: 14px !important;
+  }
+
+  .battle-bottom #combat-log-lines .combat-log-entry time {
+    font-size: 10px !important;
+  }
+
+  .battle-bottom .skill-panel .skill-panel-head strong {
+    font-size: 18px !important;
+  }
+
+  #skill-list .skill-chip.compact-skill b {
+    font-size: 14px !important;
+  }
+
+  #skill-list .skill-chip.compact-skill small,
+  #skill-list .skill-chip.compact-skill .skill-cooldown {
+    font-size: 12px !important;
+  }
+}

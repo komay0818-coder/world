@@ -237,8 +237,18 @@ for (let skillIndex = 0; skillIndex < 7; skillIndex += 1) layoutTargets.push([`s
 const defaultBattleLayout = {
   identity: { modified: true, left: 17, top: 69, width: 395, height: 209, fontSize: '', skillFontSize: '' },
   hud: { modified: true, left: 4, top: 4, width: 421, height: 250, fontSize: '', skillFontSize: '' },
-  log: { modified: true, left: 4, top: 254, width: 410, height: 700, fontSize: '', skillFontSize: '' }
+  log: { modified: true, left: 4, top: 286, width: 410, height: 640, fontSize: '', skillFontSize: '' }
 };
+
+function repairCombatLogLayoutOnce() {
+  const saved = JSON.parse(localStorage.getItem('stardust-battle-layout') || '{}');
+  if (saved.combatLogFitVersion === 1) return;
+  if (!saved.log || (saved.log.top === 254 && saved.log.height === 700)) {
+    saved.log = { ...defaultBattleLayout.log };
+  }
+  saved.combatLogFitVersion = 1;
+  localStorage.setItem('stardust-battle-layout', JSON.stringify(saved));
+}
 
 function repairSkillLayoutOnce() {
   const saved = JSON.parse(localStorage.getItem('stardust-battle-layout') || '{}');
@@ -2319,6 +2329,7 @@ function openBattle() {
   battleScreen.classList.remove('hidden');
   repairSkillLayoutOnce();
   repairHudLayoutOnce();
+  repairCombatLogLayoutOnce();
   applySavedLayout();
   const progress = getProgress();
   let currentMap = getActiveMap(progress);
@@ -2591,9 +2602,14 @@ function applyCombatLogSize(width, height, persist = true) {
 
 try {
   const savedCombatLogSize = JSON.parse(localStorage.getItem(combatLogSizeStorageKey) || '{}');
-  applyCombatLogSize(savedCombatLogSize.width ?? 410, savedCombatLogSize.height ?? 700, false);
+  if (savedCombatLogSize.fitVersion !== 1 && (savedCombatLogSize.height == null || savedCombatLogSize.height === 700)) {
+    savedCombatLogSize.height = 640;
+  }
+  savedCombatLogSize.fitVersion = 1;
+  localStorage.setItem(combatLogSizeStorageKey, JSON.stringify(savedCombatLogSize));
+  applyCombatLogSize(savedCombatLogSize.width ?? 410, savedCombatLogSize.height ?? 640, false);
 } catch {
-  applyCombatLogSize(410, 700, false);
+  applyCombatLogSize(410, 640, false);
 }
 
 layoutLogWidth.addEventListener('input', () => applyCombatLogSize(layoutLogWidth.value, layoutLogHeight.value));
