@@ -486,7 +486,7 @@ function openCreation(slotIndex = 0) {
 }
 
 const monsterTypes = {
-  plainsRabbit: { id: 'plainsRabbit', name: '野兔', maxHp: 24, attack: 5, artClass: 'monster-placeholder-art', xp: 4, gold: 1 },
+  plainsRabbit: { id: 'plainsRabbit', name: '野兔', maxHp: 24, attack: 5, artClass: 'plains-rabbit-art', xp: 4, gold: 1 },
   plainsWolfPup: { id: 'plainsWolfPup', name: '幼狼', maxHp: 34, attack: 7, artClass: 'monster-placeholder-art', xp: 4, gold: 2 },
   plainsSlime: { id: 'plainsSlime', name: '小史萊姆', maxHp: 30, attack: 6, artClass: 'monster-placeholder-art', xp: 4, gold: 1 },
   plainsGoblinYoung: { id: 'plainsGoblinYoung', name: '幼年哥布林', maxHp: 40, attack: 8, artClass: 'monster-placeholder-art', xp: 4, gold: 2 },
