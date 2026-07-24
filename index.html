@@ -17,7 +17,7 @@
   <link rel="stylesheet" href="styles/enhancement.css" />
   <link rel="stylesheet" href="styles/dungeon.css?v=20260724-plains-slime-v1" />
   <link rel="stylesheet" href="styles/mobile.css?v=20260719-mobile-header-v5" />
-  <link rel="stylesheet" href="styles/mmorpg-layout.css?v=20260725-ui-phase-one-v8" />
+  <link rel="stylesheet" href="styles/mmorpg-layout.css?v=20260725-skill-details-v9" />
 </head>
 <body>
   <div class="sky" aria-hidden="true"></div>
@@ -140,6 +140,12 @@
   </main>
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
   <div id="skill-tooltip" class="skill-tooltip" role="tooltip"></div>
+  <div id="skill-detail-modal" class="skill-detail-modal hidden" role="dialog" aria-modal="true" aria-labelledby="skill-detail-title">
+    <section class="skill-detail-window">
+      <button id="skill-detail-close" class="skill-detail-close" type="button" aria-label="關閉技能詳細資料">×</button>
+      <div id="skill-detail-content"></div>
+    </section>
+  </div>
   <div id="inventory-modal" class="inventory-modal hidden" role="dialog" aria-modal="true" aria-labelledby="inventory-title">
     <section class="inventory-window">
       <header><h2 id="inventory-title">背包</h2><button id="inventory-close" type="button" aria-label="關閉背包">×</button></header>
@@ -152,6 +158,6 @@
       <div id="character-roster-content" class="character-roster-content"></div>
     </section>
   </div>
-  <script src="script.js?v=20260725-reference-layout-v6"></script>
+  <script src="script.js?v=20260725-skill-details-v9"></script>
 </body>
 </html>

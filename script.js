@@ -11,6 +11,9 @@ const classChoices = document.querySelector('#class-choices');
 const characterName = document.querySelector('#character-name');
 const skillTooltip = document.querySelector('#skill-tooltip');
 let skillTooltipTimer;
+let selectedSkillKey = '';
+let skillUpgradeLockedUntil = 0;
+let lastSkillUpgradeResult = '';
 
 const factions = {
   light: [{ id: 'human', icon: '♙', portrait: 0, name: '人類', trait: '控制抗性 +20%' }, { id: 'elf', icon: '♧', portrait: 1, name: '精靈', trait: '暴擊率 +5%' }],
@@ -1750,31 +1753,15 @@ function renderSkills(character, level) {
   const maxMana = getMaxMana(character.job, level);
   const raceInfo = Object.values(factions).flat().find((race) => race.id === character.race);
   const raceTalent = raceTalents[character.race] || raceTalents.human;
-  const renderSkill = (skill, activeIndex = -1) => {
+  const renderSkill = (skill) => {
     const unlocked = level >= skill.level;
     const upgradeLevel = getSkillUpgradeLevel(progress, character.job, skill);
-    const nextCost = skillUpgradeCosts[upgradeLevel + 1] || 0;
-    const nextBookCost = skillBookCosts[upgradeLevel + 1] || 0;
-    const nextGoldCost = skillUpgradeGoldCosts[upgradeLevel + 1] || 0;
-    const ownedBooks = Number(progress.skillBooks?.[upgradeLevel + 1]) || 0;
-    const cooldown = skill.type === 'active' && unlocked ? Math.max(0, Math.ceil(((battle.skillCooldowns[skill.id] || 0) - Date.now()) / 1000)) : 0;
-    const manaCost = skill.type === 'active' ? getSkillManaCost(skill) : 0;
-    const upgradeMultiplier = getSkillPowerMultiplier(progress, character.job, skill);
-    const upgradeBonusPercent = Math.round((upgradeMultiplier - 1) * 100);
-    const effectivePercent = skill.power ? Math.round(skill.power * upgradeMultiplier * 100) : skill.id === 'heal' ? Math.round(40 * upgradeMultiplier) : 0;
-    const upgradedDetail = effectivePercent > 0
-      ? (/\d+%/.test(skill.detail) ? skill.detail.replace(/\d+%/, `${effectivePercent}%`) : `${skill.detail}・效果 +${upgradeBonusPercent}%`)
-      : skill.type === 'passive' ? getPassiveSkillDetail(progress, character.job, skill) : skill.detail;
-    const stateClass = !unlocked ? 'locked' : skill.type === 'passive' ? 'enabled' : battle.manaExhausted ? 'exhausted' : battle.playerMana < manaCost ? 'no-mana' : cooldown > 0 ? 'cooling' : 'ready';
-    const statusText = !unlocked ? `Lv.${skill.level} 解鎖` : skill.type === 'passive' ? '已生效' : battle.manaExhausted ? '魔力枯竭' : battle.playerMana < manaCost ? '魔力不足' : cooldown > 0 ? `${cooldown} 秒` : '可施放';
-    const metaText = skill.type === 'active' ? `技能 ${upgradeLevel}/${maxSkillUpgradeLevel}・${effectivePercent ? `${effectivePercent}%・` : ''}${manaCost} MP` : `技能 ${upgradeLevel}/${maxSkillUpgradeLevel}・專屬效果`;
     const icon = skill.type === 'active' ? (skillIcons[skill.id] || '✦') : '◆';
-    const priority = activeIndex >= 0 ? `<i class="skill-priority">${activeIndex + 1}</i>` : '';
-    const detail = unlocked ? `${upgradedDetail}｜${skill.type === 'active' ? `消耗 ${manaCost} MP｜冷卻 ${Math.round(skill.cooldown * skillCooldownMultiplier)} 秒` : '被動技能'}` : `Lv.${skill.level} 解鎖`;
-    const upgradeButton = unlocked ? `<button class="skill-upgrade-button" type="button" data-upgrade-skill="${getSkillUpgradeKey(character.job, skill)}" ${upgradeLevel >= maxSkillUpgradeLevel || progress.magicCrystals < nextCost || ownedBooks < nextBookCost || progress.gold < nextGoldCost ? 'disabled' : ''}>${upgradeLevel >= maxSkillUpgradeLevel ? '已滿級' : `升階・💎${nextCost}＋${upgradeLevel + 1}階書×${nextBookCost}＋${nextGoldCost}金・${Math.round(skillUpgradeSuccessRates[upgradeLevel + 1] * 100)}%`}</button>` : '';
-    return `<div class="skill-chip ${skill.type} ${stateClass}" data-skill-detail="${detail}">${priority}<span class="skill-icon">${icon}</span><b>${unlocked ? skill.name : '未解鎖'}</b><small>${metaText}</small><em class="skill-cooldown ${stateClass}">${statusText}</em>${upgradeButton}</div>`;
+    if (!unlocked) return `<div class="skill-chip ${skill.type} locked"><span class="skill-lock">🔒 Lv${skill.level} 解鎖</span></div>`;
+    const cooldownText = skill.type === 'active' ? `${Math.round(skill.cooldown * skillCooldownMultiplier)}秒` : '常駐';
+    return `<button class="skill-chip ${skill.type} compact-skill" type="button" data-skill-key="${getSkillUpgradeKey(character.job, skill)}"><span class="skill-icon">${icon}</span><b>${skill.name}</b><small>LV${upgradeLevel}</small><em class="skill-cooldown">${cooldownText}</em></button>`;
   };
-  skillList.innerHTML = `<section class="skill-group active-group"><h3>主動技能</h3><div class="skill-row">${activeSkills.map((skill, index) => renderSkill(skill, index)).join('')}</div></section><section class="skill-group passive-group"><h3>被動技能</h3><div class="skill-row">${passiveSkills.map((skill) => renderSkill(skill)).join('')}</div></section><section class="race-talent-group"><h3>種族天賦</h3><article class="race-talent-card race-talent-${character.race}"><span>${raceTalent.icon}</span><div><b>${raceInfo?.name || character.race}・${raceTalent.name}</b><small>${raceTalent.detail}</small></div><em>永久生效</em></article></section>`;
+  skillList.innerHTML = `<section class="skill-group active-group"><h3>主動技能</h3><div class="skill-row">${activeSkills.map((skill) => renderSkill(skill)).join('')}</div></section><section class="skill-group passive-group"><h3>被動技能</h3><div class="skill-row">${passiveSkills.map((skill) => renderSkill(skill)).join('')}</div></section><section class="race-talent-group"><h3>種族天賦</h3><article class="race-talent-card race-talent-${character.race}"><span>${raceTalent.icon}</span><div><b>${raceInfo?.name || character.race}・${raceTalent.name}</b><small>${raceTalent.detail}</small></div><em>永久生效</em></article></section>`;
   skillList.dataset.level = String(level);
   skillList.dataset.job = character.job;
   skillList.dataset.race = character.race;
@@ -1782,9 +1769,6 @@ function renderSkills(character, level) {
   document.querySelectorAll('#layout-skill-select option').forEach((option, index) => {
     option.textContent = orderedSkills[index] ? `單一技能：${orderedSkills[index].name}` : `單一技能：技能 ${index + 1}`;
   });
-  setupLayoutDrag();
-  applySavedLayout();
-  setupSkillTooltips();
   const resourceStatus = document.querySelector('#skill-resource-status');
   if (resourceStatus) resourceStatus.textContent = `魔法結晶 ${progress.magicCrystals}・${battle.manaExhausted ? `枯竭中・${Math.ceil(maxMana * .45)} MP 恢復` : `${Math.ceil(battle.playerMana)} / ${maxMana} MP`}`;
 }
@@ -1797,61 +1781,76 @@ function refreshSkills(character, level) {
     return;
   }
 
-  const skills = skillProgression[character.job] || [];
-  const orderedSkills = [...skills.filter((skill) => skill.type === 'active'), ...skills.filter((skill) => skill.type === 'passive')];
   const maxMana = getMaxMana(character.job, level);
   const resourceStatus = document.querySelector('#skill-resource-status');
   if (resourceStatus) resourceStatus.textContent = `魔法結晶 ${progress.magicCrystals}・${battle.manaExhausted ? `枯竭中・${Math.ceil(maxMana * .45)} MP 恢復` : `${Math.ceil(battle.playerMana)} / ${maxMana} MP`}`;
-  orderedSkills.forEach((skill, index) => {
-    const chip = document.querySelector(`#skill-${index}`);
-    if (!chip) return;
-    const upgradeLevel = getSkillUpgradeLevel(progress, character.job, skill);
-    const upgradeButton = chip.querySelector('.skill-upgrade-button');
-    if (upgradeButton) {
-      const nextCost = skillUpgradeCosts[upgradeLevel + 1] || 0;
-      const nextBookCost = skillBookCosts[upgradeLevel + 1] || 0;
-      const nextGoldCost = skillUpgradeGoldCosts[upgradeLevel + 1] || 0;
-      const ownedBooks = Number(progress.skillBooks?.[upgradeLevel + 1]) || 0;
-      upgradeButton.disabled = upgradeLevel >= maxSkillUpgradeLevel || progress.magicCrystals < nextCost || ownedBooks < nextBookCost || progress.gold < nextGoldCost;
-      upgradeButton.textContent = upgradeLevel >= maxSkillUpgradeLevel ? '已滿級' : `升階・💎${nextCost}＋${upgradeLevel + 1}階書×${nextBookCost}＋${nextGoldCost}金・${Math.round(skillUpgradeSuccessRates[upgradeLevel + 1] * 100)}%`;
-    }
-    if (skill.type !== 'active' || level < skill.level) return;
-    const cooldown = Math.max(0, Math.ceil(((battle.skillCooldowns[skill.id] || 0) - Date.now()) / 1000));
-    const manaCost = getSkillManaCost(skill);
-    const stateClass = battle.manaExhausted ? 'exhausted' : battle.playerMana < manaCost ? 'no-mana' : cooldown > 0 ? 'cooling' : 'ready';
-    chip.classList.remove('ready', 'cooling', 'no-mana', 'exhausted');
-    chip.classList.add(stateClass);
-    const cooldownText = chip.querySelector('.skill-cooldown');
-    if (cooldownText) {
-      cooldownText.textContent = battle.manaExhausted ? '魔力枯竭' : battle.playerMana < manaCost ? '魔力不足' : cooldown > 0 ? `${cooldown} 秒` : '可施放';
-      cooldownText.className = `skill-cooldown ${stateClass}`;
-    }
-  });
 }
 
-function setupSkillTooltips() {
-  document.querySelectorAll('#skill-list .skill-chip').forEach((chip) => {
-    if (chip.dataset.tooltipReady) return;
-    chip.dataset.tooltipReady = 'true';
+function getSkillEffectPercent(skill, upgradeLevel) {
+  const multiplier = 1 + (upgradeLevel - 1) * .12;
+  if (skill.power) return Math.round(skill.power * multiplier * 100);
+  if (skill.id === 'heal') return Math.round(40 * multiplier);
+  return 0;
+}
 
-    chip.addEventListener('mouseenter', () => {
-      clearTimeout(skillTooltipTimer);
-      skillTooltipTimer = setTimeout(() => {
-        const rect = chip.getBoundingClientRect();
-        const left = Math.max(8, Math.min(rect.left, window.innerWidth - 320));
-        const top = Math.max(8, Math.min(rect.top - 100, window.innerHeight - 130));
-        skillTooltip.textContent = `技能說明：${chip.dataset.skillDetail}`;
-        skillTooltip.style.left = `${left}px`;
-        skillTooltip.style.top = `${top}px`;
-        skillTooltip.classList.add('show');
-      }, 2000);
-    });
+function getSkillDescription(progress, job, skill, upgradeLevel) {
+  const effectPercent = getSkillEffectPercent(skill, upgradeLevel);
+  if (skill.id === 'heal') return `恢復相當於魔法攻擊 ${effectPercent}% 的生命值。`;
+  if (skill.type === 'active' && effectPercent) return `對敵人造成 ${effectPercent}% 技能傷害。`;
+  if (skill.type === 'passive') return getPassiveSkillDetail(progress, job, skill);
+  return skill.detail;
+}
 
-    chip.addEventListener('mouseleave', () => {
-      clearTimeout(skillTooltipTimer);
-      skillTooltip.classList.remove('show');
-    });
-  });
+function closeSkillDetailModal() {
+  selectedSkillKey = '';
+  lastSkillUpgradeResult = '';
+  document.querySelector('#skill-detail-modal')?.classList.add('hidden');
+}
+
+function renderSkillDetailModal() {
+  const modal = document.querySelector('#skill-detail-modal');
+  const content = document.querySelector('#skill-detail-content');
+  const character = JSON.parse(localStorage.getItem('stardust-character') || 'null');
+  const progress = getProgress();
+  const skill = (skillProgression[character?.job] || []).find((entry) => getSkillUpgradeKey(character.job, entry) === selectedSkillKey);
+  if (!modal || !content || !character || !skill || progress.level < skill.level) {
+    closeSkillDetailModal();
+    return;
+  }
+
+  const upgradeLevel = getSkillUpgradeLevel(progress, character.job, skill);
+  const nextLevel = Math.min(maxSkillUpgradeLevel, upgradeLevel + 1);
+  const cooldown = skill.type === 'active' ? Math.round(skill.cooldown * skillCooldownMultiplier) : 0;
+  const manaCost = skill.type === 'active' ? getSkillManaCost(skill) : 0;
+  const currentEffect = getSkillEffectPercent(skill, upgradeLevel);
+  const nextEffect = getSkillEffectPercent(skill, nextLevel);
+  const nextCost = skillUpgradeCosts[nextLevel] || 0;
+  const nextBookCost = skillBookCosts[nextLevel] || 0;
+  const nextGoldCost = skillUpgradeGoldCosts[nextLevel] || 0;
+  const ownedBooks = Number(progress.skillBooks?.[nextLevel]) || 0;
+  const maxed = upgradeLevel >= maxSkillUpgradeLevel;
+  const canAfford = !maxed && progress.magicCrystals >= nextCost && ownedBooks >= nextBookCost && progress.gold >= nextGoldCost;
+  const nextEffectText = maxed
+    ? '已達最高等級'
+    : currentEffect
+      ? `效果提升至 ${nextEffect}%`
+      : `技能效果提升 ${Math.round((nextLevel - 1) * 12)}%`;
+
+  content.innerHTML = `
+    <header><h2 id="skill-detail-title">${skill.name} <span>LV${upgradeLevel}</span></h2></header>
+    <dl class="skill-detail-stats">
+      <div><dt>冷卻時間</dt><dd>${skill.type === 'active' ? `${cooldown}秒` : '常駐'}</dd></div>
+      <div><dt>${skill.id === 'heal' ? '恢復' : skill.type === 'active' ? '傷害' : '效果'}</dt><dd>${currentEffect ? `${currentEffect}%` : '專屬效果'}</dd></div>
+      <div><dt>消耗</dt><dd>${skill.type === 'active' ? `${manaCost} MP` : '無'}</dd></div>
+    </dl>
+    <section class="skill-detail-copy"><h3>技能說明</h3><p>${getSkillDescription(progress, character.job, skill, upgradeLevel)}</p></section>
+    <section class="skill-detail-copy"><h3>下一級效果</h3><p>${nextEffectText}</p></section>
+    <section class="skill-upgrade-summary">
+      ${maxed ? '<p>此技能已滿級。</p>' : `<p>材料：💎 ${progress.magicCrystals}/${nextCost}・${nextLevel}階書 ${ownedBooks}/${nextBookCost}・金幣 ${progress.gold}/${nextGoldCost}</p><p>成功率：${Math.round(skillUpgradeSuccessRates[nextLevel] * 100)}%</p>`}
+      ${lastSkillUpgradeResult ? `<p class="skill-upgrade-result">${lastSkillUpgradeResult}</p>` : ''}
+      <button id="skill-detail-upgrade" type="button" ${maxed || !canAfford ? 'disabled' : ''}>${maxed ? '已滿級' : '升級'}</button>
+    </section>`;
+  modal.classList.remove('hidden');
 }
 
 function updateBattleUI() {
@@ -2386,11 +2385,25 @@ document.querySelector('#battle-toggle').addEventListener('click', () => { if (b
 document.querySelector('#potion-button').addEventListener('click', () => usePotion(true));
 document.querySelector('#mana-potion-button').addEventListener('click', () => useManaPotion(true));
 document.querySelector('#skill-list').addEventListener('click', (event) => {
-  const button = event.target.closest('[data-upgrade-skill]');
-  if (!button) return;
+  const chip = event.target.closest('.skill-chip[data-skill-key]');
+  if (!chip) return;
+  selectedSkillKey = chip.dataset.skillKey;
+  lastSkillUpgradeResult = '';
+  skillTooltip.classList.remove('show');
+  renderSkillDetailModal();
+});
+document.querySelector('#skill-detail-close').addEventListener('click', closeSkillDetailModal);
+document.querySelector('#skill-detail-modal').addEventListener('click', (event) => {
+  if (event.target === event.currentTarget) closeSkillDetailModal();
+});
+document.querySelector('#skill-detail-modal').addEventListener('click', (event) => {
+  const button = event.target.closest('#skill-detail-upgrade');
+  if (!button || button.disabled || Date.now() < skillUpgradeLockedUntil) return;
+  skillUpgradeLockedUntil = Date.now() + 800;
+  button.disabled = true;
   const character = JSON.parse(localStorage.getItem('stardust-character') || 'null');
   const progress = getProgress();
-  const skill = (skillProgression[character?.job] || []).find((entry) => getSkillUpgradeKey(character.job, entry) === button.dataset.upgradeSkill);
+  const skill = (skillProgression[character?.job] || []).find((entry) => getSkillUpgradeKey(character.job, entry) === selectedSkillKey);
   if (!skill || progress.level < skill.level) return;
   const currentLevel = getSkillUpgradeLevel(progress, character.job, skill);
   if (currentLevel >= maxSkillUpgradeLevel) return;
@@ -2409,6 +2422,8 @@ document.querySelector('#skill-list').addEventListener('click', (event) => {
   if (succeeded) progress.skillLevels = { ...(progress.skillLevels || {}), [getSkillUpgradeKey(character.job, skill)]: targetTier };
   saveProgress(progress);
   renderSkills(character, progress.level);
+  lastSkillUpgradeResult = succeeded ? `升級成功：LV${targetTier}` : `升級失敗：維持 LV${currentLevel}`;
+  renderSkillDetailModal();
   showToast(succeeded ? `【${skill.name}】成功升至 ${targetTier} 階！` : `【${skill.name}】升階失敗，材料已消耗。`);
   logBattle(succeeded ? `◆ 技能升階成功【${skill.name}】→ ${targetTier} 階` : `◇ 技能升階失敗【${skill.name}】・維持 ${currentLevel} 階`, 'progress');
 });
