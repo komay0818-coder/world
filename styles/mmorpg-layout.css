@@ -1497,5 +1497,5 @@
 
 /* Keep the formation intact while giving the player side more breathing room. */
 .battle-field #enemy-squad .enemy-unit {
-  left: calc(var(--stage-x) + 4%) !important;
+  left: calc(var(--stage-x) + 8%) !important;
 }
