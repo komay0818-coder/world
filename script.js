@@ -520,30 +520,30 @@ function openCreation(slotIndex = 0) {
 }
 
 const monsterTypes = {
-  plainsRabbit: { id: 'plainsRabbit', name: '野兔', maxHp: 24, attack: 5, artClass: 'plains-rabbit-art', xp: 4, gold: 1 },
-  plainsWolfPup: { id: 'plainsWolfPup', name: '幼狼', maxHp: 34, attack: 7, artClass: 'plains-wolf-pup-art', xp: 4, gold: 2 },
-  plainsSlime: { id: 'plainsSlime', name: '小史萊姆', maxHp: 30, attack: 6, artClass: 'plains-slime-art', xp: 4, gold: 1 },
-  plainsGoblinYoung: { id: 'plainsGoblinYoung', name: '幼年哥布林', maxHp: 40, attack: 8, artClass: 'plains-goblin-young-art', xp: 4, gold: 2 },
-  lostGoblin: { id: 'lostGoblin', name: '迷路的哥布林', maxHp: 62, attack: 10, artClass: 'lost-goblin-art', xp: 10, gold: 5, isRare: true },
-  goblin: { id: 'goblin', name: '哥布林', maxHp: 45, attack: 11, artClass: 'goblin-art', xp: 10, gold: 3 },
-  wolf: { id: 'wolf', name: '森林狼', maxHp: 68, attack: 14, artClass: 'wolf-art', xp: 14, gold: 4 },
-  boar: { id: 'boar', name: '野豬', maxHp: 82, attack: 17, artClass: 'boar-art', xp: 18, gold: 5 },
-  goblinOverlord: { id: 'goblinOverlord', name: '哥布林督軍', maxHp: 320, attack: 14, artClass: 'goblin-art', xp: 90, gold: 35, isElite: true, lootSource: 'goblin' },
-  wolfAlpha: { id: 'wolfAlpha', name: '霜牙狼王', maxHp: 410, attack: 17, artClass: 'wolf-art', xp: 120, gold: 48, isElite: true, lootSource: 'wolf' },
-  boarTyrant: { id: 'boarTyrant', name: '獠牙巨獸', maxHp: 520, attack: 20, artClass: 'boar-art', xp: 150, gold: 62, isElite: true, lootSource: 'boar' },
-  goblinKing: { id: 'goblinKing', name: '赤冠哥布林王', maxHp: 1500, attack: 22, artClass: 'goblin-king-art', xp: 520, gold: 260, isBoss: true, lootSource: 'boss' },
-  nightGoblin: { id: 'nightGoblin', name: '夜行哥布林', maxHp: 120, attack: 14, artClass: 'black-forest-goblin black-forest-monster', xp: 5, gold: 7, lootSource: 'blackGoblin' },
-  shadowWolf: { id: 'shadowWolf', name: '幽影森林狼', maxHp: 150, attack: 17, artClass: 'black-forest-wolf black-forest-monster', xp: 5, gold: 8, lootSource: 'blackWolf' },
-  thornBoar: { id: 'thornBoar', name: '荊棘野豬', maxHp: 185, attack: 20, artClass: 'black-forest-boar black-forest-monster', xp: 5, gold: 9, lootSource: 'blackBoar' },
-  forestShaman: { id: 'forestShaman', name: '黑林薩滿', maxHp: 540, attack: 18, artClass: 'black-forest-goblin black-forest-elite', xp: 20, gold: 45, isElite: true, lootSource: 'blackGoblin' },
-  moonfangAlpha: { id: 'moonfangAlpha', name: '月牙狼王', maxHp: 680, attack: 21, artClass: 'black-forest-wolf black-forest-elite', xp: 20, gold: 55, isElite: true, lootSource: 'blackWolf' },
-  thornbackTyrant: { id: 'thornbackTyrant', name: '棘背暴君', maxHp: 820, attack: 24, artClass: 'black-forest-boar black-forest-elite', xp: 20, gold: 65, isElite: true, lootSource: 'blackBoar' },
-  forestGuardian: { id: 'forestGuardian', name: '腐月森林守衛', maxHp: 2400, attack: 28, artClass: 'black-forest-guardian black-forest-boss', xp: 80, gold: 320, isBoss: true, lootSource: 'blackBoss' },
-  rootExecutioner: { id: 'rootExecutioner', name: '根縛行刑者', maxHp: 920, attack: 27, artClass: 'dungeon-root-executioner dungeon-monster-art', xp: 32, gold: 70, isElite: true, lootSource: 'dungeonElite' },
-  altarNightblade: { id: 'altarNightblade', name: '祭壇夜刃', maxHp: 820, attack: 31, artClass: 'dungeon-nightblade dungeon-monster-art', xp: 32, gold: 74, isElite: true, lootSource: 'dungeonElite' },
-  moonboneSentinel: { id: 'moonboneSentinel', name: '月骨守衛', maxHp: 1120, attack: 25, artClass: 'dungeon-moonbone dungeon-monster-art', xp: 32, gold: 78, isElite: true, lootSource: 'dungeonElite' },
-  blightOracle: { id: 'blightOracle', name: '疫木神諭', maxHp: 860, attack: 30, artClass: 'dungeon-oracle dungeon-monster-art', xp: 32, gold: 76, isElite: true, lootSource: 'dungeonElite' },
-  eclipseSovereign: { id: 'eclipseSovereign', name: '蝕月鹿王', maxHp: 5200, attack: 39, artClass: 'dungeon-boss dungeon-monster-art', xp: 180, gold: 620, isBoss: true, lootSource: 'dungeonBoss' }
+  plainsRabbit: { id: 'plainsRabbit', name: '野兔', maxHp: 24, attack: 5, defense: 0, evasion: 8, parry: 0, damageReduction: 0, artClass: 'plains-rabbit-art', xp: 4, gold: 1 },
+  plainsWolfPup: { id: 'plainsWolfPup', name: '幼狼', maxHp: 34, attack: 7, defense: 1, evasion: 5, parry: 0, damageReduction: 0, artClass: 'plains-wolf-pup-art', xp: 4, gold: 2 },
+  plainsSlime: { id: 'plainsSlime', name: '小史萊姆', maxHp: 30, attack: 6, defense: 0, evasion: 0, parry: 0, damageReduction: 5, artClass: 'plains-slime-art', xp: 4, gold: 1 },
+  plainsGoblinYoung: { id: 'plainsGoblinYoung', name: '幼年哥布林', maxHp: 40, attack: 8, defense: 2, evasion: 2, parry: 3, damageReduction: 0, artClass: 'plains-goblin-young-art', xp: 4, gold: 2 },
+  lostGoblin: { id: 'lostGoblin', name: '迷路的哥布林', maxHp: 62, attack: 10, defense: 4, evasion: 5, parry: 6, damageReduction: 2, artClass: 'lost-goblin-art', xp: 10, gold: 5, isRare: true },
+  goblin: { id: 'goblin', name: '哥布林', maxHp: 45, attack: 11, defense: 3, evasion: 2, parry: 5, damageReduction: 0, artClass: 'goblin-art', xp: 10, gold: 3 },
+  wolf: { id: 'wolf', name: '森林狼', maxHp: 68, attack: 14, defense: 2, evasion: 8, parry: 0, damageReduction: 0, artClass: 'wolf-art', xp: 14, gold: 4 },
+  boar: { id: 'boar', name: '野豬', maxHp: 82, attack: 17, defense: 7, evasion: 1, parry: 0, damageReduction: 4, artClass: 'boar-art', xp: 18, gold: 5 },
+  goblinOverlord: { id: 'goblinOverlord', name: '哥布林督軍', maxHp: 320, attack: 14, defense: 14, evasion: 4, parry: 10, damageReduction: 5, artClass: 'goblin-art', xp: 90, gold: 35, isElite: true, lootSource: 'goblin' },
+  wolfAlpha: { id: 'wolfAlpha', name: '霜牙狼王', maxHp: 410, attack: 17, defense: 9, evasion: 12, parry: 0, damageReduction: 5, artClass: 'wolf-art', xp: 120, gold: 48, isElite: true, lootSource: 'wolf' },
+  boarTyrant: { id: 'boarTyrant', name: '獠牙巨獸', maxHp: 520, attack: 20, defense: 20, evasion: 2, parry: 0, damageReduction: 8, artClass: 'boar-art', xp: 150, gold: 62, isElite: true, lootSource: 'boar' },
+  goblinKing: { id: 'goblinKing', name: '赤冠哥布林王', maxHp: 1500, attack: 22, defense: 28, evasion: 6, parry: 15, damageReduction: 12, artClass: 'goblin-king-art', xp: 520, gold: 260, isBoss: true, lootSource: 'boss' },
+  nightGoblin: { id: 'nightGoblin', name: '夜行哥布林', maxHp: 120, attack: 14, defense: 8, evasion: 7, parry: 7, damageReduction: 3, artClass: 'black-forest-goblin black-forest-monster', xp: 5, gold: 7, lootSource: 'blackGoblin' },
+  shadowWolf: { id: 'shadowWolf', name: '幽影森林狼', maxHp: 150, attack: 17, defense: 6, evasion: 12, parry: 0, damageReduction: 3, artClass: 'black-forest-wolf black-forest-monster', xp: 5, gold: 8, lootSource: 'blackWolf' },
+  thornBoar: { id: 'thornBoar', name: '荊棘野豬', maxHp: 185, attack: 20, defense: 16, evasion: 2, parry: 0, damageReduction: 8, artClass: 'black-forest-boar black-forest-monster', xp: 5, gold: 9, lootSource: 'blackBoar' },
+  forestShaman: { id: 'forestShaman', name: '黑林薩滿', maxHp: 540, attack: 18, defense: 12, evasion: 8, parry: 4, damageReduction: 10, artClass: 'black-forest-goblin black-forest-elite', xp: 20, gold: 45, isElite: true, lootSource: 'blackGoblin' },
+  moonfangAlpha: { id: 'moonfangAlpha', name: '月牙狼王', maxHp: 680, attack: 21, defense: 14, evasion: 15, parry: 0, damageReduction: 8, artClass: 'black-forest-wolf black-forest-elite', xp: 20, gold: 55, isElite: true, lootSource: 'blackWolf' },
+  thornbackTyrant: { id: 'thornbackTyrant', name: '棘背暴君', maxHp: 820, attack: 24, defense: 25, evasion: 3, parry: 0, damageReduction: 12, artClass: 'black-forest-boar black-forest-elite', xp: 20, gold: 65, isElite: true, lootSource: 'blackBoar' },
+  forestGuardian: { id: 'forestGuardian', name: '腐月森林守衛', maxHp: 2400, attack: 28, defense: 36, evasion: 5, parry: 8, damageReduction: 15, artClass: 'black-forest-guardian black-forest-boss', xp: 80, gold: 320, isBoss: true, lootSource: 'blackBoss' },
+  rootExecutioner: { id: 'rootExecutioner', name: '根縛行刑者', maxHp: 920, attack: 27, defense: 24, evasion: 4, parry: 12, damageReduction: 10, artClass: 'dungeon-root-executioner dungeon-monster-art', xp: 32, gold: 70, isElite: true, lootSource: 'dungeonElite' },
+  altarNightblade: { id: 'altarNightblade', name: '祭壇夜刃', maxHp: 820, attack: 31, defense: 14, evasion: 14, parry: 14, damageReduction: 8, artClass: 'dungeon-nightblade dungeon-monster-art', xp: 32, gold: 74, isElite: true, lootSource: 'dungeonElite' },
+  moonboneSentinel: { id: 'moonboneSentinel', name: '月骨守衛', maxHp: 1120, attack: 25, defense: 32, evasion: 3, parry: 10, damageReduction: 14, artClass: 'dungeon-moonbone dungeon-monster-art', xp: 32, gold: 78, isElite: true, lootSource: 'dungeonElite' },
+  blightOracle: { id: 'blightOracle', name: '疫木神諭', maxHp: 860, attack: 30, defense: 16, evasion: 10, parry: 3, damageReduction: 12, artClass: 'dungeon-oracle dungeon-monster-art', xp: 32, gold: 76, isElite: true, lootSource: 'dungeonElite' },
+  eclipseSovereign: { id: 'eclipseSovereign', name: '蝕月鹿王', maxHp: 5200, attack: 39, defense: 45, evasion: 8, parry: 12, damageReduction: 18, artClass: 'dungeon-boss dungeon-monster-art', xp: 180, gold: 620, isBoss: true, lootSource: 'dungeonBoss' }
 };
 const normalMonsterIds = ['goblin', 'wolf', 'boar'];
 const eliteMonsterIds = ['goblinOverlord', 'wolfAlpha', 'boarTyrant'];
@@ -1763,8 +1763,12 @@ function processEnemyDots() {
     });
     battle.enemyDots[index] = dots.filter((dot) => dot.remaining > 0);
     if (damage <= 0) return;
-    battle.enemyHps[index] -= damage;
-    showEnemyDamage([index], damage, 'dot');
+    applyDamageToMonster(index, damage, { damageType: 'periodic', attackRange: 'none' }, {
+      canEvade: false,
+      canParry: false,
+      logDefense: false,
+      effectType: 'dot'
+    });
   });
 }
 
@@ -2148,6 +2152,39 @@ function queueDefeatedEnemies() {
   });
 }
 
+function getPlayerAttackProfile(character, skill = null) {
+  if (skill?.id === 'companion') return { damageType: 'physical', attackRange: 'melee' };
+  const magicJob = character.job === 'mage' || character.job === 'priest';
+  const meleeJob = character.job === 'warrior' || character.job === 'assassin';
+  return {
+    damageType: magicJob ? 'magic' : 'physical',
+    attackRange: meleeJob ? 'melee' : 'ranged'
+  };
+}
+
+function applyDamageToMonster(index, baseDamage, profile, options = {}) {
+  const enemy = getEnemyDefinition(index);
+  const result = MonsterDefense.resolveDamage({
+    baseDamage,
+    monster: enemy,
+    damageType: profile.damageType,
+    attackRange: profile.attackRange,
+    canEvade: options.canEvade !== false,
+    canParry: options.canParry !== false
+  });
+
+  if (result.evaded) {
+    if (options.logDefense !== false) logBattle(`${enemy.name}閃避了你的攻擊！`, 'damage-dealt');
+    return result;
+  }
+  if (result.parried && options.logDefense !== false) {
+    logBattle(`${enemy.name}招架了你的攻擊！`, 'damage-dealt');
+  }
+  battle.enemyHps[index] -= result.finalDamage;
+  if (options.showDamage !== false) showEnemyDamage([index], result.finalDamage, options.effectType || 'normal');
+  return result;
+}
+
 function useAutoSkill(character, progress) {
   if (battle.manaExhausted) return false;
   const unlocked = getKnownSkills(character.job, progress.level).filter((skill) => skill.type === 'active' && skill.level <= progress.level);
@@ -2162,17 +2199,19 @@ function useAutoSkill(character, progress) {
     const targets = aliveEnemyIndexesByAge().slice(0, skill.targets || 1).map((index) => ({ hp: battle.enemyHps[index], index }));
     if (!targets.length) continue;
     const stats = getCharacterStats(progress.level, progress, character);
-    const hitTargets = targets.filter((target) => Math.random() >= getMonsterDodgeChance(getEnemyDefinition(target.index), stats));
-    const missedTargets = targets.filter((target) => !hitTargets.includes(target));
     const critical = Math.random() < stats.crit;
     const companionPassiveMultiplier = skill.id === 'companion' && progress.level >= 8 ? 1.15 + (getPassiveSkillUpgradeLevel(progress, 'hunter', '野性夥伴') - 1) * .10 : 1;
     const damage = Math.max(1, Math.ceil(stats.attack * skill.power * getSkillPowerMultiplier(progress, character.job, skill) * companionPassiveMultiplier * (critical ? 1.5 : 1)));
-    hitTargets.forEach((enemy) => { battle.enemyHps[enemy.index] -= damage; });
-    showEnemyDamage(hitTargets.map((enemy) => enemy.index), damage);
-    missedTargets.forEach((enemy) => logBattle(`💨【${getEnemyDefinition(enemy.index).name}】閃避了你的【${skill.name}】。`, 'damage-dealt'));
+    const attackProfile = getPlayerAttackProfile(character, skill);
+    const resolvedTargets = targets.map((enemy) => ({
+      ...enemy,
+      result: applyDamageToMonster(enemy.index, damage, attackProfile)
+    }));
+    const hitTargets = resolvedTargets.filter((enemy) => !enemy.result.evaded);
+    const totalDamage = hitTargets.reduce((total, enemy) => total + enemy.result.finalDamage, 0);
     if (skill.id !== 'companion') playPlayerAttackAnimation();
-    if (skill.id === 'fireball') hitTargets.forEach((enemy) => applyDot(enemy.index, 'burn', Math.max(1, Math.ceil(damage * .18 * stats.dotMultiplier)), 4));
-    if (skill.id === 'poison-blade') hitTargets.forEach((enemy) => applyDot(enemy.index, 'poison', Math.max(1, Math.ceil(damage * .15 * stats.dotMultiplier)), 5));
+    if (skill.id === 'fireball') hitTargets.forEach((enemy) => applyDot(enemy.index, 'burn', Math.max(1, Math.ceil(enemy.result.finalDamage * .18 * stats.dotMultiplier)), 4));
+    if (skill.id === 'poison-blade') hitTargets.forEach((enemy) => applyDot(enemy.index, 'poison', Math.max(1, Math.ceil(enemy.result.finalDamage * .15 * stats.dotMultiplier)), 5));
     battle.playerMana -= manaCost;
     battle.skillCooldowns[skill.id] = now + skill.cooldown * skillCooldownMultiplier * 1000 / stats.cooldownSpeed;
     battle.globalSkillReadyAt = now + 1000;
@@ -2180,9 +2219,9 @@ function useAutoSkill(character, progress) {
       playCompanionAttackAnimation((hitTargets.length ? hitTargets : targets).map((enemy) => enemy.index));
       if (hitTargets.length) {
         const targetNames = hitTargets.map((enemy) => getEnemyDefinition(enemy.index).name).join('、');
-        logBattle(`🐺 戰寵攻擊【${targetNames}】，造成 ${damage} 傷害${critical ? '（暴擊）' : ''}。`, 'pet-damage', { aggregateKey: `pet-${hitTargets.map((enemy) => enemy.index).join('-')}`, damage, summary: `🐺 戰寵攻擊【${targetNames}】` });
+        logBattle(`🐺 戰寵攻擊【${targetNames}】，共造成 ${totalDamage} 傷害${critical ? '（暴擊）' : ''}。`, 'pet-damage', { aggregateKey: `pet-${hitTargets.map((enemy) => enemy.index).join('-')}`, damage: totalDamage, summary: `🐺 戰寵攻擊【${targetNames}】` });
       }
-    } else if (hitTargets.length) logBattle(`✦ 立即施放【${skill.name}】（-${manaCost} MP），造成 ${damage}${critical ? ' 暴擊' : ''}${hitTargets.length > 1 ? ` × ${hitTargets.length}` : ''} 傷害。`, 'damage-dealt');
+    } else if (hitTargets.length) logBattle(`✦ 立即施放【${skill.name}】（-${manaCost} MP），共造成 ${totalDamage}${critical ? ' 暴擊' : ''}傷害。`, 'damage-dealt');
     casted = true;
     updateManaExhaustion(getMaxMana(character.job, progress.level));
     break;
@@ -2206,11 +2245,6 @@ function useAutoSkill(character, progress) {
   battle.skillCooldowns[healSkill.id] = now + healSkill.cooldown * skillCooldownMultiplier * 1000 / getCharacterStats(progress.level, progress, character).cooldownSpeed;
   logBattle(`✦ 立即施放【${healSkill.name}】（-${manaCost} MP），恢復 ${heal} 生命。`);
   return true;
-}
-
-function getMonsterDodgeChance(enemy, playerStats) {
-  const baseDodge = enemy.isBoss ? .10 : enemy.isElite ? .07 : .03;
-  return Math.max(0, baseDodge - Math.max(0, (playerStats.accuracy || 1) - 1));
 }
 
 function autoSkillTick() {
@@ -2251,16 +2285,15 @@ function battleTick() {
     playPlayerAttackAnimation();
     playPlayerProjectile(targetIndex);
     const targetEnemy = getEnemyDefinition(targetIndex);
-    if (Math.random() < getMonsterDodgeChance(targetEnemy, stats)) {
-      logBattle(`💨【${targetEnemy.name}】閃避了你的攻擊。`, 'damage-dealt');
-    } else {
-      battle.enemyHps[targetIndex] -= playerHit;
-      showEnemyDamage([targetIndex], playerHit);
-      logBattle(`⚔ 你對【${targetEnemy.name}】造成 ${playerHit} 傷害${critical ? '（暴擊）' : ''}${orcRage ? '（狂怒）' : ''}${instinctTriggered ? '（獵人本能）' : ''}`, 'damage-dealt', { aggregateKey: `player-${battle.enemyTypes[targetIndex]}`, damage: playerHit, summary: `⚔ 你攻擊【${targetEnemy.name}】` });
+    const attackProfile = getPlayerAttackProfile(character);
+    const attackResult = applyDamageToMonster(targetIndex, playerHit, attackProfile);
+    if (!attackResult.evaded) {
+      logBattle(`⚔ 你對【${targetEnemy.name}】造成 ${attackResult.finalDamage} 傷害${critical ? '（暴擊）' : ''}${orcRage ? '（狂怒）' : ''}${instinctTriggered ? '（獵人本能）' : ''}`, 'damage-dealt', { aggregateKey: `player-${battle.enemyTypes[targetIndex]}`, damage: attackResult.finalDamage, summary: `⚔ 你攻擊【${targetEnemy.name}】` });
       if (instinctTriggered && hunterInstinct.extraAttack && battle.enemyHps[targetIndex] > 0) {
-        battle.enemyHps[targetIndex] -= basePlayerHit;
-        showEnemyDamage([targetIndex], basePlayerHit);
-        logBattle(`➶【獵人本能】額外攻擊【${targetEnemy.name}】，造成 ${basePlayerHit} 傷害。`, 'damage-dealt');
+        const extraResult = applyDamageToMonster(targetIndex, basePlayerHit, attackProfile);
+        if (!extraResult.evaded) {
+          logBattle(`➶【獵人本能】額外攻擊【${targetEnemy.name}】，造成 ${extraResult.finalDamage} 傷害。`, 'damage-dealt');
+        }
       }
     }
     queueDefeatedEnemies();
