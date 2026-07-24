@@ -23,6 +23,7 @@ const classes = [{ id: 'warrior', icon: '⚔', portrait: 4, name: '戰士' }, { 
 const classIcons = Object.fromEntries(classes.map((job) => [job.id, job.icon]));
 const raceTotems = { human: '☀', elf: '❈', orc: '⛧', undead: '☾' };
 const jobMarks = { warrior: '⛨', assassin: '◈', hunter: '➶', mage: '✦', priest: '✥' };
+const CHARACTER_SCALE = 0.90;
 const battleCharacterArt = {
   'human:warrior': 'assets/character-sprites/human-warrior.png',
   'human:assassin': 'assets/character-sprites/human-assassin.png',
@@ -2393,6 +2394,7 @@ function openBattle() {
   if (battlePlayerArt) {
     battlePlayerArt.classList.toggle('hidden', !characterArt);
     battlePlayerArt.classList.toggle('undead-art', character.race === 'undead' && Boolean(characterArt));
+    battlePlayerArt.style.setProperty('--character-scale', CHARACTER_SCALE);
     battlePlayerArt.style.backgroundImage = characterArt ? `url('${characterArt}')` : '';
     const raceName = Object.values(factions).flat().find((race) => race.id === character.race)?.name || character.race;
     battlePlayerArt.setAttribute('aria-label', `${raceName}${classes.find((job) => job.id === character.job)?.name || ''}`);
