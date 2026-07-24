@@ -1358,8 +1358,16 @@
   }
 
   #enemy-squad .enemy-unit.attacking .enemy-art {
-    animation: enemyAttackLunge .52s cubic-bezier(.2, .82, .28, 1) !important;
-    filter: brightness(1.18) drop-shadow(0 10px 8px rgba(0, 0, 0, .5)) !important;
+    animation: enemyAttackLunge .72s cubic-bezier(.18, .86, .24, 1) !important;
+    filter: brightness(1.45) saturate(1.35) drop-shadow(0 0 18px rgba(255, 92, 55, .9)) drop-shadow(0 12px 9px rgba(0, 0, 0, .58)) !important;
+  }
+
+  #enemy-squad .enemy-unit.attacking small {
+    border-color: #ff784f !important;
+    background: rgba(108, 26, 18, .94) !important;
+    color: #fff3cf !important;
+    box-shadow: 0 0 16px rgba(255, 84, 45, .9) !important;
+    animation: enemyAttackLabel .72s ease-out both;
   }
 
   #enemy-squad .enemy-unit.attacking::before {
@@ -1368,25 +1376,33 @@
     z-index: 12;
     left: -18px;
     bottom: 42px;
-    width: 96px;
-    height: 5px;
+    width: 150px;
+    height: 9px;
     border-radius: 999px;
-    background: linear-gradient(90deg, transparent, rgba(255, 236, 168, .95), transparent);
-    box-shadow: 0 0 12px rgba(255, 190, 88, .72);
+    background: linear-gradient(90deg, transparent, #fff4b0 34%, #ff7048 68%, transparent);
+    box-shadow: 0 0 20px rgba(255, 101, 61, .95);
     transform-origin: left center;
-    animation: enemyAttackTrail .52s ease-out both;
+    animation: enemyAttackTrail .72s ease-out both;
     pointer-events: none;
   }
 }
 
 @keyframes enemyAttackLunge {
   0%, 100% { transform: translate3d(0, 0, 0) rotate(0) scale(1); }
-  38% { transform: translate3d(-30px, 22px, 0) rotate(-3deg) scale(1.1); }
-  68% { transform: translate3d(-10px, 7px, 0) rotate(1deg) scale(1.03); }
+  16% { transform: translate3d(10px, -7px, 0) rotate(3deg) scale(.96); }
+  46% { transform: translate3d(-72px, 48px, 0) rotate(-8deg) scale(1.22); }
+  68% { transform: translate3d(-34px, 22px, 0) rotate(3deg) scale(1.1); }
+  84% { transform: translate3d(7px, -4px, 0) rotate(-2deg) scale(.98); }
 }
 
 @keyframes enemyAttackTrail {
   0% { opacity: 0; transform: rotate(-18deg) scaleX(.15); }
-  34% { opacity: 1; transform: rotate(-18deg) scaleX(1); }
-  100% { opacity: 0; transform: translate(-36px, 22px) rotate(-18deg) scaleX(.45); }
+  30% { opacity: 0; transform: rotate(-18deg) scaleX(.2); }
+  48% { opacity: 1; transform: translate(-18px, 10px) rotate(-18deg) scaleX(1); }
+  100% { opacity: 0; transform: translate(-88px, 50px) rotate(-18deg) scaleX(.35); }
+}
+
+@keyframes enemyAttackLabel {
+  0%, 100% { transform: scale(1); }
+  42% { transform: scale(1.14); }
 }

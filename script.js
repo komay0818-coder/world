@@ -1667,7 +1667,7 @@ function playMonsterAttackAnimation(enemyIndex, playerWasHit) {
   if (enemy) {
     enemy.classList.remove('attacking');
     requestAnimationFrame(() => enemy.classList.add('attacking'));
-    setTimeout(() => enemy.classList.remove('attacking'), 560);
+    setTimeout(() => enemy.classList.remove('attacking'), 780);
   }
   if (!playerWasHit) return;
   const player = document.querySelector('#player-fighter');
