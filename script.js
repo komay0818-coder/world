@@ -46,7 +46,7 @@ const battleCharacterArt = {
   'undead:priest': 'assets/undead-priest.png'
 };
 const racialCompanions = {
-  human: { image: 'assets/companion-human.png', name: '王國獵犬' },
+  human: { image: 'assets/companion-human-hunter.png', name: '王國獵犬' },
   elf: { image: 'assets/companion-elf.png', name: '月光山貓' },
   orc: { image: 'assets/companion-orc.png', name: '獠牙戰狼' },
   undead: { image: 'assets/companion-undead.png', name: '亡靈獵犬' }
