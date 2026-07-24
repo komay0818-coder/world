@@ -1358,53 +1358,53 @@
   }
 
   #enemy-squad .enemy-unit.attacking .enemy-art {
-    animation: enemyAttackLunge .72s cubic-bezier(.18, .86, .24, 1) !important;
-    filter: brightness(1.45) saturate(1.35) drop-shadow(0 0 18px rgba(255, 92, 55, .9)) drop-shadow(0 12px 9px rgba(0, 0, 0, .58)) !important;
+    animation: enemyAttackLunge .82s cubic-bezier(.18, .86, .24, 1) !important;
+    filter: brightness(1.65) saturate(1.5) drop-shadow(0 0 28px rgba(255, 92, 55, .98)) drop-shadow(0 15px 12px rgba(0, 0, 0, .64)) !important;
   }
 
   #enemy-squad .enemy-unit.attacking small {
     border-color: #ff784f !important;
     background: rgba(108, 26, 18, .94) !important;
     color: #fff3cf !important;
-    box-shadow: 0 0 16px rgba(255, 84, 45, .9) !important;
-    animation: enemyAttackLabel .72s ease-out both;
+    box-shadow: 0 0 24px rgba(255, 84, 45, .98) !important;
+    animation: enemyAttackLabel .82s ease-out both;
   }
 
   #enemy-squad .enemy-unit.attacking::before {
     content: "";
     position: absolute;
     z-index: 12;
-    left: -18px;
-    bottom: 42px;
-    width: 150px;
-    height: 9px;
+    left: -42px;
+    bottom: 34px;
+    width: 220px;
+    height: 14px;
     border-radius: 999px;
     background: linear-gradient(90deg, transparent, #fff4b0 34%, #ff7048 68%, transparent);
-    box-shadow: 0 0 20px rgba(255, 101, 61, .95);
+    box-shadow: 0 0 30px rgba(255, 101, 61, 1);
     transform-origin: left center;
-    animation: enemyAttackTrail .72s ease-out both;
+    animation: enemyAttackTrail .82s ease-out both;
     pointer-events: none;
   }
 }
 
 @keyframes enemyAttackLunge {
   0%, 100% { transform: translate3d(0, 0, 0) rotate(0) scale(1); }
-  16% { transform: translate3d(10px, -7px, 0) rotate(3deg) scale(.96); }
-  46% { transform: translate3d(-72px, 48px, 0) rotate(-8deg) scale(1.22); }
-  68% { transform: translate3d(-34px, 22px, 0) rotate(3deg) scale(1.1); }
-  84% { transform: translate3d(7px, -4px, 0) rotate(-2deg) scale(.98); }
+  16% { transform: translate3d(18px, -12px, 0) rotate(5deg) scale(.9); }
+  46% { transform: translate3d(-116px, 70px, 0) rotate(-11deg) scale(1.38); }
+  68% { transform: translate3d(-54px, 34px, 0) rotate(4deg) scale(1.18); }
+  84% { transform: translate3d(12px, -7px, 0) rotate(-3deg) scale(.96); }
 }
 
 @keyframes enemyAttackTrail {
   0% { opacity: 0; transform: rotate(-18deg) scaleX(.15); }
   30% { opacity: 0; transform: rotate(-18deg) scaleX(.2); }
-  48% { opacity: 1; transform: translate(-18px, 10px) rotate(-18deg) scaleX(1); }
-  100% { opacity: 0; transform: translate(-88px, 50px) rotate(-18deg) scaleX(.35); }
+  48% { opacity: 1; transform: translate(-32px, 16px) rotate(-18deg) scaleX(1.15); }
+  100% { opacity: 0; transform: translate(-138px, 78px) rotate(-18deg) scaleX(.4); }
 }
 
 @keyframes enemyAttackLabel {
   0%, 100% { transform: scale(1); }
-  42% { transform: scale(1.14); }
+  42% { transform: scale(1.25); }
 }
 
 /* Human hunter companion is intentionally larger for clearer battlefield presence. */
