@@ -1344,4 +1344,49 @@
     color: #aac0c8;
     font-weight: 500;
   }
+
+  #enemy-squad .enemy-unit {
+    width: 145px !important;
+  }
+
+  #enemy-squad .enemy-unit .enemy-art {
+    position: relative;
+    left: 50%;
+    width: 152px !important;
+    height: 163px !important;
+    translate: -50% 0;
+  }
+
+  #enemy-squad .enemy-unit.attacking .enemy-art {
+    animation: enemyAttackLunge .52s cubic-bezier(.2, .82, .28, 1) !important;
+    filter: brightness(1.18) drop-shadow(0 10px 8px rgba(0, 0, 0, .5)) !important;
+  }
+
+  #enemy-squad .enemy-unit.attacking::before {
+    content: "";
+    position: absolute;
+    z-index: 12;
+    left: -18px;
+    bottom: 42px;
+    width: 96px;
+    height: 5px;
+    border-radius: 999px;
+    background: linear-gradient(90deg, transparent, rgba(255, 236, 168, .95), transparent);
+    box-shadow: 0 0 12px rgba(255, 190, 88, .72);
+    transform-origin: left center;
+    animation: enemyAttackTrail .52s ease-out both;
+    pointer-events: none;
+  }
+}
+
+@keyframes enemyAttackLunge {
+  0%, 100% { transform: translate3d(0, 0, 0) rotate(0) scale(1); }
+  38% { transform: translate3d(-30px, 22px, 0) rotate(-3deg) scale(1.1); }
+  68% { transform: translate3d(-10px, 7px, 0) rotate(1deg) scale(1.03); }
+}
+
+@keyframes enemyAttackTrail {
+  0% { opacity: 0; transform: rotate(-18deg) scaleX(.15); }
+  34% { opacity: 1; transform: rotate(-18deg) scaleX(1); }
+  100% { opacity: 0; transform: translate(-36px, 22px) rotate(-18deg) scaleX(.45); }
 }
