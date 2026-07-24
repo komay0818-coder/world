@@ -69,6 +69,7 @@ const raceTalents = {
 };
 const mapProgression = [
   { id: 'beginner-plains', min: 1, max: 5, name: '初心者平原', background: 'assets/beginner-plains-background.png', implemented: true, normalXp: 4, eliteXp: 18, bossXp: 70, recommended: { attack: 14, defense: 3, hp: 100 } },
+  { id: 'plains-entrance', regionOf: 'beginner-plains', min: 1, max: 2, name: '平原入口', background: 'assets/plains-entrance-background.png', implemented: true, normalXp: 4, eliteXp: 10, bossXp: 0, recommended: { attack: 10, defense: 1, hp: 80 } },
   { id: 'black-forest', min: 5, max: 10, name: '黑森林', background: 'assets/black-forest-background.png', implemented: true, normalXp: 4, eliteXp: 14, bossXp: 56, recommended: { attack: 26, defense: 8, hp: 180 } },
   { id: 'black-forest-altar', min: 5, max: 10, name: '黑森林祭壇', background: 'assets/black-forest-background.png', implemented: true, dungeon: true, normalXp: 0, eliteXp: 22, bossXp: 126, recommended: { attack: 34, defense: 11, hp: 230 } },
   { min: 10, max: 15, name: '石牙山谷', normalXp: 8, eliteXp: 35, bossXp: 140 },
@@ -485,6 +486,11 @@ function openCreation(slotIndex = 0) {
 }
 
 const monsterTypes = {
+  plainsRabbit: { id: 'plainsRabbit', name: '野兔', maxHp: 24, attack: 5, artClass: 'monster-placeholder-art', xp: 4, gold: 1 },
+  plainsWolfPup: { id: 'plainsWolfPup', name: '幼狼', maxHp: 34, attack: 7, artClass: 'monster-placeholder-art', xp: 4, gold: 2 },
+  plainsSlime: { id: 'plainsSlime', name: '小史萊姆', maxHp: 30, attack: 6, artClass: 'monster-placeholder-art', xp: 4, gold: 1 },
+  plainsGoblinYoung: { id: 'plainsGoblinYoung', name: '幼年哥布林', maxHp: 40, attack: 8, artClass: 'monster-placeholder-art', xp: 4, gold: 2 },
+  lostGoblin: { id: 'lostGoblin', name: '迷路的哥布林', maxHp: 62, attack: 10, artClass: 'monster-placeholder-art rare-placeholder-art', xp: 10, gold: 5, isRare: true },
   goblin: { id: 'goblin', name: '哥布林', maxHp: 45, attack: 11, artClass: 'goblin-art', xp: 10, gold: 3 },
   wolf: { id: 'wolf', name: '森林狼', maxHp: 68, attack: 14, artClass: 'wolf-art', xp: 14, gold: 4 },
   boar: { id: 'boar', name: '野豬', maxHp: 82, attack: 17, artClass: 'boar-art', xp: 18, gold: 5 },
@@ -509,6 +515,7 @@ const normalMonsterIds = ['goblin', 'wolf', 'boar'];
 const eliteMonsterIds = ['goblinOverlord', 'wolfAlpha', 'boarTyrant'];
 const bossMonsterIds = ['goblinKing'];
 const mapMonsterPools = {
+  plainsEntrance: { normal: ['plainsRabbit', 'plainsWolfPup', 'plainsSlime', 'plainsGoblinYoung'], rare: ['lostGoblin'], rareChance: .10, elite: [], boss: [] },
   beginner: { normal: normalMonsterIds, elite: eliteMonsterIds, boss: bossMonsterIds },
   blackForest: { normal: ['nightGoblin', 'shadowWolf', 'thornBoar'], elite: ['forestShaman', 'moonfangAlpha', 'thornbackTyrant'], boss: ['forestGuardian'] }
 };
@@ -1032,14 +1039,23 @@ function setupBattleLogControls() {
 }
 
 function getMonsterPool(level = getProgress().level) {
-  return getActiveMap(getProgress()).id === 'black-forest' ? mapMonsterPools.blackForest : mapMonsterPools.beginner;
+  const mapId = getActiveMap(getProgress()).id;
+  if (mapId === 'plains-entrance') return mapMonsterPools.plainsEntrance;
+  return mapId === 'black-forest' ? mapMonsterPools.blackForest : mapMonsterPools.beginner;
 }
 
-function randomEnemyId(level = getProgress().level) { const pool = getMonsterPool(level).normal; return pool[Math.floor(Math.random() * pool.length)]; }
+function randomEnemyId(level = getProgress().level) {
+  const pool = getMonsterPool(level);
+  if (pool.rare?.length && Math.random() < pool.rareChance) return pool.rare[Math.floor(Math.random() * pool.rare.length)];
+  return pool.normal[Math.floor(Math.random() * pool.normal.length)];
+}
 function randomEliteId(level = getProgress().level) { const pool = getMonsterPool(level).elite; return pool[Math.floor(Math.random() * pool.length)]; }
 function randomBossId(level = getProgress().level) { const pool = getMonsterPool(level).boss; return pool[Math.floor(Math.random() * pool.length)]; }
 
 function createEnemyTypes(playerLevel = 1) {
+  if (getActiveMap(getProgress()).id === 'plains-entrance') {
+    return Array.from({ length: 5 }, () => randomEnemyId(playerLevel));
+  }
   const types = [...getMonsterPool(playerLevel).normal];
   while (types.length < 5) types.push(randomEnemyId(playerLevel));
   const specialRoll = Math.random();
@@ -1141,8 +1157,9 @@ function getCurrentMap(level) {
 
 function getActiveMap(progress = getProgress()) {
   const selected = mapProgression.find((map) => map.id === progress.selectedMapId && map.implemented && progress.level >= map.min);
+  if (selected?.id === 'beginner-plains') return mapProgression.find((map) => map.id === 'plains-entrance');
   if (selected) return selected;
-  return mapProgression.find((map) => map.id === 'beginner-plains') || mapProgression[0];
+  return mapProgression.find((map) => map.id === 'plains-entrance') || mapProgression[0];
 }
 
 function getCharacterStats(level, progress = getProgress(), character = JSON.parse(localStorage.getItem('stardust-character') || 'null')) {
@@ -1454,7 +1471,7 @@ function renderMapSelector() {
   const character = JSON.parse(localStorage.getItem('stardust-character') || 'null');
   const stats = getCharacterStats(progress.level, progress, character);
   const activeMap = getActiveMap(progress);
-  const maps = mapProgression.filter((map) => map.implemented);
+  const maps = mapProgression.filter((map) => map.implemented && !map.regionOf);
   const modal = document.querySelector('#inventory-modal');
   document.querySelector('#inventory-title').textContent = '選擇冒險地圖';
   document.querySelector('#inventory-content').innerHTML = `<section class="map-selection-grid">${maps.map((map) => {
@@ -1479,6 +1496,8 @@ function renderMapSelector() {
 }
 
 function renderBeginnerPlainsRegions() {
+  const progress = getProgress();
+  const activeMap = getActiveMap(progress);
   const modal = document.querySelector('#inventory-modal');
   document.querySelector('#inventory-title').textContent = '初心者平原・區域選擇';
   document.querySelector('#inventory-content').innerHTML = `
@@ -1487,12 +1506,17 @@ function renderBeginnerPlainsRegions() {
       <div><b>初心者平原</b><small>Lv. 1～5 地區</small></div>
       <em>區域架構已建立，怪物、圖片與個別掉落物將於後續逐區追加。</em>
     </section>
-    <section class="map-region-grid">${beginnerPlainsRegions.map((region, index) => `
-      <article class="map-region-card pending">
+    <section class="map-region-grid">${beginnerPlainsRegions.map((region, index) => {
+      const available = region.id === 'plains-entrance';
+      return `
+      <article class="map-region-card ${available ? 'available' : 'pending'} ${activeMap.id === region.id ? 'selected' : ''}">
         <span>${String(index + 1).padStart(2, '0')}</span>
-        <div><b>${region.name}</b><small>怪物與掉落物：尚未設定</small></div>
-        <em>準備中</em>
-      </article>`).join('')}
+        <div><b>${region.name}</b><small>${available ? '怪物 5 種・稀有怪物機率 10%' : '怪物與掉落物：尚未設定'}</small></div>
+        ${available
+          ? activeMap.id === region.id ? '<em class="current-region">目前區域</em>' : `<button type="button" data-select-map="${region.id}">進入區域</button>`
+          : '<em>準備中</em>'}
+      </article>`;
+    }).join('')}
     </section>`;
   modal.dataset.view = 'map-regions';
   modal.classList.remove('hidden');
@@ -1563,8 +1587,8 @@ function renderEnemySquad() {
   squad.innerHTML = battle.enemyHps.map((hp, index) => {
     const enemy = getEnemyDefinition(index);
     const damageEvents = (battle.enemyDamages[index] || []).map((event, eventIndex) => `<b class="enemy-damage ${event.type || 'normal'}" style="--damage-offset:${eventIndex * 18}px">-${event.damage}</b>`).join('');
-    const rankClass = enemy.isBoss ? 'boss' : enemy.isElite ? 'elite' : '';
-    const rankName = enemy.isBoss ? `♛ BOSS・${enemy.name}` : enemy.isElite ? `◆ 菁英・${enemy.name}` : enemy.name;
+    const rankClass = enemy.isBoss ? 'boss' : enemy.isElite ? 'elite' : enemy.isRare ? 'rare' : '';
+    const rankName = enemy.isBoss ? `♛ BOSS・${enemy.name}` : enemy.isElite ? `◆ 菁英・${enemy.name}` : enemy.isRare ? `✦ 稀有・${enemy.name}` : enemy.name;
     return `<div id="enemy-${index}" class="enemy-unit ${rankClass} ${hp <= 0 ? 'defeated' : ''} ${battle.targetIndexes.includes(index) ? 'targeted hit' : ''}"><span class="enemy-art ${enemy.artClass}"></span>${damageEvents}<small>${rankName}</small><div class="hp-track enemy-track"><i style="width:${Math.max(0, hp / enemy.maxHp * 100)}%"></i></div></div>`;
   }).join('');
 }
@@ -2005,9 +2029,12 @@ function processEnemyRespawns() {
     if (timer === null) return;
     const nextTimer = timer - 1;
     if (nextTimer <= 0) {
+    const currentMapId = getActiveMap(getProgress()).id;
     const specialRoll = Math.random();
-    const bossAllowed = playerLevel >= 4 && !hasAliveBoss(index);
-    battle.enemyTypes[index] = bossAllowed && specialRoll < bossSpawnChance ? randomBossId(playerLevel) : specialRoll < bossSpawnChance + eliteSpawnChance ? randomEliteId(playerLevel) : randomEnemyId(playerLevel);
+    const bossAllowed = currentMapId !== 'plains-entrance' && playerLevel >= 4 && !hasAliveBoss(index);
+    battle.enemyTypes[index] = currentMapId === 'plains-entrance'
+      ? randomEnemyId(playerLevel)
+      : bossAllowed && specialRoll < bossSpawnChance ? randomBossId(playerLevel) : specialRoll < bossSpawnChance + eliteSpawnChance ? randomEliteId(playerLevel) : randomEnemyId(playerLevel);
       battle.enemyRespawns[index] = null;
       battle.enemyHps[index] = getEnemyDefinition(index).maxHp;
     battle.enemySpawnedAt[index] = Date.now();
