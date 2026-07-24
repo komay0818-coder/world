@@ -76,6 +76,13 @@ const mapProgression = [
   { min: 20, max: 25, name: '冰霜高原', normalXp: 35, eliteXp: 140, bossXp: 560 },
   { min: 25, max: 30, name: '熔岩要塞', normalXp: 70, eliteXp: 280, bossXp: 1050 }
 ];
+const beginnerPlainsRegions = [
+  { id: 'plains-entrance', name: '平原入口' },
+  { id: 'wolf-den', name: '狼穴' },
+  { id: 'boar-woods', name: '野豬林' },
+  { id: 'goblin-camp', name: '哥布林營地' },
+  { id: 'plains-depths', name: '平原深處' }
+];
 const skillCooldownMultiplier = 1.0;
 const skillProgression = {
   warrior: [
@@ -1452,17 +1459,42 @@ function renderMapSelector() {
   document.querySelector('#inventory-title').textContent = '選擇冒險地圖';
   document.querySelector('#inventory-content').innerHTML = `<section class="map-selection-grid">${maps.map((map) => {
     const unlocked = progress.level >= map.min;
+    const isRegionHub = map.id === 'beginner-plains';
     const recommended = map.recommended || { attack: 0, defense: 0, hp: 0 };
     const ready = stats.attack >= recommended.attack && stats.defense >= recommended.defense && stats.hp >= recommended.hp;
     const recommendation = `<strong class="map-recommendation ${ready ? 'ready' : 'danger'}">${ready ? '✓ 能力達標' : '⚠ 建議整備'}　攻 ${recommended.attack}・防 ${recommended.defense}・生命 ${recommended.hp}</strong>`;
     const dungeonKeys = resources.dungeonKeys?.blackForestAltar || 0;
-    const detail = map.dungeon ? `<em>10 波精英・第 10 波最終 BOSS・職業套裝</em><strong class="dungeon-key-count">祭壇鑰匙：${dungeonKeys}</strong>` : `<em>普通 ${map.normalXp} EXP・精英 ${map.eliteXp} EXP・Boss ${map.bossXp} EXP</em>`;
-    const action = map.dungeon
+    const detail = isRegionHub
+      ? `<em>包含 ${beginnerPlainsRegions.length} 個探索區域・怪物與掉落物將陸續追加</em>`
+      : map.dungeon ? `<em>10 波精英・第 10 波最終 BOSS・職業套裝</em><strong class="dungeon-key-count">祭壇鑰匙：${dungeonKeys}</strong>` : `<em>普通 ${map.normalXp} EXP・精英 ${map.eliteXp} EXP・Boss ${map.bossXp} EXP</em>`;
+    const action = isRegionHub
+      ? `<button type="button" data-open-map-region="${map.id}">查看 ${beginnerPlainsRegions.length} 個區域</button>`
+      : map.dungeon
       ? unlocked ? `<button type="button" data-select-map="${map.id}" ${dungeonKeys < 1 ? 'disabled' : ''}>${dungeonKeys > 0 ? '消耗鑰匙進入' : '需要祭壇鑰匙'}</button>` : `<span>Lv. ${map.min} 解鎖</span>`
       : unlocked ? map.id === activeMap.id ? '<span>目前地圖</span>' : `<button type="button" data-select-map="${map.id}">前往地圖</button>` : `<span>Lv. ${map.min} 解鎖</span>`;
-    return `<article class="map-selection-card ${map.dungeon ? 'dungeon-card' : ''} ${map.id === activeMap.id ? 'selected' : ''} ${unlocked ? '' : 'locked'}" style="--map-preview:url('${map.background}')"><div><b>${map.dungeon ? '◆ ' : ''}${map.name}</b><small>怪物等級 Lv. ${map.min}～${map.max}</small>${detail}${recommendation}</div>${action}</article>`;
+    return `<article class="map-selection-card ${isRegionHub ? 'region-hub-card' : ''} ${map.dungeon ? 'dungeon-card' : ''} ${map.id === activeMap.id ? 'selected' : ''} ${unlocked ? '' : 'locked'}" style="--map-preview:url('${map.background}')"><div><b>${map.dungeon ? '◆ ' : ''}${map.name}</b><small>${isRegionHub ? '地區等級' : '怪物等級'} Lv. ${map.min}～${map.max}</small>${detail}${isRegionHub ? '' : recommendation}</div>${action}</article>`;
   }).join('')}</section>`;
   modal.dataset.view = 'maps';
+  modal.classList.remove('hidden');
+}
+
+function renderBeginnerPlainsRegions() {
+  const modal = document.querySelector('#inventory-modal');
+  document.querySelector('#inventory-title').textContent = '初心者平原・區域選擇';
+  document.querySelector('#inventory-content').innerHTML = `
+    <button type="button" class="map-region-back" data-map-region-back>← 返回地區選擇</button>
+    <section class="region-overview-card" style="--map-preview:url('assets/beginner-plains-background.png')">
+      <div><b>初心者平原</b><small>Lv. 1～5 地區</small></div>
+      <em>區域架構已建立，怪物、圖片與個別掉落物將於後續逐區追加。</em>
+    </section>
+    <section class="map-region-grid">${beginnerPlainsRegions.map((region, index) => `
+      <article class="map-region-card pending">
+        <span>${String(index + 1).padStart(2, '0')}</span>
+        <div><b>${region.name}</b><small>怪物與掉落物：尚未設定</small></div>
+        <em>準備中</em>
+      </article>`).join('')}
+    </section>`;
+  modal.dataset.view = 'map-regions';
   modal.classList.remove('hidden');
 }
 
@@ -2379,6 +2411,9 @@ document.querySelectorAll('[data-menu-action]').forEach((button) => button.addEv
 document.querySelector('#inventory-close').addEventListener('click', () => document.querySelector('#inventory-modal').classList.add('hidden'));
 document.querySelector('#inventory-modal').addEventListener('click', (event) => {
   if (event.target === event.currentTarget) event.currentTarget.classList.add('hidden');
+  const regionHubButton = event.target.closest('[data-open-map-region]');
+  if (regionHubButton) { renderBeginnerPlainsRegions(); return; }
+  if (event.target.closest('[data-map-region-back]')) { renderMapSelector(); return; }
   const mapButton = event.target.closest('[data-select-map]');
   if (mapButton) { selectAdventureMap(mapButton.dataset.selectMap); return; }
   const categoryButton = event.target.closest('[data-inventory-category]');
