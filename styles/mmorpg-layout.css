@@ -516,6 +516,12 @@
   pointer-events: none !important;
 }
 
+#race-totem,
+#job-mark {
+  display: none !important;
+  visibility: hidden !important;
+}
+
 /* Screenshot-aligned widescreen proportions. */
 @media (min-width: 1101px) {
   .battle-screen {
