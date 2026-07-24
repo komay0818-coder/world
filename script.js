@@ -1583,14 +1583,15 @@ function discardSelectedEquipment() {
 }
 
 const BATTLE_FORMATION = [
-  { depth: 'near', role: 'vanguard', x: 36, y: 83, scale: 1.1, z: 9, blur: 0 },
-  { depth: 'far', role: 'rear-guard', x: 70, y: 43, scale: .74, z: 5, blur: .4 },
-  { depth: 'mid', role: 'flanker', x: 78, y: 76, scale: .92, z: 7, blur: 0 }
+  { depth: 'near', role: 'vanguard', x: 34, y: 78, scale: 1.06, z: 9, blur: 0 },
+  { depth: 'far', role: 'rear-guard', x: 55, y: 55, scale: .76, z: 5, blur: .35 },
+  { depth: 'mid', role: 'flanker', x: 84, y: 73, scale: .88, z: 7, blur: 0 },
+  { depth: 'near', role: 'skirmisher', x: 69, y: 91, scale: .98, z: 10, blur: 0 }
 ];
 
 function renderEnemySquad() {
   const squad = document.querySelector('#enemy-squad');
-  const visibleIndexes = aliveEnemyIndexesByAge().slice(0, 3);
+  const visibleIndexes = aliveEnemyIndexesByAge().slice(0, 4);
   const focusIndex = visibleIndexes[0] ?? -1;
   const reserveCount = Math.max(0, battle.enemyHps.filter((hp) => hp > 0).length - visibleIndexes.length);
   const visibleEnemies = visibleIndexes.map((index, stageSlot) => {
