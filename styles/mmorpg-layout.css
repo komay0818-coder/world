@@ -508,6 +508,44 @@
   }
 }
 
+/* UI phase 1: compact side rails and preserve more of the battlefield. */
+@media (min-width: 1101px) {
+  .battle-screen {
+    grid-template-columns: clamp(250px, 20.5vw, 310px) minmax(0, 1fr) clamp(200px, 14.4vw, 232px) !important;
+    grid-template-rows: 25.5dvh minmax(0, 1fr) 78px !important;
+  }
+
+  .battle-bottom .skill-panel {
+    padding: 12px 8px !important;
+  }
+
+  .battle-bottom #combat-log-lines {
+    gap: 3px !important;
+  }
+
+  .battle-bottom #combat-log-lines .combat-log-entry {
+    padding: 5px 6px !important;
+    font-size: 11px !important;
+    line-height: 1.35 !important;
+  }
+
+  .battle-bottom .skill-list .skill-chip.locked {
+    min-height: 54px !important;
+    padding-top: 5px !important;
+    padding-bottom: 5px !important;
+  }
+
+  .battle-field #battle-player-art {
+    width: 190px !important;
+    height: 246px !important;
+  }
+
+  .battle-field #battle-player-art.undead-art {
+    width: 335px !important;
+    height: 258px !important;
+  }
+}
+
 /* Permanently retire the legacy drag-and-resize editor from the battle HUD. */
 #layout-toggle,
 #layout-panel {
