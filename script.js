@@ -1642,6 +1642,10 @@ const BATTLE_FORMATION = [
 
 function renderEnemySquad() {
   const squad = document.querySelector('#enemy-squad');
+  const previousPositions = new Map(Array.from(squad.querySelectorAll('.enemy-unit')).map((element) => [
+    element.id,
+    { rect: element.getBoundingClientRect(), stageSlot: element.dataset.stageSlot }
+  ]));
   const visibleIndexes = aliveEnemyIndexesByAge().slice(0, 4);
   const focusIndex = visibleIndexes[0] ?? -1;
   const reserveCount = Math.max(0, battle.enemyHps.filter((hp) => hp > 0).length - visibleIndexes.length);
@@ -1654,12 +1658,34 @@ function renderEnemySquad() {
     const focusClass = index === focusIndex ? 'focus-target' : 'support-target';
     const formation = BATTLE_FORMATION[stageSlot] || BATTLE_FORMATION[0];
     const formationStyle = `--stage-x:${formation.x}%;--stage-y:${formation.y}%;--stage-scale:${formation.scale};--stage-z:${formation.z};--stage-blur:${formation.blur}px`;
-    return `<div id="enemy-${index}" class="enemy-unit stage-slot-${stageSlot} ${focusClass} ${rankClass} ${battle.targetIndexes.includes(index) ? 'targeted hit' : ''}" data-depth="${formation.depth}" data-role="${formation.role}" style="${formationStyle}"><span class="enemy-art ${enemy.artClass}"></span>${damageEvents}<small>${rankName}</small><div class="hp-track enemy-track"><i style="width:${Math.max(0, hp / enemy.maxHp * 100)}%"></i></div></div>`;
+    return `<div id="enemy-${index}" class="enemy-unit stage-slot-${stageSlot} ${focusClass} ${rankClass} ${battle.targetIndexes.includes(index) ? 'targeted hit' : ''}" data-stage-slot="${stageSlot}" data-depth="${formation.depth}" data-role="${formation.role}" style="${formationStyle}"><span class="enemy-art ${enemy.artClass}"></span>${damageEvents}<small>${rankName}</small><div class="hp-track enemy-track"><i style="width:${Math.max(0, hp / enemy.maxHp * 100)}%"></i></div></div>`;
   }).join('');
   const reserveLabel = reserveCount > 0
     ? `<div class="reserve-indicator"><b>後備 ${reserveCount}</b><span>等待進場</span></div>`
     : visibleIndexes.length ? '' : '<div class="reserve-indicator empty"><b>戰場暫空</b><span>怪物即將重生</span></div>';
   squad.innerHTML = visibleEnemies + reserveLabel;
+  if (!previousPositions.size) return;
+  requestAnimationFrame(() => {
+    squad.querySelectorAll('.enemy-unit').forEach((element) => {
+      if (typeof element.animate !== 'function') return;
+      const previous = previousPositions.get(element.id);
+      if (!previous) {
+        element.animate([
+          { opacity: 0, translate: '64px -36px', scale: '.82' },
+          { opacity: 1, translate: '0 0', scale: '1' }
+        ], { duration: 620, easing: 'cubic-bezier(.18,.82,.24,1)' });
+        return;
+      }
+      if (previous.stageSlot === element.dataset.stageSlot) return;
+      const currentRect = element.getBoundingClientRect();
+      const deltaX = previous.rect.left - currentRect.left;
+      const deltaY = previous.rect.top - currentRect.top;
+      element.animate([
+        { translate: `${deltaX}px ${deltaY}px`, scale: '.94', opacity: .82 },
+        { translate: '0 0', scale: '1', opacity: 1 }
+      ], { duration: 720, easing: 'cubic-bezier(.2,.8,.25,1)' });
+    });
+  });
 }
 
 function playMonsterAttackAnimation(enemyIndex, playerWasHit) {
