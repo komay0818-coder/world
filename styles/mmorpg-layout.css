@@ -1474,7 +1474,7 @@
 
 /* Shared character-sprite contract: 42% visible height, one scale and one foot-center anchor. */
 .battle-field #battle-player-art[aria-label] {
-  left: 0 !important;
+  left: 15% !important;
   bottom: 0 !important;
   width: auto !important;
   height: 46.6667% !important;
@@ -1483,6 +1483,7 @@
   background-size: 100% 100% !important;
   background-repeat: no-repeat !important;
   transform-origin: 50% 100% !important;
+  translate: -50% 0 !important;
   scale: var(--character-scale) !important;
   transform: none !important;
   animation: none !important;
