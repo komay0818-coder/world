@@ -1964,6 +1964,7 @@ function updateBattleUI() {
   const racialCompanion = racialCompanions[character.race] || racialCompanions.human;
   const companionArt = companion?.querySelector('span');
   const companionName = companion?.querySelector('small');
+  if (companion) companion.dataset.race = character.race;
   if (companionArt) {
     const companionImage = `url("${racialCompanion.image}")`;
     companionArt.style.setProperty('--companion-art', companionImage);

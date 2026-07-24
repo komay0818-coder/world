@@ -1406,3 +1406,16 @@
   0%, 100% { transform: scale(1); }
   42% { transform: scale(1.14); }
 }
+
+/* Human hunter companion is intentionally larger for clearer battlefield presence. */
+@media (min-width: 701px) {
+  .battle-field #hunter-companion[data-race="human"] {
+    transform: scale(.9) !important;
+  }
+}
+
+@media (max-width: 700px) {
+  .battle-field #hunter-companion[data-race="human"] {
+    transform: scale(.82) !important;
+  }
+}
