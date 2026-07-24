@@ -1,4 +1,83 @@
-/* Final battlefield layout layer. Loaded last to replace legacy positioning rules. */
+/* Perspective battlefield composition. Loaded after the legacy game styles. */
+.battle-field {
+  isolation: isolate;
+  overflow: hidden;
+}
+
+.world-depth,
+.world-depth > div,
+.player-grounding {
+  position: absolute;
+  pointer-events: none;
+}
+
+.world-depth {
+  inset: 0;
+  z-index: 1;
+  overflow: hidden;
+}
+
+.world-depth > div {
+  inset: 0;
+}
+
+.world-veil {
+  z-index: 1;
+  background:
+    radial-gradient(ellipse at 63% 67%, transparent 0 22%, rgba(4, 17, 21, .10) 55%, rgba(3, 13, 19, .34) 100%),
+    linear-gradient(180deg, rgba(8, 23, 32, .30), rgba(7, 22, 28, .10) 52%, rgba(4, 16, 21, .30));
+}
+
+.world-haze-far {
+  z-index: 2;
+  bottom: 47% !important;
+  background: linear-gradient(180deg, rgba(177, 205, 210, .13), rgba(98, 133, 139, .06) 70%, transparent);
+  backdrop-filter: blur(1.5px) brightness(.84) saturate(.78);
+  -webkit-backdrop-filter: blur(1.5px) brightness(.84) saturate(.78);
+  mask-image: linear-gradient(black 10%, black 68%, transparent);
+}
+
+.world-haze-mid {
+  z-index: 3;
+  top: 29% !important;
+  bottom: 26% !important;
+  background: linear-gradient(180deg, rgba(161, 190, 190, .04), transparent 70%);
+  backdrop-filter: blur(.45px) brightness(.92);
+  -webkit-backdrop-filter: blur(.45px) brightness(.92);
+  mask-image: linear-gradient(transparent, black 25%, black 70%, transparent);
+}
+
+.road-perspective {
+  z-index: 4;
+  inset: 30% 13% -14% 27% !important;
+  clip-path: polygon(43% 0, 56% 0, 91% 100%, 5% 100%);
+  background: linear-gradient(90deg, transparent, rgba(211, 225, 205, .035) 23%, rgba(235, 237, 209, .08) 50%, rgba(211, 225, 205, .035) 77%, transparent);
+  mix-blend-mode: screen;
+}
+
+.engagement-ground {
+  z-index: 5;
+  inset: auto 7% 2% 20% !important;
+  height: 31%;
+  border-radius: 50%;
+  background: radial-gradient(ellipse, rgba(4, 14, 15, .36), rgba(5, 16, 17, .13) 49%, transparent 72%);
+  transform: perspective(420px) rotateX(62deg);
+  transform-origin: center bottom;
+  filter: blur(2px);
+}
+
+.player-grounding {
+  left: 17px;
+  bottom: -8px;
+  z-index: 5;
+  width: 270px;
+  height: 62px;
+  border-radius: 50%;
+  background: radial-gradient(ellipse, rgba(2, 10, 12, .72), rgba(2, 10, 12, .28) 48%, transparent 72%);
+  filter: blur(3px);
+  transform: rotate(-3deg);
+}
+
 @media (min-width: 701px) {
   .battle-screen {
     grid-template-columns: 285px minmax(0, 1fr) !important;
@@ -13,24 +92,28 @@
   }
 
   .battle-field #battle-player-art {
-    left: 12px !important;
-    bottom: 0 !important;
-    width: 193px !important;
-    height: 250px !important;
+    left: 18px !important;
+    bottom: 4px !important;
+    z-index: 7 !important;
+    width: 186px !important;
+    height: 240px !important;
+    filter: drop-shadow(0 7px 7px rgba(0, 0, 0, .48)) contrast(1.04) saturate(1.04) !important;
   }
 
   .battle-field #battle-player-art.undead-art {
-    left: 8px !important;
-    width: 352px !important;
-    height: 270px !important;
+    left: 9px !important;
+    width: 336px !important;
+    height: 258px !important;
   }
 
   .battle-field #hunter-companion {
-    left: 136px !important;
-    bottom: 2px !important;
+    left: 143px !important;
+    bottom: 3px !important;
+    z-index: 8 !important;
     width: 170px !important;
-    transform: scale(.72) !important;
+    transform: scale(.68) !important;
     transform-origin: left bottom !important;
+    filter: drop-shadow(0 7px 6px rgba(0, 0, 0, .42));
   }
 
   .battle-field #hunter-companion span {
@@ -39,48 +122,58 @@
   }
 
   .battle-field #battle-player-art.undead-art + #hunter-companion {
-    left: 168px !important;
-    bottom: 0 !important;
-    transform: scale(.68) !important;
+    left: 169px !important;
+    transform: scale(.65) !important;
   }
 
   .battle-field #enemy-squad {
+    position: absolute !important;
+    inset: 0 !important;
     z-index: 6 !important;
-    top: 12% !important;
-    left: 63% !important;
-    width: min(64%, 620px) !important;
-    height: 76% !important;
-    transform: translateX(-50%) !important;
+    width: 100% !important;
+    height: 100% !important;
+    transform: none !important;
+    pointer-events: none;
   }
 
   #enemy-squad .enemy-unit {
     position: absolute !important;
+    left: var(--stage-x) !important;
+    top: var(--stage-y) !important;
+    z-index: var(--stage-z) !important;
     width: 126px !important;
     margin: 0 !important;
+    opacity: 1 !important;
+    transform: translate(-50%, -100%) scale(var(--stage-scale)) !important;
     transform-origin: center bottom !important;
+    filter: blur(var(--stage-blur)) drop-shadow(0 7px 5px rgba(0, 0, 0, .38));
+    pointer-events: auto;
   }
 
-  #enemy-squad .stage-slot-0 {
-    left: 20% !important;
-    top: 40% !important;
-    z-index: 8 !important;
-    transform: scale(1.04) !important;
+  #enemy-squad .enemy-unit::after {
+    content: "";
+    position: absolute;
+    left: 50%;
+    bottom: -7px;
+    z-index: -1;
+    width: 88%;
+    height: 18px;
+    border-radius: 50%;
+    background: rgba(1, 9, 10, .52);
+    filter: blur(4px);
+    transform: translateX(-50%) scaleY(.43);
   }
 
-  #enemy-squad .stage-slot-1 {
-    left: 54% !important;
-    top: 5% !important;
-    z-index: 5 !important;
-    transform: scale(.82) !important;
-    opacity: .84 !important;
+  #enemy-squad .enemy-unit[data-depth="far"] {
+    filter: blur(var(--stage-blur)) brightness(.88) saturate(.82) drop-shadow(0 4px 4px rgba(0, 0, 0, .32));
   }
 
-  #enemy-squad .stage-slot-2 {
-    left: 67% !important;
-    top: 49% !important;
-    z-index: 7 !important;
-    transform: scale(.94) !important;
-    opacity: .93 !important;
+  #enemy-squad .enemy-unit[data-depth="far"]::after {
+    opacity: .55;
+  }
+
+  #enemy-squad .enemy-unit[data-depth="near"] {
+    filter: contrast(1.04) saturate(1.05) drop-shadow(0 9px 6px rgba(0, 0, 0, .48));
   }
 
   #enemy-squad .focus-target .enemy-track {
@@ -88,13 +181,34 @@
     width: 104px !important;
     height: 7px !important;
     opacity: 1 !important;
+    box-shadow: 0 2px 7px rgba(0, 0, 0, .65);
   }
 
   #enemy-squad .support-target .enemy-track {
     display: block !important;
-    width: 66px !important;
+    width: 62px !important;
     height: 3px !important;
-    opacity: .24 !important;
+    opacity: .2 !important;
+  }
+
+  #enemy-squad .support-target small {
+    opacity: .82;
+    transform: scale(.92);
+    transform-origin: center;
+  }
+
+  .reserve-indicator {
+    left: auto !important;
+    right: 16px !important;
+    top: 18px !important;
+    z-index: 12 !important;
+    opacity: .62;
+  }
+
+  .battle-status {
+    z-index: 14 !important;
+    background: rgba(5, 17, 22, .54) !important;
+    backdrop-filter: blur(4px);
   }
 
   .battle-bottom {
@@ -102,29 +216,26 @@
     grid-row: 2 !important;
     grid-template-columns: minmax(240px, 1fr) minmax(310px, 350px) 92px !important;
     gap: 10px !important;
-    padding-top: 10px !important;
-    padding-bottom: 10px !important;
+    padding: 10px 12px !important;
   }
 
   .battle-bottom .combat-log {
     align-self: start !important;
     width: auto !important;
-    height: min(210px, 100%) !important;
-    padding: 9px 11px !important;
-    background: rgba(6, 18, 26, .56) !important;
-    opacity: .66 !important;
+    height: min(198px, 100%) !important;
+    padding: 8px 10px !important;
+    background: rgba(6, 18, 26, .50) !important;
+    opacity: .58 !important;
     transition: opacity .18s ease !important;
   }
 
   .battle-bottom .combat-log:hover,
-  .battle-bottom .combat-log:focus-within {
-    opacity: .96 !important;
-  }
+  .battle-bottom .combat-log:focus-within { opacity: .96 !important; }
 
   .battle-bottom #combat-log-lines {
     gap: 3px !important;
     padding: 5px !important;
-    background: rgba(239, 245, 247, .84) !important;
+    background: rgba(239, 245, 247, .82) !important;
   }
 
   .battle-bottom #combat-log-lines .combat-log-entry {
@@ -137,9 +248,9 @@
   .battle-bottom .skill-panel {
     align-self: start !important;
     width: auto !important;
-    height: min(300px, 100%) !important;
-    padding: 9px !important;
-    background: rgba(7, 20, 29, .72) !important;
+    height: min(282px, 100%) !important;
+    padding: 8px !important;
+    background: rgba(7, 20, 29, .68) !important;
   }
 
   .battle-bottom .skill-panel > .potion-button {
@@ -147,37 +258,17 @@
     inset: auto !important;
     display: inline-flex !important;
     width: calc(50% - 5px) !important;
-    min-height: 36px !important;
-    margin: 0 4px 6px 0 !important;
-    padding: 5px 7px !important;
+    min-height: 34px !important;
+    margin: 0 4px 5px 0 !important;
+    padding: 4px 7px !important;
   }
 
-  .battle-bottom .skill-panel > .potion-button + button {
-    margin-right: 0 !important;
-  }
-
-  .battle-bottom .skill-list .skill-group {
-    margin-top: 5px !important;
-  }
-
-  .battle-bottom .skill-list .skill-group h3 {
-    margin-bottom: 3px !important;
-  }
-
-  .battle-bottom .skill-list .skill-row {
-    gap: 4px !important;
-  }
-
-  .battle-bottom .skill-list .skill-chip {
-    min-height: 56px !important;
-    padding: 5px !important;
-  }
-
-  .battle-bottom .skill-upgrade-button {
-    margin-top: 2px !important;
-    padding: 2px 3px !important;
-    font-size: 7px !important;
-  }
+  .battle-bottom .skill-panel > .potion-button + button { margin-right: 0 !important; }
+  .battle-bottom .skill-list .skill-group { margin-top: 4px !important; }
+  .battle-bottom .skill-list .skill-group h3 { margin-bottom: 3px !important; }
+  .battle-bottom .skill-list .skill-row { gap: 4px !important; }
+  .battle-bottom .skill-list .skill-chip { min-height: 52px !important; padding: 4px !important; }
+  .battle-bottom .skill-upgrade-button { margin-top: 2px !important; padding: 2px 3px !important; font-size: 7px !important; }
 
   .battle-menu {
     width: 92px !important;
@@ -185,9 +276,7 @@
     gap: 5px !important;
   }
 
-  .battle-menu-button {
-    min-height: 46px !important;
-  }
+  .battle-menu-button { min-height: 44px !important; }
 }
 
 @media (min-width: 701px) and (max-width: 1100px) {
@@ -195,65 +284,30 @@
     grid-template-columns: 210px minmax(0, 1fr) !important;
     grid-template-rows: 54vh minmax(0, 1fr) !important;
   }
-
-  .battle-field {
-    height: 54vh !important;
-  }
-
-  .battle-field #battle-player-art {
-    width: 174px !important;
-    height: 225px !important;
-  }
-
-  .battle-field #battle-player-art.undead-art {
-    width: 316px !important;
-    height: 243px !important;
-  }
-
-  .battle-field #enemy-squad {
-    left: 61% !important;
-    width: 70% !important;
-  }
-
-  .battle-bottom {
-    grid-template-columns: minmax(210px, 1fr) minmax(290px, 330px) 80px !important;
-  }
+  .battle-field { height: 54vh !important; }
+  .battle-field #battle-player-art { width: 168px !important; height: 218px !important; }
+  .battle-field #battle-player-art.undead-art { width: 302px !important; height: 232px !important; }
+  .battle-bottom { grid-template-columns: minmax(210px, 1fr) minmax(290px, 330px) 80px !important; }
 }
 
 @media (max-width: 700px) {
+  .world-haze-far { bottom: 50% !important; }
+  .player-grounding { width: 190px; height: 44px; }
   #enemy-squad {
-    top: 11% !important;
-    left: 61% !important;
-    width: 76% !important;
-    height: 72% !important;
+    position: absolute !important;
+    inset: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    transform: none !important;
   }
-
-  #enemy-squad .stage-slot-0 {
-    left: 4% !important;
-    top: 38% !important;
-    transform: scale(1) !important;
+  #enemy-squad .enemy-unit {
+    position: absolute !important;
+    left: var(--stage-x) !important;
+    top: var(--stage-y) !important;
+    z-index: var(--stage-z) !important;
+    transform: translate(-50%, -100%) scale(calc(var(--stage-scale) * .78)) !important;
+    transform-origin: center bottom !important;
   }
-
-  #enemy-squad .stage-slot-1 {
-    left: 47% !important;
-    top: 5% !important;
-    transform: scale(.78) !important;
-  }
-
-  #enemy-squad .stage-slot-2 {
-    left: 59% !important;
-    top: 50% !important;
-    transform: scale(.9) !important;
-  }
-
-  #enemy-squad .focus-target .enemy-track {
-    width: 68px !important;
-    height: 5px !important;
-  }
-
-  #enemy-squad .support-target .enemy-track {
-    width: 46px !important;
-    height: 2px !important;
-    opacity: .24 !important;
-  }
+  #enemy-squad .focus-target .enemy-track { width: 68px !important; height: 5px !important; }
+  #enemy-squad .support-target .enemy-track { width: 46px !important; height: 2px !important; opacity: .2 !important; }
 }

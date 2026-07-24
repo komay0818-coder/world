@@ -17,7 +17,7 @@
   <link rel="stylesheet" href="styles/enhancement.css" />
   <link rel="stylesheet" href="styles/dungeon.css?v=20260724-plains-slime-v1" />
   <link rel="stylesheet" href="styles/mobile.css?v=20260719-mobile-header-v5" />
-  <link rel="stylesheet" href="styles/mmorpg-layout.css?v=20260724-mmorpg-layout-v1" />
+  <link rel="stylesheet" href="styles/mmorpg-layout.css?v=20260724-perspective-v2" />
 </head>
 <body>
   <div class="sky" aria-hidden="true"></div>
@@ -120,7 +120,15 @@
         <button id="layout-reset" class="layout-reset" type="button">回復預設位置</button>
       </section>
       <div class="battle-field">
+        <div class="world-depth" aria-hidden="true">
+          <div class="world-veil"></div>
+          <div class="world-haze world-haze-far"></div>
+          <div class="world-haze world-haze-mid"></div>
+          <div class="road-perspective"></div>
+          <div class="engagement-ground"></div>
+        </div>
         <div class="terrain terrain-one"></div><div class="terrain terrain-two"></div>
+        <div class="player-grounding" aria-hidden="true"></div>
         <div id="damage-float" class="damage-float"></div>
         <div id="battle-player-art" class="battle-player-art hidden" aria-label="人類獵人"></div>
         <div id="hunter-companion" class="hunter-companion hidden" aria-label="獵人戰寵"><span></span><small>戰寵</small></div>
@@ -144,6 +152,6 @@
       <div id="character-roster-content" class="character-roster-content"></div>
     </section>
   </div>
-  <script src="script.js?v=20260724-mmorpg-layout-v1"></script>
+  <script src="script.js?v=20260724-perspective-v2"></script>
 </body>
 </html>

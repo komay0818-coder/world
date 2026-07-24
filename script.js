@@ -1582,6 +1582,12 @@ function discardSelectedEquipment() {
   renderInventory('inventory');
 }
 
+const BATTLE_FORMATION = [
+  { depth: 'near', role: 'vanguard', x: 28, y: 82, scale: 1.08, z: 9, blur: 0 },
+  { depth: 'far', role: 'rear-guard', x: 70, y: 48, scale: .76, z: 5, blur: .35 },
+  { depth: 'mid', role: 'flanker', x: 67, y: 79, scale: .92, z: 7, blur: 0 }
+];
+
 function renderEnemySquad() {
   const squad = document.querySelector('#enemy-squad');
   const visibleIndexes = aliveEnemyIndexesByAge().slice(0, 3);
@@ -1594,7 +1600,9 @@ function renderEnemySquad() {
     const rankClass = enemy.isBoss ? 'boss' : enemy.isElite ? 'elite' : enemy.isRare ? 'rare' : '';
     const rankName = enemy.isBoss ? `♛ BOSS・${enemy.name}` : enemy.isElite ? `◆ 菁英・${enemy.name}` : enemy.isRare ? `✦ 稀有・${enemy.name}` : enemy.name;
     const focusClass = index === focusIndex ? 'focus-target' : 'support-target';
-    return `<div id="enemy-${index}" class="enemy-unit stage-slot-${stageSlot} ${focusClass} ${rankClass} ${battle.targetIndexes.includes(index) ? 'targeted hit' : ''}"><span class="enemy-art ${enemy.artClass}"></span>${damageEvents}<small>${rankName}</small><div class="hp-track enemy-track"><i style="width:${Math.max(0, hp / enemy.maxHp * 100)}%"></i></div></div>`;
+    const formation = BATTLE_FORMATION[stageSlot] || BATTLE_FORMATION[0];
+    const formationStyle = `--stage-x:${formation.x}%;--stage-y:${formation.y}%;--stage-scale:${formation.scale};--stage-z:${formation.z};--stage-blur:${formation.blur}px`;
+    return `<div id="enemy-${index}" class="enemy-unit stage-slot-${stageSlot} ${focusClass} ${rankClass} ${battle.targetIndexes.includes(index) ? 'targeted hit' : ''}" data-depth="${formation.depth}" data-role="${formation.role}" style="${formationStyle}"><span class="enemy-art ${enemy.artClass}"></span>${damageEvents}<small>${rankName}</small><div class="hp-track enemy-track"><i style="width:${Math.max(0, hp / enemy.maxHp * 100)}%"></i></div></div>`;
   }).join('');
   const reserveLabel = reserveCount > 0
     ? `<div class="reserve-indicator"><b>後備 ${reserveCount}</b><span>等待進場</span></div>`
