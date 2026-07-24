@@ -212,7 +212,7 @@ let scrapSelection = new Set();
 let inventoryCategory = 'weapon';
 let battleLogMode = 'player';
 let battleLogEntries = [];
-let battle = { enemyTypes: ['goblin', 'wolf', 'boar', 'goblin', 'wolf'], enemyHps: [45, 68, 82, 45, 68], playerHp: 100, playerMana: 100, playerShield: 0, manaExhausted: false, playerAttackCharge: 0, globalSkillReadyAt: 0, undeadRevived: false, skillCooldowns: {}, enemyRespawns: [null, null, null, null, null], enemySpawnedAt: [0, 1, 2, 3, 4], enemyDots: [[], [], [], [], []], monsterMoveSpeed: 200, targetIndexes: [], enemyDamages: [[], [], [], [], []], damageTimers: [] };
+let battle = { enemyTypes: ['goblin', 'wolf', 'boar', 'goblin', 'wolf'], enemyHps: [45, 68, 82, 45, 68], playerHp: 100, playerMana: 100, playerShield: 0, manaExhausted: false, playerAttackCharge: 0, globalSkillReadyAt: 0, undeadRevived: false, skillCooldowns: {}, enemyRespawns: [null, null, null, null, null], enemySpawnedAt: [0, 1, 2, 3, 4], enemyNextAttackAt: [0, 0, 0, 0, 0], enemyDots: [[], [], [], [], []], monsterMoveSpeed: 200, targetIndexes: [], enemyDamages: [[], [], [], [], []], damageTimers: [] };
 let layoutEditMode = false;
 let activeLayoutDrag = null;
 let selectedLayoutTarget = 'map';
@@ -1085,6 +1085,7 @@ function loadDungeonWave(wave) {
   battle.enemySpawnedAt = enemyTypes.map((_, index) => now + index);
   battle.enemyDots = enemyTypes.map(() => []);
   battle.enemyDamages = enemyTypes.map(() => []);
+  battle.enemyNextAttackAt = createEnemyAttackSchedule(enemyTypes, now);
   battle.targetIndexes = [];
   battle.waveTransitioning = false;
   logBattle(`◆ 黑森林祭壇第 ${wave}／10 波開始：${enemyTypes.length} 名精英來襲。`, 'system');
@@ -1125,6 +1126,22 @@ function getMonsterAttackPower(enemy, progress = getProgress()) {
   const rankMultiplier = enemy.isBoss ? 2.4 : enemy.isElite ? 1.65 : 1;
   const randomMultiplier = .9 + Math.random() * .2;
   return Math.max(1, Math.round((enemy.attack || 10) * levelMultiplier * rankMultiplier * randomMultiplier * 1.25));
+}
+
+function getMonsterAttackInterval(enemy) {
+  return Math.max(250, enemy.attackInterval || (1000 / (enemy.attackSpeed || 1)));
+}
+
+function createEnemyAttackSchedule(enemyTypes, startAt = Date.now()) {
+  return enemyTypes.map((type) => startAt + getMonsterAttackInterval(monsterTypes[type] || monsterTypes.goblin));
+}
+
+function resetAliveEnemyAttackSchedule(startAt = Date.now()) {
+  battle.enemyNextAttackAt = battle.enemyTypes.map((type, index) => (
+    battle.enemyHps[index] > 0
+      ? startAt + getMonsterAttackInterval(monsterTypes[type] || monsterTypes.goblin)
+      : null
+  ));
 }
 
 function aliveEnemyIndexesByAge() {
@@ -2054,12 +2071,13 @@ function processEnemyRespawns() {
       : bossAllowed && specialRoll < bossSpawnChance ? randomBossId(playerLevel) : specialRoll < bossSpawnChance + eliteSpawnChance ? randomEliteId(playerLevel) : randomEnemyId(playerLevel);
       battle.enemyRespawns[index] = null;
       battle.enemyHps[index] = getEnemyDefinition(index).maxHp;
-    battle.enemySpawnedAt[index] = Date.now();
-    battle.enemyDots[index] = [];
-    if (getEnemyDefinition(index).isBoss) {
-      showToast(`⚠ BOSS 出現：${getEnemyDefinition(index).name}`);
-      logBattle(`⚠ BOSS【${getEnemyDefinition(index).name}】出現！`);
-    }
+      battle.enemySpawnedAt[index] = Date.now();
+      battle.enemyDots[index] = [];
+      battle.enemyNextAttackAt[index] = Date.now() + getMonsterAttackInterval(getEnemyDefinition(index));
+      if (getEnemyDefinition(index).isBoss) {
+        showToast(`⚠ BOSS 出現：${getEnemyDefinition(index).name}`);
+        logBattle(`⚠ BOSS【${getEnemyDefinition(index).name}】出現！`);
+      }
     } else {
       battle.enemyRespawns[index] = nextTimer;
     }
@@ -2072,6 +2090,7 @@ function queueDefeatedEnemies() {
       if (hp > 0 || battle.enemyRespawns[index] !== null) return;
       battle.enemyHps[index] = 0;
       battle.enemyRespawns[index] = -1;
+      battle.enemyNextAttackAt[index] = null;
       rewardVictory(index);
     });
     const waveCleared = battle.enemyHps.every((hp) => hp <= 0) && battle.enemyRespawns.every((timer) => timer === -1);
@@ -2090,6 +2109,7 @@ function queueDefeatedEnemies() {
   battle.enemyHps.forEach((hp, index) => {
     if (hp > 0 || battle.enemyRespawns[index] !== null) return;
     battle.enemyHps[index] = 0;
+    battle.enemyNextAttackAt[index] = null;
     const respawnTicks = getMonsterRespawnTicks() + battle.enemyRespawns.filter((timer) => timer !== null).length;
     battle.enemyRespawns[index] = respawnTicks;
     rewardVictory(index);
@@ -2217,48 +2237,62 @@ function battleTick() {
 }
 
 function enemyAttackTick() {
-  if (battleScreen.classList.contains('hidden') || battle.dungeonComplete) return;
+  if (!fighting || battleScreen.classList.contains('hidden') || battle.dungeonComplete) return;
   const progress = getProgress();
   const character = JSON.parse(localStorage.getItem('stardust-character'));
   if (!character) return;
-  const attackingEnemyIndex = oldestAliveEnemyIndex();
-  if (attackingEnemyIndex === -1) return;
-  const attackingEnemyName = getEnemyDefinition(attackingEnemyIndex).name;
-  const attackingEnemy = getEnemyDefinition(attackingEnemyIndex);
   const now = Date.now();
-  if ((battle.nextEnemyAttackAt || 0) > now) return;
-  const attackInterval = Math.max(250, attackingEnemy.attackInterval || (1000 / (attackingEnemy.attackSpeed || 1)));
-  battle.nextEnemyAttackAt = now + attackInterval;
   const stats = getCharacterStats(progress.level, progress, character);
-  const dodged = Math.random() < stats.dodge;
-  const monsterCritRate = attackingEnemy.isBoss ? .15 : attackingEnemy.isElite ? .10 : .05;
-  const monsterCritical = !dodged && Math.random() < monsterCritRate;
-  const rawEnemyHit = getMonsterAttackPower(attackingEnemy, progress) * (monsterCritical ? 1.5 : 1);
-  let enemyHit = dodged ? 0 : Math.max(1, Math.ceil(rawEnemyHit * (100 / (100 + stats.defense * 8))));
-  const absorbed = Math.min(battle.playerShield, enemyHit);
-  battle.playerShield -= absorbed;
-  enemyHit -= absorbed;
-  battle.playerHp -= enemyHit;
-  if (dodged) logBattle(`【${attackingEnemyName}】發動攻擊，你成功閃避。`, 'damage-taken');
-  else logBattle(`🩸【${attackingEnemyName}】對你造成 ${enemyHit} 傷害${monsterCritical ? '（暴擊）' : ''}${absorbed ? `，護盾吸收 ${absorbed}` : ''}。`, 'damage-taken', { aggregateKey: `enemy-${battle.enemyTypes[attackingEnemyIndex]}`, damage: enemyHit, summary: `🩸【${attackingEnemyName}】攻擊你${monsterCritical ? '（暴擊）' : ''}` });
   const maxHp = getMaxHp(progress.level, progress);
-  if (battle.playerHp > 0 && battle.playerHp / maxHp < 0.35) usePotion();
-  if (battle.playerHp <= 0) {
+  let attackOccurred = false;
+
+  for (const attackingEnemyIndex of aliveEnemyIndexesByAge()) {
+    if (battle.enemyHps[attackingEnemyIndex] <= 0) continue;
+    const attackingEnemy = getEnemyDefinition(attackingEnemyIndex);
+    const nextAttackAt = battle.enemyNextAttackAt?.[attackingEnemyIndex];
+    if (!Number.isFinite(nextAttackAt)) {
+      battle.enemyNextAttackAt[attackingEnemyIndex] = now + getMonsterAttackInterval(attackingEnemy);
+      continue;
+    }
+    if (nextAttackAt > now) continue;
+
+    battle.enemyNextAttackAt[attackingEnemyIndex] = now + getMonsterAttackInterval(attackingEnemy);
+    attackOccurred = true;
+    const attackingEnemyName = attackingEnemy.name;
+    const dodged = Math.random() < stats.dodge;
+    const monsterCritRate = attackingEnemy.isBoss ? .15 : attackingEnemy.isElite ? .10 : .05;
+    const monsterCritical = !dodged && Math.random() < monsterCritRate;
+    const rawEnemyHit = getMonsterAttackPower(attackingEnemy, progress) * (monsterCritical ? 1.5 : 1);
+    let enemyHit = dodged ? 0 : Math.max(1, Math.ceil(rawEnemyHit * (100 / (100 + stats.defense * 8))));
+    const absorbed = Math.min(battle.playerShield, enemyHit);
+    battle.playerShield -= absorbed;
+    enemyHit -= absorbed;
+    battle.playerHp -= enemyHit;
+
+    if (dodged) logBattle(`【${attackingEnemyName}】發動攻擊，你成功閃避。`, 'damage-taken');
+    else logBattle(`🩸【${attackingEnemyName}】對你造成 ${enemyHit} 傷害${monsterCritical ? '（暴擊）' : ''}${absorbed ? `，護盾吸收 ${absorbed}` : ''}。`, 'damage-taken', { aggregateKey: `enemy-${battle.enemyTypes[attackingEnemyIndex]}`, damage: enemyHit, summary: `🩸【${attackingEnemyName}】攻擊你${monsterCritical ? '（暴擊）' : ''}` });
+
+    playMonsterAttackAnimation(attackingEnemyIndex, !dodged && enemyHit > 0);
+    if (battle.playerHp > 0 && battle.playerHp / maxHp < 0.35) usePotion();
+    if (battle.playerHp > 0) continue;
+
     if (character.race === 'undead' && !battle.undeadRevived && Math.random() < .35) {
       battle.undeadRevived = true;
       battle.playerHp = Math.ceil(maxHp * .35);
       logBattle('☾ 不死族天賦觸發：從死亡中復活！');
-      updateBattleUI();
-      return;
+    } else {
+      battle.playerHp = maxHp;
+      battle.playerMana = getMaxMana(character.job, progress.level);
+      battle.playerShield = 0;
+      battle.undeadRevived = false;
+      logBattle('你暫時撤退並恢復了生命。');
     }
-    battle.playerHp = getMaxHp(progress.level, progress);
-    battle.playerMana = getMaxMana(character.job, progress.level);
-    battle.playerShield = 0;
-    battle.undeadRevived = false;
-    logBattle('你暫時撤退並恢復了生命。');
+    resetAliveEnemyAttackSchedule(now);
+    updateBattleUI();
+    return;
   }
-  updateBattleUI();
-  if (attackingEnemyIndex !== -1) playMonsterAttackAnimation(attackingEnemyIndex, !dodged && enemyHit > 0);
+
+  if (attackOccurred) updateBattleUI();
 }
 
 function openBattle() {
@@ -2292,7 +2326,7 @@ function openBattle() {
   }
   const enemyTypes = isDungeon ? createDungeonWaveTypes(1) : createEnemyTypes(progress.level);
   const battleStart = Date.now();
-  battle = { enemyTypes, enemyHps: enemyTypes.map((type) => monsterTypes[type].maxHp), playerHp: getMaxHp(progress.level, progress), playerMana: getMaxMana(character.job, progress.level), playerShield: 0, manaExhausted: false, playerAttackCharge: 0, hunterAttackCount: 0, nextEnemyAttackAt: 0, globalSkillReadyAt: 0, undeadRevived: false, skillCooldowns: {}, enemyRespawns: enemyTypes.map(() => null), enemySpawnedAt: enemyTypes.map((_, index) => battleStart + index), enemyDots: enemyTypes.map(() => []), monsterMoveSpeed: 200, targetIndexes: [], enemyDamages: enemyTypes.map(() => []), damageTimers: [], isDungeon, dungeonWave: isDungeon ? 1 : 0, dungeonComplete: false, waveTransitioning: false };
+  battle = { enemyTypes, enemyHps: enemyTypes.map((type) => monsterTypes[type].maxHp), playerHp: getMaxHp(progress.level, progress), playerMana: getMaxMana(character.job, progress.level), playerShield: 0, manaExhausted: false, playerAttackCharge: 0, hunterAttackCount: 0, enemyNextAttackAt: createEnemyAttackSchedule(enemyTypes, battleStart), globalSkillReadyAt: 0, undeadRevived: false, skillCooldowns: {}, enemyRespawns: enemyTypes.map(() => null), enemySpawnedAt: enemyTypes.map((_, index) => battleStart + index), enemyDots: enemyTypes.map(() => []), monsterMoveSpeed: 200, targetIndexes: [], enemyDamages: enemyTypes.map(() => []), damageTimers: [], isDungeon, dungeonWave: isDungeon ? 1 : 0, dungeonComplete: false, waveTransitioning: false };
   clearBattleLog();
   if (pendingOfflineReport) {
     logBattle(`☾ 離線掛機 ${pendingOfflineReport.duration}${pendingOfflineReport.capped ? '（已達 12 小時上限）' : ''}，擊敗約 ${pendingOfflineReport.defeated} 隻怪物。`, 'system');
