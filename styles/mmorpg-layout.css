@@ -1494,3 +1494,8 @@
     transform: scale(.98) !important;
   }
 }
+
+/* Keep the formation intact while giving the player side more breathing room. */
+.battle-field #enemy-squad .enemy-unit {
+  left: calc(var(--stage-x) + 4%) !important;
+}
