@@ -1188,3 +1188,10 @@
     height: 100% !important;
   }
 }
+
+/* Desktop battle columns: widen player/log, maximize field, narrow skills. */
+@media (min-width: 1101px) {
+  .battle-screen {
+    grid-template-columns: 26% minmax(0, 1fr) 18% !important;
+  }
+}
