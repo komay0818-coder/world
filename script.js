@@ -26,7 +26,7 @@ const jobMarks = { warrior: '⛨', assassin: '◈', hunter: '➶', mage: '✦', 
 const battleCharacterArt = {
   'human:warrior': 'assets/human-warrior.png',
   'human:assassin': 'assets/human-assassin.png',
-  'human:hunter': 'assets/human-hunter.png',
+  'human:hunter': 'assets/human-hunter-v2.png',
   'human:mage': 'assets/human-mage.png',
   'human:priest': 'assets/human-priest.png',
   'elf:warrior': 'assets/elf-warrior.png',
