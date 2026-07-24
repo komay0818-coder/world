@@ -367,6 +367,11 @@ function applySavedLayout() {
     element.style.height = layout.height ? `${layout.height}px` : '';
     element.style.margin = '0';
     element.style.zIndex = '20';
+    if (key === 'log') {
+      element.style.setProperty('position', 'fixed', 'important');
+      element.style.setProperty('left', `${layout.left}px`, 'important');
+      element.style.setProperty('top', `${layout.top}px`, 'important');
+    }
     if (layout.fontSize) element.style.fontSize = layout.fontSize;
     if (layout.skillFontSize) element.style.setProperty('--layout-skill-font-size', layout.skillFontSize);
   });
@@ -448,8 +453,8 @@ function setupLayoutDrag() {
       const maxTop = Math.max(0, window.innerHeight - element.offsetHeight);
       const left = Math.max(0, Math.min(maxLeft, event.clientX - activeLayoutDrag.offsetX));
       const top = Math.max(0, Math.min(maxTop, event.clientY - activeLayoutDrag.offsetY));
-      element.style.left = `${left}px`;
-      element.style.top = `${top}px`;
+      element.style.setProperty('left', `${left}px`, element.classList.contains('combat-log') ? 'important' : '');
+      element.style.setProperty('top', `${top}px`, element.classList.contains('combat-log') ? 'important' : '');
     });
     element.addEventListener('pointerup', (event) => {
       if (!activeLayoutDrag || activeLayoutDrag.element !== element) return;
@@ -457,6 +462,10 @@ function setupLayoutDrag() {
       element.releasePointerCapture(event.pointerId);
       activeLayoutDrag = null;
       saveCurrentLayout();
+      if (element.classList.contains('combat-log')) {
+        const rect = element.getBoundingClientRect();
+        applyCombatLogPosition(Math.round(rect.left), Math.round(rect.top));
+      }
     });
   });
 }
@@ -2555,6 +2564,10 @@ const layoutLogWidth = document.querySelector('#layout-log-width');
 const layoutLogHeight = document.querySelector('#layout-log-height');
 const layoutLogWidthValue = document.querySelector('#layout-log-width-value');
 const layoutLogHeightValue = document.querySelector('#layout-log-height-value');
+const layoutLogX = document.querySelector('#layout-log-x');
+const layoutLogY = document.querySelector('#layout-log-y');
+const layoutLogXValue = document.querySelector('#layout-log-x-value');
+const layoutLogYValue = document.querySelector('#layout-log-y-value');
 const layoutToggleButton = document.querySelector('#layout-toggle');
 
 layoutToggleButton.hidden = false;
@@ -2614,6 +2627,42 @@ try {
 
 layoutLogWidth.addEventListener('input', () => applyCombatLogSize(layoutLogWidth.value, layoutLogHeight.value));
 layoutLogHeight.addEventListener('input', () => applyCombatLogSize(layoutLogWidth.value, layoutLogHeight.value));
+
+function applyCombatLogPosition(left, top, persist = true) {
+  const combatLog = document.querySelector('.combat-log');
+  const safeLeft = Math.max(0, Math.min(1400, Number(left) || 0));
+  const safeTop = Math.max(0, Math.min(900, Number(top) || 0));
+  combatLog.style.setProperty('position', 'fixed', 'important');
+  combatLog.style.setProperty('left', `${safeLeft}px`, 'important');
+  combatLog.style.setProperty('top', `${safeTop}px`, 'important');
+  combatLog.style.margin = '0';
+  layoutLogX.value = String(safeLeft);
+  layoutLogY.value = String(safeTop);
+  layoutLogXValue.value = `${safeLeft}px`;
+  layoutLogYValue.value = `${safeTop}px`;
+  if (!persist) return;
+  const saved = JSON.parse(localStorage.getItem('stardust-battle-layout') || '{}');
+  const rect = combatLog.getBoundingClientRect();
+  saved.log = {
+    ...(saved.log || defaultBattleLayout.log),
+    modified: true,
+    left: safeLeft,
+    top: safeTop,
+    width: Math.round(rect.width),
+    height: Math.round(rect.height)
+  };
+  localStorage.setItem('stardust-battle-layout', JSON.stringify(saved));
+}
+
+try {
+  const savedLayoutPosition = JSON.parse(localStorage.getItem('stardust-battle-layout') || '{}').log || defaultBattleLayout.log;
+  applyCombatLogPosition(savedLayoutPosition.left, savedLayoutPosition.top, false);
+} catch {
+  applyCombatLogPosition(defaultBattleLayout.log.left, defaultBattleLayout.log.top, false);
+}
+
+layoutLogX.addEventListener('input', () => applyCombatLogPosition(layoutLogX.value, layoutLogY.value));
+layoutLogY.addEventListener('input', () => applyCombatLogPosition(layoutLogX.value, layoutLogY.value));
 
 document.querySelector('#layout-export').addEventListener('click', async () => {
   saveVisibleAdjustedLayout();

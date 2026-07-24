@@ -17,7 +17,7 @@
   <link rel="stylesheet" href="styles/enhancement.css" />
   <link rel="stylesheet" href="styles/dungeon.css?v=20260724-plains-slime-v1" />
   <link rel="stylesheet" href="styles/mobile.css?v=20260719-mobile-header-v5" />
-  <link rel="stylesheet" href="styles/mmorpg-layout.css?v=20260725-layout-editor-v16" />
+  <link rel="stylesheet" href="styles/mmorpg-layout.css?v=20260725-layout-editor-v17" />
 </head>
 <body>
   <div class="sky" aria-hidden="true"></div>
@@ -101,6 +101,10 @@
           <input id="layout-log-width" type="range" min="240" max="600" value="410" step="10">
           <label for="layout-log-height">戰鬥紀錄高度 <output id="layout-log-height-value">640px</output></label>
           <input id="layout-log-height" type="range" min="220" max="850" value="640" step="10">
+          <label for="layout-log-x">戰鬥紀錄水平位置 <output id="layout-log-x-value">4px</output></label>
+          <input id="layout-log-x" type="range" min="0" max="1400" value="4" step="1">
+          <label for="layout-log-y">戰鬥紀錄垂直位置 <output id="layout-log-y-value">286px</output></label>
+          <input id="layout-log-y" type="range" min="0" max="900" value="286" step="1">
           <small>選擇視窗後，可直接拖曳到想要的位置。</small>
         </div>
         <div class="layout-targets">
@@ -171,6 +175,6 @@
       <div id="character-roster-content" class="character-roster-content"></div>
     </section>
   </div>
-  <script src="script.js?v=20260725-layout-editor-v14"></script>
+  <script src="script.js?v=20260725-layout-editor-v15"></script>
 </body>
 </html>
