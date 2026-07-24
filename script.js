@@ -1583,9 +1583,9 @@ function discardSelectedEquipment() {
 }
 
 const BATTLE_FORMATION = [
-  { depth: 'near', role: 'vanguard', x: 33, y: 85, scale: 1.1, z: 9, blur: 0 },
-  { depth: 'far', role: 'rear-guard', x: 69, y: 49, scale: .75, z: 5, blur: .35 },
-  { depth: 'mid', role: 'flanker', x: 75, y: 82, scale: .93, z: 7, blur: 0 }
+  { depth: 'near', role: 'vanguard', x: 36, y: 83, scale: 1.1, z: 9, blur: 0 },
+  { depth: 'far', role: 'rear-guard', x: 70, y: 43, scale: .74, z: 5, blur: .4 },
+  { depth: 'mid', role: 'flanker', x: 78, y: 76, scale: .92, z: 7, blur: 0 }
 ];
 
 function renderEnemySquad() {
