@@ -1472,11 +1472,31 @@
   }
 }
 
-/* Keep every human class at the established human-hunter artwork size. */
+/* Normalize each human class to the human hunter's visible character height. */
 @media (min-width: 701px) {
-  .battle-field #battle-player-art[aria-label^="人類"] {
+  .battle-field #battle-player-art[aria-label="人類獵人"] {
     width: 270px !important;
     height: 350px !important;
+  }
+
+  .battle-field #battle-player-art[aria-label="人類戰士"] {
+    width: 459px !important;
+    height: 306px !important;
+  }
+
+  .battle-field #battle-player-art[aria-label="人類刺客"] {
+    width: 417px !important;
+    height: 336px !important;
+  }
+
+  .battle-field #battle-player-art[aria-label="人類法師"] {
+    width: 401px !important;
+    height: 319px !important;
+  }
+
+  .battle-field #battle-player-art[aria-label="人類牧師"] {
+    width: 264px !important;
+    height: 397px !important;
   }
 
   .battle-field #hunter-companion[data-race="human"] {
@@ -1485,9 +1505,29 @@
 }
 
 @media (max-width: 700px) {
-  .battle-field #battle-player-art[aria-label^="人類"] {
+  .battle-field #battle-player-art[aria-label="人類獵人"] {
     width: 202px !important;
     height: 262px !important;
+  }
+
+  .battle-field #battle-player-art[aria-label="人類戰士"] {
+    width: 343px !important;
+    height: 229px !important;
+  }
+
+  .battle-field #battle-player-art[aria-label="人類刺客"] {
+    width: 312px !important;
+    height: 251px !important;
+  }
+
+  .battle-field #battle-player-art[aria-label="人類法師"] {
+    width: 300px !important;
+    height: 238px !important;
+  }
+
+  .battle-field #battle-player-art[aria-label="人類牧師"] {
+    width: 197px !important;
+    height: 297px !important;
   }
 
   .battle-field #hunter-companion[data-race="human"] {
