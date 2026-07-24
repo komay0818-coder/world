@@ -24,7 +24,7 @@ const classIcons = Object.fromEntries(classes.map((job) => [job.id, job.icon]));
 const raceTotems = { human: '☀', elf: '❈', orc: '⛧', undead: '☾' };
 const jobMarks = { warrior: '⛨', assassin: '◈', hunter: '➶', mage: '✦', priest: '✥' };
 const battleCharacterArt = {
-  'human:warrior': 'assets/human-warrior.png',
+  'human:warrior': 'assets/human-warrior-v2.png',
   'human:assassin': 'assets/human-assassin.png',
   'human:hunter': 'assets/human-hunter-v2.png',
   'human:mage': 'assets/human-mage.png',
