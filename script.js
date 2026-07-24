@@ -488,7 +488,7 @@ function openCreation(slotIndex = 0) {
 const monsterTypes = {
   plainsRabbit: { id: 'plainsRabbit', name: '野兔', maxHp: 24, attack: 5, artClass: 'plains-rabbit-art', xp: 4, gold: 1 },
   plainsWolfPup: { id: 'plainsWolfPup', name: '幼狼', maxHp: 34, attack: 7, artClass: 'monster-placeholder-art', xp: 4, gold: 2 },
-  plainsSlime: { id: 'plainsSlime', name: '小史萊姆', maxHp: 30, attack: 6, artClass: 'monster-placeholder-art', xp: 4, gold: 1 },
+  plainsSlime: { id: 'plainsSlime', name: '小史萊姆', maxHp: 30, attack: 6, artClass: 'plains-slime-art', xp: 4, gold: 1 },
   plainsGoblinYoung: { id: 'plainsGoblinYoung', name: '幼年哥布林', maxHp: 40, attack: 8, artClass: 'monster-placeholder-art', xp: 4, gold: 2 },
   lostGoblin: { id: 'lostGoblin', name: '迷路的哥布林', maxHp: 62, attack: 10, artClass: 'monster-placeholder-art rare-placeholder-art', xp: 10, gold: 5, isRare: true },
   goblin: { id: 'goblin', name: '哥布林', maxHp: 45, attack: 11, artClass: 'goblin-art', xp: 10, gold: 3 },
