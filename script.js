@@ -73,6 +73,7 @@ const raceTalents = {
 const mapProgression = [
   { id: 'beginner-plains', min: 1, max: 5, name: '初心者平原', background: 'assets/beginner-plains-background.png', implemented: true, normalXp: 4, eliteXp: 18, bossXp: 70, recommended: { attack: 14, defense: 3, hp: 100 } },
   { id: 'plains-entrance', regionOf: 'beginner-plains', min: 1, max: 2, name: '平原入口', background: 'assets/plains-entrance-background.png', implemented: true, normalXp: 4, eliteXp: 10, bossXp: 0, recommended: { attack: 10, defense: 1, hp: 80 } },
+  { id: 'wolf-den', regionOf: 'beginner-plains', min: 2, max: 5, name: '狼穴', background: 'assets/wolf-den-background.png', implemented: true, normalXp: 6, eliteXp: 16, bossXp: 80, recommended: { attack: 16, defense: 4, hp: 110 } },
   { id: 'black-forest', min: 5, max: 10, name: '黑森林', background: 'assets/black-forest-background.png', implemented: true, normalXp: 4, eliteXp: 14, bossXp: 56, recommended: { attack: 26, defense: 8, hp: 180 } },
   { id: 'black-forest-altar', min: 5, max: 10, name: '黑森林祭壇', background: 'assets/black-forest-background.png', implemented: true, dungeon: true, normalXp: 0, eliteXp: 22, bossXp: 126, recommended: { attack: 34, defense: 11, hp: 230 } },
   { min: 10, max: 15, name: '石牙山谷', normalXp: 8, eliteXp: 35, bossXp: 140 },
@@ -525,6 +526,9 @@ const monsterTypes = {
   plainsSlime: { id: 'plainsSlime', name: '小史萊姆', maxHp: 30, attack: 6, defense: 0, evasion: 0, parry: 0, damageReduction: 5, artClass: 'plains-slime-art', xp: 4, gold: 1 },
   plainsGoblinYoung: { id: 'plainsGoblinYoung', name: '幼年哥布林', maxHp: 40, attack: 8, defense: 2, evasion: 2, parry: 3, damageReduction: 0, artClass: 'plains-goblin-young-art', xp: 4, gold: 2 },
   lostGoblin: { id: 'lostGoblin', name: '迷路的哥布林', maxHp: 62, attack: 10, defense: 4, evasion: 5, parry: 6, damageReduction: 2, artClass: 'lost-goblin-art', xp: 10, gold: 5, isRare: true },
+  denForestWolf: { id: 'denForestWolf', name: '森林狼', maxHp: 58, attack: 11, defense: 3, evasion: 8, parry: 0, damageReduction: 0, artClass: 'wolf-art', xp: 6, gold: 3, lootSource: 'wolf' },
+  ragingWolf: { id: 'ragingWolf', name: '狂暴狼', maxHp: 125, attack: 16, defense: 6, evasion: 10, parry: 0, damageReduction: 4, artClass: 'wolf-art', xp: 16, gold: 9, isElite: true, lootSource: 'wolf' },
+  greatfangWolf: { id: 'greatfangWolf', name: '巨牙狼', maxHp: 480, attack: 21, defense: 12, evasion: 8, parry: 0, damageReduction: 8, artClass: 'wolf-art', xp: 80, gold: 45, isBoss: true, lootSource: 'wolf' },
   goblin: { id: 'goblin', name: '哥布林', maxHp: 45, attack: 11, defense: 3, evasion: 2, parry: 5, damageReduction: 0, artClass: 'goblin-art', xp: 10, gold: 3 },
   wolf: { id: 'wolf', name: '森林狼', maxHp: 68, attack: 14, defense: 2, evasion: 8, parry: 0, damageReduction: 0, artClass: 'wolf-art', xp: 14, gold: 4 },
   boar: { id: 'boar', name: '野豬', maxHp: 82, attack: 17, defense: 7, evasion: 1, parry: 0, damageReduction: 4, artClass: 'boar-art', xp: 18, gold: 5 },
@@ -550,6 +554,7 @@ const eliteMonsterIds = ['goblinOverlord', 'wolfAlpha', 'boarTyrant'];
 const bossMonsterIds = ['goblinKing'];
 const mapMonsterPools = {
   plainsEntrance: { normal: ['plainsRabbit', 'plainsWolfPup', 'plainsSlime', 'plainsGoblinYoung'], rare: ['lostGoblin'], rareChance: .10, elite: [], boss: [] },
+  wolfDen: { normal: ['plainsWolfPup', 'denForestWolf'], rare: ['lostGoblin'], rareChance: .10, elite: ['ragingWolf'], boss: ['greatfangWolf'] },
   beginner: { normal: normalMonsterIds, elite: eliteMonsterIds, boss: bossMonsterIds },
   blackForest: { normal: ['nightGoblin', 'shadowWolf', 'thornBoar'], elite: ['forestShaman', 'moonfangAlpha', 'thornbackTyrant'], boss: ['forestGuardian'] }
 };
@@ -1075,6 +1080,7 @@ function setupBattleLogControls() {
 function getMonsterPool(level = getProgress().level) {
   const mapId = getActiveMap(getProgress()).id;
   if (mapId === 'plains-entrance') return mapMonsterPools.plainsEntrance;
+  if (mapId === 'wolf-den') return mapMonsterPools.wolfDen;
   return mapId === 'black-forest' ? mapMonsterPools.blackForest : mapMonsterPools.beginner;
 }
 
@@ -1558,7 +1564,7 @@ function renderBeginnerPlainsRegions() {
       <em>區域架構已建立，怪物、圖片與個別掉落物將於後續逐區追加。</em>
     </section>
     <section class="map-region-grid">${beginnerPlainsRegions.map((region, index) => {
-      const available = region.id === 'plains-entrance';
+      const available = ['plains-entrance', 'wolf-den'].includes(region.id);
       return `
       <article class="map-region-card ${available ? 'available' : 'pending'} ${activeMap.id === region.id ? 'selected' : ''}">
         <span>${String(index + 1).padStart(2, '0')}</span>
