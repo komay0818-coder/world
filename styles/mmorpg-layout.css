@@ -1250,6 +1250,12 @@
   display: none !important;
 }
 
+#layout-panel .layout-export {
+  margin-bottom: 7px;
+  color: #dff8ff;
+  background: rgba(22, 91, 112, .78);
+}
+
 .battle-screen.layout-editing .battle-header {
   outline: 2px dashed #7ee6ff;
   outline-offset: -3px;

@@ -2593,6 +2593,37 @@ try {
 
 layoutLogWidth.addEventListener('input', () => applyCombatLogSize(layoutLogWidth.value, layoutLogHeight.value));
 layoutLogHeight.addEventListener('input', () => applyCombatLogSize(layoutLogWidth.value, layoutLogHeight.value));
+
+document.querySelector('#layout-export').addEventListener('click', async () => {
+  saveVisibleAdjustedLayout();
+  const readSavedSetting = (key) => {
+    try {
+      return JSON.parse(localStorage.getItem(key) || '{}');
+    } catch {
+      return {};
+    }
+  };
+  const exportedLayout = JSON.stringify({
+    version: 1,
+    exportedAt: new Date().toISOString(),
+    windows: readSavedSetting('stardust-battle-layout'),
+    columns: readSavedSetting(layoutColumnStorageKey),
+    combatLog: readSavedSetting(combatLogSizeStorageKey)
+  }, null, 2);
+  try {
+    await navigator.clipboard.writeText(exportedLayout);
+    showToast('版面設定已複製，請直接貼給 Codex。');
+  } catch {
+    const file = new Blob([exportedLayout], { type: 'application/json' });
+    const downloadUrl = URL.createObjectURL(file);
+    const link = document.createElement('a');
+    link.href = downloadUrl;
+    link.download = `battle-layout-${Date.now()}.json`;
+    link.click();
+    URL.revokeObjectURL(downloadUrl);
+    showToast('瀏覽器禁止複製，已改為下載設定檔。');
+  }
+});
 document.querySelector('#inventory-modal').addEventListener('change', (event) => {
   const selectAllCheckbox = event.target.closest('[data-select-all-scrap]');
   if (selectAllCheckbox) {
