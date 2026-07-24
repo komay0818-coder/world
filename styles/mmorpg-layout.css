@@ -1471,3 +1471,26 @@
     height: 184px !important;
   }
 }
+
+/* Larger human hunter and companion, scoped away from other race/job artwork. */
+@media (min-width: 701px) {
+  .battle-field #battle-player-art[aria-label="人類獵人"] {
+    width: 270px !important;
+    height: 350px !important;
+  }
+
+  .battle-field #hunter-companion[data-race="human"] {
+    transform: scale(1.08) !important;
+  }
+}
+
+@media (max-width: 700px) {
+  .battle-field #battle-player-art[aria-label="人類獵人"] {
+    width: 202px !important;
+    height: 262px !important;
+  }
+
+  .battle-field #hunter-companion[data-race="human"] {
+    transform: scale(.98) !important;
+  }
+}
