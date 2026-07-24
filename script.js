@@ -235,18 +235,18 @@ const layoutTargets = [
 for (let skillIndex = 0; skillIndex < 7; skillIndex += 1) layoutTargets.push([`skill-${skillIndex}`, `#skill-${skillIndex}`]);
 
 const defaultBattleLayout = {
-  identity: { modified: true, left: 17, top: 69, width: 395, height: 209, fontSize: '', skillFontSize: '' },
+  identity: { modified: true, left: 17, top: 74, width: 395, height: 209, fontSize: '', skillFontSize: '' },
   hud: { modified: true, left: 4, top: 4, width: 421, height: 290, fontSize: '', skillFontSize: '' },
-  log: { modified: true, left: 4, top: 286, width: 410, height: 640, fontSize: '', skillFontSize: '' }
+  log: { modified: true, left: 4, top: 306, width: 410, height: 640, fontSize: '', skillFontSize: '' }
 };
 
 function repairCombatLogLayoutOnce() {
   const saved = JSON.parse(localStorage.getItem('stardust-battle-layout') || '{}');
-  if (saved.combatLogFitVersion === 1) return;
-  if (!saved.log || (saved.log.top === 254 && saved.log.height === 700)) {
+  if (saved.combatLogFitVersion === 2) return;
+  if (!saved.log || (saved.log.left === 4 && [254, 286].includes(saved.log.top))) {
     saved.log = { ...defaultBattleLayout.log };
   }
-  saved.combatLogFitVersion = 1;
+  saved.combatLogFitVersion = 2;
   localStorage.setItem('stardust-battle-layout', JSON.stringify(saved));
 }
 
@@ -268,10 +268,12 @@ function repairMenuLayoutOnce() {
 
 function repairHudLayoutOnce() {
   const saved = JSON.parse(localStorage.getItem('stardust-battle-layout') || '{}');
-  if (saved.hudLayoutVersion === 2) return;
+  if (saved.hudLayoutVersion === 3) return;
   if (!saved.hud || saved.hud.height === 250) saved.hud = { ...defaultBattleLayout.hud };
-  if (!saved.identity) saved.identity = { ...defaultBattleLayout.identity };
-  saved.hudLayoutVersion = 2;
+  if (!saved.identity || (saved.identity.left === 17 && saved.identity.top === 69)) {
+    saved.identity = { ...defaultBattleLayout.identity };
+  }
+  saved.hudLayoutVersion = 3;
   localStorage.setItem('stardust-battle-layout', JSON.stringify(saved));
 }
 
