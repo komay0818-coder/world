@@ -1192,6 +1192,66 @@
 /* Desktop battle columns: wider player/log, fluid field, narrower skills. */
 @media (min-width: 1101px) {
   .battle-screen {
-    grid-template-columns: 30% minmax(0, 1fr) 16% !important;
+    grid-template-columns: var(--battle-left-column, 30%) minmax(0, 1fr) var(--battle-right-column, 16%) !important;
   }
+}
+
+/* Optional layout editor: column sliders and draggable primary windows. */
+#layout-toggle {
+  display: block !important;
+  visibility: visible !important;
+  pointer-events: auto !important;
+}
+
+.battle-screen.layout-editing #layout-panel {
+  display: block !important;
+  visibility: visible !important;
+  pointer-events: auto !important;
+}
+
+.layout-column-controls {
+  display: grid;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+
+.layout-column-controls label {
+  display: flex;
+  justify-content: space-between;
+  color: #dff7ff;
+  font-size: 12px;
+}
+
+.layout-column-controls input {
+  width: 100%;
+  accent-color: #55c9f3;
+}
+
+.layout-column-controls small {
+  color: #9fc0cf;
+  font-size: 10px;
+  line-height: 1.45;
+}
+
+#layout-panel .layout-targets [data-layout-target] {
+  display: none;
+}
+
+#layout-panel .layout-targets [data-layout-target="hud"],
+#layout-panel .layout-targets [data-layout-target="log"],
+#layout-panel .layout-targets [data-layout-target="skills"] {
+  display: block;
+}
+
+#layout-panel .layout-skill-select,
+#layout-panel .layout-arrows,
+#layout-panel .layout-size,
+#layout-panel #layout-skills-stack {
+  display: none !important;
+}
+
+.battle-screen.layout-editing .battle-header {
+  outline: 2px dashed #7ee6ff;
+  outline-offset: -3px;
+  cursor: grab;
 }

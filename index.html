@@ -17,7 +17,7 @@
   <link rel="stylesheet" href="styles/enhancement.css" />
   <link rel="stylesheet" href="styles/dungeon.css?v=20260724-plains-slime-v1" />
   <link rel="stylesheet" href="styles/mobile.css?v=20260719-mobile-header-v5" />
-  <link rel="stylesheet" href="styles/mmorpg-layout.css?v=20260725-column-ratio-v11" />
+  <link rel="stylesheet" href="styles/mmorpg-layout.css?v=20260725-layout-editor-v12" />
 </head>
 <body>
   <div class="sky" aria-hidden="true"></div>
@@ -92,8 +92,16 @@
       </header>
       <section id="layout-panel" class="layout-panel" aria-label="版面調整工具" hidden>
         <strong>版面調整</strong>
+        <div class="layout-column-controls">
+          <label for="layout-left-width">左側寬度 <output id="layout-left-value">30%</output></label>
+          <input id="layout-left-width" type="range" min="22" max="38" value="30" step="1">
+          <label for="layout-right-width">右側寬度 <output id="layout-right-value">16%</output></label>
+          <input id="layout-right-width" type="range" min="12" max="26" value="16" step="1">
+          <small>選擇視窗後，可直接拖曳到想要的位置。</small>
+        </div>
         <div class="layout-targets">
-          <button type="button" class="layout-target selected" data-layout-target="map">地圖</button>
+          <button type="button" class="layout-target selected" data-layout-target="hud">玩家資訊</button>
+          <button type="button" class="layout-target" data-layout-target="map">地圖</button>
           <button type="button" class="layout-target" data-layout-target="back">返回箭頭</button>
           <button type="button" class="layout-target" data-layout-target="title">地圖名稱</button>
           <button type="button" class="layout-target" data-layout-target="monster-level">怪物等級</button>
@@ -158,6 +166,6 @@
       <div id="character-roster-content" class="character-roster-content"></div>
     </section>
   </div>
-  <script src="script.js?v=20260725-skill-details-v9"></script>
+  <script src="script.js?v=20260725-layout-editor-v10"></script>
 </body>
 </html>

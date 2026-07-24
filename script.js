@@ -215,8 +215,9 @@ let battleLogEntries = [];
 let battle = { enemyTypes: ['goblin', 'wolf', 'boar', 'goblin', 'wolf'], enemyHps: [45, 68, 82, 45, 68], playerHp: 100, playerMana: 100, playerShield: 0, manaExhausted: false, playerAttackCharge: 0, globalSkillReadyAt: 0, undeadRevived: false, skillCooldowns: {}, enemyRespawns: [null, null, null, null, null], enemySpawnedAt: [0, 1, 2, 3, 4], enemyNextAttackAt: [0, 0, 0, 0, 0], enemyDots: [[], [], [], [], []], monsterMoveSpeed: 200, targetIndexes: [], enemyDamages: [[], [], [], [], []], damageTimers: [] };
 let layoutEditMode = false;
 let activeLayoutDrag = null;
-let selectedLayoutTarget = 'map';
+let selectedLayoutTarget = 'hud';
 const layoutTargets = [
+  ['hud', '.battle-header'],
   ['map', '.battle-field'],
   ['back', '#leave-battle'],
   ['title', '#battle-title'],
@@ -390,6 +391,7 @@ function setupLayoutDrag() {
     element.dataset.layoutDragReady = 'true';
     element.addEventListener('pointerdown', (event) => {
       if (!layoutEditMode || (event.pointerType === 'mouse' && event.button !== 0)) return;
+      if (event.target.closest('button, input, select, a')) return;
       const clickedTarget = layoutTargets.find(([, targetSelector]) => document.querySelector(targetSelector) === element);
       if (clickedTarget) {
         selectedLayoutTarget = clickedTarget[0];
@@ -2491,6 +2493,7 @@ document.querySelector('#layout-skills-stack').addEventListener('click', () => {
 });
 document.querySelector('#layout-reset').addEventListener('click', () => {
   localStorage.removeItem('stardust-battle-layout');
+  localStorage.removeItem('stardust-battle-columns');
   window.location.reload();
 });
 setupLayoutDrag();
@@ -2524,6 +2527,42 @@ document.querySelector('#inventory-modal').addEventListener('click', (event) => 
 });
 document.querySelector('#battle-title').addEventListener('click', () => { if (!layoutEditMode) renderMapSelector(); });
 document.querySelector('#battle-title').addEventListener('keydown', (event) => { if (!layoutEditMode && ['Enter', ' '].includes(event.key)) { event.preventDefault(); renderMapSelector(); } });
+
+const layoutColumnStorageKey = 'stardust-battle-columns';
+const layoutLeftWidth = document.querySelector('#layout-left-width');
+const layoutRightWidth = document.querySelector('#layout-right-width');
+const layoutLeftValue = document.querySelector('#layout-left-value');
+const layoutRightValue = document.querySelector('#layout-right-value');
+const layoutToggleButton = document.querySelector('#layout-toggle');
+
+layoutToggleButton.hidden = false;
+layoutToggleButton.textContent = '✥ 調整版面';
+layoutToggleButton.addEventListener('click', () => {
+  layoutToggleButton.textContent = layoutEditMode ? '✓ 完成調整' : '✥ 調整版面';
+});
+
+function applyBattleColumnWidths(left, right, persist = true) {
+  const safeLeft = Math.max(22, Math.min(38, Number(left) || 30));
+  const safeRight = Math.max(12, Math.min(26, Number(right) || 16));
+  const limitedLeft = Math.min(safeLeft, 72 - safeRight);
+  battleScreen.style.setProperty('--battle-left-column', `${limitedLeft}%`);
+  battleScreen.style.setProperty('--battle-right-column', `${safeRight}%`);
+  layoutLeftWidth.value = String(limitedLeft);
+  layoutRightWidth.value = String(safeRight);
+  layoutLeftValue.value = `${limitedLeft}%`;
+  layoutRightValue.value = `${safeRight}%`;
+  if (persist) localStorage.setItem(layoutColumnStorageKey, JSON.stringify({ left: limitedLeft, right: safeRight }));
+}
+
+try {
+  const savedColumns = JSON.parse(localStorage.getItem(layoutColumnStorageKey) || '{}');
+  applyBattleColumnWidths(savedColumns.left, savedColumns.right, false);
+} catch {
+  applyBattleColumnWidths(30, 16, false);
+}
+
+layoutLeftWidth.addEventListener('input', () => applyBattleColumnWidths(layoutLeftWidth.value, layoutRightWidth.value));
+layoutRightWidth.addEventListener('input', () => applyBattleColumnWidths(layoutLeftWidth.value, layoutRightWidth.value));
 document.querySelector('#inventory-modal').addEventListener('change', (event) => {
   const selectAllCheckbox = event.target.closest('[data-select-all-scrap]');
   if (selectAllCheckbox) {
