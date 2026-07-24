@@ -1419,3 +1419,55 @@
     transform: scale(.82) !important;
   }
 }
+
+/* Wolf Den keeps its cave readable while separating combatants from the backdrop. */
+.battle-field[data-map-id="wolf-den"] {
+  background: #07111d !important;
+}
+
+.battle-field[data-map-id="wolf-den"]::before {
+  content: "";
+  position: absolute;
+  z-index: 0;
+  inset: -10px;
+  background: linear-gradient(rgba(5, 13, 25, .2), rgba(4, 10, 20, .38)), url('../assets/wolf-den-background.png') center 54% / cover no-repeat;
+  filter: blur(3px) brightness(.74) saturate(.82);
+  transform: scale(1.025);
+  animation: none;
+  pointer-events: none;
+}
+
+.battle-field[data-map-id="wolf-den"]::after {
+  background: linear-gradient(to top, rgba(2, 8, 18, .62), transparent 72%), radial-gradient(ellipse at 65% 42%, rgba(91, 139, 224, .13), transparent 58%);
+  filter: blur(2px);
+}
+
+.battle-field[data-map-id="wolf-den"] #enemy-squad .enemy-unit {
+  width: 166px !important;
+}
+
+.battle-field[data-map-id="wolf-den"] #enemy-squad .enemy-unit .enemy-art {
+  width: 184px !important;
+  height: 196px !important;
+}
+
+.battle-field[data-map-id="wolf-den"] #enemy-squad .enemy-unit.boss .enemy-art {
+  width: 210px !important;
+  height: 220px !important;
+}
+
+@media (max-width: 700px) {
+  .battle-field[data-map-id="wolf-den"] #enemy-squad .enemy-unit {
+    width: 138px !important;
+  }
+
+  .battle-field[data-map-id="wolf-den"] #enemy-squad .enemy-unit .enemy-art {
+    width: 150px !important;
+    height: 160px !important;
+  }
+
+  .battle-field[data-map-id="wolf-den"] #enemy-squad .enemy-unit.boss .enemy-art {
+    width: 174px !important;
+    height: 184px !important;
+  }
+}
