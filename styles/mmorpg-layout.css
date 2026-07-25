@@ -1420,9 +1420,9 @@
   }
 }
 
-/* All hunter companion artwork is displayed 20% larger without changing attack transforms. */
+/* Hunter companion artwork is 25% larger than the previous 1.2 display size. */
 .battle-field #hunter-companion span {
-  scale: 1.2;
+  scale: 1.5;
   transform-origin: center bottom;
 }
 
@@ -1528,18 +1528,18 @@
   translate: 0 var(--pet-ground-offset, 18px);
 }
 
-.battle-field #hunter-companion[data-race="human"] { --pet-ground-offset: 22px; }
-.battle-field #hunter-companion[data-race="elf"] { --pet-ground-offset: 12px; }
-.battle-field #hunter-companion[data-race="orc"] { --pet-ground-offset: 19px; }
-.battle-field #hunter-companion[data-race="undead"] { --pet-ground-offset: 18px; }
+.battle-field #hunter-companion[data-race="human"] { --pet-ground-offset: 28px; }
+.battle-field #hunter-companion[data-race="elf"] { --pet-ground-offset: 15px; }
+.battle-field #hunter-companion[data-race="orc"] { --pet-ground-offset: 24px; }
+.battle-field #hunter-companion[data-race="undead"] { --pet-ground-offset: 23px; }
 
 @media (max-width: 700px) {
   .battle-field #hunter-companion {
     left: clamp(160px, 38%, 240px) !important;
   }
 
-  .battle-field #hunter-companion[data-race="human"] { --pet-ground-offset: 17px; }
-  .battle-field #hunter-companion[data-race="elf"] { --pet-ground-offset: 9px; }
-  .battle-field #hunter-companion[data-race="orc"] { --pet-ground-offset: 15px; }
-  .battle-field #hunter-companion[data-race="undead"] { --pet-ground-offset: 14px; }
+  .battle-field #hunter-companion[data-race="human"] { --pet-ground-offset: 21px; }
+  .battle-field #hunter-companion[data-race="elf"] { --pet-ground-offset: 11px; }
+  .battle-field #hunter-companion[data-race="orc"] { --pet-ground-offset: 19px; }
+  .battle-field #hunter-companion[data-race="undead"] { --pet-ground-offset: 18px; }
 }
