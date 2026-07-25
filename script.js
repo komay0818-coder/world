@@ -1723,13 +1723,38 @@ function playMonsterAttackAnimation(enemyIndex, playerWasHit) {
 function playPlayerAttackAnimation() {
   const fighter = document.querySelector('#player-fighter');
   const art = document.querySelector('#battle-player-art');
+  const field = document.querySelector('.battle-field');
+  const character = JSON.parse(localStorage.getItem('stardust-character') || 'null');
+  const job = character?.job || art?.dataset.job || 'warrior';
   fighter?.classList.remove('attack');
   art?.classList.remove('attack');
+  if (art) art.dataset.job = job;
   requestAnimationFrame(() => {
     fighter?.classList.add('attack');
     art?.classList.add('attack');
   });
-  setTimeout(() => art?.classList.remove('attack'), 520);
+  if (field && art) {
+    const target = document.querySelector(`#enemy-${oldestAliveEnemyIndex()}`);
+    const fieldRect = field.getBoundingClientRect();
+    const artRect = art.getBoundingClientRect();
+    const targetRect = target?.getBoundingClientRect();
+    const effect = document.createElement('span');
+    const startX = artRect.right - fieldRect.left - Math.min(38, artRect.width * .16);
+    const startY = artRect.top - fieldRect.top + artRect.height * (job === 'mage' || job === 'priest' ? .37 : .48);
+    const targetX = targetRect ? targetRect.left - fieldRect.left + targetRect.width * .42 : fieldRect.width * .62;
+    const targetY = targetRect ? targetRect.top - fieldRect.top + targetRect.height * .5 : fieldRect.height * .45;
+    effect.className = `character-attack-effect attack-effect-${job}`;
+    effect.style.setProperty('--attack-start-x', `${startX}px`);
+    effect.style.setProperty('--attack-start-y', `${startY}px`);
+    effect.style.setProperty('--attack-travel-x', `${targetX - startX}px`);
+    effect.style.setProperty('--attack-travel-y', `${targetY - startY}px`);
+    field.appendChild(effect);
+    setTimeout(() => effect.remove(), 760);
+  }
+  setTimeout(() => {
+    fighter?.classList.remove('attack');
+    art?.classList.remove('attack');
+  }, 620);
 }
 
 function playCompanionAttackAnimation(targetIndexes = []) {
@@ -2394,6 +2419,8 @@ function openBattle() {
   if (battlePlayerArt) {
     battlePlayerArt.classList.toggle('hidden', !characterArt);
     battlePlayerArt.classList.toggle('undead-art', character.race === 'undead' && Boolean(characterArt));
+    battlePlayerArt.dataset.job = character.job;
+    battlePlayerArt.dataset.race = character.race;
     battlePlayerArt.style.setProperty('--character-scale', CHARACTER_SCALE);
     battlePlayerArt.style.backgroundImage = characterArt ? `url('${characterArt}')` : '';
     const raceName = Object.values(factions).flat().find((race) => race.id === character.race)?.name || character.race;
