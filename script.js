@@ -29,7 +29,7 @@ const battleCharacterArt = {
   'human:assassin': 'assets/character-sprites/human-assassin-v4.png',
   'human:hunter': 'assets/character-sprites/human-hunter.png',
   'human:mage': 'assets/character-sprites/human-mage-v2.png',
-  'human:priest': 'assets/character-sprites/human-priest.png',
+  'human:priest': 'assets/character-sprites/human-priest-v2.png',
   'elf:warrior': 'assets/character-sprites/elf-warrior.png',
   'elf:assassin': 'assets/character-sprites/elf-assassin.png',
   'elf:hunter': 'assets/character-sprites/elf-hunter.png',
