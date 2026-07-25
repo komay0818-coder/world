@@ -1420,6 +1420,12 @@
   }
 }
 
+/* All hunter companion artwork is displayed 20% larger without changing attack transforms. */
+.battle-field #hunter-companion span {
+  scale: 1.2;
+  transform-origin: center bottom;
+}
+
 /* Wolf Den keeps its cave readable while separating combatants from the backdrop. */
 .battle-field[data-map-id="wolf-den"] {
   background: #07111d !important;
