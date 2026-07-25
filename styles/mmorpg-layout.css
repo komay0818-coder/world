@@ -1516,3 +1516,30 @@
 .battle-field #enemy-squad .enemy-unit {
   left: calc(var(--stage-x) + 8%) !important;
 }
+
+/* Hunter companion: visible paws share the player's ground line and stay clear of the character. */
+.battle-field #hunter-companion {
+  left: clamp(280px, 34%, 520px) !important;
+  bottom: 0 !important;
+  transform-origin: left bottom !important;
+}
+
+.battle-field #hunter-companion span {
+  translate: 0 var(--pet-ground-offset, 18px);
+}
+
+.battle-field #hunter-companion[data-race="human"] { --pet-ground-offset: 22px; }
+.battle-field #hunter-companion[data-race="elf"] { --pet-ground-offset: 12px; }
+.battle-field #hunter-companion[data-race="orc"] { --pet-ground-offset: 19px; }
+.battle-field #hunter-companion[data-race="undead"] { --pet-ground-offset: 18px; }
+
+@media (max-width: 700px) {
+  .battle-field #hunter-companion {
+    left: clamp(160px, 38%, 240px) !important;
+  }
+
+  .battle-field #hunter-companion[data-race="human"] { --pet-ground-offset: 17px; }
+  .battle-field #hunter-companion[data-race="elf"] { --pet-ground-offset: 9px; }
+  .battle-field #hunter-companion[data-race="orc"] { --pet-ground-offset: 15px; }
+  .battle-field #hunter-companion[data-race="undead"] { --pet-ground-offset: 14px; }
+}
