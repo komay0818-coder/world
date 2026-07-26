@@ -35,4 +35,15 @@ assert.deepEqual(policy.getEquipSlots(weapons.loggingHatchet, 'assassin'), ['wea
 assert.deepEqual(policy.getEquipSlots(weapons.battleGreataxe, 'assassin'), [], 'assassins cannot equip two-handed axes');
 assert.deepEqual(policy.getEquipSlots(weapons.giantIronSword, 'warrior'), ['weapon'], 'warriors equip two-handed weapons in the main-hand slot');
 
-console.log('equipment-policy: 38 assertions passed');
+assert.deepEqual([weapons.hunterShortbow.attackMin, weapons.hunterShortbow.attackMax, weapons.hunterShortbow.attackSpeed], [9, 13, 1.10], 'hunter shortbow stats match the design');
+assert.deepEqual([weapons.longHuntingBow.attackMin, weapons.longHuntingBow.attackMax, weapons.longHuntingBow.attackSpeed], [11, 15, .90], 'long hunting bow stats match the design');
+assert.deepEqual([weapons.rustyDagger.attackMin, weapons.rustyDagger.attackMax, weapons.rustyDagger.attackSpeed], [6, 9, 1.80], 'rusty dagger stats match the design');
+assert.deepEqual([weapons.assassinShortblade.attackMin, weapons.assassinShortblade.attackMax, weapons.assassinShortblade.attackSpeed], [8, 11, 1.60], 'assassin shortblade stats match the design');
+assert.deepEqual([weapons.apprenticeStaff.attackMin, weapons.apprenticeStaff.attackMax, weapons.apprenticeStaff.attackSpeed], [10, 15, 1.00], 'apprentice staff stats match the design');
+assert.deepEqual([weapons.arcaneStaff.attackMin, weapons.arcaneStaff.attackMax, weapons.arcaneStaff.attackSpeed], [13, 18, .85], 'arcane staff stats match the design');
+assert.deepEqual(policy.getEquipSlots(weapons.hunterShortbow, 'hunter'), ['weapon'], 'hunters equip bows in the main-hand slot');
+assert.deepEqual(policy.getEquipSlots(weapons.rustyDagger, 'assassin'), ['weapon', 'offhand'], 'assassins can equip daggers in either hand');
+assert.deepEqual(policy.getEquipSlots(weapons.apprenticeStaff, 'mage'), ['weapon'], 'mages equip staves in the main-hand slot');
+assert.deepEqual(policy.getEquipSlots(weapons.apprenticeStaff, 'priest'), [], 'priests cannot equip mage staves');
+
+console.log('equipment-policy: 58 assertions passed');
