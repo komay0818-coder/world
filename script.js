@@ -585,22 +585,7 @@ const dungeonDefinitions = {
   'black-forest-altar': { name: '黑森林祭壇', waves: 10 }
 };
 
-const collectibleTemplates = {
-  goblin: { id: 'goblin-badge', name: '哥布林斥候徽記', source: '哥布林', icon: '♟', attack: 1, description: '攻擊／法攻 +1' },
-  wolf: { id: 'wolf-moon-fang', name: '月痕狼牙', source: '森林狼', icon: '☾', crit: .01, description: '暴擊率 +1%' },
-  boar: { id: 'boar-heart-stone', name: '野豬心石', source: '野豬', icon: '◆', hp: 12, description: '最大生命 +12' },
-  goblinOverlord: { id: 'overlord-command-token', name: '督軍號令牌', source: '哥布林督軍', icon: '⚑', defense: 2, description: '防禦 +2' },
-  wolfAlpha: { id: 'alpha-frost-claw', name: '狼王霜爪', source: '霜牙狼王', icon: '❄', dodge: .01, description: '閃避率 +1%' },
-  boarTyrant: { id: 'tyrant-tusk-core', name: '巨獸獠牙核心', source: '獠牙巨獸', icon: '◇', attack: 2, hp: 20, description: '攻擊／法攻 +2、最大生命 +20' },
-  goblinKing: { id: 'red-crown-relic', name: '赤冠王之遺珍', source: '赤冠哥布林王', icon: '♛', attack: 3, defense: 3, hp: 30, description: '攻擊／法攻 +3、防禦 +3、最大生命 +30' },
-  nightGoblin: { id: 'night-goblin-lantern', name: '夜行者微光燈', source: '夜行哥布林', icon: '✦', attack: 1, description: '攻擊／法攻 +1' },
-  shadowWolf: { id: 'shadow-wolf-pelt', name: '幽影狼皮', source: '幽影森林狼', icon: '◐', crit: .01, description: '暴擊率 +1%' },
-  thornBoar: { id: 'thorn-boar-seed', name: '荊棘生命種', source: '荊棘野豬', icon: '❈', hp: 15, description: '最大生命 +15' },
-  forestShaman: { id: 'forest-shaman-charm', name: '黑林薩滿符', source: '黑林薩滿', icon: '☽', mana: 12, description: '最大魔力 +12' },
-  moonfangAlpha: { id: 'moonfang-emblem', name: '月牙狼王印', source: '月牙狼王', icon: '☾', dodge: .01, description: '閃避率 +1%' },
-  thornbackTyrant: { id: 'thornback-shell', name: '棘背硬殼', source: '棘背暴君', icon: '⬟', defense: 2, description: '防禦 +2' },
-  forestGuardian: { id: 'corrupt-moon-heart', name: '腐月森林之心', source: '腐月森林守衛', icon: '◉', attack: 2, defense: 2, hp: 25, description: '攻擊／法攻 +2、防禦 +2、最大生命 +25' }
-};
+const collectibleTemplates = CollectiblePolicy.COLLECTIBLE_CATALOG;
 const collectibleDropRates = { normal: .01, elite: .08, boss: .30 };
 
 const lootTemplates = {
@@ -824,6 +809,11 @@ function getProgress() {
     saved.inventory = inventoryForRestrictions;
     saved.equipment = equipmentForRestrictions;
     saved.jobRestrictionMigrationVersion = 'job-restriction-v1';
+    localStorage.setItem('stardust-progress', JSON.stringify(saved));
+  }
+  if (saved.collectibleMigrationVersion !== 'unique-monster-collectibles-v1') {
+    saved.collection = CollectiblePolicy.removeLegacyCollectibles(saved.collection);
+    saved.collectibleMigrationVersion = 'unique-monster-collectibles-v1';
     localStorage.setItem('stardust-progress', JSON.stringify(saved));
   }
   const inventory = Array.isArray(saved.inventory) ? saved.inventory : [];
