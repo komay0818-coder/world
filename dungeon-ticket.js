@@ -3,6 +3,21 @@
   if (typeof module === 'object' && module.exports) module.exports = api;
   else root.DungeonTicketCycle = api;
 }(typeof globalThis !== 'undefined' ? globalThis : this, function createDungeonTicketCycle() {
+  const GOBLIN_CAMP_WAVES = Object.freeze({
+    1: Object.freeze(['goblinWarrior', 'goblinSlinger', 'goblinScout', 'goblinScout']),
+    2: Object.freeze(['goblinWarrior', 'goblinSlinger', 'goblinSlinger', 'goblinScout']),
+    3: Object.freeze(['goblinWarrior', 'goblinWarrior', 'goblinShaman', 'goblinShaman']),
+    4: Object.freeze(['goblinGuard', 'goblinWarrior', 'goblinShaman', 'goblinShaman']),
+    5: Object.freeze(['goblinCaptain', 'goblinGuard', 'goblinGuard', 'goblinShaman']),
+    6: Object.freeze(['goblinGuard', 'goblinGuard', 'goblinShaman', 'goblinTreasureChest']),
+    7: Object.freeze(['goblinHighChief', 'goblinGuard', 'goblinShaman'])
+  });
+
+  function getGoblinCampWaveTypes(wave) {
+    const normalizedWave = Math.floor(Number(wave) || 0);
+    return [...(GOBLIN_CAMP_WAVES[normalizedWave] || [])];
+  }
+
   function resolveCompletion({ ticketCount = 0, dungeonId, returnMapId }) {
     const availableTickets = Math.max(0, Math.floor(Number(ticketCount) || 0));
     const consumed = availableTickets > 0 ? 1 : 0;
@@ -41,5 +56,5 @@
     };
   }
 
-  return { resolveCompletion, shouldDropTicket, resolveGoblinCampWaveClear };
+  return { GOBLIN_CAMP_WAVES, getGoblinCampWaveTypes, resolveCompletion, shouldDropTicket, resolveGoblinCampWaveClear };
 }));

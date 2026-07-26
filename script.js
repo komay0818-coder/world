@@ -537,6 +537,14 @@ const monsterTypes = {
   irritableBoar: { id: 'irritableBoar', name: '暴躁野豬', maxHp: 165, attack: 19, defense: 13, evasion: 2, parry: 0, damageReduction: 7, artClass: 'boar-woods-irritable-boar-art', xp: 20, gold: 12, isElite: true, lootSource: 'boar' },
   boarKing: { id: 'boarKing', name: '巨牙野豬', maxHp: 620, attack: 24, defense: 20, evasion: 1, parry: 0, damageReduction: 10, artClass: 'boar-woods-giant-tusk-boar-art', xp: 95, gold: 58, isBoss: true, lootSource: 'boar' },
   goblin: { id: 'goblin', name: '哥布林', maxHp: 45, attack: 11, defense: 3, evasion: 2, parry: 5, damageReduction: 0, artClass: 'goblin-art', xp: 10, gold: 3 },
+  goblinScout: { id: 'goblinScout', name: '哥布林斥候', maxHp: 48, attack: 10, defense: 2, evasion: 7, parry: 3, damageReduction: 0, artClass: 'goblin-camp-placeholder goblin-art', xp: 10, gold: 3, lootPending: true },
+  goblinWarrior: { id: 'goblinWarrior', name: '哥布林戰士', maxHp: 82, attack: 13, defense: 7, evasion: 2, parry: 9, damageReduction: 3, artClass: 'goblin-camp-placeholder goblin-art', xp: 10, gold: 5, lootPending: true },
+  goblinSlinger: { id: 'goblinSlinger', name: '哥布林投石者', maxHp: 58, attack: 14, defense: 3, evasion: 5, parry: 0, damageReduction: 1, artClass: 'goblin-camp-placeholder goblin-art', xp: 10, gold: 4, lootPending: true },
+  goblinShaman: { id: 'goblinShaman', name: '哥布林薩滿', maxHp: 175, attack: 17, defense: 8, evasion: 5, parry: 2, damageReduction: 5, artClass: 'goblin-camp-placeholder goblin-art', xp: 28, gold: 12, isElite: true, lootPending: true },
+  goblinGuard: { id: 'goblinGuard', name: '哥布林護衛', maxHp: 245, attack: 16, defense: 15, evasion: 2, parry: 13, damageReduction: 8, artClass: 'goblin-camp-placeholder goblin-art', xp: 28, gold: 16, isElite: true, lootPending: true },
+  goblinCaptain: { id: 'goblinCaptain', name: '哥布林隊長', maxHp: 720, attack: 21, defense: 19, evasion: 4, parry: 12, damageReduction: 9, artClass: 'goblin-camp-placeholder goblin-art', xp: 120, gold: 65, isBoss: true, lootPending: true },
+  goblinTreasureChest: { id: 'goblinTreasureChest', name: '哥布林寶箱', maxHp: 210, attack: 1, defense: 18, evasion: 0, parry: 0, damageReduction: 12, artClass: 'goblin-camp-placeholder goblin-art', xp: 28, gold: 45, isRare: true, lootPending: true },
+  goblinHighChief: { id: 'goblinHighChief', name: '哥布林大酋長', maxHp: 1180, attack: 25, defense: 25, evasion: 4, parry: 15, damageReduction: 11, artClass: 'goblin-camp-placeholder goblin-art', xp: 120, gold: 110, isBoss: true, lootPending: true },
   wolf: { id: 'wolf', name: '森林狼', maxHp: 68, attack: 14, defense: 2, evasion: 8, parry: 0, damageReduction: 0, artClass: 'wolf-art', xp: 14, gold: 4 },
   boar: { id: 'boar', name: '野豬', maxHp: 82, attack: 17, defense: 7, evasion: 1, parry: 0, damageReduction: 4, artClass: 'boar-art', xp: 18, gold: 5 },
   goblinOverlord: { id: 'goblinOverlord', name: '哥布林督軍', maxHp: 320, attack: 14, defense: 14, evasion: 4, parry: 10, damageReduction: 5, artClass: 'goblin-art', xp: 90, gold: 35, isElite: true, lootSource: 'goblin' },
@@ -1125,12 +1133,7 @@ function getDungeonDefinition(mapId = battle.dungeonId || getActiveMap(getProgre
 
 function createDungeonWaveTypes(wave, mapId = battle.dungeonId || getActiveMap(getProgress()).id) {
   const definition = getDungeonDefinition(mapId);
-  if (mapId === 'goblin-camp') {
-    if (wave >= definition.waves) return ['goblinOverlord', 'goblinOverlord', 'goblinKing'];
-    const enemyCount = wave <= 2 ? 3 : 4;
-    const types = Array.from({ length: enemyCount }, (_, index) => (wave >= 3 && index === enemyCount - 1 ? 'goblinOverlord' : Math.random() < .38 ? 'goblin' : 'plainsGoblinYoung'));
-    return types.sort(() => Math.random() - .5);
-  }
+  if (mapId === 'goblin-camp') return DungeonTicketCycle.getGoblinCampWaveTypes(wave);
   const enemyCount = wave <= 3 ? 3 : wave <= 6 ? 4 : 5;
   const eliteCount = wave === definition.waves ? 4 : enemyCount;
   const types = Array.from({ length: eliteCount }, () => dungeonEliteIds[Math.floor(Math.random() * dungeonEliteIds.length)]);
@@ -1373,6 +1376,7 @@ function consumeInventoryItem(progress, itemId, amount = 1) {
 }
 
 function addLoot(progress, enemy) {
+  if (enemy.lootPending) return null;
   if (enemy.lootSource === 'dungeonBoss' || (enemy.lootSource === 'dungeonElite' && Math.random() < .12)) {
     const item = createDungeonSetDrop(enemy);
     progress.inventory.unshift(item);
@@ -2175,19 +2179,20 @@ function rewardVictory(index) {
     addGoblinCampMap(progress);
     goblinCampMapDropped = true;
   }
-  const skillMaterialChance = currentMap.dungeon ? (enemy.isBoss ? 1 : .24) : currentMap.min >= 5 ? (enemy.isBoss ? .18 : enemy.isElite ? .08 : .03) : 0;
+  const dungeonItemDropsEnabled = currentMap.dungeon && currentMap.id !== 'goblin-camp';
+  const skillMaterialChance = dungeonItemDropsEnabled ? (enemy.isBoss ? 1 : .24) : currentMap.min >= 5 && !currentMap.dungeon ? (enemy.isBoss ? .18 : enemy.isElite ? .08 : .03) : 0;
   if (skillMaterialChance > 0 && Math.random() < skillMaterialChance) {
     const amount = currentMap.dungeon && enemy.isBoss ? 2 : 1;
     progress.magicCrystals = (progress.magicCrystals || 0) + amount;
     accountDrops.push(`魔法結晶 ×${amount}`);
   }
   const bookTier = Math.min(6, Math.max(2, Math.floor(currentMap.min / 5) + 1));
-  const bookDropChance = currentMap.dungeon ? (enemy.isBoss ? .60 : .15) : currentMap.min >= 5 ? (enemy.isBoss ? .06 : enemy.isElite ? .02 : .005) : 0;
+  const bookDropChance = dungeonItemDropsEnabled ? (enemy.isBoss ? .60 : .15) : currentMap.min >= 5 && !currentMap.dungeon ? (enemy.isBoss ? .06 : enemy.isElite ? .02 : .005) : 0;
   if (bookDropChance > 0 && Math.random() < bookDropChance) {
     progress.skillBooks = { ...(progress.skillBooks || {}), [bookTier]: (Number(progress.skillBooks?.[bookTier]) || 0) + 1 };
     accountDrops.push(`${bookTier}階魔法書 ×1`);
   }
-  if (currentMap.dungeon) {
+  if (dungeonItemDropsEnabled) {
     const resources = getAccountResources();
     const ironChance = enemy.isBoss ? 1 : .22;
     if (Math.random() < ironChance) {

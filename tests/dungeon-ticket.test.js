@@ -72,4 +72,13 @@ assert.deepEqual(cycle.resolveGoblinCampWaveClear({ wave: 7, randomValue: 0 }), 
   nextWave: null
 }, 'wave seven always completes the dungeon');
 
-console.log('dungeon-ticket: 32 assertions passed');
+assert.deepEqual(cycle.getGoblinCampWaveTypes(1), ['goblinWarrior', 'goblinSlinger', 'goblinScout', 'goblinScout'], 'wave one uses one warrior, one slinger and two scouts');
+assert.deepEqual(cycle.getGoblinCampWaveTypes(2), ['goblinWarrior', 'goblinSlinger', 'goblinSlinger', 'goblinScout'], 'wave two uses one warrior, two slingers and one scout');
+assert.deepEqual(cycle.getGoblinCampWaveTypes(3), ['goblinWarrior', 'goblinWarrior', 'goblinShaman', 'goblinShaman'], 'wave three uses two warriors and two elite shamans');
+assert.deepEqual(cycle.getGoblinCampWaveTypes(4), ['goblinGuard', 'goblinWarrior', 'goblinShaman', 'goblinShaman'], 'wave four uses one elite guard, one warrior and two elite shamans');
+assert.deepEqual(cycle.getGoblinCampWaveTypes(5), ['goblinCaptain', 'goblinGuard', 'goblinGuard', 'goblinShaman'], 'wave five uses one captain boss, two elite guards and one elite shaman');
+assert.deepEqual(cycle.getGoblinCampWaveTypes(6), ['goblinGuard', 'goblinGuard', 'goblinShaman', 'goblinTreasureChest'], 'wave six includes the rare goblin treasure chest');
+assert.deepEqual(cycle.getGoblinCampWaveTypes(7), ['goblinHighChief', 'goblinGuard', 'goblinShaman'], 'wave seven uses the high chief boss, one elite guard and one elite shaman');
+assert.deepEqual(cycle.getGoblinCampWaveTypes(8), [], 'waves beyond seven have no monster distribution');
+
+console.log('dungeon-ticket: 61 assertions passed');
