@@ -720,29 +720,29 @@ function emptyEquipment() { return Object.fromEntries(Object.keys(equipmentSlots
 function createStarterEquipment(job = 'warrior') {
   const starterSets = {
     warrior: [
-      { name: '見習鐵劍', slot: 'weapon', weaponType: 'sword', image: 'assets/goblin-short-sword.png', attack: 5, defense: 1, hp: 0 },
-      { name: '見習戰甲', slot: 'armor', armorType: 'heavy', image: 'assets/hardened-hide-armor.png', attack: 0, defense: 3, hp: 20 }
+      { name: '新兵鐵劍', slot: 'weapon', weaponType: 'sword', image: 'assets/goblin-short-sword.png', attack: 5, defense: 1, hp: 0 },
+      { name: '新兵戰甲', slot: 'armor', armorType: 'heavy', image: 'assets/hardened-hide-armor.png', attack: 0, defense: 3, hp: 20 }
     ],
     assassin: [
-      { name: '見習匕首', slot: 'weapon', weaponType: 'dagger', image: 'assets/wolf-fang-dagger.png', attack: 6, defense: 0, hp: 0 },
-      { name: '見習夜行衣', slot: 'armor', armorType: 'leather', image: 'assets/hunter-leather-armor.png', attack: 1, defense: 2, hp: 14 }
+      { name: '新兵匕首', slot: 'weapon', weaponType: 'dagger', image: 'assets/wolf-fang-dagger.png', attack: 6, defense: 0, hp: 0 },
+      { name: '新兵夜行衣', slot: 'armor', armorType: 'leather', image: 'assets/hunter-leather-armor.png', attack: 1, defense: 2, hp: 14 }
     ],
     hunter: [
-      { name: '見習短弓', slot: 'weapon', weaponType: 'bow', image: 'assets/black-forest-bow.png', attack: 6, defense: 0, hp: 0 },
-      { name: '見習獵裝', slot: 'armor', armorType: 'leather', image: 'assets/hunter-leather-armor.png', attack: 0, defense: 2, hp: 16 }
+      { name: '新兵短弓', slot: 'weapon', weaponType: 'bow', image: 'assets/black-forest-bow.png', attack: 6, defense: 0, hp: 0 },
+      { name: '新兵獵裝', slot: 'armor', armorType: 'leather', image: 'assets/hunter-leather-armor.png', attack: 0, defense: 2, hp: 16 }
     ],
     mage: [
-      { name: '見習法杖', slot: 'weapon', weaponType: 'staff', image: 'assets/boar-bone-staff.png', attack: 7, defense: 0, hp: 0 },
-      { name: '見習法袍', slot: 'armor', armorType: 'cloth', image: 'assets/rough-cloth-vest.png', attack: 1, defense: 2, hp: 12 }
+      { name: '新兵法杖', slot: 'weapon', weaponType: 'staff', image: 'assets/boar-bone-staff.png', attack: 7, defense: 0, hp: 0 },
+      { name: '新兵法袍', slot: 'armor', armorType: 'cloth', image: 'assets/rough-cloth-vest.png', attack: 1, defense: 2, hp: 12 }
     ],
     priest: [
-      { name: '見習聖杖', slot: 'weapon', weaponType: 'staff', image: 'assets/boar-bone-staff.png', attack: 5, defense: 1, hp: 8 },
-      { name: '見習祭袍', slot: 'armor', armorType: 'cloth', image: 'assets/rough-cloth-vest.png', attack: 0, defense: 3, hp: 18 }
+      { name: '新兵聖杖', slot: 'weapon', weaponType: 'staff', image: 'assets/boar-bone-staff.png', attack: 5, defense: 1, hp: 8 },
+      { name: '新兵祭袍', slot: 'armor', armorType: 'cloth', image: 'assets/rough-cloth-vest.png', attack: 0, defense: 3, hp: 18 }
     ]
   };
   const equipment = emptyEquipment();
   (starterSets[job] || starterSets.warrior).forEach((item, index) => {
-    equipment[item.slot] = { ...item, id: `starter-${job}-${item.slot}-${index}`, kind: 'equipment', quality: '普通', allowedJobs: [job] };
+    equipment[item.slot] = { ...item, id: `starter-${job}-${item.slot}-${index}`, kind: 'equipment', quality: '新兵', allowedJobs: [job] };
   });
   return equipment;
 }
@@ -769,6 +769,13 @@ function getProgress() {
       if (!saved.equipment.armor) saved.equipment.armor = starterEquipment.armor;
     }
     saved.starterGearVersion = 'starter-gear-v1';
+    localStorage.setItem('stardust-progress', JSON.stringify(saved));
+  }
+  if (saved.equipmentSystemResetVersion !== 'recruit-only-v1') {
+    const character = JSON.parse(localStorage.getItem('stardust-character') || 'null');
+    saved.inventory = EquipmentPolicy.removeLegacyEquipmentFromInventory(saved.inventory);
+    saved.equipment = createStarterEquipment(character?.job || 'warrior');
+    saved.equipmentSystemResetVersion = 'recruit-only-v1';
     localStorage.setItem('stardust-progress', JSON.stringify(saved));
   }
   if (saved.inventoryCleanupVersion !== 'equipment-clean-v1') {
@@ -1016,7 +1023,6 @@ function claimOfflineRewards() {
   const defeated = Math.floor(offlineMs / 60000 * killsPerMinute);
   let gainedXp = 0;
   let levelsGained = 0;
-  let equipmentFound = 0;
   for (let kill = 0; kill < defeated; kill += 1) {
     const gained = getActiveMap(progress).normalXp;
     progress.xp += gained;
@@ -1030,17 +1036,12 @@ function claimOfflineRewards() {
       progress.level = 30;
       progress.xp = Math.min(progress.xp, requiredXp(30));
     }
-    if (Math.random() < equipmentDropRate * offlineEquipmentRateMultiplier) {
-      const enemy = monsterTypes[randomEnemyId()];
-      progress.inventory.unshift(createEquipmentDrop(enemy));
-      equipmentFound += 1;
-    }
   }
   const gainedGold = defeated * 2;
   progress.gold += gainedGold;
   saveProgress(progress);
-  pendingOfflineReport = { duration: formatOfflineDuration(offlineMs), defeated, gainedXp, gainedGold, levelsGained, equipmentFound, capped: now - lastActiveAt > offlineLimitMs };
-  showToast(`離線掛機 ${pendingOfflineReport.duration}：獲得 ${gainedXp} EXP、${gainedGold} 金幣、${equipmentFound} 件裝備`);
+  pendingOfflineReport = { duration: formatOfflineDuration(offlineMs), defeated, gainedXp, gainedGold, levelsGained, equipmentFound: 0, capped: now - lastActiveAt > offlineLimitMs };
+  showToast(`離線掛機 ${pendingOfflineReport.duration}：獲得 ${gainedXp} EXP、${gainedGold} 金幣`);
   return pendingOfflineReport;
 }
 
@@ -1377,17 +1378,6 @@ function consumeInventoryItem(progress, itemId, amount = 1) {
 
 function addLoot(progress, enemy) {
   if (enemy.lootPending) return null;
-  if (enemy.lootSource === 'dungeonBoss' || (enemy.lootSource === 'dungeonElite' && Math.random() < .12)) {
-    const item = createDungeonSetDrop(enemy);
-    progress.inventory.unshift(item);
-    return item;
-  }
-  if (enemy.isBoss) {
-    if (Math.random() >= bossEquipmentDropRate) return null;
-    const item = createEquipmentDrop(enemy);
-    progress.inventory.unshift(item);
-    return item;
-  }
   const roll = Math.random();
   if (roll < potionDropRate) {
     progress.potions += 1;
@@ -1398,12 +1388,6 @@ function addLoot(progress, enemy) {
     progress.manaPotions = (progress.manaPotions || 0) + 1;
     addManaPotionItem(progress);
     return { kind: 'consumable', name: '魔法藥水', quantity: 1 };
-  }
-  const equipmentChance = enemy.isElite ? eliteEquipmentDropRate : equipmentDropRate;
-  if (roll < potionDropRate + manaPotionDropRate + equipmentChance) {
-    const item = createEquipmentDrop(enemy);
-    progress.inventory.unshift(item);
-    return item;
   }
   return null;
 }
@@ -2564,7 +2548,7 @@ function openBattle() {
   clearBattleLog();
   if (pendingOfflineReport) {
     logBattle(`☾ 離線掛機 ${pendingOfflineReport.duration}${pendingOfflineReport.capped ? '（已達 12 小時上限）' : ''}，擊敗約 ${pendingOfflineReport.defeated} 隻怪物。`, 'system');
-    logBattle(`🎁 離線收益：${pendingOfflineReport.gainedXp} EXP、${pendingOfflineReport.gainedGold} 金幣、${pendingOfflineReport.equipmentFound} 件裝備${pendingOfflineReport.levelsGained ? `，提升 ${pendingOfflineReport.levelsGained} 級` : ''}。`, 'loot');
+    logBattle(`🎁 離線收益：${pendingOfflineReport.gainedXp} EXP、${pendingOfflineReport.gainedGold} 金幣${pendingOfflineReport.levelsGained ? `，提升 ${pendingOfflineReport.levelsGained} 級` : ''}。`, 'loot');
     pendingOfflineReport = null;
   }
   const openingSpecial = enemyTypes.map((type) => monsterTypes[type]).find((enemy) => enemy.isBoss || enemy.isElite);
