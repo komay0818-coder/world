@@ -1406,6 +1406,8 @@ function addCollectibleLoot(progress, enemy) {
 function itemStatsText(item) {
   const parts = [];
   if (item.series) parts.push(item.series);
+  const armorCategory = EquipmentPolicy.getArmorCategory(item);
+  if (armorCategory) parts.push(({ plate: '鎧甲', leather: '皮甲', cloth: '布甲' })[armorCategory]);
   if (Number.isFinite(Number(item.attackMin)) && Number.isFinite(Number(item.attackMax))) parts.push(`攻擊 ${item.attackMin}～${item.attackMax}`);
   else if (item.attack) parts.push(`攻擊 +${effectiveEquipmentStat(item, 'attack')}`);
   if (Number(item.attackSpeed) > 0) parts.push(`攻速 ${Number(item.attackSpeed).toFixed(2)} 次／秒`);
@@ -1424,7 +1426,7 @@ function itemCategory(item) {
 }
 
 function isItemWearableByCharacter(item, character) {
-  return item.kind !== 'equipment' || !item.allowedJobs?.length || Boolean(character && item.allowedJobs.includes(character.job));
+  return item.kind !== 'equipment' || Boolean(character && EquipmentPolicy.getEquipSlots(item, character.job).length);
 }
 
 function equipmentValue(item) {

@@ -46,4 +46,21 @@ assert.deepEqual(policy.getEquipSlots(weapons.rustyDagger, 'assassin'), ['weapon
 assert.deepEqual(policy.getEquipSlots(weapons.apprenticeStaff, 'mage'), ['weapon'], 'mages equip staves in the main-hand slot');
 assert.deepEqual(policy.getEquipSlots(weapons.apprenticeStaff, 'priest'), [], 'priests cannot equip mage staves');
 
-console.log('equipment-policy: 58 assertions passed');
+const plateArmor = { id: 'plate-test', kind: 'equipment', slot: 'armor', armorType: 'heavy' };
+const leatherArmor = { id: 'leather-test', kind: 'equipment', slot: 'armor', armorType: 'leather' };
+const hideArmor = { id: 'hide-test', kind: 'equipment', slot: 'boots', armorType: 'hide' };
+const clothArmor = { id: 'cloth-test', kind: 'equipment', slot: 'armor', armorType: 'cloth' };
+const legacyRestrictedLeather = { id: 'legacy-leather-test', kind: 'equipment', slot: 'boots', armorType: 'hide', allowedJobs: ['warrior', 'hunter'] };
+assert.equal(policy.getArmorCategory(plateArmor), 'plate', 'heavy armor is normalized as plate armor');
+assert.equal(policy.getArmorCategory(hideArmor), 'leather', 'hide armor is normalized as leather armor');
+assert.deepEqual(policy.getEquipSlots(plateArmor, 'warrior'), ['armor'], 'warriors can equip plate armor');
+assert.deepEqual(policy.getEquipSlots(plateArmor, 'hunter'), [], 'hunters cannot equip plate armor');
+assert.deepEqual(policy.getEquipSlots(leatherArmor, 'hunter'), ['armor'], 'hunters can equip leather armor');
+assert.deepEqual(policy.getEquipSlots(leatherArmor, 'assassin'), ['armor'], 'assassins can equip leather armor');
+assert.deepEqual(policy.getEquipSlots(leatherArmor, 'warrior'), [], 'warriors cannot equip leather armor');
+assert.deepEqual(policy.getEquipSlots(clothArmor, 'mage'), ['armor'], 'mages can equip cloth armor');
+assert.deepEqual(policy.getEquipSlots(clothArmor, 'priest'), ['armor'], 'priests can equip cloth armor');
+assert.deepEqual(policy.getEquipSlots(clothArmor, 'assassin'), [], 'assassins cannot equip cloth armor');
+assert.deepEqual(policy.getEquipSlots(legacyRestrictedLeather, 'assassin'), ['boots'], 'armor category rules replace legacy per-item job restrictions');
+
+console.log('equipment-policy: 69 assertions passed');

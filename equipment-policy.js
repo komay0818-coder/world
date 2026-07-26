@@ -216,6 +216,31 @@
     })
   });
 
+  const ARMOR_CATEGORY_JOBS = Object.freeze({
+    plate: Object.freeze(['warrior']),
+    leather: Object.freeze(['hunter', 'assassin']),
+    cloth: Object.freeze(['mage', 'priest'])
+  });
+
+  const ARMOR_TYPE_CATEGORY = Object.freeze({
+    plate: 'plate',
+    heavy: 'plate',
+    mail: 'plate',
+    leather: 'leather',
+    'reinforced-leather': 'leather',
+    hide: 'leather',
+    cloth: 'cloth'
+  });
+
+  function getArmorCategory(item) {
+    return ARMOR_TYPE_CATEGORY[String(item?.armorType || '')] || null;
+  }
+
+  function isArmorCompatible(item, job) {
+    const category = getArmorCategory(item);
+    return !category || ARMOR_CATEGORY_JOBS[category].includes(job);
+  }
+
   function isRecruitEquipment(item) {
     return Boolean(item && item.kind === 'equipment' && String(item.id || '').startsWith('starter-'));
   }
@@ -243,7 +268,9 @@
 
   function getEquipSlots(item, job) {
     if (!item || item.kind !== 'equipment') return [];
-    if (item.allowedJobs?.length && !item.allowedJobs.includes(job)) return [];
+    const armorCategory = getArmorCategory(item);
+    if (armorCategory && !isArmorCompatible(item, job)) return [];
+    if (!armorCategory && item.allowedJobs?.length && !item.allowedJobs.includes(job)) return [];
     const slots = [item.slot];
     if (job === 'assassin' && item.slot === 'weapon' && isOneHandedWeapon(item)) slots.push('offhand');
     return [...new Set(slots)];
@@ -255,6 +282,9 @@
 
   return {
     WEAPON_CATALOG,
+    ARMOR_CATEGORY_JOBS,
+    getArmorCategory,
+    isArmorCompatible,
     isRecruitEquipment,
     removeLegacyEquipmentFromInventory,
     rollWeaponAttack,
