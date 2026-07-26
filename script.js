@@ -573,7 +573,7 @@ const dungeonBossId = 'eclipseSovereign';
 const GOBLIN_CAMP_TICKET_ID = 'goblin-camp-map';
 const GOBLIN_CAMP_TICKET_DROP_RATE = .50;
 const dungeonDefinitions = {
-  'goblin-camp': { name: '哥布林營地', waves: 5, ticketItemId: GOBLIN_CAMP_TICKET_ID },
+  'goblin-camp': { name: '哥布林營地', waves: 7, minWaves: 4, maxWaves: 7, ticketItemId: GOBLIN_CAMP_TICKET_ID },
   'black-forest-altar': { name: '黑森林祭壇', waves: 10 }
 };
 
@@ -1152,8 +1152,9 @@ function loadDungeonWave(wave) {
   battle.enemyNextAttackAt = createEnemyAttackSchedule(enemyTypes, now);
   battle.targetIndexes = [];
   battle.waveTransitioning = false;
-  logBattle(`◆ ${definition.name}第 ${wave}／${definition.waves} 波開始：${enemyTypes.length} 名敵人來襲。`, 'system');
-  showToast(`副本第 ${wave}／${definition.waves} 波`);
+  const waveRange = battle.dungeonId === 'goblin-camp' ? `第 ${wave} 波（最少 4／最多 7 波）` : `第 ${wave}／${definition.waves} 波`;
+  logBattle(`◆ ${definition.name}${waveRange}開始：${enemyTypes.length} 名敵人來襲。`, 'system');
+  showToast(`副本${waveRange}`);
   updateBattleUI();
 }
 
@@ -1614,7 +1615,7 @@ function renderMapSelector() {
     const dungeonPassName = map.ticketItemId ? '哥布林營地地圖' : '祭壇鑰匙';
     const detail = isRegionHub
       ? `<em>包含 ${beginnerPlainsRegions.length} 個探索區域・怪物與掉落物將陸續追加</em>`
-      : map.dungeon ? `<em>${dungeonDefinition?.waves || 10} 波戰鬥・最終波 BOSS${map.ticketItemId ? '・可連續自動挑戰' : '・職業套裝'}</em><strong class="dungeon-key-count">${dungeonPassName}：${dungeonPasses}</strong>` : `<em>普通 ${map.normalXp} EXP・精英 ${map.eliteXp} EXP・Boss ${map.bossXp} EXP</em>`;
+      : map.dungeon ? `<em>${map.id === 'goblin-camp' ? '隨機 4～7 波・第 4～6 波各有 50% 機率結束' : `${dungeonDefinition?.waves || 10} 波戰鬥・最終波 BOSS・職業套裝`}${map.ticketItemId ? '・可連續自動挑戰' : ''}</em><strong class="dungeon-key-count">${dungeonPassName}：${dungeonPasses}</strong>` : `<em>普通 ${map.normalXp} EXP・精英 ${map.eliteXp} EXP・Boss ${map.bossXp} EXP</em>`;
     const action = isRegionHub
       ? `<button type="button" data-open-map-region="${map.id}">查看 ${beginnerPlainsRegions.length} 個區域</button>`
       : map.dungeon
@@ -1641,7 +1642,7 @@ function renderBeginnerPlainsRegions() {
       const available = ['plains-entrance', 'wolf-den', 'boar-woods', 'goblin-camp'].includes(region.id);
       const isGoblinCamp = region.id === 'goblin-camp';
       const goblinMaps = getInventoryItemQuantity(progress, GOBLIN_CAMP_TICKET_ID);
-      const regionDetail = isGoblinCamp ? `副本 5 波・哥布林營地地圖 ${goblinMaps} 張` : available ? '怪物 5 種・稀有怪物機率 10%' : '怪物與掉落物：尚未設定';
+      const regionDetail = isGoblinCamp ? `副本隨機 4～7 波・哥布林營地地圖 ${goblinMaps} 張` : available ? '怪物 5 種・稀有怪物機率 10%' : '怪物與掉落物：尚未設定';
       return `
       <article class="map-region-card ${available ? 'available' : 'pending'} ${activeMap.id === region.id ? 'selected' : ''}">
         <span>${String(index + 1).padStart(2, '0')}</span>
@@ -2071,7 +2072,11 @@ function updateBattleUI() {
     companionArt.style.backgroundImage = companionImage;
   }
   if (companionName) companionName.textContent = racialCompanion.name;
-  document.querySelector('#map-level-text').textContent = currentMap.dungeon ? `特殊副本・第 ${battle.dungeonWave || 1}／${getDungeonDefinition(currentMap.id).waves} 波・Lv. ${currentMap.min}–${currentMap.max}` : `怪物等級：Lv. ${currentMap.min}–${currentMap.max}`;
+  const currentDungeonDefinition = currentMap.dungeon ? getDungeonDefinition(currentMap.id) : null;
+  const dungeonWaveText = currentMap.id === 'goblin-camp'
+    ? `第 ${battle.dungeonWave || 1} 波・隨機 4～7 波`
+    : `第 ${battle.dungeonWave || 1}／${currentDungeonDefinition?.waves || 10} 波`;
+  document.querySelector('#map-level-text').textContent = currentMap.dungeon ? `特殊副本・${dungeonWaveText}・Lv. ${currentMap.min}–${currentMap.max}` : `怪物等級：Lv. ${currentMap.min}–${currentMap.max}`;
   document.querySelector('#player-hp-text').textContent = `${Math.max(0, battle.playerHp)} / ${maxHp}${battle.playerShield > 0 ? `　護盾 ${battle.playerShield}` : ''}`;
   document.querySelector('#player-hp-bar').style.width = `${Math.max(0, battle.playerHp / maxHp * 100)}%`;
   document.querySelector('#player-mp-text').textContent = `${Math.ceil(battle.playerMana)} / ${maxMana} MP`;
@@ -2266,11 +2271,32 @@ function queueDefeatedEnemies() {
     if (waveCleared && !battle.waveTransitioning && !battle.dungeonComplete) {
       battle.waveTransitioning = true;
       const clearedWave = battle.dungeonWave;
-      const finalWave = getDungeonDefinition().waves;
+      const definition = getDungeonDefinition();
       logBattle(`✓ 第 ${clearedWave} 波全滅。`, 'progress');
+      if (battle.dungeonId === 'goblin-camp') {
+        const outcome = DungeonTicketCycle.resolveGoblinCampWaveClear({
+          wave: clearedWave,
+          randomValue: Math.random(),
+          minWave: definition.minWaves,
+          maxWave: definition.maxWaves
+        });
+        if (outcome.horn) logBattle('📯 哥布林號角響起……', 'system');
+        setTimeout(() => {
+          if (!battle.isDungeon || battle.dungeonWave !== clearedWave) return;
+          if (!outcome.continueDungeon) {
+            if (outcome.escaped) logBattle('……發現哥布林逃跑了，副本結束。', 'progress');
+            else logBattle('哥布林營地已被完全清空，副本結束。', 'progress');
+            completeDungeon();
+            return;
+          }
+          if (outcome.horn) logBattle('號角後出現更多哥布林，繼續前進！', 'spawn');
+          loadDungeonWave(outcome.nextWave);
+        }, outcome.horn ? 1200 : 650);
+        return;
+      }
       setTimeout(() => {
         if (!battle.isDungeon || battle.dungeonWave !== clearedWave) return;
-        if (clearedWave >= finalWave) completeDungeon();
+        if (clearedWave >= definition.waves) completeDungeon();
         else loadDungeonWave(clearedWave + 1);
       }, 650);
     }
@@ -2542,7 +2568,10 @@ function openBattle() {
     showToast(`⚠ ${rank} 出現：${openingSpecial.name}`);
     logBattle(`⚠ ${rank}【${openingSpecial.name}】已出現在地圖！`);
   }
-  logBattle(isDungeon ? `◆ 進入${currentMap.name}，第 1／${dungeonDefinition.waves} 波：${enemyTypes.length} 名敵人來襲。全滅後自動進入下一波。` : `進入${currentMap.name}，${character.name}開始自動戰鬥。怪物移動速度 200%，重生約 2 秒。`);
+  const dungeonOpening = currentMap.id === 'goblin-camp'
+    ? `◆ 進入${currentMap.name}，本次副本最少 4 波、最多 7 波；第 4～6 波清場後號角將決定是否繼續。`
+    : `◆ 進入${currentMap.name}，第 1／${dungeonDefinition?.waves || 10} 波：${enemyTypes.length} 名敵人來襲。全滅後自動進入下一波。`;
+  logBattle(isDungeon ? dungeonOpening : `進入${currentMap.name}，${character.name}開始自動戰鬥。怪物移動速度 200%，重生約 2 秒。`);
   fighting = true;
   document.querySelector('#battle-toggle').textContent = 'Ⅱ 暫停攻擊';
   updateBattleUI();

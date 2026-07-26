@@ -24,5 +24,22 @@
     return roll < rate;
   }
 
-  return { resolveCompletion, shouldDropTicket };
+  function resolveGoblinCampWaveClear({ wave, randomValue, minWave = 4, maxWave = 7 }) {
+    const clearedWave = Math.max(1, Math.floor(Number(wave) || 1));
+    if (clearedWave < minWave) {
+      return { horn: false, escaped: false, continueDungeon: true, nextWave: clearedWave + 1 };
+    }
+    if (clearedWave >= maxWave) {
+      return { horn: false, escaped: false, continueDungeon: false, nextWave: null };
+    }
+    const escaped = (Number(randomValue) || 0) < .5;
+    return {
+      horn: true,
+      escaped,
+      continueDungeon: !escaped,
+      nextWave: escaped ? null : clearedWave + 1
+    };
+  }
+
+  return { resolveCompletion, shouldDropTicket, resolveGoblinCampWaveClear };
 }));
