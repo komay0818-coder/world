@@ -17,4 +17,13 @@ assert.deepEqual(policy.removeLegacyEquipmentFromInventory(inventory).map((item)
   'starter-warrior-weapon-0'
 ], 'materials, consumables and recruit equipment survive the reset');
 
-console.log('equipment-policy: 5 assertions passed');
+const weapons = policy.WEAPON_CATALOG;
+assert.deepEqual([weapons.shortIronSword.attackMin, weapons.shortIronSword.attackMax, weapons.shortIronSword.attackSpeed], [8, 11, 1.40], 'short iron sword stats match the design');
+assert.deepEqual([weapons.knightLongsword.attackMin, weapons.knightLongsword.attackMax, weapons.knightLongsword.attackSpeed], [10, 14, 1.20], 'knight longsword stats match the design');
+assert.deepEqual([weapons.mercenaryGreatsword.attackMin, weapons.mercenaryGreatsword.attackMax, weapons.mercenaryGreatsword.attackSpeed], [18, 24, .80], 'mercenary greatsword stats match the design');
+assert.deepEqual([weapons.giantIronSword.attackMin, weapons.giantIronSword.attackMax, weapons.giantIronSword.attackSpeed], [21, 28, .65], 'giant iron sword stats match the design');
+assert.equal(policy.rollWeaponAttack(weapons.shortIronSword, 0), 8, 'minimum roll uses the lower attack bound');
+assert.equal(policy.rollWeaponAttack(weapons.shortIronSword, .999), 11, 'maximum roll uses the upper attack bound');
+assert.equal(policy.getAttacksPerSecond(weapons.giantIronSword, 1), .65, 'weapon speed is measured in attacks per second');
+
+console.log('equipment-policy: 21 assertions passed');

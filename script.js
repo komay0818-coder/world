@@ -1279,6 +1279,7 @@ function getCharacterStats(level, progress = getProgress(), character = JSON.par
   const hunterPrecisionTier = character?.job === 'hunter' && level >= 3 ? getPassiveSkillUpgradeLevel(progress, 'hunter', '精準射擊') : 0;
   const hunterMasteryTier = character?.job === 'hunter' && level >= 15 ? getPassiveSkillUpgradeLevel(progress, 'hunter', '弓術專精') : 0;
   const hunterWeaponMultiplier = hunterMasteryTier ? 1 + (.10 + (hunterMasteryTier - 1) * .02) : 1;
+  const equippedWeapon = progress.equipment?.weapon;
   return {
     hp: Math.round((base.hp + race.hp + (level - 1) * 12 + equipment.hp + collection.hp) * humanMultiplier),
     mana: Math.round((base.mana + race.mana + (level - 1) * 6 + collection.mana) * humanMultiplier),
@@ -1287,7 +1288,7 @@ function getCharacterStats(level, progress = getProgress(), character = JSON.par
     crit: Math.min(.60, base.crit + race.crit + collection.crit + (hunterPrecisionTier ? .05 + (hunterPrecisionTier - 1) * .01 : 0)),
     dodge: Math.min(.45, Math.max(0, base.dodge + race.dodge + collection.dodge)),
     accuracy: Math.min(1.30, 1.05 + (character?.job === 'hunter' ? .05 : 0) + (hunterPrecisionTier ? .10 + (hunterPrecisionTier - 1) * .02 : 0)),
-    attackSpeed: base.attackSpeed * 1.15,
+    attackSpeed: EquipmentPolicy.getAttacksPerSecond(equippedWeapon, base.attackSpeed * 1.15),
     cooldownSpeed: character?.race === 'elf' ? 1.03 : 1,
     dotMultiplier: character?.race === 'undead' ? 1.20 : 1
   };
@@ -1404,7 +1405,9 @@ function addCollectibleLoot(progress, enemy) {
 
 function itemStatsText(item) {
   const parts = [];
-  if (item.attack) parts.push(`攻擊 +${effectiveEquipmentStat(item, 'attack')}`);
+  if (Number.isFinite(Number(item.attackMin)) && Number.isFinite(Number(item.attackMax))) parts.push(`攻擊 ${item.attackMin}～${item.attackMax}`);
+  else if (item.attack) parts.push(`攻擊 +${effectiveEquipmentStat(item, 'attack')}`);
+  if (Number(item.attackSpeed) > 0) parts.push(`攻速 ${Number(item.attackSpeed).toFixed(2)} 次／秒`);
   if (item.defense) parts.push(`防禦 +${effectiveEquipmentStat(item, 'defense')}`);
   if (item.hp) parts.push(`生命 +${effectiveEquipmentStat(item, 'hp')}`);
   if (item.affix) parts.push(`詞綴【${item.affix.name}】：${item.affix.text}`);
@@ -1438,6 +1441,9 @@ function equipmentStackKey(item) {
     quality: item.quality || '普通',
     slot: item.slot,
     weaponType: item.weaponType || '',
+    attackMin: item.attackMin || 0,
+    attackMax: item.attackMax || 0,
+    attackSpeed: item.attackSpeed || 0,
     armorType: item.armorType || '',
     attack: item.attack || 0,
     defense: item.defense || 0,
@@ -1696,7 +1702,11 @@ function equipItem(itemId) {
   showToast(`已穿戴：${item.name}`);
   logBattle(`⚙ 已穿戴【${item.name}】。`);
   renderInventory(document.querySelector('#inventory-modal').dataset.view || 'inventory');
-  if (fighting) updateBattleUI();
+  if (fighting) {
+    clearInterval(battleTimer);
+    battleTimer = setInterval(battleTick, Math.round(1000 / getCharacterStats(progress.level, progress, character).attackSpeed));
+    updateBattleUI();
+  }
 }
 
 function discardSelectedEquipment() {
@@ -2416,9 +2426,13 @@ function battleTick() {
   autoSkillTick();
   queueDefeatedEnemies();
   const stats = getCharacterStats(progress.level, progress, character);
+  const equippedWeapon = progress.equipment?.weapon;
+  const rolledWeaponAttack = EquipmentPolicy.rollWeaponAttack(equippedWeapon, Math.random());
+  const displayedWeaponAttack = rolledWeaponAttack === null ? 0 : effectiveEquipmentStat(equippedWeapon, 'attack');
+  const attackWithWeaponRoll = stats.attack + (rolledWeaponAttack === null ? 0 : rolledWeaponAttack - displayedWeaponAttack);
   const orcRage = character.race === 'orc' && Math.random() < .10;
   const critical = Math.random() < stats.crit;
-  const basePlayerHit = Math.max(1, Math.ceil(stats.attack * (orcRage ? 1.10 : 1) * (critical ? 1.5 : 1)));
+  const basePlayerHit = Math.max(1, Math.ceil(attackWithWeaponRoll * (orcRage ? 1.10 : 1) * (critical ? 1.5 : 1)));
   let targetIndex = oldestAliveEnemyIndex();
   if (targetIndex === -1) {
     updateBattleUI();
