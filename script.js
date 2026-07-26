@@ -1717,57 +1717,73 @@ function discardSelectedEquipment() {
   renderInventory('inventory');
 }
 
-const BATTLE_FORMATION = [
-  { depth: 'near', role: 'vanguard', x: 34, y: 78, scale: 1.06, z: 9, blur: 0 },
-  { depth: 'far', role: 'rear-guard', x: 55, y: 55, scale: .76, z: 5, blur: .35 },
-  { depth: 'mid', role: 'flanker', x: 84, y: 73, scale: .88, z: 7, blur: 0 },
-  { depth: 'near', role: 'skirmisher', x: 69, y: 91, scale: .98, z: 10, blur: 0 }
-];
-
 function renderEnemySquad() {
   const squad = document.querySelector('#enemy-squad');
-  const previousPositions = new Map(Array.from(squad.querySelectorAll('.enemy-unit')).map((element) => [
+  const previousPositions = new Map(Array.from(squad.querySelectorAll('.enemy-unit:not(.defeated-ghost)')).map((element) => [
     element.id,
-    { rect: element.getBoundingClientRect(), stageSlot: element.dataset.stageSlot }
+    { rect: element.getBoundingClientRect(), displaySlot: element.dataset.displaySlot, clone: element.cloneNode(true) }
   ]));
   const visibleIndexes = aliveEnemyIndexesByAge().slice(0, 4);
   const focusIndex = visibleIndexes[0] ?? -1;
   const reserveCount = Math.max(0, battle.enemyHps.filter((hp) => hp > 0).length - visibleIndexes.length);
-  const visibleEnemies = visibleIndexes.map((index, stageSlot) => {
+  const currentMap = getActiveMap(getProgress());
+  const monsterLevel = MonsterDisplayPolicy.getMonsterLevel(currentMap, getProgress().level);
+  const visibleEnemies = Array.from({ length: 4 }, (_, displaySlot) => {
+    const index = visibleIndexes[displaySlot];
+    if (index === undefined) {
+      return `<div class="monster-battle-slot empty-slot" data-display-slot="${displaySlot}" role="gridcell"><div class="monster-empty-slot">等待怪物</div></div>`;
+    }
     const hp = battle.enemyHps[index];
     const enemy = getEnemyDefinition(index);
     const damageEvents = (battle.enemyDamages[index] || []).map((event, eventIndex) => `<b class="enemy-damage ${event.type || 'normal'}" style="--damage-offset:${eventIndex * 18}px">-${event.damage}</b>`).join('');
-    const rankClass = enemy.isBoss ? 'boss' : enemy.isElite ? 'elite' : enemy.isRare ? 'rare' : '';
-    const rankName = enemy.isBoss ? `♛ BOSS・${enemy.name}` : enemy.isElite ? `◆ 菁英・${enemy.name}` : enemy.isRare ? `✦ 稀有・${enemy.name}` : enemy.name;
+    const rank = MonsterDisplayPolicy.getRankDisplay(enemy);
+    const statusDisplays = MonsterDisplayPolicy.getStatusDisplays(battle.enemyDots[index]);
+    const statusIcons = statusDisplays.length
+      ? statusDisplays.map((status) => `<span class="monster-status-icon" title="${status.label}" aria-label="${status.label}">${status.icon}</span>`).join('')
+      : '<span class="monster-status-empty">無異常狀態</span>';
     const focusClass = index === focusIndex ? 'focus-target' : 'support-target';
-    const formation = BATTLE_FORMATION[stageSlot] || BATTLE_FORMATION[0];
-    const formationStyle = `--stage-x:${formation.x}%;--stage-y:${formation.y}%;--stage-scale:${formation.scale};--stage-z:${formation.z};--stage-blur:${formation.blur}px`;
-    return `<div id="enemy-${index}" class="enemy-unit stage-slot-${stageSlot} ${focusClass} ${rankClass} ${battle.targetIndexes.includes(index) ? 'targeted hit' : ''}" data-stage-slot="${stageSlot}" data-depth="${formation.depth}" data-role="${formation.role}" style="${formationStyle}"><span class="enemy-art ${enemy.artClass}"></span>${damageEvents}<small>${rankName}</small><div class="hp-track enemy-track"><i style="width:${Math.max(0, hp / enemy.maxHp * 100)}%"></i></div></div>`;
+    const rankBadge = rank.label ? `<span class="monster-rank-badge">${rank.icon} ${rank.label}</span>` : '';
+    const imagePath = MonsterDisplayPolicy.MONSTER_IMAGE_BY_TYPE[enemy.id] || MonsterDisplayPolicy.MONSTER_IMAGE_BY_TYPE.goblin;
+    const hpPercent = Math.max(0, hp / enemy.maxHp * 100);
+    return `<article id="enemy-${index}" class="enemy-unit monster-battle-slot ${focusClass} ${rank.className} ${battle.targetIndexes.includes(index) ? 'targeted hit' : ''}" data-display-slot="${displaySlot}" data-enemy-index="${index}" role="gridcell" aria-label="${enemy.name}，等級 ${monsterLevel}"><header class="monster-slot-header"><div class="monster-slot-title"><b>${enemy.name}</b><small>Lv. ${monsterLevel}</small></div>${rankBadge}</header><div class="monster-image-frame"><img class="monster-slot-image" src="${imagePath}" alt="${enemy.name}" draggable="false">${damageEvents}</div><div class="monster-status-row" aria-label="異常狀態">${statusIcons}</div><div class="hp-track enemy-track monster-slot-hp" role="progressbar" aria-label="${enemy.name}生命" aria-valuemin="0" aria-valuemax="${enemy.maxHp}" aria-valuenow="${Math.max(0, hp)}"><i style="width:${hpPercent}%"></i></div></article>`;
   }).join('');
   const reserveLabel = reserveCount > 0
     ? `<div class="reserve-indicator"><b>後備 ${reserveCount}</b><span>等待進場</span></div>`
-    : visibleIndexes.length ? '' : '<div class="reserve-indicator empty"><b>戰場暫空</b><span>怪物即將重生</span></div>';
+    : '';
   squad.innerHTML = visibleEnemies + reserveLabel;
   if (!previousPositions.size) return;
+  const squadRect = squad.getBoundingClientRect();
+  previousPositions.forEach((previous, id) => {
+    if (visibleIndexes.some((index) => `enemy-${index}` === id)) return;
+    const ghost = previous.clone;
+    ghost.removeAttribute('id');
+    ghost.classList.add('defeated-ghost');
+    ghost.style.setProperty('--ghost-left', `${previous.rect.left - squadRect.left}px`);
+    ghost.style.setProperty('--ghost-top', `${previous.rect.top - squadRect.top}px`);
+    ghost.style.setProperty('--ghost-width', `${previous.rect.width}px`);
+    ghost.style.setProperty('--ghost-height', `${previous.rect.height}px`);
+    squad.appendChild(ghost);
+    setTimeout(() => ghost.remove(), 380);
+  });
   requestAnimationFrame(() => {
-    squad.querySelectorAll('.enemy-unit').forEach((element) => {
+    squad.querySelectorAll('.enemy-unit:not(.defeated-ghost)').forEach((element) => {
       if (typeof element.animate !== 'function') return;
       const previous = previousPositions.get(element.id);
       if (!previous) {
         element.animate([
-          { opacity: 0, translate: '64px -36px', scale: '.82' },
+          { opacity: 0, translate: '24px 0', scale: '.96' },
           { opacity: 1, translate: '0 0', scale: '1' }
-        ], { duration: 620, easing: 'cubic-bezier(.18,.82,.24,1)' });
+        ], { duration: 360, easing: 'cubic-bezier(.18,.82,.24,1)' });
         return;
       }
-      if (previous.stageSlot === element.dataset.stageSlot) return;
+      if (previous.displaySlot === element.dataset.displaySlot) return;
       const currentRect = element.getBoundingClientRect();
       const deltaX = previous.rect.left - currentRect.left;
       const deltaY = previous.rect.top - currentRect.top;
       element.animate([
-        { translate: `${deltaX}px ${deltaY}px`, scale: '.94', opacity: .82 },
+        { translate: `${deltaX}px ${deltaY}px`, scale: '.98', opacity: .88 },
         { translate: '0 0', scale: '1', opacity: 1 }
-      ], { duration: 720, easing: 'cubic-bezier(.2,.8,.25,1)' });
+      ], { duration: 420, easing: 'cubic-bezier(.2,.8,.25,1)' });
     });
   });
 }
