@@ -1405,6 +1405,7 @@ function addCollectibleLoot(progress, enemy) {
 
 function itemStatsText(item) {
   const parts = [];
+  if (item.series) parts.push(item.series);
   if (Number.isFinite(Number(item.attackMin)) && Number.isFinite(Number(item.attackMax))) parts.push(`攻擊 ${item.attackMin}～${item.attackMax}`);
   else if (item.attack) parts.push(`攻擊 +${effectiveEquipmentStat(item, 'attack')}`);
   if (Number(item.attackSpeed) > 0) parts.push(`攻速 ${Number(item.attackSpeed).toFixed(2)} 次／秒`);
@@ -1503,7 +1504,9 @@ function renderInventory(view = 'inventory') {
     const scoreDifference = score - equipmentScore(currentItem);
     const scoreText = item.kind === 'equipment' ? `<em class="equipment-score">評分 ${score}${!equipped ? `<span class="score-difference ${scoreDifference >= 0 ? 'upgrade' : 'downgrade'}">${scoreDifference >= 0 ? '▲' : '▼'} ${Math.abs(scoreDifference)}</span>` : ''}</em>` : '';
     const comparison = item.kind === 'equipment' && !equipped ? `<aside class="equipment-compare-tooltip"><strong>目前穿戴・${equipmentSlots[item.slot]?.label || item.slot}</strong>${currentItem ? `<div><span class="compare-item-icon"><img src="${itemImagePath(currentItem)}" alt=""></span><p><b>${currentItem.name}</b><small>評分 ${equipmentScore(currentItem)}　${currentItem.quality || '裝備'}　${itemStatsText(currentItem)}</small></p></div>` : '<p class="compare-empty">此欄位目前沒有穿戴裝備</p>'}</aside>` : '';
-    return `<article class="inventory-item ${itemQualityClass(item)} ${equipped ? 'is-equipped' : ''} ${!wearable ? 'incompatible' : ''}" tabindex="${item.kind === 'equipment' && !equipped ? '0' : '-1'}"><span class="item-icon">${visual}</span><div><b>${item.name}${stackQuantity > 1 ? ` ×${stackQuantity}` : ''}${equipped ? '<mark>已穿戴</mark>' : ''}</b><small><span class="item-quality">${item.quality || '道具'}</span>${slot}　${itemStatsText(item)}</small>${scoreText}</div>${item.kind === 'equipment' && !equipped ? wearable ? `<button type="button" data-equip-id="${item.id}">穿戴</button>` : '<span class="equip-blocked">無法穿戴</span>' : ''}${scrapControl}${comparison}</article>`;
+    const equipSlots = item.kind === 'equipment' ? EquipmentPolicy.getEquipSlots(item, character?.job) : [];
+    const equipControls = equipSlots.map((targetSlot) => `<button type="button" data-equip-id="${item.id}" data-equip-slot="${targetSlot}">${equipSlots.length > 1 ? targetSlot === 'weapon' ? '裝主手' : '裝副手' : '穿戴'}</button>`).join('');
+    return `<article class="inventory-item ${itemQualityClass(item)} ${equipped ? 'is-equipped' : ''} ${!wearable ? 'incompatible' : ''}" tabindex="${item.kind === 'equipment' && !equipped ? '0' : '-1'}"><span class="item-icon">${visual}</span><div><b>${item.name}${stackQuantity > 1 ? ` ×${stackQuantity}` : ''}${equipped ? '<mark>已穿戴</mark>' : ''}</b><small><span class="item-quality">${item.quality || '道具'}</span>${slot}　${itemStatsText(item)}</small>${scoreText}</div>${item.kind === 'equipment' && !equipped ? wearable && equipControls ? equipControls : '<span class="equip-blocked">無法穿戴</span>' : ''}${scrapControl}${comparison}</article>`;
   };
   const categoryTabs = [
     ['weapon', '武器'],
@@ -1676,27 +1679,28 @@ function selectAdventureMap(mapId) {
   openBattle();
 }
 
-function equipItem(itemId) {
+function equipItem(itemId, preferredSlot = null) {
   const progress = getProgress();
   const itemIndex = progress.inventory.findIndex((item) => item.id === itemId && item.kind === 'equipment');
   if (itemIndex < 0) return;
   const item = progress.inventory[itemIndex];
   const character = JSON.parse(localStorage.getItem('stardust-character') || 'null');
-  if (item.allowedJobs?.length && (!character || !item.allowedJobs.includes(character.job))) {
+  const targetSlot = preferredSlot || item.slot;
+  if (!character || !EquipmentPolicy.canEquipInSlot(item, character.job, targetSlot)) {
     showToast('這件裝備不適合目前職業。');
     return;
   }
   progress.inventory.splice(itemIndex, 1);
-  if (!equipmentSlots[item.slot]) {
+  if (!equipmentSlots[targetSlot]) {
     progress.inventory.unshift(item);
     return;
   }
   Object.entries(progress.equipment).forEach(([slot, equipped]) => {
-    if (slot !== item.slot && equipped?.id === item.id) progress.equipment[slot] = null;
+    if (slot !== targetSlot && equipped?.id === item.id) progress.equipment[slot] = null;
   });
-  const previous = progress.equipment[item.slot];
+  const previous = progress.equipment[targetSlot];
   if (previous) progress.inventory.unshift(previous);
-  progress.equipment[item.slot] = item;
+  progress.equipment[targetSlot] = item;
   scrapSelection.delete(item.id);
   saveProgress(progress);
   showToast(`已穿戴：${item.name}`);
@@ -2756,7 +2760,7 @@ document.querySelector('#inventory-modal').addEventListener('click', (event) => 
   }
   if (event.target.closest('[data-delete-scrap]')) { discardSelectedEquipment(); return; }
   const equipButton = event.target.closest('[data-equip-id]');
-  if (equipButton) { equipItem(equipButton.dataset.equipId); return; }
+  if (equipButton) { equipItem(equipButton.dataset.equipId, equipButton.dataset.equipSlot || null); return; }
   const enhanceButton = event.target.closest('[data-enhance-slot]');
   if (enhanceButton) enhanceEquipment(enhanceButton.dataset.enhanceSlot);
 });

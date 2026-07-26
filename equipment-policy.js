@@ -16,7 +16,7 @@
       attackMax: 11,
       attack: 10,
       attackSpeed: 1.40,
-      allowedJobs: ['warrior'],
+      allowedJobs: ['warrior', 'assassin'],
       quality: '普通'
     }),
     knightLongsword: Object.freeze({
@@ -31,7 +31,7 @@
       attackMax: 14,
       attack: 12,
       attackSpeed: 1.20,
-      allowedJobs: ['warrior'],
+      allowedJobs: ['warrior', 'assassin'],
       quality: '普通'
     }),
     mercenaryGreatsword: Object.freeze({
@@ -63,6 +63,66 @@
       attackSpeed: .65,
       allowedJobs: ['warrior'],
       quality: '普通'
+    }),
+    loggingHatchet: Object.freeze({
+      id: 'logging-hatchet',
+      kind: 'equipment',
+      series: '單手斧',
+      name: '伐木手斧',
+      slot: 'weapon',
+      weaponType: 'one-handed-axe',
+      image: 'assets/equipment-weapon.png',
+      attackMin: 9,
+      attackMax: 12,
+      attack: 11,
+      attackSpeed: 1.10,
+      allowedJobs: ['warrior', 'assassin'],
+      quality: '普通'
+    }),
+    warriorHatchet: Object.freeze({
+      id: 'warrior-hatchet',
+      kind: 'equipment',
+      series: '單手斧',
+      name: '戰士手斧',
+      slot: 'weapon',
+      weaponType: 'one-handed-axe',
+      image: 'assets/equipment-weapon.png',
+      attackMin: 11,
+      attackMax: 15,
+      attack: 13,
+      attackSpeed: .95,
+      allowedJobs: ['warrior', 'assassin'],
+      quality: '普通'
+    }),
+    battleGreataxe: Object.freeze({
+      id: 'battle-greataxe',
+      kind: 'equipment',
+      series: '雙手斧',
+      name: '戰鬥巨斧',
+      slot: 'weapon',
+      weaponType: 'two-handed-axe',
+      image: 'assets/equipment-weapon.png',
+      attackMin: 20,
+      attackMax: 26,
+      attack: 23,
+      attackSpeed: .70,
+      allowedJobs: ['warrior'],
+      quality: '普通'
+    }),
+    rockbreakerGreataxe: Object.freeze({
+      id: 'rockbreaker-greataxe',
+      kind: 'equipment',
+      series: '雙手斧',
+      name: '碎岩巨斧',
+      slot: 'weapon',
+      weaponType: 'two-handed-axe',
+      image: 'assets/equipment-weapon.png',
+      attackMin: 23,
+      attackMax: 30,
+      attack: 27,
+      attackSpeed: .55,
+      allowedJobs: ['warrior'],
+      quality: '普通'
     })
   });
 
@@ -87,5 +147,30 @@
     return weaponSpeed > 0 ? weaponSpeed : Math.max(.01, Number(fallback) || 1);
   }
 
-  return { WEAPON_CATALOG, isRecruitEquipment, removeLegacyEquipmentFromInventory, rollWeaponAttack, getAttacksPerSecond };
+  function isOneHandedWeapon(item) {
+    return String(item?.weaponType || '').startsWith('one-handed-');
+  }
+
+  function getEquipSlots(item, job) {
+    if (!item || item.kind !== 'equipment') return [];
+    if (item.allowedJobs?.length && !item.allowedJobs.includes(job)) return [];
+    const slots = [item.slot];
+    if (job === 'assassin' && item.slot === 'weapon' && isOneHandedWeapon(item)) slots.push('offhand');
+    return [...new Set(slots)];
+  }
+
+  function canEquipInSlot(item, job, slot) {
+    return getEquipSlots(item, job).includes(slot);
+  }
+
+  return {
+    WEAPON_CATALOG,
+    isRecruitEquipment,
+    removeLegacyEquipmentFromInventory,
+    rollWeaponAttack,
+    getAttacksPerSecond,
+    isOneHandedWeapon,
+    getEquipSlots,
+    canEquipInSlot
+  };
 }));

@@ -26,4 +26,13 @@ assert.equal(policy.rollWeaponAttack(weapons.shortIronSword, 0), 8, 'minimum rol
 assert.equal(policy.rollWeaponAttack(weapons.shortIronSword, .999), 11, 'maximum roll uses the upper attack bound');
 assert.equal(policy.getAttacksPerSecond(weapons.giantIronSword, 1), .65, 'weapon speed is measured in attacks per second');
 
-console.log('equipment-policy: 21 assertions passed');
+assert.deepEqual([weapons.loggingHatchet.attackMin, weapons.loggingHatchet.attackMax, weapons.loggingHatchet.attackSpeed], [9, 12, 1.10], 'logging hatchet stats match the design');
+assert.deepEqual([weapons.warriorHatchet.attackMin, weapons.warriorHatchet.attackMax, weapons.warriorHatchet.attackSpeed], [11, 15, .95], 'warrior hatchet stats match the design');
+assert.deepEqual([weapons.battleGreataxe.attackMin, weapons.battleGreataxe.attackMax, weapons.battleGreataxe.attackSpeed], [20, 26, .70], 'battle greataxe stats match the design');
+assert.deepEqual([weapons.rockbreakerGreataxe.attackMin, weapons.rockbreakerGreataxe.attackMax, weapons.rockbreakerGreataxe.attackSpeed], [23, 30, .55], 'rockbreaker greataxe stats match the design');
+assert.deepEqual(policy.getEquipSlots(weapons.shortIronSword, 'assassin'), ['weapon', 'offhand'], 'assassins can equip one-handed swords in either hand');
+assert.deepEqual(policy.getEquipSlots(weapons.loggingHatchet, 'assassin'), ['weapon', 'offhand'], 'assassins can equip one-handed axes in either hand');
+assert.deepEqual(policy.getEquipSlots(weapons.battleGreataxe, 'assassin'), [], 'assassins cannot equip two-handed axes');
+assert.deepEqual(policy.getEquipSlots(weapons.giantIronSword, 'warrior'), ['weapon'], 'warriors equip two-handed weapons in the main-hand slot');
+
+console.log('equipment-policy: 38 assertions passed');
