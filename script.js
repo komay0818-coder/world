@@ -77,6 +77,7 @@ const mapProgression = [
   { id: 'wolf-den', regionOf: 'beginner-plains', min: 2, max: 5, name: '狼穴', background: 'assets/wolf-den-background.png', implemented: true, normalXp: 6, eliteXp: 16, bossXp: 80, recommended: { attack: 16, defense: 4, hp: 110 } },
   { id: 'boar-woods', regionOf: 'beginner-plains', min: 3, max: 5, name: '野豬林', background: 'assets/boar-woods-background.png', implemented: true, normalXp: 8, eliteXp: 20, bossXp: 95, recommended: { attack: 19, defense: 6, hp: 135 } },
   { id: 'black-forest', min: 5, max: 10, name: '黑森林', background: 'assets/black-forest-background.png', implemented: true, normalXp: 4, eliteXp: 14, bossXp: 56, recommended: { attack: 26, defense: 8, hp: 180 } },
+  { id: 'goblin-camp', regionOf: 'beginner-plains', min: 2, max: 5, name: '哥布林營地', background: 'assets/plains-entrance-background.png', implemented: true, dungeon: true, ticketItemId: 'goblin-camp-map', normalXp: 10, eliteXp: 28, bossXp: 120, recommended: { attack: 18, defense: 5, hp: 120 } },
   { id: 'black-forest-altar', min: 5, max: 10, name: '黑森林祭壇', background: 'assets/black-forest-background.png', implemented: true, dungeon: true, normalXp: 0, eliteXp: 22, bossXp: 126, recommended: { attack: 34, defense: 11, hp: 230 } },
   { min: 10, max: 15, name: '石牙山谷', normalXp: 8, eliteXp: 35, bossXp: 140 },
   { min: 15, max: 20, name: '荒蕪沙漠', normalXp: 18, eliteXp: 70, bossXp: 280 },
@@ -569,6 +570,11 @@ const eliteSpawnChance = .08;
 const bossSpawnChance = .03;
 const dungeonEliteIds = ['rootExecutioner', 'altarNightblade', 'moonboneSentinel', 'blightOracle'];
 const dungeonBossId = 'eclipseSovereign';
+const GOBLIN_CAMP_TICKET_ID = 'goblin-camp-map';
+const dungeonDefinitions = {
+  'goblin-camp': { name: '哥布林營地', waves: 5, ticketItemId: GOBLIN_CAMP_TICKET_ID },
+  'black-forest-altar': { name: '黑森林祭壇', waves: 10 }
+};
 
 const collectibleTemplates = {
   goblin: { id: 'goblin-badge', name: '哥布林斥候徽記', source: '哥布林', icon: '♟', attack: 1, description: '攻擊／法攻 +1' },
@@ -1112,16 +1118,28 @@ function createEnemyTypes(playerLevel = 1) {
   return types.sort(() => Math.random() - .5);
 }
 
-function createDungeonWaveTypes(wave) {
+function getDungeonDefinition(mapId = battle.dungeonId || getActiveMap(getProgress()).id) {
+  return dungeonDefinitions[mapId] || dungeonDefinitions['black-forest-altar'];
+}
+
+function createDungeonWaveTypes(wave, mapId = battle.dungeonId || getActiveMap(getProgress()).id) {
+  const definition = getDungeonDefinition(mapId);
+  if (mapId === 'goblin-camp') {
+    if (wave >= definition.waves) return ['goblinOverlord', 'goblinOverlord', 'goblinKing'];
+    const enemyCount = wave <= 2 ? 3 : 4;
+    const types = Array.from({ length: enemyCount }, (_, index) => (wave >= 3 && index === enemyCount - 1 ? 'goblinOverlord' : Math.random() < .38 ? 'goblin' : 'plainsGoblinYoung'));
+    return types.sort(() => Math.random() - .5);
+  }
   const enemyCount = wave <= 3 ? 3 : wave <= 6 ? 4 : 5;
-  const eliteCount = wave === 10 ? 4 : enemyCount;
+  const eliteCount = wave === definition.waves ? 4 : enemyCount;
   const types = Array.from({ length: eliteCount }, () => dungeonEliteIds[Math.floor(Math.random() * dungeonEliteIds.length)]);
-  if (wave === 10) types.push(dungeonBossId);
+  if (wave === definition.waves) types.push(dungeonBossId);
   return types;
 }
 
 function loadDungeonWave(wave) {
-  const enemyTypes = createDungeonWaveTypes(wave);
+  const definition = getDungeonDefinition();
+  const enemyTypes = createDungeonWaveTypes(wave, battle.dungeonId);
   const now = Date.now();
   battle.dungeonWave = wave;
   battle.enemyTypes = enemyTypes;
@@ -1133,14 +1151,32 @@ function loadDungeonWave(wave) {
   battle.enemyNextAttackAt = createEnemyAttackSchedule(enemyTypes, now);
   battle.targetIndexes = [];
   battle.waveTransitioning = false;
-  logBattle(`◆ 黑森林祭壇第 ${wave}／10 波開始：${enemyTypes.length} 名精英來襲。`, 'system');
-  showToast(`副本第 ${wave}／10 波`);
+  logBattle(`◆ ${definition.name}第 ${wave}／${definition.waves} 波開始：${enemyTypes.length} 名敵人來襲。`, 'system');
+  showToast(`副本第 ${wave}／${definition.waves} 波`);
   updateBattleUI();
 }
 
 function completeDungeon() {
   const progress = getProgress();
-  progress.selectedMapId = 'black-forest';
+  const dungeonId = battle.dungeonId || getActiveMap(progress).id;
+  const definition = getDungeonDefinition(dungeonId);
+  const returnMapId = progress.dungeonReturnMapId || (dungeonId === 'black-forest-altar' ? 'black-forest' : 'plains-entrance');
+  let restartDungeon = false;
+  let returnDelay = 1200;
+  if (definition.ticketItemId) {
+    const result = DungeonTicketCycle.resolveCompletion({
+      ticketCount: getInventoryItemQuantity(progress, definition.ticketItemId),
+      dungeonId,
+      returnMapId
+    });
+    if (result.consumed) consumeInventoryItem(progress, definition.ticketItemId, result.consumed);
+    restartDungeon = result.restartDungeon;
+    returnDelay = result.delayMs;
+    progress.selectedMapId = result.nextMapId;
+    progress.dungeonAdmission = result.nextAdmission;
+  } else {
+    progress.selectedMapId = returnMapId;
+  }
   saveProgress(progress);
   battle.dungeonComplete = true;
   battle.waveTransitioning = false;
@@ -1149,13 +1185,14 @@ function completeDungeon() {
   clearInterval(skillTimer);
   clearInterval(enemyAttackTimer);
   document.querySelector('#battle-toggle').textContent = '副本完成';
-  logBattle('♛ 黑森林祭壇攻略完成！你已擊破全部 10 波精英。', 'progress');
-  showToast('黑森林祭壇攻略完成！');
+  const ticketsLeft = definition.ticketItemId ? getInventoryItemQuantity(progress, definition.ticketItemId) : 0;
+  logBattle(`♛ ${definition.name}攻略完成！${definition.ticketItemId ? `已消耗 1 張哥布林營地地圖，剩餘 ${ticketsLeft} 張。` : ''}`, 'progress');
+  showToast(restartDungeon ? `通關完成，剩餘 ${ticketsLeft} 張地圖，即將重新開始。` : `${definition.name}攻略完成！`);
   setTimeout(() => {
     if (!battle.dungeonComplete) return;
     openBattle();
-    showToast('已返回黑森林，掛機戰鬥繼續');
-  }, 1200);
+    showToast(restartDungeon ? `再次進入${definition.name}。` : `已返回${mapProgression.find((map) => map.id === returnMapId)?.name || '原地圖'}，繼續自動戰鬥。`);
+  }, returnDelay);
 }
 
 function hasAliveBoss(excludeIndex = -1) {
@@ -1305,6 +1342,32 @@ function removeManaPotionItem(progress) {
   if (!potion) return;
   potion.quantity -= 1;
   if (potion.quantity <= 0) progress.inventory = progress.inventory.filter((item) => item !== potion);
+}
+
+function getInventoryItemQuantity(progress, itemId) {
+  return Math.max(0, Number(progress.inventory.find((item) => item.id === itemId)?.quantity) || 0);
+}
+
+function addGoblinCampMap(progress, amount = 1) {
+  const existing = progress.inventory.find((item) => item.id === GOBLIN_CAMP_TICKET_ID);
+  if (existing) existing.quantity = getInventoryItemQuantity(progress, GOBLIN_CAMP_TICKET_ID) + amount;
+  else progress.inventory.push({
+    id: GOBLIN_CAMP_TICKET_ID,
+    kind: 'material',
+    icon: '🗺️',
+    quality: '稀有',
+    name: '哥布林營地地圖',
+    description: '進入哥布林營地副本的門票；每次完整通關消耗 1 張。',
+    quantity: amount
+  });
+}
+
+function consumeInventoryItem(progress, itemId, amount = 1) {
+  const item = progress.inventory.find((entry) => entry.id === itemId);
+  if (!item || (Number(item.quantity) || 0) < amount) return false;
+  item.quantity -= amount;
+  if (item.quantity <= 0) progress.inventory = progress.inventory.filter((entry) => entry !== item);
+  return true;
 }
 
 function addLoot(progress, enemy) {
@@ -1545,14 +1608,16 @@ function renderMapSelector() {
     const recommended = map.recommended || { attack: 0, defense: 0, hp: 0 };
     const ready = stats.attack >= recommended.attack && stats.defense >= recommended.defense && stats.hp >= recommended.hp;
     const recommendation = `<strong class="map-recommendation ${ready ? 'ready' : 'danger'}">${ready ? '✓ 能力達標' : '⚠ 建議整備'}　攻 ${recommended.attack}・防 ${recommended.defense}・生命 ${recommended.hp}</strong>`;
-    const dungeonKeys = resources.dungeonKeys?.blackForestAltar || 0;
+    const dungeonDefinition = map.dungeon ? dungeonDefinitions[map.id] : null;
+    const dungeonPasses = map.ticketItemId ? getInventoryItemQuantity(progress, map.ticketItemId) : resources.dungeonKeys?.blackForestAltar || 0;
+    const dungeonPassName = map.ticketItemId ? '哥布林營地地圖' : '祭壇鑰匙';
     const detail = isRegionHub
       ? `<em>包含 ${beginnerPlainsRegions.length} 個探索區域・怪物與掉落物將陸續追加</em>`
-      : map.dungeon ? `<em>10 波精英・第 10 波最終 BOSS・職業套裝</em><strong class="dungeon-key-count">祭壇鑰匙：${dungeonKeys}</strong>` : `<em>普通 ${map.normalXp} EXP・精英 ${map.eliteXp} EXP・Boss ${map.bossXp} EXP</em>`;
+      : map.dungeon ? `<em>${dungeonDefinition?.waves || 10} 波戰鬥・最終波 BOSS${map.ticketItemId ? '・可連續自動挑戰' : '・職業套裝'}</em><strong class="dungeon-key-count">${dungeonPassName}：${dungeonPasses}</strong>` : `<em>普通 ${map.normalXp} EXP・精英 ${map.eliteXp} EXP・Boss ${map.bossXp} EXP</em>`;
     const action = isRegionHub
       ? `<button type="button" data-open-map-region="${map.id}">查看 ${beginnerPlainsRegions.length} 個區域</button>`
       : map.dungeon
-      ? unlocked ? `<button type="button" data-select-map="${map.id}" ${dungeonKeys < 1 ? 'disabled' : ''}>${dungeonKeys > 0 ? '消耗鑰匙進入' : '需要祭壇鑰匙'}</button>` : `<span>Lv. ${map.min} 解鎖</span>`
+      ? unlocked ? `<button type="button" data-select-map="${map.id}" ${dungeonPasses < 1 ? 'disabled' : ''}>${dungeonPasses > 0 ? map.ticketItemId ? '使用地圖進入' : '消耗鑰匙進入' : `需要${dungeonPassName}`}</button>` : `<span>Lv. ${map.min} 解鎖</span>`
       : unlocked ? map.id === activeMap.id ? '<span>目前地圖</span>' : `<button type="button" data-select-map="${map.id}">前往地圖</button>` : `<span>Lv. ${map.min} 解鎖</span>`;
     return `<article class="map-selection-card ${isRegionHub ? 'region-hub-card' : ''} ${map.dungeon ? 'dungeon-card' : ''} ${map.id === activeMap.id ? 'selected' : ''} ${unlocked ? '' : 'locked'}" style="--map-preview:url('${map.background}')"><div><b>${map.dungeon ? '◆ ' : ''}${map.name}</b><small>${isRegionHub ? '地區等級' : '怪物等級'} Lv. ${map.min}～${map.max}</small>${detail}${isRegionHub ? '' : recommendation}</div>${action}</article>`;
   }).join('')}</section>`;
@@ -1572,13 +1637,16 @@ function renderBeginnerPlainsRegions() {
       <em>區域架構已建立，怪物、圖片與個別掉落物將於後續逐區追加。</em>
     </section>
     <section class="map-region-grid">${beginnerPlainsRegions.map((region, index) => {
-      const available = ['plains-entrance', 'wolf-den', 'boar-woods'].includes(region.id);
+      const available = ['plains-entrance', 'wolf-den', 'boar-woods', 'goblin-camp'].includes(region.id);
+      const isGoblinCamp = region.id === 'goblin-camp';
+      const goblinMaps = getInventoryItemQuantity(progress, GOBLIN_CAMP_TICKET_ID);
+      const regionDetail = isGoblinCamp ? `副本 5 波・哥布林營地地圖 ${goblinMaps} 張` : available ? '怪物 5 種・稀有怪物機率 10%' : '怪物與掉落物：尚未設定';
       return `
       <article class="map-region-card ${available ? 'available' : 'pending'} ${activeMap.id === region.id ? 'selected' : ''}">
         <span>${String(index + 1).padStart(2, '0')}</span>
-        <div><b>${region.name}</b><small>${available ? '怪物 5 種・稀有怪物機率 10%' : '怪物與掉落物：尚未設定'}</small></div>
+        <div><b>${region.name}</b><small>${regionDetail}</small></div>
         ${available
-          ? activeMap.id === region.id ? '<em class="current-region">目前區域</em>' : `<button type="button" data-select-map="${region.id}">進入區域</button>`
+          ? activeMap.id === region.id ? '<em class="current-region">目前區域</em>' : `<button type="button" data-select-map="${region.id}" ${isGoblinCamp && goblinMaps < 1 ? 'disabled' : ''}>${isGoblinCamp ? goblinMaps > 0 ? '使用地圖進入副本' : '需要哥布林營地地圖' : '進入區域'}</button>`
           : '<em>準備中</em>'}
       </article>`;
     }).join('')}
@@ -1592,17 +1660,23 @@ function selectAdventureMap(mapId) {
   const map = mapProgression.find((item) => item.id === mapId && item.implemented);
   if (!map || progress.level < map.min) return;
   if (map.dungeon) {
-    const resources = getAccountResources();
-    const keys = resources.dungeonKeys?.blackForestAltar || 0;
-    if (keys < 1) { showToast('需要黑森林祭壇鑰匙才能進入。'); return; }
-    resources.dungeonKeys.blackForestAltar = keys - 1;
-    saveAccountResources(resources);
+    if (map.ticketItemId) {
+      if (getInventoryItemQuantity(progress, map.ticketItemId) < 1) { showToast('需要哥布林營地地圖才能進入。'); return; }
+    } else {
+      const resources = getAccountResources();
+      const keys = resources.dungeonKeys?.blackForestAltar || 0;
+      if (keys < 1) { showToast('需要黑森林祭壇鑰匙才能進入。'); return; }
+      resources.dungeonKeys.blackForestAltar = keys - 1;
+      saveAccountResources(resources);
+    }
+    const activeMap = getActiveMap(progress);
+    if (!activeMap.dungeon) progress.dungeonReturnMapId = activeMap.id;
     progress.dungeonAdmission = true;
   }
   progress.selectedMapId = map.id;
   saveProgress(progress);
   document.querySelector('#inventory-modal').classList.add('hidden');
-  showToast(map.dungeon ? `已消耗 1 把鑰匙，進入：${map.name}` : `已前往：${map.name}`);
+  showToast(map.dungeon ? map.ticketItemId ? `持有地圖，進入：${map.name}` : `已消耗 1 把鑰匙，進入：${map.name}` : `已前往：${map.name}`);
   openBattle();
 }
 
@@ -1996,7 +2070,7 @@ function updateBattleUI() {
     companionArt.style.backgroundImage = companionImage;
   }
   if (companionName) companionName.textContent = racialCompanion.name;
-  document.querySelector('#map-level-text').textContent = currentMap.dungeon ? `特殊副本・第 ${battle.dungeonWave || 1}／10 波・全員精英 Lv. ${currentMap.min}–${currentMap.max}` : `怪物等級：Lv. ${currentMap.min}–${currentMap.max}`;
+  document.querySelector('#map-level-text').textContent = currentMap.dungeon ? `特殊副本・第 ${battle.dungeonWave || 1}／${getDungeonDefinition(currentMap.id).waves} 波・Lv. ${currentMap.min}–${currentMap.max}` : `怪物等級：Lv. ${currentMap.min}–${currentMap.max}`;
   document.querySelector('#player-hp-text').textContent = `${Math.max(0, battle.playerHp)} / ${maxHp}${battle.playerShield > 0 ? `　護盾 ${battle.playerShield}` : ''}`;
   document.querySelector('#player-hp-bar').style.width = `${Math.max(0, battle.playerHp / maxHp * 100)}%`;
   document.querySelector('#player-mp-text').textContent = `${Math.ceil(battle.playerMana)} / ${maxMana} MP`;
@@ -2090,6 +2164,11 @@ function rewardVictory(index) {
   const loot = addLoot(progress, enemy);
   const collectible = addCollectibleLoot(progress, enemy);
   const accountDrops = [];
+  let goblinCampMapDropped = false;
+  if (enemy.id === 'lostGoblin') {
+    addGoblinCampMap(progress);
+    goblinCampMapDropped = true;
+  }
   const skillMaterialChance = currentMap.dungeon ? (enemy.isBoss ? 1 : .24) : currentMap.min >= 5 ? (enemy.isBoss ? .18 : enemy.isElite ? .08 : .03) : 0;
   if (skillMaterialChance > 0 && Math.random() < skillMaterialChance) {
     const amount = currentMap.dungeon && enemy.isBoss ? 2 : 1;
@@ -2132,6 +2211,7 @@ function rewardVictory(index) {
   saveProgress(progress);
   logBattle(`✦ 擊敗${enemy.name}！獲得 ${earnedXp} EXP、${earnedGold} 金幣`, 'reward');
   if (loot) logBattle(`🎁 掉落【${loot.name}】${loot.quantity ? ` ×${loot.quantity}` : ''}`);
+  if (goblinCampMapDropped) logBattle('🗺 迷路的哥布林掉落【哥布林營地地圖 ×1】', 'loot');
   accountDrops.forEach((drop) => logBattle(`◆ BOSS掉落【${drop}】`, 'loot'));
   if (collectible) {
     showToast(`獲得收藏品：${collectible.name}`);
@@ -2185,10 +2265,11 @@ function queueDefeatedEnemies() {
     if (waveCleared && !battle.waveTransitioning && !battle.dungeonComplete) {
       battle.waveTransitioning = true;
       const clearedWave = battle.dungeonWave;
+      const finalWave = getDungeonDefinition().waves;
       logBattle(`✓ 第 ${clearedWave} 波全滅。`, 'progress');
       setTimeout(() => {
         if (!battle.isDungeon || battle.dungeonWave !== clearedWave) return;
-        if (clearedWave >= 10) completeDungeon();
+        if (clearedWave >= finalWave) completeDungeon();
         else loadDungeonWave(clearedWave + 1);
       }, 650);
     }
@@ -2435,7 +2516,7 @@ function openBattle() {
   const progress = getProgress();
   let currentMap = getActiveMap(progress);
   if (currentMap.dungeon && !progress.dungeonAdmission) {
-    progress.selectedMapId = 'black-forest';
+    progress.selectedMapId = progress.dungeonReturnMapId || (currentMap.id === 'black-forest-altar' ? 'black-forest' : 'plains-entrance');
     saveProgress(progress);
     currentMap = getActiveMap(progress);
   }
@@ -2444,9 +2525,10 @@ function openBattle() {
     progress.dungeonAdmission = false;
     saveProgress(progress);
   }
-  const enemyTypes = isDungeon ? createDungeonWaveTypes(1) : createEnemyTypes(progress.level);
+  const dungeonDefinition = isDungeon ? getDungeonDefinition(currentMap.id) : null;
+  const enemyTypes = isDungeon ? createDungeonWaveTypes(1, currentMap.id) : createEnemyTypes(progress.level);
   const battleStart = Date.now();
-  battle = { enemyTypes, enemyHps: enemyTypes.map((type) => monsterTypes[type].maxHp), playerHp: getMaxHp(progress.level, progress), playerMana: getMaxMana(character.job, progress.level), playerShield: 0, manaExhausted: false, playerAttackCharge: 0, hunterAttackCount: 0, enemyNextAttackAt: createEnemyAttackSchedule(enemyTypes, battleStart), globalSkillReadyAt: 0, undeadRevived: false, skillCooldowns: {}, enemyRespawns: enemyTypes.map(() => null), enemySpawnedAt: enemyTypes.map((_, index) => battleStart + index), enemyDots: enemyTypes.map(() => []), monsterMoveSpeed: 200, targetIndexes: [], enemyDamages: enemyTypes.map(() => []), damageTimers: [], isDungeon, dungeonWave: isDungeon ? 1 : 0, dungeonComplete: false, waveTransitioning: false };
+  battle = { enemyTypes, enemyHps: enemyTypes.map((type) => monsterTypes[type].maxHp), playerHp: getMaxHp(progress.level, progress), playerMana: getMaxMana(character.job, progress.level), playerShield: 0, manaExhausted: false, playerAttackCharge: 0, hunterAttackCount: 0, enemyNextAttackAt: createEnemyAttackSchedule(enemyTypes, battleStart), globalSkillReadyAt: 0, undeadRevived: false, skillCooldowns: {}, enemyRespawns: enemyTypes.map(() => null), enemySpawnedAt: enemyTypes.map((_, index) => battleStart + index), enemyDots: enemyTypes.map(() => []), monsterMoveSpeed: 200, targetIndexes: [], enemyDamages: enemyTypes.map(() => []), damageTimers: [], isDungeon, dungeonId: isDungeon ? currentMap.id : null, dungeonWave: isDungeon ? 1 : 0, dungeonComplete: false, waveTransitioning: false };
   clearBattleLog();
   if (pendingOfflineReport) {
     logBattle(`☾ 離線掛機 ${pendingOfflineReport.duration}${pendingOfflineReport.capped ? '（已達 12 小時上限）' : ''}，擊敗約 ${pendingOfflineReport.defeated} 隻怪物。`, 'system');
@@ -2459,7 +2541,7 @@ function openBattle() {
     showToast(`⚠ ${rank} 出現：${openingSpecial.name}`);
     logBattle(`⚠ ${rank}【${openingSpecial.name}】已出現在地圖！`);
   }
-  logBattle(isDungeon ? `◆ 進入${currentMap.name}，第 1／10 波：3 名精英來襲。全滅後自動進入下一波。` : `進入${currentMap.name}，${character.name}開始自動戰鬥。怪物移動速度 200%，重生約 2 秒。`);
+  logBattle(isDungeon ? `◆ 進入${currentMap.name}，第 1／${dungeonDefinition.waves} 波：${enemyTypes.length} 名敵人來襲。全滅後自動進入下一波。` : `進入${currentMap.name}，${character.name}開始自動戰鬥。怪物移動速度 200%，重生約 2 秒。`);
   fighting = true;
   document.querySelector('#battle-toggle').textContent = 'Ⅱ 暫停攻擊';
   updateBattleUI();
@@ -2528,7 +2610,8 @@ document.querySelector('#leave-battle').addEventListener('click', () => {
   clearInterval(enemyAttackTimer);
   if (battle.isDungeon) {
     const progress = getProgress();
-    progress.selectedMapId = 'black-forest';
+    progress.selectedMapId = progress.dungeonReturnMapId || (battle.dungeonId === 'black-forest-altar' ? 'black-forest' : 'plains-entrance');
+    progress.dungeonAdmission = false;
     saveProgress(progress);
   }
   fighting = false;
