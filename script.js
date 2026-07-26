@@ -571,6 +571,7 @@ const bossSpawnChance = .03;
 const dungeonEliteIds = ['rootExecutioner', 'altarNightblade', 'moonboneSentinel', 'blightOracle'];
 const dungeonBossId = 'eclipseSovereign';
 const GOBLIN_CAMP_TICKET_ID = 'goblin-camp-map';
+const GOBLIN_CAMP_TICKET_DROP_RATE = .50;
 const dungeonDefinitions = {
   'goblin-camp': { name: '哥布林營地', waves: 5, ticketItemId: GOBLIN_CAMP_TICKET_ID },
   'black-forest-altar': { name: '黑森林祭壇', waves: 10 }
@@ -2165,7 +2166,7 @@ function rewardVictory(index) {
   const collectible = addCollectibleLoot(progress, enemy);
   const accountDrops = [];
   let goblinCampMapDropped = false;
-  if (enemy.id === 'lostGoblin') {
+  if (enemy.id === 'lostGoblin' && DungeonTicketCycle.shouldDropTicket(Math.random(), GOBLIN_CAMP_TICKET_DROP_RATE)) {
     addGoblinCampMap(progress);
     goblinCampMapDropped = true;
   }

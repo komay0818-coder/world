@@ -37,4 +37,8 @@ const missingTicket = cycle.resolveCompletion({
 assert.equal(missingTicket.consumed, 0, 'ticket count never becomes negative');
 assert.equal(missingTicket.nextMapId, 'plains-entrance', 'missing tickets safely return to the original map');
 
-console.log('dungeon-ticket: 9 assertions passed');
+assert.equal(cycle.shouldDropTicket(.49), true, 'a roll below 50% drops the goblin camp map');
+assert.equal(cycle.shouldDropTicket(.50), false, 'a roll at 50% does not drop the goblin camp map');
+assert.equal(cycle.shouldDropTicket(.99), false, 'a high roll does not drop the goblin camp map');
+
+console.log('dungeon-ticket: 12 assertions passed');

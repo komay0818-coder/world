@@ -18,5 +18,11 @@
     };
   }
 
-  return { resolveCompletion };
+  function shouldDropTicket(randomValue, dropRate = .5) {
+    const roll = Math.min(1, Math.max(0, Number(randomValue) || 0));
+    const rate = Math.min(1, Math.max(0, Number(dropRate) || 0));
+    return roll < rate;
+  }
+
+  return { resolveCompletion, shouldDropTicket };
 }));
