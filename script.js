@@ -1246,8 +1246,14 @@ function getEquipmentStats(progress = getProgress()) {
   return Object.values(progress.equipment || {}).filter(Boolean).reduce((stats, item) => ({
     attack: stats.attack + effectiveEquipmentStat(item, 'attack'),
     defense: stats.defense + effectiveEquipmentStat(item, 'defense'),
-    hp: stats.hp + effectiveEquipmentStat(item, 'hp')
-  }), { attack: 0, defense: 0, hp: 0 });
+    hp: stats.hp + effectiveEquipmentStat(item, 'hp'),
+    mana: stats.mana + effectiveEquipmentStat(item, 'mana'),
+    strength: stats.strength + effectiveEquipmentStat(item, 'strength'),
+    intelligence: stats.intelligence + effectiveEquipmentStat(item, 'intelligence'),
+    accuracy: stats.accuracy + effectiveEquipmentStat(item, 'accuracy'),
+    attackSpeedBonus: stats.attackSpeedBonus + effectiveEquipmentStat(item, 'attackSpeedBonus'),
+    cooldownSpeedBonus: stats.cooldownSpeedBonus + effectiveEquipmentStat(item, 'cooldownSpeedBonus')
+  }), { attack: 0, defense: 0, hp: 0, mana: 0, strength: 0, intelligence: 0, accuracy: 0, attackSpeedBonus: 0, cooldownSpeedBonus: 0 });
 }
 
 function getCollectionStats(progress = getProgress()) {
@@ -1280,14 +1286,14 @@ function getCharacterStats(level, progress = getProgress(), character = JSON.par
   const equippedWeapon = progress.equipment?.weapon;
   return {
     hp: Math.round((base.hp + race.hp + (level - 1) * 12 + equipment.hp + collection.hp) * humanMultiplier),
-    mana: Math.round((base.mana + race.mana + (level - 1) * 6 + collection.mana) * humanMultiplier),
-    attack: Math.round((base.attack + race.attack + (level - 1) + equipment.attack + collection.attack) * humanMultiplier * hunterWeaponMultiplier),
+    mana: Math.round((base.mana + race.mana + (level - 1) * 6 + equipment.mana + collection.mana) * humanMultiplier),
+    attack: Math.round((base.attack + race.attack + (level - 1) + equipment.attack + equipment.strength + equipment.intelligence + collection.attack) * humanMultiplier * hunterWeaponMultiplier),
     defense: Math.round((base.defense + race.defense + Math.floor((level - 1) / 5) + equipment.defense + collection.defense) * humanMultiplier),
     crit: Math.min(.60, base.crit + race.crit + collection.crit + (hunterPrecisionTier ? .05 + (hunterPrecisionTier - 1) * .01 : 0)),
     dodge: Math.min(.45, Math.max(0, base.dodge + race.dodge + collection.dodge)),
-    accuracy: Math.min(1.30, 1.05 + (character?.job === 'hunter' ? .05 : 0) + (hunterPrecisionTier ? .10 + (hunterPrecisionTier - 1) * .02 : 0)),
-    attackSpeed: EquipmentPolicy.getAttacksPerSecond(equippedWeapon, base.attackSpeed * 1.15),
-    cooldownSpeed: character?.race === 'elf' ? 1.03 : 1,
+    accuracy: Math.min(1.30, 1.05 + equipment.accuracy + (character?.job === 'hunter' ? .05 : 0) + (hunterPrecisionTier ? .10 + (hunterPrecisionTier - 1) * .02 : 0)),
+    attackSpeed: EquipmentPolicy.getAttacksPerSecond(equippedWeapon, base.attackSpeed * 1.15) * (1 + equipment.attackSpeedBonus),
+    cooldownSpeed: (character?.race === 'elf' ? 1.03 : 1) * (1 + equipment.cooldownSpeedBonus),
     dotMultiplier: character?.race === 'undead' ? 1.20 : 1
   };
 }
@@ -1411,6 +1417,12 @@ function itemStatsText(item) {
   if (Number(item.attackSpeed) > 0) parts.push(`攻速 ${Number(item.attackSpeed).toFixed(2)} 次／秒`);
   if (item.defense) parts.push(`防禦 +${effectiveEquipmentStat(item, 'defense')}`);
   if (item.hp) parts.push(`生命 +${effectiveEquipmentStat(item, 'hp')}`);
+  if (item.mana) parts.push(`最大魔力 +${effectiveEquipmentStat(item, 'mana')}`);
+  if (item.strength) parts.push(`力量 +${effectiveEquipmentStat(item, 'strength')}`);
+  if (item.intelligence) parts.push(`智力 +${effectiveEquipmentStat(item, 'intelligence')}`);
+  if (item.accuracy) parts.push(`命中率 +${Math.round(effectiveEquipmentStat(item, 'accuracy') * 100)}%`);
+  if (item.attackSpeedBonus) parts.push(`攻擊速度 +${Math.round(effectiveEquipmentStat(item, 'attackSpeedBonus') * 100)}%`);
+  if (item.cooldownSpeedBonus) parts.push(`冷卻速度 +${Math.round(effectiveEquipmentStat(item, 'cooldownSpeedBonus') * 100)}%`);
   if (item.affix) parts.push(`詞綴【${item.affix.name}】：${item.affix.text}`);
   if (item.allowedJobs?.length) parts.push(`職業：${item.allowedJobs.map((job) => ({ warrior: '戰士', assassin: '刺客', hunter: '獵人', mage: '法師', priest: '牧師' })[job] || job).join('、')}`);
   return parts.join('　') || item.description || '';
@@ -1433,7 +1445,17 @@ function equipmentValue(item) {
 
 function equipmentScore(item) {
   if (!item || item.kind !== 'equipment') return 0;
-  return Math.round(effectiveEquipmentStat(item, 'attack') * 4 + effectiveEquipmentStat(item, 'defense') * 6 + effectiveEquipmentStat(item, 'hp') * .25);
+  return Math.round(
+    effectiveEquipmentStat(item, 'attack') * 4
+    + effectiveEquipmentStat(item, 'defense') * 6
+    + effectiveEquipmentStat(item, 'hp') * .25
+    + effectiveEquipmentStat(item, 'mana') * .2
+    + effectiveEquipmentStat(item, 'strength') * 4
+    + effectiveEquipmentStat(item, 'intelligence') * 4
+    + effectiveEquipmentStat(item, 'accuracy') * 200
+    + effectiveEquipmentStat(item, 'attackSpeedBonus') * 200
+    + effectiveEquipmentStat(item, 'cooldownSpeedBonus') * 200
+  );
 }
 
 function equipmentStackKey(item) {

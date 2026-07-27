@@ -216,6 +216,81 @@
     })
   });
 
+  const ARMOR_CATALOG = Object.freeze({
+    recruitIronHelmet: Object.freeze({
+      id: 'starter-recruit-iron-helmet',
+      kind: 'equipment',
+      series: '鎧甲',
+      name: '新兵鐵盔',
+      slot: 'head',
+      armorType: 'plate',
+      image: 'assets/patchwork-cap.png',
+      defense: 5,
+      hp: 25,
+      quality: '普通'
+    }),
+    guardHelmet: Object.freeze({
+      id: 'guard-helmet',
+      kind: 'equipment',
+      series: '鎧甲',
+      name: '守衛頭盔',
+      slot: 'head',
+      armorType: 'plate',
+      image: 'assets/patchwork-cap.png',
+      defense: 3,
+      strength: 2,
+      quality: '普通'
+    }),
+    leatherHood: Object.freeze({
+      id: 'leather-hood',
+      kind: 'equipment',
+      series: '皮甲',
+      name: '皮革兜帽',
+      slot: 'head',
+      armorType: 'leather',
+      image: 'assets/patchwork-cap.png',
+      accuracy: .02,
+      defense: 2,
+      quality: '普通'
+    }),
+    huntingHood: Object.freeze({
+      id: 'hunting-hood',
+      kind: 'equipment',
+      series: '皮甲',
+      name: '狩獵頭罩',
+      slot: 'head',
+      armorType: 'leather',
+      image: 'assets/patchwork-cap.png',
+      attackSpeedBonus: .02,
+      defense: 2,
+      quality: '普通'
+    }),
+    apprenticeMageHat: Object.freeze({
+      id: 'apprentice-mage-hat',
+      kind: 'equipment',
+      series: '布甲',
+      name: '學徒法帽',
+      slot: 'head',
+      armorType: 'cloth',
+      image: 'assets/patchwork-cap.png',
+      mana: 20,
+      intelligence: 2,
+      quality: '普通'
+    }),
+    noviceHeadscarf: Object.freeze({
+      id: 'novice-headscarf',
+      kind: 'equipment',
+      series: '布甲',
+      name: '見習者頭巾',
+      slot: 'head',
+      armorType: 'cloth',
+      image: 'assets/patchwork-cap.png',
+      cooldownSpeedBonus: .02,
+      intelligence: 1,
+      quality: '普通'
+    })
+  });
+
   const ARMOR_CATEGORY_JOBS = Object.freeze({
     plate: Object.freeze(['warrior']),
     leather: Object.freeze(['hunter', 'assassin']),
@@ -282,6 +357,7 @@
 
   return {
     WEAPON_CATALOG,
+    ARMOR_CATALOG,
     ARMOR_CATEGORY_JOBS,
     getArmorCategory,
     isArmorCompatible,

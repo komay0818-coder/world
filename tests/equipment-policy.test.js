@@ -63,4 +63,19 @@ assert.deepEqual(policy.getEquipSlots(clothArmor, 'priest'), ['armor'], 'priests
 assert.deepEqual(policy.getEquipSlots(clothArmor, 'assassin'), [], 'assassins cannot equip cloth armor');
 assert.deepEqual(policy.getEquipSlots(legacyRestrictedLeather, 'assassin'), ['boots'], 'armor category rules replace legacy per-item job restrictions');
 
-console.log('equipment-policy: 69 assertions passed');
+const armor = policy.ARMOR_CATALOG;
+assert.deepEqual([armor.recruitIronHelmet.defense, armor.recruitIronHelmet.hp], [5, 25], 'recruit iron helmet stats match the design');
+assert.deepEqual([armor.guardHelmet.defense, armor.guardHelmet.strength], [3, 2], 'guard helmet stats match the design');
+assert.deepEqual([armor.leatherHood.accuracy, armor.leatherHood.defense], [.02, 2], 'leather hood stats match the design');
+assert.deepEqual([armor.huntingHood.attackSpeedBonus, armor.huntingHood.defense], [.02, 2], 'hunting hood stats match the design');
+assert.deepEqual([armor.apprenticeMageHat.mana, armor.apprenticeMageHat.intelligence], [20, 2], 'apprentice mage hat stats match the design');
+assert.deepEqual([armor.noviceHeadscarf.cooldownSpeedBonus, armor.noviceHeadscarf.intelligence], [.02, 1], 'novice headscarf stats match the design');
+assert.deepEqual(policy.getEquipSlots(armor.guardHelmet, 'warrior'), ['head'], 'warriors can equip plate helmets');
+assert.deepEqual(policy.getEquipSlots(armor.guardHelmet, 'hunter'), [], 'hunters cannot equip plate helmets');
+assert.deepEqual(policy.getEquipSlots(armor.leatherHood, 'hunter'), ['head'], 'hunters can equip leather hoods');
+assert.deepEqual(policy.getEquipSlots(armor.leatherHood, 'assassin'), ['head'], 'assassins can equip leather hoods');
+assert.deepEqual(policy.getEquipSlots(armor.apprenticeMageHat, 'mage'), ['head'], 'mages can equip cloth hats');
+assert.deepEqual(policy.getEquipSlots(armor.apprenticeMageHat, 'priest'), ['head'], 'priests can equip cloth hats');
+assert.equal(policy.isRecruitEquipment(armor.recruitIronHelmet), true, 'recruit iron helmet survives recruit-only inventory migration');
+
+console.log('equipment-policy: assertions passed');
