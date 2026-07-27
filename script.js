@@ -1134,7 +1134,8 @@ function createDungeonWaveTypes(wave, mapId = battle.dungeonId || getActiveMap(g
 
 function getMonsterDefinitionForMap(type, mapId = battle.dungeonId || getActiveMap(getProgress()).id) {
   const monster = monsterTypes[type] || monsterTypes.goblin;
-  return GoblinCampPolicy.scaleMonster(monster, mapId === 'goblin-camp');
+  const dungeonMonster = GoblinCampPolicy.scaleMonster(monster, mapId === 'goblin-camp');
+  return WolfDenPolicy.applyWolfDenPassive(dungeonMonster, mapId);
 }
 
 function loadDungeonWave(wave) {
@@ -1205,17 +1206,23 @@ function getEnemyDefinition(index) {
   return getMonsterDefinitionForMap(battle.enemyTypes[index], battle.dungeonId || getActiveMap(getProgress()).id);
 }
 
+function isPlayerBleeding(now = Date.now()) {
+  return Boolean(battle.playerBleed && battle.playerBleed.expiresAt > now);
+}
+
 function getMonsterAttackPower(enemy, progress = getProgress()) {
   const map = getActiveMap(progress);
   const monsterLevel = Math.min(map.max, Math.max(map.min, progress.level));
   const levelMultiplier = 1 + (monsterLevel - 1) * .10;
   const rankMultiplier = enemy.isBoss ? 2.4 : enemy.isElite ? 1.65 : 1;
   const randomMultiplier = .9 + Math.random() * .2;
-  return Math.max(1, Math.round((enemy.attack || 10) * levelMultiplier * rankMultiplier * randomMultiplier * 1.25));
+  const bloodFrenzy = WolfDenPolicy.getBloodFrenzyMultiplier(enemy.id, isPlayerBleeding());
+  return Math.max(1, Math.round((enemy.attack || 10) * levelMultiplier * rankMultiplier * randomMultiplier * 1.25 * bloodFrenzy));
 }
 
 function getMonsterAttackInterval(enemy) {
-  return Math.max(250, enemy.attackInterval || (1000 / (enemy.attackSpeed || 1)));
+  const bloodFrenzy = WolfDenPolicy.getBloodFrenzyMultiplier(enemy.id, isPlayerBleeding());
+  return Math.max(250, (enemy.attackInterval || (1000 / (enemy.attackSpeed || 1))) / bloodFrenzy);
 }
 
 function createEnemyAttackSchedule(enemyTypes, startAt = Date.now()) {
@@ -2524,6 +2531,37 @@ function summonGoblinScout(chiefIndex, now = Date.now()) {
   return true;
 }
 
+function inflictPlayerBleed(enemy, now = Date.now()) {
+  const tickDamage = Math.max(2, Math.ceil((Number(enemy.attack) || 1) * .25));
+  battle.playerBleed = {
+    tickDamage,
+    nextTickAt: now + WolfDenPolicy.BLEED_TICK_MS,
+    expiresAt: now + WolfDenPolicy.BLEED_DURATION_MS
+  };
+  logBattle(`🩸【${enemy.name}】撕裂傷口，你陷入流血狀態！`, 'system');
+}
+
+function processPlayerBleed(now = Date.now()) {
+  const bleed = battle.playerBleed;
+  if (!bleed) return false;
+  if (now >= bleed.expiresAt) {
+    battle.playerBleed = null;
+    logBattle('✚ 流血效果結束。', 'system');
+    return true;
+  }
+  if (now < bleed.nextTickAt) return false;
+  const ticks = Math.max(1, Math.floor((now - bleed.nextTickAt) / WolfDenPolicy.BLEED_TICK_MS) + 1);
+  const damage = bleed.tickDamage * ticks;
+  bleed.nextTickAt += WolfDenPolicy.BLEED_TICK_MS * ticks;
+  battle.playerHp = Math.max(1, battle.playerHp - damage);
+  logBattle(`🩸 流血造成 ${damage} 點持續傷害。`, 'damage-taken', {
+    aggregateKey: 'enemy-bleed',
+    damage,
+    summary: '🩸 流血持續傷害'
+  });
+  return true;
+}
+
 function enemyAttackTick() {
   if (!fighting || battleScreen.classList.contains('hidden') || battle.dungeonComplete) return;
   const progress = getProgress();
@@ -2532,7 +2570,7 @@ function enemyAttackTick() {
   const now = Date.now();
   const stats = getCharacterStats(progress.level, progress, character);
   const maxHp = getMaxHp(progress.level, progress);
-  let attackOccurred = false;
+  let attackOccurred = processPlayerBleed(now);
 
   for (const attackingEnemyIndex of aliveEnemyIndexesByAge()) {
     if (battle.enemyHps[attackingEnemyIndex] <= 0) continue;
@@ -2567,6 +2605,11 @@ function enemyAttackTick() {
     battle.playerShield -= absorbed;
     enemyHit -= absorbed;
     battle.playerHp -= enemyHit;
+    if (!dodged && enemyHit > 0 && getActiveMap(progress).id === 'wolf-den'
+      && WolfDenPolicy.shouldInflictBleed(attackingEnemy.id, Math.random())) {
+      inflictPlayerBleed(attackingEnemy, now);
+      battle.enemyNextAttackAt[attackingEnemyIndex] = now + getMonsterAttackInterval(attackingEnemy);
+    }
     if (!dodged && enemyHit > 0 && battle.dungeonId === 'goblin-camp'
       && GoblinCampPolicy.shouldStun(battle.enemyTypes[attackingEnemyIndex], Math.random())) {
       battle.playerStunnedUntil = Math.max(battle.playerStunnedUntil || 0, now + 1500);
@@ -2591,6 +2634,7 @@ function enemyAttackTick() {
       battle.undeadRevived = false;
       logBattle('你暫時撤退並恢復了生命。');
     }
+    battle.playerBleed = null;
     resetAliveEnemyAttackSchedule(now);
     updateBattleUI();
     return;
@@ -2635,7 +2679,7 @@ function openBattle() {
   const dungeonDefinition = isDungeon ? getDungeonDefinition(currentMap.id) : null;
   const enemyTypes = isDungeon ? createDungeonWaveTypes(1, currentMap.id) : createEnemyTypes(progress.level);
   const battleStart = Date.now();
-  battle = { enemyTypes, enemyHps: enemyTypes.map((type) => getMonsterDefinitionForMap(type, currentMap.id).maxHp), playerHp: getMaxHp(progress.level, progress), playerMana: getMaxMana(character.job, progress.level), playerShield: 0, playerStunnedUntil: 0, manaExhausted: false, playerAttackCharge: 0, hunterAttackCount: 0, enemyNextAttackAt: createEnemyAttackSchedule(enemyTypes, battleStart), globalSkillReadyAt: 0, undeadRevived: false, skillCooldowns: {}, enemyRespawns: enemyTypes.map(() => null), enemySpawnedAt: enemyTypes.map((_, index) => battleStart + index), enemyDots: enemyTypes.map(() => []), monsterMoveSpeed: 200, targetIndexes: [], enemyDamages: enemyTypes.map(() => []), damageTimers: [], isDungeon, dungeonId: isDungeon ? currentMap.id : null, dungeonWave: isDungeon ? 1 : 0, dungeonComplete: false, waveTransitioning: false, goblinScoutSummons: 0 };
+  battle = { enemyTypes, enemyHps: enemyTypes.map((type) => getMonsterDefinitionForMap(type, currentMap.id).maxHp), playerHp: getMaxHp(progress.level, progress), playerMana: getMaxMana(character.job, progress.level), playerShield: 0, playerStunnedUntil: 0, playerBleed: null, manaExhausted: false, playerAttackCharge: 0, hunterAttackCount: 0, enemyNextAttackAt: createEnemyAttackSchedule(enemyTypes, battleStart), globalSkillReadyAt: 0, undeadRevived: false, skillCooldowns: {}, enemyRespawns: enemyTypes.map(() => null), enemySpawnedAt: enemyTypes.map((_, index) => battleStart + index), enemyDots: enemyTypes.map(() => []), monsterMoveSpeed: 200, targetIndexes: [], enemyDamages: enemyTypes.map(() => []), damageTimers: [], isDungeon, dungeonId: isDungeon ? currentMap.id : null, dungeonWave: isDungeon ? 1 : 0, dungeonComplete: false, waveTransitioning: false, goblinScoutSummons: 0 };
   clearBattleLog();
   if (pendingOfflineReport) {
     logBattle(`☾ 離線掛機 ${pendingOfflineReport.duration}${pendingOfflineReport.capped ? '（已達 12 小時上限）' : ''}，擊敗約 ${pendingOfflineReport.defeated} 隻怪物。`, 'system');
