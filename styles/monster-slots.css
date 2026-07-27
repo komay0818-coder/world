@@ -2,9 +2,9 @@
 .battle-field #enemy-squad.monster-slot-grid {
   position: absolute !important;
   z-index: 8 !important;
-  top: 54px !important;
+  top: auto !important;
   right: 18px !important;
-  bottom: auto !important;
+  bottom: 1px !important;
   left: auto !important;
   display: grid !important;
   grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
@@ -293,9 +293,9 @@
 
 @media (max-width: 700px) {
   .battle-field #enemy-squad.monster-slot-grid {
-    top: 48px !important;
+    top: auto !important;
     right: 8px !important;
-    bottom: 10px !important;
+    bottom: 1px !important;
     left: clamp(145px, 36%, 205px) !important;
     width: auto !important;
     height: auto !important;
