@@ -252,17 +252,6 @@
   display: none !important;
 }
 
-#enemy-squad .monster-battle-slot.defeated-ghost {
-  position: absolute !important;
-  top: var(--ghost-top) !important;
-  left: var(--ghost-left) !important;
-  width: var(--ghost-width) !important;
-  height: var(--ghost-height) !important;
-  z-index: 20 !important;
-  pointer-events: none;
-  animation: monsterSlotDefeat .36s ease-out forwards !important;
-}
-
 #enemy-squad .reserve-indicator {
   position: absolute !important;
   z-index: 30 !important;
@@ -284,11 +273,6 @@
 
 @keyframes monsterSlotAttack {
   45% { translate: -7px 4px; filter: brightness(1.18); }
-}
-
-@keyframes monsterSlotDefeat {
-  from { opacity: 1; filter: grayscale(0); }
-  to { opacity: 0; filter: grayscale(1) brightness(.45); translate: 0 12px; scale: .95; }
 }
 
 @media (max-width: 700px) {

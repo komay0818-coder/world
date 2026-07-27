@@ -1727,10 +1727,6 @@ function discardSelectedEquipment() {
 
 function renderEnemySquad() {
   const squad = document.querySelector('#enemy-squad');
-  const previousPositions = new Map(Array.from(squad.querySelectorAll('.enemy-unit:not(.defeated-ghost)')).map((element) => [
-    element.id,
-    { rect: element.getBoundingClientRect(), displaySlot: element.dataset.displaySlot, clone: element.cloneNode(true) }
-  ]));
   const visibleIndexes = aliveEnemyIndexesByAge().slice(0, 4);
   const focusIndex = visibleIndexes[0] ?? -1;
   const reserveCount = Math.max(0, battle.enemyHps.filter((hp) => hp > 0).length - visibleIndexes.length);
@@ -1759,41 +1755,6 @@ function renderEnemySquad() {
     ? `<div class="reserve-indicator"><b>後備 ${reserveCount}</b><span>等待進場</span></div>`
     : '';
   squad.innerHTML = visibleEnemies + reserveLabel;
-  if (!previousPositions.size) return;
-  const squadRect = squad.getBoundingClientRect();
-  previousPositions.forEach((previous, id) => {
-    if (visibleIndexes.some((index) => `enemy-${index}` === id)) return;
-    const ghost = previous.clone;
-    ghost.removeAttribute('id');
-    ghost.classList.add('defeated-ghost');
-    ghost.style.setProperty('--ghost-left', `${previous.rect.left - squadRect.left}px`);
-    ghost.style.setProperty('--ghost-top', `${previous.rect.top - squadRect.top}px`);
-    ghost.style.setProperty('--ghost-width', `${previous.rect.width}px`);
-    ghost.style.setProperty('--ghost-height', `${previous.rect.height}px`);
-    squad.appendChild(ghost);
-    setTimeout(() => ghost.remove(), 380);
-  });
-  requestAnimationFrame(() => {
-    squad.querySelectorAll('.enemy-unit:not(.defeated-ghost)').forEach((element) => {
-      if (typeof element.animate !== 'function') return;
-      const previous = previousPositions.get(element.id);
-      if (!previous) {
-        element.animate([
-          { opacity: 0, translate: '24px 0', scale: '.96' },
-          { opacity: 1, translate: '0 0', scale: '1' }
-        ], { duration: 360, easing: 'cubic-bezier(.18,.82,.24,1)' });
-        return;
-      }
-      if (previous.displaySlot === element.dataset.displaySlot) return;
-      const currentRect = element.getBoundingClientRect();
-      const deltaX = previous.rect.left - currentRect.left;
-      const deltaY = previous.rect.top - currentRect.top;
-      element.animate([
-        { translate: `${deltaX}px ${deltaY}px`, scale: '.98', opacity: .88 },
-        { translate: '0 0', scale: '1', opacity: 1 }
-      ], { duration: 420, easing: 'cubic-bezier(.2,.8,.25,1)' });
-    });
-  });
 }
 
 function playMonsterAttackAnimation(enemyIndex, playerWasHit) {
