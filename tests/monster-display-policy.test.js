@@ -17,4 +17,4 @@ assert.equal(displayPolicy.getRankDisplay({ isBoss: true }).className, 'boss', '
 assert.equal(displayPolicy.getRankDisplay({ isElite: true }).className, 'elite', 'elite rank has a dedicated slot class');
 assert.deepEqual(displayPolicy.getStatusDisplays([{ type: 'burn' }, { type: 'burn' }, { type: 'poison' }]).map((status) => status.label), ['燃燒', '中毒'], 'status icons are unique and ordered');
 
-console.log('monster-display-policy: 46 assertions passed');
+console.log('monster-display-policy: 53 assertions passed');

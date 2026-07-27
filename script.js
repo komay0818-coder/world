@@ -76,6 +76,7 @@ const mapProgression = [
   { id: 'plains-entrance', regionOf: 'beginner-plains', min: 1, max: 2, name: '平原入口', background: 'assets/plains-entrance-background.png', implemented: true, normalXp: 4, eliteXp: 10, bossXp: 0, recommended: { attack: 10, defense: 1, hp: 80 } },
   { id: 'wolf-den', regionOf: 'beginner-plains', min: 2, max: 5, name: '狼穴', background: 'assets/wolf-den-background.png', implemented: true, normalXp: 6, eliteXp: 16, bossXp: 80, recommended: { attack: 16, defense: 4, hp: 110 } },
   { id: 'boar-woods', regionOf: 'beginner-plains', min: 3, max: 5, name: '野豬林', background: 'assets/boar-woods-background.png', implemented: true, normalXp: 8, eliteXp: 20, bossXp: 95, recommended: { attack: 19, defense: 6, hp: 135 } },
+  { id: 'plains-depths', regionOf: 'beginner-plains', min: 4, max: 5, name: '平原深處', background: 'assets/beginner-plains-background.png', implemented: true, normalXp: 10, eliteXp: 26, bossXp: 110, recommended: { attack: 22, defense: 8, hp: 155 } },
   { id: 'black-forest', min: 5, max: 10, name: '黑森林', background: 'assets/black-forest-background.png', implemented: true, normalXp: 4, eliteXp: 14, bossXp: 56, recommended: { attack: 26, defense: 8, hp: 180 } },
   { id: 'goblin-camp', regionOf: 'beginner-plains', min: 2, max: 5, name: '哥布林營地', background: 'assets/goblin-camp-background.png', implemented: true, dungeon: true, ticketItemId: 'goblin-camp-map', normalXp: 10, eliteXp: 28, bossXp: 120, recommended: { attack: 18, defense: 5, hp: 120 } },
   { id: 'black-forest-altar', min: 5, max: 10, name: '黑森林祭壇', background: 'assets/black-forest-background.png', implemented: true, dungeon: true, normalXp: 0, eliteXp: 22, bossXp: 126, recommended: { attack: 34, defense: 11, hp: 230 } },
@@ -562,7 +563,8 @@ const monsterTypes = {
   altarNightblade: { id: 'altarNightblade', name: '祭壇夜刃', maxHp: 820, attack: 31, defense: 14, evasion: 14, parry: 14, damageReduction: 8, artClass: 'dungeon-nightblade dungeon-monster-art', xp: 32, gold: 74, isElite: true, lootSource: 'dungeonElite' },
   moonboneSentinel: { id: 'moonboneSentinel', name: '月骨守衛', maxHp: 1120, attack: 25, defense: 32, evasion: 3, parry: 10, damageReduction: 14, artClass: 'dungeon-moonbone dungeon-monster-art', xp: 32, gold: 78, isElite: true, lootSource: 'dungeonElite' },
   blightOracle: { id: 'blightOracle', name: '疫木神諭', maxHp: 860, attack: 30, defense: 16, evasion: 10, parry: 3, damageReduction: 12, artClass: 'dungeon-oracle dungeon-monster-art', xp: 32, gold: 76, isElite: true, lootSource: 'dungeonElite' },
-  eclipseSovereign: { id: 'eclipseSovereign', name: '蝕月鹿王', maxHp: 5200, attack: 39, defense: 45, evasion: 8, parry: 12, damageReduction: 18, artClass: 'dungeon-boss dungeon-monster-art', xp: 180, gold: 620, isBoss: true, lootSource: 'dungeonBoss' }
+  eclipseSovereign: { id: 'eclipseSovereign', name: '蝕月鹿王', maxHp: 5200, attack: 39, defense: 45, evasion: 8, parry: 12, damageReduction: 18, artClass: 'dungeon-boss dungeon-monster-art', xp: 180, gold: 620, isBoss: true, lootSource: 'dungeonBoss' },
+  ...PlainsDepthsPolicy.MONSTER_TYPES
 };
 const normalMonsterIds = ['goblin', 'wolf', 'boar'];
 const eliteMonsterIds = ['goblinOverlord', 'wolfAlpha', 'boarTyrant'];
@@ -571,6 +573,7 @@ const mapMonsterPools = {
   plainsEntrance: { normal: ['plainsRabbit', 'plainsWolfPup', 'plainsSlime', 'plainsGoblinYoung'], rare: ['lostGoblin'], rareChance: .10, elite: [], boss: [] },
   wolfDen: { normal: ['plainsWolfPup', 'denForestWolf'], rare: ['lostGoblin'], rareChance: .10, elite: ['ragingWolf'], boss: ['greatfangWolf'] },
   boarWoods: { normal: ['boarPiglet', 'forestBoar'], rare: ['lostGoblin'], rareChance: .10, elite: ['irritableBoar'], boss: ['boarKing'] },
+  plainsDepths: PlainsDepthsPolicy.MONSTER_POOL,
   beginner: { normal: normalMonsterIds, elite: eliteMonsterIds, boss: bossMonsterIds },
   blackForest: { normal: ['nightGoblin', 'shadowWolf', 'thornBoar'], elite: ['forestShaman', 'moonfangAlpha', 'thornbackTyrant'], boss: ['forestGuardian'] }
 };
@@ -1095,6 +1098,7 @@ function getMonsterPool(level = getProgress().level) {
   if (mapId === 'plains-entrance') return mapMonsterPools.plainsEntrance;
   if (mapId === 'wolf-den') return mapMonsterPools.wolfDen;
   if (mapId === 'boar-woods') return mapMonsterPools.boarWoods;
+  if (mapId === 'plains-depths') return mapMonsterPools.plainsDepths;
   return mapId === 'black-forest' ? mapMonsterPools.blackForest : mapMonsterPools.beginner;
 }
 
@@ -1669,16 +1673,20 @@ function renderBeginnerPlainsRegions() {
       <em>區域架構已建立，怪物、圖片與個別掉落物將於後續逐區追加。</em>
     </section>
     <section class="map-region-grid">${beginnerPlainsRegions.map((region, index) => {
-      const available = ['plains-entrance', 'wolf-den', 'boar-woods', 'goblin-camp'].includes(region.id);
+      const available = ['plains-entrance', 'wolf-den', 'boar-woods', 'goblin-camp', 'plains-depths'].includes(region.id);
+      const regionMap = mapProgression.find((map) => map.id === region.id);
+      const unlocked = progress.level >= (regionMap?.min || 1);
       const isGoblinCamp = region.id === 'goblin-camp';
       const goblinMaps = getInventoryItemQuantity(progress, GOBLIN_CAMP_TICKET_ID);
-      const regionDetail = isGoblinCamp ? `號角將決定是否繼續深入・哥布林營地地圖 ${goblinMaps} 張` : available ? '怪物 5 種・稀有怪物機率 10%' : '怪物與掉落物：尚未設定';
+      const regionDetail = isGoblinCamp
+        ? `號角將決定是否繼續深入・哥布林營地地圖 ${goblinMaps} 張`
+        : region.id === 'plains-depths' ? '怪物 7 種・圖片待補' : available ? '怪物 5 種・稀有怪物機率 10%' : '怪物與掉落物：尚未設定';
       return `
-      <article class="map-region-card ${available ? 'available' : 'pending'} ${activeMap.id === region.id ? 'selected' : ''}">
+      <article class="map-region-card ${available ? 'available' : 'pending'} ${unlocked ? '' : 'locked'} ${activeMap.id === region.id ? 'selected' : ''}">
         <span>${String(index + 1).padStart(2, '0')}</span>
         <div><b>${region.name}</b><small>${regionDetail}</small></div>
         ${available
-          ? activeMap.id === region.id ? '<em class="current-region">目前區域</em>' : `<button type="button" data-select-map="${region.id}" ${isGoblinCamp && goblinMaps < 1 ? 'disabled' : ''}>${isGoblinCamp ? goblinMaps > 0 ? '使用地圖進入副本' : '需要哥布林營地地圖' : '進入區域'}</button>`
+          ? !unlocked ? `<em>Lv. ${regionMap?.min || 1} 解鎖</em>` : activeMap.id === region.id ? '<em class="current-region">目前區域</em>' : `<button type="button" data-select-map="${region.id}" ${isGoblinCamp && goblinMaps < 1 ? 'disabled' : ''}>${isGoblinCamp ? goblinMaps > 0 ? '使用地圖進入副本' : '需要哥布林營地地圖' : '進入區域'}</button>`
           : '<em>準備中</em>'}
       </article>`;
     }).join('')}

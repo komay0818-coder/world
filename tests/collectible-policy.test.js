@@ -10,7 +10,8 @@ const expectedMonsterIds = [
   'wolfAlpha', 'boarTyrant', 'goblinKing', 'nightGoblin', 'shadowWolf', 'thornBoar',
   'forestShaman', 'moonfangAlpha', 'thornbackTyrant', 'forestGuardian',
   'rootExecutioner', 'altarNightblade', 'moonboneSentinel', 'blightOracle',
-  'eclipseSovereign'
+  'eclipseSovereign', 'highlandWolf', 'rockbackBoar', 'blackstoneScout',
+  'grasslandVulture', 'blackstoneRaider', 'wanderingBlackKnight', 'blackstoneLeader'
 ];
 
 const catalog = policy.COLLECTIBLE_CATALOG;
@@ -28,4 +29,4 @@ assert.deepEqual(Object.keys(policy.removeLegacyCollectibles({
   [currentId]: catalog.plainsRabbit
 })), [currentId], 'legacy collectibles and their bonuses are removed from saves');
 
-console.log('collectible-policy: 82 assertions passed');
+console.log('collectible-policy: 96 assertions passed');

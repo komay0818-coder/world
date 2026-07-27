@@ -58,7 +58,14 @@
     altarNightblade: collectible('altar-nightblade-shard', '祭壇夜刃碎片', '祭壇夜刃', '◢', { attack: 2, crit: .01 }),
     moonboneSentinel: collectible('moonbone-sentinel-rune', '月骨守衛符骨', '月骨守衛', '✧', { defense: 3, mana: 10 }),
     blightOracle: collectible('blight-oracle-eye', '疫木神諭之眼', '疫木神諭', '◌', { attack: 2, mana: 15 }),
-    eclipseSovereign: collectible('eclipse-sovereign-antler', '蝕月鹿王聖角', '蝕月鹿王', '♕', { attack: 4, defense: 4, hp: 40, mana: 20 })
+    eclipseSovereign: collectible('eclipse-sovereign-antler', '蝕月鹿王聖角', '蝕月鹿王', '♕', { attack: 4, defense: 4, hp: 40, mana: 20 }),
+    highlandWolf: collectible('highland-wolf-fang', '高地野狼長牙', '高地野狼', '◒', { crit: .005 }),
+    rockbackBoar: collectible('rockback-boar-plate', '岩背野豬甲片', '岩背野豬', '⬢', { defense: 1 }),
+    blackstoneScout: collectible('blackstone-scout-mark', '黑石斥侯暗記', '黑石斥侯', '⌖', { dodge: .005 }),
+    grasslandVulture: collectible('grassland-vulture-feather', '草原禿鷹翎羽', '草原禿鷹', '⌁', { attack: 1 }),
+    blackstoneRaider: collectible('blackstone-raider-token', '黑石掠奪者令牌', '黑石掠奪者', '⚔', { attack: 2 }),
+    wanderingBlackKnight: collectible('wandering-black-knight-spur', '流浪黑騎士馬刺', '流浪黑騎士', '♞', { defense: 2, hp: 10 }),
+    blackstoneLeader: collectible('blackstone-leader-signet', '黑石頭目印戒', '黑石頭目', '♜', { attack: 3, defense: 3, hp: 25 })
   });
 
   function removeLegacyCollectibles(collection) {

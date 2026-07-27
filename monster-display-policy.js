@@ -42,7 +42,14 @@
     altarNightblade: 'assets/dungeon-nightblade.png',
     moonboneSentinel: 'assets/dungeon-moonbone.png',
     blightOracle: 'assets/dungeon-oracle.png',
-    eclipseSovereign: 'assets/dungeon-boss.png'
+    eclipseSovereign: 'assets/dungeon-boss.png',
+    highlandWolf: 'assets/monster-placeholder.svg',
+    rockbackBoar: 'assets/monster-placeholder.svg',
+    blackstoneScout: 'assets/monster-placeholder.svg',
+    grasslandVulture: 'assets/monster-placeholder.svg',
+    blackstoneRaider: 'assets/monster-placeholder.svg',
+    wanderingBlackKnight: 'assets/monster-placeholder.svg',
+    blackstoneLeader: 'assets/monster-placeholder.svg'
   });
 
   const STATUS_DISPLAY = Object.freeze({
