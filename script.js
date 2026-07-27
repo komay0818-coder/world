@@ -72,13 +72,13 @@ const raceTalents = {
   undead: { name: '不滅意志', icon: '☾', detail: '持續傷害 +20%；倒下時有 35% 機率以 35% 生命復活一次。' }
 };
 const mapProgression = [
-  { id: 'beginner-plains', min: 1, max: 5, name: '初心者平原', background: 'assets/beginner-plains-background.png', implemented: true, normalXp: 4, eliteXp: 18, bossXp: 70, recommended: { attack: 14, defense: 3, hp: 100 } },
-  { id: 'plains-entrance', regionOf: 'beginner-plains', min: 1, max: 2, name: '平原入口', background: 'assets/plains-entrance-background.png', implemented: true, normalXp: 4, eliteXp: 10, bossXp: 0, recommended: { attack: 10, defense: 1, hp: 80 } },
-  { id: 'wolf-den', regionOf: 'beginner-plains', min: 2, max: 5, name: '狼穴', background: 'assets/wolf-den-background.png', implemented: true, normalXp: 6, eliteXp: 16, bossXp: 80, recommended: { attack: 16, defense: 4, hp: 110 } },
-  { id: 'boar-woods', regionOf: 'beginner-plains', min: 3, max: 5, name: '野豬林', background: 'assets/boar-woods-background.png', implemented: true, normalXp: 8, eliteXp: 20, bossXp: 95, recommended: { attack: 19, defense: 6, hp: 135 } },
-  { id: 'plains-depths', regionOf: 'beginner-plains', min: 4, max: 5, name: '平原深處', background: 'assets/plains-depths-background.png?v=20260728-user-image-v1', implemented: true, normalXp: 10, eliteXp: 26, bossXp: 110, recommended: { attack: 22, defense: 8, hp: 155 } },
+  { id: 'beginner-plains', min: 1, max: 5, chapterLevelRange: [1, 15], name: '初心者平原', background: 'assets/beginner-plains-background.png', implemented: true, normalXp: 4, eliteXp: 18, bossXp: 70, recommended: { attack: 14, defense: 3, hp: 100 } },
+  { id: 'plains-entrance', regionOf: 'beginner-plains', min: 1, max: 2, monsterMin: 1, monsterMax: 4, name: '平原入口', background: 'assets/plains-entrance-background.png', implemented: true, normalXp: 4, eliteXp: 10, bossXp: 0, recommended: { attack: 10, defense: 1, hp: 80 } },
+  { id: 'wolf-den', regionOf: 'beginner-plains', min: 2, max: 5, monsterMin: 3, monsterMax: 7, name: '狼穴', background: 'assets/wolf-den-background.png', implemented: true, normalXp: 6, eliteXp: 16, bossXp: 80, recommended: { attack: 16, defense: 4, hp: 110 } },
+  { id: 'boar-woods', regionOf: 'beginner-plains', min: 3, max: 5, monsterMin: 6, monsterMax: 10, name: '野豬林', background: 'assets/boar-woods-background.png', implemented: true, normalXp: 8, eliteXp: 20, bossXp: 95, recommended: { attack: 19, defense: 6, hp: 135 } },
+  { id: 'plains-depths', regionOf: 'beginner-plains', min: 4, max: 5, monsterMin: 12, monsterMax: 15, name: '平原深處', background: 'assets/plains-depths-background.png?v=20260728-user-image-v1', implemented: true, normalXp: 10, eliteXp: 26, bossXp: 110, recommended: { attack: 22, defense: 8, hp: 155 } },
   { id: 'black-forest', min: 5, max: 10, name: '黑森林', background: 'assets/black-forest-background.png', implemented: true, normalXp: 4, eliteXp: 14, bossXp: 56, recommended: { attack: 26, defense: 8, hp: 180 } },
-  { id: 'goblin-camp', regionOf: 'beginner-plains', min: 2, max: 5, name: '哥布林營地', background: 'assets/goblin-camp-background.png', implemented: true, dungeon: true, ticketItemId: 'goblin-camp-map', normalXp: 10, eliteXp: 28, bossXp: 120, recommended: { attack: 18, defense: 5, hp: 120 } },
+  { id: 'goblin-camp', regionOf: 'beginner-plains', min: 2, max: 5, monsterMin: 8, monsterMax: 12, name: '哥布林營地', background: 'assets/goblin-camp-background.png', implemented: true, dungeon: true, ticketItemId: 'goblin-camp-map', normalXp: 10, eliteXp: 28, bossXp: 120, recommended: { attack: 18, defense: 5, hp: 120 } },
   { id: 'black-forest-altar', min: 5, max: 10, name: '黑森林祭壇', background: 'assets/black-forest-background.png', implemented: true, dungeon: true, normalXp: 0, eliteXp: 22, bossXp: 126, recommended: { attack: 34, defense: 11, hp: 230 } },
   { min: 10, max: 15, name: '石牙山谷', normalXp: 8, eliteXp: 35, bossXp: 140 },
   { min: 15, max: 20, name: '荒蕪沙漠', normalXp: 18, eliteXp: 70, bossXp: 280 },
@@ -1117,7 +1117,7 @@ function createEnemyTypes(playerLevel = 1) {
   const types = [...getMonsterPool(playerLevel).normal];
   while (types.length < 5) types.push(randomEnemyId(playerLevel));
   const specialRoll = Math.random();
-  if (playerLevel >= 4 && specialRoll < bossSpawnChance) types[Math.floor(Math.random() * types.length)] = randomBossId(playerLevel);
+  if (specialRoll < bossSpawnChance) types[Math.floor(Math.random() * types.length)] = randomBossId(playerLevel);
   else if (specialRoll < bossSpawnChance + eliteSpawnChance) types[Math.floor(Math.random() * types.length)] = randomEliteId(playerLevel);
   return types.sort(() => Math.random() - .5);
 }
@@ -1136,11 +1136,16 @@ function createDungeonWaveTypes(wave, mapId = battle.dungeonId || getActiveMap(g
   return types;
 }
 
-function getMonsterDefinitionForMap(type, mapId = battle.dungeonId || getActiveMap(getProgress()).id) {
+function getMonsterDefinitionForMap(type, mapId = battle.dungeonId || getActiveMap(getProgress()).id, level = null) {
   const monster = monsterTypes[type] || monsterTypes.goblin;
-  const dungeonMonster = GoblinCampPolicy.scaleMonster(monster, mapId === 'goblin-camp');
+  const chapterMonster = ChapterOneLevelPolicy.scaleMonster(monster, mapId, level);
+  const dungeonMonster = GoblinCampPolicy.scaleMonster(chapterMonster, mapId === 'goblin-camp' && !ChapterOneLevelPolicy.getProfile(mapId, type));
   const wolfMonster = WolfDenPolicy.applyWolfDenPassive(dungeonMonster, mapId);
   return BoarWoodsPolicy.applyBoarWoodsPassive(wolfMonster, mapId);
+}
+
+function createEnemyLevels(enemyTypes, mapId, random = Math.random) {
+  return enemyTypes.map((type) => ChapterOneLevelPolicy.rollLevel(mapId, type, random()) ?? null);
 }
 
 function loadDungeonWave(wave) {
@@ -1149,14 +1154,15 @@ function loadDungeonWave(wave) {
   const now = Date.now();
   battle.dungeonWave = wave;
   battle.enemyTypes = enemyTypes;
-  battle.enemyHps = enemyTypes.map((type) => getMonsterDefinitionForMap(type, battle.dungeonId).maxHp);
+  battle.enemyLevels = createEnemyLevels(enemyTypes, battle.dungeonId);
+  battle.enemyHps = enemyTypes.map((type, index) => getMonsterDefinitionForMap(type, battle.dungeonId, battle.enemyLevels[index]).maxHp);
   battle.enemyRespawns = enemyTypes.map(() => null);
   battle.enemySpawnedAt = enemyTypes.map((_, index) => now + index);
   battle.enemyDots = enemyTypes.map(() => []);
   battle.enemyDamages = enemyTypes.map(() => []);
   battle.enemyBoarEnraged = enemyTypes.map(() => false);
   battle.goblinScoutSummons = 0;
-  battle.enemyNextAttackAt = createEnemyAttackSchedule(enemyTypes, now);
+  battle.enemyNextAttackAt = createEnemyAttackSchedule(enemyTypes, now, battle.dungeonId, battle.enemyLevels);
   battle.targetIndexes = [];
   battle.waveTransitioning = false;
   const waveRange = battle.dungeonId === 'goblin-camp' ? `第 ${wave} 波` : `第 ${wave}／${definition.waves} 波`;
@@ -1209,7 +1215,7 @@ function hasAliveBoss(excludeIndex = -1) {
 }
 
 function getEnemyDefinition(index) {
-  return getMonsterDefinitionForMap(battle.enemyTypes[index], battle.dungeonId || getActiveMap(getProgress()).id);
+  return getMonsterDefinitionForMap(battle.enemyTypes[index], battle.dungeonId || getActiveMap(getProgress()).id, battle.enemyLevels?.[index]);
 }
 
 function isPlayerBleeding(now = Date.now()) {
@@ -1217,13 +1223,14 @@ function isPlayerBleeding(now = Date.now()) {
 }
 
 function getMonsterAttackPower(enemy, progress = getProgress(), currentHp = enemy.maxHp) {
+  const randomMultiplier = .9 + Math.random() * .2;
+  const bloodFrenzy = WolfDenPolicy.getBloodFrenzyMultiplier(enemy.id, isPlayerBleeding());
+  const irritable = BoarWoodsPolicy.getIrritableMultiplier(enemy.id, currentHp, enemy.maxHp);
+  if (enemy.mapId) return Math.max(1, Math.round((enemy.attack || 1) * randomMultiplier * bloodFrenzy * irritable));
   const map = getActiveMap(progress);
   const monsterLevel = Math.min(map.max, Math.max(map.min, progress.level));
   const levelMultiplier = 1 + (monsterLevel - 1) * .10;
   const rankMultiplier = enemy.isBoss ? 2.4 : enemy.isElite ? 1.65 : 1;
-  const randomMultiplier = .9 + Math.random() * .2;
-  const bloodFrenzy = WolfDenPolicy.getBloodFrenzyMultiplier(enemy.id, isPlayerBleeding());
-  const irritable = BoarWoodsPolicy.getIrritableMultiplier(enemy.id, currentHp, enemy.maxHp);
   return Math.max(1, Math.round((enemy.attack || 10) * levelMultiplier * rankMultiplier * randomMultiplier * 1.25 * bloodFrenzy * irritable));
 }
 
@@ -1233,14 +1240,14 @@ function getMonsterAttackInterval(enemy, currentHp = enemy.maxHp) {
   return Math.max(250, (enemy.attackInterval || (1000 / (enemy.attackSpeed || 1))) / bloodFrenzy / irritable);
 }
 
-function createEnemyAttackSchedule(enemyTypes, startAt = Date.now()) {
-  return enemyTypes.map((type) => startAt + getMonsterAttackInterval(monsterTypes[type] || monsterTypes.goblin));
+function createEnemyAttackSchedule(enemyTypes, startAt = Date.now(), mapId = getActiveMap(getProgress()).id, enemyLevels = []) {
+  return enemyTypes.map((type, index) => startAt + getMonsterAttackInterval(getMonsterDefinitionForMap(type, mapId, enemyLevels[index])));
 }
 
 function resetAliveEnemyAttackSchedule(startAt = Date.now()) {
   battle.enemyNextAttackAt = battle.enemyTypes.map((type, index) => (
     battle.enemyHps[index] > 0
-      ? startAt + getMonsterAttackInterval(monsterTypes[type] || monsterTypes.goblin)
+      ? startAt + getMonsterAttackInterval(getEnemyDefinition(index))
       : null
   ));
 }
@@ -1283,7 +1290,8 @@ function getCurrentMap(level) {
 }
 
 function getActiveMap(progress = getProgress()) {
-  const selected = mapProgression.find((map) => map.id === progress.selectedMapId && map.implemented && progress.level >= map.min);
+  const selected = mapProgression.find((map) => map.id === progress.selectedMapId && map.implemented
+    && (ChapterOneLevelPolicy.canEnterMap(map.id) || progress.level >= map.min));
   if (selected?.id === 'beginner-plains') return mapProgression.find((map) => map.id === 'plains-entrance');
   if (selected) return selected;
   return mapProgression.find((map) => map.id === 'plains-entrance') || mapProgression[0];
@@ -1639,7 +1647,7 @@ function renderMapSelector() {
   const modal = document.querySelector('#inventory-modal');
   document.querySelector('#inventory-title').textContent = '選擇冒險地圖';
   document.querySelector('#inventory-content').innerHTML = `<section class="map-selection-grid">${maps.map((map) => {
-    const unlocked = progress.level >= map.min;
+    const unlocked = ChapterOneLevelPolicy.canEnterMap(map.id) || progress.level >= map.min;
     const isRegionHub = map.id === 'beginner-plains';
     const recommended = map.recommended || { attack: 0, defense: 0, hp: 0 };
     const ready = stats.attack >= recommended.attack && stats.defense >= recommended.defense && stats.hp >= recommended.hp;
@@ -1655,7 +1663,7 @@ function renderMapSelector() {
       : map.dungeon
       ? unlocked ? `<button type="button" data-select-map="${map.id}" ${dungeonPasses < 1 ? 'disabled' : ''}>${dungeonPasses > 0 ? map.ticketItemId ? '使用地圖進入' : '消耗鑰匙進入' : `需要${dungeonPassName}`}</button>` : `<span>Lv. ${map.min} 解鎖</span>`
       : unlocked ? map.id === activeMap.id ? '<span>目前地圖</span>' : `<button type="button" data-select-map="${map.id}">前往地圖</button>` : `<span>Lv. ${map.min} 解鎖</span>`;
-    return `<article class="map-selection-card ${isRegionHub ? 'region-hub-card' : ''} ${map.dungeon ? 'dungeon-card' : ''} ${map.id === activeMap.id ? 'selected' : ''} ${unlocked ? '' : 'locked'}" style="--map-preview:url('${map.background}')"><div><b>${map.dungeon ? '◆ ' : ''}${map.name}</b><small>${isRegionHub ? '地區等級' : '怪物等級'} Lv. ${map.min}～${map.max}</small>${detail}${isRegionHub ? '' : recommendation}</div>${action}</article>`;
+    return `<article class="map-selection-card ${isRegionHub ? 'region-hub-card' : ''} ${map.dungeon ? 'dungeon-card' : ''} ${map.id === activeMap.id ? 'selected' : ''} ${unlocked ? '' : 'locked'}" style="--map-preview:url('${map.background}')"><div><b>${map.dungeon ? '◆ ' : ''}${map.name}</b><small>${isRegionHub ? '第一章探索地區' : `怪物等級 Lv. ${map.monsterMin || map.min}～${map.monsterMax || map.max}`}</small>${detail}${isRegionHub ? '' : recommendation}</div>${action}</article>`;
   }).join('')}</section>`;
   modal.dataset.view = 'maps';
   modal.classList.remove('hidden');
@@ -1669,13 +1677,13 @@ function renderBeginnerPlainsRegions() {
   document.querySelector('#inventory-content').innerHTML = `
     <button type="button" class="map-region-back" data-map-region-back>← 返回地區選擇</button>
     <section class="region-overview-card" style="--map-preview:url('assets/beginner-plains-background.png')">
-      <div><b>初心者平原</b><small>Lv. 1～5 地區</small></div>
+      <div><b>初心者平原</b><small>第一章探索地區</small></div>
       <em>區域架構已建立，怪物、圖片與個別掉落物將於後續逐區追加。</em>
     </section>
     <section class="map-region-grid">${beginnerPlainsRegions.map((region, index) => {
       const available = ['plains-entrance', 'wolf-den', 'boar-woods', 'goblin-camp', 'plains-depths'].includes(region.id);
       const regionMap = mapProgression.find((map) => map.id === region.id);
-      const unlocked = progress.level >= (regionMap?.min || 1);
+      const unlocked = available;
       const isGoblinCamp = region.id === 'goblin-camp';
       const goblinMaps = getInventoryItemQuantity(progress, GOBLIN_CAMP_TICKET_ID);
       const regionDetail = isGoblinCamp
@@ -1698,7 +1706,7 @@ function renderBeginnerPlainsRegions() {
 function selectAdventureMap(mapId) {
   const progress = getProgress();
   const map = mapProgression.find((item) => item.id === mapId && item.implemented);
-  if (!map || progress.level < map.min) return;
+  if (!map || (!ChapterOneLevelPolicy.canEnterMap(map.id) && progress.level < map.min)) return;
   if (map.dungeon) {
     if (map.ticketItemId) {
       if (getInventoryItemQuantity(progress, map.ticketItemId) < 1) { showToast('需要哥布林營地地圖才能進入。'); return; }
@@ -1771,8 +1779,6 @@ function renderEnemySquad() {
   const visibleIndexes = aliveEnemyIndexesByAge().slice(0, 4);
   const focusIndex = visibleIndexes[0] ?? -1;
   const reserveCount = Math.max(0, battle.enemyHps.filter((hp) => hp > 0).length - visibleIndexes.length);
-  const currentMap = getActiveMap(getProgress());
-  const monsterLevel = MonsterDisplayPolicy.getMonsterLevel(currentMap, getProgress().level);
   const visibleEnemies = Array.from({ length: 4 }, (_, displaySlot) => {
     const index = visibleIndexes[displaySlot];
     if (index === undefined) {
@@ -1780,6 +1786,7 @@ function renderEnemySquad() {
     }
     const hp = battle.enemyHps[index];
     const enemy = getEnemyDefinition(index);
+    const monsterLevel = enemy.level || MonsterDisplayPolicy.getMonsterLevel(getActiveMap(getProgress()), getProgress().level);
     const damageEvents = (battle.enemyDamages[index] || []).map((event, eventIndex) => `<b class="enemy-damage ${event.type || 'normal'}" style="--damage-offset:${eventIndex * 18}px">-${event.damage}</b>`).join('');
     const rank = MonsterDisplayPolicy.getRankDisplay(enemy);
     const statusDisplays = MonsterDisplayPolicy.getStatusDisplays(battle.enemyDots[index]);
@@ -2096,7 +2103,9 @@ function updateBattleUI() {
   const dungeonWaveText = currentMap.id === 'goblin-camp'
     ? `第 ${battle.dungeonWave || 1} 波`
     : `第 ${battle.dungeonWave || 1}／${currentDungeonDefinition?.waves || 10} 波`;
-  document.querySelector('#map-level-text').textContent = currentMap.dungeon ? `特殊副本・${dungeonWaveText}・Lv. ${currentMap.min}–${currentMap.max}` : `怪物等級：Lv. ${currentMap.min}–${currentMap.max}`;
+  const displayedMonsterMin = currentMap.monsterMin || currentMap.min;
+  const displayedMonsterMax = currentMap.monsterMax || currentMap.max;
+  document.querySelector('#map-level-text').textContent = currentMap.dungeon ? `特殊副本・${dungeonWaveText}・Lv. ${displayedMonsterMin}–${displayedMonsterMax}` : `怪物等級：Lv. ${displayedMonsterMin}–${displayedMonsterMax}`;
   document.querySelector('#player-hp-text').textContent = `${Math.max(0, battle.playerHp)} / ${maxHp}${battle.playerShield > 0 ? `　護盾 ${battle.playerShield}` : ''}`;
   document.querySelector('#player-hp-bar').style.width = `${Math.max(0, battle.playerHp / maxHp * 100)}%`;
   document.querySelector('#player-mp-text').textContent = `${Math.ceil(battle.playerMana)} / ${maxMana} MP`;
@@ -2183,7 +2192,7 @@ function rewardVictory(index) {
   const progress = getProgress();
   const enemy = getEnemyDefinition(index);
   const currentMap = getActiveMap(progress);
-  const earnedXp = enemy.isBoss ? currentMap.bossXp : enemy.isElite ? currentMap.eliteXp : currentMap.normalXp;
+  const earnedXp = enemy.mapId ? enemy.xp : enemy.isBoss ? currentMap.bossXp : enemy.isElite ? currentMap.eliteXp : currentMap.normalXp;
   progress.xp += earnedXp;
   const earnedGold = Math.max(1, Math.floor(enemy.gold * .55));
   progress.gold += earnedGold;
@@ -2260,11 +2269,13 @@ function processEnemyRespawns() {
     if (nextTimer <= 0) {
     const currentMapId = getActiveMap(getProgress()).id;
     const specialRoll = Math.random();
-    const bossAllowed = currentMapId !== 'plains-entrance' && playerLevel >= 4 && !hasAliveBoss(index);
+    const bossAllowed = currentMapId !== 'plains-entrance' && !hasAliveBoss(index);
     battle.enemyTypes[index] = currentMapId === 'plains-entrance'
       ? randomEnemyId(playerLevel)
       : bossAllowed && specialRoll < bossSpawnChance ? randomBossId(playerLevel) : specialRoll < bossSpawnChance + eliteSpawnChance ? randomEliteId(playerLevel) : randomEnemyId(playerLevel);
       battle.enemyRespawns[index] = null;
+      if (!battle.enemyLevels) battle.enemyLevels = battle.enemyTypes.map(() => null);
+      battle.enemyLevels[index] = ChapterOneLevelPolicy.rollLevel(currentMapId, battle.enemyTypes[index], Math.random());
       battle.enemyHps[index] = getEnemyDefinition(index).maxHp;
       battle.enemySpawnedAt[index] = Date.now();
       battle.enemyDots[index] = [];
@@ -2346,6 +2357,16 @@ function getPlayerAttackProfile(character, skill = null) {
 
 function applyDamageToMonster(index, baseDamage, profile, options = {}) {
   const enemy = getEnemyDefinition(index);
+  if (enemy.mapId) {
+    const progress = getProgress();
+    const character = JSON.parse(localStorage.getItem('stardust-character') || 'null');
+    const stats = getCharacterStats(progress.level, progress, character);
+    const hitChance = ChapterOneLevelPolicy.getPlayerHitChance(progress.level, enemy.level, stats.accuracy, 0);
+    if (Math.random() >= hitChance) {
+      if (options.logDefense !== false) logBattle(`你的攻擊未能命中【${enemy.name}】！`, 'damage-dealt');
+      return { finalDamage: 0, missed: true, evaded: true, parried: false };
+    }
+  }
   const result = MonsterDefense.resolveDamage({
     baseDamage,
     monster: enemy,
@@ -2530,8 +2551,11 @@ function useGoblinHealingTotem(chiefIndex) {
 function summonGoblinScout(chiefIndex, now = Date.now()) {
   if (aliveEnemyIndexesByAge().length >= 4 || (battle.goblinScoutSummons || 0) >= 2) return false;
   const type = 'goblinScout';
-  const scout = getMonsterDefinitionForMap(type, 'goblin-camp');
+  const scoutLevel = ChapterOneLevelPolicy.rollLevel('goblin-camp', type, Math.random());
+  const scout = getMonsterDefinitionForMap(type, 'goblin-camp', scoutLevel);
   battle.enemyTypes.push(type);
+  if (!battle.enemyLevels) battle.enemyLevels = [];
+  battle.enemyLevels.push(scoutLevel);
   battle.enemyHps.push(scout.maxHp);
   battle.enemyRespawns.push(null);
   battle.enemySpawnedAt.push(now);
@@ -2617,7 +2641,10 @@ function enemyAttackTick() {
       if (action === 'healing-totem' && useGoblinHealingTotem(attackingEnemyIndex)) continue;
       if (action === 'summon-scout' && summonGoblinScout(attackingEnemyIndex, now)) continue;
     }
-    const dodged = Math.random() < stats.dodge;
+    const monsterHitChance = attackingEnemy.mapId
+      ? ChapterOneLevelPolicy.getMonsterHitChance(attackingEnemy.level, progress.level, stats.dodge)
+      : 1 - stats.dodge;
+    const dodged = Math.random() >= monsterHitChance;
     const monsterCritRate = attackingEnemy.isBoss ? .15 : attackingEnemy.isElite ? .10 : .05;
     const monsterCritical = !dodged && Math.random() < monsterCritRate;
     const rawEnemyHit = getMonsterAttackPower(attackingEnemy, progress, enemyCurrentHp) * (monsterCritical ? 1.5 : 1);
@@ -2704,8 +2731,10 @@ function openBattle() {
   }
   const dungeonDefinition = isDungeon ? getDungeonDefinition(currentMap.id) : null;
   const enemyTypes = isDungeon ? createDungeonWaveTypes(1, currentMap.id) : createEnemyTypes(progress.level);
+  const enemyLevels = createEnemyLevels(enemyTypes, currentMap.id);
+  const enemyHps = enemyTypes.map((type, index) => getMonsterDefinitionForMap(type, currentMap.id, enemyLevels[index]).maxHp);
   const battleStart = Date.now();
-  battle = { enemyTypes, enemyHps: enemyTypes.map((type) => getMonsterDefinitionForMap(type, currentMap.id).maxHp), playerHp: getMaxHp(progress.level, progress), playerMana: getMaxMana(character.job, progress.level), playerShield: 0, playerStunnedUntil: 0, playerBleed: null, manaExhausted: false, playerAttackCharge: 0, hunterAttackCount: 0, enemyNextAttackAt: createEnemyAttackSchedule(enemyTypes, battleStart), enemyBoarEnraged: enemyTypes.map(() => false), globalSkillReadyAt: 0, undeadRevived: false, skillCooldowns: {}, enemyRespawns: enemyTypes.map(() => null), enemySpawnedAt: enemyTypes.map((_, index) => battleStart + index), enemyDots: enemyTypes.map(() => []), monsterMoveSpeed: 200, targetIndexes: [], enemyDamages: enemyTypes.map(() => []), damageTimers: [], isDungeon, dungeonId: isDungeon ? currentMap.id : null, dungeonWave: isDungeon ? 1 : 0, dungeonComplete: false, waveTransitioning: false, goblinScoutSummons: 0 };
+  battle = { enemyTypes, enemyLevels, enemyHps, playerHp: getMaxHp(progress.level, progress), playerMana: getMaxMana(character.job, progress.level), playerShield: 0, playerStunnedUntil: 0, playerBleed: null, manaExhausted: false, playerAttackCharge: 0, hunterAttackCount: 0, enemyNextAttackAt: createEnemyAttackSchedule(enemyTypes, battleStart, currentMap.id, enemyLevels), enemyBoarEnraged: enemyTypes.map(() => false), globalSkillReadyAt: 0, undeadRevived: false, skillCooldowns: {}, enemyRespawns: enemyTypes.map(() => null), enemySpawnedAt: enemyTypes.map((_, index) => battleStart + index), enemyDots: enemyTypes.map(() => []), monsterMoveSpeed: 200, targetIndexes: [], enemyDamages: enemyTypes.map(() => []), damageTimers: [], isDungeon, dungeonId: isDungeon ? currentMap.id : null, dungeonWave: isDungeon ? 1 : 0, dungeonComplete: false, waveTransitioning: false, goblinScoutSummons: 0 };
   clearBattleLog();
   if (pendingOfflineReport) {
     logBattle(`☾ 離線掛機 ${pendingOfflineReport.duration}${pendingOfflineReport.capped ? '（已達 12 小時上限）' : ''}，擊敗約 ${pendingOfflineReport.defeated} 隻怪物。`, 'system');
