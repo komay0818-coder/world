@@ -77,7 +77,7 @@ const mapProgression = [
   { id: 'wolf-den', regionOf: 'beginner-plains', min: 2, max: 5, name: '狼穴', background: 'assets/wolf-den-background.png', implemented: true, normalXp: 6, eliteXp: 16, bossXp: 80, recommended: { attack: 16, defense: 4, hp: 110 } },
   { id: 'boar-woods', regionOf: 'beginner-plains', min: 3, max: 5, name: '野豬林', background: 'assets/boar-woods-background.png', implemented: true, normalXp: 8, eliteXp: 20, bossXp: 95, recommended: { attack: 19, defense: 6, hp: 135 } },
   { id: 'black-forest', min: 5, max: 10, name: '黑森林', background: 'assets/black-forest-background.png', implemented: true, normalXp: 4, eliteXp: 14, bossXp: 56, recommended: { attack: 26, defense: 8, hp: 180 } },
-  { id: 'goblin-camp', regionOf: 'beginner-plains', min: 2, max: 5, name: '哥布林營地', background: 'assets/plains-entrance-background.png', implemented: true, dungeon: true, ticketItemId: 'goblin-camp-map', normalXp: 10, eliteXp: 28, bossXp: 120, recommended: { attack: 18, defense: 5, hp: 120 } },
+  { id: 'goblin-camp', regionOf: 'beginner-plains', min: 2, max: 5, name: '哥布林營地', background: 'assets/goblin-camp-background.png', implemented: true, dungeon: true, ticketItemId: 'goblin-camp-map', normalXp: 10, eliteXp: 28, bossXp: 120, recommended: { attack: 18, defense: 5, hp: 120 } },
   { id: 'black-forest-altar', min: 5, max: 10, name: '黑森林祭壇', background: 'assets/black-forest-background.png', implemented: true, dungeon: true, normalXp: 0, eliteXp: 22, bossXp: 126, recommended: { attack: 34, defense: 11, hp: 230 } },
   { min: 10, max: 15, name: '石牙山谷', normalXp: 8, eliteXp: 35, bossXp: 140 },
   { min: 15, max: 20, name: '荒蕪沙漠', normalXp: 18, eliteXp: 70, bossXp: 280 },
