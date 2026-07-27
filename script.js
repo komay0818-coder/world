@@ -538,11 +538,11 @@ const monsterTypes = {
   boarKing: { id: 'boarKing', name: '巨牙野豬', maxHp: 620, attack: 24, defense: 20, evasion: 1, parry: 0, damageReduction: 10, artClass: 'boar-woods-giant-tusk-boar-art', xp: 95, gold: 58, isBoss: true, lootSource: 'boar' },
   goblin: { id: 'goblin', name: '哥布林', maxHp: 45, attack: 11, defense: 3, evasion: 2, parry: 5, damageReduction: 0, artClass: 'goblin-art', xp: 10, gold: 3 },
   goblinScout: { id: 'goblinScout', name: '哥布林斥候', maxHp: 48, attack: 10, defense: 2, evasion: 7, parry: 3, damageReduction: 0, artClass: 'goblin-camp-placeholder goblin-art', xp: 10, gold: 3, lootPending: true },
-  goblinWarrior: { id: 'goblinWarrior', name: '哥布林戰士', maxHp: 82, attack: 13, defense: 7, evasion: 2, parry: 9, damageReduction: 3, artClass: 'goblin-camp-placeholder goblin-art', xp: 10, gold: 5, lootPending: true },
+  goblinWarrior: { id: 'goblinWarrior', name: '哥布林戰士', maxHp: 82, attack: 13, defense: 7, evasion: 2, parry: 20, damageReduction: 3, artClass: 'goblin-camp-placeholder goblin-art', xp: 10, gold: 5, lootPending: true },
   goblinSlinger: { id: 'goblinSlinger', name: '哥布林投石者', maxHp: 58, attack: 14, defense: 3, evasion: 5, parry: 0, damageReduction: 1, artClass: 'goblin-camp-placeholder goblin-art', xp: 10, gold: 4, lootPending: true },
   goblinShaman: { id: 'goblinShaman', name: '哥布林薩滿', maxHp: 175, attack: 17, defense: 8, evasion: 5, parry: 2, damageReduction: 5, artClass: 'goblin-camp-placeholder goblin-art', xp: 28, gold: 12, isElite: true, lootPending: true },
   goblinGuard: { id: 'goblinGuard', name: '哥布林護衛', maxHp: 245, attack: 16, defense: 15, evasion: 2, parry: 13, damageReduction: 8, artClass: 'goblin-camp-placeholder goblin-art', xp: 28, gold: 16, isElite: true, lootPending: true },
-  goblinCaptain: { id: 'goblinCaptain', name: '哥布林隊長', maxHp: 720, attack: 21, defense: 19, evasion: 4, parry: 12, damageReduction: 9, artClass: 'goblin-camp-placeholder goblin-art', xp: 120, gold: 65, isBoss: true, lootPending: true },
+  goblinCaptain: { id: 'goblinCaptain', name: '哥布林隊長', maxHp: 720, attack: 21, defense: 19, evasion: 4, parry: 25, damageReduction: 18, artClass: 'goblin-camp-placeholder goblin-art', xp: 120, gold: 65, isBoss: true, lootPending: true },
   goblinTreasureChest: { id: 'goblinTreasureChest', name: '哥布林寶箱', maxHp: 210, attack: 1, defense: 18, evasion: 0, parry: 0, damageReduction: 12, artClass: 'goblin-camp-placeholder goblin-art', xp: 28, gold: 45, isRare: true, lootPending: true },
   goblinHighChief: { id: 'goblinHighChief', name: '哥布林大酋長', maxHp: 1180, attack: 25, defense: 25, evasion: 4, parry: 15, damageReduction: 11, artClass: 'goblin-camp-placeholder goblin-art', xp: 120, gold: 110, isBoss: true, lootPending: true },
   wolf: { id: 'wolf', name: '森林狼', maxHp: 68, attack: 14, defense: 2, evasion: 8, parry: 0, damageReduction: 0, artClass: 'wolf-art', xp: 14, gold: 4 },
@@ -1132,21 +1132,27 @@ function createDungeonWaveTypes(wave, mapId = battle.dungeonId || getActiveMap(g
   return types;
 }
 
+function getMonsterDefinitionForMap(type, mapId = battle.dungeonId || getActiveMap(getProgress()).id) {
+  const monster = monsterTypes[type] || monsterTypes.goblin;
+  return GoblinCampPolicy.scaleMonster(monster, mapId === 'goblin-camp');
+}
+
 function loadDungeonWave(wave) {
   const definition = getDungeonDefinition();
   const enemyTypes = createDungeonWaveTypes(wave, battle.dungeonId);
   const now = Date.now();
   battle.dungeonWave = wave;
   battle.enemyTypes = enemyTypes;
-  battle.enemyHps = enemyTypes.map((type) => monsterTypes[type].maxHp);
+  battle.enemyHps = enemyTypes.map((type) => getMonsterDefinitionForMap(type, battle.dungeonId).maxHp);
   battle.enemyRespawns = enemyTypes.map(() => null);
   battle.enemySpawnedAt = enemyTypes.map((_, index) => now + index);
   battle.enemyDots = enemyTypes.map(() => []);
   battle.enemyDamages = enemyTypes.map(() => []);
+  battle.goblinScoutSummons = 0;
   battle.enemyNextAttackAt = createEnemyAttackSchedule(enemyTypes, now);
   battle.targetIndexes = [];
   battle.waveTransitioning = false;
-  const waveRange = battle.dungeonId === 'goblin-camp' ? `第 ${wave} 波（最少 4／最多 7 波）` : `第 ${wave}／${definition.waves} 波`;
+  const waveRange = battle.dungeonId === 'goblin-camp' ? `第 ${wave} 波` : `第 ${wave}／${definition.waves} 波`;
   logBattle(`◆ ${definition.name}${waveRange}開始：${enemyTypes.length} 名敵人來襲。`, 'system');
   showToast(`副本${waveRange}`);
   updateBattleUI();
@@ -1195,7 +1201,9 @@ function hasAliveBoss(excludeIndex = -1) {
   return battle.enemyTypes.some((type, index) => index !== excludeIndex && battle.enemyHps[index] > 0 && monsterTypes[type]?.isBoss);
 }
 
-function getEnemyDefinition(index) { return monsterTypes[battle.enemyTypes[index]] || monsterTypes.goblin; }
+function getEnemyDefinition(index) {
+  return getMonsterDefinitionForMap(battle.enemyTypes[index], battle.dungeonId || getActiveMap(getProgress()).id);
+}
 
 function getMonsterAttackPower(enemy, progress = getProgress()) {
   const map = getActiveMap(progress);
@@ -1604,7 +1612,7 @@ function renderMapSelector() {
     const dungeonPassName = map.ticketItemId ? '哥布林營地地圖' : '祭壇鑰匙';
     const detail = isRegionHub
       ? `<em>包含 ${beginnerPlainsRegions.length} 個探索區域・怪物與掉落物將陸續追加</em>`
-      : map.dungeon ? `<em>${map.id === 'goblin-camp' ? '隨機 4～7 波・第 4～6 波各有 50% 機率結束' : `${dungeonDefinition?.waves || 10} 波戰鬥・最終波 BOSS・職業套裝`}${map.ticketItemId ? '・可連續自動挑戰' : ''}</em><strong class="dungeon-key-count">${dungeonPassName}：${dungeonPasses}</strong>` : `<em>普通 ${map.normalXp} EXP・精英 ${map.eliteXp} EXP・Boss ${map.bossXp} EXP</em>`;
+      : map.dungeon ? `<em>${map.id === 'goblin-camp' ? '清場後留意哥布林號角' : `${dungeonDefinition?.waves || 10} 波戰鬥・最終波 BOSS・職業套裝`}${map.ticketItemId ? '・可連續自動挑戰' : ''}</em><strong class="dungeon-key-count">${dungeonPassName}：${dungeonPasses}</strong>` : `<em>普通 ${map.normalXp} EXP・精英 ${map.eliteXp} EXP・Boss ${map.bossXp} EXP</em>`;
     const action = isRegionHub
       ? `<button type="button" data-open-map-region="${map.id}">查看 ${beginnerPlainsRegions.length} 個區域</button>`
       : map.dungeon
@@ -1631,7 +1639,7 @@ function renderBeginnerPlainsRegions() {
       const available = ['plains-entrance', 'wolf-den', 'boar-woods', 'goblin-camp'].includes(region.id);
       const isGoblinCamp = region.id === 'goblin-camp';
       const goblinMaps = getInventoryItemQuantity(progress, GOBLIN_CAMP_TICKET_ID);
-      const regionDetail = isGoblinCamp ? `副本隨機 4～7 波・哥布林營地地圖 ${goblinMaps} 張` : available ? '怪物 5 種・稀有怪物機率 10%' : '怪物與掉落物：尚未設定';
+      const regionDetail = isGoblinCamp ? `號角將決定是否繼續深入・哥布林營地地圖 ${goblinMaps} 張` : available ? '怪物 5 種・稀有怪物機率 10%' : '怪物與掉落物：尚未設定';
       return `
       <article class="map-region-card ${available ? 'available' : 'pending'} ${activeMap.id === region.id ? 'selected' : ''}">
         <span>${String(index + 1).padStart(2, '0')}</span>
@@ -2084,7 +2092,7 @@ function updateBattleUI() {
   if (companionName) companionName.textContent = racialCompanion.name;
   const currentDungeonDefinition = currentMap.dungeon ? getDungeonDefinition(currentMap.id) : null;
   const dungeonWaveText = currentMap.id === 'goblin-camp'
-    ? `第 ${battle.dungeonWave || 1} 波・隨機 4～7 波`
+    ? `第 ${battle.dungeonWave || 1} 波`
     : `第 ${battle.dungeonWave || 1}／${currentDungeonDefinition?.waves || 10} 波`;
   document.querySelector('#map-level-text').textContent = currentMap.dungeon ? `特殊副本・${dungeonWaveText}・Lv. ${currentMap.min}–${currentMap.max}` : `怪物等級：Lv. ${currentMap.min}–${currentMap.max}`;
   document.querySelector('#player-hp-text').textContent = `${Math.max(0, battle.playerHp)} / ${maxHp}${battle.playerShield > 0 ? `　護盾 ${battle.playerShield}` : ''}`;
@@ -2291,16 +2299,16 @@ function queueDefeatedEnemies() {
           minWave: definition.minWaves,
           maxWave: definition.maxWaves
         });
-        if (outcome.horn) logBattle('📯 哥布林號角響起……', 'system');
+        if (outcome.horn) logBattle('📯 哥布林號角響起！', 'system');
         setTimeout(() => {
           if (!battle.isDungeon || battle.dungeonWave !== clearedWave) return;
           if (!outcome.continueDungeon) {
-            if (outcome.escaped) logBattle('……發現哥布林逃跑了，副本結束。', 'progress');
+            if (outcome.escaped) logBattle('🏃 哥布林撤退，離開副本。', 'progress');
             else logBattle('哥布林營地已被完全清空，副本結束。', 'progress');
             completeDungeon();
             return;
           }
-          if (outcome.horn) logBattle('號角後出現更多哥布林，繼續前進！', 'spawn');
+          if (outcome.horn) logBattle('⚔ 更多的哥布林到來，繼續副本！', 'spawn');
           loadDungeonWave(outcome.nextWave);
         }, outcome.horn ? 1200 : 650);
         return;
@@ -2420,6 +2428,7 @@ function useAutoSkill(character, progress) {
 
 function autoSkillTick() {
   if (!fighting) return;
+  if (Date.now() < (battle.playerStunnedUntil || 0)) return;
   const character = JSON.parse(localStorage.getItem('stardust-character'));
   if (!character) return;
   if (useAutoSkill(character, getProgress())) updateBattleUI();
@@ -2437,6 +2446,10 @@ function battleTick() {
   updateManaExhaustion(maxMana);
   autoSkillTick();
   queueDefeatedEnemies();
+  if (Date.now() < (battle.playerStunnedUntil || 0)) {
+    updateBattleUI();
+    return;
+  }
   const stats = getCharacterStats(progress.level, progress, character);
   const equippedWeapon = progress.equipment?.weapon;
   const rolledWeaponAttack = EquipmentPolicy.rollWeaponAttack(equippedWeapon, Math.random());
@@ -2475,6 +2488,59 @@ function battleTick() {
   updateBattleUI();
 }
 
+function getWoundedEnemyIndexes() {
+  return aliveEnemyIndexesByAge().filter((index) => battle.enemyHps[index] < getEnemyDefinition(index).maxHp);
+}
+
+function healGoblinAlly(healerIndex) {
+  const wounded = getWoundedEnemyIndexes();
+  if (!wounded.length) return false;
+  const targetIndex = wounded.sort((first, second) => (
+    battle.enemyHps[first] / getEnemyDefinition(first).maxHp
+    - battle.enemyHps[second] / getEnemyDefinition(second).maxHp
+  ))[0];
+  const target = getEnemyDefinition(targetIndex);
+  const heal = Math.max(1, Math.ceil(target.maxHp * .25));
+  const restored = Math.min(heal, target.maxHp - battle.enemyHps[targetIndex]);
+  battle.enemyHps[targetIndex] += restored;
+  playMonsterAttackAnimation(healerIndex, false);
+  logBattle(`✨【哥布林薩滿】施放治療術，替【${target.name}】恢復 ${restored} 生命。`, 'system');
+  return true;
+}
+
+function useGoblinHealingTotem(chiefIndex) {
+  const wounded = getWoundedEnemyIndexes();
+  if (!wounded.length) return false;
+  let totalRestored = 0;
+  wounded.forEach((index) => {
+    const target = getEnemyDefinition(index);
+    const heal = Math.max(1, Math.ceil(target.maxHp * .20));
+    const restored = Math.min(heal, target.maxHp - battle.enemyHps[index]);
+    battle.enemyHps[index] += restored;
+    totalRestored += restored;
+  });
+  playMonsterAttackAnimation(chiefIndex, false);
+  logBattle(`🗿【哥布林大酋長】立起治療圖騰，為自己與隊友共恢復 ${totalRestored} 生命。`, 'system');
+  return true;
+}
+
+function summonGoblinScout(chiefIndex, now = Date.now()) {
+  if (aliveEnemyIndexesByAge().length >= 4 || (battle.goblinScoutSummons || 0) >= 2) return false;
+  const type = 'goblinScout';
+  const scout = getMonsterDefinitionForMap(type, 'goblin-camp');
+  battle.enemyTypes.push(type);
+  battle.enemyHps.push(scout.maxHp);
+  battle.enemyRespawns.push(null);
+  battle.enemySpawnedAt.push(now);
+  battle.enemyDots.push([]);
+  battle.enemyDamages.push([]);
+  battle.enemyNextAttackAt.push(now + getMonsterAttackInterval(scout));
+  battle.goblinScoutSummons = (battle.goblinScoutSummons || 0) + 1;
+  playMonsterAttackAnimation(chiefIndex, false);
+  logBattle('📯【哥布林大酋長】發出召喚，一名【哥布林斥候】加入戰鬥！', 'spawn');
+  return true;
+}
+
 function enemyAttackTick() {
   if (!fighting || battleScreen.classList.contains('hidden') || battle.dungeonComplete) return;
   const progress = getProgress();
@@ -2498,6 +2564,17 @@ function enemyAttackTick() {
     battle.enemyNextAttackAt[attackingEnemyIndex] = now + getMonsterAttackInterval(attackingEnemy);
     attackOccurred = true;
     const attackingEnemyName = attackingEnemy.name;
+    if (battle.dungeonId === 'goblin-camp') {
+      const action = GoblinCampPolicy.resolveAction({
+        type: battle.enemyTypes[attackingEnemyIndex],
+        randomValue: Math.random(),
+        hasWoundedAlly: getWoundedEnemyIndexes().length > 0,
+        canSummon: aliveEnemyIndexesByAge().length < 4 && (battle.goblinScoutSummons || 0) < 2
+      });
+      if (action === 'heal' && healGoblinAlly(attackingEnemyIndex)) continue;
+      if (action === 'healing-totem' && useGoblinHealingTotem(attackingEnemyIndex)) continue;
+      if (action === 'summon-scout' && summonGoblinScout(attackingEnemyIndex, now)) continue;
+    }
     const dodged = Math.random() < stats.dodge;
     const monsterCritRate = attackingEnemy.isBoss ? .15 : attackingEnemy.isElite ? .10 : .05;
     const monsterCritical = !dodged && Math.random() < monsterCritRate;
@@ -2507,6 +2584,11 @@ function enemyAttackTick() {
     battle.playerShield -= absorbed;
     enemyHit -= absorbed;
     battle.playerHp -= enemyHit;
+    if (!dodged && enemyHit > 0 && battle.dungeonId === 'goblin-camp'
+      && GoblinCampPolicy.shouldStun(battle.enemyTypes[attackingEnemyIndex], Math.random())) {
+      battle.playerStunnedUntil = Math.max(battle.playerStunnedUntil || 0, now + 1500);
+      logBattle('💫【哥布林投石者】的投石命中要害，你陷入暈眩 1.5 秒！', 'system');
+    }
 
     if (dodged) logBattle(`【${attackingEnemyName}】發動攻擊，你成功閃避。`, 'damage-taken');
     else logBattle(`🩸【${attackingEnemyName}】對你造成 ${enemyHit} 傷害${monsterCritical ? '（暴擊）' : ''}${absorbed ? `，護盾吸收 ${absorbed}` : ''}。`, 'damage-taken', { aggregateKey: `enemy-${battle.enemyTypes[attackingEnemyIndex]}`, damage: enemyHit, summary: `🩸【${attackingEnemyName}】攻擊你${monsterCritical ? '（暴擊）' : ''}` });
@@ -2570,7 +2652,7 @@ function openBattle() {
   const dungeonDefinition = isDungeon ? getDungeonDefinition(currentMap.id) : null;
   const enemyTypes = isDungeon ? createDungeonWaveTypes(1, currentMap.id) : createEnemyTypes(progress.level);
   const battleStart = Date.now();
-  battle = { enemyTypes, enemyHps: enemyTypes.map((type) => monsterTypes[type].maxHp), playerHp: getMaxHp(progress.level, progress), playerMana: getMaxMana(character.job, progress.level), playerShield: 0, manaExhausted: false, playerAttackCharge: 0, hunterAttackCount: 0, enemyNextAttackAt: createEnemyAttackSchedule(enemyTypes, battleStart), globalSkillReadyAt: 0, undeadRevived: false, skillCooldowns: {}, enemyRespawns: enemyTypes.map(() => null), enemySpawnedAt: enemyTypes.map((_, index) => battleStart + index), enemyDots: enemyTypes.map(() => []), monsterMoveSpeed: 200, targetIndexes: [], enemyDamages: enemyTypes.map(() => []), damageTimers: [], isDungeon, dungeonId: isDungeon ? currentMap.id : null, dungeonWave: isDungeon ? 1 : 0, dungeonComplete: false, waveTransitioning: false };
+  battle = { enemyTypes, enemyHps: enemyTypes.map((type) => getMonsterDefinitionForMap(type, currentMap.id).maxHp), playerHp: getMaxHp(progress.level, progress), playerMana: getMaxMana(character.job, progress.level), playerShield: 0, playerStunnedUntil: 0, manaExhausted: false, playerAttackCharge: 0, hunterAttackCount: 0, enemyNextAttackAt: createEnemyAttackSchedule(enemyTypes, battleStart), globalSkillReadyAt: 0, undeadRevived: false, skillCooldowns: {}, enemyRespawns: enemyTypes.map(() => null), enemySpawnedAt: enemyTypes.map((_, index) => battleStart + index), enemyDots: enemyTypes.map(() => []), monsterMoveSpeed: 200, targetIndexes: [], enemyDamages: enemyTypes.map(() => []), damageTimers: [], isDungeon, dungeonId: isDungeon ? currentMap.id : null, dungeonWave: isDungeon ? 1 : 0, dungeonComplete: false, waveTransitioning: false, goblinScoutSummons: 0 };
   clearBattleLog();
   if (pendingOfflineReport) {
     logBattle(`☾ 離線掛機 ${pendingOfflineReport.duration}${pendingOfflineReport.capped ? '（已達 12 小時上限）' : ''}，擊敗約 ${pendingOfflineReport.defeated} 隻怪物。`, 'system');
@@ -2584,7 +2666,7 @@ function openBattle() {
     logBattle(`⚠ ${rank}【${openingSpecial.name}】已出現在地圖！`);
   }
   const dungeonOpening = currentMap.id === 'goblin-camp'
-    ? `◆ 進入${currentMap.name}，本次副本最少 4 波、最多 7 波；第 4～6 波清場後號角將決定是否繼續。`
+    ? `◆ 進入${currentMap.name}。清場後若哥布林號角響起，將顯示哥布林撤退或更多哥布林到來。`
     : `◆ 進入${currentMap.name}，第 1／${dungeonDefinition?.waves || 10} 波：${enemyTypes.length} 名敵人來襲。全滅後自動進入下一波。`;
   logBattle(isDungeon ? dungeonOpening : `進入${currentMap.name}，${character.name}開始自動戰鬥。怪物移動速度 200%，重生約 2 秒。`);
   fighting = true;
