@@ -1135,7 +1135,8 @@ function createDungeonWaveTypes(wave, mapId = battle.dungeonId || getActiveMap(g
 function getMonsterDefinitionForMap(type, mapId = battle.dungeonId || getActiveMap(getProgress()).id) {
   const monster = monsterTypes[type] || monsterTypes.goblin;
   const dungeonMonster = GoblinCampPolicy.scaleMonster(monster, mapId === 'goblin-camp');
-  return WolfDenPolicy.applyWolfDenPassive(dungeonMonster, mapId);
+  const wolfMonster = WolfDenPolicy.applyWolfDenPassive(dungeonMonster, mapId);
+  return BoarWoodsPolicy.applyBoarWoodsPassive(wolfMonster, mapId);
 }
 
 function loadDungeonWave(wave) {
@@ -1149,6 +1150,7 @@ function loadDungeonWave(wave) {
   battle.enemySpawnedAt = enemyTypes.map((_, index) => now + index);
   battle.enemyDots = enemyTypes.map(() => []);
   battle.enemyDamages = enemyTypes.map(() => []);
+  battle.enemyBoarEnraged = enemyTypes.map(() => false);
   battle.goblinScoutSummons = 0;
   battle.enemyNextAttackAt = createEnemyAttackSchedule(enemyTypes, now);
   battle.targetIndexes = [];
@@ -1210,19 +1212,21 @@ function isPlayerBleeding(now = Date.now()) {
   return Boolean(battle.playerBleed && battle.playerBleed.expiresAt > now);
 }
 
-function getMonsterAttackPower(enemy, progress = getProgress()) {
+function getMonsterAttackPower(enemy, progress = getProgress(), currentHp = enemy.maxHp) {
   const map = getActiveMap(progress);
   const monsterLevel = Math.min(map.max, Math.max(map.min, progress.level));
   const levelMultiplier = 1 + (monsterLevel - 1) * .10;
   const rankMultiplier = enemy.isBoss ? 2.4 : enemy.isElite ? 1.65 : 1;
   const randomMultiplier = .9 + Math.random() * .2;
   const bloodFrenzy = WolfDenPolicy.getBloodFrenzyMultiplier(enemy.id, isPlayerBleeding());
-  return Math.max(1, Math.round((enemy.attack || 10) * levelMultiplier * rankMultiplier * randomMultiplier * 1.25 * bloodFrenzy));
+  const irritable = BoarWoodsPolicy.getIrritableMultiplier(enemy.id, currentHp, enemy.maxHp);
+  return Math.max(1, Math.round((enemy.attack || 10) * levelMultiplier * rankMultiplier * randomMultiplier * 1.25 * bloodFrenzy * irritable));
 }
 
-function getMonsterAttackInterval(enemy) {
+function getMonsterAttackInterval(enemy, currentHp = enemy.maxHp) {
   const bloodFrenzy = WolfDenPolicy.getBloodFrenzyMultiplier(enemy.id, isPlayerBleeding());
-  return Math.max(250, (enemy.attackInterval || (1000 / (enemy.attackSpeed || 1))) / bloodFrenzy);
+  const irritable = BoarWoodsPolicy.getIrritableMultiplier(enemy.id, currentHp, enemy.maxHp);
+  return Math.max(250, (enemy.attackInterval || (1000 / (enemy.attackSpeed || 1))) / bloodFrenzy / irritable);
 }
 
 function createEnemyAttackSchedule(enemyTypes, startAt = Date.now()) {
@@ -2256,6 +2260,7 @@ function processEnemyRespawns() {
       battle.enemyHps[index] = getEnemyDefinition(index).maxHp;
       battle.enemySpawnedAt[index] = Date.now();
       battle.enemyDots[index] = [];
+      if (battle.enemyBoarEnraged) battle.enemyBoarEnraged[index] = false;
       battle.enemyNextAttackAt[index] = Date.now() + getMonsterAttackInterval(getEnemyDefinition(index));
       if (getEnemyDefinition(index).isBoss) {
         showToast(`⚠ BOSS 出現：${getEnemyDefinition(index).name}`);
@@ -2582,7 +2587,15 @@ function enemyAttackTick() {
     }
     if (nextAttackAt > now) continue;
 
-    battle.enemyNextAttackAt[attackingEnemyIndex] = now + getMonsterAttackInterval(attackingEnemy);
+    const enemyCurrentHp = battle.enemyHps[attackingEnemyIndex];
+    const irritableActive = getActiveMap(progress).id === 'boar-woods'
+      && BoarWoodsPolicy.isIrritableActive(attackingEnemy.id, enemyCurrentHp, attackingEnemy.maxHp);
+    if (!battle.enemyBoarEnraged) battle.enemyBoarEnraged = battle.enemyTypes.map(() => false);
+    if (irritableActive && !battle.enemyBoarEnraged?.[attackingEnemyIndex]) {
+      battle.enemyBoarEnraged[attackingEnemyIndex] = true;
+      logBattle(`💢【${attackingEnemy.name}】陷入暴躁，攻擊與攻速提高 15%！`, 'system');
+    }
+    battle.enemyNextAttackAt[attackingEnemyIndex] = now + getMonsterAttackInterval(attackingEnemy, enemyCurrentHp);
     attackOccurred = true;
     const attackingEnemyName = attackingEnemy.name;
     if (battle.dungeonId === 'goblin-camp') {
@@ -2599,7 +2612,7 @@ function enemyAttackTick() {
     const dodged = Math.random() < stats.dodge;
     const monsterCritRate = attackingEnemy.isBoss ? .15 : attackingEnemy.isElite ? .10 : .05;
     const monsterCritical = !dodged && Math.random() < monsterCritRate;
-    const rawEnemyHit = getMonsterAttackPower(attackingEnemy, progress) * (monsterCritical ? 1.5 : 1);
+    const rawEnemyHit = getMonsterAttackPower(attackingEnemy, progress, enemyCurrentHp) * (monsterCritical ? 1.5 : 1);
     let enemyHit = dodged ? 0 : Math.max(1, Math.ceil(rawEnemyHit * (100 / (100 + stats.defense * 8))));
     const absorbed = Math.min(battle.playerShield, enemyHit);
     battle.playerShield -= absorbed;
@@ -2614,6 +2627,11 @@ function enemyAttackTick() {
       && GoblinCampPolicy.shouldStun(battle.enemyTypes[attackingEnemyIndex], Math.random())) {
       battle.playerStunnedUntil = Math.max(battle.playerStunnedUntil || 0, now + 1500);
       logBattle('💫【哥布林投石者】的投石命中要害，你陷入暈眩 1.5 秒！', 'system');
+    }
+    if (!dodged && enemyHit > 0 && getActiveMap(progress).id === 'boar-woods'
+      && BoarWoodsPolicy.shouldCharge(attackingEnemy.id, Math.random())) {
+      battle.playerStunnedUntil = Math.max(battle.playerStunnedUntil || 0, now + BoarWoodsPolicy.BOSS_CHARGE_STUN_MS);
+      logBattle('💥【巨牙野豬】施放【衝撞】，你陷入暈眩 2 秒！', 'system');
     }
 
     if (dodged) logBattle(`【${attackingEnemyName}】發動攻擊，你成功閃避。`, 'damage-taken');
@@ -2679,7 +2697,7 @@ function openBattle() {
   const dungeonDefinition = isDungeon ? getDungeonDefinition(currentMap.id) : null;
   const enemyTypes = isDungeon ? createDungeonWaveTypes(1, currentMap.id) : createEnemyTypes(progress.level);
   const battleStart = Date.now();
-  battle = { enemyTypes, enemyHps: enemyTypes.map((type) => getMonsterDefinitionForMap(type, currentMap.id).maxHp), playerHp: getMaxHp(progress.level, progress), playerMana: getMaxMana(character.job, progress.level), playerShield: 0, playerStunnedUntil: 0, playerBleed: null, manaExhausted: false, playerAttackCharge: 0, hunterAttackCount: 0, enemyNextAttackAt: createEnemyAttackSchedule(enemyTypes, battleStart), globalSkillReadyAt: 0, undeadRevived: false, skillCooldowns: {}, enemyRespawns: enemyTypes.map(() => null), enemySpawnedAt: enemyTypes.map((_, index) => battleStart + index), enemyDots: enemyTypes.map(() => []), monsterMoveSpeed: 200, targetIndexes: [], enemyDamages: enemyTypes.map(() => []), damageTimers: [], isDungeon, dungeonId: isDungeon ? currentMap.id : null, dungeonWave: isDungeon ? 1 : 0, dungeonComplete: false, waveTransitioning: false, goblinScoutSummons: 0 };
+  battle = { enemyTypes, enemyHps: enemyTypes.map((type) => getMonsterDefinitionForMap(type, currentMap.id).maxHp), playerHp: getMaxHp(progress.level, progress), playerMana: getMaxMana(character.job, progress.level), playerShield: 0, playerStunnedUntil: 0, playerBleed: null, manaExhausted: false, playerAttackCharge: 0, hunterAttackCount: 0, enemyNextAttackAt: createEnemyAttackSchedule(enemyTypes, battleStart), enemyBoarEnraged: enemyTypes.map(() => false), globalSkillReadyAt: 0, undeadRevived: false, skillCooldowns: {}, enemyRespawns: enemyTypes.map(() => null), enemySpawnedAt: enemyTypes.map((_, index) => battleStart + index), enemyDots: enemyTypes.map(() => []), monsterMoveSpeed: 200, targetIndexes: [], enemyDamages: enemyTypes.map(() => []), damageTimers: [], isDungeon, dungeonId: isDungeon ? currentMap.id : null, dungeonWave: isDungeon ? 1 : 0, dungeonComplete: false, waveTransitioning: false, goblinScoutSummons: 0 };
   clearBattleLog();
   if (pendingOfflineReport) {
     logBattle(`☾ 離線掛機 ${pendingOfflineReport.duration}${pendingOfflineReport.capped ? '（已達 12 小時上限）' : ''}，擊敗約 ${pendingOfflineReport.defeated} 隻怪物。`, 'system');
