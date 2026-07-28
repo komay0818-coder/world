@@ -1283,8 +1283,10 @@ function getEquipmentStats(progress = getProgress()) {
     dodge: stats.dodge + effectiveEquipmentStat(item, 'dodge'),
     attackSpeedBonus: stats.attackSpeedBonus + effectiveEquipmentStat(item, 'attackSpeedBonus'),
     cooldownSpeedBonus: stats.cooldownSpeedBonus + effectiveEquipmentStat(item, 'cooldownSpeedBonus'),
-    manaRegenBonus: stats.manaRegenBonus + effectiveEquipmentStat(item, 'manaRegenBonus')
-  }), { attack: 0, defense: 0, hp: 0, mana: 0, strength: 0, intelligence: 0, accuracy: 0, dodge: 0, attackSpeedBonus: 0, cooldownSpeedBonus: 0, manaRegenBonus: 0 });
+    manaRegenBonus: stats.manaRegenBonus + effectiveEquipmentStat(item, 'manaRegenBonus'),
+    manaRegenFlat: stats.manaRegenFlat + effectiveEquipmentStat(item, 'manaRegenFlat'),
+    parry: stats.parry + effectiveEquipmentStat(item, 'parry')
+  }), { attack: 0, defense: 0, hp: 0, mana: 0, strength: 0, intelligence: 0, accuracy: 0, dodge: 0, attackSpeedBonus: 0, cooldownSpeedBonus: 0, manaRegenBonus: 0, manaRegenFlat: 0, parry: 0 });
 }
 
 function getCollectionStats(progress = getProgress()) {
@@ -1327,6 +1329,8 @@ function getCharacterStats(level, progress = getProgress(), character = JSON.par
     attackSpeed: EquipmentPolicy.getAttacksPerSecond(equippedWeapon, base.attackSpeed * 1.15) * (1 + equipment.attackSpeedBonus),
     cooldownSpeed: (character?.race === 'elf' ? 1.03 : 1) * (1 + equipment.cooldownSpeedBonus),
     manaRegen: 1 + equipment.manaRegenBonus,
+    manaRegenFlat: equipment.manaRegenFlat,
+    parry: Math.min(.50, Math.max(0, equipment.parry)),
     dotMultiplier: character?.race === 'undead' ? 1.20 : 1
   };
 }
@@ -1458,6 +1462,8 @@ function itemStatsText(item) {
   if (item.attackSpeedBonus) parts.push(`攻擊速度 +${Math.round(effectiveEquipmentStat(item, 'attackSpeedBonus') * 100)}%`);
   if (item.cooldownSpeedBonus) parts.push(`冷卻速度 +${Math.round(effectiveEquipmentStat(item, 'cooldownSpeedBonus') * 100)}%`);
   if (item.manaRegenBonus) parts.push(`魔力恢復 +${Math.round(effectiveEquipmentStat(item, 'manaRegenBonus') * 100)}%`);
+  if (item.manaRegenFlat) parts.push(`每秒回魔 +${effectiveEquipmentStat(item, 'manaRegenFlat')}`);
+  if (item.parry) parts.push(`招架 +${Math.round(effectiveEquipmentStat(item, 'parry') * 100)}%`);
   if (item.affix) parts.push(`詞綴【${item.affix.name}】：${item.affix.text}`);
   if (item.allowedJobs?.length) parts.push(`職業：${item.allowedJobs.map((job) => ({ warrior: '戰士', assassin: '刺客', hunter: '獵人', mage: '法師', priest: '牧師' })[job] || job).join('、')}`);
   return parts.join('　') || item.description || '';
@@ -1492,6 +1498,8 @@ function equipmentScore(item) {
     + effectiveEquipmentStat(item, 'attackSpeedBonus') * 200
     + effectiveEquipmentStat(item, 'cooldownSpeedBonus') * 200
     + effectiveEquipmentStat(item, 'manaRegenBonus') * 200
+    + effectiveEquipmentStat(item, 'manaRegenFlat') * 10
+    + effectiveEquipmentStat(item, 'parry') * 200
   );
 }
 
@@ -1508,6 +1516,10 @@ function equipmentStackKey(item) {
     attack: item.attack || 0,
     defense: item.defense || 0,
     hp: item.hp || 0,
+    mana: item.mana || 0,
+    accuracy: item.accuracy || 0,
+    manaRegenFlat: item.manaRegenFlat || 0,
+    parry: item.parry || 0,
     enhanceLevel: item.enhanceLevel || 0,
     affix: item.affix || null,
     allowedJobs: [...(item.allowedJobs || [])].sort()
@@ -1627,6 +1639,8 @@ function renderCharacterAbilities() {
         <article><small>暴擊率</small><b>${(stats.crit * 100).toFixed(1)}%</b><em>上限 60%</em></article>
         <article><small>閃避率</small><b>${(stats.dodge * 100).toFixed(1)}%</b><em>上限 45%</em></article>
         <article><small>命中能力</small><b>${Math.round(stats.accuracy * 100)}%</b><em>${character.job === 'hunter' && progress.level >= 3 ? '精準射擊加成' : '基礎命中加成'}</em></article>
+        <article><small>招架率</small><b>${(stats.parry * 100).toFixed(1)}%</b><em>成功時傷害減半</em></article>
+        <article><small>額外回魔</small><b>+${stats.manaRegenFlat.toFixed(1)}／秒</b><em>裝備固定回復</em></article>
         <article><small>攻擊速度</small><b>${stats.attackSpeed.toFixed(2)}</b><em>次／秒倍率</em></article>
         <article><small>技能冷卻速度</small><b>${Math.round(stats.cooldownSpeed * 100)}%</b><em>${character.race === 'elf' ? '種族加成' : '基礎值'}</em></article>
       </div>
@@ -2479,8 +2493,13 @@ function battleTick() {
   processEnemyRespawns();
   processEnemyDots();
   const maxMana = getMaxMana(character.job, progress.level);
-  const manaRegen = getCharacterStats(progress.level, progress, character).manaRegen;
-  battle.playerMana = Math.min(maxMana, battle.playerMana + Math.max(.625, maxMana * .01) * manaRegen);
+  const stats = getCharacterStats(progress.level, progress, character);
+  const manaRegenNow = Date.now();
+  const manaRegenElapsedSeconds = Math.max(0, Math.min(5, (manaRegenNow - (battle.lastManaRegenAt || manaRegenNow)) / 1000));
+  battle.lastManaRegenAt = manaRegenNow;
+  battle.playerMana = Math.min(maxMana, battle.playerMana
+    + Math.max(.625, maxMana * .01) * stats.manaRegen
+    + stats.manaRegenFlat * manaRegenElapsedSeconds);
   if (battle.playerMana / maxMana <= .20) useManaPotion();
   updateManaExhaustion(maxMana);
   autoSkillTick();
@@ -2663,7 +2682,12 @@ function enemyAttackTick() {
     const monsterCritRate = attackingEnemy.isBoss ? .15 : attackingEnemy.isElite ? .10 : .05;
     const monsterCritical = !dodged && Math.random() < monsterCritRate;
     const rawEnemyHit = getMonsterAttackPower(attackingEnemy, progress, enemyCurrentHp) * (monsterCritical ? 1.5 : 1);
+    const parried = !dodged && Math.random() < stats.parry;
     let enemyHit = dodged ? 0 : Math.max(1, Math.ceil(rawEnemyHit * (100 / (100 + stats.defense * 8))));
+    if (parried) {
+      enemyHit = Math.max(1, Math.ceil(enemyHit * .5));
+      logBattle(`你招架了【${attackingEnemyName}】的攻擊，傷害降低 50%！`, 'damage-taken');
+    }
     const absorbed = Math.min(battle.playerShield, enemyHit);
     battle.playerShield -= absorbed;
     enemyHit -= absorbed;
@@ -2749,7 +2773,7 @@ function openBattle() {
   const enemyLevels = createEnemyLevels(enemyTypes, currentMap.id);
   const enemyHps = enemyTypes.map((type, index) => getMonsterDefinitionForMap(type, currentMap.id, enemyLevels[index]).maxHp);
   const battleStart = Date.now();
-  battle = { enemyTypes, enemyLevels, enemyHps, playerHp: getMaxHp(progress.level, progress), playerMana: getMaxMana(character.job, progress.level), playerShield: 0, playerStunnedUntil: 0, playerBleed: null, manaExhausted: false, playerAttackCharge: 0, hunterAttackCount: 0, enemyNextAttackAt: createEnemyAttackSchedule(enemyTypes, battleStart, currentMap.id, enemyLevels), enemyBoarEnraged: enemyTypes.map(() => false), globalSkillReadyAt: 0, undeadRevived: false, skillCooldowns: {}, enemyRespawns: enemyTypes.map(() => null), enemySpawnedAt: enemyTypes.map((_, index) => battleStart + index), enemyDots: enemyTypes.map(() => []), monsterMoveSpeed: 200, targetIndexes: [], enemyDamages: enemyTypes.map(() => []), damageTimers: [], isDungeon, dungeonId: isDungeon ? currentMap.id : null, dungeonWave: isDungeon ? 1 : 0, dungeonComplete: false, waveTransitioning: false, goblinScoutSummons: 0 };
+  battle = { enemyTypes, enemyLevels, enemyHps, playerHp: getMaxHp(progress.level, progress), playerMana: getMaxMana(character.job, progress.level), playerShield: 0, playerStunnedUntil: 0, playerBleed: null, manaExhausted: false, playerAttackCharge: 0, hunterAttackCount: 0, lastManaRegenAt: battleStart, enemyNextAttackAt: createEnemyAttackSchedule(enemyTypes, battleStart, currentMap.id, enemyLevels), enemyBoarEnraged: enemyTypes.map(() => false), globalSkillReadyAt: 0, undeadRevived: false, skillCooldowns: {}, enemyRespawns: enemyTypes.map(() => null), enemySpawnedAt: enemyTypes.map((_, index) => battleStart + index), enemyDots: enemyTypes.map(() => []), monsterMoveSpeed: 200, targetIndexes: [], enemyDamages: enemyTypes.map(() => []), damageTimers: [], isDungeon, dungeonId: isDungeon ? currentMap.id : null, dungeonWave: isDungeon ? 1 : 0, dungeonComplete: false, waveTransitioning: false, goblinScoutSummons: 0 };
   clearBattleLog();
   if (pendingOfflineReport) {
     logBattle(`☾ 離線掛機 ${pendingOfflineReport.duration}${pendingOfflineReport.capped ? '（已達 12 小時上限）' : ''}，擊敗約 ${pendingOfflineReport.defeated} 隻怪物。`, 'system');

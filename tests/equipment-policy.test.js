@@ -90,5 +90,18 @@ assert.deepEqual(policy.getEquipSlots(armor.leatherHood, 'assassin'), ['head'], 
 assert.deepEqual(policy.getEquipSlots(armor.apprenticeMageHat, 'mage'), ['head'], 'mages can equip cloth hats');
 assert.deepEqual(policy.getEquipSlots(armor.apprenticeMageHat, 'priest'), ['head'], 'priests can equip cloth hats');
 assert.equal(policy.isRecruitEquipment(armor.recruitIronHelmet), true, 'recruit iron helmet survives recruit-only inventory migration');
+assert.deepEqual([armor.recruitIronLegguards.defense, armor.recruitIronLegguards.hp], [10, 18], 'recruit iron legguards stats match the design');
+assert.deepEqual([armor.guardLegguards.defense, armor.guardLegguards.parry], [12, .01], 'guard legguards stats match the design');
+assert.deepEqual([armor.leatherPants.defense, armor.leatherPants.hp], [6, 12], 'leather pants stats match the design');
+assert.deepEqual([armor.huntingLegguards.defense, armor.huntingLegguards.accuracy], [4, .01], 'hunting legguards stats match the design');
+assert.deepEqual([armor.apprenticeClothPants.defense, armor.apprenticeClothPants.mana], [3, 40], 'apprentice cloth pants stats match the design');
+assert.deepEqual([armor.novicePriestPants.defense, armor.novicePriestPants.hp, armor.novicePriestPants.manaRegenFlat], [2, 10, 1], 'novice priest pants stats match the design');
+assert.deepEqual(policy.getEquipSlots(armor.recruitIronLegguards, 'warrior'), ['pants'], 'warriors can equip plate legguards');
+assert.deepEqual(policy.getEquipSlots(armor.guardLegguards, 'hunter'), [], 'hunters cannot equip plate legguards');
+assert.deepEqual(policy.getEquipSlots(armor.leatherPants, 'hunter'), ['pants'], 'hunters can equip leather pants');
+assert.deepEqual(policy.getEquipSlots(armor.leatherPants, 'assassin'), ['pants'], 'assassins can equip leather pants');
+assert.deepEqual(policy.getEquipSlots(armor.apprenticeClothPants, 'mage'), ['pants'], 'mages can equip cloth pants');
+assert.deepEqual(policy.getEquipSlots(armor.novicePriestPants, 'priest'), ['pants'], 'priests can equip priest pants');
+assert.equal(policy.isRecruitEquipment(armor.recruitIronLegguards), true, 'recruit iron legguards survive recruit-only inventory migration');
 
 console.log('equipment-policy: assertions passed');
