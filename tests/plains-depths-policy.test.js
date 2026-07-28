@@ -20,7 +20,8 @@ assert.equal(policy.MONSTER_TYPES.blackstoneLeader.artClass, 'plains-depths-blac
 assert.equal(policy.MONSTER_TYPES.grasslandVulture.artClass, 'plains-depths-grassland-vulture-art');
 assert.equal(policy.MONSTER_TYPES.highlandWolf.artClass, 'plains-depths-highland-wolf-art');
 assert.equal(policy.MONSTER_TYPES.rockbackBoar.artClass, 'plains-depths-rockback-boar-art');
-assert.ok(monsters.filter((monster) => !['blackstoneScout', 'blackstoneRaider', 'blackstoneLeader', 'grasslandVulture', 'highlandWolf', 'rockbackBoar'].includes(monster.id)).every((monster) => monster.artClass === 'monster-placeholder-art'));
+assert.equal(policy.MONSTER_TYPES.wanderingBlackKnight.artClass, 'plains-depths-wandering-black-knight-art');
+assert.ok(monsters.every((monster) => monster.artClass !== 'monster-placeholder-art'));
 assert.ok(monsters.every((monster) => monster.lootPending));
 assert.equal(new Set(monsters.map((monster) => monster.id)).size, 7, 'monster IDs are unique');
 

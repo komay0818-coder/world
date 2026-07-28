@@ -10,6 +10,12 @@ monsterIds.forEach((monsterId) => {
   const imagePath = displayPolicy.MONSTER_IMAGE_BY_TYPE[monsterId].split('?')[0];
   assert.ok(fs.existsSync(path.join(__dirname, '..', imagePath)), `${monsterId} combat-slot image exists`);
 });
+[
+  'highlandWolf', 'rockbackBoar', 'blackstoneScout', 'grasslandVulture',
+  'blackstoneRaider', 'wanderingBlackKnight', 'blackstoneLeader'
+].forEach((monsterId) => {
+  assert.ok(!displayPolicy.MONSTER_IMAGE_BY_TYPE[monsterId].includes('monster-placeholder'), `${monsterId} uses dedicated combat art`);
+});
 assert.equal(displayPolicy.getMonsterLevel({ min: 3, max: 5 }, 1), 3, 'monster level does not fall below the map minimum');
 assert.equal(displayPolicy.getMonsterLevel({ min: 3, max: 5 }, 4), 4, 'monster level follows player level inside the map range');
 assert.equal(displayPolicy.getMonsterLevel({ min: 3, max: 5 }, 8), 5, 'monster level does not exceed the map maximum');

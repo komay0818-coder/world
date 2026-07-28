@@ -43,13 +43,13 @@
     moonboneSentinel: 'assets/dungeon-moonbone.png',
     blightOracle: 'assets/dungeon-oracle.png',
     eclipseSovereign: 'assets/dungeon-boss.png',
-    highlandWolf: 'assets/monster-placeholder.svg',
-    rockbackBoar: 'assets/monster-placeholder.svg',
-    blackstoneScout: 'assets/monster-placeholder.svg',
-    grasslandVulture: 'assets/monster-placeholder.svg',
-    blackstoneRaider: 'assets/monster-placeholder.svg',
-    wanderingBlackKnight: 'assets/monster-placeholder.svg',
-    blackstoneLeader: 'assets/monster-placeholder.svg'
+    highlandWolf: 'assets/plains-depths-highland-wolf.png?v=20260729-user-image-v1',
+    rockbackBoar: 'assets/plains-depths-rockback-boar.png?v=20260729-user-image-v1',
+    blackstoneScout: 'assets/plains-depths-blackstone-scout.png?v=20260729-user-image-v1',
+    grasslandVulture: 'assets/plains-depths-grassland-vulture.png?v=20260729-user-image-v1',
+    blackstoneRaider: 'assets/plains-depths-blackstone-raider.png?v=20260729-user-image-v1',
+    wanderingBlackKnight: 'assets/plains-depths-wandering-black-knight.png?v=20260729-user-image-v1',
+    blackstoneLeader: 'assets/plains-depths-blackstone-leader.png?v=20260729-user-image-v1'
   });
 
   const STATUS_DISPLAY = Object.freeze({
