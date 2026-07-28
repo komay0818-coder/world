@@ -552,7 +552,7 @@ const monsterTypes = {
   goblinGuard: { id: 'goblinGuard', name: '哥布林護衛', maxHp: 245, attack: 16, defense: 15, evasion: 2, parry: 13, damageReduction: 8, artClass: 'goblin-camp-guard-art', xp: 28, gold: 16, isElite: true, lootPending: true },
   goblinCaptain: { id: 'goblinCaptain', name: '哥布林隊長', maxHp: 720, attack: 21, defense: 19, evasion: 4, parry: 25, damageReduction: 18, artClass: 'goblin-camp-placeholder goblin-art', xp: 120, gold: 65, isBoss: true, lootPending: true },
   goblinTreasureChest: { id: 'goblinTreasureChest', name: '哥布林寶箱', maxHp: 210, attack: 1, defense: 18, evasion: 0, parry: 0, damageReduction: 12, artClass: 'goblin-camp-placeholder goblin-art', xp: 28, gold: 45, isRare: true, lootPending: true },
-  goblinHighChief: { id: 'goblinHighChief', name: '哥布林大酋長', maxHp: 1180, attack: 25, defense: 25, evasion: 4, parry: 15, damageReduction: 11, artClass: 'goblin-camp-placeholder goblin-art', xp: 120, gold: 110, isBoss: true, lootPending: true },
+  goblinHighChief: { id: 'goblinHighChief', name: '哥布林大酋長', maxHp: 1180, attack: 25, defense: 25, evasion: 4, parry: 15, damageReduction: 11, artClass: 'goblin-camp-high-chief-art', xp: 120, gold: 110, isBoss: true, lootPending: true },
   wolf: { id: 'wolf', name: '森林狼', maxHp: 68, attack: 14, defense: 2, evasion: 8, parry: 0, damageReduction: 0, artClass: 'wolf-art', xp: 14, gold: 4 },
   boar: { id: 'boar', name: '野豬', maxHp: 82, attack: 17, defense: 7, evasion: 1, parry: 0, damageReduction: 4, artClass: 'boar-art', xp: 18, gold: 5 },
   goblinOverlord: { id: 'goblinOverlord', name: '哥布林督軍', maxHp: 320, attack: 14, defense: 14, evasion: 4, parry: 10, damageReduction: 5, artClass: 'goblin-art', xp: 90, gold: 35, isElite: true, lootSource: 'goblin' },
