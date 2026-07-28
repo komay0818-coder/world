@@ -1610,7 +1610,7 @@ function renderBeginnerPlainsRegions() {
       const goblinMaps = getInventoryItemQuantity(progress, GOBLIN_CAMP_TICKET_ID);
       const regionDetail = isGoblinCamp
         ? `號角將決定是否繼續深入・哥布林營地地圖 ${goblinMaps} 張`
-        : region.id === 'plains-depths' ? '怪物 7 種・已完成圖片 4 種' : available ? '怪物 5 種・稀有怪物機率 10%' : '怪物與掉落物：尚未設定';
+        : region.id === 'plains-depths' ? '怪物 7 種・已完成圖片 5 種' : available ? '怪物 5 種・稀有怪物機率 10%' : '怪物與掉落物：尚未設定';
       return `
       <article class="map-region-card ${available ? 'available' : 'pending'} ${unlocked ? '' : 'locked'} ${activeMap.id === region.id ? 'selected' : ''}">
         <span>${String(index + 1).padStart(2, '0')}</span>

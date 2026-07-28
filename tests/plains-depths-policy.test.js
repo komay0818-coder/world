@@ -18,8 +18,9 @@ assert.equal(policy.MONSTER_TYPES.blackstoneScout.artClass, 'plains-depths-black
 assert.equal(policy.MONSTER_TYPES.blackstoneRaider.artClass, 'plains-depths-blackstone-raider-art');
 assert.equal(policy.MONSTER_TYPES.blackstoneLeader.artClass, 'plains-depths-blackstone-leader-art');
 assert.equal(policy.MONSTER_TYPES.grasslandVulture.artClass, 'plains-depths-grassland-vulture-art');
-assert.ok(monsters.filter((monster) => !['blackstoneScout', 'blackstoneRaider', 'blackstoneLeader', 'grasslandVulture'].includes(monster.id)).every((monster) => monster.artClass === 'monster-placeholder-art'));
+assert.equal(policy.MONSTER_TYPES.highlandWolf.artClass, 'plains-depths-highland-wolf-art');
+assert.ok(monsters.filter((monster) => !['blackstoneScout', 'blackstoneRaider', 'blackstoneLeader', 'grasslandVulture', 'highlandWolf'].includes(monster.id)).every((monster) => monster.artClass === 'monster-placeholder-art'));
 assert.ok(monsters.every((monster) => monster.lootPending));
 assert.equal(new Set(monsters.map((monster) => monster.id)).size, 7, 'monster IDs are unique');
 
-console.log('plains-depths-policy: 14 assertions passed');
+console.log('plains-depths-policy: 15 assertions passed');
