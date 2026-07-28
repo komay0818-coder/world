@@ -357,6 +357,12 @@ function applySavedLayout() {
     const layout = saved[key];
     const element = document.querySelector(selector);
     if (!layout || !layout.modified || !element) return;
+    if (key === 'log' && isMobileBattleLayout()) {
+      ['position', 'left', 'top', 'right', 'bottom', 'width', 'height', 'margin', 'z-index'].forEach((property) => {
+        element.style.removeProperty(property);
+      });
+      return;
+    }
     if (layout.skillRelative && element.classList.contains('skill-chip')) {
       element.style.position = 'relative';
       element.style.left = layout.leftOffset || '0px';
@@ -439,6 +445,7 @@ function setupLayoutDrag() {
         element.setPointerCapture(event.pointerId);
         return;
       }
+      if (element.classList.contains('combat-log') && isMobileBattleLayout()) return;
       element.style.position = 'fixed';
       element.style.left = `${rect.left}px`;
       element.style.top = `${rect.top}px`;
@@ -3024,6 +3031,16 @@ function applyCombatLogPosition(left, top, persist = true) {
   const combatLog = document.querySelector('.combat-log');
   const safeLeft = Math.max(0, Math.min(1400, Number(left) || 0));
   const safeTop = Math.max(0, Math.min(900, Number(top) || 0));
+  if (isMobileBattleLayout()) {
+    ['position', 'left', 'top', 'right', 'bottom', 'width', 'height', 'margin', 'z-index'].forEach((property) => {
+      combatLog.style.removeProperty(property);
+    });
+    layoutLogX.value = String(safeLeft);
+    layoutLogY.value = String(safeTop);
+    layoutLogXValue.value = `${safeLeft}px`;
+    layoutLogYValue.value = `${safeTop}px`;
+    return;
+  }
   combatLog.style.setProperty('position', 'fixed', 'important');
   combatLog.style.setProperty('left', `${safeLeft}px`, 'important');
   combatLog.style.setProperty('top', `${safeTop}px`, 'important');
@@ -3055,6 +3072,19 @@ try {
 
 layoutLogX.addEventListener('input', () => applyCombatLogPosition(layoutLogX.value, layoutLogY.value));
 layoutLogY.addEventListener('input', () => applyCombatLogPosition(layoutLogX.value, layoutLogY.value));
+
+function isMobileBattleLayout() {
+  return window.matchMedia('(max-width: 700px)').matches;
+}
+
+window.matchMedia('(max-width: 700px)').addEventListener('change', () => {
+  try {
+    const savedLayoutPosition = JSON.parse(localStorage.getItem('stardust-battle-layout') || '{}').log || defaultBattleLayout.log;
+    applyCombatLogPosition(savedLayoutPosition.left, savedLayoutPosition.top, false);
+  } catch {
+    applyCombatLogPosition(defaultBattleLayout.log.left, defaultBattleLayout.log.top, false);
+  }
+});
 
 document.querySelector('#layout-export').addEventListener('click', async () => {
   saveVisibleAdjustedLayout();

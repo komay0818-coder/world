@@ -137,7 +137,13 @@
     width: 100% !important; height: auto !important; min-height: 0 !important;
     max-height: none !important; overflow: visible !important;
   }
-  .battle-bottom .combat-log { order: 1; }
+  .battle-bottom .combat-log {
+    position: static !important;
+    inset: auto !important;
+    order: 1;
+    box-sizing: border-box !important;
+    margin: 0 !important;
+  }
   .battle-bottom .skill-panel {
     order: 2; min-height: 0 !important;
     align-self: stretch !important;
