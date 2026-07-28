@@ -14,7 +14,9 @@ assert.deepEqual(policy.MONSTER_POOL.boss, ['blackstoneLeader']);
 assert.ok(policy.MONSTER_POOL.normal.every((id) => !policy.MONSTER_TYPES[id].isElite && !policy.MONSTER_TYPES[id].isBoss));
 assert.ok(policy.MONSTER_POOL.elite.every((id) => policy.MONSTER_TYPES[id].isElite && !policy.MONSTER_TYPES[id].isBoss));
 assert.ok(policy.MONSTER_POOL.boss.every((id) => policy.MONSTER_TYPES[id].isBoss));
-assert.ok(monsters.every((monster) => monster.artClass === 'monster-placeholder-art' && monster.lootPending));
+assert.equal(policy.MONSTER_TYPES.blackstoneScout.artClass, 'plains-depths-blackstone-scout-art');
+assert.ok(monsters.filter((monster) => monster.id !== 'blackstoneScout').every((monster) => monster.artClass === 'monster-placeholder-art'));
+assert.ok(monsters.every((monster) => monster.lootPending));
 assert.equal(new Set(monsters.map((monster) => monster.id)).size, 7, 'monster IDs are unique');
 
-console.log('plains-depths-policy: 9 assertions passed');
+console.log('plains-depths-policy: 11 assertions passed');
