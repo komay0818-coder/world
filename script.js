@@ -598,100 +598,8 @@ const dungeonDefinitions = {
 const collectibleTemplates = CollectiblePolicy.COLLECTIBLE_CATALOG;
 const collectibleDropRates = { normal: .01, elite: .08, boss: .30 };
 
-const lootTemplates = {
-  goblin: [
-    { name: '哥布林短劍', slot: 'weapon', weaponType: 'sword', image: 'assets/goblin-short-sword.png', allowedJobs: ['warrior', 'assassin'], attack: 5, defense: 0, hp: 0 },
-    { name: '粗布背心', slot: 'armor', armorType: 'cloth', image: 'assets/rough-cloth-vest.png', allowedJobs: ['mage', 'priest'], attack: 0, defense: 2, hp: 12 },
-    { name: '補丁布帽', slot: 'head', armorType: 'cloth', image: 'assets/patchwork-cap.png', allowedJobs: ['mage', 'priest'], attack: 0, defense: 2, hp: 8 },
-    { name: '秘法織紋手套', slot: 'gloves', armorType: 'cloth', image: 'assets/arcane-weave-gloves.png', allowedJobs: ['mage'], attack: 3, defense: 2, hp: 10 }
-  ],
-  wolf: [
-    { name: '狼牙匕首', slot: 'weapon', weaponType: 'dagger', image: 'assets/wolf-fang-dagger.png', allowedJobs: ['assassin'], attack: 8, defense: 0, hp: 0 },
-    { name: '森林獵弓', slot: 'weapon', weaponType: 'bow', image: 'assets/black-forest-bow.png', allowedJobs: ['hunter'], attack: 8, defense: 0, hp: 0 },
-    { name: '獵人皮甲', slot: 'armor', armorType: 'leather', image: 'assets/hunter-leather-armor.png', allowedJobs: ['hunter', 'assassin'], attack: 0, defense: 4, hp: 24 },
-    { name: '森林獵手手套', slot: 'gloves', armorType: 'leather', image: 'assets/forest-hunter-gloves.png', allowedJobs: ['hunter', 'assassin'], attack: 2, defense: 2, hp: 10 },
-    { name: '聖紋手套', slot: 'gloves', armorType: 'cloth', image: 'assets/holy-sigil-gloves.png', allowedJobs: ['priest'], attack: 2, defense: 2, hp: 16 }
-  ],
-  boar: [
-    { name: '野豬骨法杖', slot: 'weapon', weaponType: 'staff', image: 'assets/boar-bone-staff.png', allowedJobs: ['mage', 'priest'], attack: 10, defense: 0, hp: 0 },
-    { name: '獠牙箭筒', slot: 'offhand', weaponType: 'quiver', image: 'assets/hunter-quiver.png', allowedJobs: ['hunter'], attack: 5, defense: 2, hp: 14 },
-    { name: '硬皮護甲', slot: 'armor', armorType: 'reinforced-leather', image: 'assets/hardened-hide-armor.png', allowedJobs: ['warrior', 'hunter'], attack: 0, defense: 5, hp: 32 },
-    { name: '野豬皮長靴', slot: 'boots', armorType: 'hide', image: 'assets/boarhide-boots.png', allowedJobs: ['warrior', 'hunter'], attack: 0, defense: 3, hp: 22 },
-    { name: '獠牙肩甲', slot: 'shoulders', armorType: 'hide', image: 'assets/hunter-shoulders.png', allowedJobs: ['warrior', 'hunter'], attack: 0, defense: 4, hp: 18 },
-    { name: '星輝肩飾', slot: 'shoulders', armorType: 'cloth', image: 'assets/starfall-mantle.png', allowedJobs: ['mage'], attack: 4, defense: 2, hp: 14 },
-    { name: '聖光披肩', slot: 'shoulders', armorType: 'cloth', image: 'assets/radiant-shoulders.png', allowedJobs: ['priest'], attack: 0, defense: 4, hp: 24 }
-  ],
-  blackGoblin: [
-    { name: '黑林戰刃', slot: 'weapon', weaponType: 'sword', image: 'assets/goblin-short-sword.png', allowedJobs: ['warrior', 'assassin'], attack: 14, defense: 0, hp: 0 },
-    { name: '黯影布袍', slot: 'armor', armorType: 'cloth', image: 'assets/rough-cloth-vest.png', allowedJobs: ['mage', 'priest'], attack: 3, defense: 7, hp: 48 },
-    { name: '薩滿符印', slot: 'offhand', weaponType: 'focus', image: 'assets/equipment-weapon.png', allowedJobs: ['mage', 'priest'], attack: 9, defense: 4, hp: 24 }
-  ],
-  blackWolf: [
-    { name: '幽影獵弓', slot: 'weapon', weaponType: 'bow', image: 'assets/black-forest-bow.png', allowedJobs: ['hunter'], attack: 16, defense: 0, hp: 0 },
-    { name: '月牙匕首', slot: 'weapon', weaponType: 'dagger', image: 'assets/wolf-fang-dagger.png', allowedJobs: ['assassin'], attack: 15, defense: 0, hp: 0 },
-    { name: '影狼皮甲', slot: 'armor', armorType: 'leather', image: 'assets/hunter-leather-armor.png', allowedJobs: ['hunter', 'assassin'], attack: 3, defense: 8, hp: 58 }
-  ],
-  blackBoar: [
-    { name: '棘木法杖', slot: 'weapon', weaponType: 'staff', image: 'assets/boar-bone-staff.png', allowedJobs: ['mage', 'priest'], attack: 18, defense: 0, hp: 0 },
-    { name: '荊棘重甲', slot: 'armor', armorType: 'heavy', image: 'assets/hardened-hide-armor.png', allowedJobs: ['warrior', 'hunter'], attack: 0, defense: 11, hp: 82 },
-    { name: '腐月箭筒', slot: 'offhand', weaponType: 'quiver', image: 'assets/hunter-quiver.png', allowedJobs: ['hunter'], attack: 9, defense: 4, hp: 28 }
-  ],
-  blackBoss: [
-    { name: '腐月核心', slot: 'necklace', armorType: 'relic', image: 'assets/red-crown-amulet.png', allowedJobs: ['warrior', 'assassin', 'hunter', 'mage', 'priest'], attack: 12, defense: 12, hp: 100 },
-    { name: '森林守衛根戒', slot: 'ring1', armorType: 'relic', image: 'assets/red-crown-amulet.png', allowedJobs: ['warrior', 'assassin', 'hunter', 'mage', 'priest'], attack: 7, defense: 7, hp: 60 }
-  ],
-  boss: [
-    { name: '赤冠王印', slot: 'necklace', armorType: 'royal', image: 'assets/red-crown-amulet.png', allowedJobs: ['warrior', 'assassin', 'hunter', 'mage', 'priest'], attack: 8, defense: 8, hp: 70 }
-  ]
-};
 const potionDropRate = .10;
 const manaPotionDropRate = .07;
-const equipmentDropRate = .08;
-const eliteEquipmentDropRate = .25;
-const bossEquipmentDropRate = .20;
-
-function equipmentDropTier(source = '') {
-  if (source === 'dungeonBoss' || source === 'dungeonElite') return 3;
-  if (String(source).startsWith('black')) return 2;
-  return 1;
-}
-
-function rollEquipmentBase(value, stat, tier = 1) {
-  if (!value) return 0;
-  const multiplier = .80 + Math.random() * .50;
-  const tierSwing = stat === 'hp' ? tier * 4 : tier;
-  return Math.max(1, Math.round(value * multiplier + Math.random() * tierSwing));
-}
-
-const dungeonClassSets = {
-  warrior: [
-    { name: '暮衛戰刃', slot: 'weapon', weaponType: 'sword', image: 'assets/goblin-short-sword.png', attack: 26, defense: 4, hp: 34 },
-    { name: '暮衛重甲', slot: 'armor', armorType: 'heavy', image: 'assets/hardened-hide-armor.png', attack: 4, defense: 16, hp: 120 }
-  ],
-  assassin: [
-    { name: '影祭雙刃', slot: 'weapon', weaponType: 'dagger', image: 'assets/wolf-fang-dagger.png', attack: 29, defense: 3, hp: 28 },
-    { name: '影祭夜衣', slot: 'armor', armorType: 'leather', image: 'assets/hunter-leather-armor.png', attack: 7, defense: 13, hp: 88 }
-  ],
-  hunter: [
-    { name: '月痕長弓', slot: 'weapon', weaponType: 'bow', image: 'assets/black-forest-bow.png', attack: 29, defense: 3, hp: 30 },
-    { name: '月痕獵裝', slot: 'armor', armorType: 'leather', image: 'assets/hunter-leather-armor.png', attack: 6, defense: 14, hp: 96 }
-  ],
-  mage: [
-    { name: '星蝕法杖', slot: 'weapon', weaponType: 'staff', image: 'assets/boar-bone-staff.png', attack: 32, defense: 2, hp: 24 },
-    { name: '星蝕法袍', slot: 'armor', armorType: 'cloth', image: 'assets/rough-cloth-vest.png', attack: 9, defense: 11, hp: 82 }
-  ],
-  priest: [
-    { name: '靈木聖杖', slot: 'weapon', weaponType: 'staff', image: 'assets/boar-bone-staff.png', attack: 27, defense: 4, hp: 48 },
-    { name: '靈木祭袍', slot: 'armor', armorType: 'cloth', image: 'assets/rough-cloth-vest.png', attack: 6, defense: 13, hp: 104 }
-  ]
-};
-
-function createDungeonSetDrop(enemy) {
-  const character = JSON.parse(localStorage.getItem('stardust-character') || 'null');
-  const choices = dungeonClassSets[character?.job] || dungeonClassSets.warrior;
-  const base = choices[Math.floor(Math.random() * choices.length)];
-  return { ...base, id: `altar-set-${Date.now()}-${Math.floor(Math.random() * 100000)}`, kind: 'equipment', quality: '套裝', attack: rollEquipmentBase(base.attack, 'attack', 3), defense: rollEquipmentBase(base.defense, 'defense', 3), hp: rollEquipmentBase(base.hp, 'hp', 3), setId: `${character?.job || 'warrior'}-altar`, setName: '黑森林祭壇套裝', allowedJobs: [character?.job || 'warrior'] };
-}
 
 const equipmentSlots = {
   weapon: { label: '武器', icon: '⚔' },
@@ -744,9 +652,7 @@ function createStarterEquipment(job = 'warrior') {
 
 function applyEquipmentVisual(item) {
   if (!item || item.kind !== 'equipment') return item;
-  if (item.name === '野豬獠牙槍') return { ...item, name: '野豬骨法杖', weaponType: 'staff', image: 'assets/boar-bone-staff.png' };
-  const template = Object.values(lootTemplates).flat().find((entry) => entry.name === item.name);
-  return template ? { ...item, image: template.image, weaponType: template.weaponType, armorType: template.armorType, allowedJobs: template.allowedJobs } : item;
+  return item;
 }
 
 function getProgress() {
@@ -766,16 +672,17 @@ function getProgress() {
     saved.starterGearVersion = 'starter-gear-v1';
     localStorage.setItem('stardust-progress', JSON.stringify(saved));
   }
-  if (saved.equipmentSystemResetVersion !== 'recruit-only-v1') {
+  if (saved.equipmentRetentionVersion !== 'planned-catalog-and-starter-v2') {
     const character = JSON.parse(localStorage.getItem('stardust-character') || 'null');
+    const starterEquipment = createStarterEquipment(character?.job || 'warrior');
     saved.inventory = EquipmentPolicy.removeLegacyEquipmentFromInventory(saved.inventory);
-    saved.equipment = createStarterEquipment(character?.job || 'warrior');
-    saved.equipmentSystemResetVersion = 'recruit-only-v1';
-    localStorage.setItem('stardust-progress', JSON.stringify(saved));
-  }
-  if (saved.inventoryCleanupVersion !== 'equipment-clean-v1') {
-    saved.inventory = (Array.isArray(saved.inventory) ? saved.inventory : []).filter((item) => item.kind !== 'equipment');
-    saved.inventoryCleanupVersion = 'equipment-clean-v1';
+    saved.equipment = Object.fromEntries(Object.entries({
+      ...emptyEquipment(),
+      ...(saved.equipment || {})
+    }).map(([slot, item]) => [slot, EquipmentPolicy.isPreservedEquipment(item) ? item : null]));
+    if (!saved.equipment.weapon) saved.equipment.weapon = starterEquipment.weapon;
+    if (!saved.equipment.armor) saved.equipment.armor = starterEquipment.armor;
+    saved.equipmentRetentionVersion = 'planned-catalog-and-starter-v2';
     localStorage.setItem('stardust-progress', JSON.stringify(saved));
   }
   if (saved.equipmentVisualMigrationVersion !== 'individual-item-images-v3') {
@@ -1340,35 +1247,6 @@ function getCharacterStats(level, progress = getProgress(), character = JSON.par
 }
 
 function getMaxHp(level, progress = getProgress()) { return getCharacterStats(level, progress).hp; }
-
-function createEquipmentDrop(enemy) {
-  const choices = lootTemplates[enemy.lootSource || enemy.id] || lootTemplates.goblin;
-  const base = choices[Math.floor(Math.random() * choices.length)];
-  const source = enemy.lootSource || enemy.id;
-  const tier = equipmentDropTier(source);
-  const blackForestDrop = String(source).startsWith('black');
-  const isExcellent = blackForestDrop && Math.random() < .40;
-  const item = {
-    ...base,
-    id: `${enemy.id}-${Date.now()}-${Math.floor(Math.random() * 100000)}`,
-    kind: 'equipment',
-    allowedJobs: base.allowedJobs,
-    quality: isExcellent ? '優良' : '普通',
-    attack: rollEquipmentBase(base.attack, 'attack', tier),
-    defense: rollEquipmentBase(base.defense, 'defense', tier),
-    hp: rollEquipmentBase(base.hp, 'hp', tier)
-  };
-  if (isExcellent) {
-    const affixPool = ['weapon', 'offhand'].includes(item.slot)
-      ? [{ name: '鋒利', stat: 'attack', value: 5, text: '攻擊 +5' }, { name: '獵殺', stat: 'attack', value: 7, text: '攻擊 +7' }, { name: '活力', stat: 'hp', value: 30, text: '生命 +30' }]
-      : [{ name: '堅固', stat: 'defense', value: 4, text: '防禦 +4' }, { name: '活力', stat: 'hp', value: 45, text: '生命 +45' }, { name: '守護', stat: 'defense', value: 3, secondaryStat: 'hp', secondaryValue: 30, text: '防禦 +3、生命 +30' }];
-    const affix = affixPool[Math.floor(Math.random() * affixPool.length)];
-    item[affix.stat] = (item[affix.stat] || 0) + affix.value;
-    if (affix.secondaryStat) item[affix.secondaryStat] = (item[affix.secondaryStat] || 0) + affix.secondaryValue;
-    item.affix = affix;
-  }
-  return item;
-}
 
 function addPotionItem(progress, amount = 1) {
   const potion = progress.inventory.find((item) => item.kind === 'consumable' && item.id === 'healing-potion');

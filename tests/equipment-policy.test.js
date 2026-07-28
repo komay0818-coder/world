@@ -5,17 +5,24 @@ const inventory = [
   { id: 'healing-potion', kind: 'consumable' },
   { id: 'goblin-camp-map', kind: 'material' },
   { id: 'starter-warrior-weapon-0', kind: 'equipment', name: '新兵鐵劍' },
+  { id: 'short-iron-sword', kind: 'equipment', name: '短鐵劍' },
+  { id: 'guard-plate-armor', kind: 'equipment', name: '守衛鎧甲' },
   { id: 'goblin-sword-123', kind: 'equipment', name: '哥布林短劍' },
   { id: 'altar-set-456', kind: 'equipment', name: '暮衛戰刃' }
 ];
 
 assert.equal(policy.isRecruitEquipment(inventory[2]), true, 'starter equipment is retained');
-assert.equal(policy.isRecruitEquipment(inventory[3]), false, 'monster equipment is not retained');
+assert.equal(policy.isRecruitEquipment(inventory[3]), false, 'planned catalog weapon is not classified as starter gear');
 assert.deepEqual(policy.removeLegacyEquipmentFromInventory(inventory).map((item) => item.id), [
   'healing-potion',
   'goblin-camp-map',
-  'starter-warrior-weapon-0'
-], 'materials, consumables and recruit equipment survive the reset');
+  'starter-warrior-weapon-0',
+  'short-iron-sword',
+  'guard-plate-armor'
+], 'materials, consumables, starter gear and planned catalog equipment survive cleanup');
+assert.equal(policy.isPreservedEquipment(inventory[3]), true, 'planned weapons are retained');
+assert.equal(policy.isPreservedEquipment(inventory[4]), true, 'planned armor is retained');
+assert.equal(policy.isPreservedEquipment(inventory[5]), false, 'legacy monster equipment is removed');
 
 const weapons = policy.WEAPON_CATALOG;
 assert.deepEqual([weapons.shortIronSword.attackMin, weapons.shortIronSword.attackMax, weapons.shortIronSword.attackSpeed], [8, 11, 1.40], 'short iron sword stats match the design');

@@ -466,8 +466,21 @@
     return Boolean(item && item.kind === 'equipment' && String(item.id || '').startsWith('starter-'));
   }
 
+  const PRESERVED_EQUIPMENT_IDS = new Set([
+    ...Object.values(WEAPON_CATALOG),
+    ...Object.values(ARMOR_CATALOG)
+  ].map((item) => item.id));
+
+  function isPreservedEquipment(item) {
+    return Boolean(
+      item
+      && item.kind === 'equipment'
+      && (isRecruitEquipment(item) || PRESERVED_EQUIPMENT_IDS.has(String(item.id || '')))
+    );
+  }
+
   function removeLegacyEquipmentFromInventory(inventory) {
-    return (Array.isArray(inventory) ? inventory : []).filter((item) => item?.kind !== 'equipment' || isRecruitEquipment(item));
+    return (Array.isArray(inventory) ? inventory : []).filter((item) => item?.kind !== 'equipment' || isPreservedEquipment(item));
   }
 
   function rollWeaponAttack(item, randomValue = Math.random()) {
@@ -508,6 +521,7 @@
     getArmorCategory,
     isArmorCompatible,
     isRecruitEquipment,
+    isPreservedEquipment,
     removeLegacyEquipmentFromInventory,
     rollWeaponAttack,
     getAttacksPerSecond,
