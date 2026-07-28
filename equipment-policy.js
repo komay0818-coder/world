@@ -442,7 +442,7 @@
       name: '新兵鐵護手',
       slot: 'gloves',
       armorType: 'plate',
-      image: 'assets/forest-hunter-gloves.png',
+      image: 'assets/recruit-iron-gauntlets.png?v=20260729-user-image-v1',
       defense: 8,
       hp: 10,
       quality: '普通'
@@ -454,7 +454,7 @@
       name: '守衛鐵護手',
       slot: 'gloves',
       armorType: 'plate',
-      image: 'assets/forest-hunter-gloves.png',
+      image: 'assets/guard-iron-gauntlets.png?v=20260729-user-image-v1',
       defense: 5,
       hp: 30,
       quality: '普通'
