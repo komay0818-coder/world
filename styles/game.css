@@ -129,6 +129,8 @@
   .battle-menu{padding:6px!important;gap:6px!important}
   .battle-menu-button{min-height:50px!important}
 }
+.mana-track.rage-resource i{background:linear-gradient(90deg,#b53d24,#ffb13b)!important}
+.mana-track.rage-resource + .mana-text{color:#ffc568!important;font-weight:900}
 
 @media(min-width:701px) and (max-width:1100px){
   .battle-screen{grid-template-rows:minmax(410px,54dvh) minmax(0,1fr)!important}
