@@ -287,7 +287,7 @@
       image: 'assets/rough-cloth-vest.png',
       defense: 2,
       mana: 15,
-      manaRegenBonus: .03,
+      manaRegenFlat: 1,
       quality: '普通'
     }),
     recruitIronLegguards: Object.freeze({

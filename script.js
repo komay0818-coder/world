@@ -2495,11 +2495,14 @@ function battleTick() {
   const maxMana = getMaxMana(character.job, progress.level);
   const stats = getCharacterStats(progress.level, progress, character);
   const manaRegenNow = Date.now();
-  const manaRegenElapsedSeconds = Math.max(0, Math.min(5, (manaRegenNow - (battle.lastManaRegenAt || manaRegenNow)) / 1000));
+  const manaRegenElapsedSeconds = ManaRegenPolicy.getElapsedSeconds(manaRegenNow, battle.lastManaRegenAt);
   battle.lastManaRegenAt = manaRegenNow;
-  battle.playerMana = Math.min(maxMana, battle.playerMana
-    + Math.max(.625, maxMana * .01) * stats.manaRegen
-    + stats.manaRegenFlat * manaRegenElapsedSeconds);
+  battle.playerMana = Math.min(maxMana, battle.playerMana + ManaRegenPolicy.calculateRegenAmount({
+    maxMana,
+    regenMultiplier: stats.manaRegen,
+    flatPerSecond: stats.manaRegenFlat,
+    elapsedSeconds: manaRegenElapsedSeconds
+  }));
   if (battle.playerMana / maxMana <= .20) useManaPotion();
   updateManaExhaustion(maxMana);
   autoSkillTick();
@@ -2508,7 +2511,6 @@ function battleTick() {
     updateBattleUI();
     return;
   }
-  const stats = getCharacterStats(progress.level, progress, character);
   const equippedWeapon = progress.equipment?.weapon;
   const rolledWeaponAttack = EquipmentPolicy.rollWeaponAttack(equippedWeapon, Math.random());
   const displayedWeaponAttack = rolledWeaponAttack === null ? 0 : effectiveEquipmentStat(equippedWeapon, 'attack');
@@ -2866,7 +2868,7 @@ document.querySelector('#leave-battle').addEventListener('click', () => {
   battleScreen.classList.add('hidden');
   menuScreen.classList.remove('hidden');
 });
-document.querySelector('#battle-toggle').addEventListener('click', () => { if (battle.dungeonComplete) return; fighting = !fighting; document.querySelector('#battle-toggle').textContent = fighting ? 'Ⅱ 暫停攻擊' : '▶ 繼續攻擊'; logBattle(fighting ? '玩家自動攻擊已繼續。' : '玩家自動攻擊已暫停；怪物仍會持續攻擊。'); });
+document.querySelector('#battle-toggle').addEventListener('click', () => { if (battle.dungeonComplete) return; fighting = !fighting; battle.lastManaRegenAt = Date.now(); document.querySelector('#battle-toggle').textContent = fighting ? 'Ⅱ 暫停攻擊' : '▶ 繼續攻擊'; logBattle(fighting ? '玩家自動攻擊已繼續。' : '玩家自動攻擊已暫停；怪物仍會持續攻擊。'); });
 document.querySelector('#potion-button').addEventListener('click', () => usePotion(true));
 document.querySelector('#mana-potion-button').addEventListener('click', () => useManaPotion(true));
 document.querySelector('#skill-list').addEventListener('click', (event) => {

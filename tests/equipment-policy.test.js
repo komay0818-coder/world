@@ -69,7 +69,7 @@ assert.deepEqual([armor.guardPlateArmor.defense, armor.guardPlateArmor.hp], [5, 
 assert.deepEqual([armor.leatherVest.defense, armor.leatherVest.dodge], [4, .03], 'leather vest stats match the design');
 assert.deepEqual([armor.huntingLeatherArmor.defense, armor.huntingLeatherArmor.accuracy], [3, .04], 'hunting leather armor stats match the design');
 assert.deepEqual([armor.apprenticeRobe.defense, armor.apprenticeRobe.mana], [3, 50], 'apprentice robe stats match the design');
-assert.deepEqual([armor.novicePriestRobe.defense, armor.novicePriestRobe.mana, armor.novicePriestRobe.manaRegenBonus], [2, 15, .03], 'novice priest robe stats match the design');
+assert.deepEqual([armor.novicePriestRobe.defense, armor.novicePriestRobe.mana, armor.novicePriestRobe.manaRegenFlat], [2, 15, 1], 'novice priest robe stats match the design');
 assert.deepEqual(policy.getEquipSlots(armor.recruitPlateArmor, 'warrior'), ['armor'], 'warriors can equip recruit plate armor');
 assert.deepEqual(policy.getEquipSlots(armor.recruitPlateArmor, 'hunter'), [], 'hunters cannot equip recruit plate armor');
 assert.deepEqual(policy.getEquipSlots(armor.leatherVest, 'hunter'), ['armor'], 'hunters can equip leather vests');
