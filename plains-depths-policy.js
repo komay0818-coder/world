@@ -10,7 +10,7 @@
     grasslandVulture: Object.freeze({ id: 'grasslandVulture', name: '草原禿鷹', maxHp: 78, attack: 18, defense: 4, evasion: 14, parry: 0, damageReduction: 1, artClass: 'monster-placeholder-art', xp: 10, gold: 7, lootPending: true }),
     blackstoneRaider: Object.freeze({ id: 'blackstoneRaider', name: '黑石掠奪者', maxHp: 230, attack: 23, defense: 16, evasion: 5, parry: 15, damageReduction: 8, artClass: 'plains-depths-blackstone-raider-art', xp: 26, gold: 16, isElite: true, lootPending: true }),
     wanderingBlackKnight: Object.freeze({ id: 'wanderingBlackKnight', name: '流浪黑騎士', maxHp: 280, attack: 25, defense: 22, evasion: 4, parry: 18, damageReduction: 12, artClass: 'monster-placeholder-art', xp: 26, gold: 20, isElite: true, lootPending: true }),
-    blackstoneLeader: Object.freeze({ id: 'blackstoneLeader', name: '黑石頭目', maxHp: 850, attack: 29, defense: 27, evasion: 5, parry: 20, damageReduction: 15, artClass: 'monster-placeholder-art', xp: 110, gold: 72, isBoss: true, lootPending: true })
+    blackstoneLeader: Object.freeze({ id: 'blackstoneLeader', name: '黑石頭目', maxHp: 850, attack: 29, defense: 27, evasion: 5, parry: 20, damageReduction: 15, artClass: 'plains-depths-blackstone-leader-art', xp: 110, gold: 72, isBoss: true, lootPending: true })
   });
 
   const MONSTER_POOL = Object.freeze({
