@@ -545,7 +545,7 @@ const monsterTypes = {
   irritableBoar: { id: 'irritableBoar', name: '暴躁野豬', maxHp: 165, attack: 19, defense: 13, evasion: 2, parry: 0, damageReduction: 7, artClass: 'boar-woods-irritable-boar-art', xp: 20, gold: 12, isElite: true, lootSource: 'boar' },
   boarKing: { id: 'boarKing', name: '巨牙野豬', maxHp: 620, attack: 24, defense: 20, evasion: 1, parry: 0, damageReduction: 10, artClass: 'boar-woods-giant-tusk-boar-art', xp: 95, gold: 58, isBoss: true, lootSource: 'boar' },
   goblin: { id: 'goblin', name: '哥布林', maxHp: 45, attack: 11, defense: 3, evasion: 2, parry: 5, damageReduction: 0, artClass: 'goblin-art', xp: 10, gold: 3 },
-  goblinScout: { id: 'goblinScout', name: '哥布林斥候', maxHp: 48, attack: 10, defense: 2, evasion: 7, parry: 3, damageReduction: 0, artClass: 'goblin-camp-placeholder goblin-art', xp: 10, gold: 3, lootPending: true },
+  goblinScout: { id: 'goblinScout', name: '哥布林斥候', maxHp: 48, attack: 10, defense: 2, evasion: 7, parry: 3, damageReduction: 0, artClass: 'goblin-camp-scout-art', xp: 10, gold: 3, lootPending: true },
   goblinWarrior: { id: 'goblinWarrior', name: '哥布林戰士', maxHp: 82, attack: 13, defense: 7, evasion: 2, parry: 20, damageReduction: 3, artClass: 'goblin-camp-placeholder goblin-art', xp: 10, gold: 5, lootPending: true },
   goblinSlinger: { id: 'goblinSlinger', name: '哥布林投石者', maxHp: 58, attack: 14, defense: 3, evasion: 5, parry: 0, damageReduction: 1, artClass: 'goblin-camp-placeholder goblin-art', xp: 10, gold: 4, lootPending: true },
   goblinShaman: { id: 'goblinShaman', name: '哥布林薩滿', maxHp: 175, attack: 17, defense: 8, evasion: 5, parry: 2, damageReduction: 5, artClass: 'goblin-camp-placeholder goblin-art', xp: 28, gold: 12, isElite: true, lootPending: true },
