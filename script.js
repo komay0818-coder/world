@@ -856,6 +856,10 @@ function getProgress() {
     collection: saved.collection && typeof saved.collection === 'object' ? saved.collection : {},
     skillBooks: saved.skillBooks && typeof saved.skillBooks === 'object' ? saved.skillBooks : {}
   };
+  const activeCharacter = JSON.parse(localStorage.getItem('stardust-character') || 'null');
+  if (AssassinEnergyPolicy.isAssassin(activeCharacter?.job)) {
+    AssassinEnergyPolicy.normalizeProgress(normalizedProgress);
+  }
   syncSkillMaterialInventory(normalizedProgress);
   return normalizedProgress;
 }
@@ -1320,7 +1324,7 @@ function getCharacterStats(level, progress = getProgress(), character = JSON.par
   const equippedWeapon = progress.equipment?.weapon;
   return {
     hp: Math.round((base.hp + race.hp + (level - 1) * 12 + equipment.hp + collection.hp) * humanMultiplier),
-    mana: character?.job === 'warrior' ? 0 : Math.round((base.mana + race.mana + (level - 1) * 6 + equipment.mana + collection.mana) * humanMultiplier),
+    mana: ['warrior', 'assassin'].includes(character?.job) ? 0 : Math.round((base.mana + race.mana + (level - 1) * 6 + equipment.mana + collection.mana) * humanMultiplier),
     attack: Math.round((base.attack + race.attack + (level - 1) + equipment.attack + equipment.strength + equipment.intelligence + collection.attack) * humanMultiplier * hunterWeaponMultiplier),
     defense: Math.round((base.defense + race.defense + Math.floor((level - 1) / 5) + equipment.defense + collection.defense) * humanMultiplier),
     crit: Math.min(.60, base.crit + race.crit + collection.crit + (hunterPrecisionTier ? .05 + (hunterPrecisionTier - 1) * .01 : 0)),
@@ -1627,6 +1631,7 @@ function renderCharacterAbilities() {
   const race = Object.values(factions).flat().find((item) => item.id === character.race);
   const job = classes.find((item) => item.id === character.job);
   const usesRage = WarriorResourcePolicy.isWarrior(character.job);
+  const usesEnergy = AssassinEnergyPolicy.isAssassin(character.job);
   const modal = document.querySelector('#inventory-modal');
   document.querySelector('#inventory-title').textContent = '角色能力';
   document.querySelector('#inventory-content').innerHTML = `
@@ -1634,14 +1639,14 @@ function renderCharacterAbilities() {
       <div class="ability-identity"><span class="creation-race-icon race-${character.race}" aria-hidden="true"></span><div><h3>${character.name}</h3><p>${race?.name || character.race}・${job?.name || character.job}・Lv. ${progress.level}</p><small>${race?.trait || ''}</small></div></div>
       <div class="ability-grid">
         <article><small>最大生命</small><b>${stats.hp}</b><em>裝備 +${equipment.hp}・收藏 +${collection.hp}</em></article>
-        <article><small>${usesRage ? '最大怒氣' : '最大魔力'}</small><b>${usesRage ? WarriorResourcePolicy.MAX_RAGE : stats.mana}</b><em>${usesRage ? '攻擊與受到攻擊時取得' : `收藏 +${collection.mana}`}</em></article>
+        <article><small>${usesRage ? '最大怒氣' : usesEnergy ? '最大能量' : '最大魔力'}</small><b>${usesRage ? WarriorResourcePolicy.MAX_RAGE : usesEnergy ? AssassinEnergyPolicy.MAX_ENERGY : stats.mana}</b><em>${usesRage ? '攻擊與受到攻擊時取得' : usesEnergy ? `固定恢復 ${AssassinEnergyPolicy.ENERGY_REGEN_PER_SECOND}／秒` : `收藏 +${collection.mana}`}</em></article>
         <article><small>攻擊／法攻</small><b>${stats.attack}</b><em>裝備 +${equipment.attack}・收藏 +${collection.attack}</em></article>
         <article><small>防禦</small><b>${stats.defense}</b><em>裝備 +${equipment.defense}・收藏 +${collection.defense}</em></article>
         <article><small>暴擊率</small><b>${(stats.crit * 100).toFixed(1)}%</b><em>上限 60%</em></article>
         <article><small>閃避率</small><b>${(stats.dodge * 100).toFixed(1)}%</b><em>上限 45%</em></article>
         <article><small>命中能力</small><b>${Math.round(stats.accuracy * 100)}%</b><em>${character.job === 'hunter' && progress.level >= 3 ? '精準射擊加成' : '基礎命中加成'}</em></article>
         <article><small>招架率</small><b>${(stats.parry * 100).toFixed(1)}%</b><em>成功時傷害減半</em></article>
-        ${usesRage ? '' : `<article><small>額外回魔</small><b>+${stats.manaRegenFlat.toFixed(1)}／秒</b><em>裝備固定回復</em></article>`}
+        ${usesRage || usesEnergy ? '' : `<article><small>額外回魔</small><b>+${stats.manaRegenFlat.toFixed(1)}／秒</b><em>裝備固定回復</em></article>`}
         <article><small>攻擊速度</small><b>${stats.attackSpeed.toFixed(2)}</b><em>次／秒倍率</em></article>
         <article><small>技能冷卻速度</small><b>${Math.round(stats.cooldownSpeed * 100)}%</b><em>${character.race === 'elf' ? '種族加成' : '基礎值'}</em></article>
       </div>
@@ -1962,11 +1967,15 @@ function getMaxMana(job, level) {
 }
 
 function getMaxCombatResource(job, level) {
-  return WarriorResourcePolicy.isWarrior(job) ? WarriorResourcePolicy.MAX_RAGE : getMaxMana(job, level);
+  if (WarriorResourcePolicy.isWarrior(job)) return WarriorResourcePolicy.MAX_RAGE;
+  if (AssassinEnergyPolicy.isAssassin(job)) return AssassinEnergyPolicy.MAX_ENERGY;
+  return getMaxMana(job, level);
 }
 
 function getCombatResourceUnit(job) {
-  return WarriorResourcePolicy.isWarrior(job) ? '怒氣' : 'MP';
+  if (WarriorResourcePolicy.isWarrior(job)) return '怒氣';
+  if (AssassinEnergyPolicy.isAssassin(job)) return '能量';
+  return 'MP';
 }
 
 function getSkillManaCost(skill) {
@@ -1974,6 +1983,34 @@ function getSkillManaCost(skill) {
   if (skill.targets && skill.targets > 1) return 26;
   if (skill.id === 'companion') return 24;
   return 18;
+}
+
+function getSkillResourceCost(job, skill) {
+  if (AssassinEnergyPolicy.isAssassin(job)) {
+    return AssassinEnergyPolicy.getSkillCost(skill.id) ?? getSkillManaCost(skill);
+  }
+  return getSkillManaCost(skill);
+}
+
+function usesManaResource(job) {
+  return !WarriorResourcePolicy.isWarrior(job) && !AssassinEnergyPolicy.isAssassin(job);
+}
+
+function formatCombatResourceStatus(character, progress, maximum) {
+  if (WarriorResourcePolicy.isWarrior(character.job)) {
+    return `怒氣 ${Math.floor(battle.playerMana)} / ${maximum}`;
+  }
+  if (AssassinEnergyPolicy.isAssassin(character.job)) {
+    return `能量 ${Math.floor(battle.playerMana)} / ${maximum}・恢復 ${AssassinEnergyPolicy.ENERGY_REGEN_PER_SECOND}／秒`;
+  }
+  return `魔法結晶 ${progress.magicCrystals}・${battle.manaExhausted ? `枯竭中・${Math.ceil(maximum * .45)} MP 恢復` : `${Math.ceil(battle.playerMana)} / ${maximum} MP`}`;
+}
+
+function persistAssassinEnergy(progress, now = Date.now()) {
+  progress.energy = AssassinEnergyPolicy.clampEnergy(battle.playerMana);
+  progress.maxEnergy = AssassinEnergyPolicy.MAX_ENERGY;
+  progress.energyUpdatedAt = now;
+  saveProgress(progress);
 }
 
 function updateManaExhaustion(maxMana) {
@@ -2014,9 +2051,7 @@ function renderSkills(character, level) {
     option.textContent = orderedSkills[index] ? `單一技能：${orderedSkills[index].name}` : `單一技能：技能 ${index + 1}`;
   });
   const resourceStatus = document.querySelector('#skill-resource-status');
-  if (resourceStatus) resourceStatus.textContent = WarriorResourcePolicy.isWarrior(character.job)
-    ? `怒氣 ${Math.floor(battle.playerMana)} / ${maxMana}`
-    : `魔法結晶 ${progress.magicCrystals}・${battle.manaExhausted ? `枯竭中・${Math.ceil(maxMana * .45)} MP 恢復` : `${Math.ceil(battle.playerMana)} / ${maxMana} MP`}`;
+  if (resourceStatus) resourceStatus.textContent = formatCombatResourceStatus(character, progress, maxMana);
 }
 
 function refreshSkills(character, level) {
@@ -2029,9 +2064,7 @@ function refreshSkills(character, level) {
 
   const maxMana = getMaxCombatResource(character.job, level);
   const resourceStatus = document.querySelector('#skill-resource-status');
-  if (resourceStatus) resourceStatus.textContent = WarriorResourcePolicy.isWarrior(character.job)
-    ? `怒氣 ${Math.floor(battle.playerMana)} / ${maxMana}`
-    : `魔法結晶 ${progress.magicCrystals}・${battle.manaExhausted ? `枯竭中・${Math.ceil(maxMana * .45)} MP 恢復` : `${Math.ceil(battle.playerMana)} / ${maxMana} MP`}`;
+  if (resourceStatus) resourceStatus.textContent = formatCombatResourceStatus(character, progress, maxMana);
 }
 
 function getSkillEffectPercent(skill, upgradeLevel) {
@@ -2069,7 +2102,7 @@ function renderSkillDetailModal() {
   const upgradeLevel = getSkillUpgradeLevel(progress, character.job, skill);
   const nextLevel = Math.min(maxSkillUpgradeLevel, upgradeLevel + 1);
   const cooldown = skill.type === 'active' ? Math.round(skill.cooldown * skillCooldownMultiplier) : 0;
-  const manaCost = skill.type === 'active' ? getSkillManaCost(skill) : 0;
+  const manaCost = skill.type === 'active' ? getSkillResourceCost(character.job, skill) : 0;
   const currentEffect = getSkillEffectPercent(skill, upgradeLevel);
   const nextEffect = getSkillEffectPercent(skill, nextLevel);
   const nextCost = skillUpgradeCosts[nextLevel] || 0;
@@ -2107,6 +2140,7 @@ function updateBattleUI() {
   const maxHp = getMaxHp(progress.level, progress);
   const maxMana = getMaxCombatResource(character.job, progress.level);
   const usesRage = WarriorResourcePolicy.isWarrior(character.job);
+  const usesEnergy = AssassinEnergyPolicy.isAssassin(character.job);
   document.querySelector('#battle-player-name').textContent = character.name;
   const playerSprite = document.querySelector('#player-sprite');
   if (playerSprite) {
@@ -2152,17 +2186,20 @@ function updateBattleUI() {
   document.querySelector('#player-hp-bar').style.width = `${Math.max(0, battle.playerHp / maxHp * 100)}%`;
   document.querySelector('#player-mp-text').textContent = usesRage
     ? `${Math.floor(battle.playerMana)} / ${maxMana} 怒氣`
-    : `${Math.ceil(battle.playerMana)} / ${maxMana} MP`;
+    : usesEnergy
+      ? `能量：${Math.floor(battle.playerMana)} / ${maxMana}　恢復：${AssassinEnergyPolicy.ENERGY_REGEN_PER_SECOND}／秒`
+      : `${Math.ceil(battle.playerMana)} / ${maxMana} MP`;
   document.querySelector('#player-mp-bar').style.width = `${Math.max(0, battle.playerMana / maxMana * 100)}%`;
   document.querySelector('#player-mp-text').textContent += !usesRage && battle.manaExhausted ? '　魔力枯竭' : '';
-  document.querySelector('.mana-track')?.classList.toggle('exhausted', battle.manaExhausted);
+  document.querySelector('.mana-track')?.classList.toggle('exhausted', usesManaResource(character.job) && battle.manaExhausted);
   document.querySelector('.mana-track')?.classList.toggle('rage-resource', usesRage);
+  document.querySelector('.mana-track')?.classList.toggle('energy-resource', usesEnergy);
   document.querySelector('#enemy-count').textContent = battle.enemyHps.filter((hp) => hp > 0).length;
   renderEnemySquad();
   document.querySelector('#gold-count').textContent = progress.gold;
   document.querySelector('#potion-count').textContent = progress.potions;
   document.querySelector('#mana-potion-count').textContent = progress.manaPotions || 0;
-  document.querySelector('#mana-potion-button')?.classList.toggle('hidden', usesRage);
+  document.querySelector('#mana-potion-button')?.classList.toggle('hidden', usesRage || usesEnergy);
   document.querySelector('#exp-text').textContent = `${progress.xp} / ${requiredXp(progress.level)}`;
   document.querySelector('#xp-bar').style.width = `${progress.xp / requiredXp(progress.level) * 100}%`;
   refreshSkills(character, progress.level);
@@ -2210,6 +2247,10 @@ function useManaPotion(manual = false) {
   if (!character) return false;
   if (WarriorResourcePolicy.isWarrior(character.job)) {
     if (manual) showToast('戰士使用怒氣，無法使用魔法藥水。');
+    return false;
+  }
+  if (AssassinEnergyPolicy.isAssassin(character.job)) {
+    if (manual) showToast('盜賊使用能量，無法使用魔法藥水。');
     return false;
   }
   const maxMana = getMaxMana(character.job, progress.level);
@@ -2439,8 +2480,9 @@ function applyDamageToMonster(index, baseDamage, profile, options = {}) {
 }
 
 function useAutoSkill(character, progress) {
-  const usesRage = WarriorResourcePolicy.isWarrior(character.job);
-  if (!usesRage && battle.manaExhausted) return false;
+  const usesEnergy = AssassinEnergyPolicy.isAssassin(character.job);
+  const usesMana = usesManaResource(character.job);
+  if (usesMana && battle.manaExhausted) return false;
   const unlocked = getKnownSkills(character.job, progress.level).filter((skill) => skill.type === 'active' && skill.level <= progress.level);
   const now = Date.now();
   if (now < (battle.globalSkillReadyAt || 0)) return false;
@@ -2448,7 +2490,7 @@ function useAutoSkill(character, progress) {
   let casted = false;
 
   for (const skill of attackSkills) {
-    const manaCost = getSkillManaCost(skill);
+    const manaCost = getSkillResourceCost(character.job, skill);
     if (battle.playerMana < manaCost) continue;
     const targets = aliveEnemyIndexesByAge().slice(0, skill.targets || 1).map((index) => ({ hp: battle.enemyHps[index], index }));
     if (!targets.length) continue;
@@ -2467,6 +2509,7 @@ function useAutoSkill(character, progress) {
     if (skill.id === 'fireball') hitTargets.forEach((enemy) => applyDot(enemy.index, 'burn', Math.max(1, Math.ceil(enemy.result.finalDamage * .18 * stats.dotMultiplier)), 4));
     if (skill.id === 'poison-blade') hitTargets.forEach((enemy) => applyDot(enemy.index, 'poison', Math.max(1, Math.ceil(enemy.result.finalDamage * .15 * stats.dotMultiplier)), 5));
     battle.playerMana -= manaCost;
+    if (usesEnergy) persistAssassinEnergy(progress, now);
     battle.skillCooldowns[skill.id] = now + skill.cooldown * skillCooldownMultiplier * 1000 / stats.cooldownSpeed;
     battle.globalSkillReadyAt = now + 1000;
     if (skill.id === 'companion') {
@@ -2477,7 +2520,7 @@ function useAutoSkill(character, progress) {
       }
     } else if (hitTargets.length) logBattle(`✦ 立即施放【${skill.name}】（-${manaCost} ${getCombatResourceUnit(character.job)}），共造成 ${totalDamage}${critical ? ' 暴擊' : ''}傷害。`, 'damage-dealt');
     casted = true;
-    if (!usesRage) updateManaExhaustion(getMaxMana(character.job, progress.level));
+    if (usesMana) updateManaExhaustion(getMaxMana(character.job, progress.level));
     break;
   }
 
@@ -2516,9 +2559,11 @@ function battleTick() {
   processEnemyRespawns();
   processEnemyDots();
   const usesRage = WarriorResourcePolicy.isWarrior(character.job);
+  const usesEnergy = AssassinEnergyPolicy.isAssassin(character.job);
+  const usesMana = usesManaResource(character.job);
   const maxMana = getMaxCombatResource(character.job, progress.level);
   const stats = getCharacterStats(progress.level, progress, character);
-  if (!usesRage) {
+  if (usesMana) {
     const manaRegenNow = Date.now();
     const manaRegenElapsedSeconds = ManaRegenPolicy.getElapsedSeconds(manaRegenNow, battle.lastManaRegenAt);
     battle.lastManaRegenAt = manaRegenNow;
@@ -2530,6 +2575,12 @@ function battleTick() {
     }));
     if (battle.playerMana / maxMana <= .20) useManaPotion();
     updateManaExhaustion(maxMana);
+  } else if (usesEnergy) {
+    const energyNow = Date.now();
+    const energyElapsedSeconds = AssassinEnergyPolicy.getElapsedSeconds(energyNow, battle.lastResourceUpdatedAt);
+    battle.lastResourceUpdatedAt = energyNow;
+    battle.playerMana = AssassinEnergyPolicy.getRegeneratedEnergy(battle.playerMana, energyElapsedSeconds);
+    persistAssassinEnergy(progress, energyNow);
   }
   autoSkillTick();
   queueDefeatedEnemies();
@@ -2753,7 +2804,11 @@ function enemyAttackTick() {
       logBattle('☾ 不死族天賦觸發：從死亡中復活！');
     } else {
       battle.playerHp = maxHp;
-      battle.playerMana = WarriorResourcePolicy.isWarrior(character.job) ? 0 : getMaxMana(character.job, progress.level);
+      battle.playerMana = WarriorResourcePolicy.isWarrior(character.job)
+        ? 0
+        : AssassinEnergyPolicy.isAssassin(character.job)
+          ? AssassinEnergyPolicy.clampEnergy(battle.playerMana)
+          : getMaxMana(character.job, progress.level);
       battle.playerShield = 0;
       battle.undeadRevived = false;
       logBattle('你暫時撤退並恢復了生命。');
@@ -2805,7 +2860,7 @@ function openBattle() {
   const enemyLevels = createEnemyLevels(enemyTypes, currentMap.id);
   const enemyHps = enemyTypes.map((type, index) => getMonsterDefinitionForMap(type, currentMap.id, enemyLevels[index]).maxHp);
   const battleStart = Date.now();
-  battle = { enemyTypes, enemyLevels, enemyHps, playerHp: getMaxHp(progress.level, progress), playerMana: WarriorResourcePolicy.isWarrior(character.job) ? 0 : getMaxMana(character.job, progress.level), playerShield: 0, playerStunnedUntil: 0, playerBleed: null, manaExhausted: false, playerAttackCharge: 0, hunterAttackCount: 0, lastManaRegenAt: battleStart, enemyNextAttackAt: createEnemyAttackSchedule(enemyTypes, battleStart, currentMap.id, enemyLevels), enemyBoarEnraged: enemyTypes.map(() => false), globalSkillReadyAt: 0, undeadRevived: false, skillCooldowns: {}, enemyRespawns: enemyTypes.map(() => null), enemySpawnedAt: enemyTypes.map((_, index) => battleStart + index), enemyDots: enemyTypes.map(() => []), monsterMoveSpeed: 200, targetIndexes: [], enemyDamages: enemyTypes.map(() => []), damageTimers: [], isDungeon, dungeonId: isDungeon ? currentMap.id : null, dungeonWave: isDungeon ? 1 : 0, dungeonComplete: false, waveTransitioning: false, goblinScoutSummons: 0 };
+  battle = { enemyTypes, enemyLevels, enemyHps, playerHp: getMaxHp(progress.level, progress), playerMana: WarriorResourcePolicy.isWarrior(character.job) ? 0 : AssassinEnergyPolicy.isAssassin(character.job) ? AssassinEnergyPolicy.clampEnergy(progress.energy) : getMaxMana(character.job, progress.level), playerShield: 0, playerStunnedUntil: 0, playerBleed: null, manaExhausted: false, playerAttackCharge: 0, hunterAttackCount: 0, lastManaRegenAt: battleStart, lastResourceUpdatedAt: battleStart, enemyNextAttackAt: createEnemyAttackSchedule(enemyTypes, battleStart, currentMap.id, enemyLevels), enemyBoarEnraged: enemyTypes.map(() => false), globalSkillReadyAt: 0, undeadRevived: false, skillCooldowns: {}, enemyRespawns: enemyTypes.map(() => null), enemySpawnedAt: enemyTypes.map((_, index) => battleStart + index), enemyDots: enemyTypes.map(() => []), monsterMoveSpeed: 200, targetIndexes: [], enemyDamages: enemyTypes.map(() => []), damageTimers: [], isDungeon, dungeonId: isDungeon ? currentMap.id : null, dungeonWave: isDungeon ? 1 : 0, dungeonComplete: false, waveTransitioning: false, goblinScoutSummons: 0 };
   clearBattleLog();
   if (pendingOfflineReport) {
     logBattle(`☾ 離線掛機 ${pendingOfflineReport.duration}${pendingOfflineReport.capped ? '（已達 12 小時上限）' : ''}，擊敗約 ${pendingOfflineReport.defeated} 隻怪物。`, 'system');
@@ -2866,7 +2921,7 @@ document.querySelectorAll('[data-faction]').forEach((card) => card.addEventListe
 raceChoices.addEventListener('click', (event) => { const choice = event.target.closest('[data-race]'); if (choice) { selection.race = choice.dataset.race; renderCreation(); } });
 classChoices.addEventListener('click', (event) => { const choice = event.target.closest('[data-job]'); if (choice) { selection.job = choice.dataset.job; renderCreation(); } });
 document.querySelector('#back-to-menu').addEventListener('click', () => { characterScreen.classList.add('hidden'); menuScreen.classList.remove('hidden'); });
-document.querySelector('#create-character').addEventListener('click', () => { const name = characterName.value.trim(); if (!name) { showToast('請先為角色取名。'); characterName.focus(); return; } const lockedFaction = getLockedFactionForCreation(); if (lockedFaction && selection.faction !== lockedFaction) { selection.faction = lockedFaction; selection.race = factions[lockedFaction][0].id; renderCreation(); showToast('兩名角色必須選擇相同陣營。'); return; } const race = factions[selection.faction].find((item) => item.id === selection.race); const job = classes.find((item) => item.id === selection.job); const character = { ...selection, name }; const progress = { level: 1, xp: 0, gold: 0, potions: 5, manaPotions: 0, selectedMapId: 'beginner-plains', inventory: [], equipment: emptyEquipment(), lastActiveAt: Date.now() }; const slots = getCharacterSlots(); slots[creationSlotIndex] = { character, progress }; localStorage.setItem('stardust-character-slots', JSON.stringify(slots)); localStorage.setItem('stardust-active-character-slot', String(creationSlotIndex)); localStorage.setItem('stardust-character', JSON.stringify(character)); localStorage.setItem('stardust-progress', JSON.stringify(progress)); characterScreen.classList.add('hidden'); menuScreen.classList.remove('hidden'); document.querySelector('#character-title').textContent = '建立你的角色'; showToast(`${race.name}${job.name}「${name}」已儲存至角色欄位 ${creationSlotIndex + 1}！`); });
+document.querySelector('#create-character').addEventListener('click', () => { const name = characterName.value.trim(); if (!name) { showToast('請先為角色取名。'); characterName.focus(); return; } const lockedFaction = getLockedFactionForCreation(); if (lockedFaction && selection.faction !== lockedFaction) { selection.faction = lockedFaction; selection.race = factions[lockedFaction][0].id; renderCreation(); showToast('兩名角色必須選擇相同陣營。'); return; } const race = factions[selection.faction].find((item) => item.id === selection.race); const job = classes.find((item) => item.id === selection.job); const character = { ...selection, name }; const progress = { level: 1, xp: 0, gold: 0, potions: 5, manaPotions: 0, selectedMapId: 'beginner-plains', inventory: [], equipment: emptyEquipment(), lastActiveAt: Date.now(), ...(selection.job === 'assassin' ? { energy: 100, maxEnergy: 100, energyUpdatedAt: Date.now() } : {}) }; const slots = getCharacterSlots(); slots[creationSlotIndex] = { character, progress }; localStorage.setItem('stardust-character-slots', JSON.stringify(slots)); localStorage.setItem('stardust-active-character-slot', String(creationSlotIndex)); localStorage.setItem('stardust-character', JSON.stringify(character)); localStorage.setItem('stardust-progress', JSON.stringify(progress)); characterScreen.classList.add('hidden'); menuScreen.classList.remove('hidden'); document.querySelector('#character-title').textContent = '建立你的角色'; showToast(`${race.name}${job.name}「${name}」已儲存至角色欄位 ${creationSlotIndex + 1}！`); });
 document.querySelector('#character-roster-button').addEventListener('click', renderCharacterRoster);
 document.querySelector('#character-roster-close').addEventListener('click', () => document.querySelector('#character-roster-modal').classList.add('hidden'));
 document.querySelector('#character-roster-modal').addEventListener('click', (event) => {
@@ -2885,6 +2940,15 @@ document.querySelector('#leave-battle').addEventListener('click', () => {
     showToast('調整版面中：返回箭頭只會移動，不會離開戰鬥。');
     return;
   }
+  const leavingCharacter = JSON.parse(localStorage.getItem('stardust-character') || 'null');
+  if (AssassinEnergyPolicy.isAssassin(leavingCharacter?.job)) {
+    const energyNow = Date.now();
+    battle.playerMana = AssassinEnergyPolicy.getRegeneratedEnergy(
+      battle.playerMana,
+      AssassinEnergyPolicy.getElapsedSeconds(energyNow, battle.lastResourceUpdatedAt)
+    );
+    persistAssassinEnergy(getProgress(), energyNow);
+  }
   clearInterval(battleTimer);
   clearInterval(skillTimer);
   clearInterval(enemyAttackTimer);
@@ -2898,7 +2962,24 @@ document.querySelector('#leave-battle').addEventListener('click', () => {
   battleScreen.classList.add('hidden');
   menuScreen.classList.remove('hidden');
 });
-document.querySelector('#battle-toggle').addEventListener('click', () => { if (battle.dungeonComplete) return; fighting = !fighting; battle.lastManaRegenAt = Date.now(); document.querySelector('#battle-toggle').textContent = fighting ? 'Ⅱ 暫停攻擊' : '▶ 繼續攻擊'; logBattle(fighting ? '玩家自動攻擊已繼續。' : '玩家自動攻擊已暫停；怪物仍會持續攻擊。'); });
+document.querySelector('#battle-toggle').addEventListener('click', () => {
+  if (battle.dungeonComplete) return;
+  const character = JSON.parse(localStorage.getItem('stardust-character') || 'null');
+  const now = Date.now();
+  if (AssassinEnergyPolicy.isAssassin(character?.job)) {
+    battle.playerMana = AssassinEnergyPolicy.getRegeneratedEnergy(
+      battle.playerMana,
+      AssassinEnergyPolicy.getElapsedSeconds(now, battle.lastResourceUpdatedAt)
+    );
+    persistAssassinEnergy(getProgress(), now);
+  }
+  fighting = !fighting;
+  battle.lastManaRegenAt = now;
+  battle.lastResourceUpdatedAt = now;
+  document.querySelector('#battle-toggle').textContent = fighting ? 'Ⅱ 暫停攻擊' : '▶ 繼續攻擊';
+  logBattle(fighting ? '玩家自動攻擊已繼續。' : '玩家自動攻擊已暫停；怪物仍會持續攻擊。');
+  updateBattleUI();
+});
 document.querySelector('#potion-button').addEventListener('click', () => usePotion(true));
 document.querySelector('#mana-potion-button').addEventListener('click', () => useManaPotion(true));
 document.querySelector('#skill-list').addEventListener('click', (event) => {

@@ -131,6 +131,8 @@
 }
 .mana-track.rage-resource i{background:linear-gradient(90deg,#b53d24,#ffb13b)!important}
 .mana-track.rage-resource + .mana-text{color:#ffc568!important;font-weight:900}
+.mana-track.energy-resource i{background:linear-gradient(90deg,#d69b16,#ffe36e)!important}
+.mana-track.energy-resource + .mana-text{color:#ffe47a!important;font-weight:900}
 
 @media(min-width:701px) and (max-width:1100px){
   .battle-screen{grid-template-rows:minmax(410px,54dvh) minmax(0,1fr)!important}
