@@ -224,7 +224,7 @@
       name: '新兵鎧甲',
       slot: 'armor',
       armorType: 'plate',
-      image: 'assets/hardened-hide-armor.png',
+      image: 'assets/recruit-plate-armor.png?v=20260729-user-image-v1',
       defense: 8,
       hp: 20,
       quality: '普通'
@@ -236,7 +236,7 @@
       name: '守衛鎧甲',
       slot: 'armor',
       armorType: 'plate',
-      image: 'assets/hardened-hide-armor.png',
+      image: 'assets/guard-plate-armor.png?v=20260729-user-image-v1',
       defense: 5,
       hp: 50,
       quality: '普通'

@@ -98,6 +98,8 @@ assert.deepEqual(policy.getEquipSlots(legacyRestrictedLeather, 'assassin'), ['bo
 const armor = policy.ARMOR_CATALOG;
 assert.deepEqual([armor.recruitPlateArmor.defense, armor.recruitPlateArmor.hp], [8, 20], 'recruit plate armor stats match the design');
 assert.deepEqual([armor.guardPlateArmor.defense, armor.guardPlateArmor.hp], [5, 50], 'guard plate armor stats match the design');
+assert.equal(armor.recruitPlateArmor.image.split('?')[0], 'assets/recruit-plate-armor.png', 'recruit plate armor uses its dedicated image');
+assert.equal(armor.guardPlateArmor.image.split('?')[0], 'assets/guard-plate-armor.png', 'guard plate armor uses its dedicated image');
 assert.deepEqual([armor.leatherVest.defense, armor.leatherVest.dodge], [4, .03], 'leather vest stats match the design');
 assert.deepEqual([armor.huntingLeatherArmor.defense, armor.huntingLeatherArmor.accuracy], [3, .04], 'hunting leather armor stats match the design');
 assert.deepEqual([armor.apprenticeRobe.defense, armor.apprenticeRobe.mana], [3, 50], 'apprentice robe stats match the design');
