@@ -1,5 +1,6 @@
 const assert = require('assert');
 const policy = require('../chapter-one-level-policy');
+const defense = require('../monster-defense');
 
 const levelOneWarrior = { hp: 163, attack: 12, defense: 10, accuracy: 1.05, dodge: .03 };
 
@@ -11,7 +12,10 @@ function estimateEncounter(mapId, monsterType, monsterLevel, monsterBase, player
   ));
   const secondsToDefeat = monster.maxHp / (playerDamage * playerHitChance);
   const monsterHitChance = policy.getMonsterHitChance(monsterLevel, 1, player.dodge);
-  const incomingDamage = Math.max(1, Math.ceil(monster.attack * (100 / (100 + player.defense * 8))));
+  const incomingDamage = defense.resolvePlayerDamage({
+    baseDamage: monster.attack,
+    defense: player.defense
+  }).finalDamage;
   const secondsToFallAgainstFour = player.hp / (incomingDamage * monsterHitChance * 4);
   return { monster, playerHitChance, secondsToDefeat, monsterHitChance, secondsToFallAgainstFour };
 }

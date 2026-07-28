@@ -2651,7 +2651,11 @@ function enemyAttackTick() {
     const monsterCritical = !dodged && Math.random() < monsterCritRate;
     const rawEnemyHit = getMonsterAttackPower(attackingEnemy, progress, enemyCurrentHp) * (monsterCritical ? 1.5 : 1);
     const parried = !dodged && Math.random() < stats.parry;
-    let enemyHit = dodged ? 0 : Math.max(1, Math.ceil(rawEnemyHit * (100 / (100 + stats.defense * 8)) * (1 - stats.damageReduction)));
+    let enemyHit = dodged ? 0 : MonsterDefense.resolvePlayerDamage({
+      baseDamage: rawEnemyHit,
+      defense: stats.defense,
+      damageReduction: stats.damageReduction
+    }).finalDamage;
     if (parried) {
       enemyHit = Math.max(1, Math.ceil(enemyHit * .5));
       logBattle(`你招架了【${attackingEnemyName}】的攻擊，傷害降低 50%！`, 'damage-taken');
