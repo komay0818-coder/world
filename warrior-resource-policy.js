@@ -4,8 +4,8 @@
   if (root) root.WarriorResourcePolicy = api;
 }(typeof globalThis !== 'undefined' ? globalThis : this, function () {
   const MAX_RAGE = 100;
-  const RAGE_PER_ATTACK = 8;
-  const RAGE_PER_HIT_TAKEN = 5;
+  const RAGE_PER_ATTACK = 4;
+  const RAGE_PER_HIT_TAKEN = 2.5;
 
   function isWarrior(job) {
     return job === 'warrior';
