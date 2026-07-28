@@ -110,5 +110,18 @@ assert.deepEqual(policy.getEquipSlots(armor.leatherPants, 'assassin'), ['pants']
 assert.deepEqual(policy.getEquipSlots(armor.apprenticeClothPants, 'mage'), ['pants'], 'mages can equip cloth pants');
 assert.deepEqual(policy.getEquipSlots(armor.novicePriestPants, 'priest'), ['pants'], 'priests can equip priest pants');
 assert.equal(policy.isRecruitEquipment(armor.recruitIronLegguards), true, 'recruit iron legguards survive recruit-only inventory migration');
+assert.deepEqual([armor.recruitIronGauntlets.defense, armor.recruitIronGauntlets.hp], [8, 10], 'recruit iron gauntlets stats match the design');
+assert.deepEqual([armor.guardIronGauntlets.defense, armor.guardIronGauntlets.hp], [5, 30], 'guard iron gauntlets stats match the design');
+assert.deepEqual([armor.roughLeatherGloves.defense, armor.roughLeatherGloves.hp], [5, 10], 'rough leather gloves stats match the design');
+assert.deepEqual([armor.huntingGloves.defense, armor.huntingGloves.hp], [3, 20], 'hunting gloves stats match the design');
+assert.deepEqual([armor.apprenticeGloves.defense, armor.apprenticeGloves.hp], [5, 10], 'apprentice gloves stats match the design');
+assert.deepEqual([armor.noviceGloves.defense, armor.noviceGloves.hp], [3, 15], 'novice gloves stats match the design');
+assert.deepEqual(policy.getEquipSlots(armor.recruitIronGauntlets, 'warrior'), ['gloves'], 'warriors can equip plate gauntlets');
+assert.deepEqual(policy.getEquipSlots(armor.recruitIronGauntlets, 'hunter'), [], 'hunters cannot equip plate gauntlets');
+assert.deepEqual(policy.getEquipSlots(armor.roughLeatherGloves, 'hunter'), ['gloves'], 'hunters can equip leather gloves');
+assert.deepEqual(policy.getEquipSlots(armor.roughLeatherGloves, 'assassin'), ['gloves'], 'assassins can equip leather gloves');
+assert.deepEqual(policy.getEquipSlots(armor.apprenticeGloves, 'mage'), ['gloves'], 'mages can equip cloth gloves');
+assert.deepEqual(policy.getEquipSlots(armor.noviceGloves, 'priest'), ['gloves'], 'priests can equip cloth gloves');
+assert.equal(policy.isRecruitEquipment(armor.recruitIronGauntlets), true, 'recruit iron gauntlets survive starter inventory cleanup');
 
 console.log('equipment-policy: assertions passed');

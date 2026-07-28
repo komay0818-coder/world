@@ -434,6 +434,78 @@
       cooldownSpeedBonus: .02,
       intelligence: 1,
       quality: '普通'
+    }),
+    recruitIronGauntlets: Object.freeze({
+      id: 'starter-recruit-iron-gauntlets',
+      kind: 'equipment',
+      series: '鎧甲',
+      name: '新兵鐵護手',
+      slot: 'gloves',
+      armorType: 'plate',
+      image: 'assets/forest-hunter-gloves.png',
+      defense: 8,
+      hp: 10,
+      quality: '普通'
+    }),
+    guardIronGauntlets: Object.freeze({
+      id: 'guard-iron-gauntlets',
+      kind: 'equipment',
+      series: '鎧甲',
+      name: '守衛鐵護手',
+      slot: 'gloves',
+      armorType: 'plate',
+      image: 'assets/forest-hunter-gloves.png',
+      defense: 5,
+      hp: 30,
+      quality: '普通'
+    }),
+    roughLeatherGloves: Object.freeze({
+      id: 'rough-leather-gloves',
+      kind: 'equipment',
+      series: '皮甲',
+      name: '粗皮手套',
+      slot: 'gloves',
+      armorType: 'leather',
+      image: 'assets/forest-hunter-gloves.png',
+      defense: 5,
+      hp: 10,
+      quality: '普通'
+    }),
+    huntingGloves: Object.freeze({
+      id: 'hunting-gloves',
+      kind: 'equipment',
+      series: '皮甲',
+      name: '狩獵手套',
+      slot: 'gloves',
+      armorType: 'leather',
+      image: 'assets/forest-hunter-gloves.png',
+      defense: 3,
+      hp: 20,
+      quality: '普通'
+    }),
+    apprenticeGloves: Object.freeze({
+      id: 'apprentice-gloves',
+      kind: 'equipment',
+      series: '布甲',
+      name: '學徒手套',
+      slot: 'gloves',
+      armorType: 'cloth',
+      image: 'assets/arcane-weave-gloves.png',
+      defense: 5,
+      hp: 10,
+      quality: '普通'
+    }),
+    noviceGloves: Object.freeze({
+      id: 'novice-gloves',
+      kind: 'equipment',
+      series: '布甲',
+      name: '見習者手套',
+      slot: 'gloves',
+      armorType: 'cloth',
+      image: 'assets/holy-sigil-gloves.png',
+      defense: 3,
+      hp: 15,
+      quality: '普通'
     })
   });
 
