@@ -506,6 +506,78 @@
       defense: 3,
       hp: 15,
       quality: '普通'
+    }),
+    recruitIronBoots: Object.freeze({
+      id: 'starter-recruit-iron-boots',
+      kind: 'equipment',
+      series: '鎧甲',
+      name: '新兵鐵靴',
+      slot: 'boots',
+      armorType: 'plate',
+      image: 'assets/boarhide-boots.png',
+      defense: 15,
+      hp: 40,
+      quality: '普通'
+    }),
+    guardWarBoots: Object.freeze({
+      id: 'guard-war-boots',
+      kind: 'equipment',
+      series: '鎧甲',
+      name: '守衛戰靴',
+      slot: 'boots',
+      armorType: 'plate',
+      image: 'assets/boarhide-boots.png',
+      defense: 10,
+      damageReduction: .02,
+      quality: '普通'
+    }),
+    leatherShortBoots: Object.freeze({
+      id: 'leather-short-boots',
+      kind: 'equipment',
+      series: '皮甲',
+      name: '皮革短靴',
+      slot: 'boots',
+      armorType: 'leather',
+      image: 'assets/boarhide-boots.png',
+      defense: 8,
+      dodge: .03,
+      quality: '普通'
+    }),
+    travelLongBoots: Object.freeze({
+      id: 'travel-long-boots',
+      kind: 'equipment',
+      series: '皮甲',
+      name: '旅行長靴',
+      slot: 'boots',
+      armorType: 'leather',
+      image: 'assets/boarhide-boots.png',
+      defense: 6,
+      movementSpeedBonus: .08,
+      quality: '普通'
+    }),
+    apprenticeClothShoes: Object.freeze({
+      id: 'apprentice-cloth-shoes',
+      kind: 'equipment',
+      series: '布甲',
+      name: '學徒布鞋',
+      slot: 'boots',
+      armorType: 'cloth',
+      image: 'assets/boarhide-boots.png',
+      defense: 4,
+      mana: 40,
+      quality: '普通'
+    }),
+    arcaneLongBoots: Object.freeze({
+      id: 'arcane-long-boots',
+      kind: 'equipment',
+      series: '布甲',
+      name: '祕法長靴',
+      slot: 'boots',
+      armorType: 'cloth',
+      image: 'assets/boarhide-boots.png',
+      defense: 3,
+      manaRegenFlat: 2,
+      quality: '普通'
     })
   });
 

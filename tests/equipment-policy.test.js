@@ -123,5 +123,17 @@ assert.deepEqual(policy.getEquipSlots(armor.roughLeatherGloves, 'assassin'), ['g
 assert.deepEqual(policy.getEquipSlots(armor.apprenticeGloves, 'mage'), ['gloves'], 'mages can equip cloth gloves');
 assert.deepEqual(policy.getEquipSlots(armor.noviceGloves, 'priest'), ['gloves'], 'priests can equip cloth gloves');
 assert.equal(policy.isRecruitEquipment(armor.recruitIronGauntlets), true, 'recruit iron gauntlets survive starter inventory cleanup');
+assert.deepEqual([armor.recruitIronBoots.defense, armor.recruitIronBoots.hp], [15, 40], 'recruit iron boots stats match the design');
+assert.deepEqual([armor.guardWarBoots.defense, armor.guardWarBoots.damageReduction], [10, .02], 'guard war boots stats match the design');
+assert.deepEqual([armor.leatherShortBoots.defense, armor.leatherShortBoots.dodge], [8, .03], 'leather short boots stats match the design');
+assert.deepEqual([armor.travelLongBoots.defense, armor.travelLongBoots.movementSpeedBonus], [6, .08], 'travel long boots stats match the design');
+assert.deepEqual([armor.apprenticeClothShoes.defense, armor.apprenticeClothShoes.mana], [4, 40], 'apprentice cloth shoes stats match the design');
+assert.deepEqual([armor.arcaneLongBoots.defense, armor.arcaneLongBoots.manaRegenFlat], [3, 2], 'arcane long boots stats match the design');
+assert.deepEqual(policy.getEquipSlots(armor.recruitIronBoots, 'warrior'), ['boots'], 'warriors can equip plate boots');
+assert.deepEqual(policy.getEquipSlots(armor.leatherShortBoots, 'assassin'), ['boots'], 'assassins can equip leather boots');
+assert.deepEqual(policy.getEquipSlots(armor.travelLongBoots, 'hunter'), ['boots'], 'hunters can equip leather boots');
+assert.deepEqual(policy.getEquipSlots(armor.apprenticeClothShoes, 'mage'), ['boots'], 'mages can equip cloth shoes');
+assert.deepEqual(policy.getEquipSlots(armor.arcaneLongBoots, 'priest'), ['boots'], 'priests can equip cloth boots');
+assert.equal(policy.isRecruitEquipment(armor.recruitIronBoots), true, 'recruit iron boots survive starter inventory cleanup');
 
 console.log('equipment-policy: assertions passed');

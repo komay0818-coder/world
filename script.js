@@ -1196,8 +1196,10 @@ function getEquipmentStats(progress = getProgress()) {
     cooldownSpeedBonus: stats.cooldownSpeedBonus + effectiveEquipmentStat(item, 'cooldownSpeedBonus'),
     manaRegenBonus: stats.manaRegenBonus + effectiveEquipmentStat(item, 'manaRegenBonus'),
     manaRegenFlat: stats.manaRegenFlat + effectiveEquipmentStat(item, 'manaRegenFlat'),
-    parry: stats.parry + effectiveEquipmentStat(item, 'parry')
-  }), { attack: 0, defense: 0, hp: 0, mana: 0, strength: 0, intelligence: 0, accuracy: 0, dodge: 0, attackSpeedBonus: 0, cooldownSpeedBonus: 0, manaRegenBonus: 0, manaRegenFlat: 0, parry: 0 });
+    parry: stats.parry + effectiveEquipmentStat(item, 'parry'),
+    damageReduction: stats.damageReduction + effectiveEquipmentStat(item, 'damageReduction'),
+    movementSpeedBonus: stats.movementSpeedBonus + effectiveEquipmentStat(item, 'movementSpeedBonus')
+  }), { attack: 0, defense: 0, hp: 0, mana: 0, strength: 0, intelligence: 0, accuracy: 0, dodge: 0, attackSpeedBonus: 0, cooldownSpeedBonus: 0, manaRegenBonus: 0, manaRegenFlat: 0, parry: 0, damageReduction: 0, movementSpeedBonus: 0 });
 }
 
 function getCollectionStats(progress = getProgress()) {
@@ -1242,6 +1244,8 @@ function getCharacterStats(level, progress = getProgress(), character = JSON.par
     manaRegen: 1 + equipment.manaRegenBonus,
     manaRegenFlat: equipment.manaRegenFlat,
     parry: Math.min(.50, Math.max(0, equipment.parry)),
+    damageReduction: Math.min(.50, Math.max(0, equipment.damageReduction)),
+    movementSpeedBonus: Math.max(0, equipment.movementSpeedBonus),
     dotMultiplier: character?.race === 'undead' ? 1.20 : 1
   };
 }
@@ -1346,6 +1350,8 @@ function itemStatsText(item) {
   if (item.manaRegenBonus) parts.push(`魔力恢復 +${Math.round(effectiveEquipmentStat(item, 'manaRegenBonus') * 100)}%`);
   if (item.manaRegenFlat) parts.push(`每秒回魔 +${effectiveEquipmentStat(item, 'manaRegenFlat')}`);
   if (item.parry) parts.push(`招架 +${Math.round(effectiveEquipmentStat(item, 'parry') * 100)}%`);
+  if (item.damageReduction) parts.push(`傷害減免 +${Math.round(effectiveEquipmentStat(item, 'damageReduction') * 100)}%`);
+  if (item.movementSpeedBonus) parts.push(`移動速度 +${Math.round(effectiveEquipmentStat(item, 'movementSpeedBonus') * 100)}%`);
   if (item.affix) parts.push(`詞綴【${item.affix.name}】：${item.affix.text}`);
   if (item.allowedJobs?.length) parts.push(`職業：${item.allowedJobs.map((job) => ({ warrior: '戰士', assassin: '刺客', hunter: '獵人', mage: '法師', priest: '牧師' })[job] || job).join('、')}`);
   return parts.join('　') || item.description || '';
@@ -1382,6 +1388,8 @@ function equipmentScore(item) {
     + effectiveEquipmentStat(item, 'manaRegenBonus') * 200
     + effectiveEquipmentStat(item, 'manaRegenFlat') * 10
     + effectiveEquipmentStat(item, 'parry') * 200
+    + effectiveEquipmentStat(item, 'damageReduction') * 200
+    + effectiveEquipmentStat(item, 'movementSpeedBonus') * 100
   );
 }
 
@@ -1402,6 +1410,8 @@ function equipmentStackKey(item) {
     accuracy: item.accuracy || 0,
     manaRegenFlat: item.manaRegenFlat || 0,
     parry: item.parry || 0,
+    damageReduction: item.damageReduction || 0,
+    movementSpeedBonus: item.movementSpeedBonus || 0,
     enhanceLevel: item.enhanceLevel || 0,
     affix: item.affix || null,
     allowedJobs: [...(item.allowedJobs || [])].sort()
@@ -2641,7 +2651,7 @@ function enemyAttackTick() {
     const monsterCritical = !dodged && Math.random() < monsterCritRate;
     const rawEnemyHit = getMonsterAttackPower(attackingEnemy, progress, enemyCurrentHp) * (monsterCritical ? 1.5 : 1);
     const parried = !dodged && Math.random() < stats.parry;
-    let enemyHit = dodged ? 0 : Math.max(1, Math.ceil(rawEnemyHit * (100 / (100 + stats.defense * 8))));
+    let enemyHit = dodged ? 0 : Math.max(1, Math.ceil(rawEnemyHit * (100 / (100 + stats.defense * 8)) * (1 - stats.damageReduction)));
     if (parried) {
       enemyHit = Math.max(1, Math.ceil(enemyHit * .5));
       logBattle(`你招架了【${attackingEnemyName}】的攻擊，傷害降低 50%！`, 'damage-taken');
