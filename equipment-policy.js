@@ -217,6 +217,79 @@
   });
 
   const ARMOR_CATALOG = Object.freeze({
+    recruitPlateArmor: Object.freeze({
+      id: 'starter-recruit-plate-armor',
+      kind: 'equipment',
+      series: '鎧甲',
+      name: '新兵鎧甲',
+      slot: 'armor',
+      armorType: 'plate',
+      image: 'assets/hardened-hide-armor.png',
+      defense: 8,
+      hp: 20,
+      quality: '普通'
+    }),
+    guardPlateArmor: Object.freeze({
+      id: 'guard-plate-armor',
+      kind: 'equipment',
+      series: '鎧甲',
+      name: '守衛鎧甲',
+      slot: 'armor',
+      armorType: 'plate',
+      image: 'assets/hardened-hide-armor.png',
+      defense: 5,
+      hp: 50,
+      quality: '普通'
+    }),
+    leatherVest: Object.freeze({
+      id: 'leather-vest',
+      kind: 'equipment',
+      series: '皮甲',
+      name: '皮革背心',
+      slot: 'armor',
+      armorType: 'leather',
+      image: 'assets/hunter-leather-armor.png',
+      defense: 4,
+      dodge: .03,
+      quality: '普通'
+    }),
+    huntingLeatherArmor: Object.freeze({
+      id: 'hunting-leather-armor',
+      kind: 'equipment',
+      series: '皮甲',
+      name: '狩獵皮甲',
+      slot: 'armor',
+      armorType: 'leather',
+      image: 'assets/hunter-leather-armor.png',
+      defense: 3,
+      accuracy: .04,
+      quality: '普通'
+    }),
+    apprenticeRobe: Object.freeze({
+      id: 'apprentice-robe',
+      kind: 'equipment',
+      series: '布甲',
+      name: '學徒長袍',
+      slot: 'armor',
+      armorType: 'cloth',
+      image: 'assets/rough-cloth-vest.png',
+      defense: 3,
+      mana: 50,
+      quality: '普通'
+    }),
+    novicePriestRobe: Object.freeze({
+      id: 'novice-priest-robe',
+      kind: 'equipment',
+      series: '布甲',
+      name: '見習祭司袍',
+      slot: 'armor',
+      armorType: 'cloth',
+      image: 'assets/rough-cloth-vest.png',
+      defense: 2,
+      mana: 15,
+      manaRegenBonus: .03,
+      quality: '普通'
+    }),
     recruitIronHelmet: Object.freeze({
       id: 'starter-recruit-iron-helmet',
       kind: 'equipment',

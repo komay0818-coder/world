@@ -1273,9 +1273,11 @@ function getEquipmentStats(progress = getProgress()) {
     strength: stats.strength + effectiveEquipmentStat(item, 'strength'),
     intelligence: stats.intelligence + effectiveEquipmentStat(item, 'intelligence'),
     accuracy: stats.accuracy + effectiveEquipmentStat(item, 'accuracy'),
+    dodge: stats.dodge + effectiveEquipmentStat(item, 'dodge'),
     attackSpeedBonus: stats.attackSpeedBonus + effectiveEquipmentStat(item, 'attackSpeedBonus'),
-    cooldownSpeedBonus: stats.cooldownSpeedBonus + effectiveEquipmentStat(item, 'cooldownSpeedBonus')
-  }), { attack: 0, defense: 0, hp: 0, mana: 0, strength: 0, intelligence: 0, accuracy: 0, attackSpeedBonus: 0, cooldownSpeedBonus: 0 });
+    cooldownSpeedBonus: stats.cooldownSpeedBonus + effectiveEquipmentStat(item, 'cooldownSpeedBonus'),
+    manaRegenBonus: stats.manaRegenBonus + effectiveEquipmentStat(item, 'manaRegenBonus')
+  }), { attack: 0, defense: 0, hp: 0, mana: 0, strength: 0, intelligence: 0, accuracy: 0, dodge: 0, attackSpeedBonus: 0, cooldownSpeedBonus: 0, manaRegenBonus: 0 });
 }
 
 function getCollectionStats(progress = getProgress()) {
@@ -1313,10 +1315,11 @@ function getCharacterStats(level, progress = getProgress(), character = JSON.par
     attack: Math.round((base.attack + race.attack + (level - 1) + equipment.attack + equipment.strength + equipment.intelligence + collection.attack) * humanMultiplier * hunterWeaponMultiplier),
     defense: Math.round((base.defense + race.defense + Math.floor((level - 1) / 5) + equipment.defense + collection.defense) * humanMultiplier),
     crit: Math.min(.60, base.crit + race.crit + collection.crit + (hunterPrecisionTier ? .05 + (hunterPrecisionTier - 1) * .01 : 0)),
-    dodge: Math.min(.45, Math.max(0, base.dodge + race.dodge + collection.dodge)),
+    dodge: Math.min(.45, Math.max(0, base.dodge + race.dodge + collection.dodge + equipment.dodge)),
     accuracy: Math.min(1.30, 1.05 + equipment.accuracy + (character?.job === 'hunter' ? .05 : 0) + (hunterPrecisionTier ? .10 + (hunterPrecisionTier - 1) * .02 : 0)),
     attackSpeed: EquipmentPolicy.getAttacksPerSecond(equippedWeapon, base.attackSpeed * 1.15) * (1 + equipment.attackSpeedBonus),
     cooldownSpeed: (character?.race === 'elf' ? 1.03 : 1) * (1 + equipment.cooldownSpeedBonus),
+    manaRegen: 1 + equipment.manaRegenBonus,
     dotMultiplier: character?.race === 'undead' ? 1.20 : 1
   };
 }
@@ -1444,8 +1447,10 @@ function itemStatsText(item) {
   if (item.strength) parts.push(`力量 +${effectiveEquipmentStat(item, 'strength')}`);
   if (item.intelligence) parts.push(`智力 +${effectiveEquipmentStat(item, 'intelligence')}`);
   if (item.accuracy) parts.push(`命中率 +${Math.round(effectiveEquipmentStat(item, 'accuracy') * 100)}%`);
+  if (item.dodge) parts.push(`閃避率 +${Math.round(effectiveEquipmentStat(item, 'dodge') * 100)}%`);
   if (item.attackSpeedBonus) parts.push(`攻擊速度 +${Math.round(effectiveEquipmentStat(item, 'attackSpeedBonus') * 100)}%`);
   if (item.cooldownSpeedBonus) parts.push(`冷卻速度 +${Math.round(effectiveEquipmentStat(item, 'cooldownSpeedBonus') * 100)}%`);
+  if (item.manaRegenBonus) parts.push(`魔力恢復 +${Math.round(effectiveEquipmentStat(item, 'manaRegenBonus') * 100)}%`);
   if (item.affix) parts.push(`詞綴【${item.affix.name}】：${item.affix.text}`);
   if (item.allowedJobs?.length) parts.push(`職業：${item.allowedJobs.map((job) => ({ warrior: '戰士', assassin: '刺客', hunter: '獵人', mage: '法師', priest: '牧師' })[job] || job).join('、')}`);
   return parts.join('　') || item.description || '';
@@ -1476,8 +1481,10 @@ function equipmentScore(item) {
     + effectiveEquipmentStat(item, 'strength') * 4
     + effectiveEquipmentStat(item, 'intelligence') * 4
     + effectiveEquipmentStat(item, 'accuracy') * 200
+    + effectiveEquipmentStat(item, 'dodge') * 200
     + effectiveEquipmentStat(item, 'attackSpeedBonus') * 200
     + effectiveEquipmentStat(item, 'cooldownSpeedBonus') * 200
+    + effectiveEquipmentStat(item, 'manaRegenBonus') * 200
   );
 }
 
@@ -2465,7 +2472,8 @@ function battleTick() {
   processEnemyRespawns();
   processEnemyDots();
   const maxMana = getMaxMana(character.job, progress.level);
-  battle.playerMana = Math.min(maxMana, battle.playerMana + Math.max(.625, maxMana * .01));
+  const manaRegen = getCharacterStats(progress.level, progress, character).manaRegen;
+  battle.playerMana = Math.min(maxMana, battle.playerMana + Math.max(.625, maxMana * .01) * manaRegen);
   if (battle.playerMana / maxMana <= .20) useManaPotion();
   updateManaExhaustion(maxMana);
   autoSkillTick();
