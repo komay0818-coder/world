@@ -23,6 +23,7 @@ check(dungeonWarrior.xp, leveledWarrior.xp);
 check(policy.shouldStun('goblinSlinger', .19), true);
 check(policy.shouldStun('goblinSlinger', .20), false);
 check(policy.shouldStun('goblinWarrior', 0), false);
+check(policy.SHAMAN_HEAL_RATIO, .15);
 check(policy.resolveAction({ type: 'goblinShaman', randomValue: .34, hasWoundedAlly: true }), 'heal');
 check(policy.resolveAction({ type: 'goblinShaman', randomValue: .1, hasWoundedAlly: false }), 'attack');
 check(policy.resolveAction({ type: 'goblinHighChief', randomValue: .24, hasWoundedAlly: true, canSummon: true }), 'healing-totem');

@@ -1073,7 +1073,7 @@ function renderBattleLog() {
   if (!container) return;
   let entries = battleLogEntries;
   if (battleLogMode === 'player') entries = entries.filter((entry) => ['damage-dealt', 'pet-damage'].includes(entry.type));
-  if (battleLogMode === 'enemy') entries = entries.filter((entry) => entry.type === 'damage-taken');
+  if (battleLogMode === 'enemy') entries = entries.filter((entry) => ['damage-taken', 'enemy-healing'].includes(entry.type));
   if (battleLogMode === 'loot') entries = entries.filter((entry) => ['loot', 'reward', 'progress'].includes(entry.type));
   container.innerHTML = entries.slice(0, 100).map((entry) => {
     const message = entry.count > 1 ? `${entry.summary || entry.message}：${entry.damage} 總傷害 ×${entry.count}` : entry.message;
@@ -2638,11 +2638,11 @@ function healGoblinAlly(healerIndex) {
     - battle.enemyHps[second] / getEnemyDefinition(second).maxHp
   ))[0];
   const target = getEnemyDefinition(targetIndex);
-  const heal = Math.max(1, Math.ceil(target.maxHp * .25));
+  const heal = Math.max(1, Math.ceil(target.maxHp * GoblinCampPolicy.SHAMAN_HEAL_RATIO));
   const restored = Math.min(heal, target.maxHp - battle.enemyHps[targetIndex]);
   battle.enemyHps[targetIndex] += restored;
   playMonsterAttackAnimation(healerIndex, false);
-  logBattle(`✨【哥布林薩滿】施放治療術，替【${target.name}】恢復 ${restored} 生命。`, 'system');
+  logBattle(`✨【哥布林薩滿】施放治療術，替【${target.name}】恢復 ${restored} 生命。`, 'enemy-healing');
   return true;
 }
 
