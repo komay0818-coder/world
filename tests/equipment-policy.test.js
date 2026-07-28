@@ -24,6 +24,31 @@ assert.equal(policy.isPreservedEquipment(inventory[3]), true, 'planned weapons a
 assert.equal(policy.isPreservedEquipment(inventory[4]), true, 'planned armor is retained');
 assert.equal(policy.isPreservedEquipment(inventory[5]), false, 'legacy monster equipment is removed');
 
+const offhands = policy.OFFHAND_CATALOG;
+assert.deepEqual(policy.getEquipSlots(offhands.woodenRoundShield, 'warrior'), ['offhand'], 'warriors can equip wooden round shields');
+assert.deepEqual(policy.getEquipSlots(offhands.woodenRoundShield, 'hunter'), [], 'hunters cannot equip wooden round shields');
+assert.deepEqual(policy.getEquipSlots(offhands.roughQuiver, 'hunter'), ['offhand'], 'hunters can equip rough quivers');
+assert.deepEqual(policy.getEquipSlots(offhands.beginnerSpellbook, 'mage'), ['offhand'], 'mages can equip beginner spellbooks');
+assert.deepEqual(policy.getEquipSlots(offhands.beginnerSpellbook, 'priest'), ['offhand'], 'priests can equip beginner spellbooks');
+assert.deepEqual(policy.getEquipSlots(offhands.beginnerSpellbook, 'warrior'), [], 'warriors cannot equip beginner spellbooks');
+assert.equal(policy.getPlainsDepthsOffhandDropRate({}), .03, 'normal plains-depths monsters have a 3% offhand drop rate');
+assert.equal(policy.getPlainsDepthsOffhandDropRate({ isElite: true }), .08, 'elite plains-depths monsters have an 8% offhand drop rate');
+assert.equal(policy.getPlainsDepthsOffhandDropRate({ isBoss: true }), .15, 'boss plains-depths monsters have a 15% offhand drop rate');
+const sturdyShield = policy.createRandomOffhandDrop(0, 0, 'shield-test');
+const parryShield = policy.createRandomOffhandDrop(0, .9, 'parry-test');
+const expandedQuiver = policy.createRandomOffhandDrop(.4, 0, 'quiver-test');
+const quickQuiver = policy.createRandomOffhandDrop(.4, .9, 'quick-test');
+const magicBook = policy.createRandomOffhandDrop(.8, 0, 'book-test');
+const regenBook = policy.createRandomOffhandDrop(.8, .9, 'regen-test');
+assert.equal(sturdyShield.damageReduction, .03, 'wooden round shield can roll 3% damage reduction');
+assert.equal(parryShield.parry, .03, 'wooden round shield can roll 3% parry');
+assert.deepEqual([expandedQuiver.maxArrows, expandedQuiver.arrowRecoveryInterval], [12, 1000], 'expanded rough quiver holds twelve arrows');
+assert.deepEqual([quickQuiver.maxArrows, quickQuiver.arrowRecoverySpeedBonus], [10, .10], 'quick rough quiver starts at ten arrows and gains 10% recovery speed');
+assert.equal(magicBook.magicDamageBonus, .05, 'beginner spellbook can roll 5% magic damage');
+assert.equal(regenBook.manaRegenFlat, 3, 'beginner spellbook can roll 3 mana per second');
+assert.equal(policy.applyMagicDamageBonus(100, magicBook.magicDamageBonus), 105, 'the magic damage affix increases magic damage by 5%');
+assert.equal(policy.isPreservedEquipment(sturdyShield), true, 'random offhand variants survive save cleanup');
+
 const weapons = policy.WEAPON_CATALOG;
 assert.deepEqual([weapons.shortIronSword.attackMin, weapons.shortIronSword.attackMax, weapons.shortIronSword.attackSpeed], [8, 11, 1.40], 'short iron sword stats match the design');
 assert.deepEqual([weapons.knightLongsword.attackMin, weapons.knightLongsword.attackMax, weapons.knightLongsword.attackSpeed], [10, 14, 1.20], 'knight longsword stats match the design');

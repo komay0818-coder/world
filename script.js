@@ -1205,10 +1205,11 @@ function getEquipmentStats(progress = getProgress()) {
     cooldownSpeedBonus: stats.cooldownSpeedBonus + effectiveEquipmentStat(item, 'cooldownSpeedBonus'),
     manaRegenBonus: stats.manaRegenBonus + effectiveEquipmentStat(item, 'manaRegenBonus'),
     manaRegenFlat: stats.manaRegenFlat + effectiveEquipmentStat(item, 'manaRegenFlat'),
+    magicDamageBonus: stats.magicDamageBonus + effectiveEquipmentStat(item, 'magicDamageBonus'),
     parry: stats.parry + effectiveEquipmentStat(item, 'parry'),
     damageReduction: stats.damageReduction + effectiveEquipmentStat(item, 'damageReduction'),
     movementSpeedBonus: stats.movementSpeedBonus + effectiveEquipmentStat(item, 'movementSpeedBonus')
-  }), { attack: 0, defense: 0, hp: 0, mana: 0, strength: 0, intelligence: 0, accuracy: 0, dodge: 0, attackSpeedBonus: 0, cooldownSpeedBonus: 0, manaRegenBonus: 0, manaRegenFlat: 0, parry: 0, damageReduction: 0, movementSpeedBonus: 0 });
+  }), { attack: 0, defense: 0, hp: 0, mana: 0, strength: 0, intelligence: 0, accuracy: 0, dodge: 0, attackSpeedBonus: 0, cooldownSpeedBonus: 0, manaRegenBonus: 0, manaRegenFlat: 0, magicDamageBonus: 0, parry: 0, damageReduction: 0, movementSpeedBonus: 0 });
 }
 
 function getCollectionStats(progress = getProgress()) {
@@ -1252,6 +1253,7 @@ function getCharacterStats(level, progress = getProgress(), character = JSON.par
     cooldownSpeed: (character?.race === 'elf' ? 1.03 : 1) * (1 + equipment.cooldownSpeedBonus),
     manaRegen: 1 + equipment.manaRegenBonus,
     manaRegenFlat: equipment.manaRegenFlat,
+    magicDamageBonus: Math.max(0, equipment.magicDamageBonus),
     parry: Math.min(.50, Math.max(0, equipment.parry)),
     damageReduction: Math.min(.50, Math.max(0, equipment.damageReduction)),
     movementSpeedBonus: Math.max(0, equipment.movementSpeedBonus),
@@ -1358,11 +1360,13 @@ function itemStatsText(item) {
   if (item.cooldownSpeedBonus) parts.push(`冷卻速度 +${Math.round(effectiveEquipmentStat(item, 'cooldownSpeedBonus') * 100)}%`);
   if (item.manaRegenBonus) parts.push(`魔力恢復 +${Math.round(effectiveEquipmentStat(item, 'manaRegenBonus') * 100)}%`);
   if (item.manaRegenFlat) parts.push(`每秒回魔 +${effectiveEquipmentStat(item, 'manaRegenFlat')}`);
+  if (item.magicDamageBonus) parts.push(`魔法傷害 +${Math.round(effectiveEquipmentStat(item, 'magicDamageBonus') * 100)}%`);
   if (item.parry) parts.push(`招架 +${Math.round(effectiveEquipmentStat(item, 'parry') * 100)}%`);
   if (item.damageReduction) parts.push(`傷害減免 +${Math.round(effectiveEquipmentStat(item, 'damageReduction') * 100)}%`);
   if (item.movementSpeedBonus) parts.push(`移動速度 +${Math.round(effectiveEquipmentStat(item, 'movementSpeedBonus') * 100)}%`);
   if (item.maxArrows) parts.push(`最大箭矢 ${Math.floor(Number(item.maxArrows))}`);
   if (item.arrowRecoveryInterval) parts.push(`每 ${(Number(item.arrowRecoveryInterval) / 1000).toFixed(1).replace(/\.0$/, '')} 秒恢復 1 支箭矢`);
+  if (item.arrowRecoverySpeedBonus) parts.push(`箭矢恢復速度 +${Math.round(Number(item.arrowRecoverySpeedBonus) * 100)}%`);
   if (item.affix) parts.push(`詞綴【${item.affix.name}】：${item.affix.text}`);
   if (item.allowedJobs?.length) parts.push(`職業：${item.allowedJobs.map((job) => ({ warrior: '戰士', assassin: '刺客', hunter: '獵人', mage: '法師', priest: '牧師' })[job] || job).join('、')}`);
   return parts.join('　') || item.description || '';
@@ -1398,6 +1402,7 @@ function equipmentScore(item) {
     + effectiveEquipmentStat(item, 'cooldownSpeedBonus') * 200
     + effectiveEquipmentStat(item, 'manaRegenBonus') * 200
     + effectiveEquipmentStat(item, 'manaRegenFlat') * 10
+    + effectiveEquipmentStat(item, 'magicDamageBonus') * 200
     + effectiveEquipmentStat(item, 'parry') * 200
     + effectiveEquipmentStat(item, 'damageReduction') * 200
     + effectiveEquipmentStat(item, 'movementSpeedBonus') * 100
@@ -1420,6 +1425,9 @@ function equipmentStackKey(item) {
     mana: item.mana || 0,
     accuracy: item.accuracy || 0,
     manaRegenFlat: item.manaRegenFlat || 0,
+    magicDamageBonus: item.magicDamageBonus || 0,
+    maxArrows: item.maxArrows || 0,
+    arrowRecoverySpeedBonus: item.arrowRecoverySpeedBonus || 0,
     parry: item.parry || 0,
     damageReduction: item.damageReduction || 0,
     movementSpeedBonus: item.movementSpeedBonus || 0,
@@ -2207,6 +2215,11 @@ function rewardVictory(index) {
   progress.gold += earnedGold;
   const loot = addLoot(progress, enemy);
   const collectible = addCollectibleLoot(progress, enemy);
+  let offhandDrop = null;
+  if (currentMap.id === 'plains-depths' && Math.random() < EquipmentPolicy.getPlainsDepthsOffhandDropRate(enemy)) {
+    offhandDrop = EquipmentPolicy.createRandomOffhandDrop(Math.random(), Math.random(), `${Date.now()}-${Math.floor(Math.random() * 1000000)}`);
+    progress.inventory.push(offhandDrop);
+  }
   const accountDrops = [];
   let goblinCampMapDropped = false;
   if (enemy.id === 'lostGoblin' && DungeonTicketCycle.shouldDropTicket(Math.random(), GOBLIN_CAMP_TICKET_DROP_RATE)) {
@@ -2256,6 +2269,10 @@ function rewardVictory(index) {
   saveProgress(progress);
   logBattle(`✦ 擊敗${enemy.name}！獲得 ${earnedXp} EXP、${earnedGold} 金幣`, 'reward');
   if (loot) logBattle(`🎁 掉落【${loot.name}】${loot.quantity ? ` ×${loot.quantity}` : ''}`);
+  if (offhandDrop) {
+    showToast(`獲得副手：${offhandDrop.name}【${offhandDrop.affix.name}】`);
+    logBattle(`🎁 掉落【${offhandDrop.name}】－${offhandDrop.affix.text}`, 'loot');
+  }
   if (goblinCampMapDropped) logBattle('🗺 迷路的哥布林掉落【哥布林營地地圖 ×1】', 'loot');
   accountDrops.forEach((drop) => logBattle(`◆ BOSS掉落【${drop}】`, 'loot'));
   if (collectible) {
@@ -2366,9 +2383,11 @@ function getPlayerAttackProfile(character, skill = null) {
 
 function applyDamageToMonster(index, baseDamage, profile, options = {}) {
   const enemy = getEnemyDefinition(index);
+  const progress = getProgress();
+  const character = JSON.parse(localStorage.getItem('stardust-character') || 'null');
+  const magicDamageBonus = profile.damageType === 'magic' ? getCharacterStats(progress.level, progress, character).magicDamageBonus : 0;
+  const adjustedBaseDamage = EquipmentPolicy.applyMagicDamageBonus(baseDamage, magicDamageBonus);
   if (enemy.mapId) {
-    const progress = getProgress();
-    const character = JSON.parse(localStorage.getItem('stardust-character') || 'null');
     const stats = getCharacterStats(progress.level, progress, character);
     const hitChance = ChapterOneLevelPolicy.getPlayerHitChance(progress.level, enemy.level, stats.accuracy, 0);
     if (Math.random() >= hitChance) {
@@ -2377,7 +2396,7 @@ function applyDamageToMonster(index, baseDamage, profile, options = {}) {
     }
   }
   const result = MonsterDefense.resolveDamage({
-    baseDamage,
+    baseDamage: adjustedBaseDamage,
     monster: enemy,
     damageType: profile.damageType,
     attackRange: profile.attackRange,

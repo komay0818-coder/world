@@ -581,6 +581,56 @@
     })
   });
 
+  const OFFHAND_CATALOG = Object.freeze({
+    woodenRoundShield: Object.freeze({
+      id: 'wooden-round-shield',
+      kind: 'equipment',
+      series: '盾牌',
+      name: '木製圓盾',
+      slot: 'offhand',
+      image: 'assets/equipment-armor.png',
+      allowedJobs: Object.freeze(['warrior']),
+      quality: '普通'
+    }),
+    roughQuiver: Object.freeze({
+      id: 'rough-quiver',
+      kind: 'equipment',
+      series: '箭筒',
+      name: '粗製箭筒',
+      slot: 'offhand',
+      image: 'assets/hunter-quiver.png',
+      maxArrows: 10,
+      arrowRecoveryInterval: 1000,
+      allowedJobs: Object.freeze(['hunter']),
+      quality: '普通'
+    }),
+    beginnerSpellbook: Object.freeze({
+      id: 'beginner-spellbook',
+      kind: 'equipment',
+      series: '魔導書',
+      name: '初學者魔導書',
+      slot: 'offhand',
+      image: 'assets/equipment-weapon.png',
+      allowedJobs: Object.freeze(['mage', 'priest']),
+      quality: '普通'
+    })
+  });
+
+  const OFFHAND_AFFIXES = Object.freeze({
+    woodenRoundShield: Object.freeze([
+      Object.freeze({ name: '堅固', text: '傷害減免 +3%', stat: 'damageReduction', value: .03 }),
+      Object.freeze({ name: '格擋', text: '招架率 +3%', stat: 'parry', value: .03 })
+    ]),
+    roughQuiver: Object.freeze([
+      Object.freeze({ name: '擴充', text: '最大箭矢 +2', stat: 'maxArrows', value: 2 }),
+      Object.freeze({ name: '迅捷', text: '箭矢恢復速度 +10%', stat: 'arrowRecoverySpeedBonus', value: .10 })
+    ]),
+    beginnerSpellbook: Object.freeze([
+      Object.freeze({ name: '魔導', text: '魔法傷害 +5%', stat: 'magicDamageBonus', value: .05 }),
+      Object.freeze({ name: '湧泉', text: '每秒魔力恢復 +3', stat: 'manaRegenFlat', value: 3 })
+    ])
+  });
+
   const ARMOR_CATEGORY_JOBS = Object.freeze({
     plate: Object.freeze(['warrior']),
     leather: Object.freeze(['hunter', 'assassin']),
@@ -612,15 +662,44 @@
 
   const PRESERVED_EQUIPMENT_IDS = new Set([
     ...Object.values(WEAPON_CATALOG),
-    ...Object.values(ARMOR_CATALOG)
+    ...Object.values(ARMOR_CATALOG),
+    ...Object.values(OFFHAND_CATALOG)
   ].map((item) => item.id));
 
   function isPreservedEquipment(item) {
     return Boolean(
       item
       && item.kind === 'equipment'
-      && (isRecruitEquipment(item) || PRESERVED_EQUIPMENT_IDS.has(String(item.id || '')))
+      && (isRecruitEquipment(item)
+        || PRESERVED_EQUIPMENT_IDS.has(String(item.id || ''))
+        || PRESERVED_EQUIPMENT_IDS.has(String(item.baseItemId || '')))
     );
+  }
+
+  function getPlainsDepthsOffhandDropRate(enemy) {
+    return enemy?.isBoss ? .15 : enemy?.isElite ? .08 : .03;
+  }
+
+  function applyMagicDamageBonus(baseDamage, bonus) {
+    return Math.max(0, Number(baseDamage) || 0) * (1 + Math.max(0, Number(bonus) || 0));
+  }
+
+  function createRandomOffhandDrop(itemRoll = Math.random(), affixRoll = Math.random(), uniqueId = Date.now()) {
+    const keys = Object.keys(OFFHAND_CATALOG);
+    const itemIndex = Math.min(keys.length - 1, Math.floor(Math.max(0, Math.min(.999999, Number(itemRoll) || 0)) * keys.length));
+    const key = keys[itemIndex];
+    const template = OFFHAND_CATALOG[key];
+    const affixes = OFFHAND_AFFIXES[key];
+    const affixIndex = Math.min(affixes.length - 1, Math.floor(Math.max(0, Math.min(.999999, Number(affixRoll) || 0)) * affixes.length));
+    const affix = affixes[affixIndex];
+    return {
+      ...template,
+      id: `${template.id}-${uniqueId}`,
+      baseItemId: template.id,
+      allowedJobs: [...template.allowedJobs],
+      [affix.stat]: (Number(template[affix.stat]) || 0) + affix.value,
+      affix: { ...affix }
+    };
   }
 
   function removeLegacyEquipmentFromInventory(inventory) {
@@ -661,12 +740,17 @@
   return {
     WEAPON_CATALOG,
     ARMOR_CATALOG,
+    OFFHAND_CATALOG,
+    OFFHAND_AFFIXES,
     ARMOR_CATEGORY_JOBS,
     getArmorCategory,
     isArmorCompatible,
     isRecruitEquipment,
     isPreservedEquipment,
     removeLegacyEquipmentFromInventory,
+    getPlainsDepthsOffhandDropRate,
+    applyMagicDamageBonus,
+    createRandomOffhandDrop,
     rollWeaponAttack,
     getAttacksPerSecond,
     isOneHandedWeapon,

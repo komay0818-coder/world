@@ -9,6 +9,7 @@ assert.equal(starter.name, '新手箭筒', 'starter quiver has the expected name
 assert.equal(starter.slot, 'offhand', 'starter quiver uses the offhand slot');
 assert.equal(starter.maxArrows, 8, 'starter quiver holds eight arrows');
 assert.equal(starter.arrowRecoveryInterval, 1000, 'starter quiver recovers one arrow per second');
+assert.equal(policy.getRecoveryInterval({ offhand: { slot: 'offhand', maxArrows: 10, arrowRecoveryInterval: 1000, arrowRecoverySpeedBonus: .10 } }), 1000 / 1.1, 'recovery speed bonus shortens the arrow recovery interval by 10%');
 assert.deepEqual(starter.allowedJobs, ['hunter'], 'starter quiver is hunter-only');
 
 const oldEquipment = { weapon: { id: 'starter-hunter-weapon-0' }, offhand: null };

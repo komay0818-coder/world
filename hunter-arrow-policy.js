@@ -49,7 +49,10 @@
   }
 
   function getRecoveryInterval(equipment) {
-    return Math.max(1, Number(getQuiver(equipment)?.arrowRecoveryInterval) || STARTER_QUIVER.arrowRecoveryInterval);
+    const quiver = getQuiver(equipment);
+    const baseInterval = Number(quiver?.arrowRecoveryInterval) || STARTER_QUIVER.arrowRecoveryInterval;
+    const recoverySpeedBonus = Math.max(0, Number(quiver?.arrowRecoverySpeedBonus) || 0);
+    return Math.max(1, baseInterval / (1 + recoverySpeedBonus));
   }
 
   function clampArrows(value, equipment) {

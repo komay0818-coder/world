@@ -16,5 +16,7 @@ assert.match(script, /if \(usesArrows\) battle\.playerArrows = HunterArrowPolicy
 assert.match(script, /const displayedResource = usesArrows \? battle\.playerArrows : battle\.playerMana;/, 'the hunter resource bar reads arrows');
 assert.match(script, /if \(usesArrows\) \{[\s\S]*HunterArrowPolicy\.recoverArrows/, 'battle ticks recover hunter arrows');
 assert.doesNotMatch(script, /battle\.playerArrows\s*[-+]=[\s\S]{0,100}playerAttackCharge/, 'ordinary attack flow does not spend arrows');
+assert.match(script, /currentMap\.id === 'plains-depths'[\s\S]*getPlainsDepthsOffhandDropRate/, 'plains-depths victories roll the new offhand drop rates');
+assert.match(script, /applyMagicDamageBonus\(baseDamage, magicDamageBonus\)/, 'magic damage offhands increase resolved magic damage');
 
 console.log('hunter-arrow-integration: assertions passed');
