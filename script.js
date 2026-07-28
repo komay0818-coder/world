@@ -1139,7 +1139,7 @@ function createDungeonWaveTypes(wave, mapId = battle.dungeonId || getActiveMap(g
 function getMonsterDefinitionForMap(type, mapId = battle.dungeonId || getActiveMap(getProgress()).id, level = null) {
   const monster = monsterTypes[type] || monsterTypes.goblin;
   const chapterMonster = ChapterOneLevelPolicy.scaleMonster(monster, mapId, level);
-  const dungeonMonster = GoblinCampPolicy.scaleMonster(chapterMonster, mapId === 'goblin-camp' && !ChapterOneLevelPolicy.getProfile(mapId, type));
+  const dungeonMonster = GoblinCampPolicy.scaleMonster(chapterMonster, mapId === 'goblin-camp');
   const wolfMonster = WolfDenPolicy.applyWolfDenPassive(dungeonMonster, mapId);
   return BoarWoodsPolicy.applyBoarWoodsPassive(wolfMonster, mapId);
 }

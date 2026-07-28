@@ -1,5 +1,6 @@
 const assert = require('assert');
 const policy = require('../goblin-camp-policy');
+const chapterPolicy = require('../chapter-one-level-policy');
 
 let assertions = 0;
 function check(actual, expected) {
@@ -13,6 +14,12 @@ check(policy.scaleMonster(base, true).maxHp, 150);
 check(policy.scaleMonster(base, true).attack, 30);
 check(policy.scaleMonster(base, true).defense, 15);
 check(policy.scaleMonster(base, true).parry, 5);
+const leveledWarrior = chapterPolicy.scaleMonster({ id: 'goblinWarrior' }, 'goblin-camp', 10);
+const dungeonWarrior = policy.scaleMonster(leveledWarrior, true);
+check(dungeonWarrior.maxHp, Math.round(leveledWarrior.maxHp * 1.5));
+check(dungeonWarrior.attack, Math.round(leveledWarrior.attack * 1.5));
+check(dungeonWarrior.defense, Math.round(leveledWarrior.defense * 1.5));
+check(dungeonWarrior.xp, leveledWarrior.xp);
 check(policy.shouldStun('goblinSlinger', .19), true);
 check(policy.shouldStun('goblinSlinger', .20), false);
 check(policy.shouldStun('goblinWarrior', 0), false);
