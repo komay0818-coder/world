@@ -117,6 +117,8 @@ assert.equal(armor.recruitIronHelmet.image.split('?')[0], 'assets/recruit-iron-h
 assert.equal(armor.guardHelmet.image.split('?')[0], 'assets/guard-helmet.png', 'guard helmet uses its dedicated image');
 assert.deepEqual([armor.leatherHood.accuracy, armor.leatherHood.defense], [.02, 2], 'leather hood stats match the design');
 assert.deepEqual([armor.huntingHood.attackSpeedBonus, armor.huntingHood.defense], [.02, 2], 'hunting hood stats match the design');
+assert.equal(armor.leatherHood.image.split('?')[0], 'assets/leather-hood.png', 'leather hood uses its dedicated image');
+assert.equal(armor.huntingHood.image.split('?')[0], 'assets/hunting-hood.png', 'hunting hood uses its dedicated image');
 assert.deepEqual([armor.apprenticeMageHat.mana, armor.apprenticeMageHat.intelligence], [20, 2], 'apprentice mage hat stats match the design');
 assert.deepEqual([armor.noviceHeadscarf.cooldownSpeedBonus, armor.noviceHeadscarf.intelligence], [.02, 1], 'novice headscarf stats match the design');
 assert.deepEqual(policy.getEquipSlots(armor.guardHelmet, 'warrior'), ['head'], 'warriors can equip plate helmets');

@@ -394,7 +394,7 @@
       name: '皮革兜帽',
       slot: 'head',
       armorType: 'leather',
-      image: 'assets/patchwork-cap.png',
+      image: 'assets/leather-hood.png?v=20260729-user-image-v1',
       accuracy: .02,
       defense: 2,
       quality: '普通'
@@ -406,7 +406,7 @@
       name: '狩獵頭罩',
       slot: 'head',
       armorType: 'leather',
-      image: 'assets/patchwork-cap.png',
+      image: 'assets/hunting-hood.png?v=20260729-user-image-v1',
       attackSpeedBonus: .02,
       defense: 2,
       quality: '普通'
