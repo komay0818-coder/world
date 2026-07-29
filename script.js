@@ -44,7 +44,7 @@ const battleCharacterArt = {
   'undead:assassin': 'assets/character-sprites/undead-assassin-v2.png?v=20260730-user-image-v1',
   'undead:hunter': 'assets/character-sprites/undead-hunter-v2.png?v=20260730-user-image-v1',
   'undead:mage': 'assets/character-sprites/undead-mage-v2.png?v=20260730-user-image-v1',
-  'undead:priest': 'assets/character-sprites/undead-priest.png'
+  'undead:priest': 'assets/character-sprites/undead-priest-v2.png?v=20260730-user-image-v1'
 };
 const racialCompanions = {
   human: { image: 'assets/companion-human-hunter.png', name: '王國獵犬' },
