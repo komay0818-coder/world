@@ -466,7 +466,7 @@
       name: '粗皮手套',
       slot: 'gloves',
       armorType: 'leather',
-      image: 'assets/forest-hunter-gloves.png',
+      image: 'assets/rough-leather-gloves.png?v=20260729-user-image-v1',
       defense: 5,
       hp: 10,
       quality: '普通'
@@ -478,7 +478,7 @@
       name: '狩獵手套',
       slot: 'gloves',
       armorType: 'leather',
-      image: 'assets/forest-hunter-gloves.png',
+      image: 'assets/hunting-gloves.png?v=20260729-user-image-v1',
       defense: 3,
       hp: 20,
       quality: '普通'
