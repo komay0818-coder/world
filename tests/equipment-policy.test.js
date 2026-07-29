@@ -158,6 +158,8 @@ assert.deepEqual(policy.getEquipSlots(armor.noviceGloves, 'priest'), ['gloves'],
 assert.equal(policy.isRecruitEquipment(armor.recruitIronGauntlets), true, 'recruit iron gauntlets survive starter inventory cleanup');
 assert.deepEqual([armor.recruitIronBoots.defense, armor.recruitIronBoots.hp], [15, 40], 'recruit iron boots stats match the design');
 assert.deepEqual([armor.guardWarBoots.defense, armor.guardWarBoots.damageReduction], [10, .02], 'guard war boots stats match the design');
+assert.equal(armor.recruitIronBoots.image.split('?')[0], 'assets/recruit-iron-boots.png', 'recruit iron boots use their dedicated image');
+assert.equal(armor.guardWarBoots.image.split('?')[0], 'assets/guard-war-boots.png', 'guard war boots use their dedicated image');
 assert.deepEqual([armor.leatherShortBoots.defense, armor.leatherShortBoots.dodge], [8, .03], 'leather short boots stats match the design');
 assert.deepEqual([armor.travelLongBoots.defense, armor.travelLongBoots.movementSpeedBonus], [6, .08], 'travel long boots stats match the design');
 assert.deepEqual([armor.apprenticeClothShoes.defense, armor.apprenticeClothShoes.mana], [4, 40], 'apprentice cloth shoes stats match the design');

@@ -514,7 +514,7 @@
       name: '新兵鐵靴',
       slot: 'boots',
       armorType: 'plate',
-      image: 'assets/boarhide-boots.png',
+      image: 'assets/recruit-iron-boots.png?v=20260729-user-image-v1',
       defense: 15,
       hp: 40,
       quality: '普通'
@@ -526,7 +526,7 @@
       name: '守衛戰靴',
       slot: 'boots',
       armorType: 'plate',
-      image: 'assets/boarhide-boots.png',
+      image: 'assets/guard-war-boots.png?v=20260729-user-image-v1',
       defense: 10,
       damageReduction: .02,
       quality: '普通'
