@@ -6,9 +6,9 @@
 
 ## 測試版本
 
-- 最新紀錄基準：`4ee8517`
+- 最新紀錄基準：`7495d60`
 - 測試網址：<https://raw.githack.com/komay0818-coder/world/dev/index.html>
-- 固定版本：<https://raw.githack.com/komay0818-coder/world/4ee8517/index.html>
+- 固定版本：<https://raw.githack.com/komay0818-coder/world/7495d60/index.html>
 
 ## 新對話接續方式
 
@@ -387,6 +387,15 @@
 - 程式提交：`4ee8517`
 - 新增透明裝備素材 `assets/recruit-iron-helmet.png`，套用至鎧甲系列帽子部位「新兵鐵盔」。
 - 新增透明裝備素材 `assets/guard-helmet.png`，套用至鎧甲系列帽子部位「守衛頭盔」。
+- 玩家提供的兩張來源圖包含烘焙棋盤格，已使用內建圖片編修模式轉為綠色色鍵來源，再以本機色鍵工具輸出透明 PNG。
+- 裝備數值、職業限制、掉落規則與其他防具圖片均未修改。
+- 完整 16 組測試、JavaScript 語法檢查、兩張圖片透明通道驗證與差異格式檢查通過。
+
+## 2026-07-29 新兵與守衛腿甲圖片
+
+- 程式提交：`7495d60`
+- 新增透明裝備素材 `assets/recruit-iron-legguards.png`，套用至鎧甲系列褲子部位「新兵鐵腿甲」。
+- 新增透明裝備素材 `assets/guard-legguards.png`，套用至鎧甲系列褲子部位「守衛腿鎧」。
 - 玩家提供的兩張來源圖包含烘焙棋盤格，已使用內建圖片編修模式轉為綠色色鍵來源，再以本機色鍵工具輸出透明 PNG。
 - 裝備數值、職業限制、掉落規則與其他防具圖片均未修改。
 - 完整 16 組測試、JavaScript 語法檢查、兩張圖片透明通道驗證與差異格式檢查通過。
