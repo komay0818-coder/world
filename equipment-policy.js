@@ -297,7 +297,7 @@
       name: '新兵鐵腿甲',
       slot: 'pants',
       armorType: 'plate',
-      image: 'assets/hardened-hide-armor.png',
+      image: 'assets/recruit-iron-legguards.png?v=20260729-user-image-v1',
       defense: 10,
       hp: 18,
       quality: '普通'
@@ -309,7 +309,7 @@
       name: '守衛腿鎧',
       slot: 'pants',
       armorType: 'plate',
-      image: 'assets/hardened-hide-armor.png',
+      image: 'assets/guard-legguards.png?v=20260729-user-image-v1',
       defense: 12,
       parry: .01,
       quality: '普通'

@@ -128,6 +128,8 @@ assert.deepEqual(policy.getEquipSlots(armor.apprenticeMageHat, 'priest'), ['head
 assert.equal(policy.isRecruitEquipment(armor.recruitIronHelmet), true, 'recruit iron helmet survives recruit-only inventory migration');
 assert.deepEqual([armor.recruitIronLegguards.defense, armor.recruitIronLegguards.hp], [10, 18], 'recruit iron legguards stats match the design');
 assert.deepEqual([armor.guardLegguards.defense, armor.guardLegguards.parry], [12, .01], 'guard legguards stats match the design');
+assert.equal(armor.recruitIronLegguards.image.split('?')[0], 'assets/recruit-iron-legguards.png', 'recruit iron legguards use their dedicated image');
+assert.equal(armor.guardLegguards.image.split('?')[0], 'assets/guard-legguards.png', 'guard legguards use their dedicated image');
 assert.deepEqual([armor.leatherPants.defense, armor.leatherPants.hp], [6, 12], 'leather pants stats match the design');
 assert.deepEqual([armor.huntingLegguards.defense, armor.huntingLegguards.accuracy], [4, .01], 'hunting legguards stats match the design');
 assert.deepEqual([armor.apprenticeClothPants.defense, armor.apprenticeClothPants.mana], [3, 40], 'apprentice cloth pants stats match the design');
