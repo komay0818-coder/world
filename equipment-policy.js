@@ -248,7 +248,7 @@
       name: '皮革背心',
       slot: 'armor',
       armorType: 'leather',
-      image: 'assets/hunter-leather-armor.png',
+      image: 'assets/leather-vest.png?v=20260729-user-image-v1',
       defense: 4,
       dodge: .03,
       quality: '普通'
@@ -260,7 +260,7 @@
       name: '狩獵皮甲',
       slot: 'armor',
       armorType: 'leather',
-      image: 'assets/hunter-leather-armor.png',
+      image: 'assets/hunting-leather-armor.png?v=20260729-user-image-v1',
       defense: 3,
       accuracy: .04,
       quality: '普通'
