@@ -321,7 +321,7 @@
       name: '皮革長褲',
       slot: 'pants',
       armorType: 'leather',
-      image: 'assets/hunter-leather-armor.png',
+      image: 'assets/leather-pants.png?v=20260729-user-image-v1',
       defense: 6,
       hp: 12,
       quality: '普通'
@@ -333,7 +333,7 @@
       name: '狩獵護腿',
       slot: 'pants',
       armorType: 'leather',
-      image: 'assets/hunter-leather-armor.png',
+      image: 'assets/hunting-legguards.png?v=20260729-user-image-v1',
       defense: 4,
       accuracy: .01,
       quality: '普通'
