@@ -370,7 +370,7 @@
       name: '新兵鐵盔',
       slot: 'head',
       armorType: 'plate',
-      image: 'assets/patchwork-cap.png',
+      image: 'assets/recruit-iron-helmet.png?v=20260729-user-image-v1',
       defense: 5,
       hp: 25,
       quality: '普通'
@@ -382,7 +382,7 @@
       name: '守衛頭盔',
       slot: 'head',
       armorType: 'plate',
-      image: 'assets/patchwork-cap.png',
+      image: 'assets/guard-helmet.png?v=20260729-user-image-v1',
       defense: 3,
       strength: 2,
       quality: '普通'
