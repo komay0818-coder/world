@@ -6,9 +6,9 @@
 
 ## 測試版本
 
-- 最新紀錄基準：`3c9ca3a`
+- 最新紀錄基準：`238cdd6`
 - 測試網址：<https://raw.githack.com/komay0818-coder/world/dev/index.html>
-- 固定版本：<https://raw.githack.com/komay0818-coder/world/3c9ca3a/index.html>
+- 固定版本：<https://raw.githack.com/komay0818-coder/world/238cdd6/index.html>
 
 ## 新對話接續方式
 
@@ -424,5 +424,14 @@
 - 新增透明裝備素材 `assets/rough-leather-gloves.png`，將玩家提供的第一張初階圖片套用至「粗皮手套」。
 - 新增透明裝備素材 `assets/hunting-gloves.png`，將玩家提供的第二張進階圖片套用至「狩獵手套」。
 - 玩家提供的兩張來源圖包含烘焙棋盤格，已使用內建圖片編修模式轉為綠色色鍵來源，再以本機色鍵工具輸出透明 PNG。
+- 裝備數值、職業限制、掉落規則與其他防具圖片均未修改。
+- 完整 16 組測試、JavaScript 語法檢查、兩張圖片透明通道驗證與差異格式檢查通過。
+
+## 2026-07-29 皮甲系列衣服圖片
+
+- 程式提交：`238cdd6`
+- 新增透明裝備素材 `assets/leather-vest.png`，將玩家提供的第一張初階圖片套用至「皮革背心」。
+- 新增透明裝備素材 `assets/hunting-leather-armor.png`，將玩家提供的第二張進階圖片套用至「狩獵皮甲」。
+- 玩家提供的兩張來源圖包含烘焙棋盤格；因裝備含橄欖綠色區域，已使用內建圖片編修模式轉為洋紅色色鍵來源，再以本機色鍵工具輸出透明 PNG，並保留衣領與袖口內部的深色空間。
 - 裝備數值、職業限制、掉落規則與其他防具圖片均未修改。
 - 完整 16 組測試、JavaScript 語法檢查、兩張圖片透明通道驗證與差異格式檢查通過。
