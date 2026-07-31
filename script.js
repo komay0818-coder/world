@@ -37,7 +37,7 @@ const battleCharacterArt = {
   'elf:priest': 'assets/character-sprites/elf-priest.png',
   'orc:warrior': 'assets/character-sprites/orc-warrior-v2.png?v=20260731-user-image-v2',
   'orc:assassin': 'assets/character-sprites/orc-assassin.png',
-  'orc:hunter': 'assets/character-sprites/orc-hunter.png',
+  'orc:hunter': 'assets/character-sprites/orc-hunter.png?v=20260731-user-image-v1',
   'orc:mage': 'assets/character-sprites/orc-mage.png',
   'orc:priest': 'assets/character-sprites/orc-priest.png',
   'undead:warrior': 'assets/character-sprites/undead-warrior-v2.png?v=20260730-user-image-v1',
