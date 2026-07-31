@@ -24,6 +24,23 @@
     return character.id;
   }
 
+  function ensureUniqueCharacterIds(slots) {
+    const seen = new Set();
+    (Array.isArray(slots) ? slots : []).forEach((slot, slotIndex) => {
+      if (!slot?.character) return;
+      let id = typeof slot.character.id === 'string' ? slot.character.id.trim() : '';
+      if (!id || seen.has(id)) {
+        const base = `character-slot-${slotIndex + 1}`;
+        id = base;
+        let suffix = 2;
+        while (seen.has(id)) id = `${base}-${suffix++}`;
+        slot.character.id = id;
+      }
+      seen.add(id);
+    });
+    return slots;
+  }
+
   function getResourceType(job) {
     if (job === 'warrior') return 'rage';
     if (job === 'assassin') return 'energy';
@@ -66,7 +83,11 @@
 
   function normalizeParty(party, options = {}) {
     const slots = Array.isArray(options.slots) ? options.slots : [];
-    const mainSlotIndex = Math.max(0, Number(options.mainSlotIndex) || 0);
+    ensureUniqueCharacterIds(slots);
+    const requestedMainIndex = Math.max(0, Math.floor(Number(options.mainSlotIndex) || 0));
+    const mainSlotIndex = slots[requestedMainIndex]?.character
+      ? requestedMainIndex
+      : Math.max(0, slots.findIndex((slot) => slot?.character && slot.character.id === options.mainCharacter?.id));
     const mainSlot = slots[mainSlotIndex] || {
       character: options.mainCharacter,
       progress: options.mainProgress
@@ -86,8 +107,8 @@
     }
     const knownIds = new Set(members.map((member) => member.id));
     const requestedIds = Array.isArray(party?.activeMemberIds) ? party.activeMemberIds : [];
-    const activeMemberIds = [mainId, ...requestedIds.filter((id) => id !== mainId && knownIds.has(id))]
-      .slice(0, unlockedSlots);
+    const activeMemberIds = [...new Set([mainId, ...requestedIds.filter((id) => id !== mainId && knownIds.has(id))])]
+      .slice(0, Math.min(unlockedSlots, MAX_PARTY_SIZE));
     return {
       activeMemberIds: [...new Set(activeMemberIds)],
       unlockedSlots,
@@ -119,18 +140,58 @@
     return getAliveMembers(members).length === 0;
   }
 
+  function canMemberAttack(member, now = Date.now()) {
+    return Boolean(member && member.alive !== false && member.currentHp > 0
+      && now >= (Number(member.stunnedUntil) || 0)
+      && now >= (Number(member.nextAttackAt) || 0));
+  }
+
+  function scheduleNextAttack(member, now, attackSpeed, multiplier = 1) {
+    const interval = 1000 / Math.max(.01, Number(attackSpeed) || .01) * Math.max(.01, Number(multiplier) || 1);
+    member.nextAttackAt = Number(now) + interval;
+    return member.nextAttackAt;
+  }
+
+  function claimEnemyReward(rewardedKeys, enemyIndex, spawnedAt) {
+    const keys = rewardedKeys instanceof Set ? rewardedKeys : new Set();
+    const rewardKey = `${enemyIndex}:${Number(spawnedAt) || 0}`;
+    if (keys.has(rewardKey)) return { claimed: false, rewardKey, rewardedKeys: keys };
+    keys.add(rewardKey);
+    return { claimed: true, rewardKey, rewardedKeys: keys };
+  }
+
+  function addActiveMember(party, memberId) {
+    if (!party || party.activeMemberIds.includes(memberId)) return false;
+    if (party.activeMemberIds.length >= Math.min(party.unlockedSlots, MAX_PARTY_SIZE)) return false;
+    if (!party.members.some((member) => member.id === memberId)) return false;
+    party.activeMemberIds.push(memberId);
+    return true;
+  }
+
+  function removeActiveMember(party, memberId) {
+    if (!party || memberId === party.activeMemberIds[0] || !party.activeMemberIds.includes(memberId)) return false;
+    party.activeMemberIds = party.activeMemberIds.filter((id) => id !== memberId);
+    return true;
+  }
+
   return Object.freeze({
     MAX_PARTY_SIZE,
     UNLOCK_LEVELS,
     getUnlockedPartySlots,
     getPartySlotUnlockLevel,
     ensureCharacterId,
+    ensureUniqueCharacterIds,
     getResourceType,
     createMemberRecord,
     normalizeParty,
     getAliveMembers,
     chooseRandomAliveMember,
     getFrontAliveEnemyIndex,
-    isPartyDefeated
+    isPartyDefeated,
+    canMemberAttack,
+    scheduleNextAttack,
+    claimEnemyReward,
+    addActiveMember,
+    removeActiveMember
   });
 });

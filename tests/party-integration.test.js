@@ -13,11 +13,21 @@ assert.match(script, /activeMemberIds/, 'active party member ids are persisted')
 assert.match(script, /function createBattlePartyMember/, 'each active character receives an independent runtime record');
 assert.match(script, /skillCooldowns: \{\}/, 'each member owns skill cooldowns');
 assert.match(script, /nextAttackAt: now/, 'each member owns an attack timer');
-assert.match(script, /member\.nextAttackAt = now \+ 1000 \/ Math\.max\(\.01, member\.attackSpeed\)/, 'attack timing uses each member attack speed');
+assert.match(script, /PartyPolicy\.scheduleNextAttack\(member, now, member\.attackSpeed, exhaustedMultiplier\)/, 'attack timing uses each member attack speed');
 assert.match(script, /chooseRandomAliveMember\(battle\.partyMembers/, 'monsters choose among living party members');
 assert.match(script, /PartyPolicy\.isPartyDefeated\(battle\.partyMembers\)/, 'failure requires the whole party to be defeated');
 assert.match(script, /rewardedEnemyIndexes/, 'enemy rewards are guarded against duplicate processing');
 assert.match(script, /enemyNextAttackAt\[enemyIndex\]/, 'each monster retains an independent attack timer');
 assert.match(script, /persistPartyRuntimeState/, 'runtime party state is included in saves');
+assert.match(script, /const PARTY_DEBUG = true/, 'party debug mode can be toggled from one constant');
+assert.match(script, /logPartyDebug\('普通攻擊'/, 'debug logs include normal attacks');
+assert.match(script, /logPartyDebug\('技能施放'/, 'debug logs include skill casts and resources');
+assert.match(script, /logPartyDebug\('怪物選擇隊員'/, 'debug logs include monster target selection');
+assert.match(script, /logPartyDebug\('死亡事件'/, 'debug logs include member deaths');
+assert.match(script, /logPartyDebug\('掉落事件'/, 'debug logs include rewards and drops');
+assert.match(script, /logPartyDebug\('戰鬥失敗事件'/, 'debug logs include full-party defeat');
+assert.match(script, /PartyPolicy\.claimEnemyReward/, 'live reward processing uses the tested duplicate guard');
+assert.match(script, /PartyPolicy\.canMemberAttack/, 'live attacks use the tested per-member timer guard');
+assert.match(script, /clearInterval\(battleTimer\)[\s\S]*clearInterval\(skillTimer\)[\s\S]*clearInterval\(enemyAttackTimer\)[\s\S]*setInterval\(autoSkillTick, 100\)[\s\S]*setInterval\(battleTick, 100\)[\s\S]*setInterval\(enemyAttackTick, 100\)/, 'map entry replaces all three combat loops before registering new ones');
 
 console.log('party-integration: assertions passed');

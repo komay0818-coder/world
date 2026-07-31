@@ -24,6 +24,7 @@ const classIcons = Object.fromEntries(classes.map((job) => [job.id, job.icon]));
 const raceTotems = { human: '☀', elf: '❈', orc: '⛧', undead: '☾' };
 const jobMarks = { warrior: '⛨', assassin: '◈', hunter: '➶', mage: '✦', priest: '✥' };
 const CHARACTER_SCALE = 0.90;
+const PARTY_DEBUG = true;
 const battleCharacterArt = {
   'human:warrior': 'assets/character-sprites/human-warrior-v3.png?v=20260730-user-image-v1',
   'human:assassin': 'assets/character-sprites/human-assassin-v4.png',
@@ -224,6 +225,7 @@ let toastTimer;
 let battleTimer;
 let skillTimer;
 let enemyAttackTimer;
+let battleSessionSequence = 0;
 let fighting = false;
 let pendingOfflineReport = null;
 let creationSlotIndex = 0;
@@ -816,14 +818,9 @@ function getCharacterSlots() {
     localStorage.setItem('stardust-character-slots', JSON.stringify(slots));
     localStorage.setItem('stardust-active-character-slot', '0');
   }
-  let changed = false;
-  slots.forEach((slot, index) => {
-    if (!slot?.character) return;
-    if (!slot.character.id) {
-      PartyPolicy.ensureCharacterId(slot.character, index);
-      changed = true;
-    }
-  });
+  const idsBeforeRepair = slots.map((slot) => slot?.character?.id || '');
+  PartyPolicy.ensureUniqueCharacterIds(slots);
+  const changed = slots.some((slot, index) => (slot?.character?.id || '') !== idsBeforeRepair[index]);
   if (changed) localStorage.setItem('stardust-character-slots', JSON.stringify(slots));
   return slots;
 }
@@ -1005,9 +1002,9 @@ function addPartyMember(memberId) {
     showToast(`目前隊伍上限為 ${party.unlockedSlots} 人。`);
     return;
   }
-  if (!party.members.some((member) => member.id === memberId)) return;
-  party.activeMemberIds.push(memberId);
+  if (!PartyPolicy.addActiveMember(party, memberId)) return;
   saveProgress(progress);
+  logPartyDebug('隊員加入', { memberId, activeMemberIds: party.activeMemberIds.join(',') });
   renderParty();
   if (fighting) rebuildBattlePartyMembers();
 }
@@ -1019,8 +1016,9 @@ function removePartyMember(memberId) {
     showToast('主角色不能移出隊伍。');
     return;
   }
-  party.activeMemberIds = party.activeMemberIds.filter((id) => id !== memberId);
+  if (!PartyPolicy.removeActiveMember(party, memberId)) return;
   saveProgress(progress);
+  logPartyDebug('隊員移除', { memberId, activeMemberIds: party.activeMemberIds.join(',') });
   renderParty();
   if (fighting) rebuildBattlePartyMembers();
 }
@@ -1113,9 +1111,9 @@ function renderBattleLog() {
   const container = document.querySelector('#combat-log-lines');
   if (!container) return;
   let entries = battleLogEntries;
-  if (battleLogMode === 'player') entries = entries.filter((entry) => ['damage-dealt', 'pet-damage'].includes(entry.type));
-  if (battleLogMode === 'enemy') entries = entries.filter((entry) => ['damage-taken', 'enemy-healing'].includes(entry.type));
-  if (battleLogMode === 'loot') entries = entries.filter((entry) => ['loot', 'reward', 'progress'].includes(entry.type));
+  if (battleLogMode === 'player') entries = entries.filter((entry) => entry.partyDebug || ['damage-dealt', 'pet-damage'].includes(entry.type));
+  if (battleLogMode === 'enemy') entries = entries.filter((entry) => entry.partyDebug || ['damage-taken', 'enemy-healing'].includes(entry.type));
+  if (battleLogMode === 'loot') entries = entries.filter((entry) => entry.partyDebug || ['loot', 'reward', 'progress'].includes(entry.type));
   container.innerHTML = entries.slice(0, 100).map((entry) => {
     const message = entry.count > 1 ? `${entry.summary || entry.message}：${entry.damage} 總傷害 ×${entry.count}` : entry.message;
     return `<span class="combat-log-entry log-${entry.type}"><time>${formatBattleLogTime(entry.timestamp)}</time><b>${escapeBattleLogText(message)}</b></span>`;
@@ -1255,8 +1253,9 @@ function completeDungeon() {
   const ticketsLeft = definition.ticketItemId ? getInventoryItemQuantity(progress, definition.ticketItemId) : 0;
   logBattle(`♛ ${definition.name}攻略完成！${definition.ticketItemId ? `已消耗 1 張哥布林營地地圖，剩餘 ${ticketsLeft} 張。` : ''}`, 'progress');
   showToast(restartDungeon ? `通關完成，剩餘 ${ticketsLeft} 張地圖，即將重新開始。` : `${definition.name}攻略完成！`);
+  const completedSessionId = battle.sessionId;
   setTimeout(() => {
-    if (!battle.dungeonComplete) return;
+    if (battle.sessionId !== completedSessionId || !battle.dungeonComplete) return;
     openBattle();
     showToast(restartDungeon ? `再次進入${definition.name}。` : `已返回${mapProgression.find((map) => map.id === returnMapId)?.name || '原地圖'}，繼續自動戰鬥。`);
   }, returnDelay);
@@ -1388,6 +1387,15 @@ function getCharacterStats(level, progress = getProgress(), character = JSON.par
 
 function getMaxHp(level, progress = getProgress(), character = JSON.parse(localStorage.getItem('stardust-character') || 'null')) {
   return getCharacterStats(level, progress, character).hp;
+}
+
+function logPartyDebug(event, details = {}) {
+  if (!PARTY_DEBUG) return;
+  const fields = Object.entries(details)
+    .filter(([, value]) => value !== undefined && value !== null && value !== '')
+    .map(([key, value]) => `${key}=${value}`)
+    .join(' | ');
+  logBattle(`[PARTY DEBUG] ${event}${fields ? ` | ${fields}` : ''}`, 'system', { partyDebug: true });
 }
 
 function addPotionItem(progress, amount = 1) {
@@ -2146,6 +2154,7 @@ function rebuildBattlePartyMembers() {
   if (!fighting) return;
   persistPartyRuntimeState();
   battle.partyMembers = buildBattlePartyMembers(Date.now());
+  logPartyDebug('戰鬥隊伍同步', { members: battle.partyMembers.map((member) => `${member.id}:${member.name}`).join(',') });
   syncLegacyBattleStateFromMain();
   updateBattleUI();
 }
@@ -2497,9 +2506,13 @@ function floatDamage(value) {
 }
 
 function rewardVictory(index) {
-  const rewardKey = `${index}:${battle.enemySpawnedAt?.[index] ?? 0}`;
   if (!battle.rewardedEnemyIndexes) battle.rewardedEnemyIndexes = new Set();
-  if (battle.rewardedEnemyIndexes.has(rewardKey)) return;
+  const rewardClaim = PartyPolicy.claimEnemyReward(battle.rewardedEnemyIndexes, index, battle.enemySpawnedAt?.[index]);
+  const rewardKey = rewardClaim.rewardKey;
+  if (!rewardClaim.claimed) {
+    logPartyDebug('重複掉落事件已阻擋', { targetId: battle.enemyTypes?.[index], rewardKey });
+    return;
+  }
   battle.rewardedEnemyIndexes.add(rewardKey);
   const progress = getProgress();
   const enemy = getEnemyDefinition(index);
@@ -2635,8 +2648,9 @@ function queueDefeatedEnemies() {
           maxWave: definition.maxWaves
         });
         if (outcome.horn) logBattle('📯 哥布林號角響起！', 'system');
+        const transitionSessionId = battle.sessionId;
         setTimeout(() => {
-          if (!battle.isDungeon || battle.dungeonWave !== clearedWave) return;
+          if (battle.sessionId !== transitionSessionId || !battle.isDungeon || battle.dungeonWave !== clearedWave) return;
           if (!outcome.continueDungeon) {
             if (outcome.escaped) logBattle('🏃 哥布林撤退，離開副本。', 'progress');
             else logBattle('哥布林營地已被完全清空，副本結束。', 'progress');
@@ -2648,8 +2662,9 @@ function queueDefeatedEnemies() {
         }, outcome.horn ? 1200 : 650);
         return;
       }
+      const transitionSessionId = battle.sessionId;
       setTimeout(() => {
-        if (!battle.isDungeon || battle.dungeonWave !== clearedWave) return;
+        if (battle.sessionId !== transitionSessionId || !battle.isDungeon || battle.dungeonWave !== clearedWave) return;
         if (clearedWave >= definition.waves) completeDungeon();
         else loadDungeonWave(clearedWave + 1);
       }, 650);
@@ -2722,6 +2737,14 @@ function updatePartyMemberManaExhaustion(member) {
     member.manaExhausted = false;
     logBattle(`◆ ${member.name}魔力恢復，重新開始施放技能。`, 'system');
   }
+  logPartyDebug('掉落事件', {
+    targetId: enemy.id,
+    targetName: enemy.name,
+    rewardKey,
+    xp: earnedXp,
+    gold: earnedGold,
+    loot: [loot?.name, offhandDrop?.name, collectible?.name, ...accountDrops].filter(Boolean).join(',') || 'none'
+  });
 }
 
 function useAutoSkillForMember(member, now = Date.now()) {
@@ -2753,6 +2776,16 @@ function useAutoSkillForMember(member, now = Date.now()) {
     if (member.isMain && skill.id !== 'companion') playPlayerAttackAnimation();
     if (member.isMain && skill.id === 'companion') playCompanionAttackAnimation((hits.length ? hits : resolvedTargets).map((target) => target.index));
     if (hits.length) logBattle(`✦ ${member.name}施放【${skill.name}】，造成 ${totalDamage}${critical ? ' 暴擊' : ''}傷害。`, 'damage-dealt');
+    logPartyDebug('技能施放', {
+      attackerId: member.id,
+      attackerName: member.name,
+      targetIds: resolvedTargets.map(({ index }) => battle.enemyTypes[index]).join(','),
+      targetNames: resolvedTargets.map(({ index }) => getEnemyDefinition(index).name).join(','),
+      damage: totalDamage,
+      skill: skill.name,
+      resource: `${member.resourceType}:${Math.floor(member.resourceCurrent)}/${member.resourceMax}`,
+      cooldownUntil: Math.round(member.skillCooldowns[skill.id])
+    });
     updatePartyMemberManaExhaustion(member);
     return true;
   }
@@ -2767,6 +2800,16 @@ function useAutoSkillForMember(member, now = Date.now()) {
   member.globalSkillReadyAt = now + 1000;
   member.skillCooldowns[healSkill.id] = now + healSkill.cooldown * skillCooldownMultiplier * 1000 / stats.cooldownSpeed;
   logBattle(`✦ ${member.name}施放【${healSkill.name}】，恢復 ${heal} 生命。`);
+  logPartyDebug('技能施放', {
+    attackerId: member.id,
+    attackerName: member.name,
+    targetId: member.id,
+    targetName: member.name,
+    damage: -heal,
+    skill: healSkill.name,
+    resource: `${member.resourceType}:${Math.floor(member.resourceCurrent)}/${member.resourceMax}`,
+    cooldownUntil: Math.round(member.skillCooldowns[healSkill.id])
+  });
   updatePartyMemberManaExhaustion(member);
   return true;
 }
@@ -2810,7 +2853,7 @@ function updatePartyMemberResource(member, now) {
 
 function processPartyMemberAttacks(now = Date.now()) {
   for (const member of battle.partyMembers || []) {
-    if (!member.alive || now < member.stunnedUntil || now < member.nextAttackAt) continue;
+    if (!PartyPolicy.canMemberAttack(member, now)) continue;
     const targetIndex = PartyPolicy.getFrontAliveEnemyIndex(battle.enemyHps, battle.enemySpawnedAt);
     member.targetIndex = targetIndex;
     if (targetIndex < 0) continue;
@@ -2837,8 +2880,17 @@ function processPartyMemberAttacks(now = Date.now()) {
         if (!extra.evaded) logBattle(`➶ ${member.name}的【獵人本能】額外造成 ${extra.finalDamage} 傷害。`, 'damage-dealt');
       }
     }
+    logPartyDebug('普通攻擊', {
+      attackerId: member.id,
+      attackerName: member.name,
+      targetId: battle.enemyTypes[targetIndex],
+      targetName: enemy.name,
+      damage: result.evaded ? 0 : result.finalDamage,
+      skill: '普通攻擊',
+      resource: `${member.resourceType}:${Math.floor(member.resourceCurrent)}/${member.resourceMax}`
+    });
     const exhaustedMultiplier = member.manaExhausted ? 1.25 : 1;
-    member.nextAttackAt = now + 1000 / Math.max(.01, member.attackSpeed) * exhaustedMultiplier;
+    PartyPolicy.scheduleNextAttack(member, now, member.attackSpeed, exhaustedMultiplier);
   }
 }
 
@@ -3097,12 +3149,16 @@ function defeatPartyMember(member, now = Date.now()) {
   member.bleed = null;
   member.stunnedUntil = 0;
   member.nextAttackAt = Number.POSITIVE_INFINITY;
+  logPartyDebug('死亡事件', { memberId: member.id, memberName: member.name, at: now });
   logBattle(`${member.name} 已倒下。`, 'system');
   return true;
 }
 
 function resetPartyAfterDefeat(now = Date.now()) {
   if (!PartyPolicy.isPartyDefeated(battle.partyMembers)) return false;
+  logPartyDebug('戰鬥失敗事件', {
+    members: battle.partyMembers.map((member) => `${member.id}:${member.name}:dead`).join(',')
+  });
   battle.partyMembers.forEach(member => {
     member.currentHp = member.maxHp;
     member.resourceCurrent = member.resourceType === 'rage' ? 0 : getMaxCombatResourceForMember(member.character, member.progress);
@@ -3165,6 +3221,12 @@ function enemyAttackTick() {
 
     const target = PartyPolicy.chooseRandomAliveMember(battle.partyMembers, Math.random);
     if (!target) break;
+    logPartyDebug('怪物選擇隊員', {
+      attackerId: battle.enemyTypes[enemyIndex],
+      attackerName: enemy.name,
+      targetId: target.id,
+      targetName: target.name
+    });
     const stats = getCharacterStats(target.level, target.progress, target.character);
     const monsterHitChance = enemy.mapId
       ? ChapterOneLevelPolicy.getMonsterHitChance(enemy.level, target.level, stats.dodge)
@@ -3268,9 +3330,11 @@ function openBattle() {
   const enemyLevels = createEnemyLevels(enemyTypes, currentMap.id);
   const enemyHps = enemyTypes.map((type, index) => getMonsterDefinitionForMap(type, currentMap.id, enemyLevels[index]).maxHp);
   const battleStart = Date.now();
+  const sessionId = ++battleSessionSequence;
   const partyMembers = buildBattlePartyMembers(battleStart);
   const mainMember = partyMembers.find((member) => member.isMain) || partyMembers[0];
   battle = { enemyTypes, enemyLevels, enemyHps, partyMembers, playerHp: mainMember?.currentHp || getMaxHp(progress.level, progress), playerMana: mainMember?.resourceCurrent || 0, playerArrows: mainMember?.resourceType === 'arrows' ? mainMember.resourceCurrent : 0, playerShield: 0, playerStunnedUntil: 0, playerBleed: null, manaExhausted: false, playerAttackCharge: 0, hunterAttackCount: 0, lastManaRegenAt: battleStart, lastResourceUpdatedAt: battleStart, lastArrowRecoveryAt: battleStart, enemyNextAttackAt: createEnemyAttackSchedule(enemyTypes, battleStart, currentMap.id, enemyLevels), enemyBoarEnraged: enemyTypes.map(() => false), globalSkillReadyAt: 0, undeadRevived: false, skillCooldowns: {}, enemyRespawns: enemyTypes.map(() => null), enemySpawnedAt: enemyTypes.map((_, index) => battleStart + index), enemyDots: enemyTypes.map(() => []), monsterMoveSpeed: 200, targetIndexes: [], enemyDamages: enemyTypes.map(() => []), damageTimers: [], rewardedEnemyIndexes: new Set(), isDungeon, dungeonId: isDungeon ? currentMap.id : null, dungeonWave: isDungeon ? 1 : 0, dungeonComplete: false, waveTransitioning: false, goblinScoutSummons: 0 };
+  battle.sessionId = sessionId;
   clearBattleLog();
   if (pendingOfflineReport) {
     logBattle(`☾ 離線掛機 ${pendingOfflineReport.duration}${pendingOfflineReport.capped ? '（已達 12 小時上限）' : ''}，擊敗約 ${pendingOfflineReport.defeated} 隻怪物。`, 'system');
@@ -3298,6 +3362,13 @@ function openBattle() {
   skillTimer = setInterval(autoSkillTick, 100);
   battleTimer = setInterval(battleTick, 100);
   enemyAttackTimer = setInterval(enemyAttackTick, 100);
+  logPartyDebug('戰鬥計時器註冊', {
+    mapId: currentMap.id,
+    partyMembers: partyMembers.map((member) => member.id).join(','),
+    battleIntervalMs: 100,
+    skillIntervalMs: 100,
+    enemyIntervalMs: 100
+  });
 }
 
 const savedName = localStorage.getItem('stardust-player-name');
