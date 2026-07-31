@@ -1526,6 +1526,53 @@
 .battle-field #battle-player-art[aria-label].attack[data-job="mage"] { animation-name: characterAttackMage !important; }
 .battle-field #battle-player-art[aria-label].attack[data-job="priest"] { animation-name: characterAttackPriest !important; }
 
+/* Keep party status bars in their own fixed-height rows. The bars are spans,
+   so leaving them inline makes their percentage-height children expand to the
+   card height in desktop layouts. */
+.battle-header .battle-party-member {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-rows: auto 4px 4px;
+  gap: 3px 6px;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.battle-header .battle-party-member > div {
+  grid-column: 1;
+  grid-row: 1;
+  min-width: 0;
+}
+
+.battle-header .battle-party-member > em {
+  grid-column: 2;
+  grid-row: 1;
+  align-self: end;
+  margin: 0 !important;
+  white-space: nowrap;
+}
+
+.battle-header .party-mini-track {
+  display: block;
+  grid-column: 1 / -1;
+  width: 100%;
+  height: 4px !important;
+  min-height: 4px !important;
+  margin: 0;
+  padding: 0;
+}
+
+.battle-header .party-mini-track.hp { grid-row: 2; }
+.battle-header .party-mini-track.resource { grid-row: 3; }
+
+.battle-header .party-mini-track > i {
+  display: block;
+  height: 100% !important;
+  min-height: 0 !important;
+  margin: 0;
+  padding: 0;
+}
+
 @keyframes characterSpriteAttack {
   0%, 100% {
     transform: translate(0, 0) rotate(0);
