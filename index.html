@@ -88,7 +88,7 @@
     <section id="battle-screen" class="screen battle-screen hidden" aria-labelledby="battle-title">
       <header class="battle-header">
         <button id="leave-battle" class="back-button" type="button" aria-label="返回主選單">←</button>
-        <div><p id="map-level-text" class="eyebrow" hidden>怪物等級：Lv. 1–5</p><h2 id="battle-title" class="map-selector-trigger" role="button" tabindex="0" title="點擊選擇地圖">初心者平原</h2><div class="map-identity"><span id="race-totem" class="race-totem" title="種族圖騰" hidden></span><span id="job-mark" class="job-mark" title="職業標記" hidden>⚔</span><div id="player-fighter" class="fighter player-fighter"><div class="player-details"><strong id="battle-player-name">冒險者</strong><small><span id="battle-race">人類</span> · <span id="battle-job">戰士</span><b class="character-level">Lv. <span id="battle-level">1</span></b></small></div><div class="hp-track"><i id="player-hp-bar"></i></div><em id="player-hp-text">100 / 100</em><div class="mana-track"><i id="player-mp-bar"></i></div><em id="player-mp-text" class="mana-text">100 / 100 MP</em><div class="experience-panel"><div><span>經驗值</span><strong id="exp-text">0 / 100</strong></div><div class="xp-track"><i id="xp-bar"></i></div></div></div></div></div>
+        <div><p id="map-level-text" class="eyebrow" hidden>怪物等級：Lv. 1–5</p><h2 id="battle-title" class="map-selector-trigger" role="button" tabindex="0" title="點擊選擇地圖">初心者平原</h2><div class="map-identity"><span id="race-totem" class="race-totem" title="種族圖騰" hidden></span><span id="job-mark" class="job-mark" title="職業標記" hidden>⚔</span><div id="player-fighter" class="fighter player-fighter"><div class="player-details"><strong id="battle-player-name">冒險者</strong><small><span id="battle-race">人類</span> · <span id="battle-job">戰士</span><b class="character-level">Lv. <span id="battle-level">1</span></b></small></div><div class="hp-track"><i id="player-hp-bar"></i></div><em id="player-hp-text">100 / 100</em><div class="mana-track"><i id="player-mp-bar"></i></div><em id="player-mp-text" class="mana-text">100 / 100 MP</em><div class="experience-panel"><div><span>經驗值</span><strong id="exp-text">0 / 100</strong></div><div class="xp-track"><i id="xp-bar"></i></div></div></div></div><div id="battle-party-status" class="battle-party-status" aria-label="參戰隊伍"></div></div>
         <button id="layout-toggle" class="layout-button" type="button" hidden>✥ 調整版面</button><button id="battle-toggle" class="pause-button" type="button" hidden>Ⅱ 暫停</button>
       </header>
       <section id="layout-panel" class="layout-panel" aria-label="版面調整工具" hidden>
@@ -176,6 +176,12 @@
       <div id="character-roster-content" class="character-roster-content"></div>
     </section>
   </div>
+  <div id="party-modal" class="inventory-modal hidden" role="dialog" aria-modal="true" aria-labelledby="party-title">
+    <section class="inventory-window party-window">
+      <header><div><p class="eyebrow">PARTY</p><h2 id="party-title">隊伍編組</h2></div><button id="party-close" type="button" aria-label="關閉隊伍">×</button></header>
+      <div id="party-content"></div>
+    </section>
+  </div>
   <script src="monster-defense.js?v=20260729-defense-balance-v2"></script>
   <script src="chapter-one-level-policy.js?v=20260728-level-distribution-v1"></script>
   <script src="wolf-den-policy.js?v=20260728-wolf-passives-v1"></script>
@@ -190,6 +196,7 @@
   <script src="collectible-policy.js?v=20260727-unique-monster-collectibles-v1"></script>
   <script src="monster-display-policy.js?v=20260729-dedicated-transparent-images-v3"></script>
   <script src="dungeon-ticket.js?v=20260727-goblin-camp-wave-roster-v4"></script>
-  <script src="script.js?v=20260729-plains-depths-offhands-v92"></script>
+  <script src="party-policy.js?v=20260731-party-phase-one-v1"></script>
+  <script src="script.js?v=20260731-party-phase-one-v93"></script>
 </body>
 </html>

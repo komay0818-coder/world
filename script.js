@@ -527,7 +527,7 @@ function openCreation(slotIndex = 0) {
   menuScreen.classList.add('hidden');
   characterScreen.classList.remove('hidden');
   characterName.value = '';
-  document.querySelector('#character-title').textContent = slotIndex === 1 ? '建立第二角色' : '建立你的角色';
+  document.querySelector('#character-title').textContent = slotIndex > 0 ? `建立第 ${slotIndex + 1} 角色` : '建立你的角色';
   renderCreation();
 }
 
@@ -773,6 +773,16 @@ function getProgress() {
     skillBooks: saved.skillBooks && typeof saved.skillBooks === 'object' ? saved.skillBooks : {}
   };
   const activeCharacter = JSON.parse(localStorage.getItem('stardust-character') || 'null');
+  const activeSlotIndex = Number(localStorage.getItem('stardust-active-character-slot') || 0);
+  let partySlots = JSON.parse(localStorage.getItem('stardust-character-slots') || '[]');
+  if (!Array.isArray(partySlots) || !partySlots.length) partySlots = activeCharacter ? [{ character: activeCharacter, progress: normalizedProgress }] : [];
+  if (partySlots[activeSlotIndex]?.character) partySlots[activeSlotIndex] = { ...partySlots[activeSlotIndex], progress: normalizedProgress };
+  normalizedProgress.party = PartyPolicy.normalizeParty(saved.party, {
+    slots: partySlots,
+    mainSlotIndex: activeSlotIndex,
+    mainCharacter: activeCharacter,
+    mainProgress: normalizedProgress
+  });
   if (AssassinEnergyPolicy.isAssassin(activeCharacter?.job)) {
     AssassinEnergyPolicy.normalizeProgress(normalizedProgress);
   }
@@ -789,7 +799,32 @@ function getCharacterSlots() {
     localStorage.setItem('stardust-character-slots', JSON.stringify(slots));
     localStorage.setItem('stardust-active-character-slot', '0');
   }
+  let changed = false;
+  slots.forEach((slot, index) => {
+    if (!slot?.character) return;
+    if (!slot.character.id) {
+      PartyPolicy.ensureCharacterId(slot.character, index);
+      changed = true;
+    }
+  });
+  if (changed) localStorage.setItem('stardust-character-slots', JSON.stringify(slots));
   return slots;
+}
+
+function normalizeCurrentParty(progress = getProgress()) {
+  const slots = getCharacterSlots();
+  const mainSlotIndex = Number(localStorage.getItem('stardust-active-character-slot') || 0);
+  const character = JSON.parse(localStorage.getItem('stardust-character') || 'null');
+  if (slots[mainSlotIndex]?.character && character?.id !== slots[mainSlotIndex].character.id) {
+    localStorage.setItem('stardust-character', JSON.stringify(slots[mainSlotIndex].character));
+  }
+  progress.party = PartyPolicy.normalizeParty(progress.party, {
+    slots,
+    mainSlotIndex,
+    mainCharacter: character,
+    mainProgress: progress
+  });
+  return progress.party;
 }
 
 function getLockedFactionForCreation(slotIndex = creationSlotIndex) {
@@ -806,6 +841,7 @@ function syncActiveCharacterSlot(progressOverride = null) {
 }
 
 function saveProgress(progress) {
+  normalizeCurrentParty(progress);
   syncSkillMaterialInventory(progress);
   localStorage.setItem('stardust-progress', JSON.stringify(progress));
   syncActiveCharacterSlot(progress);
@@ -890,7 +926,7 @@ function renderCharacterRoster() {
   const slots = getCharacterSlots();
   const activeIndex = Number(localStorage.getItem('stardust-active-character-slot') || 0);
   const content = document.querySelector('#character-roster-content');
-  content.innerHTML = [0, 1].map((index) => {
+  content.innerHTML = [0, 1, 2, 3].map((index) => {
     const slot = slots[index];
     if (!slot) return `<article class="character-slot empty"><div><b>角色欄位 ${index + 1}</b><small>尚未建立角色</small></div><button type="button" data-create-character-slot="${index}">＋ 建立角色</button></article>`;
     const raceName = Object.values(factions).flat().find((race) => race.id === slot.character.race)?.name || slot.character.race;
@@ -898,6 +934,78 @@ function renderCharacterRoster() {
     return `<article class="character-slot ${index === activeIndex ? 'active' : ''}"><span class="creation-race-icon race-${slot.character.race}" aria-hidden="true"></span><div><b>${slot.character.name}${index === activeIndex ? '　目前使用' : ''}</b><small>${raceName}・${jobName}・Lv. ${slot.progress.level || 1}</small></div>${index === activeIndex ? '<em>使用中</em>' : `<button type="button" data-activate-character-slot="${index}">切換角色</button>`}</article>`;
   }).join('');
   document.querySelector('#character-roster-modal').classList.remove('hidden');
+}
+
+function getPartyMemberDisplayStats(memberRecord, slots = getCharacterSlots()) {
+  const slot = slots[memberRecord.slotIndex] || slots.find((entry) => entry?.character?.id === memberRecord.id);
+  if (!slot?.character) return { ...memberRecord, currentHp: 0, maxHp: 1 };
+  const stats = getCharacterStats(slot.progress.level || 1, slot.progress, slot.character);
+  return {
+    ...memberRecord,
+    level: slot.progress.level || 1,
+    currentHp: stats.hp,
+    maxHp: stats.hp,
+    attack: stats.attack,
+    defense: stats.defense,
+    attackSpeed: stats.attackSpeed
+  };
+}
+
+function renderParty() {
+  const progress = getProgress();
+  const party = normalizeCurrentParty(progress);
+  saveProgress(progress);
+  const slots = getCharacterSlots();
+  const activeMembers = party.activeMemberIds
+    .map((id) => party.members.find((member) => member.id === id))
+    .filter(Boolean)
+    .map((member) => getPartyMemberDisplayStats(member, slots));
+  const availableMembers = party.members.filter((member) => !party.activeMemberIds.includes(member.id));
+  const jobName = (job) => classes.find((entry) => entry.id === job)?.name || job;
+  const slotCards = Array.from({ length: PartyPolicy.MAX_PARTY_SIZE }, (_, index) => {
+    const unlockLevel = PartyPolicy.getPartySlotUnlockLevel(index);
+    if (index >= party.unlockedSlots) {
+      return `<article class="party-slot locked"><span class="party-slot-number">${index + 1}</span><div><b>尚未解鎖</b><small>主角色達到指定等級後開放</small></div><em>Lv${unlockLevel} 解鎖</em></article>`;
+    }
+    const member = activeMembers[index];
+    if (!member) {
+      return `<article class="party-slot empty"><span class="party-slot-number">${index + 1}</span><div><b>空隊伍欄位</b><small>可從下方帳號角色加入</small></div></article>`;
+    }
+    return `<article class="party-slot"><span class="party-slot-number">${index + 1}</span><div><b>${member.name}${index === 0 ? '（主角色）' : ''}</b><small>${jobName(member.job)}・Lv. ${member.level}・HP ${member.currentHp}/${member.maxHp}</small></div>${index === 0 ? '<em>固定隊員</em>' : `<button type="button" data-party-remove="${member.id}">移出隊伍</button>`}</article>`;
+  }).join('');
+  const candidates = availableMembers.length
+    ? availableMembers.map((member) => `<article class="party-candidate"><div><b>${member.name}</b><small>${jobName(member.job)}・Lv. ${member.level}</small></div><button type="button" data-party-add="${member.id}" ${party.activeMemberIds.length >= party.unlockedSlots ? 'disabled' : ''}>加入隊伍</button></article>`).join('')
+    : '<p class="empty-inventory">目前沒有其他可加入的帳號角色。請先到「我的角色」建立角色。</p>';
+  document.querySelector('#party-content').innerHTML = `<p class="party-summary">主角色 Lv.${progress.level}・已開放 ${party.unlockedSlots}/4 個隊伍欄位</p><section class="party-slot-grid">${slotCards}</section><section class="party-candidates"><h3>可加入角色</h3>${candidates}</section>`;
+  document.querySelector('#party-modal').classList.remove('hidden');
+}
+
+function addPartyMember(memberId) {
+  const progress = getProgress();
+  const party = normalizeCurrentParty(progress);
+  if (party.activeMemberIds.includes(memberId)) return;
+  if (party.activeMemberIds.length >= party.unlockedSlots) {
+    showToast(`目前隊伍上限為 ${party.unlockedSlots} 人。`);
+    return;
+  }
+  if (!party.members.some((member) => member.id === memberId)) return;
+  party.activeMemberIds.push(memberId);
+  saveProgress(progress);
+  renderParty();
+  if (fighting) rebuildBattlePartyMembers();
+}
+
+function removePartyMember(memberId) {
+  const progress = getProgress();
+  const party = normalizeCurrentParty(progress);
+  if (memberId === party.activeMemberIds[0]) {
+    showToast('主角色不能移出隊伍。');
+    return;
+  }
+  party.activeMemberIds = party.activeMemberIds.filter((id) => id !== memberId);
+  saveProgress(progress);
+  renderParty();
+  if (fighting) rebuildBattlePartyMembers();
 }
 
 function requiredXp(level) {
@@ -1261,7 +1369,9 @@ function getCharacterStats(level, progress = getProgress(), character = JSON.par
   };
 }
 
-function getMaxHp(level, progress = getProgress()) { return getCharacterStats(level, progress).hp; }
+function getMaxHp(level, progress = getProgress(), character = JSON.parse(localStorage.getItem('stardust-character') || 'null')) {
+  return getCharacterStats(level, progress, character).hp;
+}
 
 function addPotionItem(progress, amount = 1) {
   const potion = progress.inventory.find((item) => item.kind === 'consumable' && item.id === 'healing-potion');
@@ -1880,6 +1990,149 @@ function getMaxCombatResource(job, level) {
   return getMaxMana(job, level);
 }
 
+function getMaxCombatResourceForMember(character, progress) {
+  if (WarriorResourcePolicy.isWarrior(character.job)) return WarriorResourcePolicy.MAX_RAGE;
+  if (AssassinEnergyPolicy.isAssassin(character.job)) return AssassinEnergyPolicy.MAX_ENERGY;
+  if (HunterArrowPolicy.isHunter(character.job)) return HunterArrowPolicy.getMaxArrows(progress.equipment);
+  return getCharacterStats(progress.level || 1, progress, character).mana;
+}
+
+function createBattlePartyMember(slot, slotIndex, mainId, now = Date.now()) {
+  if (!slot?.character) return null;
+  PartyPolicy.ensureCharacterId(slot.character, slotIndex);
+  const character = { ...slot.character };
+  const progress = {
+    level: 1,
+    equipment: emptyEquipment(),
+    collection: {},
+    skillLevels: {},
+    ...slot.progress,
+    equipment: { ...emptyEquipment(), ...(slot.progress?.equipment || {}) }
+  };
+  const stats = getCharacterStats(progress.level, progress, character);
+  const maxResource = getMaxCombatResourceForMember(character, progress);
+  const savedState = progress.partyMemberState && typeof progress.partyMemberState === 'object' ? progress.partyMemberState : {};
+  const initialResource = WarriorResourcePolicy.isWarrior(character.job)
+    ? 0
+    : AssassinEnergyPolicy.isAssassin(character.job)
+      ? AssassinEnergyPolicy.clampEnergy(savedState.resource?.current ?? progress.energy)
+      : maxResource;
+  return {
+    id: character.id,
+    slotIndex,
+    isMain: character.id === mainId,
+    character,
+    progress,
+    name: character.name,
+    race: character.race,
+    job: character.job,
+    level: progress.level,
+    currentHp: Math.max(1, Math.min(stats.hp, Number(savedState.currentHp) || stats.hp)),
+    maxHp: stats.hp,
+    resourceType: PartyPolicy.getResourceType(character.job),
+    resourceCurrent: Math.max(0, Math.min(maxResource, Number(savedState.resource?.current ?? initialResource) || 0)),
+    resourceMax: maxResource,
+    attack: stats.attack,
+    defense: stats.defense,
+    attackSpeed: stats.attackSpeed,
+    stats,
+    equipment: progress.equipment,
+    alive: true,
+    nextAttackAt: now,
+    targetIndex: -1,
+    globalSkillReadyAt: 0,
+    skillCooldowns: {},
+    manaExhausted: false,
+    shield: 0,
+    stunnedUntil: 0,
+    bleed: null,
+    undeadRevived: false,
+    hunterAttackCount: 0,
+    lastManaRegenAt: now,
+    lastResourceUpdatedAt: now,
+    lastArrowRecoveryAt: now
+  };
+}
+
+function buildBattlePartyMembers(now = Date.now()) {
+  const progress = getProgress();
+  const party = normalizeCurrentParty(progress);
+  const slots = getCharacterSlots();
+  const mainId = party.activeMemberIds[0];
+  return party.activeMemberIds.map((memberId) => {
+    const slotIndex = slots.findIndex((slot) => slot?.character?.id === memberId);
+    if (slotIndex < 0) return null;
+    const slot = memberId === mainId
+      ? { character: JSON.parse(localStorage.getItem('stardust-character') || 'null'), progress }
+      : slots[slotIndex];
+    return createBattlePartyMember(slot, slotIndex, mainId, now);
+  }).filter(Boolean);
+}
+
+function getMainBattleMember() {
+  return battle.partyMembers?.find((member) => member.isMain) || battle.partyMembers?.[0] || null;
+}
+
+function syncLegacyBattleStateFromMain() {
+  const main = getMainBattleMember();
+  if (!main) return;
+  battle.playerHp = main.currentHp;
+  battle.playerMana = main.resourceCurrent;
+  battle.playerArrows = main.resourceType === 'arrows' ? main.resourceCurrent : 0;
+  battle.playerShield = main.shield;
+  battle.playerStunnedUntil = main.stunnedUntil;
+  battle.playerBleed = main.bleed;
+  battle.manaExhausted = main.manaExhausted;
+  battle.globalSkillReadyAt = main.globalSkillReadyAt;
+  battle.skillCooldowns = main.skillCooldowns;
+  battle.undeadRevived = main.undeadRevived;
+}
+
+function syncMainBattleMemberFromLegacy() {
+  const main = getMainBattleMember();
+  if (!main) return;
+  main.currentHp = battle.playerHp;
+  main.resourceCurrent = main.resourceType === 'arrows' ? battle.playerArrows : battle.playerMana;
+  main.shield = battle.playerShield;
+  main.stunnedUntil = battle.playerStunnedUntil;
+  main.bleed = battle.playerBleed;
+  main.manaExhausted = battle.manaExhausted;
+  main.globalSkillReadyAt = battle.globalSkillReadyAt;
+  main.skillCooldowns = battle.skillCooldowns;
+  main.undeadRevived = battle.undeadRevived;
+  main.alive = main.currentHp > 0;
+}
+
+function persistPartyRuntimeState() {
+  if (!battle.partyMembers?.length) return;
+  const slots = getCharacterSlots();
+  const activeIndex = Number(localStorage.getItem('stardust-active-character-slot') || 0);
+  const mainProgress = getProgress();
+  battle.partyMembers.forEach((member) => {
+    const state = {
+      currentHp: Math.max(0, member.currentHp),
+      maxHp: member.maxHp,
+      resource: { type: member.resourceType, current: Math.max(0, member.resourceCurrent), max: member.resourceMax },
+      attack: member.attack,
+      defense: member.defense,
+      attackSpeed: member.attackSpeed
+    };
+    member.progress.partyMemberState = state;
+    if (member.slotIndex === activeIndex) mainProgress.partyMemberState = state;
+    if (slots[member.slotIndex]) slots[member.slotIndex].progress = { ...slots[member.slotIndex].progress, partyMemberState: state };
+  });
+  localStorage.setItem('stardust-character-slots', JSON.stringify(slots));
+  saveProgress(mainProgress);
+}
+
+function rebuildBattlePartyMembers() {
+  if (!fighting) return;
+  persistPartyRuntimeState();
+  battle.partyMembers = buildBattlePartyMembers(Date.now());
+  syncLegacyBattleStateFromMain();
+  updateBattleUI();
+}
+
 function getCombatResourceUnit(job) {
   if (WarriorResourcePolicy.isWarrior(job)) return '怒氣';
   if (AssassinEnergyPolicy.isAssassin(job)) return '能量';
@@ -2051,7 +2304,25 @@ function renderSkillDetailModal() {
   modal.classList.remove('hidden');
 }
 
+function renderBattlePartyStatus() {
+  const container = document.querySelector('#battle-party-status');
+  if (!container || !battle.partyMembers?.length) return;
+  container.innerHTML = battle.partyMembers.map(member => {
+    const resourceMax = Math.max(1, getMaxCombatResourceForMember(member.character, member.progress));
+    const resourcePercent = Math.max(0, Math.min(100, member.resourceCurrent / resourceMax * 100));
+    const hpPercent = Math.max(0, Math.min(100, member.currentHp / member.maxHp * 100));
+    const jobName = classes.find(job => job.id === member.character.job)?.name || member.character.job;
+    return `<article class="battle-party-member${member.alive ? '' : ' is-dead'}">
+      <div><strong>${member.name}</strong><small>${jobName} Lv.${member.level}</small></div>
+      <span class="party-mini-track hp"><i style="width:${hpPercent}%"></i></span>
+      <span class="party-mini-track resource"><i style="width:${resourcePercent}%"></i></span>
+      <em>${member.alive ? `${Math.max(0, member.currentHp)} / ${member.maxHp}` : '已死亡'}</em>
+    </article>`;
+  }).join('');
+}
+
 function updateBattleUI() {
+  syncLegacyBattleStateFromMain();
   const character = JSON.parse(localStorage.getItem('stardust-character'));
   const progress = getProgress();
   const maxHp = getMaxHp(progress.level, progress);
@@ -2124,6 +2395,7 @@ function updateBattleUI() {
   document.querySelector('#mana-potion-button')?.classList.toggle('hidden', usesRage || usesEnergy || usesArrows);
   document.querySelector('#exp-text').textContent = `${progress.xp} / ${requiredXp(progress.level)}`;
   document.querySelector('#xp-bar').style.width = `${progress.xp / requiredXp(progress.level) * 100}%`;
+  renderBattlePartyStatus();
   refreshSkills(character, progress.level);
 }
 
@@ -2157,6 +2429,7 @@ function usePotion(manual = false) {
   progress.potions -= 1;
   removePotionItem(progress);
   battle.playerHp = Math.min(maxHp, battle.playerHp + Math.ceil(maxHp * 0.30));
+  syncMainBattleMemberFromLegacy();
   saveProgress(progress);
   logBattle(`🧪 ${manual ? '手動' : '自動'}使用治癒藥水，恢復 30% 生命。`);
   updateBattleUI();
@@ -2192,6 +2465,7 @@ function useManaPotion(manual = false) {
   removeManaPotionItem(progress);
   battle.playerMana = Math.min(maxMana, battle.playerMana + Math.ceil(maxMana * .20));
   updateManaExhaustion(maxMana);
+  syncMainBattleMemberFromLegacy();
   saveProgress(progress);
   logBattle(`🔷 ${manual ? '手動' : '自動'}使用魔法藥水，恢復 20% 魔力。`);
   updateBattleUI();
@@ -2206,6 +2480,10 @@ function floatDamage(value) {
 }
 
 function rewardVictory(index) {
+  const rewardKey = `${index}:${battle.enemySpawnedAt?.[index] ?? 0}`;
+  if (!battle.rewardedEnemyIndexes) battle.rewardedEnemyIndexes = new Set();
+  if (battle.rewardedEnemyIndexes.has(rewardKey)) return;
+  battle.rewardedEnemyIndexes.add(rewardKey);
   const progress = getProgress();
   const enemy = getEnemyDefinition(index);
   const currentMap = getActiveMap(progress);
@@ -2383,13 +2661,14 @@ function getPlayerAttackProfile(character, skill = null) {
 
 function applyDamageToMonster(index, baseDamage, profile, options = {}) {
   const enemy = getEnemyDefinition(index);
-  const progress = getProgress();
-  const character = JSON.parse(localStorage.getItem('stardust-character') || 'null');
-  const magicDamageBonus = profile.damageType === 'magic' ? getCharacterStats(progress.level, progress, character).magicDamageBonus : 0;
+  const attacker = options.attacker || null;
+  const progress = attacker?.progress || getProgress();
+  const character = attacker?.character || JSON.parse(localStorage.getItem('stardust-character') || 'null');
+  const attackerStats = attacker?.stats || getCharacterStats(progress.level, progress, character);
+  const magicDamageBonus = profile.damageType === 'magic' ? attackerStats.magicDamageBonus : 0;
   const adjustedBaseDamage = EquipmentPolicy.applyMagicDamageBonus(baseDamage, magicDamageBonus);
   if (enemy.mapId) {
-    const stats = getCharacterStats(progress.level, progress, character);
-    const hitChance = ChapterOneLevelPolicy.getPlayerHitChance(progress.level, enemy.level, stats.accuracy, 0);
+    const hitChance = ChapterOneLevelPolicy.getPlayerHitChance(progress.level, enemy.level, attackerStats.accuracy, 0);
     if (Math.random() >= hitChance) {
       if (options.logDefense !== false) logBattle(`你的攻擊未能命中【${enemy.name}】！`, 'damage-dealt');
       return { finalDamage: 0, missed: true, evaded: true, parried: false };
@@ -2416,164 +2695,145 @@ function applyDamageToMonster(index, baseDamage, profile, options = {}) {
   return result;
 }
 
-function useAutoSkill(character, progress) {
-  const usesEnergy = AssassinEnergyPolicy.isAssassin(character.job);
-  const usesArrows = HunterArrowPolicy.isHunter(character.job);
-  const usesMana = usesManaResource(character.job);
-  if (usesMana && battle.manaExhausted) return false;
-  const unlocked = getKnownSkills(character.job, progress.level).filter((skill) => skill.type === 'active' && skill.level <= progress.level);
-  const now = Date.now();
-  if (now < (battle.globalSkillReadyAt || 0)) return false;
-  const attackSkills = unlocked.filter((skill) => skill.id !== 'heal' && (battle.skillCooldowns[skill.id] || 0) <= now);
-  let casted = false;
-
-  for (const skill of attackSkills) {
-    const manaCost = getSkillResourceCost(character.job, skill);
-    if (usesArrows && !HunterArrowPolicy.canUseSkill(battle.playerArrows, skill.id, progress.equipment)) continue;
-    if (!usesArrows && battle.playerMana < manaCost) continue;
-    const targets = aliveEnemyIndexesByAge().slice(0, skill.targets || 1).map((index) => ({ hp: battle.enemyHps[index], index }));
-    if (!targets.length) continue;
-    const stats = getCharacterStats(progress.level, progress, character);
-    const critical = Math.random() < stats.crit;
-    const companionPassiveMultiplier = skill.id === 'companion' && progress.level >= 8 ? 1.15 + (getPassiveSkillUpgradeLevel(progress, 'hunter', '野性夥伴') - 1) * .10 : 1;
-    const damage = Math.max(1, Math.ceil(stats.attack * skill.power * getSkillPowerMultiplier(progress, character.job, skill) * companionPassiveMultiplier * (critical ? 1.5 : 1)));
-    const attackProfile = getPlayerAttackProfile(character, skill);
-    const resolvedTargets = targets.map((enemy) => ({
-      ...enemy,
-      result: applyDamageToMonster(enemy.index, damage, attackProfile)
-    }));
-    const hitTargets = resolvedTargets.filter((enemy) => !enemy.result.evaded);
-    const totalDamage = hitTargets.reduce((total, enemy) => total + enemy.result.finalDamage, 0);
-    if (skill.id !== 'companion') playPlayerAttackAnimation();
-    if (skill.id === 'fireball') hitTargets.forEach((enemy) => applyDot(enemy.index, 'burn', Math.max(1, Math.ceil(enemy.result.finalDamage * .18 * stats.dotMultiplier)), 4));
-    if (skill.id === 'poison-blade') hitTargets.forEach((enemy) => applyDot(enemy.index, 'poison', Math.max(1, Math.ceil(enemy.result.finalDamage * .15 * stats.dotMultiplier)), 5));
-    if (usesArrows) battle.playerArrows = HunterArrowPolicy.spendArrows(battle.playerArrows, skill.id, progress.equipment);
-    else battle.playerMana -= manaCost;
-    if (usesEnergy) persistAssassinEnergy(progress, now);
-    battle.skillCooldowns[skill.id] = now + skill.cooldown * skillCooldownMultiplier * 1000 / stats.cooldownSpeed;
-    battle.globalSkillReadyAt = now + 1000;
-    if (skill.id === 'companion') {
-      playCompanionAttackAnimation((hitTargets.length ? hitTargets : targets).map((enemy) => enemy.index));
-      if (hitTargets.length) {
-        const targetNames = hitTargets.map((enemy) => getEnemyDefinition(enemy.index).name).join('、');
-        logBattle(`🐺 戰寵攻擊【${targetNames}】，共造成 ${totalDamage} 傷害${critical ? '（暴擊）' : ''}。`, 'pet-damage', { aggregateKey: `pet-${hitTargets.map((enemy) => enemy.index).join('-')}`, damage: totalDamage, summary: `🐺 戰寵攻擊【${targetNames}】` });
-      }
-    } else if (hitTargets.length) logBattle(`✦ 立即施放【${skill.name}】（-${manaCost} ${getCombatResourceUnit(character.job)}），共造成 ${totalDamage}${critical ? ' 暴擊' : ''}傷害。`, 'damage-dealt');
-    casted = true;
-    if (usesMana) updateManaExhaustion(getMaxMana(character.job, progress.level));
-    break;
+function updatePartyMemberManaExhaustion(member) {
+  if (!usesManaResource(member.job) || member.resourceMax <= 0) return;
+  const ratio = member.resourceCurrent / member.resourceMax;
+  if (!member.manaExhausted && ratio <= .15) {
+    member.manaExhausted = true;
+    logBattle(`◇ ${member.name}魔力枯竭，暫停施放技能。`, 'system');
+  } else if (member.manaExhausted && ratio >= .45) {
+    member.manaExhausted = false;
+    logBattle(`◆ ${member.name}魔力恢復，重新開始施放技能。`, 'system');
   }
+}
 
-  if (casted) return true;
-
-  const healSkill = unlocked.find((skill) => skill.id === 'heal' && (battle.skillCooldowns[skill.id] || 0) <= now);
-  if (!healSkill) return casted;
-  const manaCost = getSkillManaCost(healSkill);
-  if (battle.playerMana < manaCost) return casted;
-  const maxHp = getMaxHp(progress.level, progress);
-  if (battle.playerHp / maxHp > .7) return casted;
-  const heal = Math.ceil(maxHp * .4 * getSkillPowerMultiplier(progress, character.job, healSkill));
-  const missingHp = maxHp - battle.playerHp;
-  battle.playerHp = Math.min(maxHp, battle.playerHp + heal);
-  battle.playerShield += Math.max(0, heal - missingHp);
-  battle.playerMana -= manaCost;
-  battle.globalSkillReadyAt = now + 1000;
-  updateManaExhaustion(getMaxMana(character.job, progress.level));
-  battle.skillCooldowns[healSkill.id] = now + healSkill.cooldown * skillCooldownMultiplier * 1000 / getCharacterStats(progress.level, progress, character).cooldownSpeed;
-  logBattle(`✦ 立即施放【${healSkill.name}】（-${manaCost} MP），恢復 ${heal} 生命。`);
+function useAutoSkillForMember(member, now = Date.now()) {
+  if (!member?.alive || now < member.stunnedUntil || now < member.globalSkillReadyAt) return false;
+  const { character, progress, stats } = member;
+  if (usesManaResource(member.job) && member.manaExhausted) return false;
+  const unlocked = getKnownSkills(member.job, member.level).filter((skill) => skill.type === 'active' && skill.level <= member.level);
+  const attackSkills = unlocked.filter((skill) => skill.id !== 'heal' && (member.skillCooldowns[skill.id] || 0) <= now);
+  for (const skill of attackSkills) {
+    const cost = getSkillResourceCost(member.job, skill);
+    if (member.resourceType === 'arrows' && !HunterArrowPolicy.canUseSkill(member.resourceCurrent, skill.id, progress.equipment)) continue;
+    if (member.resourceType !== 'arrows' && member.resourceCurrent < cost) continue;
+    const targets = aliveEnemyIndexesByAge().slice(0, skill.targets || 1);
+    if (!targets.length) continue;
+    const critical = Math.random() < stats.crit;
+    const companionMultiplier = skill.id === 'companion' && member.level >= 8 ? 1.15 + (getPassiveSkillUpgradeLevel(progress, 'hunter', '野性夥伴') - 1) * .10 : 1;
+    const damage = Math.max(1, Math.ceil(stats.attack * skill.power * getSkillPowerMultiplier(progress, member.job, skill) * companionMultiplier * (critical ? 1.5 : 1)));
+    const profile = getPlayerAttackProfile(character, skill);
+    const resolvedTargets = targets.map((index) => ({ index, result: applyDamageToMonster(index, damage, profile, { attacker: member }) }));
+    const hits = resolvedTargets.filter((target) => !target.result.evaded);
+    if (skill.id === 'fireball') hits.forEach((target) => applyDot(target.index, 'burn', Math.max(1, Math.ceil(target.result.finalDamage * .18 * stats.dotMultiplier)), 4));
+    if (skill.id === 'poison-blade') hits.forEach((target) => applyDot(target.index, 'poison', Math.max(1, Math.ceil(target.result.finalDamage * .15 * stats.dotMultiplier)), 5));
+    member.resourceCurrent = member.resourceType === 'arrows'
+      ? HunterArrowPolicy.spendArrows(member.resourceCurrent, skill.id, progress.equipment)
+      : Math.max(0, member.resourceCurrent - cost);
+    member.skillCooldowns[skill.id] = now + skill.cooldown * skillCooldownMultiplier * 1000 / stats.cooldownSpeed;
+    member.globalSkillReadyAt = now + 1000;
+    const totalDamage = hits.reduce((total, target) => total + target.result.finalDamage, 0);
+    if (member.isMain && skill.id !== 'companion') playPlayerAttackAnimation();
+    if (member.isMain && skill.id === 'companion') playCompanionAttackAnimation((hits.length ? hits : resolvedTargets).map((target) => target.index));
+    if (hits.length) logBattle(`✦ ${member.name}施放【${skill.name}】，造成 ${totalDamage}${critical ? ' 暴擊' : ''}傷害。`, 'damage-dealt');
+    updatePartyMemberManaExhaustion(member);
+    return true;
+  }
+  const healSkill = unlocked.find((skill) => skill.id === 'heal' && (member.skillCooldowns[skill.id] || 0) <= now);
+  if (!healSkill || member.resourceCurrent < getSkillManaCost(healSkill) || member.currentHp / member.maxHp > .7) return false;
+  const cost = getSkillManaCost(healSkill);
+  const heal = Math.ceil(member.maxHp * .4 * getSkillPowerMultiplier(progress, member.job, healSkill));
+  const missing = member.maxHp - member.currentHp;
+  member.currentHp = Math.min(member.maxHp, member.currentHp + heal);
+  member.shield += Math.max(0, heal - missing);
+  member.resourceCurrent -= cost;
+  member.globalSkillReadyAt = now + 1000;
+  member.skillCooldowns[healSkill.id] = now + healSkill.cooldown * skillCooldownMultiplier * 1000 / stats.cooldownSpeed;
+  logBattle(`✦ ${member.name}施放【${healSkill.name}】，恢復 ${heal} 生命。`);
+  updatePartyMemberManaExhaustion(member);
   return true;
 }
 
 function autoSkillTick() {
   if (!fighting) return;
-  if (Date.now() < (battle.playerStunnedUntil || 0)) return;
-  const character = JSON.parse(localStorage.getItem('stardust-character'));
-  if (!character) return;
-  if (useAutoSkill(character, getProgress())) updateBattleUI();
+  const now = Date.now();
+  let casted = false;
+  (battle.partyMembers || []).forEach((member) => {
+    if (useAutoSkillForMember(member, now)) casted = true;
+  });
+  queueDefeatedEnemies();
+  syncLegacyBattleStateFromMain();
+  if (casted) updateBattleUI();
+}
+
+function updatePartyMemberResource(member, now) {
+  if (!member.alive) return;
+  if (usesManaResource(member.job)) {
+    const elapsed = ManaRegenPolicy.getElapsedSeconds(now, member.lastManaRegenAt);
+    member.lastManaRegenAt = now;
+    member.resourceCurrent = Math.min(member.resourceMax, member.resourceCurrent + ManaRegenPolicy.calculateRegenAmount({
+      maxMana: member.resourceMax,
+      regenMultiplier: member.stats.manaRegen,
+      flatPerSecond: member.stats.manaRegenFlat,
+      elapsedSeconds: elapsed
+    }));
+    updatePartyMemberManaExhaustion(member);
+  } else if (member.resourceType === 'energy') {
+    const elapsed = AssassinEnergyPolicy.getElapsedSeconds(now, member.lastResourceUpdatedAt);
+    member.lastResourceUpdatedAt = now;
+    member.resourceCurrent = AssassinEnergyPolicy.getRegeneratedEnergy(member.resourceCurrent, elapsed);
+    member.progress.energy = member.resourceCurrent;
+    member.progress.energyUpdatedAt = now;
+  } else if (member.resourceType === 'arrows') {
+    const recovery = HunterArrowPolicy.recoverArrows(member.resourceCurrent, now - member.lastArrowRecoveryAt, member.progress.equipment);
+    member.resourceCurrent = recovery.arrows;
+    member.lastArrowRecoveryAt = now - recovery.remainder;
+  }
+}
+
+function processPartyMemberAttacks(now = Date.now()) {
+  for (const member of battle.partyMembers || []) {
+    if (!member.alive || now < member.stunnedUntil || now < member.nextAttackAt) continue;
+    const targetIndex = PartyPolicy.getFrontAliveEnemyIndex(battle.enemyHps, battle.enemySpawnedAt);
+    member.targetIndex = targetIndex;
+    if (targetIndex < 0) continue;
+    const equippedWeapon = member.progress.equipment?.weapon;
+    const rolledWeaponAttack = EquipmentPolicy.rollWeaponAttack(equippedWeapon, Math.random());
+    const displayedWeaponAttack = rolledWeaponAttack === null ? 0 : effectiveEquipmentStat(equippedWeapon, 'attack');
+    const attackWithWeaponRoll = member.stats.attack + (rolledWeaponAttack === null ? 0 : rolledWeaponAttack - displayedWeaponAttack);
+    const orcRage = member.race === 'orc' && Math.random() < .10;
+    const critical = Math.random() < member.stats.crit;
+    const baseHit = Math.max(1, Math.ceil(attackWithWeaponRoll * (orcRage ? 1.10 : 1) * (critical ? 1.5 : 1)));
+    member.hunterAttackCount += 1;
+    const hunterInstinct = member.job === 'hunter' && member.level >= 20 ? getHunterInstinctEffect(member.progress) : null;
+    const instinctTriggered = Boolean(hunterInstinct && member.hunterAttackCount % hunterInstinct.interval === 0);
+    const hit = Math.max(1, Math.ceil(baseHit * (instinctTriggered ? hunterInstinct.multiplier : 1)));
+    const enemy = getEnemyDefinition(targetIndex);
+    const profile = getPlayerAttackProfile(member.character);
+    const result = applyDamageToMonster(targetIndex, hit, profile, { attacker: member });
+    if (member.isMain) playPlayerAttackAnimation();
+    if (!result.evaded) {
+      if (member.resourceType === 'rage') member.resourceCurrent = WarriorResourcePolicy.gainFromAttack(member.resourceCurrent);
+      logBattle(`⚔ ${member.name}對【${enemy.name}】造成 ${result.finalDamage} 傷害${critical ? '（暴擊）' : ''}${orcRage ? '（狂怒）' : ''}${instinctTriggered ? '（獵人本能）' : ''}`, 'damage-dealt', { aggregateKey: `member-${member.id}-${battle.enemyTypes[targetIndex]}`, damage: result.finalDamage, summary: `⚔ ${member.name}攻擊【${enemy.name}】` });
+      if (instinctTriggered && hunterInstinct.extraAttack && battle.enemyHps[targetIndex] > 0) {
+        const extra = applyDamageToMonster(targetIndex, baseHit, profile, { attacker: member });
+        if (!extra.evaded) logBattle(`➶ ${member.name}的【獵人本能】額外造成 ${extra.finalDamage} 傷害。`, 'damage-dealt');
+      }
+    }
+    const exhaustedMultiplier = member.manaExhausted ? 1.25 : 1;
+    member.nextAttackAt = now + 1000 / Math.max(.01, member.attackSpeed) * exhaustedMultiplier;
+  }
 }
 
 function battleTick() {
   if (!fighting) return;
-  const progress = getProgress();
-  const character = JSON.parse(localStorage.getItem('stardust-character'));
   processEnemyRespawns();
   processEnemyDots();
-  const usesRage = WarriorResourcePolicy.isWarrior(character.job);
-  const usesEnergy = AssassinEnergyPolicy.isAssassin(character.job);
-  const usesArrows = HunterArrowPolicy.isHunter(character.job);
-  const usesMana = usesManaResource(character.job);
-  const maxMana = getMaxCombatResource(character.job, progress.level);
-  const stats = getCharacterStats(progress.level, progress, character);
-  if (usesMana) {
-    const manaRegenNow = Date.now();
-    const manaRegenElapsedSeconds = ManaRegenPolicy.getElapsedSeconds(manaRegenNow, battle.lastManaRegenAt);
-    battle.lastManaRegenAt = manaRegenNow;
-    battle.playerMana = Math.min(maxMana, battle.playerMana + ManaRegenPolicy.calculateRegenAmount({
-      maxMana,
-      regenMultiplier: stats.manaRegen,
-      flatPerSecond: stats.manaRegenFlat,
-      elapsedSeconds: manaRegenElapsedSeconds
-    }));
-    if (battle.playerMana / maxMana <= .20) useManaPotion();
-    updateManaExhaustion(maxMana);
-  } else if (usesEnergy) {
-    const energyNow = Date.now();
-    const energyElapsedSeconds = AssassinEnergyPolicy.getElapsedSeconds(energyNow, battle.lastResourceUpdatedAt);
-    battle.lastResourceUpdatedAt = energyNow;
-    battle.playerMana = AssassinEnergyPolicy.getRegeneratedEnergy(battle.playerMana, energyElapsedSeconds);
-    persistAssassinEnergy(progress, energyNow);
-  }
-  if (usesArrows) {
-    const arrowNow = Date.now();
-    const recovery = HunterArrowPolicy.recoverArrows(
-      battle.playerArrows,
-      arrowNow - battle.lastArrowRecoveryAt,
-      progress.equipment
-    );
-    battle.playerArrows = recovery.arrows;
-    battle.lastArrowRecoveryAt = arrowNow - recovery.remainder;
-  }
-  autoSkillTick();
+  const now = Date.now();
+  (battle.partyMembers || []).forEach((member) => updatePartyMemberResource(member, now));
+  processPartyMemberAttacks(now);
   queueDefeatedEnemies();
-  if (Date.now() < (battle.playerStunnedUntil || 0)) {
-    updateBattleUI();
-    return;
-  }
-  const equippedWeapon = progress.equipment?.weapon;
-  const rolledWeaponAttack = EquipmentPolicy.rollWeaponAttack(equippedWeapon, Math.random());
-  const displayedWeaponAttack = rolledWeaponAttack === null ? 0 : effectiveEquipmentStat(equippedWeapon, 'attack');
-  const attackWithWeaponRoll = stats.attack + (rolledWeaponAttack === null ? 0 : rolledWeaponAttack - displayedWeaponAttack);
-  const orcRage = character.race === 'orc' && Math.random() < .10;
-  const critical = Math.random() < stats.crit;
-  const basePlayerHit = Math.max(1, Math.ceil(attackWithWeaponRoll * (orcRage ? 1.10 : 1) * (critical ? 1.5 : 1)));
-  let targetIndex = oldestAliveEnemyIndex();
-  if (targetIndex === -1) {
-    updateBattleUI();
-    return;
-  }
-  battle.playerAttackCharge = (battle.playerAttackCharge || 0) + (battle.manaExhausted ? .8 : 1);
-  if (battle.playerAttackCharge >= 1) {
-    battle.playerAttackCharge -= 1;
-    battle.hunterAttackCount = (battle.hunterAttackCount || 0) + 1;
-    const hunterInstinct = character.job === 'hunter' && progress.level >= 20 ? getHunterInstinctEffect(progress) : null;
-    const instinctTriggered = Boolean(hunterInstinct && battle.hunterAttackCount % hunterInstinct.interval === 0);
-    const playerHit = Math.max(1, Math.ceil(basePlayerHit * (instinctTriggered ? hunterInstinct.multiplier : 1)));
-    playPlayerAttackAnimation();
-    const targetEnemy = getEnemyDefinition(targetIndex);
-    const attackProfile = getPlayerAttackProfile(character);
-    const attackResult = applyDamageToMonster(targetIndex, playerHit, attackProfile);
-    if (!attackResult.evaded) {
-      if (usesRage) battle.playerMana = WarriorResourcePolicy.gainFromAttack(battle.playerMana);
-      logBattle(`⚔ 你對【${targetEnemy.name}】造成 ${attackResult.finalDamage} 傷害${critical ? '（暴擊）' : ''}${orcRage ? '（狂怒）' : ''}${instinctTriggered ? '（獵人本能）' : ''}`, 'damage-dealt', { aggregateKey: `player-${battle.enemyTypes[targetIndex]}`, damage: attackResult.finalDamage, summary: `⚔ 你攻擊【${targetEnemy.name}】` });
-      if (instinctTriggered && hunterInstinct.extraAttack && battle.enemyHps[targetIndex] > 0) {
-        const extraResult = applyDamageToMonster(targetIndex, basePlayerHit, attackProfile);
-        if (!extraResult.evaded) {
-          logBattle(`➶【獵人本能】額外攻擊【${targetEnemy.name}】，造成 ${extraResult.finalDamage} 傷害。`, 'damage-dealt');
-        }
-      }
-    }
-    queueDefeatedEnemies();
-  }
+  syncLegacyBattleStateFromMain();
   updateBattleUI();
 }
 
@@ -2664,7 +2924,7 @@ function processPlayerBleed(now = Date.now()) {
   return true;
 }
 
-function enemyAttackTick() {
+function legacyEnemyAttackTick() {
   if (!fighting || battleScreen.classList.contains('hidden') || battle.dungeonComplete) return;
   const progress = getProgress();
   const character = JSON.parse(localStorage.getItem('stardust-character'));
@@ -2777,6 +3037,180 @@ function enemyAttackTick() {
   if (attackOccurred) updateBattleUI();
 }
 
+function inflictPartyMemberBleed(member, enemy, now = Date.now()) {
+  member.bleed = {
+    tickDamage: Math.max(2, Math.ceil((Number(enemy.attack) || 1) * .25)),
+    nextTickAt: now + WolfDenPolicy.BLEED_TICK_MS,
+    expiresAt: now + WolfDenPolicy.BLEED_DURATION_MS
+  };
+  logBattle(`${member.name} 受到 ${enemy.name} 的流血效果。`, 'system');
+}
+
+function processPartyMemberBleed(member, now = Date.now()) {
+  const bleed = member.bleed;
+  if (!bleed) return false;
+  if (now >= bleed.expiresAt) {
+    member.bleed = null;
+    return true;
+  }
+  if (now < bleed.nextTickAt) return false;
+  const ticks = Math.max(1, Math.floor((now - bleed.nextTickAt) / WolfDenPolicy.BLEED_TICK_MS) + 1);
+  const damage = bleed.tickDamage * ticks;
+  bleed.nextTickAt += WolfDenPolicy.BLEED_TICK_MS * ticks;
+  member.currentHp = Math.max(0, member.currentHp - damage);
+  logBattle(`${member.name} 因流血受到 ${damage} 點傷害。`, 'damage-taken', {
+    aggregateKey: `enemy-bleed-${member.id}`,
+    damage,
+    summary: `${member.name} 的流血傷害`
+  });
+  return true;
+}
+
+function defeatPartyMember(member, now = Date.now()) {
+  if (member.currentHp > 0 || !member.alive) return false;
+  if (member.character.race === 'undead' && !member.undeadRevived && Math.random() < .35) {
+    member.undeadRevived = true;
+    member.currentHp = Math.ceil(member.maxHp * .35);
+    logBattle(`${member.name} 以不死族之力重新站起。`, 'system');
+    return false;
+  }
+  member.currentHp = 0;
+  member.alive = false;
+  member.targetIndex = -1;
+  member.bleed = null;
+  member.stunnedUntil = 0;
+  member.nextAttackAt = Number.POSITIVE_INFINITY;
+  logBattle(`${member.name} 已倒下。`, 'system');
+  return true;
+}
+
+function resetPartyAfterDefeat(now = Date.now()) {
+  if (!PartyPolicy.isPartyDefeated(battle.partyMembers)) return false;
+  battle.partyMembers.forEach(member => {
+    member.currentHp = member.maxHp;
+    member.resourceCurrent = member.resourceType === 'rage' ? 0 : getMaxCombatResourceForMember(member.character, member.progress);
+    member.shield = 0;
+    member.alive = true;
+    member.undeadRevived = false;
+    member.bleed = null;
+    member.stunnedUntil = 0;
+    member.nextAttackAt = now + 1000;
+    member.targetIndex = -1;
+  });
+  resetAliveEnemyAttackSchedule(now);
+  syncLegacyBattleStateFromMain();
+  persistPartyRuntimeState();
+  logBattle('全隊倒下，已撤退並恢復隊伍狀態。', 'system');
+  return true;
+}
+
+function enemyAttackTick() {
+  if (!fighting || battleScreen.classList.contains('hidden') || battle.dungeonComplete) return;
+  if (!battle.partyMembers?.length) rebuildBattlePartyMembers();
+  const progress = getProgress();
+  const now = Date.now();
+  let attackOccurred = false;
+
+  battle.partyMembers.filter(member => member.alive).forEach(member => {
+    attackOccurred = processPartyMemberBleed(member, now) || attackOccurred;
+    defeatPartyMember(member, now);
+  });
+  if (resetPartyAfterDefeat(now)) {
+    updateBattleUI();
+    return;
+  }
+
+  for (const enemyIndex of aliveEnemyIndexesByAge()) {
+    if (battle.enemyHps[enemyIndex] <= 0) continue;
+    const enemy = getEnemyDefinition(enemyIndex);
+    const nextAttackAt = battle.enemyNextAttackAt?.[enemyIndex];
+    if (!Number.isFinite(nextAttackAt)) {
+      battle.enemyNextAttackAt[enemyIndex] = now + getMonsterAttackInterval(enemy);
+      continue;
+    }
+    if (nextAttackAt > now) continue;
+
+    const enemyCurrentHp = battle.enemyHps[enemyIndex];
+    battle.enemyNextAttackAt[enemyIndex] = now + getMonsterAttackInterval(enemy, enemyCurrentHp);
+    attackOccurred = true;
+
+    if (battle.dungeonId === 'goblin-camp') {
+      const action = GoblinCampPolicy.resolveAction({
+        type: battle.enemyTypes[enemyIndex],
+        randomValue: Math.random(),
+        hasWoundedAlly: getWoundedEnemyIndexes().length > 0,
+        canSummon: aliveEnemyIndexesByAge().length < 4 && (battle.goblinScoutSummons || 0) < 2
+      });
+      if (action === 'heal' && healGoblinAlly(enemyIndex)) continue;
+      if (action === 'healing-totem' && useGoblinHealingTotem(enemyIndex)) continue;
+      if (action === 'summon-scout' && summonGoblinScout(enemyIndex, now)) continue;
+    }
+
+    const target = PartyPolicy.chooseRandomAliveMember(battle.partyMembers, Math.random);
+    if (!target) break;
+    const stats = getCharacterStats(target.level, target.progress, target.character);
+    const monsterHitChance = enemy.mapId
+      ? ChapterOneLevelPolicy.getMonsterHitChance(enemy.level, target.level, stats.dodge)
+      : 1 - stats.dodge;
+    const dodged = Math.random() >= monsterHitChance;
+    const critical = !dodged && Math.random() < (enemy.isBoss ? .15 : enemy.isElite ? .10 : .05);
+    const rawDamage = getMonsterAttackPower(enemy, progress, enemyCurrentHp) * (critical ? 1.5 : 1);
+    const parried = !dodged && Math.random() < stats.parry;
+    let damage = dodged ? 0 : MonsterDefense.resolvePlayerDamage({
+      baseDamage: rawDamage,
+      defense: stats.defense,
+      damageReduction: stats.damageReduction
+    }).finalDamage;
+    if (parried) damage = Math.max(1, Math.ceil(damage * .5));
+    const absorbed = Math.min(target.shield || 0, damage);
+    target.shield = Math.max(0, (target.shield || 0) - absorbed);
+    damage -= absorbed;
+    target.currentHp = Math.max(0, target.currentHp - damage);
+
+    if (!dodged && WarriorResourcePolicy.isWarrior(target.character.job)) {
+      target.resourceCurrent = WarriorResourcePolicy.gainFromHitTaken(target.resourceCurrent);
+    }
+    if (!dodged && damage > 0 && getActiveMap(progress).id === 'wolf-den'
+      && WolfDenPolicy.shouldInflictBleed(enemy.id, Math.random())) {
+      inflictPartyMemberBleed(target, enemy, now);
+      battle.enemyNextAttackAt[enemyIndex] = now + getMonsterAttackInterval(enemy);
+    }
+    if (!dodged && damage > 0 && battle.dungeonId === 'goblin-camp'
+      && GoblinCampPolicy.shouldStun(battle.enemyTypes[enemyIndex], Math.random())) {
+      target.stunnedUntil = Math.max(target.stunnedUntil || 0, now + 1500);
+    }
+    if (!dodged && damage > 0 && getActiveMap(progress).id === 'boar-woods'
+      && BoarWoodsPolicy.shouldCharge(enemy.id, Math.random())) {
+      target.stunnedUntil = Math.max(target.stunnedUntil || 0, now + BoarWoodsPolicy.BOSS_CHARGE_STUN_MS);
+    }
+
+    if (dodged) {
+      logBattle(`${target.name} 閃避了 ${enemy.name} 的攻擊。`, 'damage-taken');
+    } else {
+      logBattle(`${enemy.name} 對 ${target.name} 造成 ${damage} 點傷害${critical ? '（暴擊）' : ''}${absorbed ? `，護盾吸收 ${absorbed}` : ''}。`, 'damage-taken', {
+        aggregateKey: `enemy-${battle.enemyTypes[enemyIndex]}-${target.id}`,
+        damage,
+        summary: `${enemy.name} 攻擊 ${target.name}${critical ? '（暴擊）' : ''}`
+      });
+    }
+    playMonsterAttackAnimation(enemyIndex, !dodged && damage > 0);
+
+    if (target.isMain && target.currentHp > 0 && target.currentHp / target.maxHp < .35) {
+      syncLegacyBattleStateFromMain();
+      usePotion();
+      syncMainBattleMemberFromLegacy();
+    }
+    defeatPartyMember(target, now);
+    if (resetPartyAfterDefeat(now)) {
+      updateBattleUI();
+      return;
+    }
+  }
+
+  syncLegacyBattleStateFromMain();
+  if (attackOccurred) updateBattleUI();
+}
+
 function openBattle() {
   const character = JSON.parse(localStorage.getItem('stardust-character'));
   if (!character) { openCreation(); return; }
@@ -2815,7 +3249,9 @@ function openBattle() {
   const enemyLevels = createEnemyLevels(enemyTypes, currentMap.id);
   const enemyHps = enemyTypes.map((type, index) => getMonsterDefinitionForMap(type, currentMap.id, enemyLevels[index]).maxHp);
   const battleStart = Date.now();
-  battle = { enemyTypes, enemyLevels, enemyHps, playerHp: getMaxHp(progress.level, progress), playerMana: WarriorResourcePolicy.isWarrior(character.job) ? 0 : AssassinEnergyPolicy.isAssassin(character.job) ? AssassinEnergyPolicy.clampEnergy(progress.energy) : getMaxMana(character.job, progress.level), playerArrows: HunterArrowPolicy.isHunter(character.job) ? HunterArrowPolicy.getMaxArrows(progress.equipment) : 0, playerShield: 0, playerStunnedUntil: 0, playerBleed: null, manaExhausted: false, playerAttackCharge: 0, hunterAttackCount: 0, lastManaRegenAt: battleStart, lastResourceUpdatedAt: battleStart, lastArrowRecoveryAt: battleStart, enemyNextAttackAt: createEnemyAttackSchedule(enemyTypes, battleStart, currentMap.id, enemyLevels), enemyBoarEnraged: enemyTypes.map(() => false), globalSkillReadyAt: 0, undeadRevived: false, skillCooldowns: {}, enemyRespawns: enemyTypes.map(() => null), enemySpawnedAt: enemyTypes.map((_, index) => battleStart + index), enemyDots: enemyTypes.map(() => []), monsterMoveSpeed: 200, targetIndexes: [], enemyDamages: enemyTypes.map(() => []), damageTimers: [], isDungeon, dungeonId: isDungeon ? currentMap.id : null, dungeonWave: isDungeon ? 1 : 0, dungeonComplete: false, waveTransitioning: false, goblinScoutSummons: 0 };
+  const partyMembers = buildBattlePartyMembers(battleStart);
+  const mainMember = partyMembers.find((member) => member.isMain) || partyMembers[0];
+  battle = { enemyTypes, enemyLevels, enemyHps, partyMembers, playerHp: mainMember?.currentHp || getMaxHp(progress.level, progress), playerMana: mainMember?.resourceCurrent || 0, playerArrows: mainMember?.resourceType === 'arrows' ? mainMember.resourceCurrent : 0, playerShield: 0, playerStunnedUntil: 0, playerBleed: null, manaExhausted: false, playerAttackCharge: 0, hunterAttackCount: 0, lastManaRegenAt: battleStart, lastResourceUpdatedAt: battleStart, lastArrowRecoveryAt: battleStart, enemyNextAttackAt: createEnemyAttackSchedule(enemyTypes, battleStart, currentMap.id, enemyLevels), enemyBoarEnraged: enemyTypes.map(() => false), globalSkillReadyAt: 0, undeadRevived: false, skillCooldowns: {}, enemyRespawns: enemyTypes.map(() => null), enemySpawnedAt: enemyTypes.map((_, index) => battleStart + index), enemyDots: enemyTypes.map(() => []), monsterMoveSpeed: 200, targetIndexes: [], enemyDamages: enemyTypes.map(() => []), damageTimers: [], rewardedEnemyIndexes: new Set(), isDungeon, dungeonId: isDungeon ? currentMap.id : null, dungeonWave: isDungeon ? 1 : 0, dungeonComplete: false, waveTransitioning: false, goblinScoutSummons: 0 };
   clearBattleLog();
   if (pendingOfflineReport) {
     logBattle(`☾ 離線掛機 ${pendingOfflineReport.duration}${pendingOfflineReport.capped ? '（已達 12 小時上限）' : ''}，擊敗約 ${pendingOfflineReport.defeated} 隻怪物。`, 'system');
@@ -2841,7 +3277,7 @@ function openBattle() {
   logBattle('✦ 即時自動施放已啟動。');
   requestAnimationFrame(autoSkillTick);
   skillTimer = setInterval(autoSkillTick, 100);
-  battleTimer = setInterval(battleTick, Math.round(1000 / getCharacterStats(progress.level, progress, character).attackSpeed));
+  battleTimer = setInterval(battleTick, 100);
   enemyAttackTimer = setInterval(enemyAttackTick, 100);
 }
 
@@ -2876,7 +3312,7 @@ document.querySelectorAll('[data-faction]').forEach((card) => card.addEventListe
 raceChoices.addEventListener('click', (event) => { const choice = event.target.closest('[data-race]'); if (choice) { selection.race = choice.dataset.race; renderCreation(); } });
 classChoices.addEventListener('click', (event) => { const choice = event.target.closest('[data-job]'); if (choice) { selection.job = choice.dataset.job; renderCreation(); } });
 document.querySelector('#back-to-menu').addEventListener('click', () => { characterScreen.classList.add('hidden'); menuScreen.classList.remove('hidden'); });
-document.querySelector('#create-character').addEventListener('click', () => { const name = characterName.value.trim(); if (!name) { showToast('請先為角色取名。'); characterName.focus(); return; } const lockedFaction = getLockedFactionForCreation(); if (lockedFaction && selection.faction !== lockedFaction) { selection.faction = lockedFaction; selection.race = factions[lockedFaction][0].id; renderCreation(); showToast('兩名角色必須選擇相同陣營。'); return; } const race = factions[selection.faction].find((item) => item.id === selection.race); const job = classes.find((item) => item.id === selection.job); const character = { ...selection, name }; const progress = { level: 1, xp: 0, gold: 0, potions: 5, manaPotions: 0, selectedMapId: 'beginner-plains', inventory: [], equipment: selection.job === 'hunter' ? createStarterEquipment('hunter') : emptyEquipment(), lastActiveAt: Date.now(), ...(selection.job === 'assassin' ? { energy: 100, maxEnergy: 100, energyUpdatedAt: Date.now() } : {}) }; const slots = getCharacterSlots(); slots[creationSlotIndex] = { character, progress }; localStorage.setItem('stardust-character-slots', JSON.stringify(slots)); localStorage.setItem('stardust-active-character-slot', String(creationSlotIndex)); localStorage.setItem('stardust-character', JSON.stringify(character)); localStorage.setItem('stardust-progress', JSON.stringify(progress)); characterScreen.classList.add('hidden'); menuScreen.classList.remove('hidden'); document.querySelector('#character-title').textContent = '建立你的角色'; showToast(`${race.name}${job.name}「${name}」已儲存至角色欄位 ${creationSlotIndex + 1}！`); });
+document.querySelector('#create-character').addEventListener('click', () => { const name = characterName.value.trim(); if (!name) { showToast('請先為角色取名。'); characterName.focus(); return; } const lockedFaction = getLockedFactionForCreation(); if (lockedFaction && selection.faction !== lockedFaction) { selection.faction = lockedFaction; selection.race = factions[lockedFaction][0].id; renderCreation(); showToast('帳號角色必須選擇相同陣營。'); return; } const race = factions[selection.faction].find((item) => item.id === selection.race); const job = classes.find((item) => item.id === selection.job); const character = { ...selection, id: `character-slot-${creationSlotIndex + 1}`, name }; const progress = { level: 1, xp: 0, gold: 0, potions: 5, manaPotions: 0, selectedMapId: 'beginner-plains', inventory: [], equipment: selection.job === 'hunter' ? createStarterEquipment('hunter') : emptyEquipment(), lastActiveAt: Date.now(), ...(selection.job === 'assassin' ? { energy: 100, maxEnergy: 100, energyUpdatedAt: Date.now() } : {}) }; const slots = getCharacterSlots(); slots[creationSlotIndex] = { character, progress }; progress.party = PartyPolicy.normalizeParty(null, { slots, mainSlotIndex: creationSlotIndex, mainCharacter: character, mainProgress: progress }); localStorage.setItem('stardust-character-slots', JSON.stringify(slots)); localStorage.setItem('stardust-active-character-slot', String(creationSlotIndex)); localStorage.setItem('stardust-character', JSON.stringify(character)); localStorage.setItem('stardust-progress', JSON.stringify(progress)); characterScreen.classList.add('hidden'); menuScreen.classList.remove('hidden'); document.querySelector('#character-title').textContent = '建立你的角色'; showToast(`${race.name}${job.name}「${name}」已儲存至角色欄位 ${creationSlotIndex + 1}！`); });
 document.querySelector('#character-roster-button').addEventListener('click', renderCharacterRoster);
 document.querySelector('#character-roster-close').addEventListener('click', () => document.querySelector('#character-roster-modal').classList.add('hidden'));
 document.querySelector('#character-roster-modal').addEventListener('click', (event) => {
@@ -2904,6 +3340,8 @@ document.querySelector('#leave-battle').addEventListener('click', () => {
     );
     persistAssassinEnergy(getProgress(), energyNow);
   }
+  syncMainBattleMemberFromLegacy();
+  persistPartyRuntimeState();
   clearInterval(battleTimer);
   clearInterval(skillTimer);
   clearInterval(enemyAttackTimer);
@@ -3021,8 +3459,16 @@ document.querySelectorAll('[data-menu-action]').forEach((button) => button.addEv
   if (button.dataset.menuAction === '收藏品') { renderCollection(); return; }
   if (button.dataset.menuAction === '背包') { renderInventory('inventory'); return; }
   if (button.dataset.menuAction === '裝備') { renderInventory('equipment'); return; }
-  showToast('隊伍系統將在 Lv10 解鎖第二名角色後開放。');
+  if (button.dataset.menuAction === '隊伍') { renderParty(); return; }
 }));
+document.querySelector('#party-close').addEventListener('click', () => document.querySelector('#party-modal').classList.add('hidden'));
+document.querySelector('#party-modal').addEventListener('click', (event) => {
+  if (event.target === event.currentTarget) event.currentTarget.classList.add('hidden');
+  const addButton = event.target.closest('[data-party-add]');
+  if (addButton) { addPartyMember(addButton.dataset.partyAdd); return; }
+  const removeButton = event.target.closest('[data-party-remove]');
+  if (removeButton) removePartyMember(removeButton.dataset.partyRemove);
+});
 document.querySelector('#inventory-close').addEventListener('click', () => document.querySelector('#inventory-modal').classList.add('hidden'));
 document.querySelector('#inventory-modal').addEventListener('click', (event) => {
   if (event.target === event.currentTarget) event.currentTarget.classList.add('hidden');
