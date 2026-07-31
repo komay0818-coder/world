@@ -1503,7 +1503,7 @@
   bottom: 0 !important;
   width: auto !important;
   height: 46.6667% !important;
-  aspect-ratio: 2048 / 1200;
+  aspect-ratio: var(--character-aspect, 2048 / 1200);
   background-position: center bottom !important;
   background-size: 100% 100% !important;
   background-repeat: no-repeat !important;

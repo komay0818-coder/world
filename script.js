@@ -46,6 +46,20 @@ const battleCharacterArt = {
   'undead:mage': 'assets/character-sprites/undead-mage-v2.png?v=20260730-user-image-v1',
   'undead:priest': 'assets/character-sprites/undead-priest-v2.png?v=20260730-user-image-v1'
 };
+// Preserve each source image's proportions and compensate for transparent top/bottom
+// padding so every visible character matches the human hunter's battlefield height.
+const battleCharacterLayout = {
+  'human:warrior': { aspect: '1197 / 1315', visibleScale: 1.089 },
+  'orc:warrior': { aspect: '1179 / 1334', visibleScale: 1 },
+  'orc:assassin': { aspect: '1162 / 1353', visibleScale: 1 },
+  'orc:hunter': { aspect: '1123 / 1401', visibleScale: 1 },
+  'orc:mage': { aspect: '1369 / 1149', visibleScale: 1 },
+  'undead:warrior': { aspect: '1124 / 1399', visibleScale: 1.049 },
+  'undead:assassin': { aspect: '1254 / 1254', visibleScale: 1.121 },
+  'undead:hunter': { aspect: '1360 / 1156', visibleScale: 1.117 },
+  'undead:mage': { aspect: '1122 / 1402', visibleScale: 1.166 },
+  'undead:priest': { aspect: '1122 / 1402', visibleScale: 1.044 }
+};
 const racialCompanions = {
   human: { image: 'assets/companion-human-hunter.png', name: '王國獵犬' },
   elf: { image: 'assets/companion-elf.png', name: '月光山貓' },
@@ -3224,7 +3238,9 @@ function openBattle() {
     battlePlayerArt.classList.toggle('undead-art', character.race === 'undead' && Boolean(characterArt));
     battlePlayerArt.dataset.job = character.job;
     battlePlayerArt.dataset.race = character.race;
-    battlePlayerArt.style.setProperty('--character-scale', CHARACTER_SCALE);
+    const characterLayout = battleCharacterLayout[`${character.race}:${character.job}`];
+    battlePlayerArt.style.setProperty('--character-scale', CHARACTER_SCALE * (characterLayout?.visibleScale || 1));
+    battlePlayerArt.style.setProperty('--character-aspect', characterLayout?.aspect || '2048 / 1200');
     battlePlayerArt.style.backgroundImage = characterArt ? `url('${characterArt}')` : '';
     const raceName = Object.values(factions).flat().find((race) => race.id === character.race)?.name || character.race;
     battlePlayerArt.setAttribute('aria-label', `${raceName}${classes.find((job) => job.id === character.job)?.name || ''}`);
