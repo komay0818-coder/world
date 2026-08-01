@@ -1663,8 +1663,15 @@ function itemCategory(item) {
   return 'other';
 }
 
-function isItemWearableByCharacter(item, character) {
-  return item.kind !== 'equipment' || Boolean(character && EquipmentPolicy.getEquipSlots(item, character.job).length);
+function isItemWearableByCharacter(item, character, level = 1) {
+  if (item.kind !== 'equipment') return true;
+  if (item.durability !== undefined && Number(item.durability) <= 0) return false;
+  if ((Number(item.requiredLevel) || 0) > (Number(level) || 1)) return false;
+  return Boolean(character && EquipmentPolicy.getEquipSlots(item, character.job).length);
+}
+
+function getItemJunkContext(item, character, progress) {
+  return { level: progress.level, canEquip: Boolean(character && EquipmentPolicy.getEquipSlots(item, character.job).length) };
 }
 
 function equipmentStackKey(item) {
@@ -1692,6 +1699,9 @@ function equipmentStackKey(item) {
     enhanceLevel: item.enhanceLevel || 0,
     affix: item.affix || null,
     affixes: item.affixes || [],
+    durability: item.durability ?? null,
+    requiredLevel: item.requiredLevel || 0,
+    isJunk: item.isJunk === true,
     allowedJobs: [...(item.allowedJobs || [])].sort()
   });
 }
@@ -1739,19 +1749,24 @@ function renderInventory(view = 'inventory') {
   const resourceBar = `<section class="account-resource-bar"><span>◆ 星鐵碎片 <b>${accountResources.starIron}</b></span><span>🗝 黑森林祭壇鑰匙 <b>${accountResources.dungeonKeys.blackForestAltar || 0}</b></span></section>`;
   const renderItemCard = (item, options = {}) => {
     const equipped = Boolean(options.equipped);
-    const wearable = isItemWearableByCharacter(item, character);
+    const wearable = isItemWearableByCharacter(item, character, progress.level);
     const slot = options.slot ? `・${options.slot}` : '';
     const stackIds = item.stackIds || [item.id];
     const stackQuantity = item.kind === 'equipment' ? (item.stackQuantity || 1) : item.quantity;
+    const stackItems = stackIds.map((id) => progress.inventory.find((entry) => entry.id === id)).filter(Boolean);
+    const selectedCount = stackIds.filter((id) => scrapSelection.has(id)).length;
+    const junkCandidate = stackItems.some((entry) => InventorySalePolicy.isJunkCandidate(entry, getItemJunkContext(entry, character, progress)));
+    const explicitlyMarked = stackItems.length > 0 && stackItems.every((entry) => entry.isJunk === true);
     const scrapControl = item.kind === 'equipment' && !equipped && options.allowScrap !== false
-      ? `<label class="scrap-select"><input type="checkbox" data-scrap-ids="${stackIds.join(',')}" ${stackIds.every((id) => scrapSelection.has(id)) ? 'checked' : ''}><span>廢品${stackIds.length > 1 ? '（整疊）' : ''}</span></label>`
+      ? `<label class="scrap-select"><input type="checkbox" data-scrap-ids="${stackIds.join(',')}" ${selectedCount === stackIds.length ? 'checked' : ''}><span>販售${stackIds.length > 1 ? '（整疊）' : ''}</span></label><button type="button" class="junk-mark-toggle" data-toggle-junk-ids="${stackIds.join(',')}">${explicitlyMarked ? '取消廢品標記' : '標記廢品'}</button>`
       : '';
+    const junkBadge = junkCandidate ? '<span class="junk-badge" title="不能裝備的廢品" aria-label="不能裝備的廢品">🗑</span>' : '';
     const visual = item.kind === 'equipment' ? `<img src="${itemImagePath(item)}" alt="" class="equipment-item-image">` : item.icon || '◈';
     const currentItem = item.kind === 'equipment' ? progress.equipment[item.slot] : null;
     const comparison = item.kind === 'equipment' && !equipped ? `<aside class="equipment-compare-tooltip"><strong>目前穿戴・${equipmentSlots[item.slot]?.label || item.slot}</strong>${currentItem ? `<div><span class="compare-item-icon"><img src="${itemImagePath(currentItem)}" alt=""></span><p><b>${currentItem.name}</b><small>${itemQualityLabel(currentItem)}　${itemStatsText(currentItem)}</small></p></div>` : '<p class="compare-empty">此欄位目前沒有穿戴裝備</p>'}</aside>` : '';
     const equipSlots = item.kind === 'equipment' ? EquipmentPolicy.getEquipSlots(item, character?.job) : [];
     const equipControls = equipSlots.map((targetSlot) => `<button type="button" data-equip-id="${item.id}" data-equip-slot="${targetSlot}">${equipSlots.length > 1 ? targetSlot === 'weapon' ? '裝主手' : '裝副手' : '穿戴'}</button>`).join('');
-    return `<article class="inventory-item ${itemQualityClass(item)} ${equipped ? 'is-equipped' : ''} ${!wearable ? 'incompatible' : ''}" tabindex="${item.kind === 'equipment' && !equipped ? '0' : '-1'}"><span class="item-icon">${visual}</span><div><b>${item.name}${stackQuantity > 1 ? ` ×${stackQuantity}` : ''}${equipped ? '<mark>已穿戴</mark>' : ''}</b><small><span class="item-quality">${itemQualityLabel(item)}</span>${slot}　${itemStatsText(item)}</small></div>${item.kind === 'equipment' && !equipped ? wearable && equipControls ? equipControls : '<span class="equip-blocked">無法穿戴</span>' : ''}${scrapControl}${comparison}</article>`;
+    return `<article class="inventory-item ${itemQualityClass(item)} ${equipped ? 'is-equipped' : ''} ${!wearable ? 'incompatible' : ''} ${selectedCount === stackIds.length && selectedCount ? 'sale-selected' : selectedCount ? 'sale-partial' : ''}" tabindex="${item.kind === 'equipment' && !equipped ? '0' : '-1'}">${junkBadge}<span class="item-icon">${visual}</span><div><b>${item.name}${stackQuantity > 1 ? ` ×${stackQuantity}` : ''}${equipped ? '<mark>已穿戴</mark>' : ''}</b><small><span class="item-quality">${itemQualityLabel(item)}</span>${slot}　${itemStatsText(item)}</small></div>${item.kind === 'equipment' && !equipped ? wearable && equipControls ? equipControls : '<span class="equip-blocked">無法穿戴</span>' : ''}${scrapControl}${comparison}</article>`;
   };
   const categoryTabs = [
     ['weapon', '武器'],
@@ -1764,7 +1779,7 @@ function renderInventory(view = 'inventory') {
     .filter((item) => itemCategory(item) === inventoryCategory)
     .sort((first, second) => {
       if (!['weapon', 'armor'].includes(inventoryCategory)) return 0;
-      const wearableDifference = Number(isItemWearableByCharacter(second, character)) - Number(isItemWearableByCharacter(first, character));
+      const wearableDifference = Number(isItemWearableByCharacter(second, character, progress.level)) - Number(isItemWearableByCharacter(first, character, progress.level));
       return wearableDifference || first.name.localeCompare(second.name, 'zh-Hant');
     });
   const stackedItems = stackIdenticalEquipment(filteredItems);
@@ -1772,10 +1787,11 @@ function renderInventory(view = 'inventory') {
     ? stackedItems.map(renderItemCard).join('')
     : '<p class="empty-inventory">這個分類目前沒有物品。</p>';
   const selectedScrapCount = [...scrapSelection].filter((id) => progress.inventory.some((item) => item.id === id && item.kind === 'equipment')).length;
+  const saleSummary = InventorySalePolicy.summarizeSelection(progress.inventory, scrapSelection, (item) => getItemJunkContext(item, character, progress));
   const scrappableItems = progress.inventory.filter((item) => item.kind === 'equipment' && itemCategory(item) === inventoryCategory);
   const allScrapSelected = scrappableItems.length > 0 && scrappableItems.every((item) => scrapSelection.has(item.id));
   const categoryLabel = inventoryCategory === 'weapon' ? '武器' : inventoryCategory === 'armor' ? '防具' : '裝備';
-  const scrapTools = `<section class="scrap-tools"><div><b>廢品整理</b><small>目前分類：${categoryLabel}。武器與防具分開勾選。</small></div><label class="scrap-select select-all-scrap"><input type="checkbox" data-select-all-scrap ${allScrapSelected ? 'checked' : ''} ${scrappableItems.length ? '' : 'disabled'}><span>全部勾選${categoryLabel}</span></label><button type="button" data-delete-scrap ${selectedScrapCount ? '' : 'disabled'}>刪除已勾選（${selectedScrapCount}）</button></section>`;
+  const scrapTools = `<section class="scrap-tools"><div><b>批次販賣</b><small>已選擇 ${saleSummary.count} 件・預計獲得 ${saleSummary.gold} 金幣</small></div><label class="scrap-select select-all-scrap"><input type="checkbox" data-select-all-scrap ${allScrapSelected ? 'checked' : ''} ${scrappableItems.length ? '' : 'disabled'}><span>全部勾選${categoryLabel}</span></label><button type="button" class="select-junk-button" data-select-unusable-junk>勾選廢品（不能裝備）</button><button type="button" data-open-sell-confirm ${selectedScrapCount ? '' : 'disabled'}>確認販賣（${selectedScrapCount}）</button></section>`;
   const paperDoll = Object.entries(equipmentSlots).map(([slot, info]) => {
     const item = progress.equipment[slot];
     const visual = item ? `<img src="${itemImagePath(item)}" alt="" class="paper-doll-item-image">` : info.icon;
@@ -1940,7 +1956,7 @@ function equipItem(itemId, preferredSlot = null) {
   const item = progress.inventory[itemIndex];
   const character = JSON.parse(localStorage.getItem('stardust-character') || 'null');
   const targetSlot = preferredSlot || item.slot;
-  if (!character || !EquipmentPolicy.canEquipInSlot(item, character.job, targetSlot)) {
+  if (!character || !isItemWearableByCharacter(item, character, progress.level) || !EquipmentPolicy.canEquipInSlot(item, character.job, targetSlot)) {
     showToast('這件裝備不適合目前職業。');
     return;
   }
@@ -1986,15 +2002,47 @@ function unequipItem(slot) {
   }
 }
 
-function discardSelectedEquipment() {
+function selectUnusableJunkEquipment() {
   const progress = getProgress();
-  const selectedIds = new Set([...scrapSelection].filter((id) => progress.inventory.some((item) => item.id === id && item.kind === 'equipment')));
-  if (!selectedIds.size) return;
-  progress.inventory = progress.inventory.filter((item) => !(item.kind === 'equipment' && selectedIds.has(item.id)));
+  const character = JSON.parse(localStorage.getItem('stardust-character') || 'null');
+  progress.inventory.filter((item) => InventorySalePolicy.isJunkCandidate(item, getItemJunkContext(item, character, progress)))
+    .forEach((item) => scrapSelection.add(item.id));
+  renderInventory('inventory');
+}
+
+function toggleEquipmentJunkMark(itemIds) {
+  const progress = getProgress();
+  const ids = new Set(itemIds);
+  const items = progress.inventory.filter((item) => ids.has(item.id) && item.kind === 'equipment');
+  if (!items.length) return;
+  const markAsJunk = !items.every((item) => item.isJunk === true);
+  items.forEach((item) => { item.isJunk = markAsJunk; });
+  saveProgress(progress);
+  renderInventory('inventory');
+}
+
+function openSellConfirmation() {
+  const progress = getProgress();
+  const character = JSON.parse(localStorage.getItem('stardust-character') || 'null');
+  const summary = InventorySalePolicy.summarizeSelection(progress.inventory, scrapSelection, (item) => getItemJunkContext(item, character, progress));
+  if (!summary.count) return;
+  document.querySelector('#sell-confirm-content').innerHTML = `<p>您選擇了 <b>${summary.count}</b> 件物品。</p><p>預計可獲得 <b>${summary.gold}</b> 金幣。</p><p>確定要販賣這些物品嗎？販賣後將無法復原。</p>${summary.containsJunkCandidate ? '<p class="sell-warning">⚠ 選擇的物品中包含「不能裝備的廢品」，販賣後將無法復原。</p>' : ''}<div class="sell-confirm-actions"><button type="button" data-cancel-sale>取消</button><button type="button" class="confirm-sale-button" data-confirm-sale>確認販賣</button></div>`;
+  document.querySelector('#sell-confirm-modal').classList.remove('hidden');
+}
+
+function closeSellConfirmation() {
+  document.querySelector('#sell-confirm-modal').classList.add('hidden');
+}
+
+function confirmSelectedEquipmentSale() {
+  const progress = getProgress();
+  const result = InventorySalePolicy.sellSelection(progress, scrapSelection);
+  if (!result.ok) { closeSellConfirmation(); return; }
   scrapSelection.clear();
   saveProgress(progress);
-  showToast(`已刪除 ${selectedIds.size} 件廢品裝備。`);
-  logBattle(`🗑 已刪除 ${selectedIds.size} 件多餘裝備。`);
+  closeSellConfirmation();
+  showToast(`已販賣 ${result.count} 件裝備，獲得 ${result.gold} 金幣。`);
+  logBattle(`💰 已販賣 ${result.count} 件裝備，獲得 ${result.gold} 金幣。`, 'loot');
   renderInventory('inventory');
 }
 
@@ -3777,6 +3825,11 @@ document.querySelector('#party-modal').addEventListener('click', (event) => {
   if (removeButton) removePartyMember(removeButton.dataset.partyRemove);
 });
 document.querySelector('#inventory-close').addEventListener('click', () => document.querySelector('#inventory-modal').classList.add('hidden'));
+document.querySelector('#sell-confirm-close').addEventListener('click', closeSellConfirmation);
+document.querySelector('#sell-confirm-modal').addEventListener('click', (event) => {
+  if (event.target === event.currentTarget || event.target.closest('[data-cancel-sale]')) { closeSellConfirmation(); return; }
+  if (event.target.closest('[data-confirm-sale]')) confirmSelectedEquipmentSale();
+});
 document.querySelector('#inventory-modal').addEventListener('click', (event) => {
   if (event.target === event.currentTarget) event.currentTarget.classList.add('hidden');
   const regionHubButton = event.target.closest('[data-open-map-region]');
@@ -3790,7 +3843,10 @@ document.querySelector('#inventory-modal').addEventListener('click', (event) => 
     renderInventory('inventory');
     return;
   }
-  if (event.target.closest('[data-delete-scrap]')) { discardSelectedEquipment(); return; }
+  if (event.target.closest('[data-select-unusable-junk]')) { selectUnusableJunkEquipment(); return; }
+  if (event.target.closest('[data-open-sell-confirm]')) { openSellConfirmation(); return; }
+  const junkToggle = event.target.closest('[data-toggle-junk-ids]');
+  if (junkToggle) { toggleEquipmentJunkMark(junkToggle.dataset.toggleJunkIds.split(',').filter(Boolean)); return; }
   const equipButton = event.target.closest('[data-equip-id]');
   if (equipButton) { equipItem(equipButton.dataset.equipId, equipButton.dataset.equipSlot || null); return; }
   const unequipButton = event.target.closest('[data-unequip-slot]');
