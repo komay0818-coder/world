@@ -123,6 +123,10 @@ assert.equal(armor.leatherHood.image.split('?')[0], 'assets/leather-hood.png', '
 assert.equal(armor.huntingHood.image.split('?')[0], 'assets/hunting-hood.png', 'hunting hood uses its dedicated image');
 assert.deepEqual([armor.apprenticeMageHat.mana, armor.apprenticeMageHat.intelligence], [20, 2], 'apprentice mage hat stats match the design');
 assert.deepEqual([armor.noviceHeadscarf.cooldownSpeedBonus, armor.noviceHeadscarf.intelligence], [.02, 1], 'novice headscarf stats match the design');
+assert.equal(armor.apprenticeMageHat.name, '新兵布兜帽', 'the first chapter recruit cloth head item uses its requested name');
+assert.equal(armor.noviceHeadscarf.name, '守衛法帽', 'the first chapter guard cloth head item uses its requested name');
+assert.equal(armor.apprenticeMageHat.image.split('?')[0], 'assets/recruit-cloth-hood.png', 'the recruit cloth hood uses the first supplied image');
+assert.equal(armor.noviceHeadscarf.image.split('?')[0], 'assets/guard-cloth-hat.png', 'the guard cloth hat uses the second supplied image');
 assert.deepEqual(policy.getEquipSlots(armor.guardHelmet, 'warrior'), ['head'], 'warriors can equip plate helmets');
 assert.deepEqual(policy.getEquipSlots(armor.guardHelmet, 'hunter'), [], 'hunters cannot equip plate helmets');
 assert.deepEqual(policy.getEquipSlots(armor.leatherHood, 'hunter'), ['head'], 'hunters can equip leather hoods');
