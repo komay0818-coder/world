@@ -32,6 +32,10 @@ assert.match(script, /logPartyDebug\('普通攻擊'/, 'debug logs include normal
 const manaExhaustionBody = script.match(/function updatePartyMemberManaExhaustion\(member\) \{([\s\S]*?)\n\}/)?.[1] || '';
 assert.doesNotMatch(manaExhaustionBody, /enemy|rewardKey|earnedXp|earnedGold|accountDrops/, 'mana state updates cannot throw on unrelated reward variables before normal attacks');
 assert.match(script, /updatePartyMemberResource\(member, now\)[\s\S]*processPartyMemberAttacks\(now\)/, 'resource updates complete before the independent normal attack pass');
+assert.match(script, /PlainsDepthsPolicy\.resolveActiveSkill/, 'plains depths active skills resolve on monster attack turns');
+assert.match(script, /PlainsDepthsPolicy\.applyBlackstoneAura/, 'alive blackstone monsters feed the shared attack and defense aura');
+assert.match(script, /enemy\.id === 'wanderingBlackKnight'[\s\S]*COUNTER_DAMAGE_MULTIPLIER/, 'black knight parries trigger counterattack damage');
+assert.match(script, /blackstoneRoarUntil/, 'blackstone leader roar has battle-scoped duration state');
 assert.match(script, /logPartyDebug\('技能施放'/, 'debug logs include skill casts and resources');
 assert.match(script, /logPartyDebug\('怪物選擇隊員'/, 'debug logs include monster target selection');
 assert.match(script, /logPartyDebug\('死亡事件'/, 'debug logs include member deaths');

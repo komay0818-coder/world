@@ -19,5 +19,81 @@
     boss: Object.freeze(['blackstoneLeader'])
   });
 
-  return { MONSTER_TYPES, MONSTER_POOL };
+  const MAP_ID = 'plains-depths';
+  const BLACKSTONE_TIERS = Object.freeze({ blackstoneScout: .05, blackstoneRaider: .10, blackstoneLeader: .15 });
+  const WOLF_EVASION_BONUS = 10;
+  const BOAR_DAMAGE_REDUCTION_BONUS = 5;
+  const VULTURE_EVASION_BONUS = 10;
+  const IRRITABLE_HP_THRESHOLD = .40;
+  const IRRITABLE_BONUS = .15;
+  const ACTIVE_SKILL_CHANCE = .30;
+  const KNIGHT_HEAL_CHANCE = .25;
+  const KNIGHT_HEAL_RATIO = .10;
+  const DIVE_DAMAGE_MULTIPLIER = 2;
+  const SMASH_DAMAGE_MULTIPLIER = 1.5;
+  const COUNTER_DAMAGE_MULTIPLIER = .5;
+  const ROAR_ATTACK_BONUS = .10;
+  const ROAR_DURATION_MS = 5000;
+  const BLEED_DURATION_MS = 5000;
+  const BLEED_TICK_MS = 1000;
+  const CHARGE_STUN_MS = 2000;
+
+  function isBlackstone(monsterId) { return Object.hasOwn(BLACKSTONE_TIERS, monsterId); }
+
+  function applyPlainsDepthsPassive(monster = {}, mapId = '') {
+    if (mapId !== MAP_ID) return monster;
+    if (monster.id === 'highlandWolf') return { ...monster, evasion: Math.min(100, (Number(monster.evasion) || 0) + WOLF_EVASION_BONUS), passiveSkill: '狼群敏捷' };
+    if (monster.id === 'rockbackBoar') return { ...monster, damageReduction: Math.min(95, (Number(monster.damageReduction) || 0) + BOAR_DAMAGE_REDUCTION_BONUS), passiveSkill: '厚皮' };
+    if (monster.id === 'grasslandVulture') return { ...monster, evasion: Math.min(100, (Number(monster.evasion) || 0) + VULTURE_EVASION_BONUS), passiveSkill: '高空本能' };
+    if (monster.id === 'wanderingBlackKnight') return { ...monster, passiveSkill: '招架反擊' };
+    return monster;
+  }
+
+  function getBlackstoneAuraBonus(aliveMonsterIds = []) {
+    return Math.round(aliveMonsterIds.reduce((total, id) => total + (BLACKSTONE_TIERS[id] || 0), 0) * 100) / 100;
+  }
+
+  function applyBlackstoneAura(monster = {}, aliveMonsterIds = [], roarActive = false) {
+    if (!isBlackstone(monster.id)) return monster;
+    const auraBonus = getBlackstoneAuraBonus(aliveMonsterIds);
+    return {
+      ...monster,
+      attack: (Number(monster.attack) || 0) * (1 + auraBonus + (roarActive ? ROAR_ATTACK_BONUS : 0)),
+      defense: (Number(monster.defense) || 0) * (1 + auraBonus),
+      blackstoneAuraBonus: auraBonus,
+      blackstoneRoarActive: Boolean(roarActive)
+    };
+  }
+
+  function isIrritableActive(monsterId, currentHp, maxHp) {
+    return monsterId === 'rockbackBoar' && Number(maxHp) > 0 && Math.max(0, Number(currentHp) || 0) / Number(maxHp) < IRRITABLE_HP_THRESHOLD;
+  }
+
+  function getIrritableMultiplier(monsterId, currentHp, maxHp) { return isIrritableActive(monsterId, currentHp, maxHp) ? 1 + IRRITABLE_BONUS : 1; }
+
+  function resolveActiveSkill(monsterId, randomValue, canHeal = false) {
+    const roll = Math.max(0, Math.min(.999999, Number(randomValue) || 0));
+    if (monsterId === 'wanderingBlackKnight') return canHeal && roll < KNIGHT_HEAL_CHANCE ? 'heal' : 'attack';
+    if (monsterId === 'blackstoneLeader') return roll < .20 ? 'roar' : roll < .20 + ACTIVE_SKILL_CHANCE ? 'smash' : 'attack';
+    if (roll >= ACTIVE_SKILL_CHANCE) return 'attack';
+    return ({ highlandWolf: 'rend', rockbackBoar: 'charge', grasslandVulture: 'dive', blackstoneRaider: 'smash' })[monsterId] || 'attack';
+  }
+
+  function getActiveDamageMultiplier(action) {
+    if (action === 'dive') return DIVE_DAMAGE_MULTIPLIER;
+    if (action === 'smash') return SMASH_DAMAGE_MULTIPLIER;
+    return 1;
+  }
+
+  return {
+    MONSTER_TYPES, MONSTER_POOL, MAP_ID, BLACKSTONE_TIERS,
+    WOLF_EVASION_BONUS, BOAR_DAMAGE_REDUCTION_BONUS, VULTURE_EVASION_BONUS,
+    IRRITABLE_HP_THRESHOLD, IRRITABLE_BONUS, ACTIVE_SKILL_CHANCE,
+    KNIGHT_HEAL_CHANCE, KNIGHT_HEAL_RATIO, DIVE_DAMAGE_MULTIPLIER,
+    SMASH_DAMAGE_MULTIPLIER, COUNTER_DAMAGE_MULTIPLIER, ROAR_ATTACK_BONUS,
+    ROAR_DURATION_MS, BLEED_DURATION_MS, BLEED_TICK_MS, CHARGE_STUN_MS,
+    isBlackstone, applyPlainsDepthsPassive, getBlackstoneAuraBonus,
+    applyBlackstoneAura, isIrritableActive, getIrritableMultiplier,
+    resolveActiveSkill, getActiveDamageMultiplier
+  };
 }));

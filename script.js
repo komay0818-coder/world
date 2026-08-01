@@ -1316,7 +1316,11 @@ function getMonsterDefinitionForMap(type, mapId = battle.dungeonId || getActiveM
   const chapterMonster = ChapterOneLevelPolicy.scaleMonster(monster, mapId, level);
   const dungeonMonster = GoblinCampPolicy.scaleMonster(chapterMonster, mapId === 'goblin-camp');
   const wolfMonster = WolfDenPolicy.applyWolfDenPassive(dungeonMonster, mapId);
-  return BoarWoodsPolicy.applyBoarWoodsPassive(wolfMonster, mapId);
+  const boarMonster = BoarWoodsPolicy.applyBoarWoodsPassive(wolfMonster, mapId);
+  const plainsMonster = PlainsDepthsPolicy.applyPlainsDepthsPassive(boarMonster, mapId);
+  if (mapId !== 'plains-depths') return plainsMonster;
+  const aliveTypes = (battle.enemyTypes || []).filter((_, index) => !battle.enemyHps || battle.enemyHps[index] > 0);
+  return PlainsDepthsPolicy.applyBlackstoneAura(plainsMonster, aliveTypes, Date.now() < (battle.blackstoneRoarUntil || 0));
 }
 
 function createEnemyLevels(enemyTypes, mapId, random = Math.random) {
@@ -1402,18 +1406,20 @@ function getMonsterAttackPower(enemy, progress = getProgress(), currentHp = enem
   const randomMultiplier = .9 + Math.random() * .2;
   const bloodFrenzy = WolfDenPolicy.getBloodFrenzyMultiplier(enemy.id, isPlayerBleeding());
   const irritable = BoarWoodsPolicy.getIrritableMultiplier(enemy.id, currentHp, enemy.maxHp);
-  if (enemy.mapId) return Math.max(1, Math.round((enemy.attack || 1) * randomMultiplier * bloodFrenzy * irritable));
+  const plainsIrritable = PlainsDepthsPolicy.getIrritableMultiplier(enemy.id, currentHp, enemy.maxHp);
+  if (enemy.mapId) return Math.max(1, Math.round((enemy.attack || 1) * randomMultiplier * bloodFrenzy * irritable * plainsIrritable));
   const map = getActiveMap(progress);
   const monsterLevel = Math.min(map.max, Math.max(map.min, progress.level));
   const levelMultiplier = 1 + (monsterLevel - 1) * .10;
   const rankMultiplier = enemy.isBoss ? 2.4 : enemy.isElite ? 1.65 : 1;
-  return Math.max(1, Math.round((enemy.attack || 10) * levelMultiplier * rankMultiplier * randomMultiplier * 1.25 * bloodFrenzy * irritable));
+  return Math.max(1, Math.round((enemy.attack || 10) * levelMultiplier * rankMultiplier * randomMultiplier * 1.25 * bloodFrenzy * irritable * plainsIrritable));
 }
 
 function getMonsterAttackInterval(enemy, currentHp = enemy.maxHp) {
   const bloodFrenzy = WolfDenPolicy.getBloodFrenzyMultiplier(enemy.id, isPlayerBleeding());
   const irritable = BoarWoodsPolicy.getIrritableMultiplier(enemy.id, currentHp, enemy.maxHp);
-  return Math.max(250, (enemy.attackInterval || (1000 / (enemy.attackSpeed || 1))) / bloodFrenzy / irritable);
+  const plainsIrritable = PlainsDepthsPolicy.getIrritableMultiplier(enemy.id, currentHp, enemy.maxHp);
+  return Math.max(250, (enemy.attackInterval || (1000 / (enemy.attackSpeed || 1))) / bloodFrenzy / irritable / plainsIrritable);
 }
 
 function createEnemyAttackSchedule(enemyTypes, startAt = Date.now(), mapId = getActiveMap(getProgress()).id, enemyLevels = []) {
@@ -2885,6 +2891,16 @@ function applyDamageToMonster(index, baseDamage, profile, options = {}) {
   if (result.parried && options.logDefense !== false) {
     logBattle(`${enemy.name}招架了你的攻擊！`, 'damage-dealt');
   }
+  if (result.parried && enemy.id === 'wanderingBlackKnight' && attacker?.alive) {
+    const counterStats = getCharacterStats(attacker.level, attacker.progress, attacker.character);
+    const counterRaw = Math.max(1, getMonsterAttackPower(enemy, progress, battle.enemyHps[index]) * PlainsDepthsPolicy.COUNTER_DAMAGE_MULTIPLIER);
+    const counterDamage = MonsterDefense.resolvePlayerDamage({ baseDamage: counterRaw, defense: counterStats.defense, damageReduction: counterStats.damageReduction }).finalDamage;
+    const absorbed = Math.min(attacker.shield || 0, counterDamage);
+    attacker.shield = Math.max(0, (attacker.shield || 0) - absorbed);
+    attacker.currentHp = Math.max(0, attacker.currentHp - (counterDamage - absorbed));
+    logBattle(`↩【${enemy.name}】招架後反擊，對${attacker.name}造成 ${counterDamage - absorbed} 傷害。`, 'damage-taken');
+    defeatPartyMember(attacker);
+  }
   battle.enemyHps[index] -= result.finalDamage;
   if (options.showDamage !== false) showEnemyDamage([index], result.finalDamage, options.effectType || 'normal');
   return result;
@@ -3362,6 +3378,23 @@ function enemyAttackTick() {
     battle.enemyNextAttackAt[enemyIndex] = now + getMonsterAttackInterval(enemy, enemyCurrentHp);
     attackOccurred = true;
 
+    const plainsAction = getActiveMap(progress).id === 'plains-depths'
+      ? PlainsDepthsPolicy.resolveActiveSkill(enemy.id, Math.random(), enemyCurrentHp < enemy.maxHp)
+      : 'attack';
+    if (plainsAction === 'heal') {
+      const restored = Math.min(Math.ceil(enemy.maxHp * PlainsDepthsPolicy.KNIGHT_HEAL_RATIO), enemy.maxHp - enemyCurrentHp);
+      battle.enemyHps[enemyIndex] += restored;
+      logBattle(`✚【${enemy.name}】施放治療，恢復 ${restored} 生命。`, 'enemy-healing');
+      playMonsterAttackAnimation(enemyIndex, false);
+      continue;
+    }
+    if (plainsAction === 'roar') {
+      battle.blackstoneRoarUntil = now + PlainsDepthsPolicy.ROAR_DURATION_MS;
+      logBattle('📣【黑石頭目】施放【怒吼】，黑石系列怪物攻擊提高 10%！', 'system');
+      playMonsterAttackAnimation(enemyIndex, false);
+      continue;
+    }
+
     if (battle.dungeonId === 'goblin-camp') {
       const action = GoblinCampPolicy.resolveAction({
         type: battle.enemyTypes[enemyIndex],
@@ -3388,7 +3421,8 @@ function enemyAttackTick() {
       : 1 - stats.dodge;
     const dodged = Math.random() >= monsterHitChance;
     const critical = !dodged && Math.random() < (enemy.isBoss ? .15 : enemy.isElite ? .10 : .05);
-    const rawDamage = getMonsterAttackPower(enemy, progress, enemyCurrentHp) * (critical ? 1.5 : 1);
+    const activeDamageMultiplier = PlainsDepthsPolicy.getActiveDamageMultiplier(plainsAction);
+    const rawDamage = getMonsterAttackPower(enemy, progress, enemyCurrentHp) * activeDamageMultiplier * (critical ? 1.5 : 1);
     const parried = !dodged && Math.random() < stats.parry;
     let damage = dodged ? 0 : MonsterDefense.resolvePlayerDamage({
       baseDamage: rawDamage,
@@ -3417,6 +3451,13 @@ function enemyAttackTick() {
       && BoarWoodsPolicy.shouldCharge(enemy.id, Math.random())) {
       target.stunnedUntil = Math.max(target.stunnedUntil || 0, now + BoarWoodsPolicy.BOSS_CHARGE_STUN_MS);
     }
+    if (!dodged && damage > 0 && plainsAction === 'rend') inflictPartyMemberBleed(target, enemy, now);
+    if (!dodged && damage > 0 && plainsAction === 'charge') {
+      target.stunnedUntil = Math.max(target.stunnedUntil || 0, now + PlainsDepthsPolicy.CHARGE_STUN_MS);
+      logBattle(`💥【${enemy.name}】施放【衝撞】，${target.name}暈眩 2 秒！`, 'system');
+    }
+    if (!dodged && damage > 0 && plainsAction === 'dive') logBattle(`🦅【${enemy.name}】施放【俯衝】，造成雙倍傷害！`, 'system');
+    if (!dodged && damage > 0 && plainsAction === 'smash') logBattle(`💢【${enemy.name}】施放【猛擊】，攻擊傷害提高！`, 'system');
 
     if (dodged) {
       logBattle(`${target.name} 閃避了 ${enemy.name} 的攻擊。`, 'damage-taken');
@@ -3488,7 +3529,7 @@ function openBattle() {
   const sessionId = ++battleSessionSequence;
   const partyMembers = buildBattlePartyMembers(battleStart);
   const mainMember = partyMembers.find((member) => member.isMain) || partyMembers[0];
-  battle = { enemyTypes, enemyLevels, enemyHps, partyMembers, playerHp: mainMember?.currentHp || getMaxHp(progress.level, progress), playerMana: mainMember?.resourceCurrent || 0, playerArrows: mainMember?.resourceType === 'arrows' ? mainMember.resourceCurrent : 0, playerShield: 0, playerStunnedUntil: 0, playerBleed: null, manaExhausted: false, playerAttackCharge: 0, hunterAttackCount: 0, lastManaRegenAt: battleStart, lastResourceUpdatedAt: battleStart, lastArrowRecoveryAt: battleStart, enemyNextAttackAt: createEnemyAttackSchedule(enemyTypes, battleStart, currentMap.id, enemyLevels), enemyBoarEnraged: enemyTypes.map(() => false), globalSkillReadyAt: 0, undeadRevived: false, skillCooldowns: {}, enemyRespawns: enemyTypes.map(() => null), enemySpawnedAt: enemyTypes.map((_, index) => battleStart + index), enemyDots: enemyTypes.map(() => []), monsterMoveSpeed: 200, targetIndexes: [], enemyDamages: enemyTypes.map(() => []), damageTimers: [], rewardedEnemyIndexes: new Set(), isDungeon, dungeonId: isDungeon ? currentMap.id : null, dungeonWave: isDungeon ? 1 : 0, dungeonComplete: false, waveTransitioning: false, goblinScoutSummons: 0 };
+  battle = { enemyTypes, enemyLevels, enemyHps, partyMembers, playerHp: mainMember?.currentHp || getMaxHp(progress.level, progress), playerMana: mainMember?.resourceCurrent || 0, playerArrows: mainMember?.resourceType === 'arrows' ? mainMember.resourceCurrent : 0, playerShield: 0, playerStunnedUntil: 0, playerBleed: null, manaExhausted: false, playerAttackCharge: 0, hunterAttackCount: 0, lastManaRegenAt: battleStart, lastResourceUpdatedAt: battleStart, lastArrowRecoveryAt: battleStart, enemyNextAttackAt: createEnemyAttackSchedule(enemyTypes, battleStart, currentMap.id, enemyLevels), enemyBoarEnraged: enemyTypes.map(() => false), blackstoneRoarUntil: 0, globalSkillReadyAt: 0, undeadRevived: false, skillCooldowns: {}, enemyRespawns: enemyTypes.map(() => null), enemySpawnedAt: enemyTypes.map((_, index) => battleStart + index), enemyDots: enemyTypes.map(() => []), monsterMoveSpeed: 200, targetIndexes: [], enemyDamages: enemyTypes.map(() => []), damageTimers: [], rewardedEnemyIndexes: new Set(), isDungeon, dungeonId: isDungeon ? currentMap.id : null, dungeonWave: isDungeon ? 1 : 0, dungeonComplete: false, waveTransitioning: false, goblinScoutSummons: 0 };
   battle.sessionId = sessionId;
   clearBattleLog();
   if (pendingOfflineReport) {
