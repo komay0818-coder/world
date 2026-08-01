@@ -23,7 +23,10 @@ assert.match(script, /PartyPolicy\.isPartyDefeated\(battle\.partyMembers\)/, 'fa
 assert.match(script, /rewardedEnemyIndexes/, 'enemy rewards are guarded against duplicate processing');
 assert.match(script, /enemyNextAttackAt\[enemyIndex\]/, 'each monster retains an independent attack timer');
 assert.match(script, /persistPartyRuntimeState/, 'runtime party state is included in saves');
-assert.match(script, /const PARTY_DEBUG = true/, 'party debug mode can be toggled from one constant');
+assert.match(script, /const PARTY_DEBUG = false/, 'party debug mode is centrally controlled and disabled for normal play');
+assert.match(script, /battleLogEntries\.filter\(\(entry\) => PARTY_DEBUG \|\| !entry\.partyDebug\)/, 'disabled party debug entries cannot leak into the player combat log');
+assert.match(script, /const teammates = \(battle\.partyMembers \|\| \[\]\)\.filter\(\(member\) => !member\.isMain\)/, 'battle party status excludes the main character');
+assert.match(script, /container\.classList\.toggle\('hidden', teammates\.length === 0\)/, 'solo parties hide the empty teammate status area');
 assert.match(script, /logPartyDebug\('普通攻擊'/, 'debug logs include normal attacks');
 assert.match(script, /logPartyDebug\('技能施放'/, 'debug logs include skill casts and resources');
 assert.match(script, /logPartyDebug\('怪物選擇隊員'/, 'debug logs include monster target selection');

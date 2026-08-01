@@ -27,7 +27,7 @@ const classIcons = Object.fromEntries(classes.map((job) => [job.id, job.icon]));
 const raceTotems = { human: '☀', elf: '❈', orc: '⛧', undead: '☾' };
 const jobMarks = { warrior: '⛨', assassin: '◈', hunter: '➶', mage: '✦', priest: '✥' };
 const CHARACTER_SCALE = 0.90;
-const PARTY_DEBUG = true;
+const PARTY_DEBUG = false;
 const battleCharacterArt = {
   'human:warrior': 'assets/character-sprites/human-warrior-v3.png?v=20260730-user-image-v1',
   'human:assassin': 'assets/character-sprites/human-assassin-v4.png',
@@ -1195,7 +1195,7 @@ function escapeBattleLogText(value) {
 function renderBattleLog() {
   const container = document.querySelector('#combat-log-lines');
   if (!container) return;
-  let entries = battleLogEntries;
+  let entries = battleLogEntries.filter((entry) => PARTY_DEBUG || !entry.partyDebug);
   if (battleLogMode === 'player') entries = entries.filter((entry) => entry.partyDebug || ['damage-dealt', 'pet-damage'].includes(entry.type));
   if (battleLogMode === 'enemy') entries = entries.filter((entry) => entry.partyDebug || ['damage-taken', 'enemy-healing'].includes(entry.type));
   if (battleLogMode === 'loot') entries = entries.filter((entry) => entry.partyDebug || ['loot', 'reward', 'progress'].includes(entry.type));
@@ -2458,8 +2458,10 @@ function renderSkillDetailModal() {
 
 function renderBattlePartyStatus() {
   const container = document.querySelector('#battle-party-status');
-  if (!container || !battle.partyMembers?.length) return;
-  container.innerHTML = battle.partyMembers.map(member => {
+  if (!container) return;
+  const teammates = (battle.partyMembers || []).filter((member) => !member.isMain);
+  container.classList.toggle('hidden', teammates.length === 0);
+  container.innerHTML = teammates.map(member => {
     const resourceMax = Math.max(1, getMaxCombatResourceForMember(member.character, member.progress));
     const resourcePercent = Math.max(0, Math.min(100, member.resourceCurrent / resourceMax * 100));
     const hpPercent = Math.max(0, Math.min(100, member.currentHp / member.maxHp * 100));
