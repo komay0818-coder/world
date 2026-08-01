@@ -29,6 +29,9 @@ assert.match(script, /const teammates = \(battle\.partyMembers \|\| \[\]\)\.filt
 assert.match(script, /container\.classList\.toggle\('hidden', teammates\.length === 0\)/, 'solo parties hide the empty teammate status area');
 assert.match(html, /crafting-policy\.js/, 'crafting policy loads before the game integration');
 assert.match(script, /logPartyDebug\('普通攻擊'/, 'debug logs include normal attacks');
+const manaExhaustionBody = script.match(/function updatePartyMemberManaExhaustion\(member\) \{([\s\S]*?)\n\}/)?.[1] || '';
+assert.doesNotMatch(manaExhaustionBody, /enemy|rewardKey|earnedXp|earnedGold|accountDrops/, 'mana state updates cannot throw on unrelated reward variables before normal attacks');
+assert.match(script, /updatePartyMemberResource\(member, now\)[\s\S]*processPartyMemberAttacks\(now\)/, 'resource updates complete before the independent normal attack pass');
 assert.match(script, /logPartyDebug\('技能施放'/, 'debug logs include skill casts and resources');
 assert.match(script, /logPartyDebug\('怪物選擇隊員'/, 'debug logs include monster target selection');
 assert.match(script, /logPartyDebug\('死亡事件'/, 'debug logs include member deaths');

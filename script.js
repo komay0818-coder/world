@@ -2742,6 +2742,14 @@ function rewardVictory(index) {
     showToast(`獲得收藏品：${collectible.name}`);
     logBattle(`♛ 收藏品掉落【${collectible.name}】－${collectible.description}`, 'loot');
   }
+  logPartyDebug('掉落事件', {
+    targetId: enemy.id,
+    targetName: enemy.name,
+    rewardKey,
+    xp: earnedXp,
+    gold: earnedGold,
+    loot: [loot?.name, equipmentDrop?.name, offhandDrop?.name, collectible?.name, ...accountDrops].filter(Boolean).join(',') || 'none'
+  });
 }
 
 function getMonsterRespawnTicks() {
@@ -2892,14 +2900,6 @@ function updatePartyMemberManaExhaustion(member) {
     member.manaExhausted = false;
     logBattle(`◆ ${member.name}魔力恢復，重新開始施放技能。`, 'system');
   }
-  logPartyDebug('掉落事件', {
-    targetId: enemy.id,
-    targetName: enemy.name,
-    rewardKey,
-    xp: earnedXp,
-    gold: earnedGold,
-    loot: [loot?.name, offhandDrop?.name, collectible?.name, ...accountDrops].filter(Boolean).join(',') || 'none'
-  });
 }
 
 function useAutoSkillForMember(member, now = Date.now()) {

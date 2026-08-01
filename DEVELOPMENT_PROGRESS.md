@@ -21,6 +21,7 @@ DEV 測試網址：<https://raw.githack.com/komay0818-coder/world/dev/index.html
 - 背包與穿戴比較固定顯示主能力後再顯示額外詞綴；藍、紫品質可正確載入與標示。
 - 驗證指令：使用 Node.js 執行 `tests/crafting-policy.test.js`；完整回歸可依序執行 `tests/*.test.js`。
 - 背包與穿戴比較已移除裝備評分及升降分數，改以品質與實際能力直接比較。
+- 修正魔力職業更新枯竭狀態時因錯置掉落除錯資料拋錯，導致普通攻擊迴圈中斷的問題。
 
 ## 2026-08-02 隊伍狀態與戰鬥紀錄修正
 
