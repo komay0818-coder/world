@@ -10,6 +10,17 @@ DEV 測試網址：<https://raw.githack.com/komay0818-coder/world/dev/index.html
 
 固定版本網址：<https://raw.githack.com/komay0818-coder/world/1b6fa95/index.html>
 
+## 2026-08-02 工坊製作裝備基礎
+
+- 沿用既有 `kind: equipment`、背包陣列、裝備欄與 JSON 存檔，不建立第二套裝備容器。
+- 新增所有職業共用的護腕（`wrist`）、肩甲（`shoulders`）、斗篷（`cloak`）製作資料；三個欄位原已存在於紙娃娃結構。
+- 製作實例保存 `equipmentId`、`instanceId`、`equipmentSlot`、`rarity`、`sourceType: crafted`、`recipeId`、`primaryStat`、`affixes`、`craftedAt`。
+- 綠／藍／紫品質分別由可配置資料決定 1／2／3 條額外詞綴與工坊 Lv1／Lv2／Lv3 門檻。
+- 配方、材料、裝備石與工坊等級會在生成和扣料前完整驗證；失敗不扣除任何材料。
+- 工坊介面提供三張測試配方、預覽主能力池與詞綴數，完成後顯示並保存實際結果。
+- 背包與穿戴比較固定顯示主能力後再顯示額外詞綴；藍、紫品質可正確載入與標示。
+- 驗證指令：使用 Node.js 執行 `tests/crafting-policy.test.js`；完整回歸可依序執行 `tests/*.test.js`。
+
 ## 2026-08-02 隊伍狀態與戰鬥紀錄修正
 
 - 修正桌面版隊伍狀態卡的血量與職業資源條被版面樣式拉伸的問題，兩種狀態條固定為 4px 高度。

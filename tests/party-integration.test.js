@@ -27,6 +27,7 @@ assert.match(script, /const PARTY_DEBUG = false/, 'party debug mode is centrally
 assert.match(script, /battleLogEntries\.filter\(\(entry\) => PARTY_DEBUG \|\| !entry\.partyDebug\)/, 'disabled party debug entries cannot leak into the player combat log');
 assert.match(script, /const teammates = \(battle\.partyMembers \|\| \[\]\)\.filter\(\(member\) => !member\.isMain\)/, 'battle party status excludes the main character');
 assert.match(script, /container\.classList\.toggle\('hidden', teammates\.length === 0\)/, 'solo parties hide the empty teammate status area');
+assert.match(html, /crafting-policy\.js/, 'crafting policy loads before the game integration');
 assert.match(script, /logPartyDebug\('普通攻擊'/, 'debug logs include normal attacks');
 assert.match(script, /logPartyDebug\('技能施放'/, 'debug logs include skill casts and resources');
 assert.match(script, /logPartyDebug\('怪物選擇隊員'/, 'debug logs include monster target selection');

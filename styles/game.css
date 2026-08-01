@@ -45,6 +45,7 @@
 
 /* Equipment progression feedback. */
 .equipment-score{display:flex;align-items:center;gap:7px;margin-top:3px;color:#d9e7f2;font-size:12px;font-style:normal;font-weight:800}.score-difference{padding:1px 6px;border-radius:999px;font-size:11px}.score-difference.upgrade{background:rgba(43,174,101,.2);color:#70efa6}.score-difference.downgrade{background:rgba(211,70,78,.2);color:#ff8d94}.map-recommendation{display:block;margin-top:7px;padding:5px 8px;border-radius:7px;font-size:11px}.map-recommendation.ready{background:rgba(49,158,99,.22);color:#8ff0b5}.map-recommendation.danger{background:rgba(190,73,61,.24);color:#ffaaa0}
+.inventory-item.quality-rare,.equipment-frame.quality-rare{border-color:#68a8ff}.inventory-item.quality-epic,.equipment-frame.quality-epic{border-color:#c17aff;box-shadow:0 0 15px rgba(166,83,235,.2)}
 
 .mana-track.exhausted{box-shadow:0 0 0 1px rgba(255,99,120,.8),0 0 12px rgba(255,47,79,.48)}.mana-track.exhausted i{background:linear-gradient(90deg,#782f48,#e05a72)!important}.mana-text{transition:color .2s}.mana-track.exhausted + .mana-text{color:#ff91a5!important;font-weight:900}
 

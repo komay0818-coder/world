@@ -47,6 +47,9 @@ assert.equal(JSON.stringify(greenArmor.affixes), rerenderSnapshot, 'display help
 
 const loaded = policy.normalizeEquipment(JSON.parse(JSON.stringify(greenArmor)));
 assert.deepEqual(loaded.affixes, greenArmor.affixes, 'save and load preserve affix id and value');
+const crafted = { id: 'crafted-1', kind: 'equipment', slot: 'cloak', sourceType: 'crafted', quality: 'epic', rarity: 'epic', primaryStat: { stat: 'itemFind', value: 8 }, affixes: [{ id: 'crafted-maxHp', stat: 'maxHp', value: 40 }] };
+assert.deepEqual(policy.normalizeEquipment(JSON.parse(JSON.stringify(crafted))), crafted, 'crafted primary and final affixes survive normalization');
+assert.equal(policy.getQualityLabel(crafted), '紫色');
 assert.deepEqual(policy.normalizeEquipment({ ...armor, quality: undefined }).affixes, [], 'legacy equipment without affixes loads as white equipment');
 assert.equal(policy.normalizeEquipment({ ...armor, quality: undefined }).quality, 'common');
 

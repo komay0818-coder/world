@@ -3,8 +3,8 @@
   if (typeof module === 'object' && module.exports) module.exports = api;
   else root.EquipmentAffixPolicy = api;
 }(typeof globalThis !== 'undefined' ? globalThis : this, function createEquipmentAffixPolicy() {
-  const QUALITY = Object.freeze({ common: 'common', uncommon: 'uncommon' });
-  const QUALITY_LABELS = Object.freeze({ common: '白色', uncommon: '綠色' });
+  const QUALITY = Object.freeze({ common: 'common', uncommon: 'uncommon', rare: 'rare', epic: 'epic' });
+  const QUALITY_LABELS = Object.freeze({ common: '白色', uncommon: '綠色', rare: '藍色', epic: '紫色' });
   const SLOT_GROUPS = Object.freeze({
     weapon: 'weapon',
     head: 'armor', shoulders: 'armor', armor: 'armor', wrist: 'armor', gloves: 'armor',
@@ -43,6 +43,8 @@
   }
 
   function normalizeQuality(quality) {
+    if (quality === QUALITY.epic || quality === '紫色') return QUALITY.epic;
+    if (quality === QUALITY.rare || quality === '藍色' || quality === '稀有') return QUALITY.rare;
     if (quality === QUALITY.uncommon || quality === '優良' || quality === '綠色') return QUALITY.uncommon;
     return QUALITY.common;
   }
@@ -66,6 +68,13 @@
 
   function normalizeEquipment(equipment) {
     if (!equipment || equipment.kind !== 'equipment') return equipment;
+    if (equipment.sourceType === 'crafted') return {
+      ...equipment,
+      quality: normalizeQuality(equipment.quality || equipment.rarity),
+      rarity: normalizeQuality(equipment.rarity || equipment.quality),
+      primaryStat: equipment.primaryStat ? { ...equipment.primaryStat } : null,
+      affixes: (Array.isArray(equipment.affixes) ? equipment.affixes : []).map((entry) => ({ ...entry }))
+    };
     const requestedQuality = getEquipmentGroup(equipment) ? normalizeQuality(equipment.quality) : QUALITY.common;
     const affixes = (Array.isArray(equipment.affixes) ? equipment.affixes : [])
       .map(normalizeAffix)
