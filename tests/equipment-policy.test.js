@@ -159,6 +159,10 @@ assert.equal(armor.roughLeatherGloves.image.split('?')[0], 'assets/rough-leather
 assert.equal(armor.huntingGloves.image.split('?')[0], 'assets/hunting-gloves.png', 'hunting gloves use their dedicated image');
 assert.deepEqual([armor.apprenticeGloves.defense, armor.apprenticeGloves.hp], [5, 10], 'apprentice gloves stats match the design');
 assert.deepEqual([armor.noviceGloves.defense, armor.noviceGloves.hp], [3, 15], 'novice gloves stats match the design');
+assert.equal(armor.apprenticeGloves.name, '新兵布手套', 'the first chapter recruit cloth gloves use their requested name');
+assert.equal(armor.noviceGloves.name, '守衛法術手套', 'the first chapter guard cloth gloves use their requested name');
+assert.equal(armor.apprenticeGloves.image.split('?')[0], 'assets/recruit-cloth-gloves.png', 'the recruit cloth gloves use the first supplied image');
+assert.equal(armor.noviceGloves.image.split('?')[0], 'assets/guard-cloth-gloves.png', 'the guard cloth gloves use the second supplied image');
 assert.deepEqual(policy.getEquipSlots(armor.recruitIronGauntlets, 'warrior'), ['gloves'], 'warriors can equip plate gauntlets');
 assert.deepEqual(policy.getEquipSlots(armor.recruitIronGauntlets, 'hunter'), [], 'hunters cannot equip plate gauntlets');
 assert.deepEqual(policy.getEquipSlots(armor.roughLeatherGloves, 'hunter'), ['gloves'], 'hunters can equip leather gloves');
