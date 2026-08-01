@@ -31,6 +31,13 @@ assert.equal(greenWeapon.affixes.length, 1);
 assert.ok(policy.EQUIPMENT_AFFIXES[greenWeapon.affixes[0].id].allowedGroups.includes('weapon'));
 assert.ok(!['max_hp_percent', 'defense_percent', 'dodge_percent'].includes(greenWeapon.affixes[0].id), 'weapons cannot roll armor-only affixes');
 
+const rareArmorRolls = [0, .999];
+const rareArmor = policy.createEquipmentInstance(armor, { quality: 'rare', random: () => rareArmorRolls.shift() ?? 0, uniqueId: 'blue' });
+assert.equal(rareArmor.quality, 'rare');
+assert.equal(rareArmor.affixes.length, 2, 'blue equipment has exactly two affixes');
+assert.equal(new Set(rareArmor.affixes.map((entry) => entry.stat)).size, 2, 'blue equipment affixes are unique');
+assert.ok(rareArmor.affixes.every((entry) => entry.value >= policy.EQUIPMENT_AFFIXES[entry.id].value), 'blue affix values use the configured stronger range');
+
 const armorCandidates = policy.getAvailableAffixes(armor).map((entry) => entry.id);
 assert.deepEqual(armorCandidates.sort(), ['cooldown_speed_percent', 'defense_percent', 'dodge_percent', 'mana_regeneration_percent', 'max_hp_percent'].sort());
 assert.ok(!armorCandidates.includes('strength_percent'), 'unimplemented primary attributes remain disabled instead of appearing inert');
@@ -50,6 +57,7 @@ assert.deepEqual(loaded.affixes, greenArmor.affixes, 'save and load preserve aff
 const crafted = { id: 'crafted-1', kind: 'equipment', slot: 'cloak', sourceType: 'crafted', quality: 'epic', rarity: 'epic', primaryStat: { stat: 'itemFind', value: 8 }, affixes: [{ id: 'crafted-maxHp', stat: 'maxHp', value: 40 }] };
 assert.deepEqual(policy.normalizeEquipment(JSON.parse(JSON.stringify(crafted))), crafted, 'crafted primary and final affixes survive normalization');
 assert.equal(policy.getQualityLabel(crafted), '紫色');
+assert.deepEqual(policy.normalizeEquipment(JSON.parse(JSON.stringify(rareArmor))), rareArmor, 'save and load preserve blue affixes');
 assert.deepEqual(policy.normalizeEquipment({ ...armor, quality: undefined }).affixes, [], 'legacy equipment without affixes loads as white equipment');
 assert.equal(policy.normalizeEquipment({ ...armor, quality: undefined }).quality, 'common');
 

@@ -90,14 +90,14 @@ const raceTalents = {
   undead: { name: '不滅意志', icon: '☾', detail: '持續傷害 +20%；倒下時有 35% 機率以 35% 生命復活一次。' }
 };
 const mapProgression = [
-  { id: 'beginner-plains', min: 1, max: 5, chapterLevelRange: [1, 15], name: '初心者平原', background: 'assets/beginner-plains-background.png', implemented: true, normalXp: 4, eliteXp: 18, bossXp: 70, recommended: { attack: 14, defense: 3, hp: 100 } },
-  { id: 'plains-entrance', regionOf: 'beginner-plains', min: 1, max: 2, monsterMin: 1, monsterMax: 4, name: '平原入口', background: 'assets/plains-entrance-background.png', implemented: true, normalXp: 4, eliteXp: 10, bossXp: 0, recommended: { attack: 10, defense: 1, hp: 80 } },
-  { id: 'wolf-den', regionOf: 'beginner-plains', min: 2, max: 5, monsterMin: 3, monsterMax: 7, name: '狼穴', background: 'assets/wolf-den-background.png', implemented: true, normalXp: 6, eliteXp: 16, bossXp: 80, recommended: { attack: 16, defense: 4, hp: 110 } },
-  { id: 'boar-woods', regionOf: 'beginner-plains', min: 3, max: 5, monsterMin: 6, monsterMax: 10, name: '野豬林', background: 'assets/boar-woods-background.png', implemented: true, normalXp: 8, eliteXp: 20, bossXp: 95, recommended: { attack: 19, defense: 6, hp: 135 } },
-  { id: 'plains-depths', regionOf: 'beginner-plains', min: 4, max: 5, monsterMin: 12, monsterMax: 15, name: '平原深處', background: 'assets/plains-depths-background.png?v=20260728-user-image-v1', implemented: true, normalXp: 10, eliteXp: 26, bossXp: 110, recommended: { attack: 22, defense: 8, hp: 155 } },
-  { id: 'black-forest', min: 5, max: 10, name: '黑森林', background: 'assets/black-forest-background.png', implemented: true, normalXp: 4, eliteXp: 14, bossXp: 56, recommended: { attack: 26, defense: 8, hp: 180 } },
-  { id: 'goblin-camp', regionOf: 'beginner-plains', min: 2, max: 5, monsterMin: 8, monsterMax: 12, name: '哥布林營地', background: 'assets/goblin-camp-background.png', implemented: true, dungeon: true, ticketItemId: 'goblin-camp-map', normalXp: 10, eliteXp: 28, bossXp: 120, recommended: { attack: 18, defense: 5, hp: 120 } },
-  { id: 'black-forest-altar', min: 5, max: 10, name: '黑森林祭壇', background: 'assets/black-forest-background.png', implemented: true, dungeon: true, normalXp: 0, eliteXp: 22, bossXp: 126, recommended: { attack: 34, defense: 11, hp: 230 } },
+  { id: 'beginner-plains', chapter: 1, min: 1, max: 5, chapterLevelRange: [1, 15], name: '初心者平原', background: 'assets/beginner-plains-background.png', implemented: true, normalXp: 4, eliteXp: 18, bossXp: 70, recommended: { attack: 14, defense: 3, hp: 100 } },
+  { id: 'plains-entrance', chapter: 1, regionOf: 'beginner-plains', min: 1, max: 2, monsterMin: 1, monsterMax: 4, name: '平原入口', background: 'assets/plains-entrance-background.png', implemented: true, normalXp: 4, eliteXp: 10, bossXp: 0, recommended: { attack: 10, defense: 1, hp: 80 } },
+  { id: 'wolf-den', chapter: 1, regionOf: 'beginner-plains', min: 2, max: 5, monsterMin: 3, monsterMax: 7, name: '狼穴', background: 'assets/wolf-den-background.png', implemented: true, normalXp: 6, eliteXp: 16, bossXp: 80, recommended: { attack: 16, defense: 4, hp: 110 } },
+  { id: 'boar-woods', chapter: 1, regionOf: 'beginner-plains', min: 3, max: 5, monsterMin: 6, monsterMax: 10, name: '野豬林', background: 'assets/boar-woods-background.png', implemented: true, normalXp: 8, eliteXp: 20, bossXp: 95, recommended: { attack: 19, defense: 6, hp: 135 } },
+  { id: 'plains-depths', chapter: 1, regionOf: 'beginner-plains', min: 4, max: 5, monsterMin: 12, monsterMax: 15, name: '平原深處', background: 'assets/plains-depths-background.png?v=20260728-user-image-v1', implemented: true, normalXp: 10, eliteXp: 26, bossXp: 110, recommended: { attack: 22, defense: 8, hp: 155 } },
+  { id: 'black-forest', chapter: 1, min: 5, max: 10, name: '黑森林', background: 'assets/black-forest-background.png', implemented: true, normalXp: 4, eliteXp: 14, bossXp: 56, recommended: { attack: 26, defense: 8, hp: 180 } },
+  { id: 'goblin-camp', chapter: 1, regionOf: 'beginner-plains', min: 2, max: 5, monsterMin: 8, monsterMax: 12, name: '哥布林營地', background: 'assets/goblin-camp-background.png', implemented: true, dungeon: true, ticketItemId: 'goblin-camp-map', normalXp: 10, eliteXp: 28, bossXp: 120, recommended: { attack: 18, defense: 5, hp: 120 } },
+  { id: 'black-forest-altar', chapter: 1, min: 5, max: 10, name: '黑森林祭壇', background: 'assets/black-forest-background.png', implemented: true, dungeon: true, normalXp: 0, eliteXp: 22, bossXp: 126, recommended: { attack: 34, defense: 11, hp: 230 } },
   { min: 10, max: 15, name: '石牙山谷', normalXp: 8, eliteXp: 35, bossXp: 140 },
   { min: 15, max: 20, name: '荒蕪沙漠', normalXp: 18, eliteXp: 70, bossXp: 280 },
   { min: 20, max: 25, name: '冰霜高原', normalXp: 35, eliteXp: 140, bossXp: 560 },
@@ -613,8 +613,8 @@ const dungeonBossId = 'eclipseSovereign';
 const GOBLIN_CAMP_TICKET_ID = 'goblin-camp-map';
 const GOBLIN_CAMP_TICKET_DROP_RATE = .50;
 const dungeonDefinitions = {
-  'goblin-camp': { name: '哥布林營地', waves: 7, minWaves: 4, maxWaves: 7, ticketItemId: GOBLIN_CAMP_TICKET_ID },
-  'black-forest-altar': { name: '黑森林祭壇', waves: 10 }
+  'goblin-camp': { name: '哥布林營地', waves: 7, minWaves: 4, maxWaves: 7, ticketItemId: GOBLIN_CAMP_TICKET_ID, finalBossId: 'goblinHighChief' },
+  'black-forest-altar': { name: '黑森林祭壇', waves: 10, finalBossId: dungeonBossId }
 };
 
 const collectibleTemplates = CollectiblePolicy.COLLECTIBLE_CATALOG;
@@ -2727,6 +2727,18 @@ function rewardVictory(index) {
   } catch (error) {
     console.warn('[EquipmentDrop] 裝備掉落處理發生未預期錯誤，戰鬥獎勵將繼續結算。', error);
   }
+  const finalBossId = currentMap.dungeon
+    ? getDungeonDefinition(currentMap.id).finalBossId
+    : getMonsterPool(progress.level).boss?.[0] || null;
+  let blueBossDrop = null;
+  try {
+    blueBossDrop = ChapterBossDropPolicy.grantChapterBossBlueDrop(progress, enemy, {
+      chapter: currentMap.chapter,
+      finalBossId
+    });
+  } catch (error) {
+    console.warn('[ChapterBossDrop] 藍色裝備掉落處理發生未預期錯誤，其他戰鬥獎勵將繼續結算。', error);
+  }
   let offhandDrop = null;
   if (currentMap.id === 'plains-depths' && Math.random() < EquipmentPolicy.getPlainsDepthsOffhandDropRate(enemy)) {
     offhandDrop = EquipmentPolicy.createRandomOffhandDrop(Math.random(), Math.random(), `${Date.now()}-${Math.floor(Math.random() * 1000000)}`);
@@ -2786,6 +2798,10 @@ function rewardVictory(index) {
     showToast(`獲得裝備：${equipmentDrop.name}`);
     logBattle(`◆ 獲得裝備：【${rarityLabel}】${equipmentDrop.name}`, 'loot');
   }
+  if (blueBossDrop) {
+    showToast(`BOSS 掉落藍色裝備：${blueBossDrop.name}`);
+    logBattle(`◆ 第一章 BOSS 稀有掉落：【藍色】${blueBossDrop.name}`, 'loot');
+  }
   if (offhandDrop) {
     showToast(`獲得副手：${offhandDrop.name}【${offhandDrop.affix.name}】`);
     logBattle(`🎁 掉落【${offhandDrop.name}】－${offhandDrop.affix.text}`, 'loot');
@@ -2802,7 +2818,7 @@ function rewardVictory(index) {
     rewardKey,
     xp: earnedXp,
     gold: earnedGold,
-    loot: [loot?.name, equipmentDrop?.name, offhandDrop?.name, collectible?.name, ...accountDrops].filter(Boolean).join(',') || 'none'
+    loot: [loot?.name, equipmentDrop?.name, blueBossDrop?.name, offhandDrop?.name, collectible?.name, ...accountDrops].filter(Boolean).join(',') || 'none'
   });
 }
 

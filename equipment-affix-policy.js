@@ -5,6 +5,12 @@
 }(typeof globalThis !== 'undefined' ? globalThis : this, function createEquipmentAffixPolicy() {
   const QUALITY = Object.freeze({ common: 'common', uncommon: 'uncommon', rare: 'rare', epic: 'epic' });
   const QUALITY_LABELS = Object.freeze({ common: '白色', uncommon: '綠色', rare: '藍色', epic: '紫色' });
+  const QUALITY_AFFIX_RULES = Object.freeze({
+    common: Object.freeze({ count: 0, valueMultiplier: 1 }),
+    uncommon: Object.freeze({ count: 1, valueMultiplier: 1 }),
+    rare: Object.freeze({ count: 2, valueMultiplier: 1.25 }),
+    epic: Object.freeze({ count: 3, valueMultiplier: 1.55 })
+  });
   const SLOT_GROUPS = Object.freeze({
     weapon: 'weapon',
     head: 'armor', shoulders: 'armor', armor: 'armor', wrist: 'armor', gloves: 'armor',
@@ -76,11 +82,13 @@
       affixes: (Array.isArray(equipment.affixes) ? equipment.affixes : []).map((entry) => ({ ...entry }))
     };
     const requestedQuality = getEquipmentGroup(equipment) ? normalizeQuality(equipment.quality) : QUALITY.common;
+    const expectedCount = QUALITY_AFFIX_RULES[requestedQuality]?.count || 0;
     const affixes = (Array.isArray(equipment.affixes) ? equipment.affixes : [])
       .map(normalizeAffix)
       .filter(Boolean)
-      .slice(0, requestedQuality === QUALITY.uncommon ? 1 : 0);
-    const quality = requestedQuality === QUALITY.uncommon && affixes.length === 1 ? QUALITY.uncommon : QUALITY.common;
+      .filter((entry, index, list) => list.findIndex((candidate) => candidate.stat === entry.stat) === index)
+      .slice(0, expectedCount);
+    const quality = expectedCount > 0 && affixes.length === expectedCount ? requestedQuality : QUALITY.common;
     return { ...equipment, quality, affixes };
   }
 
@@ -99,6 +107,19 @@
     return { id: selected.id, name: selected.name, stat: selected.stat, value: selected.value };
   }
 
+  function rollEquipmentAffixes(equipment, count, random = Math.random, valueMultiplier = 1) {
+    const candidates = [...getAvailableAffixes(equipment)];
+    const affixes = [];
+    while (affixes.length < count && candidates.length) {
+      const totalWeight = candidates.reduce((sum, entry) => sum + entry.weight, 0);
+      let cursor = Math.min(.999999, Math.max(0, Number(random()) || 0)) * totalWeight;
+      const selected = candidates.find((entry) => ((cursor -= entry.weight) < 0)) || candidates[candidates.length - 1];
+      candidates.splice(candidates.indexOf(selected), 1);
+      affixes.push({ id: selected.id, name: selected.name, stat: selected.stat, value: Math.max(1, Math.round(selected.value * valueMultiplier)) });
+    }
+    return affixes;
+  }
+
   function createEquipmentInstance(template, options = {}) {
     const quality = normalizeQuality(options.quality ?? template?.quality);
     const item = {
@@ -108,10 +129,19 @@
       quality,
       affixes: []
     };
-    if (quality === QUALITY.uncommon) {
-      const rolled = rollEquipmentAffix(item, options.randomValue);
-      if (rolled) item.affixes = [rolled];
-      else item.quality = QUALITY.common;
+    const rule = QUALITY_AFFIX_RULES[quality];
+    if (rule?.count) {
+      const fallbackRoll = options.randomValue;
+      let usedFallback = false;
+      const fallbackRandom = () => {
+        if (!usedFallback) { usedFallback = true; return fallbackRoll; }
+        return Math.random();
+      };
+      const random = rule.count === 1 && fallbackRoll !== undefined
+        ? fallbackRandom
+        : typeof options.random === 'function' ? options.random : fallbackRandom;
+      item.affixes = rollEquipmentAffixes(item, rule.count, random, rule.valueMultiplier);
+      if (item.affixes.length !== rule.count) { item.affixes = []; item.quality = QUALITY.common; }
     }
     return item;
   }
@@ -139,9 +169,9 @@
   }
 
   return {
-    QUALITY, QUALITY_LABELS, EQUIPMENT_AFFIXES,
+    QUALITY, QUALITY_LABELS, QUALITY_AFFIX_RULES, EQUIPMENT_AFFIXES,
     getEquipmentGroup, normalizeQuality, getQualityLabel, normalizeEquipment,
-    getAvailableAffixes, rollEquipmentAffix, createEquipmentInstance,
+    getAvailableAffixes, rollEquipmentAffix, rollEquipmentAffixes, createEquipmentInstance,
     getAffixValue, getEquippedAffixStats, formatAffix
   };
 }));

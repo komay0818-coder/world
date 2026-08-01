@@ -138,7 +138,8 @@
     const generated = EquipmentAffixPolicy.createEquipmentInstance(template, {
       quality: rarity,
       uniqueId: instanceId,
-      randomValue: options.affixRandomValue
+      randomValue: options.affixRandomValue,
+      random: options.affixRandom
     });
     const armorCategory = EquipmentPolicy.getArmorCategory(template);
     const allowedClasses = [...(template.allowedJobs?.length
@@ -177,6 +178,7 @@
         rarity: options.rarity,
         instanceId: requestedId,
         affixRandomValue: options.random(),
+        affixRandom: options.random,
         obtainedFrom: options.obtainedFrom,
         obtainedAt: options.obtainedAt,
         warningHandler: options.warningHandler

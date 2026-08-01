@@ -11,6 +11,10 @@ assert.match(script, /plainsRabbit:.*lootConfig: EquipmentDropPolicy\.TEST_LOOT_
 assert.match(script, /ragingWolf:.*lootConfig: EquipmentDropPolicy\.TEST_LOOT_CONFIGS\.elite/, 'an elite monster has phase-one loot data');
 assert.match(script, /greatfangWolf:.*lootConfig: EquipmentDropPolicy\.TEST_LOOT_CONFIGS\.boss/, 'a boss has phase-one loot data');
 assert.match(script, /function rewardVictory\(index\)[\s\S]*EquipmentDropPolicy\.grantEquipmentDrop\(progress, enemy\)/, 'rewardVictory enters the equipment drop flow');
+assert.match(html, /chapter-boss-drop-policy\.js[\s\S]*script\.js/, 'chapter boss drop policy loads before reward integration');
+assert.match(script, /ChapterBossDropPolicy\.grantChapterBossBlueDrop\(progress, enemy/, 'boss blue drop is an independent reward roll');
+assert.match(script, /chapter: currentMap\.chapter[\s\S]*finalBossId/, 'chapter and final boss metadata gate the special drop');
+assert.match(script, /\[ChapterBossDrop\][\s\S]*其他戰鬥獎勵將繼續結算/, 'blue drop failures cannot stop existing rewards');
 assert.match(script, /saveProgress\(progress\);[\s\S]*獲得裝備：/, 'the existing reward save runs before the equipment drop message');
 assert.match(script, /equipmentDropMigrationVersion !== 'equipment-drop-v1'/, 'old saves initialize the new drop-system marker safely');
 assert.match(script, /戰鬥獎勵將繼續結算/, 'unexpected drop errors cannot stop reward settlement');
