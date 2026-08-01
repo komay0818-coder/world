@@ -12,7 +12,8 @@ const eliteEnemy = { id: 'ragingWolf', isElite: true, lootConfig: dropPolicy.TES
 const bossEnemy = { id: 'greatfangWolf', isBoss: true, lootConfig: dropPolicy.TEST_LOOT_CONFIGS.boss };
 
 assert.equal(normalEnemy.lootConfig.equipmentDropRate, .25);
-assert.equal(eliteEnemy.lootConfig.equipmentDropRate, .60);
+assert.deepEqual(normalEnemy.lootConfig.rarityWeights, { common: 90, uncommon: 10 });
+assert.equal(eliteEnemy.lootConfig.equipmentDropRate, .40);
 assert.equal(bossEnemy.lootConfig.equipmentDropRate, 1);
 assert.notDeepEqual(normalEnemy.lootConfig.rarityWeights, bossEnemy.lootConfig.rarityWeights, 'monster ranks can use distinct rarity tables');
 
