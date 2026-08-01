@@ -554,14 +554,14 @@ function openCreation(slotIndex = 0) {
 }
 
 const monsterTypes = {
-  plainsRabbit: { id: 'plainsRabbit', name: '野兔', maxHp: 24, attack: 5, defense: 0, evasion: 8, parry: 0, damageReduction: 0, artClass: 'plains-rabbit-art', xp: 4, gold: 1 },
+  plainsRabbit: { id: 'plainsRabbit', name: '野兔', maxHp: 24, attack: 5, defense: 0, evasion: 8, parry: 0, damageReduction: 0, artClass: 'plains-rabbit-art', xp: 4, gold: 1, lootConfig: EquipmentDropPolicy.TEST_LOOT_CONFIGS.normal },
   plainsWolfPup: { id: 'plainsWolfPup', name: '幼狼', maxHp: 34, attack: 7, defense: 1, evasion: 5, parry: 0, damageReduction: 0, artClass: 'plains-wolf-pup-art', xp: 4, gold: 2 },
   plainsSlime: { id: 'plainsSlime', name: '小史萊姆', maxHp: 30, attack: 6, defense: 0, evasion: 0, parry: 0, damageReduction: 5, artClass: 'plains-slime-art', xp: 4, gold: 1 },
   plainsGoblinYoung: { id: 'plainsGoblinYoung', name: '幼年哥布林', maxHp: 40, attack: 8, defense: 2, evasion: 2, parry: 3, damageReduction: 0, artClass: 'plains-goblin-young-art', xp: 4, gold: 2 },
   lostGoblin: { id: 'lostGoblin', name: '迷路的哥布林', maxHp: 62, attack: 10, defense: 4, evasion: 5, parry: 6, damageReduction: 2, artClass: 'lost-goblin-art', xp: 10, gold: 5, isRare: true },
   denForestWolf: { id: 'denForestWolf', name: '森林狼', maxHp: 58, attack: 11, defense: 3, evasion: 8, parry: 0, damageReduction: 0, artClass: 'den-forest-wolf-art', xp: 6, gold: 3, lootSource: 'wolf' },
-  ragingWolf: { id: 'ragingWolf', name: '狂暴狼', maxHp: 125, attack: 16, defense: 6, evasion: 10, parry: 0, damageReduction: 4, artClass: 'den-raging-wolf-art', xp: 16, gold: 9, isElite: true, lootSource: 'wolf' },
-  greatfangWolf: { id: 'greatfangWolf', name: '巨牙狼', maxHp: 480, attack: 21, defense: 12, evasion: 8, parry: 0, damageReduction: 8, artClass: 'den-greatfang-wolf-art', xp: 80, gold: 45, isBoss: true, lootSource: 'wolf' },
+  ragingWolf: { id: 'ragingWolf', name: '狂暴狼', maxHp: 125, attack: 16, defense: 6, evasion: 10, parry: 0, damageReduction: 4, artClass: 'den-raging-wolf-art', xp: 16, gold: 9, isElite: true, lootSource: 'wolf', lootConfig: EquipmentDropPolicy.TEST_LOOT_CONFIGS.elite },
+  greatfangWolf: { id: 'greatfangWolf', name: '巨牙狼', maxHp: 480, attack: 21, defense: 12, evasion: 8, parry: 0, damageReduction: 8, artClass: 'den-greatfang-wolf-art', xp: 80, gold: 45, isBoss: true, lootSource: 'wolf', lootConfig: EquipmentDropPolicy.TEST_LOOT_CONFIGS.boss },
   boarPiglet: { id: 'boarPiglet', name: '小野豬', maxHp: 48, attack: 9, defense: 4, evasion: 3, parry: 0, damageReduction: 2, artClass: 'boar-woods-piglet-art', xp: 8, gold: 3, lootSource: 'boar' },
   forestBoar: { id: 'forestBoar', name: '森林野豬', maxHp: 78, attack: 13, defense: 8, evasion: 2, parry: 0, damageReduction: 5, artClass: 'boar-woods-forest-boar-art', xp: 8, gold: 5, lootSource: 'boar' },
   irritableBoar: { id: 'irritableBoar', name: '暴躁野豬', maxHp: 165, attack: 19, defense: 13, evasion: 2, parry: 0, damageReduction: 7, artClass: 'boar-woods-irritable-boar-art', xp: 20, gold: 12, isElite: true, lootSource: 'boar' },
@@ -749,6 +749,11 @@ function getProgress() {
     saved.equipment = Object.fromEntries(Object.entries({ ...emptyEquipment(), ...(saved.equipment || {}) })
       .map(([slot, item]) => [slot, EquipmentAffixPolicy.normalizeEquipment(item)]));
     saved.equipmentAffixMigrationVersion = 'green-affix-v1';
+    localStorage.setItem('stardust-progress', JSON.stringify(saved));
+  }
+  if (saved.equipmentDropMigrationVersion !== 'equipment-drop-v1') {
+    saved.inventory = Array.isArray(saved.inventory) ? saved.inventory : [];
+    saved.equipmentDropMigrationVersion = 'equipment-drop-v1';
     localStorage.setItem('stardust-progress', JSON.stringify(saved));
   }
   if (saved.jobRestrictionMigrationVersion !== 'job-restriction-v1') {
@@ -1755,7 +1760,8 @@ function renderInventory(view = 'inventory') {
     const enhanceLevel = item?.enhanceLevel || 0;
     const nextRule = enhancementRules[enhanceLevel + 1];
     const enhanceButton = item ? enhanceLevel >= 3 ? '<button class="enhance-button maxed" type="button" disabled>強化 +3（最高）</button>' : `<button class="enhance-button" type="button" data-enhance-slot="${slot}">強化至 +${enhanceLevel + 1}<small>${nextRule.starIron} 碎片・${nextRule.gold} 金幣・${Math.round(nextRule.successRate * 100)}%</small></button>` : '';
-    return `<article class="equipment-frame slot-${slot} ${item ? `equipped ${itemQualityClass(item)}` : ''}"><span class="equipment-frame-icon">${visual}</span><b>${info.label}</b><small>${item ? `${item.name}${enhanceLevel ? ` +${enhanceLevel}` : ''}` : '空欄位'}</small>${item ? `<em><span class="item-quality">${itemQualityLabel(item)}</span>　${itemStatsText(item)}</em>${enhanceButton}` : ''}</article>`;
+    const unequipButton = item ? `<button class="unequip-button" type="button" data-unequip-slot="${slot}">卸下</button>` : '';
+    return `<article class="equipment-frame slot-${slot} ${item ? `equipped ${itemQualityClass(item)}` : ''}"><span class="equipment-frame-icon">${visual}</span><b>${info.label}</b><small>${item ? `${item.name}${enhanceLevel ? ` +${enhanceLevel}` : ''}` : '空欄位'}</small>${item ? `<em><span class="item-quality">${itemQualityLabel(item)}</span>　${itemStatsText(item)}</em>${enhanceButton}${unequipButton}` : ''}</article>`;
   }).join('');
   content.innerHTML = view === 'equipment'
     ? `${resourceBar}<section class="paper-doll" aria-label="角色裝備紙娃娃"><span class="paper-doll-silhouette" aria-hidden="true">🧍</span>${paperDoll}</section>`
@@ -1933,6 +1939,25 @@ function equipItem(itemId, preferredSlot = null) {
   logBattle(`⚙ 已穿戴【${item.name}】。`);
   renderInventory(document.querySelector('#inventory-modal').dataset.view || 'inventory');
   if (fighting) {
+    clearInterval(battleTimer);
+    battleTimer = setInterval(battleTick, Math.round(1000 / getCharacterStats(progress.level, progress, character).attackSpeed));
+    updateBattleUI();
+  }
+}
+
+function unequipItem(slot) {
+  const progress = getProgress();
+  const item = progress.equipment?.[slot];
+  if (!item) return;
+  progress.inventory = Array.isArray(progress.inventory) ? progress.inventory : [];
+  progress.inventory.unshift(item);
+  progress.equipment[slot] = null;
+  saveProgress(progress);
+  showToast(`已卸下：${item.name}`);
+  logBattle(`⚙ 已卸下【${item.name}】。`);
+  renderInventory('equipment');
+  if (fighting) {
+    const character = JSON.parse(localStorage.getItem('stardust-character') || 'null');
     clearInterval(battleTimer);
     battleTimer = setInterval(battleTick, Math.round(1000 / getCharacterStats(progress.level, progress, character).attackSpeed));
     updateBattleUI();
@@ -2624,6 +2649,12 @@ function rewardVictory(index) {
   progress.gold += earnedGold;
   const loot = addLoot(progress, enemy);
   const collectible = addCollectibleLoot(progress, enemy);
+  let equipmentDrop = null;
+  try {
+    equipmentDrop = EquipmentDropPolicy.grantEquipmentDrop(progress, enemy);
+  } catch (error) {
+    console.warn('[EquipmentDrop] 裝備掉落處理發生未預期錯誤，戰鬥獎勵將繼續結算。', error);
+  }
   let offhandDrop = null;
   if (currentMap.id === 'plains-depths' && Math.random() < EquipmentPolicy.getPlainsDepthsOffhandDropRate(enemy)) {
     offhandDrop = EquipmentPolicy.createRandomOffhandDrop(Math.random(), Math.random(), `${Date.now()}-${Math.floor(Math.random() * 1000000)}`);
@@ -2678,6 +2709,11 @@ function rewardVictory(index) {
   saveProgress(progress);
   logBattle(`✦ 擊敗${enemy.name}！獲得 ${earnedXp} EXP、${earnedGold} 金幣`, 'reward');
   if (loot) logBattle(`🎁 掉落【${loot.name}】${loot.quantity ? ` ×${loot.quantity}` : ''}`);
+  if (equipmentDrop) {
+    const rarityLabel = EquipmentAffixPolicy.getQualityLabel(equipmentDrop);
+    showToast(`獲得裝備：${equipmentDrop.name}`);
+    logBattle(`◆ 獲得裝備：【${rarityLabel}】${equipmentDrop.name}`, 'loot');
+  }
   if (offhandDrop) {
     showToast(`獲得副手：${offhandDrop.name}【${offhandDrop.affix.name}】`);
     logBattle(`🎁 掉落【${offhandDrop.name}】－${offhandDrop.affix.text}`, 'loot');
@@ -3696,6 +3732,8 @@ document.querySelector('#inventory-modal').addEventListener('click', (event) => 
   if (event.target.closest('[data-delete-scrap]')) { discardSelectedEquipment(); return; }
   const equipButton = event.target.closest('[data-equip-id]');
   if (equipButton) { equipItem(equipButton.dataset.equipId, equipButton.dataset.equipSlot || null); return; }
+  const unequipButton = event.target.closest('[data-unequip-slot]');
+  if (unequipButton) { unequipItem(unequipButton.dataset.unequipSlot); return; }
   const enhanceButton = event.target.closest('[data-enhance-slot]');
   if (enhanceButton) enhanceEquipment(enhanceButton.dataset.enhanceSlot);
 });
