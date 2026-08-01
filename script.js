@@ -744,6 +744,13 @@ function getProgress() {
     saved.qualityUnlockMigrationVersion = 'quality-tier-map-gating-v1';
     localStorage.setItem('stardust-progress', JSON.stringify(saved));
   }
+  if (saved.equipmentAffixMigrationVersion !== 'green-affix-v1') {
+    saved.inventory = (Array.isArray(saved.inventory) ? saved.inventory : []).map((item) => EquipmentAffixPolicy.normalizeEquipment(item));
+    saved.equipment = Object.fromEntries(Object.entries({ ...emptyEquipment(), ...(saved.equipment || {}) })
+      .map(([slot, item]) => [slot, EquipmentAffixPolicy.normalizeEquipment(item)]));
+    saved.equipmentAffixMigrationVersion = 'green-affix-v1';
+    localStorage.setItem('stardust-progress', JSON.stringify(saved));
+  }
   if (saved.jobRestrictionMigrationVersion !== 'job-restriction-v1') {
     const character = JSON.parse(localStorage.getItem('stardust-character') || 'null');
     const inventoryForRestrictions = Array.isArray(saved.inventory) ? saved.inventory : [];
@@ -1389,7 +1396,7 @@ function oldestAliveEnemyIndex() {
 }
 
 function getEquipmentStats(progress = getProgress()) {
-  return Object.values(progress.equipment || {}).filter(Boolean).reduce((stats, item) => ({
+  const fixed = Object.values(progress.equipment || {}).filter(Boolean).reduce((stats, item) => ({
     attack: stats.attack + effectiveEquipmentStat(item, 'attack'),
     defense: stats.defense + effectiveEquipmentStat(item, 'defense'),
     hp: stats.hp + effectiveEquipmentStat(item, 'hp'),
@@ -1407,6 +1414,18 @@ function getEquipmentStats(progress = getProgress()) {
     damageReduction: stats.damageReduction + effectiveEquipmentStat(item, 'damageReduction'),
     movementSpeedBonus: stats.movementSpeedBonus + effectiveEquipmentStat(item, 'movementSpeedBonus')
   }), { attack: 0, defense: 0, hp: 0, mana: 0, strength: 0, intelligence: 0, accuracy: 0, dodge: 0, attackSpeedBonus: 0, cooldownSpeedBonus: 0, manaRegenBonus: 0, manaRegenFlat: 0, magicDamageBonus: 0, parry: 0, damageReduction: 0, movementSpeedBonus: 0 });
+  const affixes = EquipmentAffixPolicy.getEquippedAffixStats(progress.equipment);
+  return {
+    ...fixed,
+    maxHpPercent: (affixes.maxHpPercent || 0) / 100,
+    defensePercent: (affixes.defensePercent || 0) / 100,
+    accuracyPercent: (affixes.accuracyPercent || 0) / 100,
+    dodgePercent: (affixes.dodgePercent || 0) / 100,
+    attackSpeedPercent: (affixes.attackSpeedPercent || 0) / 100,
+    criticalChance: (affixes.criticalChance || 0) / 100,
+    cooldownSpeedPercent: (affixes.cooldownSpeedPercent || 0) / 100,
+    manaRegenerationPercent: (affixes.manaRegenerationPercent || 0) / 100
+  };
 }
 
 function getCollectionStats(progress = getProgress()) {
@@ -1439,16 +1458,16 @@ function getCharacterStats(level, progress = getProgress(), character = JSON.par
   const hunterWeaponMultiplier = hunterMasteryTier ? 1 + (.10 + (hunterMasteryTier - 1) * .02) : 1;
   const equippedWeapon = progress.equipment?.weapon;
   return {
-    hp: Math.round((base.hp + race.hp + (level - 1) * 12 + equipment.hp + collection.hp) * humanMultiplier),
+    hp: Math.round((base.hp + race.hp + (level - 1) * 12 + equipment.hp + collection.hp) * (1 + equipment.maxHpPercent) * humanMultiplier),
     mana: ['warrior', 'assassin'].includes(character?.job) ? 0 : Math.round((base.mana + race.mana + (level - 1) * 6 + equipment.mana + collection.mana) * humanMultiplier),
     attack: Math.round((base.attack + race.attack + (level - 1) + equipment.attack + equipment.strength + equipment.intelligence + collection.attack) * humanMultiplier * hunterWeaponMultiplier),
-    defense: Math.round((base.defense + race.defense + Math.floor((level - 1) / 5) + equipment.defense + collection.defense) * humanMultiplier),
-    crit: Math.min(.60, base.crit + race.crit + collection.crit + (hunterPrecisionTier ? .05 + (hunterPrecisionTier - 1) * .01 : 0)),
-    dodge: Math.min(.45, Math.max(0, base.dodge + race.dodge + collection.dodge + equipment.dodge)),
-    accuracy: Math.min(1.30, 1.05 + equipment.accuracy + (character?.job === 'hunter' ? .05 : 0) + (hunterPrecisionTier ? .10 + (hunterPrecisionTier - 1) * .02 : 0)),
-    attackSpeed: EquipmentPolicy.getAttacksPerSecond(equippedWeapon, base.attackSpeed * 1.15) * (1 + equipment.attackSpeedBonus),
-    cooldownSpeed: (character?.race === 'elf' ? 1.03 : 1) * (1 + equipment.cooldownSpeedBonus),
-    manaRegen: 1 + equipment.manaRegenBonus,
+    defense: Math.round((base.defense + race.defense + Math.floor((level - 1) / 5) + equipment.defense + collection.defense) * (1 + equipment.defensePercent) * humanMultiplier),
+    crit: Math.min(.60, base.crit + race.crit + collection.crit + equipment.criticalChance + (hunterPrecisionTier ? .05 + (hunterPrecisionTier - 1) * .01 : 0)),
+    dodge: Math.min(.45, Math.max(0, base.dodge + race.dodge + collection.dodge + equipment.dodge + equipment.dodgePercent)),
+    accuracy: Math.min(1.30, 1.05 + equipment.accuracy + equipment.accuracyPercent + (character?.job === 'hunter' ? .05 : 0) + (hunterPrecisionTier ? .10 + (hunterPrecisionTier - 1) * .02 : 0)),
+    attackSpeed: EquipmentPolicy.getAttacksPerSecond(equippedWeapon, base.attackSpeed * 1.15) * (1 + equipment.attackSpeedBonus + equipment.attackSpeedPercent),
+    cooldownSpeed: (character?.race === 'elf' ? 1.03 : 1) * (1 + equipment.cooldownSpeedBonus + equipment.cooldownSpeedPercent),
+    manaRegen: 1 + equipment.manaRegenBonus + equipment.manaRegenerationPercent,
     manaRegenFlat: equipment.manaRegenFlat,
     magicDamageBonus: Math.max(0, equipment.magicDamageBonus),
     parry: Math.min(.50, Math.max(0, equipment.parry)),
@@ -1576,6 +1595,10 @@ function itemStatsText(item) {
   if (item.arrowRecoveryInterval) parts.push(`每 ${(Number(item.arrowRecoveryInterval) / 1000).toFixed(1).replace(/\.0$/, '')} 秒恢復 1 支箭矢`);
   if (item.arrowRecoverySpeedBonus) parts.push(`箭矢恢復速度 +${Math.round(Number(item.arrowRecoverySpeedBonus) * 100)}%`);
   if (item.affix) parts.push(`詞綴【${item.affix.name}】：${item.affix.text}`);
+  (Array.isArray(item.affixes) ? item.affixes : []).forEach((entry) => {
+    const text = EquipmentAffixPolicy.formatAffix(entry);
+    if (text) parts.push(`詞綴【${text}】`);
+  });
   if (item.allowedJobs?.length) parts.push(`職業：${item.allowedJobs.map((job) => ({ warrior: '戰士', assassin: '刺客', hunter: '獵人', mage: '法師', priest: '牧師' })[job] || job).join('、')}`);
   return parts.join('　') || item.description || '';
 }
@@ -1641,6 +1664,7 @@ function equipmentStackKey(item) {
     movementSpeedBonus: item.movementSpeedBonus || 0,
     enhanceLevel: item.enhanceLevel || 0,
     affix: item.affix || null,
+    affixes: item.affixes || [],
     allowedJobs: [...(item.allowedJobs || [])].sort()
   });
 }
@@ -1668,7 +1692,11 @@ function itemImagePath(item) {
   return item.image || (['weapon', 'offhand'].includes(item.slot) ? 'assets/equipment-weapon.png' : 'assets/equipment-armor.png');
 }
 
-function itemQualityClass(item) { return item.quality === '優良' ? 'quality-excellent' : item.quality === '稀有' ? 'quality-rare' : 'quality-normal'; }
+function itemQualityClass(item) { return EquipmentAffixPolicy.normalizeQuality(item?.quality) === 'uncommon' ? 'quality-excellent' : item?.quality === '稀有' ? 'quality-rare' : 'quality-normal'; }
+
+function itemQualityLabel(item) {
+  return item?.kind === 'equipment' ? EquipmentAffixPolicy.getQualityLabel(item) : item?.quality || '道具';
+}
 
 function renderInventory(view = 'inventory') {
   const progress = getProgress();
@@ -1693,10 +1721,10 @@ function renderInventory(view = 'inventory') {
     const score = equipmentScore(item);
     const scoreDifference = score - equipmentScore(currentItem);
     const scoreText = item.kind === 'equipment' ? `<em class="equipment-score">評分 ${score}${!equipped ? `<span class="score-difference ${scoreDifference >= 0 ? 'upgrade' : 'downgrade'}">${scoreDifference >= 0 ? '▲' : '▼'} ${Math.abs(scoreDifference)}</span>` : ''}</em>` : '';
-    const comparison = item.kind === 'equipment' && !equipped ? `<aside class="equipment-compare-tooltip"><strong>目前穿戴・${equipmentSlots[item.slot]?.label || item.slot}</strong>${currentItem ? `<div><span class="compare-item-icon"><img src="${itemImagePath(currentItem)}" alt=""></span><p><b>${currentItem.name}</b><small>評分 ${equipmentScore(currentItem)}　${currentItem.quality || '裝備'}　${itemStatsText(currentItem)}</small></p></div>` : '<p class="compare-empty">此欄位目前沒有穿戴裝備</p>'}</aside>` : '';
+    const comparison = item.kind === 'equipment' && !equipped ? `<aside class="equipment-compare-tooltip"><strong>目前穿戴・${equipmentSlots[item.slot]?.label || item.slot}</strong>${currentItem ? `<div><span class="compare-item-icon"><img src="${itemImagePath(currentItem)}" alt=""></span><p><b>${currentItem.name}</b><small>評分 ${equipmentScore(currentItem)}　${itemQualityLabel(currentItem)}　${itemStatsText(currentItem)}</small></p></div>` : '<p class="compare-empty">此欄位目前沒有穿戴裝備</p>'}</aside>` : '';
     const equipSlots = item.kind === 'equipment' ? EquipmentPolicy.getEquipSlots(item, character?.job) : [];
     const equipControls = equipSlots.map((targetSlot) => `<button type="button" data-equip-id="${item.id}" data-equip-slot="${targetSlot}">${equipSlots.length > 1 ? targetSlot === 'weapon' ? '裝主手' : '裝副手' : '穿戴'}</button>`).join('');
-    return `<article class="inventory-item ${itemQualityClass(item)} ${equipped ? 'is-equipped' : ''} ${!wearable ? 'incompatible' : ''}" tabindex="${item.kind === 'equipment' && !equipped ? '0' : '-1'}"><span class="item-icon">${visual}</span><div><b>${item.name}${stackQuantity > 1 ? ` ×${stackQuantity}` : ''}${equipped ? '<mark>已穿戴</mark>' : ''}</b><small><span class="item-quality">${item.quality || '道具'}</span>${slot}　${itemStatsText(item)}</small>${scoreText}</div>${item.kind === 'equipment' && !equipped ? wearable && equipControls ? equipControls : '<span class="equip-blocked">無法穿戴</span>' : ''}${scrapControl}${comparison}</article>`;
+    return `<article class="inventory-item ${itemQualityClass(item)} ${equipped ? 'is-equipped' : ''} ${!wearable ? 'incompatible' : ''}" tabindex="${item.kind === 'equipment' && !equipped ? '0' : '-1'}"><span class="item-icon">${visual}</span><div><b>${item.name}${stackQuantity > 1 ? ` ×${stackQuantity}` : ''}${equipped ? '<mark>已穿戴</mark>' : ''}</b><small><span class="item-quality">${itemQualityLabel(item)}</span>${slot}　${itemStatsText(item)}</small>${scoreText}</div>${item.kind === 'equipment' && !equipped ? wearable && equipControls ? equipControls : '<span class="equip-blocked">無法穿戴</span>' : ''}${scrapControl}${comparison}</article>`;
   };
   const categoryTabs = [
     ['weapon', '武器'],
@@ -1727,7 +1755,7 @@ function renderInventory(view = 'inventory') {
     const enhanceLevel = item?.enhanceLevel || 0;
     const nextRule = enhancementRules[enhanceLevel + 1];
     const enhanceButton = item ? enhanceLevel >= 3 ? '<button class="enhance-button maxed" type="button" disabled>強化 +3（最高）</button>' : `<button class="enhance-button" type="button" data-enhance-slot="${slot}">強化至 +${enhanceLevel + 1}<small>${nextRule.starIron} 碎片・${nextRule.gold} 金幣・${Math.round(nextRule.successRate * 100)}%</small></button>` : '';
-    return `<article class="equipment-frame slot-${slot} ${item ? `equipped ${itemQualityClass(item)}` : ''}"><span class="equipment-frame-icon">${visual}</span><b>${info.label}</b><small>${item ? `${item.name}${enhanceLevel ? ` +${enhanceLevel}` : ''}` : '空欄位'}</small>${item ? `<em><span class="item-quality">${item.quality}</span>　${itemStatsText(item)}</em>${enhanceButton}` : ''}</article>`;
+    return `<article class="equipment-frame slot-${slot} ${item ? `equipped ${itemQualityClass(item)}` : ''}"><span class="equipment-frame-icon">${visual}</span><b>${info.label}</b><small>${item ? `${item.name}${enhanceLevel ? ` +${enhanceLevel}` : ''}` : '空欄位'}</small>${item ? `<em><span class="item-quality">${itemQualityLabel(item)}</span>　${itemStatsText(item)}</em>${enhanceButton}` : ''}</article>`;
   }).join('');
   content.innerHTML = view === 'equipment'
     ? `${resourceBar}<section class="paper-doll" aria-label="角色裝備紙娃娃"><span class="paper-doll-silhouette" aria-hidden="true">🧍</span>${paperDoll}</section>`
