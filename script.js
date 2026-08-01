@@ -553,7 +553,7 @@ function openCreation(slotIndex = 0) {
   renderCreation();
 }
 
-const monsterTypes = {
+const monsterTypes = EquipmentDropPolicy.applyDefaultLootConfigs({
   plainsRabbit: { id: 'plainsRabbit', name: '野兔', maxHp: 24, attack: 5, defense: 0, evasion: 8, parry: 0, damageReduction: 0, artClass: 'plains-rabbit-art', xp: 4, gold: 1, lootConfig: EquipmentDropPolicy.TEST_LOOT_CONFIGS.normal },
   plainsWolfPup: { id: 'plainsWolfPup', name: '幼狼', maxHp: 34, attack: 7, defense: 1, evasion: 5, parry: 0, damageReduction: 0, artClass: 'plains-wolf-pup-art', xp: 4, gold: 2 },
   plainsSlime: { id: 'plainsSlime', name: '小史萊姆', maxHp: 30, attack: 6, defense: 0, evasion: 0, parry: 0, damageReduction: 5, artClass: 'plains-slime-art', xp: 4, gold: 1 },
@@ -594,7 +594,7 @@ const monsterTypes = {
   blightOracle: { id: 'blightOracle', name: '疫木神諭', maxHp: 860, attack: 30, defense: 16, evasion: 10, parry: 3, damageReduction: 12, artClass: 'dungeon-oracle dungeon-monster-art', xp: 32, gold: 76, isElite: true, lootSource: 'dungeonElite' },
   eclipseSovereign: { id: 'eclipseSovereign', name: '蝕月鹿王', maxHp: 5200, attack: 39, defense: 45, evasion: 8, parry: 12, damageReduction: 18, artClass: 'dungeon-boss dungeon-monster-art', xp: 180, gold: 620, isBoss: true, lootSource: 'dungeonBoss' },
   ...PlainsDepthsPolicy.MONSTER_TYPES
-};
+});
 const normalMonsterIds = ['goblin', 'wolf', 'boar'];
 const eliteMonsterIds = ['goblinOverlord', 'wolfAlpha', 'boarTyrant'];
 const bossMonsterIds = ['goblinKing'];

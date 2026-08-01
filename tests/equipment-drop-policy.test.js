@@ -18,6 +18,20 @@ assert.equal(bossEnemy.lootConfig.equipmentDropRate, 1);
 assert.deepEqual(bossEnemy.lootConfig.rarityWeights, { common: 40, uncommon: 60 });
 assert.notDeepEqual(normalEnemy.lootConfig.rarityWeights, bossEnemy.lootConfig.rarityWeights, 'monster ranks can use distinct rarity tables');
 
+const configuredMonsters = dropPolicy.applyDefaultLootConfigs({
+  normal: { id: 'normal' },
+  rare: { id: 'rare', isRare: true },
+  elite: { id: 'elite', isElite: true },
+  boss: { id: 'boss', isBoss: true },
+  custom: { id: 'custom', lootConfig: { equipmentDropRate: .01, rarityWeights: { common: 1 }, equipmentPools: ['custom'] } }
+});
+assert.equal(configuredMonsters.normal.lootConfig, dropPolicy.TEST_LOOT_CONFIGS.normal);
+assert.equal(configuredMonsters.rare.lootConfig, dropPolicy.TEST_LOOT_CONFIGS.normal, 'rare monsters use the normal-rank baseline until a rare profile is added');
+assert.equal(configuredMonsters.elite.lootConfig, dropPolicy.TEST_LOOT_CONFIGS.elite);
+assert.equal(configuredMonsters.boss.lootConfig, dropPolicy.TEST_LOOT_CONFIGS.boss);
+assert.equal(configuredMonsters.custom.lootConfig.equipmentDropRate, .01, 'per-monster loot overrides remain supported');
+assert.notEqual(configuredMonsters.normal, normalEnemy, 'configuration returns independent monster objects');
+
 const noDropProgress = { inventory: [] };
 assert.equal(dropPolicy.grantEquipmentDrop(noDropProgress, normalEnemy, { random: sequence([.99]) }), null);
 assert.equal(noDropProgress.inventory.length, 0);

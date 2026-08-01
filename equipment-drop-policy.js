@@ -77,6 +77,19 @@
     ], randomValue, warningHandler);
   }
 
+  function getDefaultLootConfig(enemy) {
+    if (enemy?.isBoss) return TEST_LOOT_CONFIGS.boss;
+    if (enemy?.isElite) return TEST_LOOT_CONFIGS.elite;
+    return TEST_LOOT_CONFIGS.normal;
+  }
+
+  function applyDefaultLootConfigs(monsterTypes) {
+    return Object.fromEntries(Object.entries(monsterTypes || {}).map(([id, enemy]) => [id, {
+      ...enemy,
+      lootConfig: enemy?.lootConfig || getDefaultLootConfig(enemy)
+    }]));
+  }
+
   function getTemplatesFromPools(poolIds, warningHandler) {
     if (!Array.isArray(poolIds) || !poolIds.length) {
       warn('怪物沒有設定 equipmentPools，已略過本次裝備掉落。', poolIds, warningHandler);
@@ -217,6 +230,8 @@
   return {
     EQUIPMENT_POOLS,
     TEST_LOOT_CONFIGS,
+    getDefaultLootConfig,
+    applyDefaultLootConfigs,
     rollRarity,
     getTemplatesFromPools,
     createInstanceId,
