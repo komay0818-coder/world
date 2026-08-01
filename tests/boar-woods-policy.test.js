@@ -9,10 +9,12 @@ function check(actual, expected) {
 
 const piglet = { id: 'boarPiglet', damageReduction: 2 };
 const protectedPiglet = policy.applyBoarWoodsPassive(piglet, 'boar-woods');
-check(protectedPiglet.damageReduction, 2);
+check(policy.THICK_HIDE_DAMAGE_REDUCTION_BONUS, 5);
+check(protectedPiglet.damageReduction, 7);
 check(protectedPiglet.passiveDamageReduction, true);
 check(policy.applyBoarWoodsPassive(piglet, 'wolf-den'), piglet);
 check(policy.applyBoarWoodsPassive({ id: 'lostGoblin', damageReduction: 2 }, 'boar-woods').passiveDamageReduction, undefined);
+check(policy.applyBoarWoodsPassive({ id: 'boarKing', damageReduction: 94 }, 'boar-woods').damageReduction, 95);
 
 check(policy.isIrritableActive('irritableBoar', 39, 100), true);
 check(policy.isIrritableActive('irritableBoar', 40, 100), false);

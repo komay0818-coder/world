@@ -111,6 +111,7 @@ DEV 測試網址：<https://raw.githack.com/komay0818-coder/world/dev/index.html
 ### 野豬林
 
 - 怪物包含野豬幼崽、森林野豬、暴躁野豬與 Boss 野豬王。
+- 厚皮已實裝：野豬林內所有野豬獲得固定 5 個百分點傷害減免，並遵守 95% 上限。
 - 暴躁型怪物生命低於 40% 時獲得 15% 強化。
 - 野豬王具有衝鋒及暈眩效果。
 - 規畫檔：`boar-woods-policy.js`。

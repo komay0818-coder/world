@@ -4,6 +4,7 @@
   else root.BoarWoodsPolicy = api;
 }(typeof globalThis !== 'undefined' ? globalThis : this, function createBoarWoodsPolicy() {
   const BOAR_TYPES = Object.freeze(['boarPiglet', 'forestBoar', 'irritableBoar', 'boarKing']);
+  const THICK_HIDE_DAMAGE_REDUCTION_BONUS = 5;
   const IRRITABLE_TYPES = Object.freeze(['irritableBoar', 'boarKing']);
   const IRRITABLE_HP_THRESHOLD = .40;
   const IRRITABLE_BONUS = .15;
@@ -12,7 +13,11 @@
 
   function applyBoarWoodsPassive(monster = {}, mapId = '') {
     if (mapId !== 'boar-woods' || !BOAR_TYPES.includes(monster.id)) return monster;
-    return { ...monster, passiveDamageReduction: true };
+    return {
+      ...monster,
+      damageReduction: Math.min(95, Math.max(0, Number(monster.damageReduction) || 0) + THICK_HIDE_DAMAGE_REDUCTION_BONUS),
+      passiveDamageReduction: true
+    };
   }
 
   function isIrritableActive(monsterId, currentHp, maxHp) {
@@ -31,6 +36,7 @@
 
   return {
     BOAR_TYPES,
+    THICK_HIDE_DAMAGE_REDUCTION_BONUS,
     IRRITABLE_TYPES,
     IRRITABLE_HP_THRESHOLD,
     IRRITABLE_BONUS,
