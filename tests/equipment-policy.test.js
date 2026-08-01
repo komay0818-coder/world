@@ -186,6 +186,10 @@ assert.deepEqual([armor.leatherShortBoots.defense, armor.leatherShortBoots.dodge
 assert.deepEqual([armor.travelLongBoots.defense, armor.travelLongBoots.movementSpeedBonus], [6, .08], 'travel long boots stats match the design');
 assert.deepEqual([armor.apprenticeClothShoes.defense, armor.apprenticeClothShoes.mana], [4, 40], 'apprentice cloth shoes stats match the design');
 assert.deepEqual([armor.arcaneLongBoots.defense, armor.arcaneLongBoots.manaRegenFlat], [3, 2], 'arcane long boots stats match the design');
+assert.equal(armor.apprenticeClothShoes.name, '新兵布鞋', 'chapter one recruit cloth shoes use the recruit-series name');
+assert.equal(armor.arcaneLongBoots.name, '守衛法靴', 'chapter one guard cloth boots use the guard-series name');
+assert.equal(armor.apprenticeClothShoes.image.split('?')[0], 'assets/recruit-cloth-shoes.png', 'recruit cloth shoes use their dedicated image');
+assert.equal(armor.arcaneLongBoots.image.split('?')[0], 'assets/guard-cloth-boots.png', 'guard cloth boots use their dedicated image');
 assert.deepEqual(policy.getEquipSlots(armor.recruitIronBoots, 'warrior'), ['boots'], 'warriors can equip plate boots');
 assert.deepEqual(policy.getEquipSlots(armor.leatherShortBoots, 'assassin'), ['boots'], 'assassins can equip leather boots');
 assert.deepEqual(policy.getEquipSlots(armor.travelLongBoots, 'hunter'), ['boots'], 'hunters can equip leather boots');
