@@ -15,6 +15,7 @@ assert.equal(normalEnemy.lootConfig.equipmentDropRate, .25);
 assert.deepEqual(normalEnemy.lootConfig.rarityWeights, { common: 90, uncommon: 10 });
 assert.equal(eliteEnemy.lootConfig.equipmentDropRate, .40);
 assert.equal(bossEnemy.lootConfig.equipmentDropRate, 1);
+assert.deepEqual(bossEnemy.lootConfig.rarityWeights, { common: 40, uncommon: 60 });
 assert.notDeepEqual(normalEnemy.lootConfig.rarityWeights, bossEnemy.lootConfig.rarityWeights, 'monster ranks can use distinct rarity tables');
 
 const noDropProgress = { inventory: [] };

@@ -31,7 +31,7 @@
     }),
     boss: Object.freeze({
       equipmentDropRate: 1,
-      rarityWeights: Object.freeze({ common: 20, uncommon: 80 }),
+      rarityWeights: Object.freeze({ common: 40, uncommon: 60 }),
       equipmentPools: Object.freeze(['plains_common_weapons', 'plains_common_armor'])
     })
   });
