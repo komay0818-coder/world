@@ -20,6 +20,7 @@ DEV 測試網址：<https://raw.githack.com/komay0818-coder/world/dev/index.html
 - 工坊介面提供三張測試配方、預覽主能力池與詞綴數，完成後顯示並保存實際結果。
 - 背包與穿戴比較固定顯示主能力後再顯示額外詞綴；藍、紫品質可正確載入與標示。
 - 驗證指令：使用 Node.js 執行 `tests/crafting-policy.test.js`；完整回歸可依序執行 `tests/*.test.js`。
+- 背包與穿戴比較已移除裝備評分及升降分數，改以品質與實際能力直接比較。
 
 ## 2026-08-02 隊伍狀態與戰鬥紀錄修正
 

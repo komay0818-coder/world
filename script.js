@@ -1661,32 +1661,6 @@ function isItemWearableByCharacter(item, character) {
   return item.kind !== 'equipment' || Boolean(character && EquipmentPolicy.getEquipSlots(item, character.job).length);
 }
 
-function equipmentValue(item) {
-  return equipmentScore(item);
-}
-
-function equipmentScore(item) {
-  if (!item || item.kind !== 'equipment') return 0;
-  return Math.round(
-    effectiveEquipmentStat(item, 'attack') * 4
-    + effectiveEquipmentStat(item, 'defense') * 6
-    + effectiveEquipmentStat(item, 'hp') * .25
-    + effectiveEquipmentStat(item, 'mana') * .2
-    + effectiveEquipmentStat(item, 'strength') * 4
-    + effectiveEquipmentStat(item, 'intelligence') * 4
-    + effectiveEquipmentStat(item, 'accuracy') * 200
-    + effectiveEquipmentStat(item, 'dodge') * 200
-    + effectiveEquipmentStat(item, 'attackSpeedBonus') * 200
-    + effectiveEquipmentStat(item, 'cooldownSpeedBonus') * 200
-    + effectiveEquipmentStat(item, 'manaRegenBonus') * 200
-    + effectiveEquipmentStat(item, 'manaRegenFlat') * 10
-    + effectiveEquipmentStat(item, 'magicDamageBonus') * 200
-    + effectiveEquipmentStat(item, 'parry') * 200
-    + effectiveEquipmentStat(item, 'damageReduction') * 200
-    + effectiveEquipmentStat(item, 'movementSpeedBonus') * 100
-  );
-}
-
 function equipmentStackKey(item) {
   return JSON.stringify({
     name: item.name,
@@ -1768,13 +1742,10 @@ function renderInventory(view = 'inventory') {
       : '';
     const visual = item.kind === 'equipment' ? `<img src="${itemImagePath(item)}" alt="" class="equipment-item-image">` : item.icon || '◈';
     const currentItem = item.kind === 'equipment' ? progress.equipment[item.slot] : null;
-    const score = equipmentScore(item);
-    const scoreDifference = score - equipmentScore(currentItem);
-    const scoreText = item.kind === 'equipment' ? `<em class="equipment-score">評分 ${score}${!equipped ? `<span class="score-difference ${scoreDifference >= 0 ? 'upgrade' : 'downgrade'}">${scoreDifference >= 0 ? '▲' : '▼'} ${Math.abs(scoreDifference)}</span>` : ''}</em>` : '';
-    const comparison = item.kind === 'equipment' && !equipped ? `<aside class="equipment-compare-tooltip"><strong>目前穿戴・${equipmentSlots[item.slot]?.label || item.slot}</strong>${currentItem ? `<div><span class="compare-item-icon"><img src="${itemImagePath(currentItem)}" alt=""></span><p><b>${currentItem.name}</b><small>評分 ${equipmentScore(currentItem)}　${itemQualityLabel(currentItem)}　${itemStatsText(currentItem)}</small></p></div>` : '<p class="compare-empty">此欄位目前沒有穿戴裝備</p>'}</aside>` : '';
+    const comparison = item.kind === 'equipment' && !equipped ? `<aside class="equipment-compare-tooltip"><strong>目前穿戴・${equipmentSlots[item.slot]?.label || item.slot}</strong>${currentItem ? `<div><span class="compare-item-icon"><img src="${itemImagePath(currentItem)}" alt=""></span><p><b>${currentItem.name}</b><small>${itemQualityLabel(currentItem)}　${itemStatsText(currentItem)}</small></p></div>` : '<p class="compare-empty">此欄位目前沒有穿戴裝備</p>'}</aside>` : '';
     const equipSlots = item.kind === 'equipment' ? EquipmentPolicy.getEquipSlots(item, character?.job) : [];
     const equipControls = equipSlots.map((targetSlot) => `<button type="button" data-equip-id="${item.id}" data-equip-slot="${targetSlot}">${equipSlots.length > 1 ? targetSlot === 'weapon' ? '裝主手' : '裝副手' : '穿戴'}</button>`).join('');
-    return `<article class="inventory-item ${itemQualityClass(item)} ${equipped ? 'is-equipped' : ''} ${!wearable ? 'incompatible' : ''}" tabindex="${item.kind === 'equipment' && !equipped ? '0' : '-1'}"><span class="item-icon">${visual}</span><div><b>${item.name}${stackQuantity > 1 ? ` ×${stackQuantity}` : ''}${equipped ? '<mark>已穿戴</mark>' : ''}</b><small><span class="item-quality">${itemQualityLabel(item)}</span>${slot}　${itemStatsText(item)}</small>${scoreText}</div>${item.kind === 'equipment' && !equipped ? wearable && equipControls ? equipControls : '<span class="equip-blocked">無法穿戴</span>' : ''}${scrapControl}${comparison}</article>`;
+    return `<article class="inventory-item ${itemQualityClass(item)} ${equipped ? 'is-equipped' : ''} ${!wearable ? 'incompatible' : ''}" tabindex="${item.kind === 'equipment' && !equipped ? '0' : '-1'}"><span class="item-icon">${visual}</span><div><b>${item.name}${stackQuantity > 1 ? ` ×${stackQuantity}` : ''}${equipped ? '<mark>已穿戴</mark>' : ''}</b><small><span class="item-quality">${itemQualityLabel(item)}</span>${slot}　${itemStatsText(item)}</small></div>${item.kind === 'equipment' && !equipped ? wearable && equipControls ? equipControls : '<span class="equip-blocked">無法穿戴</span>' : ''}${scrapControl}${comparison}</article>`;
   };
   const categoryTabs = [
     ['weapon', '武器'],
@@ -1788,7 +1759,7 @@ function renderInventory(view = 'inventory') {
     .sort((first, second) => {
       if (!['weapon', 'armor'].includes(inventoryCategory)) return 0;
       const wearableDifference = Number(isItemWearableByCharacter(second, character)) - Number(isItemWearableByCharacter(first, character));
-      return wearableDifference || equipmentValue(second) - equipmentValue(first) || first.name.localeCompare(second.name, 'zh-Hant');
+      return wearableDifference || first.name.localeCompare(second.name, 'zh-Hant');
     });
   const stackedItems = stackIdenticalEquipment(filteredItems);
   const itemCards = stackedItems.length
