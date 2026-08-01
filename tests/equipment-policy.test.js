@@ -106,6 +106,10 @@ assert.equal(armor.leatherVest.image.split('?')[0], 'assets/leather-vest.png', '
 assert.equal(armor.huntingLeatherArmor.image.split('?')[0], 'assets/hunting-leather-armor.png', 'hunting leather armor uses its dedicated image');
 assert.deepEqual([armor.apprenticeRobe.defense, armor.apprenticeRobe.mana], [3, 50], 'apprentice robe stats match the design');
 assert.deepEqual([armor.novicePriestRobe.defense, armor.novicePriestRobe.mana, armor.novicePriestRobe.manaRegenFlat], [2, 15, 1], 'novice priest robe stats match the design');
+assert.equal(armor.apprenticeRobe.name, '新兵布衣', 'the first chapter recruit cloth armor uses its requested name');
+assert.equal(armor.novicePriestRobe.name, '守衛法袍', 'the first chapter guard cloth armor uses its requested name');
+assert.equal(armor.apprenticeRobe.image.split('?')[0], 'assets/recruit-cloth-robe.png', 'the recruit cloth armor uses the first supplied image');
+assert.equal(armor.novicePriestRobe.image.split('?')[0], 'assets/guard-cloth-robe.png', 'the guard cloth armor uses the second supplied image');
 assert.deepEqual(policy.getEquipSlots(armor.recruitPlateArmor, 'warrior'), ['armor'], 'warriors can equip recruit plate armor');
 assert.deepEqual(policy.getEquipSlots(armor.recruitPlateArmor, 'hunter'), [], 'hunters cannot equip recruit plate armor');
 assert.deepEqual(policy.getEquipSlots(armor.leatherVest, 'hunter'), ['armor'], 'hunters can equip leather vests');
