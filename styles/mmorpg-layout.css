@@ -1532,8 +1532,11 @@
 .battle-header .battle-party-member {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
-  grid-template-rows: auto 4px 4px;
+  grid-template-rows: minmax(0, auto) 4px 4px;
+  align-items: center;
   gap: 3px 6px;
+  box-sizing: border-box;
+  min-height: 0;
   min-width: 0;
   overflow: hidden;
 }
@@ -1554,12 +1557,19 @@
 
 .battle-header .party-mini-track {
   display: block;
+  position: relative;
+  box-sizing: border-box;
+  align-self: center;
   grid-column: 1 / -1;
+  flex: 0 0 4px;
   width: 100%;
   height: 4px !important;
   min-height: 4px !important;
+  max-height: 4px !important;
   margin: 0;
   padding: 0;
+  line-height: 0;
+  overflow: hidden;
 }
 
 .battle-header .party-mini-track.hp { grid-row: 2; }
@@ -1567,8 +1577,11 @@
 
 .battle-header .party-mini-track > i {
   display: block;
+  position: absolute;
+  inset: 0 auto 0 0;
   height: 100% !important;
   min-height: 0 !important;
+  max-height: 4px !important;
   margin: 0;
   padding: 0;
 }
