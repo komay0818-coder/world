@@ -19,6 +19,7 @@
   <link rel="stylesheet" href="styles/mobile.css?v=20260728-mobile-log-flow-v6" />
   <link rel="stylesheet" href="styles/mmorpg-layout.css?v=20260801-party-health-bars-v41" />
   <link rel="stylesheet" href="styles/monster-slots.css?v=20260727-no-replacement-motion-v4" />
+  <link rel="stylesheet" href="styles/village.css?v=20260801-village-v1" />
 </head>
 <body>
   <div class="sky" aria-hidden="true"></div>
@@ -57,6 +58,7 @@
         <button id="adventure-button" class="menu-card featured" type="button">
           <span class="card-icon">⚔</span><span class="card-copy"><strong>開始冒險</strong><small>探索未知星域</small></span><span class="arrow">→</span>
         </button>
+        <button id="village-menu-button" class="menu-card" type="button"><span class="card-icon gold">⌂</span><span class="card-copy"><strong>村莊</strong><small>管理建築與製作設施</small></span><span class="arrow">›</span></button>
         <button id="character-roster-button" class="menu-card" type="button"><span class="card-icon violet">♟</span><span class="card-copy"><strong>我的角色</strong><small>建立或切換最多 2 名角色</small></span><span class="arrow">→</span></button>
         <button class="menu-card" type="button" data-message="倉庫目前還沒有收藏品。"><span class="card-icon gold">▣</span><span class="card-copy"><strong>星塵倉庫</strong><small>整理你的珍貴收藏</small></span><span class="arrow">→</span></button>
         <button class="menu-card" type="button" data-message="成就系統將記錄你的每個里程碑。"><span class="card-icon teal">✧</span><span class="card-copy"><strong>成就圖鑑</strong><small>解鎖旅程的每個瞬間</small></span><span class="arrow">→</span></button>
@@ -153,7 +155,11 @@
         <div id="enemy-squad" class="enemy-squad monster-slot-grid" role="grid" aria-label="怪物戰鬥槽"></div>
         <div class="battle-status"><span><b>⚔</b> 自動戰鬥中 · <strong id="enemy-count">5</strong> 隻敵人</span><span><b>✦</b> <strong id="gold-count">0</strong> 金幣</span></div>
       </div>
-      <div class="battle-bottom"><div class="combat-log"><p>戰鬥紀錄</p><div id="combat-log-lines" aria-live="polite"></div></div><section class="skill-panel" aria-labelledby="skill-panel-title"><div class="skill-panel-head"><strong id="skill-panel-title">技能</strong><small id="skill-resource-status">自動施放</small></div><button id="potion-button" class="potion-button" type="button"><span>🧪</span><span>治癒藥水</span><b id="potion-count">5</b></button><button id="mana-potion-button" class="potion-button" type="button"><span>🔷</span><span>魔法藥水</span><b id="mana-potion-count">0</b></button><div id="skill-list" class="skill-list"></div></section><nav class="battle-menu" aria-label="遊戲選單"><button class="battle-menu-button ability-button" type="button" data-menu-action="能力"><span>◆</span><b>能力</b><small>數值</small></button><button class="battle-menu-button" type="button" data-menu-action="背包"><span>🎒</span><b>背包</b><small>道具</small></button><button class="battle-menu-button" type="button" data-menu-action="裝備"><span>⚔</span><b>裝備</b><small>角色</small></button><button class="battle-menu-button" type="button" data-menu-action="隊伍"><span>👥</span><b>隊伍</b><small>編組</small></button><button class="battle-menu-button collection-button" type="button" data-menu-action="收藏品"><span>♛</span><b>收藏品</b><small>永久能力</small></button></nav></div>
+      <div class="battle-bottom"><div class="combat-log"><p>戰鬥紀錄</p><div id="combat-log-lines" aria-live="polite"></div></div><section class="skill-panel" aria-labelledby="skill-panel-title"><div class="skill-panel-head"><strong id="skill-panel-title">技能</strong><small id="skill-resource-status">自動施放</small></div><button id="potion-button" class="potion-button" type="button"><span>🧪</span><span>治癒藥水</span><b id="potion-count">5</b></button><button id="mana-potion-button" class="potion-button" type="button"><span>🔷</span><span>魔法藥水</span><b id="mana-potion-count">0</b></button><div id="skill-list" class="skill-list"></div></section><nav class="battle-menu" aria-label="遊戲選單"><button class="battle-menu-button ability-button" type="button" data-menu-action="能力"><span>◆</span><b>能力</b><small>數值</small></button><button class="battle-menu-button" type="button" data-menu-action="背包"><span>🎒</span><b>背包</b><small>道具</small></button><button class="battle-menu-button" type="button" data-menu-action="裝備"><span>⚔</span><b>裝備</b><small>角色</small></button><button class="battle-menu-button" type="button" data-menu-action="隊伍"><span>👥</span><b>隊伍</b><small>編組</small></button><button class="battle-menu-button collection-button" type="button" data-menu-action="收藏品"><span>♛</span><b>收藏品</b><small>永久能力</small></button><button class="battle-menu-button village-button" type="button" data-menu-action="村莊"><span>⌂</span><b>村莊</b><small>建築</small></button></nav></div>
+    </section>
+    <section id="village-screen" class="screen village-screen hidden" aria-labelledby="village-title">
+      <header class="village-header"><div><p class="eyebrow">VILLAGE</p><h2 id="village-title">星塵村莊 <span id="village-level" class="village-level">Lv1</span></h2></div><button id="village-return" class="village-return" type="button">返回戰鬥</button></header>
+      <div class="village-main"><p class="village-intro">選擇建築查看目前設施。製作與升級功能將於後續版本開放。</p><div id="village-building-grid" class="village-building-grid"></div></div>
     </section>
   </main>
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
@@ -182,6 +188,9 @@
       <div id="party-content"></div>
     </section>
   </div>
+  <div id="village-building-modal" class="inventory-modal hidden" role="dialog" aria-modal="true" aria-labelledby="village-building-title">
+    <section class="inventory-window village-building-window"><header><div><p class="eyebrow">VILLAGE BUILDING</p><h2 id="village-building-title">村莊建築</h2></div><button id="village-building-close" class="village-building-close" type="button" aria-label="關閉建築面板">×</button></header><div id="village-building-content" class="village-building-content"></div></section>
+  </div>
   <script src="monster-defense.js?v=20260729-defense-balance-v2"></script>
   <script src="chapter-one-level-policy.js?v=20260728-level-distribution-v1"></script>
   <script src="wolf-den-policy.js?v=20260728-wolf-passives-v1"></script>
@@ -197,6 +206,7 @@
   <script src="monster-display-policy.js?v=20260729-dedicated-transparent-images-v3"></script>
   <script src="dungeon-ticket.js?v=20260727-goblin-camp-wave-roster-v4"></script>
   <script src="party-policy.js?v=20260801-party-validation-v2"></script>
-  <script src="script.js?v=20260801-party-validation-v95"></script>
+  <script src="village-policy.js?v=20260801-village-v1"></script>
+  <script src="script.js?v=20260801-village-v96"></script>
 </body>
 </html>

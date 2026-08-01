@@ -1,0 +1,27 @@
+const assert = require('node:assert/strict');
+const fs = require('node:fs');
+const path = require('node:path');
+
+const root = path.join(__dirname, '..');
+const script = fs.readFileSync(path.join(root, 'script.js'), 'utf8');
+const html = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
+const css = fs.readFileSync(path.join(root, 'styles', 'village.css'), 'utf8');
+
+['openVillage', 'closeVillage', 'renderVillage', 'openVillageBuilding', 'closeVillageBuilding', 'upgradeVillageBuilding', 'getVillageBuildingData', 'saveVillageData', 'loadVillageData'].forEach((name) => {
+  assert.match(script, new RegExp(`function ${name}\\(`), `${name} is available as a dedicated village entry point`);
+});
+assert.match(html, /id="village-screen"/);
+assert.match(html, /id="village-menu-button"/);
+assert.match(html, /data-menu-action="村莊"/);
+assert.equal((html.match(/id="village-building-modal"/g) || []).length, 1, 'all buildings share one modal');
+assert.match(script, /Object\.values\(VillagePolicy\.BUILDING_DEFINITIONS\)/, 'building cards render from centralized data');
+assert.match(script, /village: VillagePolicy\.normalizeVillageData\(saved\.village\)/, 'legacy progress is normalized on load');
+assert.match(script, /progress\.village = VillagePolicy\.normalizeVillageData\(progress\.village\)/, 'village state is normalized on save');
+assert.match(script, /villageReturnScreen = !battleScreen\.classList\.contains\('hidden'\) \? 'battle' : 'menu'/);
+assert.match(script, /if \(villageReturnScreen === 'battle'[\s\S]*battleScreen\.classList\.remove\('hidden'\)/, 'closing village reveals the existing battle screen');
+assert.doesNotMatch(script.match(/function closeVillage\(\) \{[\s\S]*?\n\}/)?.[0] || '', /openBattle|clearInterval/, 'village close neither regenerates battle nor changes its timers');
+assert.match(css, /grid-template-columns:repeat\(auto-fit,minmax\(230px,1fr\)\)/, 'building cards use a responsive grid');
+assert.match(css, /\.app-shell\.village-open\{width:100%;max-width:none;padding:0\}/, 'the village can use the desktop viewport width');
+assert.match(css, /grid-template-columns:repeat\(6,minmax\(0,1fr\)\)!important/, 'the battle menu accommodates the village entry');
+
+console.log('village-integration: assertions passed');

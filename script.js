@@ -2,6 +2,7 @@ const loginScreen = document.querySelector('#login-screen');
 const menuScreen = document.querySelector('#menu-screen');
 const characterScreen = document.querySelector('#character-screen');
 const battleScreen = document.querySelector('#battle-screen');
+const villageScreen = document.querySelector('#village-screen');
 const loginForm = document.querySelector('#login-form');
 const nameInput = document.querySelector('#player-name');
 const displayName = document.querySelector('#display-name');
@@ -14,6 +15,8 @@ let skillTooltipTimer;
 let selectedSkillKey = '';
 let skillUpgradeLockedUntil = 0;
 let lastSkillUpgradeResult = '';
+let villageData = null;
+let villageReturnScreen = 'menu';
 
 const factions = {
   light: [{ id: 'human', icon: '♙', portrait: 0, name: '人類', trait: '控制抗性 +20%' }, { id: 'elf', icon: '♧', portrait: 1, name: '精靈', trait: '暴擊率 +5%' }],
@@ -789,7 +792,8 @@ function getProgress() {
     inventory,
     equipment: { ...emptyEquipment(), ...(saved.equipment || {}) },
     collection: saved.collection && typeof saved.collection === 'object' ? saved.collection : {},
-    skillBooks: saved.skillBooks && typeof saved.skillBooks === 'object' ? saved.skillBooks : {}
+    skillBooks: saved.skillBooks && typeof saved.skillBooks === 'object' ? saved.skillBooks : {},
+    village: VillagePolicy.normalizeVillageData(saved.village)
   };
   const activeCharacter = JSON.parse(localStorage.getItem('stardust-character') || 'null');
   const activeSlotIndex = Number(localStorage.getItem('stardust-active-character-slot') || 0);
@@ -856,6 +860,7 @@ function syncActiveCharacterSlot(progressOverride = null) {
 
 function saveProgress(progress) {
   normalizeCurrentParty(progress);
+  progress.village = VillagePolicy.normalizeVillageData(progress.village);
   syncSkillMaterialInventory(progress);
   localStorage.setItem('stardust-progress', JSON.stringify(progress));
   syncActiveCharacterSlot(progress);
@@ -948,6 +953,74 @@ function renderCharacterRoster() {
     return `<article class="character-slot ${index === activeIndex ? 'active' : ''}"><span class="creation-race-icon race-${slot.character.race}" aria-hidden="true"></span><div><b>${slot.character.name}${index === activeIndex ? '　目前使用' : ''}</b><small>${raceName}・${jobName}・Lv. ${slot.progress.level || 1}</small></div>${index === activeIndex ? '<em>使用中</em>' : `<button type="button" data-activate-character-slot="${index}">切換角色</button>`}</article>`;
   }).join('');
   document.querySelector('#character-roster-modal').classList.remove('hidden');
+}
+
+function loadVillageData() {
+  const progress = getProgress();
+  villageData = VillagePolicy.normalizeVillageData(progress.village);
+  return villageData;
+}
+
+function saveVillageData() {
+  const progress = getProgress();
+  progress.village = VillagePolicy.normalizeVillageData(villageData || progress.village);
+  villageData = progress.village;
+  saveProgress(progress);
+  return villageData;
+}
+
+function getVillageBuildingData(buildingId) {
+  if (!villageData) loadVillageData();
+  return VillagePolicy.getVillageBuildingData(villageData, buildingId);
+}
+
+function renderVillage() {
+  if (!villageData) loadVillageData();
+  document.querySelector('#village-level').textContent = `Lv${villageData.level}`;
+  document.querySelector('#village-building-grid').innerHTML = Object.values(VillagePolicy.BUILDING_DEFINITIONS).map((definition) => {
+    const building = getVillageBuildingData(definition.id);
+    return `<article class="village-building-card" data-village-building="${building.id}">
+      <div class="village-building-icon" aria-hidden="true">${building.icon}</div>
+      <div class="village-building-copy"><h3>${building.name}</h3><small>Lv${building.level} / ${building.maxLevel}</small><p>${building.description}</p></div>
+      <div class="village-building-actions"><button class="village-enter" type="button" data-open-village-building="${building.id}">進入</button><button class="village-upgrade" type="button" data-upgrade-village-building="${building.id}" disabled>尚未開放</button></div>
+    </article>`;
+  }).join('');
+}
+
+function openVillage() {
+  villageReturnScreen = !battleScreen.classList.contains('hidden') ? 'battle' : 'menu';
+  battleScreen.classList.add('hidden');
+  menuScreen.classList.add('hidden');
+  loadVillageData();
+  renderVillage();
+  document.querySelector('#village-return').textContent = villageReturnScreen === 'battle' ? '返回戰鬥' : '返回主選單';
+  document.querySelector('.app-shell').classList.add('village-open');
+  villageScreen.classList.remove('hidden');
+}
+
+function closeVillage() {
+  closeVillageBuilding();
+  villageScreen.classList.add('hidden');
+  document.querySelector('.app-shell').classList.remove('village-open');
+  if (villageReturnScreen === 'battle' && localStorage.getItem('stardust-character')) battleScreen.classList.remove('hidden');
+  else menuScreen.classList.remove('hidden');
+}
+
+function openVillageBuilding(buildingId) {
+  const building = getVillageBuildingData(buildingId);
+  if (!building || !building.unlocked) return;
+  document.querySelector('#village-building-title').textContent = building.name;
+  document.querySelector('#village-building-content').innerHTML = `<div class="village-building-icon" aria-hidden="true">${building.icon}</div><h3>${building.name}</h3><small>建築等級 Lv${building.level} / ${building.maxLevel}</small><p>${building.description}</p><p class="village-placeholder">${building.name}功能尚未完成，將於後續版本加入。</p>`;
+  document.querySelector('#village-building-modal').classList.remove('hidden');
+}
+
+function closeVillageBuilding() {
+  document.querySelector('#village-building-modal')?.classList.add('hidden');
+}
+
+function upgradeVillageBuilding(buildingId) {
+  if (!getVillageBuildingData(buildingId)) return;
+  showToast('建築升級功能尚未開放。');
 }
 
 function getPartyMemberDisplayStats(memberRecord, slots = getCharacterSlots()) {
@@ -3398,6 +3471,7 @@ loginForm.addEventListener('submit', (event) => {
 document.querySelector('#profile-button').addEventListener('click', () => { nameInput.value = displayName.textContent; menuScreen.classList.add('hidden'); loginScreen.classList.remove('hidden'); nameInput.focus(); });
 document.querySelector('#reset-button').addEventListener('click', () => { localStorage.removeItem('stardust-player-name'); localStorage.removeItem('stardust-character'); localStorage.removeItem('stardust-progress'); localStorage.removeItem('stardust-character-slots'); localStorage.removeItem('stardust-active-character-slot'); nameInput.value = ''; enterMenu(''); menuScreen.classList.add('hidden'); loginScreen.classList.remove('hidden'); nameInput.focus(); });
 document.querySelector('#adventure-button').addEventListener('click', openBattle);
+document.querySelector('#village-menu-button').addEventListener('click', openVillage);
 document.querySelectorAll('[data-faction]').forEach((card) => card.addEventListener('click', () => { selection.faction = card.dataset.faction; selection.race = factions[selection.faction][0].id; document.querySelectorAll('[data-faction]').forEach((item) => item.classList.toggle('selected', item === card)); renderCreation(); }));
 raceChoices.addEventListener('click', (event) => { const choice = event.target.closest('[data-race]'); if (choice) { selection.race = choice.dataset.race; if (selection.race === 'orc' && selection.job === 'priest') selection.job = 'warrior'; renderCreation(); } });
 classChoices.addEventListener('click', (event) => { const choice = event.target.closest('[data-job]'); if (!choice) return; if (selection.race === 'orc' && choice.dataset.job === 'priest') { showToast('半獸人無法創立牧師職業。'); return; } selection.job = choice.dataset.job; renderCreation(); });
@@ -3556,7 +3630,19 @@ document.querySelectorAll('[data-menu-action]').forEach((button) => button.addEv
   if (button.dataset.menuAction === '背包') { renderInventory('inventory'); return; }
   if (button.dataset.menuAction === '裝備') { renderInventory('equipment'); return; }
   if (button.dataset.menuAction === '隊伍') { renderParty(); return; }
+  if (button.dataset.menuAction === '村莊') { openVillage(); return; }
 }));
+document.querySelector('#village-return').addEventListener('click', closeVillage);
+document.querySelector('#village-building-grid').addEventListener('click', (event) => {
+  const openButton = event.target.closest('[data-open-village-building]');
+  if (openButton) { openVillageBuilding(openButton.dataset.openVillageBuilding); return; }
+  const upgradeButton = event.target.closest('[data-upgrade-village-building]');
+  if (upgradeButton) upgradeVillageBuilding(upgradeButton.dataset.upgradeVillageBuilding);
+});
+document.querySelector('#village-building-close').addEventListener('click', closeVillageBuilding);
+document.querySelector('#village-building-modal').addEventListener('click', (event) => {
+  if (event.target === event.currentTarget) closeVillageBuilding();
+});
 document.querySelector('#party-close').addEventListener('click', () => document.querySelector('#party-modal').classList.add('hidden'));
 document.querySelector('#party-modal').addEventListener('click', (event) => {
   if (event.target === event.currentTarget) event.currentTarget.classList.add('hidden');
