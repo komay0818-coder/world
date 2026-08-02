@@ -2688,6 +2688,7 @@ function rewardVictory(index) {
   progress.gold += earnedGold;
   const loot = addLoot(progress, enemy);
   const collectible = addCollectibleLoot(progress, enemy);
+  const materialDrops = ChapterOneMaterialDropPolicy.grantMaterialDrops(progress, currentMap.id);
   let equipmentDrop = null;
   try {
     equipmentDrop = EquipmentDropPolicy.grantEquipmentDrop(progress, enemy);
@@ -2760,6 +2761,10 @@ function rewardVictory(index) {
   saveProgress(progress);
   logBattle(`✦ 擊敗${enemy.name}！獲得 ${earnedXp} EXP、${earnedGold} 金幣`, 'reward');
   if (loot) logBattle(`🎁 掉落【${loot.name}】${loot.quantity ? ` ×${loot.quantity}` : ''}`);
+  materialDrops.forEach((material) => {
+    showToast(`獲得材料：${material.name}`);
+    logBattle(`◆ 材料掉落【${material.name} ×${material.quantity}】`, 'loot');
+  });
   if (equipmentDrop) {
     const rarityLabel = EquipmentAffixPolicy.getQualityLabel(equipmentDrop);
     showToast(`獲得裝備：${equipmentDrop.name}`);
@@ -2785,7 +2790,7 @@ function rewardVictory(index) {
     rewardKey,
     xp: earnedXp,
     gold: earnedGold,
-    loot: [loot?.name, equipmentDrop?.name, blueBossDrop?.name, offhandDrop?.name, collectible?.name, ...accountDrops].filter(Boolean).join(',') || 'none'
+    loot: [loot?.name, ...materialDrops.map((material) => material.name), equipmentDrop?.name, blueBossDrop?.name, offhandDrop?.name, collectible?.name, ...accountDrops].filter(Boolean).join(',') || 'none'
   });
 }
 
