@@ -2936,6 +2936,11 @@ function updatePartyMemberManaExhaustion(member) {
   if (!member.manaExhausted && ratio <= .15) {
     member.manaExhausted = true;
     logBattle(`◇ ${member.name}魔力枯竭，暫停施放技能。`, 'system');
+    if (member.isMain) {
+      syncLegacyBattleStateFromMain();
+      useManaPotion();
+      syncMainBattleMemberFromLegacy();
+    }
   } else if (member.manaExhausted && ratio >= .45) {
     member.manaExhausted = false;
     logBattle(`◆ ${member.name}魔力恢復，重新開始施放技能。`, 'system');
