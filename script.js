@@ -1723,17 +1723,13 @@ function renderInventory(view = 'inventory') {
     const stackItems = stackIds.map((id) => progress.inventory.find((entry) => entry.id === id)).filter(Boolean);
     const selectedCount = stackIds.filter((id) => scrapSelection.has(id)).length;
     const junkCandidate = stackItems.some((entry) => InventorySalePolicy.isJunkCandidate(entry, getItemJunkContext(entry, character, progress)));
-    const explicitlyMarked = stackItems.length > 0 && stackItems.every((entry) => entry.isJunk === true);
-    const scrapControl = item.kind === 'equipment' && !equipped && options.allowScrap !== false
-      ? `<label class="scrap-select"><input type="checkbox" data-scrap-ids="${stackIds.join(',')}" ${selectedCount === stackIds.length ? 'checked' : ''}><span>販售${stackIds.length > 1 ? '（整疊）' : ''}</span></label><button type="button" class="junk-mark-toggle" data-toggle-junk-ids="${stackIds.join(',')}">${explicitlyMarked ? '取消廢品標記' : '標記廢品'}</button>`
-      : '';
     const junkBadge = junkCandidate ? '<span class="junk-badge" title="不能裝備的廢品" aria-label="不能裝備的廢品">🗑</span>' : '';
     const visual = item.kind === 'equipment' ? `<img src="${itemImagePath(item)}" alt="" class="equipment-item-image">` : item.icon || '◈';
     const currentItem = item.kind === 'equipment' ? progress.equipment[item.slot] : null;
     const comparison = item.kind === 'equipment' && !equipped ? `<aside class="equipment-compare-tooltip"><strong>目前穿戴・${equipmentSlots[item.slot]?.label || item.slot}</strong>${currentItem ? `<div><span class="compare-item-icon"><img src="${itemImagePath(currentItem)}" alt=""></span><p><b>${currentItem.name}</b><small>${itemStatsText(currentItem)}</small></p></div>` : '<p class="compare-empty">此欄位目前沒有穿戴裝備</p>'}</aside>` : '';
     const equipSlots = item.kind === 'equipment' ? EquipmentPolicy.getEquipSlots(item, character?.job) : [];
     const equipControls = equipSlots.map((targetSlot) => `<button type="button" data-equip-id="${item.id}" data-equip-slot="${targetSlot}">${equipSlots.length > 1 ? targetSlot === 'weapon' ? '裝主手' : '裝副手' : '穿戴'}</button>`).join('');
-    return `<article class="inventory-item ${itemQualityClass(item)} ${equipped ? 'is-equipped' : ''} ${!wearable ? 'incompatible' : ''} ${selectedCount === stackIds.length && selectedCount ? 'sale-selected' : selectedCount ? 'sale-partial' : ''}" tabindex="${item.kind === 'equipment' && !equipped ? '0' : '-1'}">${junkBadge}<span class="item-icon">${visual}</span><div><b>${item.name}${stackQuantity > 1 ? ` ×${stackQuantity}` : ''}${equipped ? '<mark>已穿戴</mark>' : ''}</b><small>${slot}${slot ? '　' : ''}${itemStatsText(item)}</small></div>${item.kind === 'equipment' && !equipped ? wearable && equipControls ? equipControls : '<span class="equip-blocked">無法穿戴</span>' : ''}${scrapControl}${comparison}</article>`;
+    return `<article class="inventory-item ${itemQualityClass(item)} ${equipped ? 'is-equipped' : ''} ${!wearable ? 'incompatible' : ''} ${selectedCount === stackIds.length && selectedCount ? 'sale-selected' : selectedCount ? 'sale-partial' : ''}" tabindex="${item.kind === 'equipment' && !equipped ? '0' : '-1'}">${junkBadge}<span class="item-icon">${visual}</span><div><b>${item.name}${stackQuantity > 1 ? ` ×${stackQuantity}` : ''}${equipped ? '<mark>已穿戴</mark>' : ''}</b><small>${slot}${slot ? '　' : ''}${itemStatsText(item)}</small></div>${item.kind === 'equipment' && !equipped ? wearable && equipControls ? equipControls : '<span class="equip-blocked">無法穿戴</span>' : ''}${comparison}</article>`;
   };
   const categoryTabs = [
     ['weapon', '武器'],
@@ -1970,17 +1966,6 @@ function selectAllCommonEquipment() {
   const progress = getProgress();
   progress.inventory.filter((item) => InventorySalePolicy.isCommonEquipment(item))
     .forEach((item) => scrapSelection.add(item.id));
-  renderInventory('inventory');
-}
-
-function toggleEquipmentJunkMark(itemIds) {
-  const progress = getProgress();
-  const ids = new Set(itemIds);
-  const items = progress.inventory.filter((item) => ids.has(item.id) && item.kind === 'equipment');
-  if (!items.length) return;
-  const markAsJunk = !items.every((item) => item.isJunk === true);
-  items.forEach((item) => { item.isJunk = markAsJunk; });
-  saveProgress(progress);
   renderInventory('inventory');
 }
 
@@ -3901,8 +3886,6 @@ document.querySelector('#inventory-modal').addEventListener('click', (event) => 
   }
   if (event.target.closest('[data-select-common-equipment]')) { selectAllCommonEquipment(); return; }
   if (event.target.closest('[data-open-sell-confirm]')) { openSellConfirmation(); return; }
-  const junkToggle = event.target.closest('[data-toggle-junk-ids]');
-  if (junkToggle) { toggleEquipmentJunkMark(junkToggle.dataset.toggleJunkIds.split(',').filter(Boolean)); return; }
   const equipButton = event.target.closest('[data-equip-id]');
   if (equipButton) { equipItem(equipButton.dataset.equipId, equipButton.dataset.equipSlot || null); return; }
   const unequipButton = event.target.closest('[data-unequip-slot]');
@@ -4084,13 +4067,6 @@ document.querySelector('#inventory-modal').addEventListener('change', (event) =>
     renderInventory('inventory');
     return;
   }
-  const checkbox = event.target.closest('[data-scrap-ids]');
-  if (!checkbox) return;
-  checkbox.dataset.scrapIds.split(',').filter(Boolean).forEach((id) => {
-    if (checkbox.checked) scrapSelection.add(id);
-    else scrapSelection.delete(id);
-  });
-  renderInventory('inventory');
 });
 setupBattleLogControls();
 document.querySelector('.combat-log')?.addEventListener('click', (event) => {

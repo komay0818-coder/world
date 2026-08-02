@@ -27,7 +27,7 @@ assert.match(source, /InventorySalePolicy\.isCommonEquipment\(item\)/, 'common e
 assert.doesNotMatch(source, /data-select-unusable-junk|selectUnusableJunkEquipment/, 'obsolete unusable junk quick selection is removed');
 assert.match(source, /InventorySalePolicy\.summarizeSelection/, 'selection count and expected gold are recalculated during render');
 assert.match(source, /InventorySalePolicy\.sellSelection/, 'confirmed sales use the shared atomic sale policy');
-assert.match(source, /data-toggle-junk-ids/, 'equipment can persist a player junk marker');
+assert.doesNotMatch(source, /data-toggle-junk-ids|data-scrap-ids|toggleEquipmentJunkMark/, 'equipment rows no longer show per-item sale or junk-mark controls');
 assert.doesNotMatch(source, /enhanceEquipment|enhancementRules|data-enhance-slot|enhancementBonus/, 'equipment enhancement rules and UI are fully removed');
 
 console.log('equipment-affix-integration: assertions passed');
