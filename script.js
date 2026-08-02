@@ -915,42 +915,7 @@ function effectiveEquipmentStat(item, stat) {
   if (!storedValue) return 0;
   const affixValue = getAffixStatValue(item, stat);
   const baseValue = Math.max(0, storedValue - affixValue);
-  const enhancementBonus = Math.round(baseValue * .05 * Math.max(0, Math.min(3, item.enhanceLevel || 0)));
-  return baseValue + affixValue + enhancementBonus;
-}
-
-const enhancementRules = {
-  1: { successRate: 1, starIron: 1, gold: 1000 },
-  2: { successRate: .8, starIron: 2, gold: 2500 },
-  3: { successRate: .6, starIron: 3, gold: 5000 }
-};
-
-function enhanceEquipment(slot) {
-  const progress = getProgress();
-  const item = progress.equipment?.[slot];
-  if (!item) return;
-  const currentLevel = Math.max(0, Math.min(3, item.enhanceLevel || 0));
-  if (currentLevel >= 3) { showToast('這件裝備已強化至最高 +3。'); return; }
-  const targetLevel = currentLevel + 1;
-  const rule = enhancementRules[targetLevel];
-  const resources = getAccountResources();
-  if (resources.starIron < rule.starIron) { showToast(`星鐵碎片不足，需要 ${rule.starIron} 個。`); return; }
-  if (progress.gold < rule.gold) { showToast(`金幣不足，需要 ${rule.gold} 金幣。`); return; }
-  resources.starIron -= rule.starIron;
-  progress.gold -= rule.gold;
-  const succeeded = Math.random() < rule.successRate;
-  if (succeeded) item.enhanceLevel = targetLevel;
-  saveAccountResources(resources);
-  saveProgress(progress);
-  if (succeeded) {
-    showToast(`強化成功！${item.name} +${targetLevel}`);
-    logBattle(`⚒ 強化成功【${item.name} +${targetLevel}】`, 'progress');
-  } else {
-    showToast(`強化失敗，${item.name} 維持 +${currentLevel}。`);
-    logBattle(`⚒ 強化失敗【${item.name}】維持 +${currentLevel}`, 'system');
-  }
-  renderInventory('equipment');
-  if (fighting) updateBattleUI();
+  return baseValue + affixValue;
 }
 
 function activateCharacterSlot(index) {
@@ -1696,7 +1661,6 @@ function equipmentStackKey(item) {
     parry: item.parry || 0,
     damageReduction: item.damageReduction || 0,
     movementSpeedBonus: item.movementSpeedBonus || 0,
-    enhanceLevel: item.enhanceLevel || 0,
     affix: item.affix || null,
     affixes: item.affixes || [],
     durability: item.durability ?? null,
@@ -1795,11 +1759,8 @@ function renderInventory(view = 'inventory') {
   const paperDoll = Object.entries(equipmentSlots).map(([slot, info]) => {
     const item = progress.equipment[slot];
     const visual = item ? `<img src="${itemImagePath(item)}" alt="" class="paper-doll-item-image">` : info.icon;
-    const enhanceLevel = item?.enhanceLevel || 0;
-    const nextRule = enhancementRules[enhanceLevel + 1];
-    const enhanceButton = item ? enhanceLevel >= 3 ? '<button class="enhance-button maxed" type="button" disabled>強化 +3（最高）</button>' : `<button class="enhance-button" type="button" data-enhance-slot="${slot}">強化至 +${enhanceLevel + 1}<small>${nextRule.starIron} 碎片・${nextRule.gold} 金幣・${Math.round(nextRule.successRate * 100)}%</small></button>` : '';
     const unequipButton = item ? `<button class="unequip-button" type="button" data-unequip-slot="${slot}">卸下</button>` : '';
-    return `<article class="equipment-frame slot-${slot} ${item ? `equipped ${itemQualityClass(item)}` : ''}"><span class="equipment-frame-icon">${visual}</span><b>${info.label}</b><small>${item ? `${item.name}${enhanceLevel ? ` +${enhanceLevel}` : ''}` : '空欄位'}</small>${item ? `<em><span class="item-quality">${itemQualityLabel(item)}</span>　${itemStatsText(item)}</em>${enhanceButton}${unequipButton}` : ''}</article>`;
+    return `<article class="equipment-frame slot-${slot} ${item ? `equipped ${itemQualityClass(item)}` : ''}"><span class="equipment-frame-icon">${visual}</span><b>${info.label}</b><small>${item ? item.name : '空欄位'}</small>${item ? `<em><span class="item-quality">${itemQualityLabel(item)}</span>　${itemStatsText(item)}</em>${unequipButton}` : ''}</article>`;
   }).join('');
   content.innerHTML = view === 'equipment'
     ? `${resourceBar}<section class="paper-doll" aria-label="角色裝備紙娃娃"><span class="paper-doll-silhouette" aria-hidden="true">🧍</span>${paperDoll}</section>`
@@ -3867,8 +3828,6 @@ document.querySelector('#inventory-modal').addEventListener('click', (event) => 
   if (equipButton) { equipItem(equipButton.dataset.equipId, equipButton.dataset.equipSlot || null); return; }
   const unequipButton = event.target.closest('[data-unequip-slot]');
   if (unequipButton) { unequipItem(unequipButton.dataset.unequipSlot); return; }
-  const enhanceButton = event.target.closest('[data-enhance-slot]');
-  if (enhanceButton) enhanceEquipment(enhanceButton.dataset.enhanceSlot);
 });
 document.querySelector('#battle-title').addEventListener('click', () => { if (!layoutEditMode) renderMapSelector(); });
 document.querySelector('#battle-title').addEventListener('keydown', (event) => { if (!layoutEditMode && ['Enter', ' '].includes(event.key)) { event.preventDefault(); renderMapSelector(); } });

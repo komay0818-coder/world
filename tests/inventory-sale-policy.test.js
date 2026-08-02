@@ -12,7 +12,7 @@ assert.equal(policy.isJunkCandidate({ kind: 'material', id: 'ore' }, { canEquip:
 assert.equal(policy.getSellPrice(base), 10);
 assert.equal(policy.getSellPrice({ ...base, quality: 'uncommon' }), 25);
 assert.equal(policy.getSellPrice({ ...base, quality: 'rare' }), 60);
-assert.equal(policy.getSellPrice({ ...base, quality: 'epic', enhanceLevel: 2 }), 190);
+assert.equal(policy.getSellPrice({ ...base, quality: 'epic' }), 150);
 
 const inventory = [
   { ...base, id: 'a', isJunk: true },

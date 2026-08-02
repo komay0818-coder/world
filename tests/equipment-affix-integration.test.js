@@ -24,5 +24,6 @@ assert.match(source, /data-select-unusable-junk/, 'inventory exposes one-click u
 assert.match(source, /InventorySalePolicy\.summarizeSelection/, 'selection count and expected gold are recalculated during render');
 assert.match(source, /InventorySalePolicy\.sellSelection/, 'confirmed sales use the shared atomic sale policy');
 assert.match(source, /data-toggle-junk-ids/, 'equipment can persist a player junk marker');
+assert.doesNotMatch(source, /enhanceEquipment|enhancementRules|data-enhance-slot|enhancementBonus/, 'equipment enhancement rules and UI are fully removed');
 
 console.log('equipment-affix-integration: assertions passed');

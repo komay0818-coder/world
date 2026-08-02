@@ -4,7 +4,6 @@
   else root.InventorySalePolicy = api;
 }(typeof globalThis !== 'undefined' ? globalThis : this, function createInventorySalePolicy() {
   const QUALITY_SELL_PRICES = Object.freeze({ common: 10, uncommon: 25, rare: 60, epic: 150 });
-  const ENHANCE_SELL_BONUS = 20;
 
   function normalizeQuality(item) {
     const value = String(item?.rarity || item?.quality || '').toLowerCase();
@@ -29,7 +28,7 @@
   function getSellPrice(item) {
     if (!item || item.kind !== 'equipment') return 0;
     const base = QUALITY_SELL_PRICES[normalizeQuality(item)] || QUALITY_SELL_PRICES.common;
-    return Math.max(1, base + Math.max(0, Math.floor(Number(item.enhanceLevel) || 0)) * ENHANCE_SELL_BONUS);
+    return Math.max(1, base);
   }
 
   function summarizeSelection(inventory, selectedIds, contextFactory = () => ({})) {
@@ -52,5 +51,5 @@
     return { ok: true, ...summary };
   }
 
-  return Object.freeze({ QUALITY_SELL_PRICES, ENHANCE_SELL_BONUS, normalizeQuality, getJunkReasons, isJunkCandidate, getSellPrice, summarizeSelection, sellSelection });
+  return Object.freeze({ QUALITY_SELL_PRICES, normalizeQuality, getJunkReasons, isJunkCandidate, getSellPrice, summarizeSelection, sellSelection });
 }));

@@ -46,6 +46,7 @@
 /* Equipment progression feedback. */
 .map-recommendation{display:block;margin-top:7px;padding:5px 8px;border-radius:7px;font-size:11px}.map-recommendation.ready{background:rgba(49,158,99,.22);color:#8ff0b5}.map-recommendation.danger{background:rgba(190,73,61,.24);color:#ffaaa0}
 .inventory-item.quality-rare,.equipment-frame.quality-rare{border-color:#68a8ff}.inventory-item.quality-epic,.equipment-frame.quality-epic{border-color:#c17aff;box-shadow:0 0 15px rgba(166,83,235,.2)}
+.account-resource-bar{display:flex;flex-wrap:wrap;gap:8px 18px;margin:0 0 14px;padding:10px 13px;border:1px solid rgba(117,218,239,.34);border-radius:11px;background:rgba(6,27,38,.72);color:#c7e8f2;font-size:13px}.account-resource-bar b{margin-left:4px;color:#fff0a6}.equipment-frame .unequip-button{width:100%;margin-top:5px;padding:5px 4px;border:1px solid #68889a;border-radius:7px;background:linear-gradient(180deg,#294756,#172e3a);color:#d8edf5;font:800 10px "Noto Sans TC",sans-serif;cursor:pointer}@media(max-width:640px){.account-resource-bar{font-size:11px}.equipment-frame .unequip-button{font-size:8px}}
 
 .mana-track.exhausted{box-shadow:0 0 0 1px rgba(255,99,120,.8),0 0 12px rgba(255,47,79,.48)}.mana-track.exhausted i{background:linear-gradient(90deg,#782f48,#e05a72)!important}.mana-text{transition:color .2s}.mana-track.exhausted + .mana-text{color:#ff91a5!important;font-weight:900}
 
