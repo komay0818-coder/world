@@ -21,17 +21,17 @@
   const TEST_LOOT_CONFIGS = Object.freeze({
     normal: Object.freeze({
       equipmentDropRate: .25,
-      rarityWeights: Object.freeze({ common: 90, uncommon: 10 }),
+      rarityWeights: Object.freeze({ common: 80, uncommon: 20 }),
       equipmentPools: Object.freeze(['plains_common_weapons', 'plains_common_armor'])
     }),
     elite: Object.freeze({
       equipmentDropRate: .40,
-      rarityWeights: Object.freeze({ common: 50, uncommon: 50 }),
+      rarityWeights: Object.freeze({ common: 35, uncommon: 65 }),
       equipmentPools: Object.freeze(['plains_common_weapons', 'plains_common_armor'])
     }),
     boss: Object.freeze({
       equipmentDropRate: 1,
-      rarityWeights: Object.freeze({ common: 40, uncommon: 60 }),
+      rarityWeights: Object.freeze({ common: 25, uncommon: 75 }),
       equipmentPools: Object.freeze(['plains_common_weapons', 'plains_common_armor'])
     })
   });

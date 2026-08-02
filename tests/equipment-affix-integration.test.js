@@ -18,6 +18,8 @@ assert.match(source, /EquipmentAffixPolicy\.formatAffix\(entry\)/, 'inventory, c
 assert.match(source, /affixes: item\.affixes \|\| \[\]/, 'stacking distinguishes equipment with different affixes');
 assert.doesNotMatch(source, /equipmentScore|equipmentValue|評分/, 'inventory and comparison no longer expose equipment scores');
 assert.doesNotMatch(gameCss, /equipment-score|score-difference/, 'removed score UI has no stale styles');
+assert.doesNotMatch(source, /class="item-quality"/, 'inventory, comparison and equipped slots identify quality by frame color instead of text');
+assert.match(gameCss, /\.inventory-item\.quality-excellent,.equipment-frame\.quality-excellent\{border-color:#35d778!important/, 'green equipment uses a strong green inventory and equipment frame');
 assert.match(html, /inventory-sale-policy\.js[\s\S]*script\.js/, 'sale policy loads before inventory integration');
 assert.match(html, /id="sell-confirm-modal"/, 'batch selling has a dedicated confirmation dialog');
 assert.match(source, /data-select-common-equipment>勾選全部白色裝備/, 'inventory exposes one-click common equipment selection');
