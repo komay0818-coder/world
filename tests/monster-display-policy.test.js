@@ -21,6 +21,7 @@ monsterIds.forEach((monsterId) => {
   'goblinGuard', 'goblinCaptain', 'goblinHighChief'
 ].forEach((monsterId) => {
   assert.ok(displayPolicy.MONSTER_IMAGE_BY_TYPE[monsterId].includes('goblin-camp-'), `${monsterId} uses dedicated goblin-camp combat art`);
+  assert.ok(displayPolicy.MONSTER_IMAGE_BY_TYPE[monsterId].includes('-transparent.png'), `${monsterId} uses transparent goblin-camp combat art`);
 });
 assert.equal(displayPolicy.getMonsterLevel({ min: 3, max: 5 }, 1), 3, 'monster level does not fall below the map minimum');
 assert.equal(displayPolicy.getMonsterLevel({ min: 3, max: 5 }, 4), 4, 'monster level follows player level inside the map range');
