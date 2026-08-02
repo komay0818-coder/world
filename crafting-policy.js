@@ -1,31 +1,38 @@
 (function attachCraftingPolicy(root, factory) {
-  const api = factory();
+  const recipePolicy = typeof module === 'object' && module.exports
+    ? require('./chapter-one-recipe-drop-policy.js')
+    : root.ChapterOneRecipeDropPolicy;
+  const materialPolicy = typeof module === 'object' && module.exports
+    ? require('./chapter-one-material-drop-policy.js')
+    : root.ChapterOneMaterialDropPolicy;
+  const api = factory(recipePolicy, materialPolicy);
   if (typeof module === 'object' && module.exports) module.exports = api;
   else root.CraftingPolicy = api;
-}(typeof globalThis !== 'undefined' ? globalThis : this, function createCraftingPolicy() {
+}(typeof globalThis !== 'undefined' ? globalThis : this, function createCraftingPolicy(RecipePolicy, MaterialPolicy) {
+  const INVENTORY_CAPACITY = 120;
   const RARITIES = Object.freeze({
     uncommon: Object.freeze({ id: 'uncommon', label: '綠色', affixCount: 1, workshopLevel: 1, stoneId: 'equipment-stone-uncommon', primaryMultiplier: 1, affixMultiplier: 1 }),
-    rare: Object.freeze({ id: 'rare', label: '藍色', affixCount: 2, workshopLevel: 2, stoneId: 'equipment-stone-rare', primaryMultiplier: 1.35, affixMultiplier: 1.25 }),
+    rare: Object.freeze({ id: 'rare', label: '藍色', affixCount: 2, workshopLevel: 1, stoneId: 'equipment-stone-rare', primaryMultiplier: 1.35, affixMultiplier: 1.25 }),
     epic: Object.freeze({ id: 'epic', label: '紫色', affixCount: 3, workshopLevel: 3, stoneId: 'equipment-stone-epic', primaryMultiplier: 1.75, affixMultiplier: 1.55 })
   });
 
   const STAT_DEFINITIONS = Object.freeze({
-    attackFlat: { label: '攻擊力', min: 4, max: 8, unit: '' },
-    criticalChance: { label: '爆擊率', min: 2, max: 5, unit: '%' },
-    criticalDamage: { label: '爆擊傷害', min: 6, max: 12, unit: '%' },
-    attackSpeed: { label: '攻擊速度', min: 2, max: 5, unit: '%' },
-    skillDamage: { label: '技能傷害', min: 3, max: 7, unit: '%' },
-    defenseFlat: { label: '防禦', min: 4, max: 9, unit: '' },
-    maxHp: { label: '最大生命', min: 18, max: 40, unit: '' },
-    damageReduction: { label: '傷害減免', min: 2, max: 5, unit: '%' },
-    blockChance: { label: '格擋率', min: 2, max: 5, unit: '%' },
-    controlResistance: { label: '控場抗性', min: 3, max: 8, unit: '%' },
-    dodgeChance: { label: '閃避率', min: 2, max: 5, unit: '%' },
-    cooldownRecovery: { label: '冷卻速度', min: 2, max: 6, unit: '%' },
-    hpRegeneration: { label: '生命恢復', min: 2, max: 6, unit: '' },
-    manaRegeneration: { label: '魔力恢復', min: 2, max: 6, unit: '' },
-    itemFind: { label: '掉寶率', min: 2, max: 6, unit: '%' },
-    goldFind: { label: '金幣獲得率', min: 3, max: 8, unit: '%' }
+    attackFlat: Object.freeze({ label: '固定攻擊力', min: 4, max: 8, unit: '' }),
+    criticalChance: Object.freeze({ label: '爆擊率', min: 2, max: 5, unit: '%' }),
+    criticalDamage: Object.freeze({ label: '爆擊傷害', min: 6, max: 12, unit: '%' }),
+    attackSpeed: Object.freeze({ label: '攻擊速度', min: 2, max: 5, unit: '%' }),
+    skillDamage: Object.freeze({ label: '技能傷害', min: 3, max: 7, unit: '%' }),
+    defenseFlat: Object.freeze({ label: '固定防禦', min: 4, max: 9, unit: '' }),
+    maxHp: Object.freeze({ label: '最大生命', min: 18, max: 40, unit: '' }),
+    damageReduction: Object.freeze({ label: '傷害減免', min: 2, max: 5, unit: '%' }),
+    blockChance: Object.freeze({ label: '格擋率', min: 2, max: 5, unit: '%' }),
+    controlResistance: Object.freeze({ label: '控場抗性', min: 3, max: 8, unit: '%' }),
+    dodgeChance: Object.freeze({ label: '閃避率', min: 2, max: 5, unit: '%' }),
+    cooldownRecovery: Object.freeze({ label: '冷卻速度', min: 2, max: 6, unit: '%' }),
+    hpRegeneration: Object.freeze({ label: '生命恢復', min: 2, max: 6, unit: '' }),
+    manaRegeneration: Object.freeze({ label: '魔力恢復', min: 2, max: 6, unit: '' }),
+    itemFind: Object.freeze({ label: '掉寶率', min: 2, max: 6, unit: '%' }),
+    goldFind: Object.freeze({ label: '金幣獲得率', min: 3, max: 8, unit: '%' })
   });
 
   const PRIMARY_STAT_POOLS = Object.freeze({
@@ -40,19 +47,15 @@
     cloak: Object.freeze(['maxHp', 'dodgeChance', 'cooldownRecovery', 'hpRegeneration', 'manaRegeneration', 'itemFind', 'goldFind', 'damageReduction'])
   });
 
-  const MATERIALS = Object.freeze({
-    craftCloth: Object.freeze({ id: 'craft-cloth', kind: 'material', icon: '▧', name: '工坊織料', description: '製作共用防具的測試材料。' }),
-    craftMetal: Object.freeze({ id: 'craft-metal', kind: 'material', icon: '◆', name: '工坊合金', description: '製作共用防具的測試材料。' }),
-    uncommonStone: Object.freeze({ id: 'equipment-stone-uncommon', kind: 'material', icon: '◆', name: '綠色裝備石', description: '製作綠色裝備。' }),
-    rareStone: Object.freeze({ id: 'equipment-stone-rare', kind: 'material', icon: '◆', name: '藍色裝備石', description: '製作藍色裝備。' }),
-    epicStone: Object.freeze({ id: 'equipment-stone-epic', kind: 'material', icon: '◆', name: '紫色裝備石', description: '製作紫色裝備。' })
+  const EXTRA_MATERIALS = Object.freeze({
+    uncommonStone: Object.freeze({ id: 'equipment-stone-uncommon', kind: 'material', materialType: 'quality-stone', icon: '🟢', name: '綠色品質寶石', description: '製作綠色裝備所需的品質寶石。' }),
+    rareStone: Object.freeze({ id: 'equipment-stone-rare', kind: 'material', materialType: 'quality-stone', icon: '🔵', name: '藍色品質寶石', description: '製作藍色裝備所需的品質寶石。' }),
+    epicStone: Object.freeze({ id: 'equipment-stone-epic', kind: 'material', materialType: 'quality-stone', icon: '🟣', name: '紫色品質寶石', description: '保留給未來紫色裝備製作。' }),
+    blackOre: Object.freeze({ id: 'black-ore', kind: 'material', materialType: 'special-crafting', icon: '⬟', name: '黑礦石', description: '製作第一章藍色裝備所需的稀有礦石。' })
   });
-
-  const RECIPES = Object.freeze({
-    'test-wrist-uncommon': Object.freeze({ id: 'test-wrist-uncommon', equipmentId: 'workshop-wrist', name: '探索者護腕', equipmentSlot: 'wrist', rarity: 'uncommon', materials: Object.freeze({ 'craft-cloth': 2, 'craft-metal': 1, 'equipment-stone-uncommon': 1 }) }),
-    'test-shoulders-rare': Object.freeze({ id: 'test-shoulders-rare', equipmentId: 'workshop-shoulders', name: '守望者肩甲', equipmentSlot: 'shoulders', rarity: 'rare', materials: Object.freeze({ 'craft-cloth': 3, 'craft-metal': 3, 'equipment-stone-rare': 1 }) }),
-    'test-cloak-epic': Object.freeze({ id: 'test-cloak-epic', equipmentId: 'workshop-cloak', name: '遠行者斗篷', equipmentSlot: 'cloak', rarity: 'epic', materials: Object.freeze({ 'craft-cloth': 6, 'craft-metal': 2, 'equipment-stone-epic': 1 }) })
-  });
+  const MATERIALS = Object.freeze({ ...(MaterialPolicy?.MATERIALS || {}), ...EXTRA_MATERIALS });
+  const MATERIAL_BY_ID = new Map(Object.values(MATERIALS).map((entry) => [entry.id, entry]));
+  const RECIPES = Object.freeze(Object.fromEntries(Object.values(RecipePolicy?.RECIPES || {}).map((recipe) => [recipe.recipeId, recipe])));
 
   function clampRoll(value) { return Math.min(.999999, Math.max(0, Number(value) || 0)); }
   function pick(list, random) { return list[Math.floor(clampRoll(random()) * list.length)]; }
@@ -66,23 +69,46 @@
   }
   function normalizeCraftingState(state) {
     const source = state && typeof state === 'object' ? state : {};
-    return { version: 1, ...source, recipes: source.recipes && typeof source.recipes === 'object' ? { ...source.recipes } : {} };
+    return { version: 2, ...source };
   }
-  function isRecipeKnown(state, recipeId) { return Boolean(normalizeCraftingState(state).recipes[recipeId]); }
+  function getItemQuantity(inventory, itemId) {
+    return (Array.isArray(inventory) ? inventory : [])
+      .filter((item) => item?.id === itemId)
+      .reduce((sum, item) => sum + Math.max(0, Number(item.quantity) || 0), 0);
+  }
+  function getRecipeQuantity(progress, recipeId) {
+    const recipe = RECIPES[recipeId];
+    return recipe ? getItemQuantity(progress?.inventory, recipe.itemId) : 0;
+  }
+  function isRecipeKnown(progress, recipeId) { return getRecipeQuantity(progress, recipeId) > 0; }
+  function getProjectedInventorySlots(progress, recipe) {
+    const inventory = Array.isArray(progress?.inventory) ? progress.inventory : [];
+    const costs = { [recipe.itemId]: 1, ...recipe.materials };
+    const emptiedStacks = Object.entries(costs).filter(([id, amount]) => {
+      const matching = inventory.filter((item) => item?.id === id);
+      return matching.length === 1 && getItemQuantity(inventory, id) === amount;
+    }).length;
+    return inventory.length - emptiedStacks + 1;
+  }
   function canCraft(progress, recipeId, workshopLevel = 1) {
     const recipe = RECIPES[recipeId];
-    if (!recipe) return { ok: false, reason: '找不到配方。' };
-    if (!isRecipeKnown(progress?.crafting, recipeId)) return { ok: false, reason: '尚未取得配方。' };
-    const rarity = RARITIES[recipe.rarity];
-    if ((Number(workshopLevel) || 1) < rarity.workshopLevel) return { ok: false, reason: `工坊需要 Lv${rarity.workshopLevel}。` };
-    const inventory = Array.isArray(progress?.inventory) ? progress.inventory : [];
-    const missing = Object.entries(recipe.materials).find(([id, amount]) => inventory.filter((item) => item.id === id).reduce((sum, item) => sum + (Number(item.quantity) || 0), 0) < amount);
-    return missing ? { ok: false, reason: `材料不足：${MATERIALS[Object.keys(MATERIALS).find((key) => MATERIALS[key].id === missing[0])]?.name || missing[0]}。` } : { ok: true };
+    if (!recipe) return { ok: false, code: 'missing-recipe-data', reason: '找不到製作配方。' };
+    if (getRecipeQuantity(progress, recipeId) < 1) return { ok: false, code: 'missing-recipe', reason: '缺少對應配方。' };
+    const rarity = RARITIES[recipe.quality];
+    if (!rarity) return { ok: false, code: 'invalid-quality', reason: '配方品質設定錯誤。' };
+    if ((Number(workshopLevel) || 1) < rarity.workshopLevel) return { ok: false, code: 'workshop-level', reason: `需要工坊 Lv${rarity.workshopLevel}。` };
+    const stoneAmount = Number(recipe.materials?.[rarity.stoneId]) || 0;
+    if (getItemQuantity(progress?.inventory, rarity.stoneId) < stoneAmount) return { ok: false, code: 'missing-quality-stone', itemId: rarity.stoneId, reason: `缺少${MATERIAL_BY_ID.get(rarity.stoneId)?.name || '品質寶石'}。` };
+    const missingMaterial = Object.entries(recipe.materials || {}).find(([id, amount]) => id !== rarity.stoneId && getItemQuantity(progress?.inventory, id) < amount);
+    if (missingMaterial) return { ok: false, code: 'missing-material', itemId: missingMaterial[0], reason: `缺少${MATERIAL_BY_ID.get(missingMaterial[0])?.name || missingMaterial[0]}。` };
+    if ((Number(progress?.gold) || 0) < recipe.goldCost) return { ok: false, code: 'missing-gold', reason: '金幣不足。' };
+    if (getProjectedInventorySlots(progress, recipe) > INVENTORY_CAPACITY) return { ok: false, code: 'inventory-full', reason: '背包空間不足。' };
+    return { ok: true, recipe };
   }
   function generateCraftedEquipment(recipeId, options = {}) {
     const recipe = RECIPES[recipeId];
     if (!recipe) return null;
-    const rarity = RARITIES[recipe.rarity];
+    const rarity = RARITIES[recipe.quality];
     const random = typeof options.random === 'function' ? options.random : Math.random;
     const primaryStat = rollStat(pick(PRIMARY_STAT_POOLS[recipe.equipmentSlot], random), rarity.primaryMultiplier, random);
     const candidates = AFFIX_POOLS[recipe.equipmentSlot].filter((stat) => stat !== primaryStat.stat);
@@ -92,36 +118,46 @@
       candidates.splice(candidates.indexOf(selected), 1);
       affixes.push({ id: `crafted-${selected}`, ...rollStat(selected, rarity.affixMultiplier, random) });
     }
-    const instanceId = options.instanceId || createInstanceId(options.craftedAt, random);
+    const craftedAt = options.craftedAt || Date.now();
+    const instanceId = options.instanceId || createInstanceId(craftedAt, random);
     return {
-      id: instanceId, instanceId, equipmentId: recipe.equipmentId, templateId: recipe.equipmentId,
-      kind: 'equipment', name: recipe.name, slot: recipe.equipmentSlot, equipmentSlot: recipe.equipmentSlot,
-      quality: recipe.rarity, rarity: recipe.rarity, sourceType: 'crafted', recipeId,
-      primaryStat, affixes, sockets: 0, craftedAt: options.craftedAt || Date.now(), allowedJobs: []
+      id: instanceId, instanceId, equipmentId: recipe.resultItemId, templateId: recipe.resultItemId,
+      kind: 'equipment', name: recipe.resultName, slot: recipe.equipmentSlot, equipmentSlot: recipe.equipmentSlot,
+      quality: recipe.quality, rarity: recipe.quality, sourceType: 'crafted', recipeId,
+      primaryStat, affixes, sockets: 0, craftedAt, allowedJobs: []
     };
   }
-  function deductMaterials(inventory, costs) {
+  function deductInventoryItems(inventory, costs) {
+    const result = (Array.isArray(inventory) ? inventory : []).map((item) => ({ ...item }));
     Object.entries(costs).forEach(([id, amount]) => {
       let remaining = amount;
-      inventory.filter((item) => item.id === id).forEach((item) => {
-        const used = Math.min(remaining, Number(item.quantity) || 0);
-        item.quantity -= used; remaining -= used;
+      result.filter((item) => item.id === id).forEach((item) => {
+        const used = Math.min(remaining, Math.max(0, Number(item.quantity) || 0));
+        item.quantity -= used;
+        remaining -= used;
       });
     });
-    return inventory.filter((item) => item.kind === 'equipment' || (Number(item.quantity) || 0) > 0);
+    return result.filter((item) => item.kind === 'equipment' || (Number(item.quantity) || 0) > 0);
   }
   function craftEquipment(progress, recipeId, options = {}) {
     const eligibility = canCraft(progress, recipeId, options.workshopLevel);
     if (!eligibility.ok) return eligibility;
     const item = generateCraftedEquipment(recipeId, options);
-    if (!item) return { ok: false, reason: '裝備生成失敗。' };
+    if (!item) return { ok: false, code: 'generation-failed', reason: '裝備生成失敗，未扣除任何資源。' };
     const existingIds = new Set([...(progress.inventory || []), ...Object.values(progress.equipment || {})].filter(Boolean).map((entry) => entry.instanceId || entry.id));
-    if (existingIds.has(item.instanceId)) return { ok: false, reason: '裝備實例編號重複，請重新製作。' };
-    progress.inventory = deductMaterials(progress.inventory, RECIPES[recipeId].materials);
-    progress.inventory.push(item);
-    return { ok: true, item };
+    if (existingIds.has(item.instanceId)) return { ok: false, code: 'duplicate-instance', reason: '裝備識別碼重複，未扣除任何資源。' };
+    const recipe = eligibility.recipe;
+    const nextInventory = deductInventoryItems(progress.inventory, { [recipe.itemId]: 1, ...recipe.materials });
+    nextInventory.push(item);
+    progress.inventory = nextInventory;
+    progress.gold = Math.max(0, (Number(progress.gold) || 0) - recipe.goldCost);
+    return { ok: true, item, recipe };
   }
   function formatStat(entry) { return entry ? `${entry.label || STAT_DEFINITIONS[entry.stat]?.label || entry.stat} +${entry.value}${entry.unit || ''}` : ''; }
 
-  return Object.freeze({ RARITIES, STAT_DEFINITIONS, PRIMARY_STAT_POOLS, AFFIX_POOLS, MATERIALS, RECIPES, normalizeCraftingState, isRecipeKnown, canCraft, createInstanceId, generateCraftedEquipment, craftEquipment, formatStat });
+  return Object.freeze({
+    INVENTORY_CAPACITY, RARITIES, STAT_DEFINITIONS, PRIMARY_STAT_POOLS, AFFIX_POOLS, MATERIALS, RECIPES,
+    normalizeCraftingState, getItemQuantity, getRecipeQuantity, isRecipeKnown, getProjectedInventorySlots,
+    canCraft, createInstanceId, generateCraftedEquipment, craftEquipment, formatStat
+  });
 }));

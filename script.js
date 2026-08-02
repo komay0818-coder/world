@@ -237,6 +237,8 @@ let pendingOfflineReport = null;
 let creationSlotIndex = 0;
 let scrapSelection = new Set();
 let inventoryCategory = 'weapon';
+let workshopQuality = 'uncommon';
+let workshopSlot = 'all';
 let battleLogMode = 'player';
 let battleLogEntries = [];
 let battle = { enemyTypes: ['goblin', 'wolf', 'boar', 'goblin', 'wolf'], enemyHps: [45, 68, 82, 45, 68], playerHp: 100, playerMana: 100, playerShield: 0, manaExhausted: false, playerAttackCharge: 0, globalSkillReadyAt: 0, undeadRevived: false, skillCooldowns: {}, enemyRespawns: [null, null, null, null, null], enemySpawnedAt: [0, 1, 2, 3, 4], enemyNextAttackAt: [0, 0, 0, 0, 0], enemyDots: [[], [], [], [], []], monsterMoveSpeed: 200, targetIndexes: [], enemyDamages: [[], [], [], [], []], damageTimers: [] };
@@ -637,8 +639,8 @@ const equipmentSlots = {
   pants: { label: '褲子', icon: '👖' },
   gloves: { label: '手套', icon: '🧤' },
   boots: { label: '鞋子', icon: '👢' },
-  wrist: { label: '手環', icon: '◌' },
-  shoulders: { label: '肩膀', icon: '◈' },
+  wrist: { label: '護腕', icon: '◌' },
+  shoulders: { label: '肩甲', icon: '◈' },
   cloak: { label: '斗篷', icon: '🧣' },
   belt: { label: '腰帶', icon: '➿' },
   necklace: { label: '項鍊', icon: '📿' },
@@ -784,17 +786,6 @@ function getProgress() {
   }
   const inventory = Array.isArray(saved.inventory) ? saved.inventory : [];
   saved.crafting = CraftingPolicy.normalizeCraftingState(saved.crafting);
-  if (saved.craftingTestDataVersion !== 'workshop-crafting-test-v1') {
-    Object.keys(CraftingPolicy.RECIPES).forEach((recipeId) => { saved.crafting.recipes[recipeId] = true; });
-    const testQuantities = { 'craft-cloth': 150, 'craft-metal': 100, 'equipment-stone-uncommon': 15, 'equipment-stone-rare': 15, 'equipment-stone-epic': 15 };
-    Object.values(CraftingPolicy.MATERIALS).forEach((material) => {
-      const existing = inventory.find((item) => item.id === material.id);
-      if (existing) existing.quantity = Math.max(Number(existing.quantity) || 0, testQuantities[material.id] || 0);
-      else inventory.push({ ...material, quantity: testQuantities[material.id] || 0 });
-    });
-    saved.craftingTestDataVersion = 'workshop-crafting-test-v1';
-    localStorage.setItem('stardust-progress', JSON.stringify(saved));
-  }
   const existingHealingPotion = inventory.find((item) => item.id === 'healing-potion');
   if (existingHealingPotion) existingHealingPotion.description = '恢復最大生命 30%。';
   const existingManaPotion = inventory.find((item) => item.id === 'mana-potion');
@@ -1013,18 +1004,35 @@ function openVillageBuilding(buildingId) {
 
 function renderWorkshop(building = getVillageBuildingData('workshop'), craftedItem = null) {
   const progress = getProgress();
+  const inventory = Array.isArray(progress.inventory) ? progress.inventory : [];
   const materialName = (id) => Object.values(CraftingPolicy.MATERIALS).find((entry) => entry.id === id)?.name || id;
-  const quantity = (id) => progress.inventory.filter((entry) => entry.id === id).reduce((sum, entry) => sum + (Number(entry.quantity) || 0), 0);
-  const cards = Object.values(CraftingPolicy.RECIPES).map((recipe) => {
-    const rarity = CraftingPolicy.RARITIES[recipe.rarity];
-    const known = CraftingPolicy.isRecipeKnown(progress.crafting, recipe.id);
-    const eligibility = CraftingPolicy.canCraft(progress, recipe.id, building.level);
-    const materials = Object.entries(recipe.materials).map(([id, amount]) => `<li>${materialName(id)} ${quantity(id)} / ${amount}</li>`).join('');
+  const quantity = (id) => CraftingPolicy.getItemQuantity(inventory, id);
+  const visibleRecipes = Object.values(CraftingPolicy.RECIPES).filter((recipe) => recipe.chapter === 1
+    && recipe.quality === workshopQuality
+    && (workshopSlot === 'all' || recipe.equipmentSlot === workshopSlot));
+  const cards = visibleRecipes.map((recipe) => {
+    const rarity = CraftingPolicy.RARITIES[recipe.quality];
+    const recipeQuantity = CraftingPolicy.getRecipeQuantity(progress, recipe.recipeId);
+    const known = recipeQuantity > 0;
+    const eligibility = CraftingPolicy.canCraft(progress, recipe.recipeId, building.level);
+    const materials = Object.entries(recipe.materials).map(([id, amount]) => {
+      const owned = quantity(id);
+      return `<li class="${owned < amount ? 'workshop-insufficient' : ''}"><span>${materialName(id)}</span><b>${owned} / ${amount}</b></li>`;
+    }).join('');
     const primaryOptions = CraftingPolicy.PRIMARY_STAT_POOLS[recipe.equipmentSlot].map((stat) => CraftingPolicy.STAT_DEFINITIONS[stat].label).join('、');
-    return `<article class="workshop-recipe quality-${recipe.rarity}"><h4>${recipe.name}</h4><small>${equipmentSlots[recipe.equipmentSlot].label}・${rarity.label}・工坊 Lv${rarity.workshopLevel}</small><ul>${materials}</ul><p><b>可能主能力：</b>${primaryOptions}</p><p><b>額外詞綴：</b>${rarity.affixCount} 條</p><button type="button" data-craft-recipe="${recipe.id}" ${eligibility.ok ? '' : 'disabled'}>${known ? eligibility.ok ? '製作' : eligibility.reason : '尚未取得配方'}</button></article>`;
+    const goldEnough = (Number(progress.gold) || 0) >= recipe.goldCost;
+    return `<article class="workshop-recipe quality-${recipe.quality} ${known ? '' : 'workshop-locked'}">
+      <div class="workshop-recipe-head"><div><h4>${recipe.name}</h4><small>製作結果：${recipe.resultName}・${equipmentSlots[recipe.equipmentSlot].label}・${rarity.label}</small></div><span>${known ? `配方 ${recipeQuantity} 張` : '🔒 未持有配方'}</span></div>
+      <ul><li class="${known ? '' : 'workshop-insufficient'}"><span>${recipe.name}</span><b>${recipeQuantity} / 1</b></li>${materials}</ul>
+      <p class="workshop-gold ${goldEnough ? '' : 'workshop-insufficient'}"><span>所需金幣</span><b>${Number(progress.gold) || 0} / ${recipe.goldCost}</b></p>
+      <p><b>可能主能力：</b>${primaryOptions}</p><p><b>額外詞綴：</b>${rarity.affixCount} 條</p>
+      <button type="button" data-craft-recipe="${recipe.recipeId}" ${eligibility.ok ? '' : 'disabled'}>${eligibility.ok ? '製作裝備' : eligibility.reason}</button>
+    </article>`;
   }).join('');
   const result = craftedItem ? `<section class="workshop-result"><h4>製作完成：${craftedItem.name}</h4><p><b>主能力</b>　${CraftingPolicy.formatStat(craftedItem.primaryStat)}</p>${craftedItem.affixes.map((entry) => `<p><b>額外詞綴</b>　${CraftingPolicy.formatStat(entry)}</p>`).join('')}</section>` : '';
-  document.querySelector('#village-building-content').innerHTML = `<div class="village-building-icon" aria-hidden="true">${building.icon}</div><h3>${building.name}</h3><small>建築等級 Lv${building.level} / ${building.maxLevel}</small><p>配方預覽只顯示能力種類；實際能力與數值會在製作時生成並永久保存。</p>${result}<section class="workshop-recipes">${cards}</section>`;
+  document.querySelector('#village-building-content').innerHTML = `<div class="workshop-title"><div class="village-building-icon" aria-hidden="true">${building.icon}</div><div><h3>${building.name}</h3><small>第一章裝備製作・背包 ${inventory.length} / ${CraftingPolicy.INVENTORY_CAPACITY}</small></div></div><p>製作前只顯示可能能力；實際能力與數值會在製作成功時生成並永久保存。</p>
+    <div class="workshop-filters"><div><b>品質</b><button type="button" data-workshop-quality="uncommon" class="${workshopQuality === 'uncommon' ? 'selected' : ''}">綠色</button><button type="button" data-workshop-quality="rare" class="${workshopQuality === 'rare' ? 'selected' : ''}">藍色</button></div><div><b>部位</b><button type="button" data-workshop-slot="all" class="${workshopSlot === 'all' ? 'selected' : ''}">全部</button><button type="button" data-workshop-slot="wrist" class="${workshopSlot === 'wrist' ? 'selected' : ''}">護腕</button><button type="button" data-workshop-slot="cloak" class="${workshopSlot === 'cloak' ? 'selected' : ''}">斗篷</button><button type="button" data-workshop-slot="shoulders" class="${workshopSlot === 'shoulders' ? 'selected' : ''}">肩甲</button></div></div>
+    ${result}<section class="workshop-recipes">${cards || '<p class="village-placeholder">此分類目前沒有可製作配方。</p>'}</section>`;
 }
 
 function craftWorkshopEquipment(recipeId) {
@@ -1034,7 +1042,7 @@ function craftWorkshopEquipment(recipeId) {
   if (!result.ok) { showToast(result.reason); renderWorkshop(workshop); return; }
   saveProgress(progress);
   renderWorkshop(workshop, result.item);
-  showToast(`製作完成：${result.item.name}`);
+  showToast(`製作完成：${result.item.name}，已放入背包。`);
 }
 
 function closeVillageBuilding() {
@@ -3857,6 +3865,10 @@ document.querySelector('#village-building-grid').addEventListener('click', (even
 document.querySelector('#village-building-close').addEventListener('click', closeVillageBuilding);
 document.querySelector('#village-building-modal').addEventListener('click', (event) => {
   if (event.target === event.currentTarget) closeVillageBuilding();
+  const qualityButton = event.target.closest('[data-workshop-quality]');
+  if (qualityButton) { workshopQuality = qualityButton.dataset.workshopQuality; renderWorkshop(); return; }
+  const slotButton = event.target.closest('[data-workshop-slot]');
+  if (slotButton) { workshopSlot = slotButton.dataset.workshopSlot; renderWorkshop(); return; }
   const craftButton = event.target.closest('[data-craft-recipe]');
   if (craftButton) craftWorkshopEquipment(craftButton.dataset.craftRecipe);
 });

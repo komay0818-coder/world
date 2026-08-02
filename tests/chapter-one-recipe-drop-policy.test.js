@@ -19,7 +19,12 @@ Object.values(policy.RECIPES).forEach((recipe) => {
   assert.ok(['wrist', 'cloak', 'shoulders'].includes(recipe.equipmentSlot));
   assert.ok(['uncommon', 'rare'].includes(recipe.quality));
   assert.ok(recipe.resultEquipmentId);
-  assert.deepEqual(recipe.materialRequirements, {});
+  assert.equal(recipe.chapter, 1);
+  assert.equal(recipe.resultItemId, recipe.resultEquipmentId);
+  assert.ok(recipe.resultName);
+  assert.ok(Object.keys(recipe.materials).length >= 3);
+  assert.deepEqual(recipe.materialRequirements, recipe.materials);
+  assert.ok(recipe.goldCost > 0);
 });
 
 const greenBoss = { id: 'blackstoneLeader', isBoss: true };

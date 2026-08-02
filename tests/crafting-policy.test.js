@@ -5,16 +5,15 @@ function seeded(seed = 1) {
   let state = seed >>> 0;
   return () => ((state = (state * 1664525 + 1013904223) >>> 0) / 0x100000000);
 }
-function materialInventory(quantity = 999) {
-  return Object.values(CraftingPolicy.MATERIALS).map((item) => ({ ...item, quantity }));
+function stackedItem(item, quantity = 999) { return { ...item, quantity }; }
+function progressWith(recipeIds, quantity = 999, gold = 99999) {
+  const recipeItems = recipeIds.map((recipeId) => stackedItem(Object.values(require('../chapter-one-recipe-drop-policy.js').RECIPES).find((entry) => entry.recipeId === recipeId), quantity));
+  return { gold, inventory: [...Object.values(CraftingPolicy.MATERIALS).map((item) => stackedItem(item, quantity)), ...recipeItems], equipment: {} };
 }
-function progressWith(recipeIds, quantity = 999) {
-  return { inventory: materialInventory(quantity), equipment: {}, crafting: { recipes: Object.fromEntries(recipeIds.map((id) => [id, true])) } };
-}
-function assertValidBatch(recipeId, level, expectedAffixes, seed) {
+function assertValidBatch(recipeId, expectedAffixes, seed) {
   const progress = progressWith([recipeId]);
   const items = Array.from({ length: 10 }, (_, index) => {
-    const result = CraftingPolicy.craftEquipment(progress, recipeId, { workshopLevel: level, random: seeded(seed + index), instanceId: `test-${recipeId}-${index}`, craftedAt: 123 });
+    const result = CraftingPolicy.craftEquipment(progress, recipeId, { workshopLevel: 1, random: seeded(seed + index), instanceId: `test-${recipeId}-${index}`, craftedAt: 123 });
     assert.equal(result.ok, true, result.reason);
     return result.item;
   });
@@ -30,36 +29,54 @@ function assertValidBatch(recipeId, level, expectedAffixes, seed) {
   return items;
 }
 
-const green = assertValidBatch('test-wrist-uncommon', 1, 1, 10);
-assertValidBatch('test-shoulders-rare', 2, 2, 30);
-assertValidBatch('test-cloak-epic', 3, 3, 50);
+const green = assertValidBatch('chapter1-green-wrist', 1, 10);
+assertValidBatch('chapter1-green-cloak', 1, 20);
+assertValidBatch('chapter1-green-shoulders', 1, 30);
+assertValidBatch('chapter1-high-chief-rare-wrist', 2, 40);
+assertValidBatch('chapter1-goblin-rare-cloak', 2, 50);
+assertValidBatch('chapter1-black-knight-rare-shoulders', 2, 60);
 
-const snapshot = JSON.stringify(green[0]);
-assert.deepEqual(JSON.parse(snapshot), green[0], 'save/load stores final values instead of rerolling');
+assert.deepEqual(JSON.parse(JSON.stringify(green[0])), green[0], 'save/load stores final values instead of rerolling');
 
-const missingRecipe = progressWith([]);
-const missingRecipeInventory = JSON.stringify(missingRecipe.inventory);
-assert.equal(CraftingPolicy.craftEquipment(missingRecipe, 'test-wrist-uncommon', { workshopLevel: 3 }).ok, false);
-assert.equal(JSON.stringify(missingRecipe.inventory), missingRecipeInventory, 'unknown recipe deducts nothing');
+const recipeId = 'chapter1-green-wrist';
+const recipe = CraftingPolicy.RECIPES[recipeId];
+const success = progressWith([recipeId], 10, 1000);
+const beforeGold = success.gold;
+const beforeRecipe = CraftingPolicy.getRecipeQuantity(success, recipeId);
+const beforeStone = CraftingPolicy.getItemQuantity(success.inventory, 'equipment-stone-uncommon');
+const crafted = CraftingPolicy.craftEquipment(success, recipeId, { instanceId: 'atomic-success' });
+assert.equal(crafted.ok, true);
+assert.equal(CraftingPolicy.getRecipeQuantity(success, recipeId), beforeRecipe - 1, 'craft consumes exactly one recipe');
+assert.equal(CraftingPolicy.getItemQuantity(success.inventory, 'equipment-stone-uncommon'), beforeStone - 1, 'craft consumes quality stone');
+assert.equal(success.gold, beforeGold - recipe.goldCost, 'craft consumes configured gold');
+assert.ok(success.inventory.includes(crafted.item), 'crafted equipment enters the existing inventory');
 
-const insufficient = progressWith(['test-wrist-uncommon'], 0);
-const insufficientInventory = JSON.stringify(insufficient.inventory);
-assert.equal(CraftingPolicy.craftEquipment(insufficient, 'test-wrist-uncommon', { workshopLevel: 3 }).ok, false);
-assert.equal(JSON.stringify(insufficient.inventory), insufficientInventory, 'insufficient materials deduct nothing');
+for (const setup of [
+  { name: 'missing recipe', progress: progressWith([], 10, 1000), code: 'missing-recipe' },
+  { name: 'missing quality stone', progress: progressWith([recipeId], 10, 1000), code: 'missing-quality-stone', mutate: (progress) => { progress.inventory.find((item) => item.id === 'equipment-stone-uncommon').quantity = 0; } },
+  { name: 'missing map material', progress: progressWith([recipeId], 10, 1000), code: 'missing-material', mutate: (progress) => { progress.inventory.find((item) => item.id === 'iron-ore').quantity = 0; } },
+  { name: 'missing gold', progress: progressWith([recipeId], 10, 0), code: 'missing-gold' }
+]) {
+  setup.mutate?.(setup.progress);
+  const snapshot = JSON.stringify(setup.progress);
+  const result = CraftingPolicy.craftEquipment(setup.progress, recipeId);
+  assert.equal(result.code, setup.code, setup.name);
+  assert.equal(JSON.stringify(setup.progress), snapshot, `${setup.name} deducts nothing`);
+}
 
-const lowWorkshop = progressWith(['test-cloak-epic']);
-const lowWorkshopInventory = JSON.stringify(lowWorkshop.inventory);
-assert.equal(CraftingPolicy.craftEquipment(lowWorkshop, 'test-cloak-epic', { workshopLevel: 2 }).ok, false);
-assert.equal(JSON.stringify(lowWorkshop.inventory), lowWorkshopInventory, 'low workshop level deducts nothing');
+const full = progressWith([recipeId], 10, 1000);
+while (full.inventory.length < CraftingPolicy.INVENTORY_CAPACITY) full.inventory.push({ id: `filler-${full.inventory.length}`, kind: 'material', quantity: 2 });
+const fullSnapshot = JSON.stringify(full);
+assert.equal(CraftingPolicy.craftEquipment(full, recipeId).code, 'inventory-full');
+assert.equal(JSON.stringify(full), fullSnapshot, 'full inventory deducts nothing');
 
-const duplicateId = progressWith(['test-wrist-uncommon']);
-duplicateId.inventory.push({ id: 'duplicate', instanceId: 'duplicate', kind: 'equipment' });
-const duplicateInventory = JSON.stringify(duplicateId.inventory);
-assert.equal(CraftingPolicy.craftEquipment(duplicateId, 'test-wrist-uncommon', { workshopLevel: 1, instanceId: 'duplicate' }).ok, false);
-assert.equal(JSON.stringify(duplicateId.inventory), duplicateInventory, 'duplicate instance id deducts nothing');
+const duplicate = progressWith([recipeId], 10, 1000);
+duplicate.inventory.push({ id: 'duplicate', instanceId: 'duplicate', kind: 'equipment' });
+const duplicateSnapshot = JSON.stringify(duplicate);
+assert.equal(CraftingPolicy.craftEquipment(duplicate, recipeId, { instanceId: 'duplicate' }).code, 'duplicate-instance');
+assert.equal(JSON.stringify(duplicate), duplicateSnapshot, 'duplicate instance id deducts nothing');
 
-assert.deepEqual(Object.keys(CraftingPolicy.RARITIES), ['uncommon', 'rare', 'epic']);
-assert.deepEqual(Object.values(CraftingPolicy.RARITIES).map((entry) => entry.affixCount), [1, 2, 3], 'affix counts are configurable rarity data');
-assert.deepEqual(Object.values(CraftingPolicy.RARITIES).map((entry) => entry.workshopLevel), [1, 2, 3], 'workshop gates are configurable rarity data');
+assert.deepEqual(Object.values(CraftingPolicy.RARITIES).map((entry) => entry.affixCount), [1, 2, 3], 'affix counts remain configurable rarity data');
+assert.equal(CraftingPolicy.RARITIES.rare.workshopLevel, 1, 'chapter one blue crafting works without workshop upgrades');
 
 console.log('crafting-policy: assertions passed');
