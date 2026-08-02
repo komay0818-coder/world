@@ -13,6 +13,10 @@ assert.match(script, /greatfangWolf:.*lootConfig: EquipmentDropPolicy\.TEST_LOOT
 assert.match(script, /function rewardVictory\(index\)[\s\S]*EquipmentDropPolicy\.grantEquipmentDrop\(progress, enemy\)/, 'rewardVictory enters the equipment drop flow');
 assert.match(script, /ChapterOneMaterialDropPolicy\.grantMaterialDrops\(progress, currentMap\.id\)/, 'rewardVictory grants configured map materials through the shared inventory');
 assert.match(script, /materialDrops\.forEach[\s\S]*材料掉落/, 'material drops are shown in the battle loot log');
+assert.match(html, /chapter-one-recipe-drop-policy\.js[\s\S]*script\.js/, 'recipe drop policy loads before reward integration');
+assert.match(script, /ChapterOneRecipeDropPolicy\.grantRecipeDrops\(progress, enemy, currentMap\.id\)/, 'rewardVictory grants recipes for configured monsters and maps');
+assert.match(script, /recipeDrops\.forEach[\s\S]*配方掉落/, 'recipe drops are shown in the battle loot log');
+assert.match(script, /item\.kind === 'recipe'\) return 'consumable'/, 'recipe items appear in the existing backpack item category');
 assert.match(html, /chapter-boss-drop-policy\.js[\s\S]*script\.js/, 'chapter boss drop policy loads before reward integration');
 assert.match(script, /ChapterBossDropPolicy\.grantChapterBossBlueDrop\(progress, enemy/, 'boss blue drop is an independent reward roll');
 assert.match(script, /chapter: currentMap\.chapter[\s\S]*finalBossId/, 'chapter and final boss metadata gate the special drop');

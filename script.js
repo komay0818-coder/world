@@ -1624,7 +1624,7 @@ function itemStatsText(item) {
 }
 
 function itemCategory(item) {
-  if (item.kind === 'consumable' || item.kind === 'material') return 'consumable';
+  if (item.kind === 'consumable' || item.kind === 'material' || item.kind === 'recipe') return 'consumable';
   if (item.kind === 'equipment' && ['weapon', 'offhand'].includes(item.slot)) return 'weapon';
   if (item.kind === 'equipment') return 'armor';
   return 'other';
@@ -2689,6 +2689,7 @@ function rewardVictory(index) {
   const loot = addLoot(progress, enemy);
   const collectible = addCollectibleLoot(progress, enemy);
   const materialDrops = ChapterOneMaterialDropPolicy.grantMaterialDrops(progress, currentMap.id);
+  const recipeDrops = ChapterOneRecipeDropPolicy.grantRecipeDrops(progress, enemy, currentMap.id);
   let equipmentDrop = null;
   try {
     equipmentDrop = EquipmentDropPolicy.grantEquipmentDrop(progress, enemy);
@@ -2765,6 +2766,10 @@ function rewardVictory(index) {
     showToast(`獲得材料：${material.name}`);
     logBattle(`◆ 材料掉落【${material.name} ×${material.quantity}】`, 'loot');
   });
+  recipeDrops.forEach((recipe) => {
+    showToast(`獲得配方：${recipe.name}`);
+    logBattle(`◆ 配方掉落【${recipe.name} ×${recipe.quantity}】`, 'loot');
+  });
   if (equipmentDrop) {
     const rarityLabel = EquipmentAffixPolicy.getQualityLabel(equipmentDrop);
     showToast(`獲得裝備：${equipmentDrop.name}`);
@@ -2790,7 +2795,7 @@ function rewardVictory(index) {
     rewardKey,
     xp: earnedXp,
     gold: earnedGold,
-    loot: [loot?.name, ...materialDrops.map((material) => material.name), equipmentDrop?.name, blueBossDrop?.name, offhandDrop?.name, collectible?.name, ...accountDrops].filter(Boolean).join(',') || 'none'
+    loot: [loot?.name, ...materialDrops.map((material) => material.name), ...recipeDrops.map((recipe) => recipe.name), equipmentDrop?.name, blueBossDrop?.name, offhandDrop?.name, collectible?.name, ...accountDrops].filter(Boolean).join(',') || 'none'
   });
 }
 
