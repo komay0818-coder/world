@@ -624,6 +624,7 @@ const potionDropRate = .10;
 const manaPotionDropRate = .07;
 const PARTY_REVIVE_DELAY_MS = 10000;
 const PARTY_REVIVE_HEALTH_RATIO = .30;
+const PARTY_AUTO_POTION_HEALTH_RATIO = .35;
 
 const equipmentSlots = {
   weapon: { label: '武器', icon: '⚔' },
@@ -2799,6 +2800,30 @@ function rewardVictory(index) {
   });
 }
 
+function useSharedHealingPotionForMember(member) {
+  if (!member?.alive || member.isMain || member.currentHp <= 0 || member.currentHp >= member.maxHp) return false;
+  const progress = getProgress();
+  if ((progress.potions || 0) <= 0) return false;
+  progress.potions -= 1;
+  removePotionItem(progress);
+  member.currentHp = Math.min(member.maxHp, member.currentHp + Math.ceil(member.maxHp * .30));
+  saveProgress(progress);
+  logBattle(`🧪 ${member.name}使用主要角色背包的治癒藥水，恢復 30% 生命。`, 'healing');
+  return true;
+}
+
+function useSharedManaPotionForMember(member) {
+  if (!member?.alive || member.isMain || !usesManaResource(member.job) || member.resourceCurrent >= member.resourceMax) return false;
+  const progress = getProgress();
+  if ((progress.manaPotions || 0) <= 0) return false;
+  progress.manaPotions -= 1;
+  removeManaPotionItem(progress);
+  member.resourceCurrent = Math.min(member.resourceMax, member.resourceCurrent + Math.ceil(member.resourceMax * .20));
+  saveProgress(progress);
+  logBattle(`🔷 ${member.name}使用主要角色背包的魔力藥水，恢復 20% 魔力。`, 'healing');
+  return true;
+}
+
 function getMonsterRespawnTicks() {
   // 移動速度越高，怪物越快回到戰場；100% 時為 4 秒。
   return Math.max(1, Math.round(4 * (100 / battle.monsterMoveSpeed)));
@@ -2957,7 +2982,7 @@ function updatePartyMemberManaExhaustion(member) {
       syncLegacyBattleStateFromMain();
       useManaPotion();
       syncMainBattleMemberFromLegacy();
-    }
+    } else useSharedManaPotionForMember(member);
   } else if (member.manaExhausted && ratio >= .45) {
     member.manaExhausted = false;
     logBattle(`◆ ${member.name}魔力恢復，重新開始施放技能。`, 'system');
@@ -3431,6 +3456,9 @@ function enemyAttackTick() {
 
   battle.partyMembers.filter(member => member.alive).forEach(member => {
     attackOccurred = processPartyMemberBleed(member, now) || attackOccurred;
+    if (!member.isMain && member.currentHp > 0 && member.currentHp / member.maxHp < PARTY_AUTO_POTION_HEALTH_RATIO) {
+      useSharedHealingPotionForMember(member);
+    }
     defeatPartyMember(member, now);
   });
   if (resetPartyAfterDefeat(now)) {
@@ -3544,10 +3572,12 @@ function enemyAttackTick() {
     }
     playMonsterAttackAnimation(enemyIndex, !dodged && damage > 0);
 
-    if (target.isMain && target.currentHp > 0 && target.currentHp / target.maxHp < .35) {
-      syncLegacyBattleStateFromMain();
-      usePotion();
-      syncMainBattleMemberFromLegacy();
+    if (target.currentHp > 0 && target.currentHp / target.maxHp < PARTY_AUTO_POTION_HEALTH_RATIO) {
+      if (target.isMain) {
+        syncLegacyBattleStateFromMain();
+        usePotion();
+        syncMainBattleMemberFromLegacy();
+      } else useSharedHealingPotionForMember(target);
     }
     defeatPartyMember(target, now);
     if (resetPartyAfterDefeat(now)) {

@@ -21,6 +21,11 @@ assert.match(script, /const PARTY_REVIVE_DELAY_MS = 10000/, 'teammate revival wa
 assert.match(script, /member\.reviveAt = member\.isMain \? null : now \+ PARTY_REVIVE_DELAY_MS/, 'only defeated teammates receive an automatic revive timer');
 assert.match(script, /progress\.potions -= 1[\s\S]*removePotionItem\(progress\)[\s\S]*PARTY_REVIVE_HEALTH_RATIO/, 'revival consumes the main character healing potion and restores configured health');
 assert.match(script, /reviveSeconds > 0 \? `\$\{reviveSeconds\} 秒後復活` : '等待治癒藥水'/, 'party status shows the revive countdown and missing-potion state');
+assert.match(script, /const PARTY_AUTO_POTION_HEALTH_RATIO = \.35/, 'teammate healing potion threshold is configurable');
+assert.match(script, /function useSharedHealingPotionForMember\(member\)[\s\S]*progress\.potions -= 1[\s\S]*removePotionItem\(progress\)[\s\S]*member\.maxHp \* \.30/, 'living teammates consume the main inventory healing potion for thirty percent health');
+assert.match(script, /function useSharedManaPotionForMember\(member\)[\s\S]*usesManaResource\(member\.job\)[\s\S]*progress\.manaPotions -= 1[\s\S]*removeManaPotionItem\(progress\)[\s\S]*member\.resourceMax \* \.20/, 'mana teammates consume the main inventory blue potion for twenty percent mana');
+assert.match(script, /else useSharedManaPotionForMember\(member\)/, 'a non-main mana user drinks a blue potion when entering exhaustion');
+assert.match(script, /target\.currentHp \/ target\.maxHp < PARTY_AUTO_POTION_HEALTH_RATIO[\s\S]*useSharedHealingPotionForMember\(target\)/, 'a damaged teammate drinks a healing potion below thirty-five percent health');
 assert.match(script, /PartyPolicy\.scheduleNextAttack\(member, now, member\.attackSpeed, exhaustedMultiplier\)/, 'attack timing uses each member attack speed');
 assert.match(script, /chooseRandomAliveMember\(battle\.partyMembers/, 'monsters choose among living party members');
 assert.match(script, /PartyPolicy\.isPartyDefeated\(battle\.partyMembers\)/, 'failure requires the whole party to be defeated');
