@@ -1755,7 +1755,7 @@ function renderInventory(view = 'inventory') {
   const scrappableItems = progress.inventory.filter((item) => item.kind === 'equipment' && itemCategory(item) === inventoryCategory);
   const allScrapSelected = scrappableItems.length > 0 && scrappableItems.every((item) => scrapSelection.has(item.id));
   const categoryLabel = inventoryCategory === 'weapon' ? '武器' : inventoryCategory === 'armor' ? '防具' : '裝備';
-  const scrapTools = `<section class="scrap-tools"><div><b>批次販賣</b><small>已選擇 ${saleSummary.count} 件・預計獲得 ${saleSummary.gold} 金幣</small></div><label class="scrap-select select-all-scrap"><input type="checkbox" data-select-all-scrap ${allScrapSelected ? 'checked' : ''} ${scrappableItems.length ? '' : 'disabled'}><span>全部勾選${categoryLabel}</span></label><button type="button" class="select-junk-button" data-select-unusable-junk>勾選廢品（不能裝備）</button><button type="button" data-open-sell-confirm ${selectedScrapCount ? '' : 'disabled'}>確認販賣（${selectedScrapCount}）</button></section>`;
+  const scrapTools = `<section class="scrap-tools"><div><b>批次販賣</b><small>已選擇 ${saleSummary.count} 件・預計獲得 ${saleSummary.gold} 金幣</small></div><label class="scrap-select select-all-scrap"><input type="checkbox" data-select-all-scrap ${allScrapSelected ? 'checked' : ''} ${scrappableItems.length ? '' : 'disabled'}><span>全部勾選${categoryLabel}</span></label><button type="button" class="select-junk-button" data-select-common-equipment>勾選全部白色裝備</button><button type="button" data-open-sell-confirm ${selectedScrapCount ? '' : 'disabled'}>確認販賣（${selectedScrapCount}）</button></section>`;
   const paperDoll = Object.entries(equipmentSlots).map(([slot, info]) => {
     const item = progress.equipment[slot];
     const visual = item ? `<img src="${itemImagePath(item)}" alt="" class="paper-doll-item-image">` : info.icon;
@@ -1963,10 +1963,9 @@ function unequipItem(slot) {
   }
 }
 
-function selectUnusableJunkEquipment() {
+function selectAllCommonEquipment() {
   const progress = getProgress();
-  const character = JSON.parse(localStorage.getItem('stardust-character') || 'null');
-  progress.inventory.filter((item) => InventorySalePolicy.isJunkCandidate(item, getItemJunkContext(item, character, progress)))
+  progress.inventory.filter((item) => InventorySalePolicy.isCommonEquipment(item))
     .forEach((item) => scrapSelection.add(item.id));
   renderInventory('inventory');
 }
@@ -3820,7 +3819,7 @@ document.querySelector('#inventory-modal').addEventListener('click', (event) => 
     renderInventory('inventory');
     return;
   }
-  if (event.target.closest('[data-select-unusable-junk]')) { selectUnusableJunkEquipment(); return; }
+  if (event.target.closest('[data-select-common-equipment]')) { selectAllCommonEquipment(); return; }
   if (event.target.closest('[data-open-sell-confirm]')) { openSellConfirmation(); return; }
   const junkToggle = event.target.closest('[data-toggle-junk-ids]');
   if (junkToggle) { toggleEquipmentJunkMark(junkToggle.dataset.toggleJunkIds.split(',').filter(Boolean)); return; }

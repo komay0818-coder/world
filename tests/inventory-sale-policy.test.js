@@ -8,6 +8,10 @@ assert.deepEqual(policy.getJunkReasons({ ...base, requiredLevel: 11 }, { level: 
 assert.deepEqual(policy.getJunkReasons(base, { level: 10, canEquip: false }), ['job']);
 assert.deepEqual(policy.getJunkReasons({ ...base, isJunk: true }, { level: 10, canEquip: true }), ['marked']);
 assert.equal(policy.isJunkCandidate({ kind: 'material', id: 'ore' }, { canEquip: false }), false);
+assert.equal(policy.isCommonEquipment(base), true);
+assert.equal(policy.isCommonEquipment({ ...base, rarity: 'common', quality: undefined }), true);
+assert.equal(policy.isCommonEquipment({ ...base, quality: 'uncommon' }), false);
+assert.equal(policy.isCommonEquipment({ id: 'ore', kind: 'material', quality: 'common' }), false);
 
 assert.equal(policy.getSellPrice(base), 10);
 assert.equal(policy.getSellPrice({ ...base, quality: 'uncommon' }), 25);

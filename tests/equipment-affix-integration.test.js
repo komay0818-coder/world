@@ -20,7 +20,9 @@ assert.doesNotMatch(source, /equipmentScore|equipmentValue|評分/, 'inventory a
 assert.doesNotMatch(gameCss, /equipment-score|score-difference/, 'removed score UI has no stale styles');
 assert.match(html, /inventory-sale-policy\.js[\s\S]*script\.js/, 'sale policy loads before inventory integration');
 assert.match(html, /id="sell-confirm-modal"/, 'batch selling has a dedicated confirmation dialog');
-assert.match(source, /data-select-unusable-junk/, 'inventory exposes one-click unusable junk selection');
+assert.match(source, /data-select-common-equipment>勾選全部白色裝備/, 'inventory exposes one-click common equipment selection');
+assert.match(source, /InventorySalePolicy\.isCommonEquipment\(item\)/, 'common equipment selection uses the shared quality policy');
+assert.doesNotMatch(source, /data-select-unusable-junk|selectUnusableJunkEquipment/, 'obsolete unusable junk quick selection is removed');
 assert.match(source, /InventorySalePolicy\.summarizeSelection/, 'selection count and expected gold are recalculated during render');
 assert.match(source, /InventorySalePolicy\.sellSelection/, 'confirmed sales use the shared atomic sale policy');
 assert.match(source, /data-toggle-junk-ids/, 'equipment can persist a player junk marker');

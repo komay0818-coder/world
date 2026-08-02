@@ -25,6 +25,10 @@
 
   function isJunkCandidate(item, context = {}) { return getJunkReasons(item, context).length > 0; }
 
+  function isCommonEquipment(item) {
+    return item?.kind === 'equipment' && normalizeQuality(item) === 'common';
+  }
+
   function getSellPrice(item) {
     if (!item || item.kind !== 'equipment') return 0;
     const base = QUALITY_SELL_PRICES[normalizeQuality(item)] || QUALITY_SELL_PRICES.common;
@@ -51,5 +55,5 @@
     return { ok: true, ...summary };
   }
 
-  return Object.freeze({ QUALITY_SELL_PRICES, normalizeQuality, getJunkReasons, isJunkCandidate, getSellPrice, summarizeSelection, sellSelection });
+  return Object.freeze({ QUALITY_SELL_PRICES, normalizeQuality, getJunkReasons, isJunkCandidate, isCommonEquipment, getSellPrice, summarizeSelection, sellSelection });
 }));
