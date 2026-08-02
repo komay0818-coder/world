@@ -622,6 +622,8 @@ const collectibleDropRates = { normal: .01, elite: .08, boss: .30 };
 
 const potionDropRate = .10;
 const manaPotionDropRate = .07;
+const PARTY_REVIVE_DELAY_MS = 10000;
+const PARTY_REVIVE_HEALTH_RATIO = .30;
 
 const equipmentSlots = {
   weapon: { label: '武器', icon: '⚔' },
@@ -2227,6 +2229,7 @@ function createBattlePartyMember(slot, slotIndex, mainId, now = Date.now()) {
     shield: 0,
     stunnedUntil: 0,
     bleed: null,
+    reviveAt: null,
     undeadRevived: false,
     hunterAttackCount: 0,
     lastManaRegenAt: now,
@@ -2496,11 +2499,15 @@ function renderBattlePartyStatus() {
     const resourcePercent = Math.max(0, Math.min(100, member.resourceCurrent / resourceMax * 100));
     const hpPercent = Math.max(0, Math.min(100, member.currentHp / member.maxHp * 100));
     const jobName = classes.find(job => job.id === member.character.job)?.name || member.character.job;
+    const reviveSeconds = member.alive || !Number.isFinite(member.reviveAt) ? 0 : Math.max(0, Math.ceil((member.reviveAt - Date.now()) / 1000));
+    const lifeStatus = member.alive
+      ? `${Math.max(0, member.currentHp)} / ${member.maxHp}`
+      : reviveSeconds > 0 ? `${reviveSeconds} 秒後復活` : '等待治癒藥水';
     return `<article class="battle-party-member${member.alive ? '' : ' is-dead'}">
       <div><strong>${member.name}</strong><small>${jobName} Lv.${member.level}</small></div>
       <span class="party-mini-track hp"><i style="width:${hpPercent}%"></i></span>
       <span class="party-mini-track resource"><i style="width:${resourcePercent}%"></i></span>
-      <em>${member.alive ? `${Math.max(0, member.currentHp)} / ${member.maxHp}` : '已死亡'}</em>
+      <em>${lifeStatus}</em>
     </article>`;
   }).join('');
 }
@@ -3099,6 +3106,7 @@ function battleTick() {
   processEnemyRespawns();
   processEnemyDots();
   const now = Date.now();
+  reviveDefeatedTeammates(now);
   (battle.partyMembers || []).forEach((member) => updatePartyMemberResource(member, now));
   processPartyMemberAttacks(now);
   queueDefeatedEnemies();
@@ -3349,9 +3357,33 @@ function defeatPartyMember(member, now = Date.now()) {
   member.bleed = null;
   member.stunnedUntil = 0;
   member.nextAttackAt = Number.POSITIVE_INFINITY;
+  member.reviveAt = member.isMain ? null : now + PARTY_REVIVE_DELAY_MS;
   logPartyDebug('死亡事件', { memberId: member.id, memberName: member.name, at: now });
   logBattle(`${member.name} 已倒下。`, 'system');
   return true;
+}
+
+function reviveDefeatedTeammates(now = Date.now()) {
+  const progress = getProgress();
+  let revived = 0;
+  for (const member of battle.partyMembers || []) {
+    if (member.isMain || member.alive || !Number.isFinite(member.reviveAt) || now < member.reviveAt) continue;
+    if ((progress.potions || 0) <= 0) continue;
+    progress.potions -= 1;
+    removePotionItem(progress);
+    member.currentHp = Math.max(1, Math.ceil(member.maxHp * PARTY_REVIVE_HEALTH_RATIO));
+    member.alive = true;
+    member.shield = 0;
+    member.bleed = null;
+    member.stunnedUntil = 0;
+    member.nextAttackAt = now + 1000;
+    member.targetIndex = -1;
+    member.reviveAt = null;
+    revived += 1;
+    logBattle(`🧪 使用主要角色的治癒藥水，${member.name}以 30% 生命復活。`, 'healing');
+  }
+  if (revived) saveProgress(progress);
+  return revived;
 }
 
 function resetPartyAfterDefeat(now = Date.now()) {
@@ -3369,6 +3401,7 @@ function resetPartyAfterDefeat(now = Date.now()) {
     member.stunnedUntil = 0;
     member.nextAttackAt = now + 1000;
     member.targetIndex = -1;
+    member.reviveAt = null;
   });
   resetAliveEnemyAttackSchedule(now);
   syncLegacyBattleStateFromMain();
@@ -3383,6 +3416,8 @@ function enemyAttackTick() {
   const progress = getProgress();
   const now = Date.now();
   let attackOccurred = false;
+
+  reviveDefeatedTeammates(now);
 
   battle.partyMembers.filter(member => member.alive).forEach(member => {
     attackOccurred = processPartyMemberBleed(member, now) || attackOccurred;

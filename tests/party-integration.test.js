@@ -17,6 +17,10 @@ assert.match(script, /activeMemberIds/, 'active party member ids are persisted')
 assert.match(script, /function createBattlePartyMember/, 'each active character receives an independent runtime record');
 assert.match(script, /skillCooldowns: \{\}/, 'each member owns skill cooldowns');
 assert.match(script, /nextAttackAt: now/, 'each member owns an attack timer');
+assert.match(script, /const PARTY_REVIVE_DELAY_MS = 10000/, 'teammate revival waits ten seconds');
+assert.match(script, /member\.reviveAt = member\.isMain \? null : now \+ PARTY_REVIVE_DELAY_MS/, 'only defeated teammates receive an automatic revive timer');
+assert.match(script, /progress\.potions -= 1[\s\S]*removePotionItem\(progress\)[\s\S]*PARTY_REVIVE_HEALTH_RATIO/, 'revival consumes the main character healing potion and restores configured health');
+assert.match(script, /reviveSeconds > 0 \? `\$\{reviveSeconds\} 秒後復活` : '等待治癒藥水'/, 'party status shows the revive countdown and missing-potion state');
 assert.match(script, /PartyPolicy\.scheduleNextAttack\(member, now, member\.attackSpeed, exhaustedMultiplier\)/, 'attack timing uses each member attack speed');
 assert.match(script, /chooseRandomAliveMember\(battle\.partyMembers/, 'monsters choose among living party members');
 assert.match(script, /PartyPolicy\.isPartyDefeated\(battle\.partyMembers\)/, 'failure requires the whole party to be defeated');
