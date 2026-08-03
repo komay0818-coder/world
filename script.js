@@ -239,6 +239,10 @@ let scrapSelection = new Set();
 let inventoryCategory = 'weapon';
 let workshopQuality = 'uncommon';
 let workshopSlot = 'all';
+let alchemyInputItemIds = [null, null];
+let alchemyCandidates = [];
+let selectedAlchemyCandidate = null;
+let alchemyBusy = false;
 let battleLogMode = 'player';
 let battleLogEntries = [];
 let battle = { enemyTypes: ['goblin', 'wolf', 'boar', 'goblin', 'wolf'], enemyHps: [45, 68, 82, 45, 68], playerHp: 100, playerMana: 100, playerShield: 0, manaExhausted: false, playerAttackCharge: 0, globalSkillReadyAt: 0, undeadRevived: false, skillCooldowns: {}, enemyRespawns: [null, null, null, null, null], enemySpawnedAt: [0, 1, 2, 3, 4], enemyNextAttackAt: [0, 0, 0, 0, 0], enemyDots: [[], [], [], [], []], monsterMoveSpeed: 200, targetIndexes: [], enemyDamages: [[], [], [], [], []], damageTimers: [] };
@@ -998,8 +1002,96 @@ function openVillageBuilding(buildingId) {
   if (!building || !building.unlocked) return;
   document.querySelector('#village-building-title').textContent = building.name;
   if (buildingId === 'workshop') renderWorkshop(building);
+  else if (buildingId === 'alchemy') renderAlchemy(building);
   else document.querySelector('#village-building-content').innerHTML = `<div class="village-building-icon" aria-hidden="true">${building.icon}</div><h3>${building.name}</h3><small>建築等級 Lv${building.level} / ${building.maxLevel}</small><p>${building.description}</p><p class="village-placeholder">${building.name}功能尚未完成，將於後續版本加入。</p>`;
   document.querySelector('#village-building-modal').classList.remove('hidden');
+}
+
+function alchemyItemDescription(item) {
+  const slot = equipmentSlots[item?.slot]?.label || item?.slot || '未知部位';
+  return `${slot}・${itemStatsText(item)}`;
+}
+
+function resetAlchemyState() {
+  alchemyInputItemIds = [null, null];
+  alchemyCandidates = [];
+  selectedAlchemyCandidate = null;
+  alchemyBusy = false;
+}
+
+function renderAlchemy(building = getVillageBuildingData('alchemy'), message = '') {
+  const progress = getProgress();
+  const inventory = Array.isArray(progress.inventory) ? progress.inventory : [];
+  const selectedItems = alchemyInputItemIds.map((id) => inventory.find((item) => AlchemyPolicy.getItemId(item) === id) || null);
+  const selectingSecond = Boolean(selectedItems[0]);
+  const eligible = AlchemyPolicy.getEligibleInputs(progress, selectingSecond ? alchemyInputItemIds[0] : '');
+  const available = eligible.map((item) => {
+    const id = AlchemyPolicy.getItemId(item);
+    const selectedSlot = alchemyInputItemIds.indexOf(id);
+    return `<button type="button" class="alchemy-inventory-item ${selectedSlot >= 0 ? 'selected' : ''}" data-alchemy-item="${id}">
+      <span class="item-icon"><img src="${itemImagePath(item)}" alt=""></span><span><b>${item.name}</b><small>${alchemyItemDescription(item)}</small></span>
+    </button>`;
+  }).join('');
+  const slots = selectedItems.map((item, index) => `<article class="alchemy-input ${item ? 'filled' : ''}">
+    <small>材料 ${index + 1}</small>${item ? `<b>${item.name}</b><span>${alchemyItemDescription(item)}</span><button type="button" data-clear-alchemy-input="${index}">移除</button>` : '<b>尚未放入裝備</b><span>請從下方選擇綠色裝備</span>'}
+  </article>`).join('');
+  const validation = AlchemyPolicy.validateInputs(progress, alchemyInputItemIds);
+  const candidates = alchemyCandidates.map((item) => {
+    const id = AlchemyPolicy.getItemId(item);
+    return `<button type="button" class="alchemy-candidate ${selectedAlchemyCandidate === id ? 'selected' : ''}" data-select-alchemy-candidate="${id}">
+      <b>${item.name}</b><small>${alchemyItemDescription(item)}</small><span>${item.primaryStat ? `<strong>主能力</strong> ${CraftingPolicy.formatStat(item.primaryStat)}<br>${item.affixes.map((entry) => `<strong>額外詞綴</strong> ${CraftingPolicy.formatStat(entry)}`).join('<br>')}` : (item.affixes || []).map((entry) => EquipmentAffixPolicy.formatAffix(entry)).filter(Boolean).join('<br>')}</span>
+    </button>`;
+  }).join('');
+  const helper = message || (alchemyCandidates.length
+    ? '請選擇一件結果；確認後其餘候選裝備會消失。'
+    : validation.ok ? '材料符合規則，可以開始煉金。' : validation.reason);
+  document.querySelector('#village-building-content').innerHTML = `<div class="workshop-title"><div class="village-building-icon" aria-hidden="true">${building.icon}</div><div><h3>${building.name}</h3><small>建築 Lv${building.level}・產生 ${AlchemyPolicy.getCandidateCount(building.level)} 件候選裝備</small></div></div>
+    <p>消耗兩件相同部位的綠色裝備，重新產生一件相同部位的綠色裝備。詞綴、數值與插槽不會繼承。</p>
+    <section class="alchemy-inputs">${slots}</section><p class="alchemy-message ${validation.ok || alchemyCandidates.length ? 'ok' : ''}">${helper}</p>
+    <div class="alchemy-actions"><button type="button" data-start-alchemy ${validation.ok && !alchemyCandidates.length && !alchemyBusy ? '' : 'disabled'}>開始煉金</button><button type="button" data-confirm-alchemy ${selectedAlchemyCandidate && !alchemyBusy ? '' : 'disabled'}>確認選擇</button><button type="button" data-return-alchemy>返回村莊</button></div>
+    ${alchemyCandidates.length ? `<section class="alchemy-results"><h4>煉金結果候選</h4><div>${candidates}</div></section>` : `<section class="alchemy-available"><h4>${selectingSecond ? `可用的第二件材料（${equipmentSlots[selectedItems[0].slot]?.label || selectedItems[0].slot}）` : '可使用裝備'}</h4><div>${available || '<p>目前沒有符合條件的綠色裝備。</p>'}</div></section>`}`;
+}
+
+function selectAlchemyInput(itemId) {
+  if (alchemyCandidates.length || alchemyBusy) return;
+  const progress = getProgress();
+  const item = progress.inventory.find((entry) => AlchemyPolicy.getItemId(entry) === itemId);
+  if (!AlchemyPolicy.isEligibleInput(item, progress)) { renderAlchemy(undefined, '此裝備已不存在、已穿戴或受保護，請重新選擇。'); return; }
+  if (!alchemyInputItemIds[0]) alchemyInputItemIds[0] = itemId;
+  else if (!alchemyInputItemIds[1] && itemId !== alchemyInputItemIds[0] && item.slot === progress.inventory.find((entry) => AlchemyPolicy.getItemId(entry) === alchemyInputItemIds[0])?.slot) alchemyInputItemIds[1] = itemId;
+  renderAlchemy();
+}
+
+function startAlchemy() {
+  if (alchemyBusy || alchemyCandidates.length) return;
+  const progress = getProgress();
+  const validation = AlchemyPolicy.validateInputs(progress, alchemyInputItemIds);
+  if (!validation.ok) { renderAlchemy(undefined, validation.reason); return; }
+  if (!window.confirm('煉金將消耗這兩件裝備，是否繼續？')) return;
+  alchemyBusy = true;
+  const building = getVillageBuildingData('alchemy');
+  const result = AlchemyPolicy.beginAlchemy(progress, alchemyInputItemIds, { buildingLevel: building.level });
+  alchemyBusy = false;
+  if (!result.ok) { renderAlchemy(building, result.reason); return; }
+  alchemyCandidates = result.session.candidates;
+  alchemyInputItemIds = result.session.inputIds;
+  selectedAlchemyCandidate = null;
+  renderAlchemy(building);
+}
+
+function confirmAlchemy() {
+  if (alchemyBusy || !selectedAlchemyCandidate || !alchemyCandidates.length) return;
+  if (!window.confirm('確定選擇這件裝備嗎？其餘煉金結果將會消失。')) return;
+  alchemyBusy = true;
+  const progress = getProgress();
+  const session = { inputIds: [...alchemyInputItemIds], candidates: alchemyCandidates };
+  const result = AlchemyPolicy.confirmAlchemy(progress, session, selectedAlchemyCandidate);
+  if (!result.ok) { alchemyBusy = false; resetAlchemyState(); renderAlchemy(undefined, result.reason); return; }
+  saveProgress(progress);
+  const item = result.item;
+  resetAlchemyState();
+  renderAlchemy(undefined, `煉金完成：${item.name} 已放入背包。`);
+  showToast(`煉金完成：${item.name}，已放入背包。`);
 }
 
 function renderWorkshop(building = getVillageBuildingData('workshop'), craftedItem = null) {
@@ -1046,6 +1138,7 @@ function craftWorkshopEquipment(recipeId) {
 }
 
 function closeVillageBuilding() {
+  resetAlchemyState();
   document.querySelector('#village-building-modal')?.classList.add('hidden');
 }
 
@@ -1625,9 +1718,9 @@ function itemStatsText(item) {
   if (item.arrowRecoveryInterval) parts.push(`每 ${(Number(item.arrowRecoveryInterval) / 1000).toFixed(1).replace(/\.0$/, '')} 秒恢復 1 支箭矢`);
   if (item.arrowRecoverySpeedBonus) parts.push(`箭矢恢復速度 +${Math.round(Number(item.arrowRecoverySpeedBonus) * 100)}%`);
   if (item.affix) parts.push(`詞綴【${item.affix.name}】：${item.affix.text}`);
-  if (item.sourceType === 'crafted' && item.primaryStat) parts.push(`主能力【${CraftingPolicy.formatStat(item.primaryStat)}】`);
+  if (item.primaryStat) parts.push(`主能力【${CraftingPolicy.formatStat(item.primaryStat)}】`);
   (Array.isArray(item.affixes) ? item.affixes : []).forEach((entry) => {
-    if (item.sourceType === 'crafted') { parts.push(`額外詞綴【${CraftingPolicy.formatStat(entry)}】`); return; }
+    if (item.primaryStat) { parts.push(`額外詞綴【${CraftingPolicy.formatStat(entry)}】`); return; }
     const text = EquipmentAffixPolicy.formatAffix(entry);
     if (text) parts.push(`詞綴【${text}】`);
   });
@@ -3871,6 +3964,15 @@ document.querySelector('#village-building-modal').addEventListener('click', (eve
   if (slotButton) { workshopSlot = slotButton.dataset.workshopSlot; renderWorkshop(); return; }
   const craftButton = event.target.closest('[data-craft-recipe]');
   if (craftButton) craftWorkshopEquipment(craftButton.dataset.craftRecipe);
+  const alchemyItem = event.target.closest('[data-alchemy-item]');
+  if (alchemyItem) { selectAlchemyInput(alchemyItem.dataset.alchemyItem); return; }
+  const clearAlchemyInput = event.target.closest('[data-clear-alchemy-input]');
+  if (clearAlchemyInput && !alchemyCandidates.length) { const index = Number(clearAlchemyInput.dataset.clearAlchemyInput); alchemyInputItemIds[index] = null; if (index === 0) alchemyInputItemIds[1] = null; renderAlchemy(); return; }
+  const candidate = event.target.closest('[data-select-alchemy-candidate]');
+  if (candidate) { selectedAlchemyCandidate = candidate.dataset.selectAlchemyCandidate; renderAlchemy(); return; }
+  if (event.target.closest('[data-start-alchemy]')) { startAlchemy(); return; }
+  if (event.target.closest('[data-confirm-alchemy]')) { confirmAlchemy(); return; }
+  if (event.target.closest('[data-return-alchemy]')) closeVillageBuilding();
 });
 document.querySelector('#party-close').addEventListener('click', () => document.querySelector('#party-modal').classList.add('hidden'));
 document.querySelector('#party-modal').addEventListener('click', (event) => {
