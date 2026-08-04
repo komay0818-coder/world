@@ -10,6 +10,15 @@ DEV 測試網址：<https://raw.githack.com/komay0818-coder/world/dev/index.html
 
 固定版本網址：<https://raw.githack.com/komay0818-coder/world/1b6fa95/index.html>
 
+## 2026-08-05 煉金金幣費用
+
+- 每次完成煉金固定消耗 100 金幣，費用集中於 `AlchemyPolicy.ALCHEMY_RULES.goldCost`。
+- 煉金面板顯示費用與目前持有金幣；不足時不能開始，並明確顯示所需金額。
+- 金幣只在候選裝備確認成功、兩件材料即將被消耗並加入結果裝備時一起扣除。
+- 裝備消失、候選無效、金幣不足或重複確認均不扣款；精確持有 100 金幣時可完成且餘額為 0。
+- 完整 JavaScript 測試集、語法及格式檢查均通過。
+- 功能提交：`e8f6b61`。
+
 ## 2026-08-05 村莊熔爐系統 V1
 
 - 熔爐改為單件選擇、分解槽、結果區三欄介面；分解前必須再次確認。
