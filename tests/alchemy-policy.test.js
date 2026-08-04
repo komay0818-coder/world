@@ -46,6 +46,10 @@ assert.equal(begin([green('green-a'), green('blue-b', 'wrist', { quality: 'rare'
 assert.equal(begin([green('green-a'), green('white-b', 'wrist', { quality: 'common', rarity: 'common' })]).code, 'invalid-quality', 'white equipment is rejected');
 assert.equal(AlchemyPolicy.beginAlchemy(progress([green('same')]), ['same', 'same']).code, 'duplicate-input', 'the same item cannot fill both slots');
 
+const overCapacity = [green('overflow-a'), green('overflow-b'), ...Array.from({ length: CraftingPolicy.INVENTORY_CAPACITY }, (_, index) => ({ id: `material-${index}`, kind: 'material', quantity: 1 }))];
+const overflowResult = begin(overCapacity, 1, 99);
+assert.equal(overflowResult.ok, true, 'alchemy remains available above capacity because it reduces inventory slots by one');
+
 const equipped = green('equipped');
 assert.equal(AlchemyPolicy.beginAlchemy(progress([equipped, green('other')], { wrist: equipped }), ['equipped', 'other']).code, 'equipped', 'equipped items are rejected');
 for (const protection of ['locked', 'isLocked', 'protected', 'isProtected', 'favorite', 'isFavorite']) {
@@ -90,7 +94,7 @@ const fullItems = [green('full-a'), green('full-b')];
 while (fullItems.length < CraftingPolicy.INVENTORY_CAPACITY + 2) fullItems.push({ id: `filler-${fullItems.length}`, kind: 'material', quantity: 1 });
 const fullProgress = progress(fullItems);
 const fullSnapshot = JSON.stringify(fullProgress);
-assert.equal(AlchemyPolicy.beginAlchemy(fullProgress, ['full-a', 'full-b']).code, 'inventory-full');
-assert.equal(JSON.stringify(fullProgress), fullSnapshot, 'inventory-full failure consumes nothing');
+assert.equal(AlchemyPolicy.beginAlchemy(fullProgress, ['full-a', 'full-b']).ok, true, 'over-capacity inventory can start a slot-reducing alchemy');
+assert.equal(JSON.stringify(fullProgress), fullSnapshot, 'starting alchemy does not consume inputs before confirmation');
 
 console.log('alchemy-policy: assertions passed');

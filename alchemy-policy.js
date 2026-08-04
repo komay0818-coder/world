@@ -63,8 +63,8 @@
     if (items[0].slot !== items[1].slot) return { ok: false, code: 'slot-mismatch', reason: '兩件裝備必須是相同部位。' };
     if (items.some((item) => isEquipped(item, progress.equipment))) return { ok: false, code: 'equipped', reason: '已裝備的物品不可作為材料。' };
     if (items.some(isProtected)) return { ok: false, code: 'protected', reason: '已鎖定或受保護的裝備不可作為材料。' };
-    const projectedSlots = inventory.length - ALCHEMY_RULES.inputCount + 1;
-    if (projectedSlots > CraftingPolicy.INVENTORY_CAPACITY) return { ok: false, code: 'inventory-full', reason: '背包空間不足。' };
+    // Alchemy always consumes two inventory slots and creates one, so it must
+    // remain available even when legacy drops have already exceeded capacity.
     return { ok: true, items, slot: items[0].slot };
   }
   function createInstanceId(now = Date.now(), random = Math.random, index = 0) {
