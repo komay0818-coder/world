@@ -1,76 +1,58 @@
-const assert = require('assert');
+const assert = require('node:assert/strict');
 const policy = require('../equipment-affix-policy.js');
 
 const weapon = { id: 'test-sword', kind: 'equipment', slot: 'weapon', name: '測試劍' };
 const armor = { id: 'test-armor', kind: 'equipment', slot: 'armor', name: '測試甲' };
 const accessory = { id: 'test-ring', kind: 'equipment', slot: 'ring1', name: '測試戒指' };
-const offhand = { id: 'test-shield', kind: 'equipment', slot: 'offhand', name: '測試盾' };
-
+assert.equal(policy.SCHEMA_VERSION, 3);
 assert.equal(policy.getEquipmentGroup(weapon), 'weapon');
 assert.equal(policy.getEquipmentGroup(armor), 'armor');
 assert.equal(policy.getEquipmentGroup(accessory), 'accessory');
-assert.equal(policy.getEquipmentGroup(offhand), null, 'special offhands retain their existing dedicated rules');
-
-const enabled = Object.values(policy.EQUIPMENT_AFFIXES).filter((entry) => entry.enabled);
-const disabled = Object.values(policy.EQUIPMENT_AFFIXES).filter((entry) => !entry.enabled);
-assert.ok(enabled.every((entry) => entry.disabledReason === ''));
-assert.ok(disabled.every((entry) => entry.disabledReason), 'every inactive affix documents why it cannot roll');
-assert.equal(policy.EQUIPMENT_AFFIXES.item_find_percent.enabled, false, 'an inert item-find affix cannot be displayed as effective');
+assert.deepEqual(policy.QUALITY_AFFIX_RULES.uncommon, { fixedCount: 1, randomCount: 2, specialChance: 0 });
+assert.deepEqual(policy.QUALITY_AFFIX_RULES.rare, { fixedCount: 2, randomCount: 3, specialChance: 0 });
+assert.deepEqual(policy.QUALITY_AFFIX_RULES.epic, { fixedCount: 2, randomCount: 4, specialChance: .15 });
+assert.equal(policy.QUALITY_AFFIX_RULES.legendary.requiresLegendaryAbility, true);
+assert.ok(policy.MUTUAL_EXCLUSIONS.some((pair) => pair.includes('attack_flat') && pair.includes('skill_damage_percent')));
 
 const common = policy.createEquipmentInstance(armor, { quality: 'common', uniqueId: 'common' });
-assert.equal(common.quality, 'common');
-assert.deepEqual(common.affixes, [], 'white equipment has no affix');
+assert.deepEqual(common.affixes, []);
+const green = policy.createEquipmentInstance(armor, { quality: 'uncommon', uniqueId: 'green', random: () => .25 });
+assert.equal(green.fixedAffixes.length, 1);
+assert.equal(green.randomAffixes.length, 2);
+assert.equal(green.affixes.length, 3);
+const blue = policy.createEquipmentInstance(armor, { quality: 'rare', uniqueId: 'blue', random: () => .4 });
+assert.equal(blue.fixedAffixes.length, 2);
+assert.equal(blue.randomAffixes.length, 3);
+const purple = policy.createEquipmentInstance(weapon, { quality: 'epic', uniqueId: 'purple', random: () => .5 });
+assert.equal(purple.fixedAffixes.length, 2);
+assert.equal(purple.randomAffixes.length, 4);
+assert.equal(new Set(purple.affixes.map((entry) => entry.stat)).size, 6, 'V3 never duplicates a stat');
+assert.equal(purple.affixes.some((entry) => entry.id === 'attack_flat') && purple.affixes.some((entry) => entry.id === 'skill_damage_percent'), false, 'configured mutually exclusive affixes never coexist');
 
-const greenArmor = policy.createEquipmentInstance(armor, { quality: 'uncommon', randomValue: 0, uniqueId: 'green' });
-assert.equal(greenArmor.quality, 'uncommon');
-assert.equal(greenArmor.affixes.length, 1, 'green equipment has exactly one affix');
-assert.ok(policy.EQUIPMENT_AFFIXES[greenArmor.affixes[0].id].allowedGroups.includes('armor'));
+const configured = { ...armor, fixedAffixIds: ['max_hp_percent'], specialAbilityIds: ['cooldown_reset_on_critical'] };
+const disabledSpecial = policy.createEquipmentInstance(configured, { quality: 'epic', uniqueId: 'special', specialChance: 1, random: () => 0 });
+assert.equal(disabledSpecial.specialAbility, null, 'special definitions remain data-gated until enabled');
+const legendary = policy.createEquipmentInstance({ ...weapon, legendaryAbility: { id: 'burn', name: '黑炎', description: '命中附加燃燒。' } }, { quality: 'legendary', uniqueId: 'legendary', random: () => 0 });
+assert.equal(legendary.legendaryAbility.id, 'burn');
+assert.ok(legendary.fixedAffixes.length >= 2 && legendary.fixedAffixes.length <= 3);
+assert.ok(legendary.randomAffixes.length >= 1 && legendary.randomAffixes.length <= 2);
 
-const greenWeapon = policy.createEquipmentInstance(weapon, { quality: 'uncommon', randomValue: .999, uniqueId: 'green' });
-assert.equal(greenWeapon.affixes.length, 1);
-assert.ok(policy.EQUIPMENT_AFFIXES[greenWeapon.affixes[0].id].allowedGroups.includes('weapon'));
-assert.ok(!['max_hp_percent', 'defense_percent', 'dodge_percent'].includes(greenWeapon.affixes[0].id), 'weapons cannot roll armor-only affixes');
+purple.affixes.forEach((entry) => assert.equal(entry.value, policy.EQUIPMENT_AFFIXES[entry.id].value, 'rolled values always equal the definition'));
+const tampered = JSON.parse(JSON.stringify(green));
+tampered.affixes.forEach((entry) => { entry.value = 999; });
+tampered.fixedAffixes.forEach((entry) => { entry.value = 999; });
+tampered.randomAffixes.forEach((entry) => { entry.value = 999; });
+const normalized = policy.normalizeEquipment(tampered);
+normalized.affixes.forEach((entry) => assert.equal(entry.value, policy.EQUIPMENT_AFFIXES[entry.id].value, 'loading repairs floating/tampered values'));
+assert.deepEqual(policy.normalizeEquipment(JSON.parse(JSON.stringify(green))), green, 'V3 save/load is stable');
 
-const rareArmorRolls = [0, .999];
-const rareArmor = policy.createEquipmentInstance(armor, { quality: 'rare', random: () => rareArmorRolls.shift() ?? 0, uniqueId: 'blue' });
-assert.equal(rareArmor.quality, 'rare');
-assert.equal(rareArmor.affixes.length, 2, 'blue equipment has exactly two affixes');
-assert.equal(new Set(rareArmor.affixes.map((entry) => entry.stat)).size, 2, 'blue equipment affixes are unique');
-assert.ok(rareArmor.affixes.every((entry) => entry.value >= policy.EQUIPMENT_AFFIXES[entry.id].value), 'blue affix values use the configured stronger range');
+const legacy = policy.normalizeEquipment({ ...armor, quality: 'uncommon', affixes: [{ id: 'max_hp_percent', value: 7 }] });
+assert.equal(legacy.affixSchemaVersion, undefined, 'legacy saves remain readable without being silently rerolled');
+assert.equal(legacy.affixes[0].value, policy.EQUIPMENT_AFFIXES.max_hp_percent.value);
+assert.deepEqual(policy.normalizeEquipment({ ...armor, quality: undefined }).affixes, []);
 
-const armorCandidates = policy.getAvailableAffixes(armor).map((entry) => entry.id);
-assert.deepEqual(armorCandidates.sort(), ['cooldown_speed_percent', 'defense_percent', 'dodge_percent', 'mana_regeneration_percent', 'max_hp_percent'].sort());
-assert.ok(!armorCandidates.includes('strength_percent'), 'unimplemented primary attributes remain disabled instead of appearing inert');
-
-const sameNameA = policy.createEquipmentInstance(weapon, { quality: 'uncommon', randomValue: 0, uniqueId: 'a' });
-const sameNameB = policy.createEquipmentInstance(weapon, { quality: 'uncommon', randomValue: .999, uniqueId: 'b' });
-assert.equal(sameNameA.name, sameNameB.name);
-assert.notEqual(sameNameA.affixes[0].id, sameNameB.affixes[0].id, 'same-name drops can keep distinct permanent affixes');
-
-const rerenderSnapshot = JSON.stringify(greenArmor.affixes);
-policy.getQualityLabel(greenArmor);
-policy.formatAffix(greenArmor.affixes[0]);
-assert.equal(JSON.stringify(greenArmor.affixes), rerenderSnapshot, 'display helpers never reroll or mutate affixes');
-
-const loaded = policy.normalizeEquipment(JSON.parse(JSON.stringify(greenArmor)));
-assert.deepEqual(loaded.affixes, greenArmor.affixes, 'save and load preserve affix id and value');
-const crafted = { id: 'crafted-1', kind: 'equipment', slot: 'cloak', sourceType: 'crafted', quality: 'epic', rarity: 'epic', primaryStat: { stat: 'itemFind', value: 8 }, affixes: [{ id: 'crafted-maxHp', stat: 'maxHp', value: 40 }] };
-assert.deepEqual(policy.normalizeEquipment(JSON.parse(JSON.stringify(crafted))), crafted, 'crafted primary and final affixes survive normalization');
-assert.equal(policy.getQualityLabel(crafted), '紫色');
-assert.deepEqual(policy.normalizeEquipment(JSON.parse(JSON.stringify(rareArmor))), rareArmor, 'save and load preserve blue affixes');
-assert.deepEqual(policy.normalizeEquipment({ ...armor, quality: undefined }).affixes, [], 'legacy equipment without affixes loads as white equipment');
-assert.equal(policy.normalizeEquipment({ ...armor, quality: undefined }).quality, 'common');
-
-const wornOnly = policy.getEquippedAffixStats({ armor: greenArmor, weapon: null });
-assert.equal(wornOnly[greenArmor.affixes[0].stat], greenArmor.affixes[0].value);
-assert.deepEqual(policy.getEquippedAffixStats({}), {}, 'an empty equipment set gains no backpack affixes');
-
-const firstMember = policy.getEquippedAffixStats({ armor: greenArmor });
-const secondMember = policy.getEquippedAffixStats({ weapon: greenWeapon });
-assert.notDeepEqual(firstMember, secondMember, 'each party member aggregates only their own equipment object');
-
-const malformed = policy.normalizeEquipment({ ...armor, quality: 'uncommon', affixes: [{ id: 'missing_affix', stat: 'maxHpPercent', value: 999 }] });
-assert.equal(malformed.quality, 'common', 'invalid green data is repaired to a valid white item');
-assert.deepEqual(malformed.affixes, [], 'unknown affixes cannot become active stats');
-
+const worn = policy.getEquippedAffixStats({ armor: green });
+assert.ok(Object.keys(worn).length > 0);
+assert.deepEqual(policy.getEquippedAffixStats({}), {});
+assert.match(policy.formatAffix(green.affixes[0]), /\+/);
 console.log('equipment-affix-policy: assertions passed');

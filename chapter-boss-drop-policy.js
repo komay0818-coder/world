@@ -43,7 +43,7 @@
       rarity: 'rare', instanceId, affixRandom: random,
       obtainedFrom: enemy.id, obtainedAt: options.obtainedAt || Date.now(), warningHandler: options.warningHandler
     });
-    if (!item || item.quality !== 'rare' || item.affixes.length !== 2) return null;
+    if (!item || item.quality !== 'rare' || item.fixedAffixes.length !== 2 || item.randomAffixes.length !== 3) return null;
     item.specialDropType = 'chapter-boss-blue';
     progress.inventory.push(item);
     return item;

@@ -5,15 +5,18 @@
   const materialPolicy = typeof module === 'object' && module.exports
     ? require('./chapter-one-material-drop-policy.js')
     : root.ChapterOneMaterialDropPolicy;
-  const api = factory(recipePolicy, materialPolicy);
+  const affixPolicy = typeof module === 'object' && module.exports
+    ? require('./equipment-affix-policy.js')
+    : root.EquipmentAffixPolicy;
+  const api = factory(recipePolicy, materialPolicy, affixPolicy);
   if (typeof module === 'object' && module.exports) module.exports = api;
   else root.CraftingPolicy = api;
-}(typeof globalThis !== 'undefined' ? globalThis : this, function createCraftingPolicy(RecipePolicy, MaterialPolicy) {
+}(typeof globalThis !== 'undefined' ? globalThis : this, function createCraftingPolicy(RecipePolicy, MaterialPolicy, EquipmentAffixPolicy) {
   const INVENTORY_CAPACITY = 120;
   const RARITIES = Object.freeze({
-    uncommon: Object.freeze({ id: 'uncommon', label: '綠色', affixCount: 1, workshopLevel: 1, stoneId: 'equipment-stone-uncommon', primaryMultiplier: 1, affixMultiplier: 1 }),
-    rare: Object.freeze({ id: 'rare', label: '藍色', affixCount: 2, workshopLevel: 1, stoneId: 'equipment-stone-rare', primaryMultiplier: 1.35, affixMultiplier: 1.25 }),
-    epic: Object.freeze({ id: 'epic', label: '紫色', affixCount: 3, workshopLevel: 3, stoneId: 'equipment-stone-epic', primaryMultiplier: 1.75, affixMultiplier: 1.55 })
+    uncommon: Object.freeze({ id: 'uncommon', label: '綠色', fixedAffixCount: 1, randomAffixCount: 2, affixCount: 3, workshopLevel: 1, stoneId: 'equipment-stone-uncommon' }),
+    rare: Object.freeze({ id: 'rare', label: '藍色', fixedAffixCount: 2, randomAffixCount: 3, affixCount: 5, workshopLevel: 1, stoneId: 'equipment-stone-rare' }),
+    epic: Object.freeze({ id: 'epic', label: '紫色', fixedAffixCount: 2, randomAffixCount: 4, affixCount: 6, workshopLevel: 3, stoneId: 'equipment-stone-epic' })
   });
 
   const STAT_DEFINITIONS = Object.freeze({
@@ -108,24 +111,16 @@
   function generateCraftedEquipment(recipeId, options = {}) {
     const recipe = RECIPES[recipeId];
     if (!recipe) return null;
-    const rarity = RARITIES[recipe.quality];
     const random = typeof options.random === 'function' ? options.random : Math.random;
-    const primaryStat = rollStat(pick(PRIMARY_STAT_POOLS[recipe.equipmentSlot], random), rarity.primaryMultiplier, random);
-    const candidates = AFFIX_POOLS[recipe.equipmentSlot].filter((stat) => stat !== primaryStat.stat);
-    const affixes = [];
-    while (affixes.length < rarity.affixCount && candidates.length) {
-      const selected = pick(candidates, random);
-      candidates.splice(candidates.indexOf(selected), 1);
-      affixes.push({ id: `crafted-${selected}`, ...rollStat(selected, rarity.affixMultiplier, random) });
-    }
     const craftedAt = options.craftedAt || Date.now();
     const instanceId = options.instanceId || createInstanceId(craftedAt, random);
-    return {
-      id: instanceId, instanceId, equipmentId: recipe.resultItemId, templateId: recipe.resultItemId,
-      kind: 'equipment', name: recipe.resultName, slot: recipe.equipmentSlot, equipmentSlot: recipe.equipmentSlot,
-      quality: recipe.quality, rarity: recipe.quality, sourceType: 'crafted', recipeId,
-      primaryStat, affixes, sockets: 0, craftedAt, allowedJobs: []
+    const template = {
+      id: recipe.resultItemId, kind: 'equipment', name: recipe.resultName, slot: recipe.equipmentSlot,
+      equipmentSlot: recipe.equipmentSlot, allowedJobs: [], baseStats: { ...(recipe.baseStats || {}) },
+      ...(Array.isArray(recipe.fixedAffixIds) ? { fixedAffixIds: [...recipe.fixedAffixIds] } : {})
     };
+    const generated = EquipmentAffixPolicy.createEquipmentInstance(template, { quality: recipe.quality, uniqueId: instanceId, random });
+    return { ...generated, id: instanceId, instanceId, equipmentId: recipe.resultItemId, templateId: recipe.resultItemId, sourceType: 'crafted', recipeId, sockets: 0, craftedAt };
   }
   function deductInventoryItems(inventory, costs) {
     const result = (Array.isArray(inventory) ? inventory : []).map((item) => ({ ...item }));

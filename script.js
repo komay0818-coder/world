@@ -1138,11 +1138,11 @@ function renderWorkshop(building = getVillageBuildingData('workshop'), craftedIt
       <div class="workshop-recipe-head"><div><h4>${recipe.name}</h4><small>製作結果：${recipe.resultName}・${equipmentSlots[recipe.equipmentSlot].label}・${rarity.label}</small></div><span>${known ? `配方 ${recipeQuantity} 張` : '🔒 未持有配方'}</span></div>
       <ul><li class="${known ? '' : 'workshop-insufficient'}"><span>${recipe.name}</span><b>${recipeQuantity} / 1</b></li>${materials}</ul>
       <p class="workshop-gold ${goldEnough ? '' : 'workshop-insufficient'}"><span>所需金幣</span><b>${Number(progress.gold) || 0} / ${recipe.goldCost}</b></p>
-      <p><b>可能主能力：</b>${primaryOptions}</p><p><b>額外詞綴：</b>${rarity.affixCount} 條</p>
+      <p><b>固定詞綴：</b>${rarity.fixedAffixCount} 條</p><p><b>隨機詞綴：</b>${rarity.randomAffixCount} 條（種類隨機、數值固定）</p>
       <button type="button" data-craft-recipe="${recipe.recipeId}" ${eligibility.ok ? '' : 'disabled'}>${eligibility.ok ? '製作裝備' : eligibility.reason}</button>
     </article>`;
   }).join('');
-  const result = craftedItem ? `<section class="workshop-result"><h4>製作完成：${craftedItem.name}</h4><p><b>主能力</b>　${CraftingPolicy.formatStat(craftedItem.primaryStat)}</p>${craftedItem.affixes.map((entry) => `<p><b>額外詞綴</b>　${CraftingPolicy.formatStat(entry)}</p>`).join('')}</section>` : '';
+  const result = craftedItem ? `<section class="workshop-result"><h4>製作完成：${craftedItem.name}</h4>${craftedItem.affixes.map((entry) => `<p><b>${entry.source === 'fixed' ? '固定詞綴' : '隨機詞綴'}</b>　${EquipmentAffixPolicy.formatAffix(entry)}</p>`).join('')}</section>` : '';
   document.querySelector('#village-building-content').innerHTML = `<div class="workshop-title"><div class="village-building-icon" aria-hidden="true">${building.icon}</div><div><h3>${building.name}</h3><small>第一章裝備製作・背包 ${inventory.length} / ${CraftingPolicy.INVENTORY_CAPACITY}</small></div></div><p>製作前只顯示可能能力；實際能力與數值會在製作成功時生成並永久保存。</p>
     <div class="workshop-filters"><div><b>品質</b><button type="button" data-workshop-quality="uncommon" class="${workshopQuality === 'uncommon' ? 'selected' : ''}">綠色</button><button type="button" data-workshop-quality="rare" class="${workshopQuality === 'rare' ? 'selected' : ''}">藍色</button></div><div><b>部位</b><button type="button" data-workshop-slot="all" class="${workshopSlot === 'all' ? 'selected' : ''}">全部</button><button type="button" data-workshop-slot="wrist" class="${workshopSlot === 'wrist' ? 'selected' : ''}">護腕</button><button type="button" data-workshop-slot="cloak" class="${workshopSlot === 'cloak' ? 'selected' : ''}">斗篷</button><button type="button" data-workshop-slot="shoulders" class="${workshopSlot === 'shoulders' ? 'selected' : ''}">肩甲</button></div></div>
     ${result}<section class="workshop-recipes">${cards || '<p class="village-placeholder">此分類目前沒有可製作配方。</p>'}</section>`;
@@ -1561,6 +1561,10 @@ function getEquipmentStats(progress = getProgress()) {
   const affixes = EquipmentAffixPolicy.getEquippedAffixStats(progress.equipment);
   return {
     ...fixed,
+    attackFlat: affixes.attackFlat || 0,
+    maxHp: affixes.maxHp || 0,
+    hpRegeneration: affixes.hpRegeneration || 0,
+    skillDamagePercent: (affixes.skillDamagePercent || 0) / 100,
     maxHpPercent: (affixes.maxHpPercent || 0) / 100,
     defensePercent: (affixes.defensePercent || 0) / 100,
     accuracyPercent: (affixes.accuracyPercent || 0) / 100,
@@ -1602,9 +1606,9 @@ function getCharacterStats(level, progress = getProgress(), character = JSON.par
   const hunterWeaponMultiplier = hunterMasteryTier ? 1 + (.10 + (hunterMasteryTier - 1) * .02) : 1;
   const equippedWeapon = progress.equipment?.weapon;
   return {
-    hp: Math.round((base.hp + race.hp + (level - 1) * 12 + equipment.hp + collection.hp) * (1 + equipment.maxHpPercent) * humanMultiplier),
+    hp: Math.round((base.hp + race.hp + (level - 1) * 12 + equipment.hp + equipment.maxHp + collection.hp) * (1 + equipment.maxHpPercent) * humanMultiplier),
     mana: ['warrior', 'assassin'].includes(character?.job) ? 0 : Math.round((base.mana + race.mana + (level - 1) * 6 + equipment.mana + collection.mana) * humanMultiplier),
-    attack: Math.round((base.attack + race.attack + (level - 1) + equipment.attack + equipment.strength + equipment.intelligence + collection.attack) * humanMultiplier * hunterWeaponMultiplier),
+    attack: Math.round((base.attack + race.attack + (level - 1) + equipment.attack + equipment.attackFlat + equipment.strength + equipment.intelligence + collection.attack) * humanMultiplier * hunterWeaponMultiplier),
     defense: Math.round((base.defense + race.defense + Math.floor((level - 1) / 5) + equipment.defense + collection.defense) * (1 + equipment.defensePercent) * humanMultiplier),
     crit: Math.min(.60, base.crit + race.crit + collection.crit + equipment.criticalChance + (hunterPrecisionTier ? .05 + (hunterPrecisionTier - 1) * .01 : 0)),
     dodge: Math.min(.45, Math.max(0, base.dodge + race.dodge + collection.dodge + equipment.dodge + equipment.dodgePercent)),
@@ -1743,8 +1747,10 @@ function itemStatsText(item) {
   (Array.isArray(item.affixes) ? item.affixes : []).forEach((entry) => {
     if (item.primaryStat) { parts.push(`額外詞綴【${CraftingPolicy.formatStat(entry)}】`); return; }
     const text = EquipmentAffixPolicy.formatAffix(entry);
-    if (text) parts.push(`詞綴【${text}】`);
+    if (text) parts.push(`${entry.source === 'fixed' ? '固定' : '隨機'}詞綴【${text}】`);
   });
+  if (item.specialAbility) parts.push(`特殊能力【${item.specialAbility.description || item.specialAbility.name}】`);
+  if (item.legendaryAbility) parts.push(`傳奇能力【${item.legendaryAbility.description || item.legendaryAbility.name}】`);
   if (item.allowedJobs?.length) parts.push(`職業：${item.allowedJobs.map((job) => ({ warrior: '戰士', assassin: '刺客', hunter: '獵人', mage: '法師', priest: '牧師' })[job] || job).join('、')}`);
   return parts.join('　') || item.description || '';
 }

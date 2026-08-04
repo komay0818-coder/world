@@ -10,7 +10,7 @@ function progressWith(recipeIds, quantity = 999, gold = 99999) {
   const recipeItems = recipeIds.map((recipeId) => stackedItem(Object.values(require('../chapter-one-recipe-drop-policy.js').RECIPES).find((entry) => entry.recipeId === recipeId), quantity));
   return { gold, inventory: [...Object.values(CraftingPolicy.MATERIALS).map((item) => stackedItem(item, quantity)), ...recipeItems], equipment: {} };
 }
-function assertValidBatch(recipeId, expectedAffixes, seed) {
+function assertValidBatch(recipeId, expectedFixed, expectedRandom, seed) {
   const progress = progressWith([recipeId]);
   const items = Array.from({ length: 10 }, (_, index) => {
     const result = CraftingPolicy.craftEquipment(progress, recipeId, { workshopLevel: 1, random: seeded(seed + index), instanceId: `test-${recipeId}-${index}`, craftedAt: 123 });
@@ -18,23 +18,27 @@ function assertValidBatch(recipeId, expectedAffixes, seed) {
     return result.item;
   });
   items.forEach((item) => {
-    assert.ok(item.primaryStat);
-    assert.equal(item.affixes.length, expectedAffixes);
-    const stats = [item.primaryStat.stat, ...item.affixes.map((entry) => entry.stat)];
+    assert.equal(item.affixSchemaVersion, 3);
+    assert.equal(item.primaryStat, undefined, 'V3 crafting no longer rolls a separate floating primary stat');
+    assert.equal(item.fixedAffixes.length, expectedFixed);
+    assert.equal(item.randomAffixes.length, expectedRandom);
+    assert.equal(item.affixes.length, expectedFixed + expectedRandom);
+    const stats = item.affixes.map((entry) => entry.stat);
     assert.equal(new Set(stats).size, stats.length, 'primary and additional affixes never duplicate');
+    item.affixes.forEach((entry) => assert.equal(entry.value, require('../equipment-affix-policy.js').EQUIPMENT_AFFIXES[entry.id].value));
     assert.equal(item.sourceType, 'crafted');
     assert.ok(item.instanceId);
   });
-  assert.ok(new Set(items.map((item) => JSON.stringify([item.primaryStat, item.affixes]))).size > 1, 'one recipe can produce different combinations');
+  assert.ok(new Set(items.map((item) => JSON.stringify(item.randomAffixes.map((entry) => entry.id)))).size > 1, 'one recipe can produce different combinations');
   return items;
 }
 
-const green = assertValidBatch('chapter1-green-wrist', 1, 10);
-assertValidBatch('chapter1-green-cloak', 1, 20);
-assertValidBatch('chapter1-green-shoulders', 1, 30);
-assertValidBatch('chapter1-high-chief-rare-wrist', 2, 40);
-assertValidBatch('chapter1-goblin-rare-cloak', 2, 50);
-assertValidBatch('chapter1-black-knight-rare-shoulders', 2, 60);
+const green = assertValidBatch('chapter1-green-wrist', 1, 2, 10);
+assertValidBatch('chapter1-green-cloak', 1, 2, 20);
+assertValidBatch('chapter1-green-shoulders', 1, 2, 30);
+assertValidBatch('chapter1-high-chief-rare-wrist', 2, 3, 40);
+assertValidBatch('chapter1-goblin-rare-cloak', 2, 3, 50);
+assertValidBatch('chapter1-black-knight-rare-shoulders', 2, 3, 60);
 
 assert.deepEqual(JSON.parse(JSON.stringify(green[0])), green[0], 'save/load stores final values instead of rerolling');
 
@@ -76,7 +80,7 @@ const duplicateSnapshot = JSON.stringify(duplicate);
 assert.equal(CraftingPolicy.craftEquipment(duplicate, recipeId, { instanceId: 'duplicate' }).code, 'duplicate-instance');
 assert.equal(JSON.stringify(duplicate), duplicateSnapshot, 'duplicate instance id deducts nothing');
 
-assert.deepEqual(Object.values(CraftingPolicy.RARITIES).map((entry) => entry.affixCount), [1, 2, 3], 'affix counts remain configurable rarity data');
+assert.deepEqual(Object.values(CraftingPolicy.RARITIES).map((entry) => entry.affixCount), [3, 5, 6], 'V3 total affix counts remain configurable rarity data');
 assert.equal(CraftingPolicy.RARITIES.rare.workshopLevel, 1, 'chapter one blue crafting works without workshop upgrades');
 
 console.log('crafting-policy: assertions passed');

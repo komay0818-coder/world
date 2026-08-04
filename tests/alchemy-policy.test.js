@@ -30,13 +30,15 @@ assert.equal(levelOne.session.candidates.length, 1, 'level 1 creates one candida
 assert.equal(levelOne.session.candidates[0].slot, 'wrist');
 assert.equal(levelOne.session.candidates[0].quality, 'uncommon');
 assert.equal(levelOne.session.candidates[0].sockets, 0, 'sockets are not inherited');
-assert.ok(levelOne.session.candidates[0].primaryStat, 'crafted equipment keeps the existing primary-stat structure');
-assert.equal(levelOne.session.candidates[0].affixes.length, 1, 'green crafted equipment rerolls one additional affix');
+assert.equal(levelOne.session.candidates[0].affixSchemaVersion, 3);
+assert.equal(levelOne.session.candidates[0].primaryStat, undefined, 'alchemy migrates crafted results to V3');
+assert.equal(levelOne.session.candidates[0].fixedAffixes.length, 1);
+assert.equal(levelOne.session.candidates[0].randomAffixes.length, 2, 'green crafted equipment rerolls two V3 random affixes');
 
 const standardInputs = [green('standard-a', 'armor', { primaryStat: undefined, baseStats: { defense: 4 }, armorType: 'cloth' }), green('standard-b', 'armor', { primaryStat: undefined, baseStats: { defense: 4 }, armorType: 'cloth' })];
 const standardResult = begin(standardInputs, 1, 22);
 assert.equal(standardResult.ok, true);
-assert.equal(standardResult.session.candidates[0].affixes.length, 1, 'ordinary green equipment uses the existing common affix generator');
+assert.equal(standardResult.session.candidates[0].affixes.length, 3, 'ordinary green equipment uses the V3 generator');
 assert.equal(standardResult.session.candidates[0].defense, 4, 'ordinary equipment keeps only its base stats');
 
 assert.equal(begin([green('wrist-a'), green('cloak-b', 'cloak')]).code, 'slot-mismatch', 'different slots are rejected');

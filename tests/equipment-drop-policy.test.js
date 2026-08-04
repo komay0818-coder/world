@@ -64,7 +64,9 @@ const green = dropPolicy.grantEquipmentDrop(greenProgress, eliteEnemy, {
   obtainedAt: 2345
 });
 assert.equal(green.rarity, 'uncommon');
-assert.equal(green.affixes.length, 1, 'green drops receive one permanent compatible affix');
+assert.equal(green.fixedAffixes.length, 1, 'green drops receive one fixed affix');
+assert.equal(green.randomAffixes.length, 2, 'green drops receive two random affix types');
+assert.equal(green.affixes.length, 3);
 assert.ok(['weapon', 'armor', 'accessory'].includes(require('../equipment-affix-policy.js').getEquipmentGroup(green)));
 
 const firstCopyProgress = { inventory: [] };

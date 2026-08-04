@@ -73,7 +73,10 @@
     const weights = rarityWeights && typeof rarityWeights === 'object' ? rarityWeights : {};
     return weightedPick([
       { value: 'common', weight: weights.common },
-      { value: 'uncommon', weight: weights.uncommon }
+      { value: 'uncommon', weight: weights.uncommon },
+      { value: 'rare', weight: weights.rare },
+      { value: 'epic', weight: weights.epic },
+      { value: 'legendary', weight: weights.legendary }
     ], randomValue, warningHandler);
   }
 
