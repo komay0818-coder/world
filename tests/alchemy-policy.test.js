@@ -31,6 +31,7 @@ assert.equal(levelOne.session.candidates[0].slot, 'wrist');
 assert.equal(levelOne.session.candidates[0].quality, 'uncommon');
 assert.equal(levelOne.session.candidates[0].sockets, 0, 'sockets are not inherited');
 assert.equal(levelOne.session.candidates[0].affixSchemaVersion, 3);
+assert.equal(levelOne.session.candidates[0].affixChapter, 1);
 assert.equal(levelOne.session.candidates[0].primaryStat, undefined, 'alchemy migrates crafted results to V3');
 assert.equal(levelOne.session.candidates[0].fixedAffixes.length, 1);
 assert.equal(levelOne.session.candidates[0].randomAffixes.length, 2, 'green crafted equipment rerolls two V3 random affixes');

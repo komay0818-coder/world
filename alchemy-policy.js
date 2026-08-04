@@ -70,7 +70,7 @@
   function createInstanceId(now = Date.now(), random = Math.random, index = 0) {
     return `alchemy-${now}-${index}-${Math.floor(Math.max(0, Math.min(.999999, Number(random()) || 0)) * 0x100000000).toString(36)}`;
   }
-  function createStandardCandidate(source, instanceId, random, createdAt) {
+  function createStandardCandidate(source, instanceId, random, createdAt, chapter = 1, jobId = null) {
     const baseStats = source.baseStats && typeof source.baseStats === 'object' ? { ...source.baseStats } : {};
     const template = {
       id: source.templateId || source.baseItemId || source.equipmentId || source.id,
@@ -81,7 +81,7 @@
       allowedJobs: [...(source.allowedJobs || source.allowedClasses || [])],
       ...baseStats
     };
-    const generated = EquipmentAffixPolicy.createEquipmentInstance(template, { quality: 'uncommon', uniqueId: instanceId, random });
+    const generated = EquipmentAffixPolicy.createEquipmentInstance(template, { quality: 'uncommon', uniqueId: instanceId, random, chapter, jobId });
     return {
       ...generated, id: instanceId, instanceId, templateId: template.id, baseItemId: template.baseItemId,
       rarity: 'uncommon', quality: 'uncommon', baseStats, sockets: 0,
@@ -94,13 +94,13 @@
     const instanceId = String(options.instanceId || createInstanceId(createdAt, random, options.index));
     const craftedRecipeId = GENERIC_CRAFTED_RECIPE_BY_SLOT[source?.slot];
     if (source?.primaryStat && craftedRecipeId) {
-      const generated = CraftingPolicy.generateCraftedEquipment(craftedRecipeId, { random, craftedAt: createdAt, instanceId });
+      const generated = CraftingPolicy.generateCraftedEquipment(craftedRecipeId, { random, craftedAt: createdAt, instanceId, chapter: options.chapter || source.affixChapter || 1, jobId: options.jobId });
       return generated ? {
         ...generated, id: instanceId, instanceId, sourceType: 'crafted', acquisitionType: 'alchemy', recipeId: null,
         sockets: 0, craftedAt: undefined, alchemyAt: createdAt
       } : null;
     }
-    return createStandardCandidate(source, instanceId, random, createdAt);
+    return createStandardCandidate(source, instanceId, random, createdAt, options.chapter || source.affixChapter || 1, options.jobId);
   }
   function beginAlchemy(progress, inputIds, options = {}) {
     const validation = validateInputs(progress, inputIds);
@@ -109,7 +109,7 @@
     const createdAt = Number(options.createdAt) || Date.now();
     const count = getCandidateCount(options.buildingLevel);
     const candidates = Array.from({ length: count }, (_, index) => generateCandidate(validation.items[0], {
-      random, createdAt, index,
+      random, createdAt, index, chapter: options.chapter || validation.items[0].affixChapter || 1, jobId: options.jobId,
       instanceId: typeof options.instanceIdFactory === 'function' ? options.instanceIdFactory(index) : undefined
     }));
     if (candidates.some((item) => !item) || new Set(candidates.map(getItemId)).size !== candidates.length) {

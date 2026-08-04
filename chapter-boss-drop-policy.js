@@ -41,6 +41,7 @@
     if (!instanceId) return null;
     const item = EquipmentDropPolicy.createEquipmentDropInstance(template, {
       rarity: 'rare', instanceId, affixRandom: random,
+      chapter: context.chapter,
       obtainedFrom: enemy.id, obtainedAt: options.obtainedAt || Date.now(), warningHandler: options.warningHandler
     });
     if (!item || item.quality !== 'rare' || item.fixedAffixes.length !== 2 || item.randomAffixes.length !== 3) return null;

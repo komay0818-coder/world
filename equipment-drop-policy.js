@@ -142,7 +142,9 @@
       quality: rarity,
       uniqueId: instanceId,
       randomValue: options.affixRandomValue,
-      random: options.affixRandom
+      random: options.affixRandom,
+      chapter: options.chapter,
+      jobId: options.jobId
     });
     const armorCategory = EquipmentPolicy.getArmorCategory(template);
     const allowedClasses = [...(template.allowedJobs?.length
@@ -182,6 +184,8 @@
         instanceId: requestedId,
         affixRandomValue: options.random(),
         affixRandom: options.random,
+        chapter: options.chapter,
+        jobId: options.jobId,
         obtainedFrom: options.obtainedFrom,
         obtainedAt: options.obtainedAt,
         warningHandler: options.warningHandler
@@ -220,6 +224,8 @@
       instanceIdFactory: options.instanceIdFactory,
       obtainedFrom: enemy.id || enemy.name || 'unknown-monster',
       obtainedAt: options.obtainedAt || Date.now(),
+      chapter: options.chapter || enemy.chapter || enemy.lootConfig?.chapter || 1,
+      jobId: options.jobId,
       warningHandler
     });
     if (!item) return null;

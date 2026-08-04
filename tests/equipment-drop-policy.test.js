@@ -67,6 +67,7 @@ assert.equal(green.rarity, 'uncommon');
 assert.equal(green.fixedAffixes.length, 1, 'green drops receive one fixed affix');
 assert.equal(green.randomAffixes.length, 2, 'green drops receive two random affix types');
 assert.equal(green.affixes.length, 3);
+assert.equal(green.affixChapter, 1, 'drops default to chapter one affix unlocks');
 assert.ok(['weapon', 'armor', 'accessory'].includes(require('../equipment-affix-policy.js').getEquipmentGroup(green)));
 
 const firstCopyProgress = { inventory: [] };
