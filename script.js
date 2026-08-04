@@ -1001,10 +1001,31 @@ function openVillageBuilding(buildingId) {
   const building = getVillageBuildingData(buildingId);
   if (!building || !building.unlocked) return;
   document.querySelector('#village-building-title').textContent = building.name;
-  if (buildingId === 'workshop') renderWorkshop(building);
+  if (buildingId === 'furnace') renderFurnace(building);
+  else if (buildingId === 'workshop') renderWorkshop(building);
   else if (buildingId === 'alchemy') renderAlchemy(building);
   else document.querySelector('#village-building-content').innerHTML = `<div class="village-building-icon" aria-hidden="true">${building.icon}</div><h3>${building.name}</h3><small>建築等級 Lv${building.level} / ${building.maxLevel}</small><p>${building.description}</p><p class="village-placeholder">${building.name}功能尚未完成，將於後續版本加入。</p>`;
   document.querySelector('#village-building-modal').classList.remove('hidden');
+}
+
+function renderFurnace(building = getVillageBuildingData('furnace'), message = '') {
+  const progress = getProgress();
+  const equipment = (progress.inventory || []).filter((item) => item?.kind === 'equipment');
+  const cards = equipment.map((item) => {
+    const reward = SalvagePolicy.getReward(item);
+    const material = CraftingPolicy.MATERIALS && Object.values(CraftingPolicy.MATERIALS).find((entry) => entry.id === reward.id);
+    return `<article class="furnace-item quality-${SalvagePolicy.normalizeQuality(item)}"><div><b>${item.name}</b><small>${alchemyItemDescription(item)}</small></div><span>獲得 ${material?.icon || '◆'} ${material?.name || reward.id} × ${reward.quantity}</span><button type="button" data-salvage-item="${SalvagePolicy.getItemId(item)}">分解</button></article>`;
+  }).join('');
+  document.querySelector('#village-building-content').innerHTML = `<div class="workshop-title"><div class="village-building-icon" aria-hidden="true">${building.icon}</div><div><h3>${building.name}</h3><small>建築 Lv${building.level}・背包裝備 ${equipment.length} 件</small></div></div><p>分解會永久移除裝備，並回收第一章製作素材。已穿戴裝備不會出現在此處。</p>${message ? `<p class="alchemy-message ok">${message}</p>` : ''}<section class="furnace-items">${cards || '<p class="village-placeholder">背包內目前沒有可分解的裝備。</p>'}</section>`;
+}
+
+function salvageFurnaceItem(itemId) {
+  const progress = getProgress();
+  const result = SalvagePolicy.salvage(progress, itemId);
+  if (!result.ok) { renderFurnace(undefined, '找不到可分解的裝備。'); return; }
+  const material = Object.values(CraftingPolicy.MATERIALS).find((entry) => entry.id === result.reward.id);
+  saveProgress(progress);
+  renderFurnace(undefined, `已分解「${result.item.name}」，獲得 ${material?.name || result.reward.id} × ${result.reward.quantity}。`);
 }
 
 function alchemyItemDescription(item) {
@@ -3964,6 +3985,8 @@ document.querySelector('#village-building-modal').addEventListener('click', (eve
   if (slotButton) { workshopSlot = slotButton.dataset.workshopSlot; renderWorkshop(); return; }
   const craftButton = event.target.closest('[data-craft-recipe]');
   if (craftButton) craftWorkshopEquipment(craftButton.dataset.craftRecipe);
+  const salvageButton = event.target.closest('[data-salvage-item]');
+  if (salvageButton) { salvageFurnaceItem(salvageButton.dataset.salvageItem); return; }
   const alchemyItem = event.target.closest('[data-alchemy-item]');
   if (alchemyItem) { selectAlchemyInput(alchemyItem.dataset.alchemyItem); return; }
   const clearAlchemyInput = event.target.closest('[data-clear-alchemy-input]');
