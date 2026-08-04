@@ -1129,7 +1129,8 @@ function startAlchemy() {
   if (!window.confirm(`煉金將消耗這兩件裝備，完成時扣除 ${AlchemyPolicy.ALCHEMY_RULES.goldCost} 金幣，是否繼續？`)) return;
   alchemyBusy = true;
   const building = getVillageBuildingData('alchemy');
-  const result = AlchemyPolicy.beginAlchemy(progress, alchemyInputItemIds, { buildingLevel: building.level });
+  const character = JSON.parse(localStorage.getItem('stardust-character') || 'null');
+  const result = AlchemyPolicy.beginAlchemy(progress, alchemyInputItemIds, { buildingLevel: building.level, jobId: character?.job || null });
   alchemyBusy = false;
   if (!result.ok) { renderAlchemy(building, result.reason); return; }
   alchemyCandidates = result.session.candidates;

@@ -5,10 +5,13 @@
   const craftingPolicy = typeof module === 'object' && module.exports
     ? require('./crafting-policy.js')
     : root.CraftingPolicy;
-  const api = factory(affixPolicy, craftingPolicy);
+  const equipmentPolicy = typeof module === 'object' && module.exports
+    ? require('./equipment-policy.js')
+    : root.EquipmentPolicy;
+  const api = factory(affixPolicy, craftingPolicy, equipmentPolicy);
   if (typeof module === 'object' && module.exports) module.exports = api;
   else root.AlchemyPolicy = api;
-}(typeof globalThis !== 'undefined' ? globalThis : this, function createAlchemyPolicy(EquipmentAffixPolicy, CraftingPolicy) {
+}(typeof globalThis !== 'undefined' ? globalThis : this, function createAlchemyPolicy(EquipmentAffixPolicy, CraftingPolicy, EquipmentPolicy) {
   const ALCHEMY_RULES = Object.freeze({
     quality: 'uncommon',
     inputCount: 2,
@@ -72,14 +75,27 @@
   function createInstanceId(now = Date.now(), random = Math.random, index = 0) {
     return `alchemy-${now}-${index}-${Math.floor(Math.max(0, Math.min(.999999, Number(random()) || 0)) * 0x100000000).toString(36)}`;
   }
-  function createStandardCandidate(source, instanceId, random, createdAt, chapter = 1, jobId = null) {
-    const baseStats = source.baseStats && typeof source.baseStats === 'object' ? { ...source.baseStats } : {};
+  const RESULT_TEMPLATE_CATALOG = Object.freeze([
+    ...Object.values(EquipmentPolicy?.WEAPON_CATALOG || {}),
+    ...Object.values(EquipmentPolicy?.ARMOR_CATALOG || {}),
+    ...Object.values(EquipmentPolicy?.OFFHAND_CATALOG || {})
+  ]);
+  function getResultTemplates(slot, jobId = null) {
+    return RESULT_TEMPLATE_CATALOG.filter((template) => template?.kind === 'equipment' && template.slot === slot && (!jobId || EquipmentPolicy.getEquipSlots(template, jobId).length > 0));
+  }
+  function pickResultTemplate(slot, random, jobId = null) {
+    const templates = getResultTemplates(slot, jobId);
+    if (!templates.length) return null;
+    return templates[Math.floor(Math.max(0, Math.min(.999999, Number(random()) || 0)) * templates.length)];
+  }
+  function createStandardCandidate(slot, instanceId, random, createdAt, chapter = 1, jobId = null) {
+    const source = pickResultTemplate(slot, random, jobId);
+    if (!source) return null;
+    const baseStats = Object.fromEntries(['attack', 'attackMin', 'attackMax', 'attackSpeed', 'defense', 'hp', 'mana', 'strength', 'intelligence', 'accuracy', 'dodge', 'attackSpeedBonus', 'cooldownSpeedBonus', 'manaRegenBonus', 'manaRegenFlat', 'magicDamageBonus', 'parry', 'damageReduction', 'movementSpeedBonus'].filter((stat) => Number.isFinite(Number(source[stat]))).map((stat) => [stat, Number(source[stat])]));
     const template = {
-      id: source.templateId || source.baseItemId || source.equipmentId || source.id,
-      baseItemId: source.baseItemId || source.templateId || source.equipmentId || source.id,
+      ...source,
+      id: source.id, baseItemId: source.id,
       kind: 'equipment', name: source.name, slot: source.slot,
-      image: source.image, icon: source.icon,
-      weaponType: source.weaponType, armorType: source.armorType, equipmentType: source.equipmentType,
       allowedJobs: [...(source.allowedJobs || source.allowedClasses || [])],
       ...baseStats
     };
@@ -95,14 +111,14 @@
     const createdAt = Number(options.createdAt) || Date.now();
     const instanceId = String(options.instanceId || createInstanceId(createdAt, random, options.index));
     const craftedRecipeId = GENERIC_CRAFTED_RECIPE_BY_SLOT[source?.slot];
-    if (source?.primaryStat && craftedRecipeId) {
+    if (craftedRecipeId) {
       const generated = CraftingPolicy.generateCraftedEquipment(craftedRecipeId, { random, craftedAt: createdAt, instanceId, chapter: options.chapter || source.affixChapter || 1, jobId: options.jobId });
       return generated ? {
         ...generated, id: instanceId, instanceId, sourceType: 'crafted', acquisitionType: 'alchemy', recipeId: null,
         sockets: 0, craftedAt: undefined, alchemyAt: createdAt
       } : null;
     }
-    return createStandardCandidate(source, instanceId, random, createdAt, options.chapter || source.affixChapter || 1, options.jobId);
+    return createStandardCandidate(source?.slot, instanceId, random, createdAt, options.chapter || source?.affixChapter || 1, options.jobId);
   }
   function beginAlchemy(progress, inputIds, options = {}) {
     const validation = validateInputs(progress, inputIds);
@@ -138,7 +154,7 @@
   }
 
   return Object.freeze({
-    ALCHEMY_RULES, GENERIC_CRAFTED_RECIPE_BY_SLOT, getItemId, getCandidateCount, isProtected, isEquipped,
-    isEligibleInput, getEligibleInputs, validateInputs, generateCandidate, beginAlchemy, confirmAlchemy
+    ALCHEMY_RULES, GENERIC_CRAFTED_RECIPE_BY_SLOT, RESULT_TEMPLATE_CATALOG, getItemId, getCandidateCount, isProtected, isEquipped,
+    isEligibleInput, getEligibleInputs, validateInputs, getResultTemplates, pickResultTemplate, generateCandidate, beginAlchemy, confirmAlchemy
   });
 }));

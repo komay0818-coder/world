@@ -41,7 +41,19 @@ const standardInputs = [green('standard-a', 'armor', { primaryStat: undefined, b
 const standardResult = begin(standardInputs, 1, 22);
 assert.equal(standardResult.ok, true);
 assert.equal(standardResult.session.candidates[0].affixes.length, 3, 'ordinary green equipment uses the V3 generator');
-assert.equal(standardResult.session.candidates[0].defense, 4, 'ordinary equipment keeps only its base stats');
+assert.notEqual(standardResult.session.candidates[0].name, standardInputs[0].name, 'alchemy result template no longer inherits the first material name');
+
+const firstTemplateA = green('source-a1', 'head', { name: '材料甲', primaryStat: undefined, baseStats: { defense: 999 } });
+const firstTemplateB = green('source-b1', 'head', { name: '材料乙', primaryStat: undefined, baseStats: { defense: 1 } });
+const independentA = AlchemyPolicy.beginAlchemy(progress([firstTemplateA, green('source-a2', 'head', { primaryStat: undefined })]), ['source-a1', 'source-a2'], { buildingLevel: 1, random: seeded(88), instanceIdFactory: () => 'independent-a' });
+const independentB = AlchemyPolicy.beginAlchemy(progress([firstTemplateB, green('source-b2', 'head', { primaryStat: undefined })]), ['source-b1', 'source-b2'], { buildingLevel: 1, random: seeded(88), instanceIdFactory: () => 'independent-b' });
+assert.equal(independentA.ok, true);
+assert.equal(independentB.ok, true);
+assert.equal(independentA.session.candidates[0].templateId, independentB.session.candidates[0].templateId, 'same random roll produces the same result regardless of first material');
+assert.equal(independentA.session.candidates[0].name, independentB.session.candidates[0].name);
+assert.notEqual(independentA.session.candidates[0].name, '材料甲');
+assert.notEqual(independentB.session.candidates[0].name, '材料乙');
+assert.ok(AlchemyPolicy.getResultTemplates('head', 'mage').every((item) => require('../equipment-policy.js').getEquipSlots(item, 'mage').length > 0), 'result pool respects current job compatibility');
 
 assert.equal(begin([green('wrist-a'), green('cloak-b', 'cloak')]).code, 'slot-mismatch', 'different slots are rejected');
 assert.equal(begin([green('green-a'), green('blue-b', 'wrist', { quality: 'rare', rarity: 'rare' })]).code, 'invalid-quality', 'green and blue are rejected');
