@@ -12,6 +12,7 @@
   const ALCHEMY_RULES = Object.freeze({
     quality: 'uncommon',
     inputCount: 2,
+    goldCost: 100,
     candidateCountByLevel: Object.freeze({ 1: 1, 2: 2, 3: 3 }),
     maxCandidateCount: 3
   });
@@ -63,6 +64,7 @@
     if (items[0].slot !== items[1].slot) return { ok: false, code: 'slot-mismatch', reason: '兩件裝備必須是相同部位。' };
     if (items.some((item) => isEquipped(item, progress.equipment))) return { ok: false, code: 'equipped', reason: '已裝備的物品不可作為材料。' };
     if (items.some(isProtected)) return { ok: false, code: 'protected', reason: '已鎖定或受保護的裝備不可作為材料。' };
+    if ((Number(progress?.gold) || 0) < ALCHEMY_RULES.goldCost) return { ok: false, code: 'missing-gold', reason: `金幣不足，需要 ${ALCHEMY_RULES.goldCost} 金幣。` };
     // Alchemy always consumes two inventory slots and creates one, so it must
     // remain available even when legacy drops have already exceeded capacity.
     return { ok: true, items, slot: items[0].slot };
@@ -115,7 +117,7 @@
     if (candidates.some((item) => !item) || new Set(candidates.map(getItemId)).size !== candidates.length) {
       return { ok: false, code: 'generation-failed', reason: '煉金資料產生失敗，材料未被消耗。' };
     }
-    return { ok: true, session: { version: 1, inputIds: inputIds.map(String), slot: validation.slot, candidates, createdAt } };
+    return { ok: true, session: { version: 1, inputIds: inputIds.map(String), slot: validation.slot, candidates, createdAt, goldCost: ALCHEMY_RULES.goldCost } };
   }
   function confirmAlchemy(progress, session, candidateId) {
     if (!session || !Array.isArray(session.candidates)) return { ok: false, code: 'missing-session', reason: '煉金資料已失效，請重新開始。' };
@@ -131,7 +133,8 @@
     const nextInventory = progress.inventory.filter((item) => !consumed.has(getItemId(item)));
     nextInventory.push(JSON.parse(JSON.stringify(selected)));
     progress.inventory = nextInventory;
-    return { ok: true, item: progress.inventory[progress.inventory.length - 1], consumedIds: [...consumed] };
+    progress.gold = Math.max(0, (Number(progress.gold) || 0) - ALCHEMY_RULES.goldCost);
+    return { ok: true, item: progress.inventory[progress.inventory.length - 1], consumedIds: [...consumed], goldCost: ALCHEMY_RULES.goldCost };
   }
 
   return Object.freeze({

@@ -1105,6 +1105,7 @@ function renderAlchemy(building = getVillageBuildingData('alchemy'), message = '
     : validation.ok ? '材料符合規則，可以開始煉金。' : validation.reason);
   document.querySelector('#village-building-content').innerHTML = `<div class="workshop-title"><div class="village-building-icon" aria-hidden="true">${building.icon}</div><div><h3>${building.name}</h3><small>建築 Lv${building.level}・產生 ${AlchemyPolicy.getCandidateCount(building.level)} 件候選裝備</small></div></div>
     <p>消耗兩件相同部位的綠色裝備，重新產生一件相同部位的綠色裝備。詞綴、數值與插槽不會繼承。</p>
+    <p class="alchemy-gold-cost">煉金費用：<b>${AlchemyPolicy.ALCHEMY_RULES.goldCost} 金幣</b>・目前持有 ${Number(progress.gold) || 0} 金幣</p>
     <section class="alchemy-inputs">${slots}</section><p class="alchemy-message ${validation.ok || alchemyCandidates.length ? 'ok' : ''}">${helper}</p>
     <div class="alchemy-actions"><button type="button" data-start-alchemy ${validation.ok && !alchemyCandidates.length && !alchemyBusy ? '' : 'disabled'}>開始煉金</button><button type="button" data-confirm-alchemy ${selectedAlchemyCandidate && !alchemyBusy ? '' : 'disabled'}>確認選擇</button><button type="button" data-return-alchemy>返回村莊</button></div>
     ${alchemyCandidates.length ? `<section class="alchemy-results"><h4>煉金結果候選</h4><div>${candidates}</div></section>` : `<section class="alchemy-available"><h4>${selectingSecond ? `可用的第二件材料（${equipmentSlots[selectedItems[0].slot]?.label || selectedItems[0].slot}）` : '可使用裝備'}</h4><div>${available || '<p>目前沒有符合條件的綠色裝備。</p>'}</div></section>`}`;
@@ -1125,7 +1126,7 @@ function startAlchemy() {
   const progress = getProgress();
   const validation = AlchemyPolicy.validateInputs(progress, alchemyInputItemIds);
   if (!validation.ok) { renderAlchemy(undefined, validation.reason); return; }
-  if (!window.confirm('煉金將消耗這兩件裝備，是否繼續？')) return;
+  if (!window.confirm(`煉金將消耗這兩件裝備，完成時扣除 ${AlchemyPolicy.ALCHEMY_RULES.goldCost} 金幣，是否繼續？`)) return;
   alchemyBusy = true;
   const building = getVillageBuildingData('alchemy');
   const result = AlchemyPolicy.beginAlchemy(progress, alchemyInputItemIds, { buildingLevel: building.level });
@@ -1142,14 +1143,14 @@ function confirmAlchemy() {
   if (!window.confirm('確定選擇這件裝備嗎？其餘煉金結果將會消失。')) return;
   alchemyBusy = true;
   const progress = getProgress();
-  const session = { inputIds: [...alchemyInputItemIds], candidates: alchemyCandidates };
+  const session = { inputIds: [...alchemyInputItemIds], candidates: alchemyCandidates, goldCost: AlchemyPolicy.ALCHEMY_RULES.goldCost };
   const result = AlchemyPolicy.confirmAlchemy(progress, session, selectedAlchemyCandidate);
   if (!result.ok) { alchemyBusy = false; resetAlchemyState(); renderAlchemy(undefined, result.reason); return; }
   saveProgress(progress);
   const item = result.item;
   resetAlchemyState();
-  renderAlchemy(undefined, `煉金完成：${item.name} 已放入背包。`);
-  showToast(`煉金完成：${item.name}，已放入背包。`);
+  renderAlchemy(undefined, `煉金完成：${item.name} 已放入背包，消耗 ${result.goldCost} 金幣。`);
+  showToast(`煉金完成：${item.name}，消耗 ${result.goldCost} 金幣。`);
 }
 
 function renderWorkshop(building = getVillageBuildingData('workshop'), craftedItem = null) {

@@ -15,7 +15,7 @@ function green(id, slot = 'wrist', extra = {}) {
     sockets: 2, ...extra
   };
 }
-function progress(items, equipment = {}) { return { inventory: items, equipment }; }
+function progress(items, equipment = {}, gold = 999) { return { inventory: items, equipment, gold }; }
 function begin(items, level = 1, seed = 1) {
   return AlchemyPolicy.beginAlchemy(progress(items), [items[0].id, items[1].id], {
     buildingLevel: level, random: seeded(seed), createdAt: 1234,
@@ -24,6 +24,7 @@ function begin(items, level = 1, seed = 1) {
 }
 
 const twoWrists = [green('wrist-a'), green('wrist-b')];
+assert.equal(AlchemyPolicy.ALCHEMY_RULES.goldCost, 100, 'gold cost is centralized configuration');
 const levelOne = begin(twoWrists, 1, 10);
 assert.equal(levelOne.ok, true, 'two green wrists can begin alchemy');
 assert.equal(levelOne.session.candidates.length, 1, 'level 1 creates one candidate');
@@ -46,6 +47,10 @@ assert.equal(begin([green('wrist-a'), green('cloak-b', 'cloak')]).code, 'slot-mi
 assert.equal(begin([green('green-a'), green('blue-b', 'wrist', { quality: 'rare', rarity: 'rare' })]).code, 'invalid-quality', 'green and blue are rejected');
 assert.equal(begin([green('green-a'), green('white-b', 'wrist', { quality: 'common', rarity: 'common' })]).code, 'invalid-quality', 'white equipment is rejected');
 assert.equal(AlchemyPolicy.beginAlchemy(progress([green('same')]), ['same', 'same']).code, 'duplicate-input', 'the same item cannot fill both slots');
+const poorProgress = progress([green('poor-a'), green('poor-b')], {}, 99);
+const poorSnapshot = JSON.stringify(poorProgress);
+assert.equal(AlchemyPolicy.beginAlchemy(poorProgress, ['poor-a', 'poor-b']).code, 'missing-gold');
+assert.equal(JSON.stringify(poorProgress), poorSnapshot, 'insufficient gold consumes nothing');
 
 const overCapacity = [green('overflow-a'), green('overflow-b'), ...Array.from({ length: CraftingPolicy.INVENTORY_CAPACITY }, (_, index) => ({ id: `material-${index}`, kind: 'material', quantity: 1 }))];
 const overflowResult = begin(overCapacity, 1, 99);
@@ -76,6 +81,8 @@ assert.equal(JSON.stringify(confirmProgress), beforeConfirm, 'starting alchemy c
 const selected = started.session.candidates[1];
 const confirmed = AlchemyPolicy.confirmAlchemy(confirmProgress, started.session, selected.instanceId);
 assert.equal(confirmed.ok, true);
+assert.equal(confirmed.goldCost, 100);
+assert.equal(confirmProgress.gold, 899, 'gold is deducted atomically with confirmation');
 assert.equal(confirmProgress.inventory.some((item) => item.id === 'consume-a' || item.id === 'consume-b'), false, 'both inputs are consumed');
 assert.equal(confirmProgress.inventory.filter((item) => item.kind === 'equipment').length, 1, 'only one selected result enters inventory');
 assert.equal(confirmProgress.inventory.some((item) => item.instanceId === selected.instanceId), true);
@@ -83,6 +90,12 @@ assert.deepEqual(JSON.parse(JSON.stringify(confirmProgress)), confirmProgress, '
 const afterFirstConfirm = JSON.stringify(confirmProgress);
 assert.equal(AlchemyPolicy.confirmAlchemy(confirmProgress, started.session, selected.instanceId).code, 'missing-item', 'a repeated confirmation cannot grant twice');
 assert.equal(JSON.stringify(confirmProgress), afterFirstConfirm, 'repeated confirmation changes nothing');
+
+const exactGoldProgress = progress([green('exact-a'), green('exact-b')], {}, 100);
+const exactStarted = AlchemyPolicy.beginAlchemy(exactGoldProgress, ['exact-a', 'exact-b'], { instanceIdFactory: () => 'exact-result' });
+assert.equal(exactStarted.ok, true);
+assert.equal(AlchemyPolicy.confirmAlchemy(exactGoldProgress, exactStarted.session, 'exact-result').ok, true);
+assert.equal(exactGoldProgress.gold, 0, 'exact cost is allowed and never becomes negative');
 
 const vanishedProgress = progress([green('vanish-a'), green('vanish-b')]);
 const vanished = AlchemyPolicy.beginAlchemy(vanishedProgress, ['vanish-a', 'vanish-b'], { buildingLevel: 1 });
