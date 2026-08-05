@@ -1,0 +1,105 @@
+(function (root, factory) {
+  const api = factory();
+  if (typeof module === 'object' && module.exports) module.exports = api;
+  if (root) root.ChapterTwoMapPolicy = api;
+})(typeof globalThis !== 'undefined' ? globalThis : this, function () {
+  'use strict';
+
+  const CHAPTER = Object.freeze({
+    id: 'black-forest',
+    chapter: 2,
+    name: '黑森林',
+    minLevel: 15,
+    maxLevel: 30,
+    previousMapId: 'plains-depths',
+    firstMapId: 'black-forest-entrance',
+    finalMapId: 'black-forest-depths',
+    primaryFaction: 'blackstone-bandits',
+    alliedFaction: 'goblins',
+    background: 'assets/black-forest-background.png',
+    implemented: false,
+    summary: '追查平原深處的黑石山賊，深入其位於黑森林的真正據點。'
+  });
+
+  function map(id, order, name, options = {}) {
+    return Object.freeze({
+      id,
+      order,
+      name,
+      chapter: 2,
+      regionOf: CHAPTER.id,
+      min: CHAPTER.minLevel,
+      max: CHAPTER.maxLevel,
+      implemented: false,
+      contentStatus: 'planned',
+      dungeon: false,
+      isFinalMap: false,
+      background: CHAPTER.background,
+      enemyPoolId: null,
+      bossId: null,
+      dropTableId: null,
+      materialTableId: null,
+      eventTableId: null,
+      environmentEffects: Object.freeze([]),
+      story: Object.freeze({ previousMapId: null, nextMapId: null, objectiveId: null }),
+      ...options
+    });
+  }
+
+  const MAPS = Object.freeze([
+    map('black-forest-entrance', 1, '黑森林入口', {
+      story: Object.freeze({ previousMapId: 'plains-depths', nextMapId: 'black-forest-trail', objectiveId: null })
+    }),
+    map('black-forest-trail', 2, '黑森林小徑', {
+      story: Object.freeze({ previousMapId: 'black-forest-entrance', nextMapId: 'spider-nest', objectiveId: null })
+    }),
+    map('spider-nest', 3, '蜘蛛巢穴', {
+      story: Object.freeze({ previousMapId: 'black-forest-trail', nextMapId: 'blackstone-stronghold', objectiveId: null })
+    }),
+    map('blackstone-stronghold', 4, '黑石據點', {
+      dungeon: true,
+      enemyFactionIds: Object.freeze(['blackstone-bandits', 'goblins']),
+      story: Object.freeze({ previousMapId: 'spider-nest', nextMapId: 'forest-altar', objectiveId: null })
+    }),
+    map('forest-altar', 5, '森林祭壇', {
+      story: Object.freeze({ previousMapId: 'blackstone-stronghold', nextMapId: 'black-forest-depths', objectiveId: null })
+    }),
+    map('black-forest-depths', 6, '黑森林深處', {
+      isFinalMap: true,
+      story: Object.freeze({ previousMapId: 'forest-altar', nextMapId: null, objectiveId: null })
+    })
+  ]);
+
+  const DUNGEONS = Object.freeze({
+    'blackstone-stronghold': Object.freeze({
+      id: 'blackstone-stronghold',
+      chapter: 2,
+      name: '黑石據點',
+      implemented: false,
+      contentStatus: 'planned',
+      primaryFaction: 'blackstone-bandits',
+      alliedFaction: 'goblins',
+      waveTableId: null,
+      specialEventTableId: null,
+      bossMechanicId: null,
+      finalBossId: null,
+      entryItemId: null,
+      rewardTableId: null,
+      environmentEffects: Object.freeze([])
+    })
+  });
+
+  function getMap(mapId) {
+    return MAPS.find((entry) => entry.id === mapId) || null;
+  }
+
+  function getDungeon(dungeonId) {
+    return DUNGEONS[dungeonId] || null;
+  }
+
+  function canEnter(mapId) {
+    return Boolean(getMap(mapId)?.implemented);
+  }
+
+  return Object.freeze({ CHAPTER, MAPS, DUNGEONS, getMap, getDungeon, canEnter });
+});

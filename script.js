@@ -97,6 +97,8 @@ const mapProgression = [
   { id: 'boar-woods', chapter: 1, regionOf: 'beginner-plains', min: 3, max: 5, monsterMin: 6, monsterMax: 10, name: '野豬林', background: 'assets/boar-woods-background.png', implemented: true, normalXp: 8, eliteXp: 20, bossXp: 95, recommended: { attack: 19, defense: 6, hp: 135 } },
   { id: 'plains-depths', chapter: 1, regionOf: 'beginner-plains', min: 4, max: 5, monsterMin: 12, monsterMax: 15, name: '平原深處', background: 'assets/plains-depths-background.png?v=20260728-user-image-v1', implemented: true, normalXp: 10, eliteXp: 26, bossXp: 110, recommended: { attack: 22, defense: 8, hp: 155 } },
   { id: 'goblin-camp', chapter: 1, regionOf: 'beginner-plains', min: 2, max: 5, monsterMin: 8, monsterMax: 12, name: '哥布林營地', background: 'assets/goblin-camp-background.png', implemented: true, dungeon: true, ticketItemId: 'goblin-camp-map', normalXp: 10, eliteXp: 28, bossXp: 120, recommended: { attack: 18, defense: 5, hp: 120 } },
+  { id: ChapterTwoMapPolicy.CHAPTER.id, chapter: 2, min: 15, max: 30, chapterLevelRange: [15, 30], name: ChapterTwoMapPolicy.CHAPTER.name, background: ChapterTwoMapPolicy.CHAPTER.background, implemented: true, regionHub: true, contentStatus: 'planned', previousMapId: 'plains-depths', recommended: { attack: 0, defense: 0, hp: 0 } },
+  ...ChapterTwoMapPolicy.MAPS,
   { min: 10, max: 15, name: '石牙山谷', normalXp: 8, eliteXp: 35, bossXp: 140 },
   { min: 15, max: 20, name: '荒蕪沙漠', normalXp: 18, eliteXp: 70, bossXp: 280 },
   { min: 20, max: 25, name: '冰霜高原', normalXp: 35, eliteXp: 140, bossXp: 560 },
@@ -109,6 +111,7 @@ const beginnerPlainsRegions = [
   { id: 'goblin-camp', name: '哥布林營地' },
   { id: 'plains-depths', name: '平原深處' }
 ];
+const blackForestRegions = ChapterTwoMapPolicy.MAPS;
 const skillCooldownMultiplier = 1.0;
 const skillProgression = {
   warrior: [
@@ -1986,7 +1989,8 @@ function renderMapSelector() {
   document.querySelector('#inventory-title').textContent = '選擇冒險地圖';
   document.querySelector('#inventory-content').innerHTML = `<section class="map-selection-grid">${maps.map((map) => {
     const unlocked = ChapterOneLevelPolicy.canEnterMap(map.id) || progress.level >= map.min;
-    const isRegionHub = map.id === 'beginner-plains';
+    const isRegionHub = map.id === 'beginner-plains' || map.regionHub;
+    const regionCount = map.id === 'black-forest' ? blackForestRegions.length : beginnerPlainsRegions.length;
     const recommended = map.recommended || { attack: 0, defense: 0, hp: 0 };
     const ready = stats.attack >= recommended.attack && stats.defense >= recommended.defense && stats.hp >= recommended.hp;
     const recommendation = `<strong class="map-recommendation ${ready ? 'ready' : 'danger'}">${ready ? '✓ 能力達標' : '⚠ 建議整備'}　攻 ${recommended.attack}・防 ${recommended.defense}・生命 ${recommended.hp}</strong>`;
@@ -1994,14 +1998,16 @@ function renderMapSelector() {
     const dungeonPasses = map.ticketItemId ? getInventoryItemQuantity(progress, map.ticketItemId) : resources.dungeonKeys?.blackForestAltar || 0;
     const dungeonPassName = map.ticketItemId ? '哥布林營地地圖' : '祭壇鑰匙';
     const detail = isRegionHub
-      ? `<em>包含 ${beginnerPlainsRegions.length} 個探索區域・怪物與掉落物將陸續追加</em>`
+      ? map.id === 'black-forest'
+        ? '<em>第二章 Lv15～30・承接平原深處的黑石山賊主線・目前僅完成地圖架構</em>'
+        : `<em>包含 ${regionCount} 個探索區域・怪物與掉落物將陸續追加</em>`
       : map.dungeon ? `<em>${map.id === 'goblin-camp' ? '清場後留意哥布林號角' : `${dungeonDefinition?.waves || 10} 波戰鬥・最終波 BOSS・職業套裝`}${map.ticketItemId ? '・可連續自動挑戰' : ''}</em><strong class="dungeon-key-count">${dungeonPassName}：${dungeonPasses}</strong>` : `<em>普通 ${map.normalXp} EXP・精英 ${map.eliteXp} EXP・Boss ${map.bossXp} EXP</em>`;
     const action = isRegionHub
-      ? `<button type="button" data-open-map-region="${map.id}">查看 ${beginnerPlainsRegions.length} 個區域</button>`
+      ? unlocked ? `<button type="button" data-open-map-region="${map.id}">查看 ${regionCount} 個區域</button>` : `<span>Lv. ${map.min} 解鎖</span>`
       : map.dungeon
       ? unlocked ? `<button type="button" data-select-map="${map.id}" ${dungeonPasses < 1 ? 'disabled' : ''}>${dungeonPasses > 0 ? map.ticketItemId ? '使用地圖進入' : '消耗鑰匙進入' : `需要${dungeonPassName}`}</button>` : `<span>Lv. ${map.min} 解鎖</span>`
       : unlocked ? map.id === activeMap.id ? '<span>目前地圖</span>' : `<button type="button" data-select-map="${map.id}">前往地圖</button>` : `<span>Lv. ${map.min} 解鎖</span>`;
-    return `<article class="map-selection-card ${isRegionHub ? 'region-hub-card' : ''} ${map.dungeon ? 'dungeon-card' : ''} ${map.id === activeMap.id ? 'selected' : ''} ${unlocked ? '' : 'locked'}" style="--map-preview:url('${map.background}')"><div><b>${map.dungeon ? '◆ ' : ''}${map.name}</b><small>${isRegionHub ? '第一章探索地區' : `怪物等級 Lv. ${map.monsterMin || map.min}～${map.monsterMax || map.max}`}</small>${detail}${isRegionHub ? '' : recommendation}</div>${action}</article>`;
+    return `<article class="map-selection-card ${isRegionHub ? 'region-hub-card' : ''} ${map.dungeon ? 'dungeon-card' : ''} ${map.id === activeMap.id ? 'selected' : ''} ${unlocked ? '' : 'locked'}" style="--map-preview:url('${map.background}')"><div><b>${map.dungeon ? '◆ ' : ''}${map.name}</b><small>${isRegionHub ? `第 ${map.chapter} 章探索地區` : `怪物等級 Lv. ${map.monsterMin || map.min}～${map.monsterMax || map.max}`}</small>${detail}${isRegionHub ? '' : recommendation}</div>${action}</article>`;
   }).join('')}</section>`;
   modal.dataset.view = 'maps';
   modal.classList.remove('hidden');
@@ -2118,6 +2124,32 @@ function unequipItem(slot) {
     battleTimer = setInterval(battleTick, Math.round(1000 / getCharacterStats(progress.level, progress, character).attackSpeed));
     updateBattleUI();
   }
+}
+
+function renderBlackForestRegions() {
+  const modal = document.querySelector('#inventory-modal');
+  document.querySelector('#inventory-title').textContent = '第二章・黑森林';
+  document.querySelector('#inventory-content').innerHTML = `
+    <button type="button" class="map-region-back" data-map-region-back>← 返回地區選擇</button>
+    <section class="region-overview-card" style="--map-preview:url('${ChapterTwoMapPolicy.CHAPTER.background}')">
+      <div><b>黑森林</b><small>第二章・Lv15～30</small></div>
+      <em>${ChapterTwoMapPolicy.CHAPTER.summary}</em>
+    </section>
+    <section class="map-region-grid">${blackForestRegions.map((region) => {
+      const dungeon = region.dungeon ? ChapterTwoMapPolicy.getDungeon(region.id) : null;
+      const detail = region.id === 'blackstone-stronghold'
+        ? `副本骨架・${dungeon.primaryFaction === 'blackstone-bandits' ? '黑石山賊' : dungeon.primaryFaction}與哥布林合作勢力`
+        : region.isFinalMap ? '第二章最終地圖' : '怪物、Boss、掉落、材料、事件與環境效果待後續設定';
+      return `
+      <article class="map-region-card pending locked ${region.dungeon ? 'dungeon-card' : ''}">
+        <span>${String(region.order).padStart(2, '0')}</span>
+        <div><b>${region.dungeon ? '◆ ' : ''}${region.name}</b><small>${detail}</small></div>
+        <em>規劃中</em>
+      </article>`;
+    }).join('')}
+    </section>`;
+  modal.dataset.view = 'black-forest-regions';
+  modal.classList.remove('hidden');
 }
 
 function selectAllCommonEquipment() {
@@ -4024,7 +4056,11 @@ document.querySelector('#sell-confirm-modal').addEventListener('click', (event) 
 document.querySelector('#inventory-modal').addEventListener('click', (event) => {
   if (event.target === event.currentTarget) event.currentTarget.classList.add('hidden');
   const regionHubButton = event.target.closest('[data-open-map-region]');
-  if (regionHubButton) { renderBeginnerPlainsRegions(); return; }
+  if (regionHubButton) {
+    if (regionHubButton.dataset.openMapRegion === 'black-forest') renderBlackForestRegions();
+    else renderBeginnerPlainsRegions();
+    return;
+  }
   if (event.target.closest('[data-map-region-back]')) { renderMapSelector(); return; }
   const mapButton = event.target.closest('[data-select-map]');
   if (mapButton) { selectAdventureMap(mapButton.dataset.selectMap); return; }
