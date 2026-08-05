@@ -168,16 +168,27 @@ function getSkillKey(job, skill) {
   return `${job}:${skill.id || `passive-${skill.level}`}`;
 }
 
-function getHunterInstinctEffect() {
-  return { interval: 6, multiplier: 1.5, extraAttack: false };
+function getPassiveSkillUpgradeLevel(progress, job, name) {
+  const skill = (skillProgression[job] || []).find((entry) => entry.type === 'passive' && entry.name === name);
+  return skill ? getSkillUpgradeLevel(progress, job, skill) : 1;
 }
 
-function getPassiveSkillDetail(job, skill) {
-  if (job === 'hunter' && skill.name === '精準射擊') return '命中 +10%、暴擊 +5%';
-  if (job === 'hunter' && skill.name === '野性夥伴') return '戰寵生命提升、攻擊 +15%';
-  if (job === 'hunter' && skill.name === '弓術專精') return '武器傷害 +10%';
+function getHunterInstinctEffect(progress = getProgress()) {
+  const tier = getPassiveSkillUpgradeLevel(progress, 'hunter', '獵人本能');
+  return {
+    interval: tier >= 6 ? 3 : tier >= 4 ? 4 : tier >= 2 ? 5 : 6,
+    multiplier: tier >= 5 ? 2 : tier >= 3 ? 1.75 : 1.5,
+    extraAttack: tier >= 6
+  };
+}
+
+function getPassiveSkillDetail(job, skill, progress = getProgress()) {
+  const tier = getSkillUpgradeLevel(progress, job, skill);
+  if (job === 'hunter' && skill.name === '精準射擊') return `命中 +${10 + (tier - 1) * 2}%、暴擊 +${5 + (tier - 1)}%`;
+  if (job === 'hunter' && skill.name === '野性夥伴') return `戰寵生命提升、攻擊 +${15 + (tier - 1) * 10}%`;
+  if (job === 'hunter' && skill.name === '弓術專精') return `武器傷害 +${10 + (tier - 1) * 2}%`;
   if (job === 'hunter' && skill.name === '獵人本能') {
-    const effect = getHunterInstinctEffect();
+    const effect = getHunterInstinctEffect(progress);
     return `每第 ${effect.interval} 次攻擊造成 ${Math.round(effect.multiplier * 100)}% 傷害${effect.extraAttack ? '，並額外攻擊 1 次' : ''}`;
   }
   return skill.detail;
@@ -185,6 +196,18 @@ function getPassiveSkillDetail(job, skill) {
 
 function removeLegacySkillUpgradeMaterials(inventory) {
   return (Array.isArray(inventory) ? inventory : []).filter((item) => item?.id !== 'magic-crystal' && !/^magic-book-[2-6]$/.test(String(item?.id || '')));
+}
+
+function getSkillUpgradeLevel(progress, job, skill) {
+  return Math.max(1, Math.min(SkillUpgradePolicy.MAX_SKILL_LEVEL, Number(progress?.skillLevels?.[getSkillKey(job, skill)]) || 1));
+}
+
+function getSkillPowerMultiplier(progress, job, skill) {
+  return 1 + (getSkillUpgradeLevel(progress, job, skill) - 1) * .12;
+}
+
+function getUnlockedChapter(progress) {
+  return Math.max(1, Number(progress?.unlockedChapter) || 1);
 }
 let selection = { faction: 'light', race: 'human', job: 'warrior' };
 let toastTimer;
@@ -772,6 +795,7 @@ function getProgress() {
     magicCrystals: 0,
     skillBooks: {},
     skillLevels: {},
+    unlockedChapter: 1,
     selectedMapId: 'beginner-plains',
     inventory: [],
     equipment: emptyEquipment(),
@@ -1601,16 +1625,18 @@ function getCharacterStats(level, progress = getProgress(), character = JSON.par
   const humanMultiplier = character?.race === 'human' ? 1.05 : 1;
   const hunterPrecisionUnlocked = character?.job === 'hunter' && level >= 3;
   const hunterMasteryUnlocked = character?.job === 'hunter' && level >= 15;
-  const hunterWeaponMultiplier = hunterMasteryUnlocked ? 1.10 : 1;
+  const hunterPrecisionTier = hunterPrecisionUnlocked ? getPassiveSkillUpgradeLevel(progress, 'hunter', '精準射擊') : 0;
+  const hunterMasteryTier = hunterMasteryUnlocked ? getPassiveSkillUpgradeLevel(progress, 'hunter', '弓術專精') : 0;
+  const hunterWeaponMultiplier = hunterMasteryUnlocked ? 1 + (10 + (hunterMasteryTier - 1) * 2) / 100 : 1;
   const equippedWeapon = progress.equipment?.weapon;
   return {
     hp: Math.round((base.hp + race.hp + (level - 1) * 12 + equipment.hp + equipment.maxHp + collection.hp) * (1 + equipment.maxHpPercent) * humanMultiplier),
     mana: ['warrior', 'assassin'].includes(character?.job) ? 0 : Math.round((base.mana + race.mana + (level - 1) * 6 + equipment.mana + collection.mana) * humanMultiplier),
     attack: Math.round((base.attack + race.attack + (level - 1) + equipment.attack + equipment.attackFlat + equipment.strength + equipment.intelligence + collection.attack) * humanMultiplier * hunterWeaponMultiplier),
     defense: Math.round((base.defense + race.defense + Math.floor((level - 1) / 5) + equipment.defense + collection.defense) * (1 + equipment.defensePercent) * humanMultiplier),
-    crit: Math.min(.60, base.crit + race.crit + collection.crit + equipment.criticalChance + (hunterPrecisionUnlocked ? .05 : 0)),
+    crit: Math.min(.60, base.crit + race.crit + collection.crit + equipment.criticalChance + (hunterPrecisionUnlocked ? (5 + (hunterPrecisionTier - 1)) / 100 : 0)),
     dodge: Math.min(.45, Math.max(0, base.dodge + race.dodge + collection.dodge + equipment.dodge + equipment.dodgePercent)),
-    accuracy: Math.min(1.30, 1.05 + equipment.accuracy + equipment.accuracyPercent + (character?.job === 'hunter' ? .05 : 0) + (hunterPrecisionUnlocked ? .10 : 0)),
+    accuracy: Math.min(1.30, 1.05 + equipment.accuracy + equipment.accuracyPercent + (character?.job === 'hunter' ? .05 : 0) + (hunterPrecisionUnlocked ? (10 + (hunterPrecisionTier - 1) * 2) / 100 : 0)),
     attackSpeed: EquipmentPolicy.getAttacksPerSecond(equippedWeapon, base.attackSpeed * 1.15) * (1 + equipment.attackSpeedBonus + equipment.attackSpeedPercent),
     cooldownSpeed: (character?.race === 'elf' ? 1.03 : 1) * (1 + equipment.cooldownSpeedBonus + equipment.cooldownSpeedPercent),
     manaRegen: 1 + equipment.manaRegenBonus + equipment.manaRegenerationPercent,
@@ -2032,6 +2058,7 @@ function selectAdventureMap(mapId) {
     progress.dungeonAdmission = true;
   }
   progress.selectedMapId = map.id;
+  progress.unlockedChapter = Math.max(getUnlockedChapter(progress), Number(map.chapter) || 1);
   saveProgress(progress);
   document.querySelector('#inventory-modal').classList.add('hidden');
   showToast(map.dungeon ? map.ticketItemId ? `持有地圖，進入：${map.name}` : `已消耗 1 把鑰匙，進入：${map.name}` : `已前往：${map.name}`);
@@ -2508,10 +2535,11 @@ function renderSkills(character, level) {
   const raceTalent = raceTalents[character.race] || raceTalents.human;
   const renderSkill = (skill) => {
     const unlocked = level >= skill.level;
+    const upgradeLevel = getSkillUpgradeLevel(progress, character.job, skill);
     const icon = skill.type === 'active' ? (skillIcons[skill.id] || '✦') : '◆';
     if (!unlocked) return `<div class="skill-chip ${skill.type} locked"><span class="skill-lock">🔒 Lv${skill.level} 解鎖</span></div>`;
     const cooldownText = skill.type === 'active' ? `${Math.round(skill.cooldown * skillCooldownMultiplier)}秒` : '常駐';
-    return `<button class="skill-chip ${skill.type} compact-skill" type="button" data-skill-key="${getSkillKey(character.job, skill)}"><span class="skill-icon">${icon}</span><b>${skill.name}</b><small>Lv${skill.level} 解鎖</small><em class="skill-cooldown">${cooldownText}</em></button>`;
+    return `<button class="skill-chip ${skill.type} compact-skill" type="button" data-skill-key="${getSkillKey(character.job, skill)}"><span class="skill-icon">${icon}</span><b>${skill.name}</b><small>技能 Lv${upgradeLevel}</small><em class="skill-cooldown">${cooldownText}</em></button>`;
   };
   skillList.innerHTML = `<section class="skill-group active-group"><h3>主動技能</h3><div class="skill-row">${activeSkills.map((skill) => renderSkill(skill)).join('')}</div></section><section class="skill-group passive-group"><h3>被動技能</h3><div class="skill-row">${passiveSkills.map((skill) => renderSkill(skill)).join('')}</div></section><section class="race-talent-group"><h3>種族天賦</h3><article class="race-talent-card race-talent-${character.race}"><span>${raceTalent.icon}</span><div><b>${raceInfo?.name || character.race}・${raceTalent.name}</b><small>${raceTalent.detail}</small></div><em>永久生效</em></article></section>`;
   skillList.dataset.level = String(level);
@@ -2538,9 +2566,10 @@ function refreshSkills(character, level) {
   if (resourceStatus) resourceStatus.textContent = formatCombatResourceStatus(character, progress, maxMana);
 }
 
-function getSkillEffectPercent(skill) {
-  if (skill.power) return Math.round(skill.power * 100);
-  if (skill.id === 'heal') return 40;
+function getSkillEffectPercent(skill, upgradeLevel = 1) {
+  const multiplier = 1 + (Math.max(1, Number(upgradeLevel) || 1) - 1) * .12;
+  if (skill.power) return Math.round(skill.power * multiplier * 100);
+  if (skill.id === 'heal') return Math.round(40 * multiplier);
   return 0;
 }
 
@@ -2568,9 +2597,19 @@ function renderSkillDetailModal() {
     return;
   }
 
+  const upgradeLevel = getSkillUpgradeLevel(progress, character.job, skill);
+  const requirement = SkillUpgradePolicy.getUpgradeRequirement(upgradeLevel);
+  const upgradeProgress = { ...progress, unlockedChapter: getUnlockedChapter(progress) };
+  const validation = SkillUpgradePolicy.canUpgrade(upgradeProgress, upgradeLevel);
   const cooldown = skill.type === 'active' ? Math.round(skill.cooldown * skillCooldownMultiplier) : 0;
   const manaCost = skill.type === 'active' ? getSkillResourceCost(character.job, skill) : 0;
-  const currentEffect = getSkillEffectPercent(skill);
+  const currentEffect = getSkillEffectPercent(skill, upgradeLevel);
+  const materialStatus = requirement ? requirement.materials.map((material) => `${material.icon} ${material.name} ${SkillUpgradePolicy.getQuantity(progress.inventory, material.id)}/${material.amount}`).join('、') : '';
+  const upgradeStatus = !requirement
+    ? '<p>目前已達技能最高等級。</p>'
+    : getUnlockedChapter(progress) < requirement.chapter
+      ? `<p>需要解鎖第 ${requirement.chapter} 章才能繼續升級。</p>`
+      : `<p>${materialStatus}</p><p>金幣 ${progress.gold}/${requirement.gold}・成功率 ${Math.round(requirement.successRate * 100)}%</p>`;
 
   content.innerHTML = `
     <header><h2 id="skill-detail-title">${skill.name}</h2></header>
@@ -2579,7 +2618,8 @@ function renderSkillDetailModal() {
       <div><dt>${skill.id === 'heal' ? '恢復' : skill.type === 'active' ? '傷害' : '效果'}</dt><dd>${currentEffect ? `${currentEffect}%` : '專屬效果'}</dd></div>
       <div><dt>消耗</dt><dd>${skill.type === 'active' && manaCost > 0 ? `${manaCost} ${getCombatResourceUnit(character.job)}` : '無'}</dd></div>
     </dl>
-    <section class="skill-detail-copy"><h3>技能說明</h3><p>${getSkillDescription(character.job, skill)}</p></section>`;
+    <section class="skill-detail-copy"><h3>技能說明</h3><p>${getSkillDescription(character.job, skill)}</p></section>
+    <section class="skill-upgrade-summary"><h3>技能 Lv${upgradeLevel}</h3>${upgradeStatus}<button id="skill-detail-upgrade" type="button" ${validation.ok ? '' : 'disabled'}>${requirement ? `升級至 Lv${requirement.targetLevel}` : '已達上限'}</button></section>`;
   modal.classList.remove('hidden');
 }
 
@@ -2783,6 +2823,7 @@ function rewardVictory(index) {
   const loot = addLoot(progress, enemy);
   const collectible = addCollectibleLoot(progress, enemy);
   const materialDrops = ChapterOneMaterialDropPolicy.grantMaterialDrops(progress, currentMap.id);
+  const skillMaterialDrops = SkillUpgradePolicy.grantChapterDrops(progress, currentMap.chapter, enemy);
   const recipeDrops = ChapterOneRecipeDropPolicy.grantRecipeDrops(progress, enemy, currentMap.id);
   let equipmentDrop = null;
   try {
@@ -2847,6 +2888,10 @@ function rewardVictory(index) {
   materialDrops.forEach((material) => {
     showToast(`獲得材料：${material.name}`);
     logBattle(`◆ 材料掉落【${material.name} ×${material.quantity}】`, 'loot');
+  });
+  skillMaterialDrops.forEach((material) => {
+    showToast(`獲得技能材料：${material.name}`);
+    logBattle(`📜 技能材料掉落【${material.name} ×${material.quantity}】`, 'loot');
   });
   recipeDrops.forEach((recipe) => {
     showToast(`獲得配方：${recipe.name}`);
@@ -3083,8 +3128,8 @@ function useAutoSkillForMember(member, now = Date.now()) {
     const targets = aliveEnemyIndexesByAge().slice(0, skill.targets || 1);
     if (!targets.length) continue;
     const critical = Math.random() < stats.crit;
-    const companionMultiplier = skill.id === 'companion' && member.level >= 8 ? 1.15 : 1;
-    const damage = Math.max(1, Math.ceil(stats.attack * skill.power * companionMultiplier * (critical ? 1.5 : 1)));
+    const companionMultiplier = skill.id === 'companion' && member.level >= 8 ? 1.15 + (getPassiveSkillUpgradeLevel(progress, 'hunter', '野性夥伴') - 1) * .10 : 1;
+    const damage = Math.max(1, Math.ceil(stats.attack * skill.power * getSkillPowerMultiplier(progress, member.job, skill) * companionMultiplier * (critical ? 1.5 : 1)));
     const profile = getPlayerAttackProfile(character, skill);
     const resolvedTargets = targets.map((index) => ({ index, result: applyDamageToMonster(index, damage, profile, { attacker: member }) }));
     const hits = resolvedTargets.filter((target) => !target.result.evaded);
@@ -3115,7 +3160,7 @@ function useAutoSkillForMember(member, now = Date.now()) {
   const healSkill = unlocked.find((skill) => skill.id === 'heal' && (member.skillCooldowns[skill.id] || 0) <= now);
   if (!healSkill || member.resourceCurrent < getSkillManaCost(healSkill) || member.currentHp / member.maxHp > .7) return false;
   const cost = getSkillManaCost(healSkill);
-  const heal = Math.ceil(member.maxHp * .4);
+  const heal = Math.ceil(member.maxHp * .4 * getSkillPowerMultiplier(progress, member.job, healSkill));
   const missing = member.maxHp - member.currentHp;
   member.currentHp = Math.min(member.maxHp, member.currentHp + heal);
   member.shield += Math.max(0, heal - missing);
@@ -3188,7 +3233,7 @@ function processPartyMemberAttacks(now = Date.now()) {
     const critical = Math.random() < member.stats.crit;
     const baseHit = Math.max(1, Math.ceil(attackWithWeaponRoll * (orcRage ? 1.10 : 1) * (critical ? 1.5 : 1)));
     member.hunterAttackCount += 1;
-    const hunterInstinct = member.job === 'hunter' && member.level >= 20 ? getHunterInstinctEffect() : null;
+    const hunterInstinct = member.job === 'hunter' && member.level >= 20 ? getHunterInstinctEffect(member.progress) : null;
     const instinctTriggered = Boolean(hunterInstinct && member.hunterAttackCount % hunterInstinct.interval === 0);
     const hit = Math.max(1, Math.ceil(baseHit * (instinctTriggered ? hunterInstinct.multiplier : 1)));
     const enemy = getEnemyDefinition(targetIndex);
@@ -3863,6 +3908,30 @@ document.querySelector('#skill-list').addEventListener('click', (event) => {
 document.querySelector('#skill-detail-close').addEventListener('click', closeSkillDetailModal);
 document.querySelector('#skill-detail-modal').addEventListener('click', (event) => {
   if (event.target === event.currentTarget) closeSkillDetailModal();
+});
+document.querySelector('#skill-detail-modal').addEventListener('click', (event) => {
+  const button = event.target.closest('#skill-detail-upgrade');
+  if (!button || button.disabled) return;
+  button.disabled = true;
+  const character = JSON.parse(localStorage.getItem('stardust-character') || 'null');
+  const progress = getProgress();
+  const skill = (skillProgression[character?.job] || []).find((entry) => getSkillKey(character.job, entry) === selectedSkillKey);
+  if (!skill || progress.level < skill.level) return;
+  progress.unlockedChapter = getUnlockedChapter(progress);
+  const currentLevel = getSkillUpgradeLevel(progress, character.job, skill);
+  const result = SkillUpgradePolicy.attemptUpgrade(progress, currentLevel);
+  if (!result.ok) {
+    renderSkillDetailModal();
+    return;
+  }
+  if (result.succeeded) {
+    progress.skillLevels = { ...(progress.skillLevels || {}), [getSkillKey(character.job, skill)]: result.level };
+  }
+  saveProgress(progress);
+  renderSkills(character, progress.level);
+  renderSkillDetailModal();
+  showToast(result.succeeded ? `${skill.name} 升級至 Lv${result.level}！` : `${skill.name} 升級失敗，材料與金幣已消耗。`);
+  logBattle(result.succeeded ? `✦ 技能【${skill.name}】升級至 Lv${result.level}` : `◇ 技能【${skill.name}】升級失敗`, 'progress');
 });
 document.querySelector('#layout-toggle').addEventListener('click', () => {
   layoutEditMode = !layoutEditMode;

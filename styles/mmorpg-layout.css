@@ -735,6 +735,42 @@
   line-height: 1.6;
 }
 
+.skill-upgrade-summary {
+  margin-top: 16px;
+  padding: 13px;
+  border: 1px solid rgba(126, 227, 238, .28);
+  border-radius: 10px;
+  background: rgba(12, 43, 53, .72);
+}
+
+.skill-upgrade-summary h3,
+.skill-upgrade-summary p {
+  margin: 0 0 8px;
+}
+
+.skill-upgrade-summary p {
+  color: #d7e5e7;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.skill-upgrade-summary button {
+  width: 100%;
+  margin-top: 4px;
+  padding: 10px 12px;
+  border: 1px solid rgba(126, 227, 238, .6);
+  border-radius: 8px;
+  background: linear-gradient(135deg, #28798b, #475f9c);
+  color: white;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.skill-upgrade-summary button:disabled {
+  opacity: .48;
+  cursor: not-allowed;
+}
+
 /* UI phase 1: compact side rails and preserve more of the battlefield. */
 @media (min-width: 1101px) {
   .battle-screen {
