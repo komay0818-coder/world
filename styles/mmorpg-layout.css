@@ -339,7 +339,6 @@
   .battle-bottom .skill-list .skill-group h3 { margin-bottom: 3px !important; }
   .battle-bottom .skill-list .skill-row { gap: 4px !important; }
   .battle-bottom .skill-list .skill-chip { min-height: 52px !important; padding: 4px !important; }
-  .battle-bottom .skill-upgrade-button { margin-top: 2px !important; padding: 2px 3px !important; font-size: 7px !important; }
 
   .battle-menu {
     width: 92px !important;
@@ -729,43 +728,11 @@
   font-size: 12px;
 }
 
-.skill-detail-copy p,
-.skill-upgrade-summary p {
+.skill-detail-copy p {
   margin: 0;
   color: #d7e5e7;
   font-size: 13px;
   line-height: 1.6;
-}
-
-.skill-upgrade-summary {
-  display: grid;
-  gap: 7px;
-  margin-top: 18px;
-  padding-top: 14px;
-  border-top: 1px solid rgba(120, 180, 190, .22);
-}
-
-.skill-upgrade-result {
-  color: #f6d56d !important;
-  font-weight: 800;
-}
-
-#skill-detail-upgrade {
-  min-height: 42px;
-  margin-top: 4px;
-  border: 1px solid #a98538;
-  border-radius: 8px;
-  background: linear-gradient(180deg, #7c5d21, #4c3516);
-  color: #fff5cf;
-  font-weight: 900;
-  cursor: pointer;
-}
-
-#skill-detail-upgrade:disabled {
-  border-color: #46555a;
-  background: #26353a;
-  color: #829195;
-  cursor: not-allowed;
 }
 
 /* UI phase 1: compact side rails and preserve more of the battlefield. */

@@ -88,9 +88,6 @@
 .combat-log-entry b{font-weight:900!important;color:#14232d!important}
 @media(max-width:700px){.battle-bottom #combat-log-lines .combat-log-entry{font-size:14px!important;line-height:1.55!important;padding:9px 10px!important}.combat-log-entry time{font-size:10px!important}}
 
-/* Skill upgrade progression. */
-.skill-upgrade-button{grid-area:upgrade;width:100%;margin-top:5px;padding:5px 6px;border:1px solid #82d8ec;border-radius:7px;background:linear-gradient(135deg,#21677d,#174356);color:#effcff;font:800 9px "Noto Sans TC",sans-serif;cursor:pointer}.skill-upgrade-button:disabled{border-color:#566675;background:#25313b;color:#7f8b94;cursor:not-allowed}.skill-list .skill-chip{grid-template-areas:"icon name" "icon meta" "status status" "upgrade upgrade"!important}
-
 /* MMORPG battlefield composition: a clear hero anchor, three staged enemies, quieter utility UI. */
 .enemy-squad .enemy-unit{position:absolute!important;margin:0!important;transform-origin:center bottom!important}
 .enemy-squad .stage-slot-0{left:22%!important;top:38%!important;z-index:8!important;transform:scale(1.04)!important}
@@ -127,7 +124,6 @@
   .skill-panel .skill-list .skill-group h3{margin-bottom:4px!important}
   .skill-panel .skill-list .skill-row{gap:5px!important}
   .skill-panel .skill-list .skill-chip{min-height:60px!important;padding:6px!important}
-  .skill-panel .skill-upgrade-button{margin-top:3px!important;padding:3px 4px!important;font-size:8px!important}
   .battle-menu{padding:6px!important;gap:6px!important}
   .battle-menu-button{min-height:50px!important}
 }
