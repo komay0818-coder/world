@@ -10,7 +10,7 @@ const rendererEnd = script.indexOf('function selectAllCommonEquipment', renderer
 const blackForestRenderer = rendererStart >= 0 && rendererEnd > rendererStart ? script.slice(rendererStart, rendererEnd) : '';
 
 assert.match(index, /chapter-two-map-policy\.js[\s\S]*script\.js/, 'chapter-two data loads before the game');
-assert.match(index, /VER\. 0\.2\.\d+/, 'the game remains on the chapter-two minor version');
+assert.match(index, /VER\. \d+\.\d+\.\d+/, 'the game exposes a semantic version');
 assert.match(script, /\.\.\.ChapterTwoMapPolicy\.MAPS/, 'chapter-two maps join the shared progression data');
 assert.match(script, /previousMapId: 'plains-depths'/, 'chapter two connects from the first chapter finale');
 assert.match(script, /function renderBlackForestRegions\(/, 'black forest has a chapter region view');

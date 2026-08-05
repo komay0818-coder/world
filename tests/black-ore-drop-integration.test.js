@@ -8,9 +8,10 @@ const index = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
 const crafting = fs.readFileSync(path.join(root, 'crafting-policy.js'), 'utf8');
 
 assert.match(script, /grantMaterialDrops\(progress, currentMap\.id, enemy\)/, 'reward settlement passes the defeated monster to the material policy');
+assert.match(script, /VillageUpgradePolicy\.grantMapDrops\(progress, currentMap\.id\)/, 'reward settlement also grants map-based building black ore');
 assert.doesNotMatch(crafting, /blackOre: Object\.freeze/, 'black ore has one canonical material definition in the drop policy');
 assert.match(index, /chapter-one-material-drop-policy\.js\?v=20260806-black-ore-drops-v2/, 'the material policy cache key changes');
-assert.match(index, /script\.js\?v=20260806-black-ore-drops-v125/, 'the integration cache key changes');
-assert.match(index, /VER\. 0\.2\.1/, 'the black ore drop fix increments the patch version');
+assert.match(index, /script\.js\?v=20260806-village-upgrades-v126/, 'the integration cache key changes');
+assert.match(index, /VER\. 0\.3\.0/, 'the building system increments the minor version');
 
 console.log('black-ore-drop-integration: assertions passed');
