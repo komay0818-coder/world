@@ -8,7 +8,8 @@
     wolfFang: Object.freeze({ id: 'wolf-fang', kind: 'material', materialType: 'monster-crafting', rarity: 'rare', icon: '🦷', name: '狼牙', description: '從狼穴怪物身上取得的稀有製作材料。' }),
     hardHide: Object.freeze({ id: 'hard-hide', kind: 'material', materialType: 'monster-crafting', rarity: 'common', icon: '▰', name: '硬皮', description: '從野豬林怪物身上取得的普通製作材料。' }),
     boarTusk: Object.freeze({ id: 'boar-tusk', kind: 'material', materialType: 'monster-crafting', rarity: 'rare', icon: '🦷', name: '獠牙', description: '從野豬林怪物身上取得的稀有製作材料。' }),
-    ironOre: Object.freeze({ id: 'iron-ore', kind: 'material', materialType: 'monster-crafting', rarity: 'common', icon: '⛏', name: '鐵礦', description: '從哥布林營地怪物身上取得的普通製作材料。' })
+    ironOre: Object.freeze({ id: 'iron-ore', kind: 'material', materialType: 'monster-crafting', rarity: 'common', icon: '⛏', name: '鐵礦', description: '從哥布林營地怪物身上取得的普通製作材料。' }),
+    blackOre: Object.freeze({ id: 'black-ore', kind: 'material', materialType: 'special-crafting', rarity: 'rare', icon: '⬟', name: '黑礦石', description: '從平原深處的黑石山賊身上取得，用於製作第一章藍色裝備。' })
   });
 
   const MAP_DROP_CONFIGS = Object.freeze({
@@ -25,17 +26,33 @@
     ])
   });
 
+  const MONSTER_DROP_CONFIGS = Object.freeze({
+    blackstoneScout: Object.freeze([
+      Object.freeze({ materialId: MATERIALS.blackOre.id, dropRate: .10, amount: 1 })
+    ]),
+    blackstoneRaider: Object.freeze([
+      Object.freeze({ materialId: MATERIALS.blackOre.id, dropRate: .30, amount: 1 })
+    ]),
+    blackstoneLeader: Object.freeze([
+      Object.freeze({ materialId: MATERIALS.blackOre.id, dropRate: 1, amount: 2 })
+    ])
+  });
+
   const MATERIAL_BY_ID = new Map(Object.values(MATERIALS).map((material) => [material.id, material]));
 
   function clampRoll(value) {
     return Math.max(0, Math.min(.999999, Number(value) || 0));
   }
 
-  function rollDrops(mapId, random = Math.random) {
-    const config = MAP_DROP_CONFIGS[String(mapId || '')] || [];
+  function rollDrops(mapId, enemy = {}, random = Math.random) {
+    const mapConfig = MAP_DROP_CONFIGS[String(mapId || '')] || [];
+    const monsterConfig = String(mapId || '') === 'plains-depths'
+      ? MONSTER_DROP_CONFIGS[String(enemy?.id || '')] || []
+      : [];
+    const config = [...mapConfig, ...monsterConfig];
     return config
       .filter((entry) => clampRoll(random()) < entry.dropRate)
-      .map((entry) => ({ ...MATERIAL_BY_ID.get(entry.materialId), sourceMapId: mapId, quantity: 1 }));
+      .map((entry) => ({ ...MATERIAL_BY_ID.get(entry.materialId), sourceMapId: mapId, sourceMonsterId: enemy?.id || null, quantity: entry.amount || 1 }));
   }
 
   function addStackedMaterial(progress, material, amount = 1) {
@@ -52,13 +69,13 @@
     return item;
   }
 
-  function grantMaterialDrops(progress, mapId, options = {}) {
+  function grantMaterialDrops(progress, mapId, enemy = {}, options = {}) {
     if (!progress || typeof progress !== 'object') return [];
     const random = typeof options.random === 'function' ? options.random : Math.random;
-    const drops = rollDrops(mapId, random);
+    const drops = rollDrops(mapId, enemy, random);
     drops.forEach((drop) => addStackedMaterial(progress, drop, drop.quantity));
     return drops;
   }
 
-  return Object.freeze({ MATERIALS, MAP_DROP_CONFIGS, rollDrops, addStackedMaterial, grantMaterialDrops });
+  return Object.freeze({ MATERIALS, MAP_DROP_CONFIGS, MONSTER_DROP_CONFIGS, rollDrops, addStackedMaterial, grantMaterialDrops });
 }));

@@ -53,8 +53,7 @@
   const EXTRA_MATERIALS = Object.freeze({
     uncommonStone: Object.freeze({ id: 'equipment-stone-uncommon', kind: 'material', materialType: 'quality-stone', icon: '🟢', name: '綠色品質寶石', description: '製作綠色裝備所需的品質寶石。' }),
     rareStone: Object.freeze({ id: 'equipment-stone-rare', kind: 'material', materialType: 'quality-stone', icon: '🔵', name: '藍色品質寶石', description: '製作藍色裝備所需的品質寶石。' }),
-    epicStone: Object.freeze({ id: 'equipment-stone-epic', kind: 'material', materialType: 'quality-stone', icon: '🟣', name: '紫色品質寶石', description: '保留給未來紫色裝備製作。' }),
-    blackOre: Object.freeze({ id: 'black-ore', kind: 'material', materialType: 'special-crafting', icon: '⬟', name: '黑礦石', description: '製作第一章藍色裝備所需的稀有礦石。' })
+    epicStone: Object.freeze({ id: 'equipment-stone-epic', kind: 'material', materialType: 'quality-stone', icon: '🟣', name: '紫色品質寶石', description: '保留給未來紫色裝備製作。' })
   });
   const MATERIALS = Object.freeze({ ...(MaterialPolicy?.MATERIALS || {}), ...EXTRA_MATERIALS });
   const MATERIAL_BY_ID = new Map(Object.values(MATERIALS).map((entry) => [entry.id, entry]));

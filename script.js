@@ -2856,7 +2856,7 @@ function rewardVictory(index) {
   progress.gold += earnedGold;
   const loot = addLoot(progress, enemy);
   const collectible = addCollectibleLoot(progress, enemy);
-  const materialDrops = ChapterOneMaterialDropPolicy.grantMaterialDrops(progress, currentMap.id);
+  const materialDrops = ChapterOneMaterialDropPolicy.grantMaterialDrops(progress, currentMap.id, enemy);
   const skillMaterialDrops = SkillUpgradePolicy.grantChapterDrops(progress, currentMap.chapter, enemy);
   const recipeDrops = ChapterOneRecipeDropPolicy.grantRecipeDrops(progress, enemy, currentMap.id);
   let equipmentDrop = null;
