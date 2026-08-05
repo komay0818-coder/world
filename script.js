@@ -96,9 +96,7 @@ const mapProgression = [
   { id: 'wolf-den', chapter: 1, regionOf: 'beginner-plains', min: 2, max: 5, monsterMin: 3, monsterMax: 7, name: '狼穴', background: 'assets/wolf-den-background.png', implemented: true, normalXp: 6, eliteXp: 16, bossXp: 80, recommended: { attack: 16, defense: 4, hp: 110 } },
   { id: 'boar-woods', chapter: 1, regionOf: 'beginner-plains', min: 3, max: 5, monsterMin: 6, monsterMax: 10, name: '野豬林', background: 'assets/boar-woods-background.png', implemented: true, normalXp: 8, eliteXp: 20, bossXp: 95, recommended: { attack: 19, defense: 6, hp: 135 } },
   { id: 'plains-depths', chapter: 1, regionOf: 'beginner-plains', min: 4, max: 5, monsterMin: 12, monsterMax: 15, name: '平原深處', background: 'assets/plains-depths-background.png?v=20260728-user-image-v1', implemented: true, normalXp: 10, eliteXp: 26, bossXp: 110, recommended: { attack: 22, defense: 8, hp: 155 } },
-  { id: 'black-forest', chapter: 1, min: 5, max: 10, name: '黑森林', background: 'assets/black-forest-background.png', implemented: true, normalXp: 4, eliteXp: 14, bossXp: 56, recommended: { attack: 26, defense: 8, hp: 180 } },
   { id: 'goblin-camp', chapter: 1, regionOf: 'beginner-plains', min: 2, max: 5, monsterMin: 8, monsterMax: 12, name: '哥布林營地', background: 'assets/goblin-camp-background.png', implemented: true, dungeon: true, ticketItemId: 'goblin-camp-map', normalXp: 10, eliteXp: 28, bossXp: 120, recommended: { attack: 18, defense: 5, hp: 120 } },
-  { id: 'black-forest-altar', chapter: 1, min: 5, max: 10, name: '黑森林祭壇', background: 'assets/black-forest-background.png', implemented: true, dungeon: true, normalXp: 0, eliteXp: 22, bossXp: 126, recommended: { attack: 34, defense: 11, hp: 230 } },
   { min: 10, max: 15, name: '石牙山谷', normalXp: 8, eliteXp: 35, bossXp: 140 },
   { min: 15, max: 20, name: '荒蕪沙漠', normalXp: 18, eliteXp: 70, bossXp: 280 },
   { min: 20, max: 25, name: '冰霜高原', normalXp: 35, eliteXp: 140, bossXp: 560 },
@@ -608,8 +606,7 @@ const dungeonBossId = 'eclipseSovereign';
 const GOBLIN_CAMP_TICKET_ID = 'goblin-camp-map';
 const GOBLIN_CAMP_TICKET_DROP_RATE = .50;
 const dungeonDefinitions = {
-  'goblin-camp': { name: '哥布林營地', waves: 7, minWaves: 4, maxWaves: 7, ticketItemId: GOBLIN_CAMP_TICKET_ID, finalBossId: 'goblinHighChief' },
-  'black-forest-altar': { name: '黑森林祭壇', waves: 10, finalBossId: dungeonBossId }
+  'goblin-camp': { name: '哥布林營地', waves: 7, minWaves: 4, maxWaves: 7, ticketItemId: GOBLIN_CAMP_TICKET_ID, finalBossId: 'goblinHighChief' }
 };
 
 const collectibleTemplates = CollectiblePolicy.COLLECTIBLE_CATALOG;
@@ -678,6 +675,11 @@ function applyEquipmentVisual(item) {
 
 function getProgress() {
   const saved = JSON.parse(localStorage.getItem('stardust-progress') || '{}');
+  if (['black-forest', 'black-forest-altar'].includes(saved.selectedMapId)) {
+    saved.selectedMapId = 'plains-entrance';
+    saved.dungeonAdmission = false;
+    saved.dungeonReturnMapId = 'plains-entrance';
+  }
   if (saved.magicCrystals === undefined && saved.skillEssence !== undefined) {
     saved.magicCrystals = Math.max(0, Number(saved.skillEssence) || 0);
     delete saved.skillEssence;
@@ -1413,7 +1415,7 @@ function createEnemyTypes(playerLevel = 1) {
 }
 
 function getDungeonDefinition(mapId = battle.dungeonId || getActiveMap(getProgress()).id) {
-  return dungeonDefinitions[mapId] || dungeonDefinitions['black-forest-altar'];
+  return dungeonDefinitions[mapId] || dungeonDefinitions['goblin-camp'];
 }
 
 function createDungeonWaveTypes(wave, mapId = battle.dungeonId || getActiveMap(getProgress()).id) {
@@ -1868,7 +1870,7 @@ function renderInventory(view = 'inventory') {
   const content = document.querySelector('#inventory-content');
   title.textContent = view === 'equipment' ? '裝備' : '背包';
   const accountResources = getAccountResources();
-  const resourceBar = `<section class="account-resource-bar"><span>◆ 星鐵碎片 <b>${accountResources.starIron}</b></span><span>🗝 黑森林祭壇鑰匙 <b>${accountResources.dungeonKeys.blackForestAltar || 0}</b></span></section>`;
+  const resourceBar = `<section class="account-resource-bar"><span>◆ 星鐵碎片 <b>${accountResources.starIron}</b></span></section>`;
   const renderItemCard = (item, options = {}) => {
     const equipped = Boolean(options.equipped);
     const wearable = isItemWearableByCharacter(item, character, progress.level);
@@ -2867,7 +2869,6 @@ function rewardVictory(index) {
   } else if (enemy.isBoss) {
     const resources = getAccountResources();
     if (Math.random() < .12) { resources.starIron += 1; accountDrops.push('星鐵碎片 ×1'); }
-    if (currentMap.id === 'black-forest' && Math.random() < .15) { resources.dungeonKeys.blackForestAltar = (resources.dungeonKeys.blackForestAltar || 0) + 1; accountDrops.push('黑森林祭壇鑰匙 ×1'); }
     saveAccountResources(resources);
   }
   while (progress.xp >= requiredXp(progress.level)) {
