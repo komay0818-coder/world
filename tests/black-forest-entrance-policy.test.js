@@ -1,4 +1,6 @@
 const assert = require('node:assert/strict');
+const fs = require('node:fs');
+const path = require('node:path');
 const policy = require('../black-forest-entrance-policy.js');
 
 assert.equal(policy.MAP.id, 'black-forest-entrance');
@@ -23,5 +25,11 @@ assert.ok(policy.MONSTERS.filter((monster) => !['black-forest-wolf', 'corrupted-
 assert.ok(policy.MONSTERS.every((monster) => monster.stats === null && monster.dropTableId === null
   && monster.aiProfileId === null && monster.skillIds.length === 0 && monster.implemented === false));
 assert.equal(policy.getMonster('unknown'), null);
+
+['black-forest-wolf.png', 'corrupted-boar.png', 'shadow-spider.png'].forEach((filename) => {
+  const png = fs.readFileSync(path.join(__dirname, '..', 'assets', filename));
+  assert.equal(png.subarray(1, 4).toString(), 'PNG', `${filename} is a PNG asset`);
+  assert.equal(png[25], 6, `${filename} uses RGBA color type with an alpha channel`);
+});
 
 console.log('black-forest-entrance-policy: assertions passed');
