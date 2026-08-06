@@ -12,7 +12,7 @@ const blackForestRenderer = rendererStart >= 0 && rendererEnd > rendererStart ? 
 assert.match(index, /chapter-two-map-policy\.js[\s\S]*script\.js/, 'chapter-two data loads before the game');
 assert.match(index, /black-forest-corruption-policy\.js[\s\S]*blackstone-stronghold-policy\.js[\s\S]*black-forest-depths-policy\.js[\s\S]*chapter-two-map-policy\.js/);
 assert.match(index, /black-forest-entrance-policy\.js[\s\S]*chapter-two-map-policy\.js/);
-assert.match(index, /VER\. 0\.4\.3/);
+assert.match(index, /VER\. 0\.4\.4/);
 assert.match(index, /VER\. \d+\.\d+\.\d+/, 'the game exposes a semantic version');
 assert.match(script, /\.\.\.ChapterTwoMapPolicy\.MAPS/, 'chapter-two maps join the shared progression data');
 assert.match(script, /blackForestCorruption: BlackForestCorruptionPolicy\.normalizeState\(saved\.blackForestCorruption\)/);

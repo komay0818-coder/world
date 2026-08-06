@@ -18,7 +18,8 @@ assert.equal(policy.getMonster('black-forest-hunter').visualStyle, 'night-elf');
 assert.deepEqual(policy.getMonster('shadow-spider').tags, ['poison']);
 assert.equal(policy.getMonster('black-forest-wolf').image, 'assets/black-forest-wolf.png');
 assert.equal(policy.getMonster('corrupted-boar').image, 'assets/corrupted-boar.png');
-assert.ok(policy.MONSTERS.filter((monster) => !['black-forest-wolf', 'corrupted-boar'].includes(monster.id)).every((monster) => monster.image === null));
+assert.equal(policy.getMonster('shadow-spider').image, 'assets/shadow-spider.png');
+assert.ok(policy.MONSTERS.filter((monster) => !['black-forest-wolf', 'corrupted-boar', 'shadow-spider'].includes(monster.id)).every((monster) => monster.image === null));
 assert.ok(policy.MONSTERS.every((monster) => monster.stats === null && monster.dropTableId === null
   && monster.aiProfileId === null && monster.skillIds.length === 0 && monster.implemented === false));
 assert.equal(policy.getMonster('unknown'), null);

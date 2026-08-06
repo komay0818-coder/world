@@ -12,6 +12,6 @@ assert.match(script, /VillageUpgradePolicy\.grantMapDrops\(progress, currentMap\
 assert.doesNotMatch(crafting, /blackOre: Object\.freeze/, 'black ore has one canonical material definition in the drop policy');
 assert.match(index, /chapter-one-material-drop-policy\.js\?v=20260806-black-ore-drops-v2/, 'the material policy cache key changes');
 assert.match(index, /script\.js\?v=20260806-black-forest-core-v127/, 'the integration cache key changes');
-assert.match(index, /VER\. 0\.4\.3/, 'the game version includes the corrupted boar asset');
+assert.match(index, /VER\. 0\.4\.4/, 'the game version includes the shadow spider asset');
 
 console.log('black-ore-drop-integration: assertions passed');
