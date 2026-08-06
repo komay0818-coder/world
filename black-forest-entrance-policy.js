@@ -36,7 +36,7 @@
   }
 
   const MONSTERS = Object.freeze([
-    monster('black-forest-wolf', '黑森林野狼', 'normal', '黑森林最基礎怪物'),
+    monster('black-forest-wolf', '黑森林野狼', 'normal', '黑森林最基礎怪物', { image: 'assets/black-forest-wolf.png' }),
     monster('corrupted-boar', '腐化野豬', 'normal', '受到黑暗侵蝕的野豬'),
     monster('shadow-spider', '暗影蜘蛛', 'normal', '黑森林常見毒系怪物', { tags: Object.freeze(['poison']) }),
     monster('withered-tree-walker', '枯木行者', 'normal', '受到黑暗侵蝕而甦醒的古樹'),

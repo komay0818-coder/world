@@ -16,9 +16,10 @@ assert.equal(policy.getMonstersByRank('elite').length, 1);
 assert.equal(policy.getMonstersByRank('boss').length, 1);
 assert.equal(policy.getMonster('black-forest-hunter').visualStyle, 'night-elf');
 assert.deepEqual(policy.getMonster('shadow-spider').tags, ['poison']);
-assert.ok(policy.MONSTERS.every((monster) => monster.image === null && monster.stats === null
-  && monster.dropTableId === null && monster.aiProfileId === null && monster.skillIds.length === 0
-  && monster.implemented === false));
+assert.equal(policy.getMonster('black-forest-wolf').image, 'assets/black-forest-wolf.png');
+assert.ok(policy.MONSTERS.filter((monster) => monster.id !== 'black-forest-wolf').every((monster) => monster.image === null));
+assert.ok(policy.MONSTERS.every((monster) => monster.stats === null && monster.dropTableId === null
+  && monster.aiProfileId === null && monster.skillIds.length === 0 && monster.implemented === false));
 assert.equal(policy.getMonster('unknown'), null);
 
 console.log('black-forest-entrance-policy: assertions passed');
