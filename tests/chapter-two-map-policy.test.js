@@ -7,6 +7,9 @@ assert.equal(policy.CHAPTER.maxLevel, 30);
 assert.equal(policy.CHAPTER.previousMapId, 'plains-depths');
 assert.equal(policy.CHAPTER.firstMapId, 'black-forest-entrance');
 assert.equal(policy.CHAPTER.finalMapId, 'black-forest-depths');
+assert.equal(policy.getMap('black-forest-entrance').enemyPoolId, 'black-forest-entrance-enemies');
+assert.equal(policy.getMap('black-forest-entrance').bossId, 'forest-guardian');
+assert.equal(policy.getMap('black-forest-entrance').contentStatus, 'monster-foundation');
 
 assert.deepEqual(policy.MAPS.map((map) => map.name), [
   '黑森林入口',

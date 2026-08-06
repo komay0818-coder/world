@@ -49,6 +49,9 @@
 
   const MAPS = Object.freeze([
     map('black-forest-entrance', 1, '黑森林入口', {
+      contentStatus: 'monster-foundation',
+      enemyPoolId: 'black-forest-entrance-enemies',
+      bossId: 'forest-guardian',
       story: Object.freeze({ previousMapId: 'plains-depths', nextMapId: 'black-forest-trail', objectiveId: null })
     }),
     map('black-forest-trail', 2, '黑森林小徑', {
