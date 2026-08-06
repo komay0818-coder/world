@@ -18,6 +18,8 @@ assert.deepEqual(policy.MAPS.map((map) => map.name), [
 ]);
 assert.deepEqual(policy.MAPS.map((map) => map.order), [1, 2, 3, 4, 5, 6]);
 assert.ok(policy.MAPS.every((map) => map.chapter === 2 && map.regionOf === 'black-forest'));
+assert.equal(policy.CHAPTER.corruptionPolicyId, 'black-forest-corruption');
+assert.equal(new Set(policy.MAPS.map((map) => map.materialTableId)).size, 6);
 assert.ok(policy.MAPS.every((map) => map.implemented === false), 'chapter-two combat content remains disabled');
 assert.ok(policy.MAPS.every((map) => 'enemyPoolId' in map && 'bossId' in map && 'dropTableId' in map
   && 'materialTableId' in map && 'eventTableId' in map && Array.isArray(map.environmentEffects)),
@@ -25,12 +27,18 @@ assert.ok(policy.MAPS.every((map) => 'enemyPoolId' in map && 'bossId' in map && 
 
 const stronghold = policy.getMap('blackstone-stronghold');
 assert.equal(stronghold.dungeon, true);
+assert.equal(stronghold.gameplayType, 'outpost-siege');
+assert.equal(stronghold.objectiveCount, 5);
 assert.deepEqual(stronghold.enemyFactionIds, ['blackstone-bandits', 'goblins']);
 assert.equal(policy.getDungeon('blackstone-stronghold').primaryFaction, 'blackstone-bandits');
 assert.equal(policy.getDungeon('blackstone-stronghold').alliedFaction, 'goblins');
 assert.equal(policy.getDungeon('blackstone-stronghold').waveTableId, null);
+assert.equal(policy.getDungeon('blackstone-stronghold').gameplayType, 'outpost-siege');
+assert.equal(policy.getDungeon('blackstone-stronghold').encounterPolicyId, 'blackstone-stronghold');
 assert.equal(policy.getDungeon('blackstone-stronghold').finalBossId, null);
 assert.equal(policy.canEnter('blackstone-stronghold'), false, 'placeholder dungeon cannot be entered');
 assert.equal(policy.getMap('black-forest-depths').isFinalMap, true);
+assert.deepEqual(policy.getMap('black-forest-depths').environmentEffects, ['dense-fog']);
+assert.equal(policy.getMap('black-forest-depths').bossAuraPolicyId, 'black-forest-depths-boss-aura');
 
 console.log('chapter-two-map-policy: assertions passed');

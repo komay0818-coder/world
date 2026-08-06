@@ -16,6 +16,7 @@
     finalMapId: 'black-forest-depths',
     primaryFaction: 'blackstone-bandits',
     alliedFaction: 'goblins',
+    corruptionPolicyId: 'black-forest-corruption',
     background: 'assets/black-forest-background.png',
     implemented: false,
     summary: '追查平原深處的黑石山賊，深入其位於黑森林的真正據點。'
@@ -38,7 +39,7 @@
       enemyPoolId: null,
       bossId: null,
       dropTableId: null,
-      materialTableId: null,
+      materialTableId: `${id}-purification-material`,
       eventTableId: null,
       environmentEffects: Object.freeze([]),
       story: Object.freeze({ previousMapId: null, nextMapId: null, objectiveId: null }),
@@ -58,6 +59,8 @@
     }),
     map('blackstone-stronghold', 4, '黑石據點', {
       dungeon: true,
+      gameplayType: 'outpost-siege',
+      objectiveCount: 5,
       enemyFactionIds: Object.freeze(['blackstone-bandits', 'goblins']),
       story: Object.freeze({ previousMapId: 'spider-nest', nextMapId: 'forest-altar', objectiveId: null })
     }),
@@ -66,6 +69,8 @@
     }),
     map('black-forest-depths', 6, '黑森林深處', {
       isFinalMap: true,
+      environmentEffects: Object.freeze(['dense-fog']),
+      bossAuraPolicyId: 'black-forest-depths-boss-aura',
       story: Object.freeze({ previousMapId: 'forest-altar', nextMapId: null, objectiveId: null })
     })
   ]);
@@ -79,6 +84,9 @@
       contentStatus: 'planned',
       primaryFaction: 'blackstone-bandits',
       alliedFaction: 'goblins',
+      gameplayType: 'outpost-siege',
+      objectiveCount: 5,
+      encounterPolicyId: 'blackstone-stronghold',
       waveTableId: null,
       specialEventTableId: null,
       bossMechanicId: null,

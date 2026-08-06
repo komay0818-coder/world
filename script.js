@@ -800,6 +800,7 @@ function getProgress() {
     magicCrystals: 0,
     skillBooks: {},
     skillLevels: {},
+    blackForestCorruption: BlackForestCorruptionPolicy.normalizeState(null),
     unlockedChapter: 1,
     selectedMapId: 'beginner-plains',
     inventory: [],
@@ -810,6 +811,7 @@ function getProgress() {
     equipment: { ...emptyEquipment(), ...(saved.equipment || {}) },
     collection: saved.collection && typeof saved.collection === 'object' ? saved.collection : {},
     skillBooks: saved.skillBooks && typeof saved.skillBooks === 'object' ? saved.skillBooks : {},
+    blackForestCorruption: BlackForestCorruptionPolicy.normalizeState(saved.blackForestCorruption),
     crafting: CraftingPolicy.normalizeCraftingState(saved.crafting),
     village: VillagePolicy.normalizeVillageData(saved.village)
   };
@@ -1660,7 +1662,7 @@ function getCharacterStats(level, progress = getProgress(), character = JSON.par
   const hunterMasteryTier = hunterMasteryUnlocked ? getPassiveSkillUpgradeLevel(progress, 'hunter', '弓術專精') : 0;
   const hunterWeaponMultiplier = hunterMasteryUnlocked ? 1 + (10 + (hunterMasteryTier - 1) * 2) / 100 : 1;
   const equippedWeapon = progress.equipment?.weapon;
-  return {
+  const stats = {
     hp: Math.round((base.hp + race.hp + (level - 1) * 12 + equipment.hp + equipment.maxHp + collection.hp) * (1 + equipment.maxHpPercent) * humanMultiplier),
     mana: ['warrior', 'assassin'].includes(character?.job) ? 0 : Math.round((base.mana + race.mana + (level - 1) * 6 + equipment.mana + collection.mana) * humanMultiplier),
     attack: Math.round((base.attack + race.attack + (level - 1) + equipment.attack + equipment.attackFlat + equipment.strength + equipment.intelligence + collection.attack) * humanMultiplier * hunterWeaponMultiplier),
@@ -1678,6 +1680,9 @@ function getCharacterStats(level, progress = getProgress(), character = JSON.par
     movementSpeedBonus: Math.max(0, equipment.movementSpeedBonus),
     dotMultiplier: character?.race === 'undead' ? 1.20 : 1
   };
+  const activeMap = getActiveMap(progress);
+  const corruptedStats = BlackForestCorruptionPolicy.applyCombatStats(stats, progress.blackForestCorruption, activeMap.chapter === 2);
+  return { ...corruptedStats, accuracy: BlackForestDepthsPolicy.applyDenseFogAccuracy(corruptedStats.accuracy, activeMap.id) };
 }
 
 function getMaxHp(level, progress = getProgress(), character = JSON.parse(localStorage.getItem('stardust-character') || 'null')) {
@@ -2077,6 +2082,7 @@ function selectAdventureMap(mapId) {
   const progress = getProgress();
   const map = mapProgression.find((item) => item.id === mapId && item.implemented);
   if (!map || (!ChapterOneLevelPolicy.canEnterMap(map.id) && progress.level < map.min)) return;
+  if (map.chapter === 2) BlackForestCorruptionPolicy.enterChapter(progress);
   if (map.dungeon) {
     if (map.ticketItemId) {
       if (getInventoryItemQuantity(progress, map.ticketItemId) < 1) { showToast('需要哥布林營地地圖才能進入。'); return; }
@@ -3322,11 +3328,26 @@ function processPartyMemberAttacks(now = Date.now()) {
   }
 }
 
+function processBlackForestCorruption(now = Date.now()) {
+  const previousTick = Number(battle.lastCorruptionTickAt) || now;
+  battle.lastCorruptionTickAt = now;
+  const progress = getProgress();
+  if (getActiveMap(progress).chapter !== 2) return;
+  const elapsedSeconds = Math.max(0, now - previousTick) / 1000;
+  (battle.partyMembers || []).forEach((member) => {
+    if (!member.alive || member.currentHp <= 0) return;
+    const hpLoss = BlackForestCorruptionPolicy.getHpLoss(member.maxHp, elapsedSeconds, progress.blackForestCorruption);
+    member.currentHp = Math.max(0, member.currentHp - hpLoss);
+    if (member.currentHp <= 0) defeatPartyMember(member, now);
+  });
+}
+
 function battleTick() {
   if (!fighting) return;
   processEnemyRespawns();
   processEnemyDots();
   const now = Date.now();
+  processBlackForestCorruption(now);
   reviveDefeatedTeammates(now);
   (battle.partyMembers || []).forEach((member) => updatePartyMemberResource(member, now));
   processPartyMemberAttacks(now);
@@ -3819,7 +3840,7 @@ function openBattle() {
   const sessionId = ++battleSessionSequence;
   const partyMembers = buildBattlePartyMembers(battleStart);
   const mainMember = partyMembers.find((member) => member.isMain) || partyMembers[0];
-  battle = { enemyTypes, enemyLevels, enemyHps, partyMembers, playerHp: mainMember?.currentHp || getMaxHp(progress.level, progress), playerMana: mainMember?.resourceCurrent || 0, playerArrows: mainMember?.resourceType === 'arrows' ? mainMember.resourceCurrent : 0, playerShield: 0, playerStunnedUntil: 0, playerBleed: null, manaExhausted: false, playerAttackCharge: 0, hunterAttackCount: 0, lastManaRegenAt: battleStart, lastResourceUpdatedAt: battleStart, lastArrowRecoveryAt: battleStart, enemyNextAttackAt: createEnemyAttackSchedule(enemyTypes, battleStart, currentMap.id, enemyLevels), enemyBoarEnraged: enemyTypes.map(() => false), blackstoneRoarUntil: 0, globalSkillReadyAt: 0, undeadRevived: false, skillCooldowns: {}, enemyRespawns: enemyTypes.map(() => null), enemySpawnedAt: enemyTypes.map((_, index) => battleStart + index), enemyDots: enemyTypes.map(() => []), monsterMoveSpeed: 200, targetIndexes: [], enemyDamages: enemyTypes.map(() => []), damageTimers: [], rewardedEnemyIndexes: new Set(), isDungeon, dungeonId: isDungeon ? currentMap.id : null, dungeonWave: isDungeon ? 1 : 0, dungeonComplete: false, waveTransitioning: false, goblinScoutSummons: 0 };
+  battle = { enemyTypes, enemyLevels, enemyHps, partyMembers, playerHp: mainMember?.currentHp || getMaxHp(progress.level, progress), playerMana: mainMember?.resourceCurrent || 0, playerArrows: mainMember?.resourceType === 'arrows' ? mainMember.resourceCurrent : 0, playerShield: 0, playerStunnedUntil: 0, playerBleed: null, manaExhausted: false, playerAttackCharge: 0, hunterAttackCount: 0, lastManaRegenAt: battleStart, lastResourceUpdatedAt: battleStart, lastArrowRecoveryAt: battleStart, lastCorruptionTickAt: battleStart, enemyNextAttackAt: createEnemyAttackSchedule(enemyTypes, battleStart, currentMap.id, enemyLevels), enemyBoarEnraged: enemyTypes.map(() => false), blackstoneRoarUntil: 0, globalSkillReadyAt: 0, undeadRevived: false, skillCooldowns: {}, enemyRespawns: enemyTypes.map(() => null), enemySpawnedAt: enemyTypes.map((_, index) => battleStart + index), enemyDots: enemyTypes.map(() => []), monsterMoveSpeed: 200, targetIndexes: [], enemyDamages: enemyTypes.map(() => []), damageTimers: [], rewardedEnemyIndexes: new Set(), isDungeon, dungeonId: isDungeon ? currentMap.id : null, dungeonWave: isDungeon ? 1 : 0, dungeonComplete: false, waveTransitioning: false, goblinScoutSummons: 0 };
   battle.sessionId = sessionId;
   clearBattleLog();
   if (pendingOfflineReport) {
