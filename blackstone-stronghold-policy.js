@@ -40,7 +40,7 @@
 
   const MONSTERS = Object.freeze([
     monster('blackstone-guard', '黑石守衛', 'normal', 'human', '重甲前排', { image: 'assets/blackstone-guard.png' }),
-    monster('blackstone-crossbowman', '黑石弩手', 'normal', 'goblin', '遠程輸出', { faction: 'blackstone-goblins' }),
+    monster('blackstone-crossbowman', '黑石弩手', 'normal', 'goblin', '遠程輸出', { image: 'assets/blackstone-crossbowman.png', faction: 'blackstone-goblins' }),
     monster('blackstone-berserker', '黑石狂戰士', 'normal', 'orc', '雙斧近戰'),
     monster('blackstone-warhound', '黑石戰犬', 'normal', 'beast', '高速近戰', { faction: 'blackstone-beasts' }),
     monster('blackstone-lion-guard', '黑石獅衛', 'elite', 'lionkin', '高攻擊近戰'),
