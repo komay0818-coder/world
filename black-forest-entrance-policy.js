@@ -39,7 +39,7 @@
     monster('black-forest-wolf', '黑森林野狼', 'normal', '黑森林最基礎怪物', { image: 'assets/black-forest-wolf.png' }),
     monster('corrupted-boar', '腐化野豬', 'normal', '受到黑暗侵蝕的野豬', { image: 'assets/corrupted-boar.png' }),
     monster('shadow-spider', '暗影蜘蛛', 'normal', '黑森林常見毒系怪物', { image: 'assets/shadow-spider.png', tags: Object.freeze(['poison']) }),
-    monster('withered-tree-walker', '枯木行者', 'normal', '受到黑暗侵蝕而甦醒的古樹'),
+    monster('withered-tree-walker', '枯木行者', 'normal', '受到黑暗侵蝕而甦醒的古樹', { image: 'assets/withered-tree-walker.png' }),
     monster('black-forest-hunter', '黑森林獵人', 'elite', '黑森林中的菁英敵人', { visualStyle: 'night-elf' }),
     monster('forest-guardian', '森林守護者', 'boss', '黑森林入口 Boss')
   ]);
