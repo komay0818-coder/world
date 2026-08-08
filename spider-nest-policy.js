@@ -50,7 +50,7 @@
   const MONSTERS = Object.freeze([
     monster('spider-nest-blackstone-poison-spider', '黑石毒蜘蛛', 'normal', '近戰毒系怪物', { attackProfile: 'melee-poison', skillConcepts: Object.freeze(['poison-basic-attacks']) }),
     monster('venom-spitter-spider', '噴毒蜘蛛', 'normal', '遠程持續傷害怪物', { image: 'assets/venom-spitter-spider.png', attackProfile: 'ranged-poison', skillConcepts: Object.freeze(['venom-spit', 'poison-dot']) }),
-    monster('web-weaver', '蛛網編織者', 'normal', '蛛絲控制型怪物', { attackProfile: 'ranged-control', skillConcepts: Object.freeze(['web-attack-speed-slow']) }),
+    monster('web-weaver', '蛛網編織者', 'normal', '蛛絲控制型怪物', { image: 'assets/web-weaver.png', attackProfile: 'ranged-control', skillConcepts: Object.freeze(['web-attack-speed-slow']) }),
     monster('blackstone-venom-hunter', '黑石毒獵手', 'normal', '使用淬毒弓箭的哥布林遠程怪', { faction: 'blackstone-goblins', race: 'goblin', attackProfile: 'ranged-poison', skillConcepts: Object.freeze(['poisoned-arrows']) }),
     monster('spider-nest-blackstone-beastmaster', '黑石訓獸師', 'elite', '操控並強化蜘蛛的毒液菁英', { faction: 'blackstone-bandits', attackProfile: 'beast-support-poison', skillConcepts: Object.freeze(['spider-command', 'venom-attack']) }),
     monster('blackstone-venomblade-assassin', '黑石毒刃刺客', 'elite', '雙持毒刃的高速爆發近戰菁英', { faction: 'blackstone-bandits', race: 'orc', attackProfile: 'melee-burst-poison', skillConcepts: Object.freeze(['poisoned-blades', 'high-speed-dash']) }),

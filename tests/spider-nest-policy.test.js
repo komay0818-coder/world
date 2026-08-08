@@ -19,9 +19,10 @@ assert.equal(policy.getMonster('blackstone-venom-hunter').race, 'goblin');
 assert.equal(policy.getMonster('blackstone-venomblade-assassin').race, 'orc');
 assert.equal(policy.getMonster('giant-spider').bodyProfile, 'giant-bloated-abdomen');
 assert.equal(policy.getMonster('venom-spitter-spider').image, 'assets/venom-spitter-spider.png');
+assert.equal(policy.getMonster('web-weaver').image, 'assets/web-weaver.png');
 assert.ok(policy.MONSTERS.every((monster) => monster.level === 19 && monster.stats === null
   && monster.dropTableId === null && monster.aiProfileId === null && monster.skillIds.length === 0 && monster.implemented === false));
-assert.ok(policy.MONSTERS.filter((monster) => monster.id !== 'venom-spitter-spider').every((monster) => monster.image === null));
+assert.ok(policy.MONSTERS.filter((monster) => !['venom-spitter-spider', 'web-weaver'].includes(monster.id)).every((monster) => monster.image === null));
 assert.equal(policy.STORY.previousMapId, 'black-forest-trail');
 assert.equal(policy.STORY.nextMapId, 'blackstone-stronghold');
 assert.equal(policy.STORY.completionObjectiveId, 'defeat-giant-spider');
@@ -34,5 +35,8 @@ assert.equal(background[25], 2, 'the Spider Nest background uses RGB color');
 const venomSpitter = fs.readFileSync(path.join(__dirname, '..', policy.getMonster('venom-spitter-spider').image));
 assert.equal(venomSpitter.subarray(1, 4).toString(), 'PNG', 'the venom spitter spider is a PNG asset');
 assert.equal(venomSpitter[25], 6, 'the venom spitter spider uses RGBA color with transparency');
+const webWeaver = fs.readFileSync(path.join(__dirname, '..', policy.getMonster('web-weaver').image));
+assert.equal(webWeaver.subarray(1, 4).toString(), 'PNG', 'the web weaver is a PNG asset');
+assert.equal(webWeaver[25], 6, 'the web weaver uses RGBA color with transparency');
 
 console.log('spider-nest-policy: assertions passed');
