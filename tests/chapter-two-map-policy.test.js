@@ -1,4 +1,6 @@
 const assert = require('node:assert/strict');
+const fs = require('node:fs');
+const path = require('node:path');
 const policy = require('../chapter-two-map-policy.js');
 
 assert.equal(policy.CHAPTER.chapter, 2);
@@ -10,6 +12,9 @@ assert.equal(policy.CHAPTER.finalMapId, 'black-forest-depths');
 assert.equal(policy.getMap('black-forest-entrance').enemyPoolId, 'black-forest-entrance-enemies');
 assert.equal(policy.getMap('black-forest-entrance').bossId, 'forest-guardian');
 assert.equal(policy.getMap('black-forest-entrance').contentStatus, 'combat-ready');
+assert.equal(policy.getMap('black-forest-entrance').background, 'assets/black-forest-entrance-background.png');
+const entranceBackground = fs.readFileSync(path.join(__dirname, '..', policy.getMap('black-forest-entrance').background));
+assert.equal(entranceBackground.subarray(1, 4).toString(), 'PNG', 'the entrance background is a PNG asset');
 
 assert.deepEqual(policy.MAPS.map((map) => map.name), [
   '黑森林入口',

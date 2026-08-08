@@ -11,6 +11,7 @@
     order: 1,
     name: '黑森林入口',
     theme: 'corrupted-forest-creatures',
+    background: 'assets/black-forest-entrance-background.png',
     enemyPoolId: 'black-forest-entrance-enemies',
     bossId: 'forest-guardian',
     implemented: false,

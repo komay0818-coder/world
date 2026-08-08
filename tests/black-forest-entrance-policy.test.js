@@ -8,6 +8,7 @@ assert.equal(policy.MAP.chapter, 2);
 assert.equal(policy.MAP.order, 1);
 assert.equal(policy.MAP.enemyPoolId, 'black-forest-entrance-enemies');
 assert.equal(policy.MAP.bossId, 'forest-guardian');
+assert.equal(policy.MAP.background, 'assets/black-forest-entrance-background.png');
 assert.equal(policy.MAP.implemented, false);
 assert.equal(policy.MAP.contentStatus, 'combat-ready');
 assert.deepEqual(policy.MONSTERS.map((monster) => monster.name), [
