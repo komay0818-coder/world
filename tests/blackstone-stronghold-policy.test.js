@@ -15,8 +15,9 @@ assert.equal(policy.getMonstersByRank('boss').length, 1);
 assert.equal(policy.getMonster('blackstone-warlord').name, '黑石督軍');
 assert.equal(policy.getMonster('blackstone-guard').image, 'assets/blackstone-guard.png');
 assert.equal(policy.getMonster('blackstone-crossbowman').image, 'assets/blackstone-crossbowman.png');
+assert.equal(policy.getMonster('blackstone-berserker').image, 'assets/blackstone-berserker.png');
 assert.equal(policy.getMonster('unknown'), null);
-assert.ok(policy.MONSTERS.filter((monster) => !['blackstone-guard', 'blackstone-crossbowman'].includes(monster.id)).every((monster) => monster.image === null));
+assert.ok(policy.MONSTERS.filter((monster) => !['blackstone-guard', 'blackstone-crossbowman', 'blackstone-berserker'].includes(monster.id)).every((monster) => monster.image === null));
 assert.ok(policy.MONSTERS.every((monster) => monster.stats === null
   && monster.dropTableId === null && monster.aiProfileId === null && monster.skillIds.length === 0 && monster.implemented === false));
 const fs = require('node:fs');
@@ -27,6 +28,9 @@ assert.equal(guard[25], 6, 'the Blackstone guard uses RGBA color with transparen
 const crossbowman = fs.readFileSync(path.join(__dirname, '..', policy.getMonster('blackstone-crossbowman').image));
 assert.equal(crossbowman.subarray(1, 4).toString(), 'PNG', 'the Blackstone crossbowman is a PNG asset');
 assert.equal(crossbowman[25], 6, 'the Blackstone crossbowman uses RGBA color with transparency');
+const berserker = fs.readFileSync(path.join(__dirname, '..', policy.getMonster('blackstone-berserker').image));
+assert.equal(berserker.subarray(1, 4).toString(), 'PNG', 'the Blackstone berserker is a PNG asset');
+assert.equal(berserker[25], 6, 'the Blackstone berserker uses RGBA color with transparency');
 assert.equal(policy.rollRequiredKills(() => 0), 10);
 assert.equal(policy.rollRequiredKills(() => .999999), 70);
 let state = policy.createState(() => 0);
