@@ -23,9 +23,11 @@ assert.equal(policy.getMonster('web-weaver').image, 'assets/web-weaver.png');
 assert.equal(policy.getMonster('blackstone-venom-hunter').image, 'assets/blackstone-venom-hunter.png');
 assert.equal(policy.getMonster('blackstone-venomblade-assassin').image, 'assets/blackstone-venomblade-assassin.png');
 assert.equal(policy.getMonster('giant-spider').image, 'assets/giant-spider.png');
+assert.equal(policy.getMonster('spider-nest-blackstone-poison-spider').image, 'assets/blackstone-poison-spider.png');
+assert.equal(policy.getMonster('spider-nest-blackstone-beastmaster').image, 'assets/blackstone-beastmaster.png');
 assert.ok(policy.MONSTERS.every((monster) => monster.level === 19 && monster.stats === null
   && monster.dropTableId === null && monster.aiProfileId === null && monster.skillIds.length === 0 && monster.implemented === false));
-assert.ok(policy.MONSTERS.filter((monster) => !['venom-spitter-spider', 'web-weaver', 'blackstone-venom-hunter', 'blackstone-venomblade-assassin', 'giant-spider'].includes(monster.id)).every((monster) => monster.image === null));
+assert.ok(policy.MONSTERS.every((monster) => typeof monster.image === 'string' && monster.image.startsWith('assets/')));
 assert.equal(policy.STORY.previousMapId, 'black-forest-trail');
 assert.equal(policy.STORY.nextMapId, 'blackstone-stronghold');
 assert.equal(policy.STORY.completionObjectiveId, 'defeat-giant-spider');
