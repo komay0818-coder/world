@@ -74,7 +74,19 @@
       })
     }),
     map('spider-nest', 3, '蜘蛛巢穴', {
-      story: Object.freeze({ previousMapId: 'black-forest-trail', nextMapId: 'blackstone-stronghold', objectiveId: null })
+      min: 19,
+      max: 19,
+      contentStatus: 'monster-foundation',
+      enemyPoolId: 'spider-nest-enemies',
+      bossId: 'giant-spider',
+      primaryFaction: 'blackstone-beasts',
+      story: Object.freeze({
+        premise: '黑石勢力在森林深處建立蜘蛛培育巢穴，利用毒液、蛛絲與圈養蜘蛛擴張軍備。',
+        discoveries: Object.freeze(['blackstone-spider-breeding', 'venom-weapon-production', 'spider-silk-harvesting']),
+        previousMapId: 'black-forest-trail',
+        nextMapId: 'blackstone-stronghold',
+        completionObjectiveId: 'defeat-giant-spider'
+      })
     }),
     map('blackstone-stronghold', 4, '黑石據點', {
       dungeon: true,

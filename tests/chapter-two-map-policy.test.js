@@ -23,6 +23,12 @@ assert.equal(policy.getMap('black-forest-trail').implemented, true);
 assert.equal(policy.getMap('black-forest-trail').contentStatus, 'combat-ready');
 assert.equal(policy.getMap('black-forest-trail').background, 'assets/black-forest-trail-background.png');
 assert.equal(policy.getMap('black-forest-trail').story.completionClueId, 'spider-nest-route-clue');
+assert.equal(policy.getMap('spider-nest').min, 19);
+assert.equal(policy.getMap('spider-nest').max, 19);
+assert.equal(policy.getMap('spider-nest').enemyPoolId, 'spider-nest-enemies');
+assert.equal(policy.getMap('spider-nest').bossId, 'giant-spider');
+assert.equal(policy.getMap('spider-nest').contentStatus, 'monster-foundation');
+assert.equal(policy.getMap('spider-nest').story.completionObjectiveId, 'defeat-giant-spider');
 
 assert.deepEqual(policy.MAPS.map((map) => map.name), [
   '黑森林入口',
