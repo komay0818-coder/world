@@ -56,7 +56,20 @@
       story: Object.freeze({ previousMapId: 'plains-depths', nextMapId: 'black-forest-trail', objectiveId: null })
     }),
     map('black-forest-trail', 2, '黑森林小徑', {
-      story: Object.freeze({ previousMapId: 'black-forest-entrance', nextMapId: 'spider-nest', objectiveId: null })
+      min: 17,
+      max: 17,
+      contentStatus: 'monster-foundation',
+      enemyPoolId: 'black-forest-trail-enemies',
+      bossId: 'blackstone-centurion',
+      primaryFaction: 'blackstone-bandits',
+      story: Object.freeze({
+        premise: '黑石山賊已深入黑森林，建立巡邏路線與臨時據點，持續將物資運送至森林深處。',
+        discoveries: Object.freeze(['blackstone-invasion', 'patrol-and-supply-route', 'poison-spider-husbandry']),
+        previousMapId: 'black-forest-entrance',
+        nextMapId: 'spider-nest',
+        completionObjectiveId: 'defeat-blackstone-centurion',
+        completionClueId: 'spider-nest-route-clue'
+      })
     }),
     map('spider-nest', 3, '蜘蛛巢穴', {
       story: Object.freeze({ previousMapId: 'black-forest-trail', nextMapId: 'blackstone-stronghold', objectiveId: null })

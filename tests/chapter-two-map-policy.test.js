@@ -15,6 +15,12 @@ assert.equal(policy.getMap('black-forest-entrance').contentStatus, 'combat-ready
 assert.equal(policy.getMap('black-forest-entrance').background, 'assets/black-forest-entrance-background.png');
 const entranceBackground = fs.readFileSync(path.join(__dirname, '..', policy.getMap('black-forest-entrance').background));
 assert.equal(entranceBackground.subarray(1, 4).toString(), 'PNG', 'the entrance background is a PNG asset');
+assert.equal(policy.getMap('black-forest-trail').min, 17);
+assert.equal(policy.getMap('black-forest-trail').max, 17);
+assert.equal(policy.getMap('black-forest-trail').enemyPoolId, 'black-forest-trail-enemies');
+assert.equal(policy.getMap('black-forest-trail').bossId, 'blackstone-centurion');
+assert.equal(policy.getMap('black-forest-trail').contentStatus, 'monster-foundation');
+assert.equal(policy.getMap('black-forest-trail').story.completionClueId, 'spider-nest-route-clue');
 
 assert.deepEqual(policy.MAPS.map((map) => map.name), [
   '黑森林入口',
