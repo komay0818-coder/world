@@ -94,6 +94,8 @@
       dungeon: true,
       gameplayType: 'outpost-siege',
       objectiveCount: 5,
+      enemyPoolId: 'blackstone-stronghold-enemies',
+      bossId: 'blackstone-warlord',
       enemyFactionIds: Object.freeze(['blackstone-bandits', 'goblins']),
       story: Object.freeze({ previousMapId: 'spider-nest', nextMapId: 'forest-altar', objectiveId: null })
     }),
@@ -114,7 +116,7 @@
       chapter: 2,
       name: '黑石據點',
       implemented: false,
-      contentStatus: 'planned',
+      contentStatus: 'monster-roster',
       primaryFaction: 'blackstone-bandits',
       alliedFaction: 'goblins',
       gameplayType: 'outpost-siege',
@@ -123,7 +125,7 @@
       waveTableId: null,
       specialEventTableId: null,
       bossMechanicId: null,
-      finalBossId: null,
+      finalBossId: 'blackstone-warlord',
       entryItemId: null,
       rewardTableId: null,
       environmentEffects: Object.freeze([])

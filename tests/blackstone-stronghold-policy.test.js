@@ -5,6 +5,17 @@ assert.equal(policy.RULES.gameplayType, 'outpost-siege');
 assert.equal(policy.RULES.objectiveCount, 5);
 assert.equal(policy.RULES.outpostDamageReduction, null);
 assert.equal(policy.RULES.outpostShield, null);
+assert.deepEqual(policy.MONSTERS.map((monster) => monster.name), ['黑石守衛', '黑石弩手', '黑石狂戰士', '黑石戰犬', '黑石獅衛', '黑石蠻角勇士', '黑石督軍']);
+assert.deepEqual(policy.MONSTERS.map((monster) => monster.rank), ['normal', 'normal', 'normal', 'normal', 'elite', 'elite', 'boss']);
+assert.deepEqual(policy.MONSTERS.map((monster) => monster.race), ['human', 'goblin', 'orc', 'beast', 'lionkin', 'bullkin', 'orc']);
+assert.deepEqual(policy.MONSTERS.map((monster) => monster.role), ['重甲前排', '遠程輸出', '雙斧近戰', '高速近戰', '高攻擊近戰', '高血量／重擊', '據點指揮官']);
+assert.equal(policy.getMonstersByRank('normal').length, 4);
+assert.equal(policy.getMonstersByRank('elite').length, 2);
+assert.equal(policy.getMonstersByRank('boss').length, 1);
+assert.equal(policy.getMonster('blackstone-warlord').name, '黑石督軍');
+assert.equal(policy.getMonster('unknown'), null);
+assert.ok(policy.MONSTERS.every((monster) => monster.image === null && monster.stats === null
+  && monster.dropTableId === null && monster.aiProfileId === null && monster.skillIds.length === 0 && monster.implemented === false));
 assert.equal(policy.rollRequiredKills(() => 0), 10);
 assert.equal(policy.rollRequiredKills(() => .999999), 70);
 let state = policy.createState(() => 0);

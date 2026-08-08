@@ -18,6 +18,40 @@
     enrageDurationMs: 15000
   });
 
+  function monster(id, name, rank, race, role, options = {}) {
+    return Object.freeze({
+      id,
+      name,
+      rank,
+      race,
+      role,
+      chapter: 2,
+      mapId: RULES.dungeonId,
+      faction: 'blackstone-bandits',
+      image: null,
+      stats: null,
+      dropTableId: null,
+      skillIds: Object.freeze([]),
+      aiProfileId: null,
+      implemented: false,
+      ...options
+    });
+  }
+
+  const MONSTERS = Object.freeze([
+    monster('blackstone-guard', '黑石守衛', 'normal', 'human', '重甲前排'),
+    monster('blackstone-crossbowman', '黑石弩手', 'normal', 'goblin', '遠程輸出', { faction: 'blackstone-goblins' }),
+    monster('blackstone-berserker', '黑石狂戰士', 'normal', 'orc', '雙斧近戰'),
+    monster('blackstone-warhound', '黑石戰犬', 'normal', 'beast', '高速近戰', { faction: 'blackstone-beasts' }),
+    monster('blackstone-lion-guard', '黑石獅衛', 'elite', 'lionkin', '高攻擊近戰'),
+    monster('blackstone-bullhorn-warrior', '黑石蠻角勇士', 'elite', 'bullkin', '高血量／重擊'),
+    monster('blackstone-warlord', '黑石督軍', 'boss', 'orc', '據點指揮官')
+  ]);
+
+  const MONSTER_BY_ID = new Map(MONSTERS.map((entry) => [entry.id, entry]));
+  function getMonster(monsterId) { return MONSTER_BY_ID.get(monsterId) || null; }
+  function getMonstersByRank(rank) { return MONSTERS.filter((entry) => entry.rank === rank); }
+
   function rollRequiredKills(random = Math.random) {
     const roll = Math.max(0, Math.min(.999999, Number(random()) || 0));
     return RULES.minKillsPerOutpost + Math.floor(roll * (RULES.maxKillsPerOutpost - RULES.minKillsPerOutpost + 1));
@@ -66,5 +100,5 @@
     return { active, attackBonus: active ? RULES.enrageAttackBonus : 0, attackSpeedBonus: active ? RULES.enrageAttackSpeedBonus : 0, remainingMs: active ? state.enragedUntil - now : 0 };
   }
 
-  return Object.freeze({ RULES, rollRequiredKills, createState, normalizeState, recordMonsterKill, destroyOutpost, getEnrage });
+  return Object.freeze({ RULES, MONSTERS, getMonster, getMonstersByRank, rollRequiredKills, createState, normalizeState, recordMonsterKill, destroyOutpost, getEnrage });
 });
