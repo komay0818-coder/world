@@ -5,7 +5,7 @@ assert.equal(policy.RULES.gameplayType, 'outpost-siege');
 assert.equal(policy.RULES.objectiveCount, 5);
 assert.equal(policy.RULES.outpostDamageReduction, null);
 assert.equal(policy.RULES.outpostShield, null);
-assert.deepEqual(policy.OUTPOSTS.map((outpost) => outpost.name), ['補給站', '兵營', '軍械庫']);
+assert.deepEqual(policy.OUTPOSTS.map((outpost) => outpost.name), ['補給站', '兵營', '軍械庫', '哨塔']);
 assert.deepEqual(policy.getOutpost('blackstone-supply-station'), {
   id: 'blackstone-supply-station', name: '補給站', image: 'assets/blackstone-supply-station.png', effect: null, implemented: false
 });
@@ -14,6 +14,9 @@ assert.deepEqual(policy.getOutpost('blackstone-barracks'), {
 });
 assert.deepEqual(policy.getOutpost('blackstone-armory'), {
   id: 'blackstone-armory', name: '軍械庫', image: 'assets/blackstone-armory.png', effect: null, implemented: false
+});
+assert.deepEqual(policy.getOutpost('blackstone-watchtower'), {
+  id: 'blackstone-watchtower', name: '哨塔', image: 'assets/blackstone-watchtower.png', effect: null, implemented: false
 });
 assert.equal(policy.getOutpost('unknown'), null);
 assert.deepEqual(policy.MONSTERS.map((monster) => monster.name), ['黑石守衛', '黑石弩手', '黑石狂戰士', '黑石戰犬', '黑石獅衛', '黑石蠻角勇士', '黑石督軍']);
@@ -67,6 +70,9 @@ assert.equal(barracks[25], 6, 'the Blackstone barracks uses RGBA color with tran
 const armory = fs.readFileSync(path.join(__dirname, '..', policy.getOutpost('blackstone-armory').image));
 assert.equal(armory.subarray(1, 4).toString(), 'PNG', 'the Blackstone armory is a PNG asset');
 assert.equal(armory[25], 6, 'the Blackstone armory uses RGBA color with transparency');
+const watchtower = fs.readFileSync(path.join(__dirname, '..', policy.getOutpost('blackstone-watchtower').image));
+assert.equal(watchtower.subarray(1, 4).toString(), 'PNG', 'the Blackstone watchtower is a PNG asset');
+assert.equal(watchtower[25], 6, 'the Blackstone watchtower uses RGBA color with transparency');
 assert.equal(policy.rollRequiredKills(() => 0), 10);
 assert.equal(policy.rollRequiredKills(() => .999999), 70);
 let state = policy.createState(() => 0);
