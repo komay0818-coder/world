@@ -53,7 +53,7 @@
     monster('web-weaver', '蛛網編織者', 'normal', '蛛絲控制型怪物', { image: 'assets/web-weaver.png', attackProfile: 'ranged-control', skillConcepts: Object.freeze(['web-attack-speed-slow']) }),
     monster('blackstone-venom-hunter', '黑石毒獵手', 'normal', '使用淬毒弓箭的哥布林遠程怪', { image: 'assets/blackstone-venom-hunter.png', faction: 'blackstone-goblins', race: 'goblin', attackProfile: 'ranged-poison', skillConcepts: Object.freeze(['poisoned-arrows']) }),
     monster('spider-nest-blackstone-beastmaster', '黑石訓獸師', 'elite', '操控並強化蜘蛛的毒液菁英', { faction: 'blackstone-bandits', attackProfile: 'beast-support-poison', skillConcepts: Object.freeze(['spider-command', 'venom-attack']) }),
-    monster('blackstone-venomblade-assassin', '黑石毒刃刺客', 'elite', '雙持毒刃的高速爆發近戰菁英', { faction: 'blackstone-bandits', race: 'orc', attackProfile: 'melee-burst-poison', skillConcepts: Object.freeze(['poisoned-blades', 'high-speed-dash']) }),
+    monster('blackstone-venomblade-assassin', '黑石毒刃刺客', 'elite', '雙持毒刃的高速爆發近戰菁英', { image: 'assets/blackstone-venomblade-assassin.png', faction: 'blackstone-bandits', race: 'orc', attackProfile: 'melee-burst-poison', skillConcepts: Object.freeze(['poisoned-blades', 'high-speed-dash']) }),
     monster('giant-spider', '巨大蜘蛛', 'boss', '以毒液與蜘蛛絲壓制戰場的巢穴最終 Boss', { bodyProfile: 'giant-bloated-abdomen', attackProfile: 'boss-poison-web-control', skillConcepts: Object.freeze(['venom-assault', 'web-control']) })
   ]);
 
