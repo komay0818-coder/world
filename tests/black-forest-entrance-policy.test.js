@@ -22,12 +22,13 @@ assert.equal(policy.getMonster('black-forest-wolf').image, 'assets/black-forest-
 assert.equal(policy.getMonster('corrupted-boar').image, 'assets/corrupted-boar.png');
 assert.equal(policy.getMonster('shadow-spider').image, 'assets/shadow-spider.png');
 assert.equal(policy.getMonster('withered-tree-walker').image, 'assets/withered-tree-walker.png');
-assert.ok(policy.MONSTERS.filter((monster) => !['black-forest-wolf', 'corrupted-boar', 'shadow-spider', 'withered-tree-walker'].includes(monster.id)).every((monster) => monster.image === null));
+assert.equal(policy.getMonster('black-forest-hunter').image, 'assets/black-forest-hunter.png');
+assert.ok(policy.MONSTERS.filter((monster) => !['black-forest-wolf', 'corrupted-boar', 'shadow-spider', 'withered-tree-walker', 'black-forest-hunter'].includes(monster.id)).every((monster) => monster.image === null));
 assert.ok(policy.MONSTERS.every((monster) => monster.stats === null && monster.dropTableId === null
   && monster.aiProfileId === null && monster.skillIds.length === 0 && monster.implemented === false));
 assert.equal(policy.getMonster('unknown'), null);
 
-['black-forest-wolf.png', 'corrupted-boar.png', 'shadow-spider.png', 'withered-tree-walker.png'].forEach((filename) => {
+['black-forest-wolf.png', 'corrupted-boar.png', 'shadow-spider.png', 'withered-tree-walker.png', 'black-forest-hunter.png'].forEach((filename) => {
   const png = fs.readFileSync(path.join(__dirname, '..', 'assets', filename));
   assert.equal(png.subarray(1, 4).toString(), 'PNG', `${filename} is a PNG asset`);
   assert.equal(png[25], 6, `${filename} uses RGBA color type with an alpha channel`);
