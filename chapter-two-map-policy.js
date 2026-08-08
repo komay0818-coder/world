@@ -94,6 +94,7 @@
       dungeon: true,
       gameplayType: 'outpost-siege',
       objectiveCount: 5,
+      background: 'assets/blackstone-stronghold-background.png',
       enemyPoolId: 'blackstone-stronghold-enemies',
       bossId: 'blackstone-warlord',
       enemyFactionIds: Object.freeze(['blackstone-bandits', 'goblins']),
