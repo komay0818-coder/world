@@ -27,7 +27,8 @@ assert.equal(policy.getMap('spider-nest').min, 19);
 assert.equal(policy.getMap('spider-nest').max, 19);
 assert.equal(policy.getMap('spider-nest').enemyPoolId, 'spider-nest-enemies');
 assert.equal(policy.getMap('spider-nest').bossId, 'giant-spider');
-assert.equal(policy.getMap('spider-nest').contentStatus, 'monster-foundation');
+assert.equal(policy.getMap('spider-nest').implemented, true);
+assert.equal(policy.getMap('spider-nest').contentStatus, 'combat-ready');
 assert.equal(policy.getMap('spider-nest').background, 'assets/spider-nest-background.png');
 assert.equal(policy.getMap('spider-nest').story.completionObjectiveId, 'defeat-giant-spider');
 
@@ -44,7 +45,8 @@ assert.ok(policy.MAPS.every((map) => map.chapter === 2 && map.regionOf === 'blac
 assert.equal(policy.CHAPTER.corruptionPolicyId, 'black-forest-corruption');
 assert.equal(new Set(policy.MAPS.map((map) => map.materialTableId)).size, 6);
 assert.equal(policy.canEnter('black-forest-trail'), true, 'the Black Forest trail combat map can be entered');
-assert.ok(policy.MAPS.filter((map) => map.id !== 'black-forest-trail').every((map) => map.implemented === false), 'unfinished chapter-two maps remain disabled');
+assert.equal(policy.canEnter('spider-nest'), true, 'the Spider Nest combat map can be entered');
+assert.ok(policy.MAPS.filter((map) => !['black-forest-trail', 'spider-nest'].includes(map.id)).every((map) => map.implemented === false), 'unfinished chapter-two maps remain disabled');
 assert.ok(policy.MAPS.every((map) => 'enemyPoolId' in map && 'bossId' in map && 'dropTableId' in map
   && 'materialTableId' in map && 'eventTableId' in map && Array.isArray(map.environmentEffects)),
 'all maps reserve future content fields');

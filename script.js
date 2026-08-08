@@ -591,7 +591,8 @@ const monsterTypes = EquipmentDropPolicy.applyDefaultLootConfigs({
   eclipseSovereign: { id: 'eclipseSovereign', name: '蝕月鹿王', maxHp: 5200, attack: 39, defense: 45, evasion: 8, parry: 12, damageReduction: 18, artClass: 'dungeon-boss dungeon-monster-art', xp: 180, gold: 620, isBoss: true, lootSource: 'dungeonBoss' },
   ...PlainsDepthsPolicy.MONSTER_TYPES,
   ...Object.fromEntries(BlackForestEntrancePolicy.MONSTERS.map((entry) => [entry.combatId, BlackForestEntrancePolicy.toCombatMonster(entry)])),
-  ...Object.fromEntries(BlackForestTrailPolicy.MONSTERS.map((entry) => [entry.combatId, BlackForestTrailPolicy.toCombatMonster(entry)]))
+  ...Object.fromEntries(BlackForestTrailPolicy.MONSTERS.map((entry) => [entry.combatId, BlackForestTrailPolicy.toCombatMonster(entry)])),
+  ...Object.fromEntries(SpiderNestPolicy.MONSTERS.map((entry) => [entry.combatId, SpiderNestPolicy.toCombatMonster(entry)]))
 });
 const normalMonsterIds = ['goblin', 'wolf', 'boar'];
 const eliteMonsterIds = ['goblinOverlord', 'wolfAlpha', 'boarTyrant'];
@@ -603,6 +604,7 @@ const mapMonsterPools = {
   plainsDepths: PlainsDepthsPolicy.MONSTER_POOL,
   blackForestEntrance: BlackForestEntrancePolicy.getCombatPool(),
   blackForestTrail: BlackForestTrailPolicy.getCombatPool(),
+  spiderNest: SpiderNestPolicy.getCombatPool(),
   beginner: { normal: normalMonsterIds, elite: eliteMonsterIds, boss: bossMonsterIds },
   blackForest: { normal: ['nightGoblin', 'shadowWolf', 'thornBoar'], elite: ['forestShaman', 'moonfangAlpha', 'thornbackTyrant'], boss: ['forestGuardian'] }
 };
@@ -1428,6 +1430,7 @@ function getMonsterPool(level = getProgress().level) {
   if (mapId === 'plains-depths') return mapMonsterPools.plainsDepths;
   if (mapId === 'black-forest-entrance') return mapMonsterPools.blackForestEntrance;
   if (mapId === 'black-forest-trail') return mapMonsterPools.blackForestTrail;
+  if (mapId === 'spider-nest') return mapMonsterPools.spiderNest;
   return mapId === 'black-forest' ? mapMonsterPools.blackForest : mapMonsterPools.beginner;
 }
 
@@ -1468,6 +1471,7 @@ function createDungeonWaveTypes(wave, mapId = battle.dungeonId || getActiveMap(g
 function getMonsterDefinitionForMap(type, mapId = battle.dungeonId || getActiveMap(getProgress()).id, level = null) {
   if (mapId === 'black-forest-entrance') return BlackForestEntrancePolicy.getCombatMonster(type, level) || monsterTypes.goblin;
   if (mapId === 'black-forest-trail') return BlackForestTrailPolicy.getCombatMonster(type, level) || monsterTypes.goblin;
+  if (mapId === 'spider-nest') return SpiderNestPolicy.getCombatMonster(type, level) || monsterTypes.goblin;
   const monster = monsterTypes[type] || monsterTypes.goblin;
   const chapterMonster = ChapterOneLevelPolicy.scaleMonster(monster, mapId, level);
   const dungeonMonster = GoblinCampPolicy.scaleMonster(chapterMonster, mapId === 'goblin-camp');
@@ -1484,6 +1488,8 @@ function createEnemyLevels(enemyTypes, mapId, random = Math.random) {
     ? BlackForestEntrancePolicy.rollLevel(type, random())
     : mapId === 'black-forest-trail'
       ? BlackForestTrailPolicy.rollLevel(type, random())
+      : mapId === 'spider-nest'
+        ? SpiderNestPolicy.rollLevel(type, random())
       : ChapterOneLevelPolicy.rollLevel(mapId, type, random()) ?? null);
 }
 
@@ -1555,7 +1561,10 @@ function hasAliveBoss(excludeIndex = -1) {
 }
 
 function getEnemyDefinition(index) {
-  return getMonsterDefinitionForMap(battle.enemyTypes[index], battle.dungeonId || getActiveMap(getProgress()).id, battle.enemyLevels?.[index]);
+  const enemy = getMonsterDefinitionForMap(battle.enemyTypes[index], battle.dungeonId || getActiveMap(getProgress()).id, battle.enemyLevels?.[index]);
+  const summonProfile = battle.enemySummonProfiles?.[index];
+  if (!summonProfile) return enemy;
+  return { ...enemy, maxHp: Math.max(1, Math.round(enemy.maxHp * summonProfile.hpRatio)), attack: Math.max(1, Math.round(enemy.attack * summonProfile.attackRatio)) };
 }
 
 function isPlayerBleeding(now = Date.now()) {
@@ -1569,11 +1578,14 @@ function getMonsterAttackPower(enemy, progress = getProgress(), currentHp = enem
   const plainsIrritable = PlainsDepthsPolicy.getIrritableMultiplier(enemy.id, currentHp, enemy.maxHp);
   const blackForestMultiplier = BlackForestEntrancePolicy.getCombatMultipliers(enemy.id, currentHp, enemy.maxHp).attack;
   const blackForestTrailMultiplier = BlackForestTrailPolicy.getCombatMultipliers(enemy.id, currentHp, enemy.maxHp).attack;
+  const spiderNestMultiplier = SpiderNestPolicy.getCombatMultipliers(enemy.id, currentHp, enemy.maxHp).attack;
   const commandMultiplier = enemy.mapId === 'black-forest-trail' && Date.now() < (battle.blackstoneCommandUntil || 0)
     ? 1 + BlackForestTrailPolicy.CAPTAIN.commandAttackBonus : 1;
   const beastCommandMultiplier = enemy.id === 'blackstonePoisonSpider' && Date.now() < (battle.blackstoneSpiderCommandUntil || 0)
     ? 1 + BlackForestTrailPolicy.BEASTMASTER.spiderAttackBonus : 1;
-  if (enemy.mapId) return Math.max(1, Math.round((enemy.attack || 1) * randomMultiplier * bloodFrenzy * irritable * plainsIrritable * blackForestMultiplier * blackForestTrailMultiplier * commandMultiplier * beastCommandMultiplier));
+  const nestSpiderCommandMultiplier = ['spiderNestBlackstonePoisonSpider', 'venomSpitterSpider', 'webWeaver', 'giantSpider'].includes(enemy.id)
+    && Date.now() < (battle.spiderNestCommandUntil || 0) ? 1 + SpiderNestPolicy.BEASTMASTER.spiderAttackBonus : 1;
+  if (enemy.mapId) return Math.max(1, Math.round((enemy.attack || 1) * randomMultiplier * bloodFrenzy * irritable * plainsIrritable * blackForestMultiplier * blackForestTrailMultiplier * spiderNestMultiplier * commandMultiplier * beastCommandMultiplier * nestSpiderCommandMultiplier));
   const map = getActiveMap(progress);
   const monsterLevel = Math.min(map.max, Math.max(map.min, progress.level));
   const levelMultiplier = 1 + (monsterLevel - 1) * .10;
@@ -1587,9 +1599,12 @@ function getMonsterAttackInterval(enemy, currentHp = enemy.maxHp) {
   const plainsIrritable = PlainsDepthsPolicy.getIrritableMultiplier(enemy.id, currentHp, enemy.maxHp);
   const blackForestMultiplier = BlackForestEntrancePolicy.getCombatMultipliers(enemy.id, currentHp, enemy.maxHp).attackSpeed;
   const blackForestTrailMultiplier = BlackForestTrailPolicy.getCombatMultipliers(enemy.id, currentHp, enemy.maxHp).attackSpeed;
+  const spiderNestMultiplier = SpiderNestPolicy.getCombatMultipliers(enemy.id, currentHp, enemy.maxHp).attackSpeed;
   const beastCommandMultiplier = enemy.id === 'blackstonePoisonSpider' && Date.now() < (battle.blackstoneSpiderCommandUntil || 0)
     ? 1 + BlackForestTrailPolicy.BEASTMASTER.spiderAttackSpeedBonus : 1;
-  return Math.max(250, (enemy.attackInterval || (1000 / (enemy.attackSpeed || 1))) / bloodFrenzy / irritable / plainsIrritable / blackForestMultiplier / blackForestTrailMultiplier / beastCommandMultiplier);
+  const nestSpiderCommandMultiplier = ['spiderNestBlackstonePoisonSpider', 'venomSpitterSpider', 'webWeaver', 'giantSpider'].includes(enemy.id)
+    && Date.now() < (battle.spiderNestCommandUntil || 0) ? 1 + SpiderNestPolicy.BEASTMASTER.spiderAttackSpeedBonus : 1;
+  return Math.max(250, (enemy.attackInterval || (1000 / (enemy.attackSpeed || 1))) / bloodFrenzy / irritable / plainsIrritable / blackForestMultiplier / blackForestTrailMultiplier / spiderNestMultiplier / beastCommandMultiplier / nestSpiderCommandMultiplier);
 }
 
 function createEnemyAttackSchedule(enemyTypes, startAt = Date.now(), mapId = getActiveMap(getProgress()).id, enemyLevels = []) {
@@ -2461,6 +2476,7 @@ function createBattlePartyMember(slot, slotIndex, mainId, now = Date.now()) {
     bleed: null,
     blackstoneMarkedUntil: 0,
     blackstoneArmorBreakUntil: 0,
+    spiderNestArmorBreakUntil: 0,
     blackstoneAttackSpeedPenaltyUntil: 0,
     blackstoneAttackSpeedPenalty: 0,
     reviveAt: null,
@@ -3051,7 +3067,7 @@ function processEnemyRespawns() {
   if (battle.isDungeon) return;
   const playerLevel = getProgress().level;
   battle.enemyRespawns.forEach((timer, index) => {
-    if (timer === null) return;
+    if (timer === null || timer === -1) return;
     const nextTimer = timer - 1;
     if (nextTimer <= 0) {
     const currentMapId = getActiveMap(getProgress()).id;
@@ -3062,7 +3078,11 @@ function processEnemyRespawns() {
       : bossAllowed && specialRoll < bossSpawnChance ? randomBossId(playerLevel) : specialRoll < bossSpawnChance + eliteSpawnChance ? randomEliteId(playerLevel) : randomEnemyId(playerLevel);
       battle.enemyRespawns[index] = null;
       if (!battle.enemyLevels) battle.enemyLevels = battle.enemyTypes.map(() => null);
-      battle.enemyLevels[index] = ChapterOneLevelPolicy.rollLevel(currentMapId, battle.enemyTypes[index], Math.random());
+      battle.enemyLevels[index] = createEnemyLevels([battle.enemyTypes[index]], currentMapId)[0];
+      if (battle.enemyTrailSummoned) battle.enemyTrailSummoned[index] = false;
+      if (battle.enemySummonProfiles) battle.enemySummonProfiles[index] = null;
+      if (battle.enemyAssassinDashUntil) battle.enemyAssassinDashUntil[index] = 0;
+      if (battle.enemySpiderNestPhase) battle.enemySpiderNestPhase[index] = 1;
       battle.enemyHps[index] = getEnemyDefinition(index).maxHp;
       battle.enemySpawnedAt[index] = Date.now();
       battle.enemyDots[index] = [];
@@ -3166,11 +3186,13 @@ function applyDamageToMonster(index, baseDamage, profile, options = {}) {
     }
   }
   const trailMultipliers = BlackForestTrailPolicy.getCombatMultipliers(enemy.id, battle.enemyHps[index], enemy.maxHp);
+  const spiderNestMultipliers = SpiderNestPolicy.getCombatMultipliers(enemy.id, battle.enemyHps[index], enemy.maxHp);
   const captainShieldActive = enemy.id === 'blackstoneCaptain' && Date.now() < (battle.enemyCaptainShieldUntil?.[index] || 0);
+  const assassinDashActive = enemy.id === 'blackstoneVenombladeAssassin' && Date.now() < (battle.enemyAssassinDashUntil?.[index] || 0);
   const defendedEnemy = {
     ...enemy,
-    defense: Math.max(0, Math.round(enemy.defense * trailMultipliers.defense)),
-    evasion: (enemy.evasion || 0) + (trailMultipliers.evasion || 0),
+    defense: Math.max(0, Math.round(enemy.defense * trailMultipliers.defense * spiderNestMultipliers.defense)),
+    evasion: (enemy.evasion || 0) + (trailMultipliers.evasion || 0) + (spiderNestMultipliers.evasion || 0) + (assassinDashActive ? SpiderNestPolicy.ASSASSIN.dashEvasionBonus : 0),
     parry: (enemy.parry || 0) + (captainShieldActive ? BlackForestTrailPolicy.CAPTAIN.shieldParryBonus : 0)
   };
   const result = MonsterDefense.resolveDamage({
@@ -3646,6 +3668,68 @@ function inflictBlackForestTrailPoison(member, enemy, now = Date.now()) {
   logBattle(`${member.name} 受到 ${enemy.name} 的黑石毒素效果（${stacks}／${rule.maxStacks} 層）。`, 'system');
 }
 
+function getSpiderNestPoisonStacks(member) {
+  return member.bleed?.effectName === '蛛巢毒素' ? Number(member.bleed.stacks) || 0 : 0;
+}
+
+function inflictSpiderNestPoison(member, enemy, stackCount = 1, now = Date.now()) {
+  const rule = SpiderNestPolicy.POISON;
+  const existingStacks = getSpiderNestPoisonStacks(member);
+  const maxStacks = enemy.id === 'giantSpider' ? rule.bossMaxStacks : rule.maxStacks;
+  const stacks = Math.min(maxStacks, existingStacks + Math.max(1, stackCount));
+  const baseTickDamage = Math.max(1, Math.ceil((Number(enemy.attack) || 1) * rule.attackRatio));
+  member.bleed = {
+    effectName: '蛛巢毒素', tickMs: rule.tickMs, stacks,
+    tickDamage: baseTickDamage * stacks,
+    nextTickAt: now + rule.tickMs,
+    expiresAt: now + rule.durationMs
+  };
+  logBattle(`${member.name} 受到 ${enemy.name} 的蛛巢毒素（${stacks}／${maxStacks} 層）。`, 'system');
+}
+
+function countAliveSpiderNestSummons(type = null) {
+  return (battle.enemyTrailSummoned || []).filter((summoned, index) => summoned && battle.enemyHps[index] > 0
+    && (!type || battle.enemyTypes[index] === type)).length;
+}
+
+function summonSpiderNestMonster(type, summonerIndex, hpRatio, attackRatio, limit, message, now = Date.now()) {
+  if (countAliveSpiderNestSummons(type) >= limit) return false;
+  const base = SpiderNestPolicy.getCombatMonster(type);
+  if (!base) return false;
+  if (!battle.enemyTrailSummoned) battle.enemyTrailSummoned = battle.enemyTypes.map(() => false);
+  if (!battle.enemySummonProfiles) battle.enemySummonProfiles = battle.enemyTypes.map(() => null);
+  const profile = { hpRatio, attackRatio };
+  const reusedIndex = battle.enemyTrailSummoned.findIndex((summoned, index) => summoned && battle.enemyHps[index] <= 0);
+  const index = reusedIndex >= 0 ? reusedIndex : battle.enemyTypes.length;
+  if (reusedIndex >= 0) {
+    battle.enemyTypes[index] = type;
+    battle.enemyLevels[index] = SpiderNestPolicy.MAP.level;
+    battle.enemyRespawns[index] = null;
+    battle.enemySpawnedAt[index] = now;
+    battle.enemyDots[index] = [];
+    battle.enemyDamages[index] = [];
+    battle.enemyTrailSummoned[index] = true;
+    battle.enemySummonProfiles[index] = profile;
+  } else {
+    battle.enemyTypes.push(type);
+    battle.enemyLevels.push(SpiderNestPolicy.MAP.level);
+    battle.enemyRespawns.push(null);
+    battle.enemySpawnedAt.push(now);
+    battle.enemyDots.push([]);
+    battle.enemyDamages.push([]);
+    battle.enemyTrailSummoned.push(true);
+    battle.enemySummonProfiles.push(profile);
+    battle.enemyBoarEnraged.push(false);
+    battle.enemyNextAttackAt.push(null);
+  }
+  const summoned = getEnemyDefinition(index);
+  battle.enemyHps[index] = summoned.maxHp;
+  battle.enemyNextAttackAt[index] = now + getMonsterAttackInterval(summoned);
+  playMonsterAttackAnimation(summonerIndex, false);
+  logBattle(message, 'spawn');
+  return true;
+}
+
 function processPartyMemberBleed(member, now = Date.now()) {
   const bleed = member.bleed;
   if (!bleed) return false;
@@ -3710,7 +3794,8 @@ function summonBlackstonePoisonSpider(beastmasterIndex, now = Date.now()) {
 }
 
 function applyBlackstoneAttackSpeedPenalty(member, penalty, durationMs, now, sourceName) {
-  member.blackstoneAttackSpeedPenalty = Math.max(member.blackstoneAttackSpeedPenalty || 0, penalty);
+  const activePenalty = now < (member.blackstoneAttackSpeedPenaltyUntil || 0) ? member.blackstoneAttackSpeedPenalty || 0 : 0;
+  member.blackstoneAttackSpeedPenalty = Math.min(1 - SpiderNestPolicy.CONTROL.minimumAttackSpeedRatio, Math.max(activePenalty, penalty));
   member.blackstoneAttackSpeedPenaltyUntil = Math.max(member.blackstoneAttackSpeedPenaltyUntil || 0, now + durationMs);
   logBattle(`${member.name} 受到【${sourceName}】，攻擊速度降低 ${Math.round(penalty * 100)}%！`, 'system');
 }
@@ -3735,6 +3820,7 @@ function defeatPartyMember(member, now = Date.now()) {
   member.stunnedUntil = 0;
   member.blackstoneMarkedUntil = 0;
   member.blackstoneArmorBreakUntil = 0;
+  member.spiderNestArmorBreakUntil = 0;
   member.blackstoneAttackSpeedPenaltyUntil = 0;
   member.blackstoneAttackSpeedPenalty = 0;
   member.nextAttackAt = Number.POSITIVE_INFINITY;
@@ -3759,6 +3845,7 @@ function reviveDefeatedTeammates(now = Date.now()) {
     member.stunnedUntil = 0;
     member.blackstoneMarkedUntil = 0;
     member.blackstoneArmorBreakUntil = 0;
+    member.spiderNestArmorBreakUntil = 0;
     member.blackstoneAttackSpeedPenaltyUntil = 0;
     member.blackstoneAttackSpeedPenalty = 0;
     member.nextAttackAt = now + 1000;
@@ -3786,6 +3873,7 @@ function resetPartyAfterDefeat(now = Date.now()) {
     member.stunnedUntil = 0;
     member.blackstoneMarkedUntil = 0;
     member.blackstoneArmorBreakUntil = 0;
+    member.spiderNestArmorBreakUntil = 0;
     member.blackstoneAttackSpeedPenaltyUntil = 0;
     member.blackstoneAttackSpeedPenalty = 0;
     member.nextAttackAt = now + 1000;
@@ -3864,7 +3952,7 @@ function enemyAttackTick() {
     }
 
     const aliveMembers = battle.partyMembers.filter((member) => member.alive);
-    const target = ['blackForestHunter', 'blackstoneCaptain', 'blackstoneCenturion'].includes(enemy.id)
+    const target = ['blackForestHunter', 'blackstoneCaptain', 'blackstoneCenturion', 'blackstoneVenomHunter', 'blackstoneVenombladeAssassin'].includes(enemy.id)
       ? aliveMembers.sort((first, second) => first.currentHp / first.maxHp - second.currentHp / second.maxHp)[0]
       : PartyPolicy.chooseRandomAliveMember(battle.partyMembers, Math.random);
     if (!target) break;
@@ -3886,6 +3974,47 @@ function enemyAttackTick() {
     let blackForestTrailAction = getActiveMap(progress).id === 'black-forest-trail'
       ? BlackForestTrailPolicy.resolveAction(enemy.id, Math.random(), target.currentHp / target.maxHp, enemyCurrentHp, enemy.maxHp)
       : 'attack';
+    const spiderNestActive = getActiveMap(progress).id === 'spider-nest';
+    const poisonStacks = getSpiderNestPoisonStacks(target);
+    const currentBossPhase = SpiderNestPolicy.getBossPhase(enemy.id, enemyCurrentHp, enemy.maxHp);
+    if (spiderNestActive && enemy.id === 'giantSpider') {
+      if (!battle.enemySpiderNestPhase) battle.enemySpiderNestPhase = battle.enemyTypes.map(() => 1);
+      const previousPhase = battle.enemySpiderNestPhase[enemyIndex] || 1;
+      battle.enemySpiderNestPhase[enemyIndex] = currentBossPhase;
+      if (currentBossPhase === 2 && previousPhase < 2) {
+        summonSpiderNestMonster('spiderNestBlackstonePoisonSpider', enemyIndex, SpiderNestPolicy.BOSS.summonHpRatio, SpiderNestPolicy.BOSS.summonAttackRatio, SpiderNestPolicy.BOSS.summonLimit, '🥚【巨大蜘蛛】進入孵化階段，一隻削弱版黑石毒蜘蛛破卵而出！', now);
+      }
+      if (currentBossPhase === 3 && previousPhase < 3) logBattle('🕷【巨大蜘蛛】進入【巢穴狂暴】，攻擊與攻速提高，但防禦降低！', 'system');
+    }
+    let spiderNestAction = spiderNestActive
+      ? SpiderNestPolicy.resolveAction(enemy.id, Math.random(), poisonStacks, enemyCurrentHp, enemy.maxHp,
+        enemy.id === 'spiderNestBlackstoneBeastmaster'
+          ? countAliveSpiderNestSummons('venomSpitterSpider') < SpiderNestPolicy.BEASTMASTER.summonLimit
+          : countAliveSpiderNestSummons('spiderNestBlackstonePoisonSpider') < SpiderNestPolicy.BOSS.summonLimit)
+      : 'attack';
+    if (spiderNestAction === 'whip-spiders') {
+      battle.spiderNestCommandUntil = Math.max(battle.spiderNestCommandUntil || 0, now + SpiderNestPolicy.BEASTMASTER.commandDurationMs);
+      logBattle('⛓【黑石訓獸師】施放【鞭策蜘蛛】，蜘蛛攻擊提高 25%、攻速提高 20%，持續 7 秒！', 'system');
+      playMonsterAttackAnimation(enemyIndex, false);
+      continue;
+    }
+    if (spiderNestAction === 'release-spitter') {
+      if (summonSpiderNestMonster('venomSpitterSpider', enemyIndex, SpiderNestPolicy.BEASTMASTER.summonHpRatio, SpiderNestPolicy.BEASTMASTER.summonAttackRatio, SpiderNestPolicy.BEASTMASTER.summonLimit, '🕷【黑石訓獸師】施放【放養蜘蛛】，一隻削弱版噴毒蜘蛛加入戰鬥！', now)) continue;
+      spiderNestAction = 'attack';
+    }
+    if (spiderNestAction === 'hatch-spider-eggs') {
+      if (summonSpiderNestMonster('spiderNestBlackstonePoisonSpider', enemyIndex, SpiderNestPolicy.BOSS.summonHpRatio, SpiderNestPolicy.BOSS.summonAttackRatio, SpiderNestPolicy.BOSS.summonLimit, '🥚【巨大蜘蛛】施放【孵化蛛卵】，一隻削弱版黑石毒蜘蛛加入戰鬥！', now)) continue;
+      spiderNestAction = 'attack';
+    }
+    if (spiderNestAction === 'shadow-dash') {
+      if (!battle.enemyAssassinDashUntil) battle.enemyAssassinDashUntil = battle.enemyTypes.map(() => 0);
+      battle.enemyAssassinDashUntil[enemyIndex] = now + SpiderNestPolicy.ASSASSIN.dashDurationMs;
+    }
+    if (spiderNestAction === 'web-entangle') {
+      applyBlackstoneAttackSpeedPenalty(target, SpiderNestPolicy.CONTROL.webPenalty, SpiderNestPolicy.CONTROL.webDurationMs, now, '蛛絲纏繞');
+      playMonsterAttackAnimation(enemyIndex, false);
+      continue;
+    }
     if (blackForestTrailAction === 'beast-command') {
       battle.blackstoneSpiderCommandUntil = Math.max(battle.blackstoneSpiderCommandUntil || 0, now + BlackForestTrailPolicy.BEASTMASTER.commandDurationMs);
       logBattle('⛓【黑石訓獸師】施放【鞭策】，黑石毒蜘蛛攻擊與攻速提高 20%，持續 6 秒！', 'system');
@@ -3910,7 +4039,8 @@ function enemyAttackTick() {
     }
     const activeDamageMultiplier = PlainsDepthsPolicy.getActiveDamageMultiplier(plainsAction)
       * BlackForestEntrancePolicy.getDamageMultiplier(blackForestAction)
-      * BlackForestTrailPolicy.getDamageMultiplier(blackForestTrailAction);
+      * BlackForestTrailPolicy.getDamageMultiplier(blackForestTrailAction)
+      * SpiderNestPolicy.getDamageMultiplier(spiderNestAction, poisonStacks);
     const marked = now < (target.blackstoneMarkedUntil || 0);
     const markedHumanBonus = marked && enemy.faction === 'blackstone-bandits'
       ? 1 + BlackForestTrailPolicy.MARK.blackstoneHumanDamageBonus : 1;
@@ -3920,10 +4050,11 @@ function enemyAttackTick() {
     const parried = !dodged && Math.random() < stats.parry;
     const armorBreakMultiplier = now < (target.blackstoneArmorBreakUntil || 0)
       ? 1 - BlackForestTrailPolicy.RAIDER.armorBreakPenalty : 1;
+    const spiderNestArmorMultiplier = now < (target.spiderNestArmorBreakUntil || 0) ? .90 : 1;
     const piercingMultiplier = 1 - BlackForestTrailPolicy.getDefenseIgnore(blackForestTrailAction);
     let damage = dodged ? 0 : MonsterDefense.resolvePlayerDamage({
       baseDamage: rawDamage,
-      defense: Math.max(0, Math.round(stats.defense * armorBreakMultiplier * piercingMultiplier)),
+      defense: Math.max(0, Math.round(stats.defense * armorBreakMultiplier * spiderNestArmorMultiplier * piercingMultiplier)),
       damageReduction: stats.damageReduction
     }).finalDamage;
     if (parried) damage = Math.max(1, Math.ceil(damage * .5));
@@ -3986,6 +4117,18 @@ function enemyAttackTick() {
     }
     const blackForestTrailActionNames = { 'piercing-arrow': '穿甲箭', 'aimed-shot': '狙擊', 'venom-flask': '毒液瓶', 'captain-execution': '斬首', 'centurion-cleave': '破甲重斧', 'centurion-command': '百夫長號令', 'execution-axe': '處刑重斧' };
     if (!dodged && damage > 0 && blackForestTrailActionNames[blackForestTrailAction]) logBattle(`⚔【${enemy.name}】施放【${blackForestTrailActionNames[blackForestTrailAction]}】！`, 'system');
+    if (!dodged && damage > 0 && ['nest-venom-fang', 'venom-spray', 'poisoned-arrow', 'twin-poison-blades', 'boss-venom-spray'].includes(spiderNestAction)) inflictSpiderNestPoison(target, enemy, 1, now);
+    if (!dodged && damage > 0 && ['nest-venom-flask', 'toxic-bite', 'deadly-fang'].includes(spiderNestAction)) inflictSpiderNestPoison(target, enemy, 2, now);
+    if (!dodged && damage > 0 && spiderNestAction === 'corrosive-venom') {
+      target.spiderNestArmorBreakUntil = now + 4000;
+      logBattle(`☣【${enemy.name}】施放【腐蝕毒液】，${target.name}防禦降低 10%，持續 4 秒！`, 'system');
+    }
+    if (!dodged && damage > 0 && spiderNestAction === 'sticky-web-bite') applyBlackstoneAttackSpeedPenalty(target, SpiderNestPolicy.CONTROL.stickyPenalty, SpiderNestPolicy.CONTROL.stickyDurationMs, now, '黏網撕咬');
+    if (!dodged && damage > 0 && spiderNestAction === 'web-entangle') applyBlackstoneAttackSpeedPenalty(target, SpiderNestPolicy.CONTROL.webPenalty, SpiderNestPolicy.CONTROL.webDurationMs, now, '蛛絲纏繞');
+    if (!dodged && damage > 0 && spiderNestAction === 'suffocating-web') applyBlackstoneAttackSpeedPenalty(target, SpiderNestPolicy.CONTROL.suffocatingPenalty, SpiderNestPolicy.CONTROL.suffocatingDurationMs, now, '窒息蛛網');
+    if (!dodged && damage > 0 && spiderNestAction === 'web-restraint') applyBlackstoneAttackSpeedPenalty(target, .25, 5000, now, '蛛網束縛');
+    const spiderNestActionNames = { 'venom-hunt-shot': '獵毒射擊', 'venom-whip': '毒鞭', 'twin-poison-blades': '雙重毒刃', 'shadow-dash': '暗影突進', 'lethal-venom-cut': '致命毒割', 'toxic-bite': '劇毒撕咬', 'deadly-fang': '致命毒牙', 'boss-venom-spray': '毒液噴射' };
+    if (!dodged && damage > 0 && spiderNestActionNames[spiderNestAction]) logBattle(`⚔【${enemy.name}】施放【${spiderNestActionNames[spiderNestAction]}】！`, 'system');
 
     if (dodged) {
       logBattle(`${target.name} 閃避了 ${enemy.name} 的攻擊。`, 'damage-taken');
@@ -4059,7 +4202,7 @@ function openBattle() {
   const sessionId = ++battleSessionSequence;
   const partyMembers = buildBattlePartyMembers(battleStart);
   const mainMember = partyMembers.find((member) => member.isMain) || partyMembers[0];
-  battle = { enemyTypes, enemyLevels, enemyHps, partyMembers, playerHp: mainMember?.currentHp || getMaxHp(progress.level, progress), playerMana: mainMember?.resourceCurrent || 0, playerArrows: mainMember?.resourceType === 'arrows' ? mainMember.resourceCurrent : 0, playerShield: 0, playerStunnedUntil: 0, playerBleed: null, manaExhausted: false, playerAttackCharge: 0, hunterAttackCount: 0, lastManaRegenAt: battleStart, lastResourceUpdatedAt: battleStart, lastArrowRecoveryAt: battleStart, lastCorruptionTickAt: battleStart, enemyNextAttackAt: createEnemyAttackSchedule(enemyTypes, battleStart, currentMap.id, enemyLevels), enemyBoarEnraged: enemyTypes.map(() => false), enemyTrailSummoned: enemyTypes.map(() => false), enemyCaptainShieldUntil: enemyTypes.map(() => 0), blackstoneRoarUntil: 0, blackstoneCommandUntil: 0, blackstoneSpiderCommandUntil: 0, globalSkillReadyAt: 0, undeadRevived: false, skillCooldowns: {}, enemyRespawns: enemyTypes.map(() => null), enemySpawnedAt: enemyTypes.map((_, index) => battleStart + index), enemyDots: enemyTypes.map(() => []), monsterMoveSpeed: 200, targetIndexes: [], enemyDamages: enemyTypes.map(() => []), damageTimers: [], rewardedEnemyIndexes: new Set(), isDungeon, dungeonId: isDungeon ? currentMap.id : null, dungeonWave: isDungeon ? 1 : 0, dungeonComplete: false, waveTransitioning: false, goblinScoutSummons: 0 };
+  battle = { enemyTypes, enemyLevels, enemyHps, partyMembers, playerHp: mainMember?.currentHp || getMaxHp(progress.level, progress), playerMana: mainMember?.resourceCurrent || 0, playerArrows: mainMember?.resourceType === 'arrows' ? mainMember.resourceCurrent : 0, playerShield: 0, playerStunnedUntil: 0, playerBleed: null, manaExhausted: false, playerAttackCharge: 0, hunterAttackCount: 0, lastManaRegenAt: battleStart, lastResourceUpdatedAt: battleStart, lastArrowRecoveryAt: battleStart, lastCorruptionTickAt: battleStart, enemyNextAttackAt: createEnemyAttackSchedule(enemyTypes, battleStart, currentMap.id, enemyLevels), enemyBoarEnraged: enemyTypes.map(() => false), enemyTrailSummoned: enemyTypes.map(() => false), enemySummonProfiles: enemyTypes.map(() => null), enemyCaptainShieldUntil: enemyTypes.map(() => 0), enemyAssassinDashUntil: enemyTypes.map(() => 0), enemySpiderNestPhase: enemyTypes.map(() => 1), blackstoneRoarUntil: 0, blackstoneCommandUntil: 0, blackstoneSpiderCommandUntil: 0, spiderNestCommandUntil: 0, globalSkillReadyAt: 0, undeadRevived: false, skillCooldowns: {}, enemyRespawns: enemyTypes.map(() => null), enemySpawnedAt: enemyTypes.map((_, index) => battleStart + index), enemyDots: enemyTypes.map(() => []), monsterMoveSpeed: 200, targetIndexes: [], enemyDamages: enemyTypes.map(() => []), damageTimers: [], rewardedEnemyIndexes: new Set(), isDungeon, dungeonId: isDungeon ? currentMap.id : null, dungeonWave: isDungeon ? 1 : 0, dungeonComplete: false, waveTransitioning: false, goblinScoutSummons: 0 };
   battle.sessionId = sessionId;
   clearBattleLog();
   if (pendingOfflineReport) {

@@ -6,8 +6,8 @@ assert.equal(policy.MAP.level, 19);
 assert.equal(policy.MAP.enemyPoolId, 'spider-nest-enemies');
 assert.equal(policy.MAP.bossId, 'giant-spider');
 assert.equal(policy.MAP.background, 'assets/spider-nest-background.png');
-assert.equal(policy.MAP.implemented, false);
-assert.equal(policy.MAP.contentStatus, 'monster-foundation');
+assert.equal(policy.MAP.implemented, true);
+assert.equal(policy.MAP.contentStatus, 'combat-ready');
 assert.deepEqual(policy.MONSTERS.map((monster) => monster.name), [
   '黑石毒蜘蛛', '噴毒蜘蛛', '蛛網編織者', '黑石毒獵手', '黑石訓獸師', '黑石毒刃刺客', '巨大蜘蛛'
 ]);
@@ -25,13 +25,45 @@ assert.equal(policy.getMonster('blackstone-venomblade-assassin').image, 'assets/
 assert.equal(policy.getMonster('giant-spider').image, 'assets/giant-spider.png');
 assert.equal(policy.getMonster('spider-nest-blackstone-poison-spider').image, 'assets/blackstone-poison-spider.png');
 assert.equal(policy.getMonster('spider-nest-blackstone-beastmaster').image, 'assets/blackstone-beastmaster.png');
-assert.ok(policy.MONSTERS.every((monster) => monster.level === 19 && monster.stats === null
-  && monster.dropTableId === null && monster.aiProfileId === null && monster.skillIds.length === 0 && monster.implemented === false));
+assert.ok(policy.MONSTERS.every((monster) => monster.level === 19 && monster.stats
+  && monster.dropTableId === 'spider-nest-pending' && monster.aiProfileId && monster.skillIds.length > 0 && monster.implemented === true));
 assert.ok(policy.MONSTERS.every((monster) => typeof monster.image === 'string' && monster.image.startsWith('assets/')));
 assert.equal(policy.STORY.previousMapId, 'black-forest-trail');
 assert.equal(policy.STORY.nextMapId, 'blackstone-stronghold');
 assert.equal(policy.STORY.completionObjectiveId, 'defeat-giant-spider');
 assert.equal(policy.getMonster('unknown'), null);
+assert.deepEqual(policy.getMonster('spider-nest-blackstone-poison-spider').stats, { maxHp: 300, attack: 39, defense: 21, evasion: 12, parry: 0, damageReduction: 4, attackSpeed: 1.2, xp: 36, gold: 18 });
+assert.deepEqual(policy.getMonster('venom-spitter-spider').stats, { maxHp: 260, attack: 42, defense: 17, evasion: 8, parry: 0, damageReduction: 2, attackSpeed: .95, xp: 37, gold: 19 });
+assert.deepEqual(policy.getMonster('web-weaver').stats, { maxHp: 330, attack: 35, defense: 24, evasion: 7, parry: 0, damageReduction: 5, attackSpeed: .9, xp: 39, gold: 20 });
+assert.deepEqual(policy.getMonster('blackstone-venom-hunter').stats, { maxHp: 275, attack: 44, defense: 19, evasion: 13, parry: 3, damageReduction: 3, attackSpeed: 1.1, xp: 40, gold: 22 });
+assert.deepEqual(policy.getMonster('spider-nest-blackstone-beastmaster').stats, { maxHp: 900, attack: 58, defense: 42, evasion: 9, parry: 8, damageReduction: 8, attackSpeed: 1, xp: 125, gold: 72 });
+assert.deepEqual(policy.getMonster('blackstone-venomblade-assassin').stats, { maxHp: 780, attack: 63, defense: 34, evasion: 18, parry: 10, damageReduction: 6, attackSpeed: 1.25, xp: 135, gold: 78 });
+assert.deepEqual(policy.getMonster('giant-spider').stats, { maxHp: 3900, attack: 73, defense: 61, evasion: 4, parry: 8, damageReduction: 16, attackSpeed: .9, xp: 520, gold: 320 });
+assert.equal(policy.getCombatPool().normal.length, 4);
+assert.equal(policy.getCombatPool().elite.length, 2);
+assert.deepEqual(policy.getCombatPool().boss, ['giantSpider']);
+assert.equal(policy.getCombatMonster('giantSpider').maxHp, 3900);
+assert.equal(policy.rollLevel('giantSpider'), 19);
+assert.equal(policy.POISON.maxStacks, 4);
+assert.equal(policy.POISON.bossMaxStacks, 5);
+assert.equal(policy.CONTROL.minimumAttackSpeedRatio, .55);
+assert.equal(policy.resolveAction('spiderNestBlackstonePoisonSpider', .10), 'nest-venom-fang');
+assert.equal(policy.resolveAction('spiderNestBlackstonePoisonSpider', .32), 'sticky-web-bite');
+assert.equal(policy.resolveAction('venomSpitterSpider', .40), 'corrosive-venom');
+assert.equal(policy.resolveAction('webWeaver', .40), 'suffocating-web');
+assert.equal(policy.resolveAction('blackstoneVenomHunter', .35), 'venom-hunt-shot');
+assert.equal(policy.resolveAction('spiderNestBlackstoneBeastmaster', .50, 0, 1, 1, true), 'release-spitter');
+assert.equal(policy.resolveAction('spiderNestBlackstoneBeastmaster', .50, 0, 1, 1, false), 'attack');
+assert.equal(policy.resolveAction('blackstoneVenombladeAssassin', .42, 3), 'lethal-venom-cut');
+assert.equal(policy.resolveAction('blackstoneVenombladeAssassin', .42, 2), 'attack');
+assert.equal(policy.getBossPhase('giantSpider', 3900, 3900), 1);
+assert.equal(policy.getBossPhase('giantSpider', 2700, 3900), 2);
+assert.equal(policy.getBossPhase('giantSpider', 1300, 3900), 3);
+assert.equal(policy.resolveAction('giantSpider', .05, 0, 2500, 3900, true), 'hatch-spider-eggs');
+assert.equal(policy.resolveAction('giantSpider', .05, 0, 1200, 3900, true), 'deadly-fang');
+assert.deepEqual(policy.getCombatMultipliers('giantSpider', 1200, 3900), { attack: 1.2, attackSpeed: 1.15, defense: .85, evasion: 0 });
+assert.equal(policy.getDamageMultiplier('venom-hunt-shot', 0), 1.5);
+assert.equal(policy.getDamageMultiplier('venom-hunt-shot', 1), 1.725);
 const fs = require('node:fs');
 const path = require('node:path');
 const background = fs.readFileSync(path.join(__dirname, '..', policy.MAP.background));

@@ -76,7 +76,8 @@
     map('spider-nest', 3, '蜘蛛巢穴', {
       min: 19,
       max: 19,
-      contentStatus: 'monster-foundation',
+      implemented: true,
+      contentStatus: 'combat-ready',
       background: 'assets/spider-nest-background.png',
       enemyPoolId: 'spider-nest-enemies',
       bossId: 'giant-spider',
