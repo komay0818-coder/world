@@ -13,9 +13,16 @@ assert.equal(policy.getMonstersByRank('normal').length, 4);
 assert.equal(policy.getMonstersByRank('elite').length, 2);
 assert.equal(policy.getMonstersByRank('boss').length, 1);
 assert.equal(policy.getMonster('blackstone-warlord').name, '黑石督軍');
+assert.equal(policy.getMonster('blackstone-guard').image, 'assets/blackstone-guard.png');
 assert.equal(policy.getMonster('unknown'), null);
-assert.ok(policy.MONSTERS.every((monster) => monster.image === null && monster.stats === null
+assert.ok(policy.MONSTERS.filter((monster) => monster.id !== 'blackstone-guard').every((monster) => monster.image === null));
+assert.ok(policy.MONSTERS.every((monster) => monster.stats === null
   && monster.dropTableId === null && monster.aiProfileId === null && monster.skillIds.length === 0 && monster.implemented === false));
+const fs = require('node:fs');
+const path = require('node:path');
+const guard = fs.readFileSync(path.join(__dirname, '..', policy.getMonster('blackstone-guard').image));
+assert.equal(guard.subarray(1, 4).toString(), 'PNG', 'the Blackstone guard is a PNG asset');
+assert.equal(guard[25], 6, 'the Blackstone guard uses RGBA color with transparency');
 assert.equal(policy.rollRequiredKills(() => 0), 10);
 assert.equal(policy.rollRequiredKills(() => .999999), 70);
 let state = policy.createState(() => 0);
