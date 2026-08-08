@@ -45,7 +45,7 @@
     monster('blackstone-warhound', '黑石戰犬', 'normal', 'beast', '高速近戰', { image: 'assets/blackstone-warhound.png', faction: 'blackstone-beasts' }),
     monster('blackstone-lion-guard', '黑石獅衛', 'elite', 'lionkin', '高攻擊近戰'),
     monster('blackstone-bullhorn-warrior', '黑石蠻角勇士', 'elite', 'bullkin', '高血量／重擊', { image: 'assets/blackstone-bullhorn-warrior.png' }),
-    monster('blackstone-warlord', '黑石督軍', 'boss', 'orc', '據點指揮官')
+    monster('blackstone-warlord', '黑石督軍', 'boss', 'orc', '據點指揮官', { image: 'assets/blackstone-warlord.png' })
   ]);
 
   const MONSTER_BY_ID = new Map(MONSTERS.map((entry) => [entry.id, entry]));

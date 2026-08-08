@@ -18,8 +18,9 @@ assert.equal(policy.getMonster('blackstone-crossbowman').image, 'assets/blacksto
 assert.equal(policy.getMonster('blackstone-berserker').image, 'assets/blackstone-berserker.png');
 assert.equal(policy.getMonster('blackstone-warhound').image, 'assets/blackstone-warhound.png');
 assert.equal(policy.getMonster('blackstone-bullhorn-warrior').image, 'assets/blackstone-bullhorn-warrior.png');
+assert.equal(policy.getMonster('blackstone-warlord').image, 'assets/blackstone-warlord.png');
 assert.equal(policy.getMonster('unknown'), null);
-assert.ok(policy.MONSTERS.filter((monster) => !['blackstone-guard', 'blackstone-crossbowman', 'blackstone-berserker', 'blackstone-warhound', 'blackstone-bullhorn-warrior'].includes(monster.id)).every((monster) => monster.image === null));
+assert.ok(policy.MONSTERS.filter((monster) => !['blackstone-guard', 'blackstone-crossbowman', 'blackstone-berserker', 'blackstone-warhound', 'blackstone-bullhorn-warrior', 'blackstone-warlord'].includes(monster.id)).every((monster) => monster.image === null));
 assert.ok(policy.MONSTERS.every((monster) => monster.stats === null
   && monster.dropTableId === null && monster.aiProfileId === null && monster.skillIds.length === 0 && monster.implemented === false));
 const fs = require('node:fs');
@@ -39,6 +40,9 @@ assert.equal(warhound[25], 6, 'the Blackstone warhound uses RGBA color with tran
 const bullhornWarrior = fs.readFileSync(path.join(__dirname, '..', policy.getMonster('blackstone-bullhorn-warrior').image));
 assert.equal(bullhornWarrior.subarray(1, 4).toString(), 'PNG', 'the Blackstone bullhorn warrior is a PNG asset');
 assert.equal(bullhornWarrior[25], 6, 'the Blackstone bullhorn warrior uses RGBA color with transparency');
+const warlord = fs.readFileSync(path.join(__dirname, '..', policy.getMonster('blackstone-warlord').image));
+assert.equal(warlord.subarray(1, 4).toString(), 'PNG', 'the Blackstone warlord is a PNG asset');
+assert.equal(warlord[25], 6, 'the Blackstone warlord uses RGBA color with transparency');
 assert.equal(policy.rollRequiredKills(() => 0), 10);
 assert.equal(policy.rollRequiredKills(() => .999999), 70);
 let state = policy.createState(() => 0);
