@@ -22,6 +22,7 @@ assert.equal(policy.getMonstersByRank('boss').length, 1);
 assert.equal(policy.getMonster('blackstone-poison-spider').ownerFaction, 'blackstone-bandits');
 assert.deepEqual(policy.getMonster('blackstone-poison-spider').tags, ['beast', 'poison', 'spider']);
 assert.equal(policy.getMonster('blackstone-poison-spider').image, 'assets/blackstone-poison-spider.png');
+assert.equal(policy.getMonster('blackstone-archer').image, 'assets/blackstone-archer.png');
 assert.equal(policy.STORY.previousMapId, 'black-forest-entrance');
 assert.equal(policy.STORY.nextMapId, 'spider-nest');
 assert.equal(policy.STORY.completionObjectiveId, 'defeat-blackstone-centurion');
@@ -30,7 +31,7 @@ assert.ok(policy.STORY.discoveries.includes('patrol-and-supply-route'));
 assert.ok(policy.STORY.discoveries.includes('poison-spider-husbandry'));
 assert.ok(policy.MONSTERS.every((monster) => monster.level === 17 && monster.stats === null
   && monster.dropTableId === null && monster.aiProfileId === null && monster.skillIds.length === 0 && monster.implemented === false));
-assert.ok(policy.MONSTERS.filter((monster) => monster.id !== 'blackstone-poison-spider').every((monster) => monster.image === null));
+assert.ok(policy.MONSTERS.filter((monster) => !['blackstone-poison-spider', 'blackstone-archer'].includes(monster.id)).every((monster) => monster.image === null));
 assert.equal(policy.getMonster('unknown'), null);
 const background = fs.readFileSync(path.join(__dirname, '..', policy.MAP.background));
 assert.equal(background.subarray(1, 4).toString(), 'PNG', 'the Black Forest trail background is a PNG asset');
@@ -38,5 +39,8 @@ assert.equal(background[25], 2, 'the Black Forest trail background uses RGB colo
 const poisonSpider = fs.readFileSync(path.join(__dirname, '..', policy.getMonster('blackstone-poison-spider').image));
 assert.equal(poisonSpider.subarray(1, 4).toString(), 'PNG', 'the Blackstone poison spider is a PNG asset');
 assert.equal(poisonSpider[25], 6, 'the Blackstone poison spider uses RGBA color with transparency');
+const archer = fs.readFileSync(path.join(__dirname, '..', policy.getMonster('blackstone-archer').image));
+assert.equal(archer.subarray(1, 4).toString(), 'PNG', 'the Blackstone archer is a PNG asset');
+assert.equal(archer[25], 6, 'the Blackstone archer uses RGBA color with transparency');
 
 console.log('black-forest-trail-policy: assertions passed');

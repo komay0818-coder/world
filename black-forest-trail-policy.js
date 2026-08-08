@@ -51,7 +51,7 @@
   const MONSTERS = Object.freeze([
     monster('blackstone-trail-scout', '黑石斥候', 'normal', '巡邏與偵察'),
     monster('blackstone-trail-raider', '黑石掠奪者', 'normal', '近戰攔截與物資護送'),
-    monster('blackstone-archer', '黑石弓箭手', 'normal', '遠程火力'),
+    monster('blackstone-archer', '黑石弓箭手', 'normal', '遠程火力', { image: 'assets/blackstone-archer.png' }),
     monster('blackstone-poison-spider', '黑石毒蜘蛛', 'normal', '黑石圈養的毒系怪物', { image: 'assets/blackstone-poison-spider.png', faction: 'blackstone-beasts', ownerFaction: 'blackstone-bandits', tags: Object.freeze(['beast', 'poison', 'spider']) }),
     monster('blackstone-beastmaster', '黑石訓獸師', 'elite', '指揮與強化圈養蜘蛛'),
     monster('blackstone-captain', '黑石隊長', 'elite', '巡邏隊與補給線指揮官'),
