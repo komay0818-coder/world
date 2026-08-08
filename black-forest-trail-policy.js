@@ -55,7 +55,7 @@
     monster('blackstone-poison-spider', '黑石毒蜘蛛', 'normal', '黑石圈養的毒系怪物', { image: 'assets/blackstone-poison-spider.png', faction: 'blackstone-beasts', ownerFaction: 'blackstone-bandits', tags: Object.freeze(['beast', 'poison', 'spider']) }),
     monster('blackstone-beastmaster', '黑石訓獸師', 'elite', '指揮與強化圈養蜘蛛', { image: 'assets/blackstone-beastmaster.png' }),
     monster('blackstone-captain', '黑石隊長', 'elite', '巡邏隊與補給線指揮官'),
-    monster('blackstone-centurion', '黑石百夫長', 'boss', '守衛補給路線並持有蛛巢線索')
+    monster('blackstone-centurion', '黑石百夫長', 'boss', '守衛補給路線並持有蛛巢線索', { image: 'assets/blackstone-centurion.png' })
   ]);
 
   const MONSTER_BY_ID = new Map(MONSTERS.map((entry) => [entry.id, entry]));
