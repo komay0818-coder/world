@@ -2,6 +2,7 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
 const policy = require('../black-forest-trail-policy.js');
+const chapterOne = require('../chapter-one-level-policy.js');
 
 assert.equal(policy.MAP.id, 'black-forest-trail');
 assert.equal(policy.MAP.chapter, 2);
@@ -43,13 +44,17 @@ assert.deepEqual(policy.getCombatPool(), {
   elite: ['blackstoneBeastmaster', 'blackstoneCaptain'],
   boss: ['blackstoneCenturion']
 });
-assert.equal(policy.getCombatMonster('blackstoneTrailScout').maxHp, 190);
-assert.equal(policy.getCombatMonster('blackstoneTrailRaider').defense, 22);
-assert.equal(policy.getCombatMonster('blackstoneArcher').attack, 35);
+assert.equal(policy.getCombatMonster('blackstoneTrailScout').maxHp, 230);
+assert.equal(policy.getCombatMonster('blackstoneTrailRaider').defense, 25);
+assert.equal(policy.getCombatMonster('blackstoneArcher').attack, 39);
 assert.equal(policy.getCombatMonster('blackstonePoisonSpider').attackSpeed, 1.15);
 assert.equal(policy.getCombatMonster('blackstoneBeastmaster').isElite, true);
+assert.equal(policy.getCombatMonster('blackstoneBeastmaster').attack, 50);
 assert.equal(policy.getCombatMonster('blackstoneCaptain').maxHp, 880);
+assert.equal(policy.getCombatMonster('blackstoneCaptain').defense, 40);
 assert.equal(policy.getCombatMonster('blackstoneCenturion').maxHp, 2800);
+assert.equal(policy.getCombatMonster('blackstoneCenturion').attack, 64);
+assert.equal(policy.getCombatMonster('blackstoneCenturion').defense, 53);
 assert.equal(policy.resolveAction('blackstoneTrailScout', .29), 'scouting-mark');
 assert.equal(policy.resolveAction('blackstoneTrailScout', .30), 'attack');
 assert.equal(policy.resolveAction('blackstoneTrailRaider', .24), 'armor-break');
@@ -83,7 +88,23 @@ assert.equal(policy.CONTROL.webDurationMs, 4000);
 assert.equal(policy.MARK.durationMs, 5000);
 assert.equal(policy.RAIDER.armorBreakPenalty, .15);
 assert.equal(policy.CAPTAIN.commandAttackBonus, .15);
-assert.deepEqual(policy.getCombatMultipliers('blackstoneTrailScout', 50, 190), { attack: 1, attackSpeed: 1.25, defense: 1, evasion: 15 });
+assert.deepEqual(policy.getCombatMultipliers('blackstoneTrailScout', 50, 230), { attack: 1, attackSpeed: 1.25, defense: 1, evasion: 15 });
+
+const plainsDepths = Object.values(chapterOne.MONSTER_PROFILES['plains-depths']).map((profile) => chapterOne.scaleMonster(
+  { id: profile.monsterType }, 'plains-depths', profile.level[1]
+));
+const average = (entries, key) => entries.reduce((sum, entry) => sum + entry[key], 0) / entries.length;
+const chapterOneByRank = {
+  normal: plainsDepths.filter((entry) => !entry.isElite && !entry.isBoss),
+  elite: plainsDepths.filter((entry) => entry.isElite),
+  boss: plainsDepths.filter((entry) => entry.isBoss)
+};
+for (const rank of ['normal', 'elite', 'boss']) {
+  const trail = policy.getMonstersByRank(rank).map((entry) => policy.toCombatMonster(entry));
+  for (const stat of ['maxHp', 'attack', 'defense']) {
+    assert.ok(average(trail, stat) >= average(chapterOneByRank[rank], stat), `trail ${rank} ${stat} does not regress below the chapter-one finale`);
+  }
+}
 const background = fs.readFileSync(path.join(__dirname, '..', policy.MAP.background));
 assert.equal(background.subarray(1, 4).toString(), 'PNG', 'the Black Forest trail background is a PNG asset');
 assert.equal(background[25], 2, 'the Black Forest trail background uses RGB color');

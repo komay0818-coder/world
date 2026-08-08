@@ -13,8 +13,8 @@ assert.match(index, /chapter-two-map-policy\.js[\s\S]*script\.js/, 'chapter-two 
 assert.match(index, /black-forest-corruption-policy\.js[\s\S]*blackstone-stronghold-policy\.js[\s\S]*black-forest-depths-policy\.js[\s\S]*chapter-two-map-policy\.js/);
 assert.match(index, /black-forest-entrance-policy\.js[\s\S]*chapter-two-map-policy\.js/);
 assert.match(index, /black-forest-trail-policy\.js[\s\S]*chapter-two-map-policy\.js/);
-assert.match(index, /VER\. 0\.4\.19/);
-assert.match(index, /black-forest-trail-policy\.js\?v=20260809-trail-skills-v9/);
+assert.match(index, /VER\. 0\.4\.20/);
+assert.match(index, /black-forest-trail-policy\.js\?v=20260809-trail-balance-v10/);
 assert.match(index, /chapter-two-map-policy\.js\?v=20260809-trail-combat-v6/);
 assert.match(index, /VER\. \d+\.\d+\.\d+/, 'the game exposes a semantic version');
 assert.match(script, /\.\.\.ChapterTwoMapPolicy\.MAPS/, 'chapter-two maps join the shared progression data');
