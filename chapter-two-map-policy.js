@@ -77,6 +77,7 @@
       min: 19,
       max: 19,
       contentStatus: 'monster-foundation',
+      background: 'assets/spider-nest-background.png',
       enemyPoolId: 'spider-nest-enemies',
       bossId: 'giant-spider',
       primaryFaction: 'blackstone-beasts',

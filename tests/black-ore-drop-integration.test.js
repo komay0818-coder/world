@@ -12,6 +12,6 @@ assert.match(script, /VillageUpgradePolicy\.grantMapDrops\(progress, currentMap\
 assert.doesNotMatch(crafting, /blackOre: Object\.freeze/, 'black ore has one canonical material definition in the drop policy');
 assert.match(index, /chapter-one-material-drop-policy\.js\?v=20260806-black-ore-drops-v2/, 'the material policy cache key changes');
 assert.match(index, /script\.js\?v=20260809-trail-skills-v130/, 'the integration cache key changes');
-assert.match(index, /VER\. 0\.4\.21/, 'the game version includes the Spider Nest monster foundation');
+assert.match(index, /VER\. 0\.4\.22/, 'the game version includes the Spider Nest background');
 
 console.log('black-ore-drop-integration: assertions passed');

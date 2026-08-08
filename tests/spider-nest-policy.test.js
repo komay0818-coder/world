@@ -5,6 +5,7 @@ assert.equal(policy.MAP.id, 'spider-nest');
 assert.equal(policy.MAP.level, 19);
 assert.equal(policy.MAP.enemyPoolId, 'spider-nest-enemies');
 assert.equal(policy.MAP.bossId, 'giant-spider');
+assert.equal(policy.MAP.background, 'assets/spider-nest-background.png');
 assert.equal(policy.MAP.implemented, false);
 assert.equal(policy.MAP.contentStatus, 'monster-foundation');
 assert.deepEqual(policy.MONSTERS.map((monster) => monster.name), [
@@ -23,5 +24,10 @@ assert.equal(policy.STORY.previousMapId, 'black-forest-trail');
 assert.equal(policy.STORY.nextMapId, 'blackstone-stronghold');
 assert.equal(policy.STORY.completionObjectiveId, 'defeat-giant-spider');
 assert.equal(policy.getMonster('unknown'), null);
+const fs = require('node:fs');
+const path = require('node:path');
+const background = fs.readFileSync(path.join(__dirname, '..', policy.MAP.background));
+assert.equal(background.subarray(1, 4).toString(), 'PNG', 'the Spider Nest background is a PNG asset');
+assert.equal(background[25], 2, 'the Spider Nest background uses RGB color');
 
 console.log('spider-nest-policy: assertions passed');

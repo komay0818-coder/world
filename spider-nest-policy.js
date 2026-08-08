@@ -11,6 +11,7 @@
     order: 3,
     level: 19,
     name: '蜘蛛巢穴',
+    background: 'assets/spider-nest-background.png',
     primaryFaction: 'blackstone-beasts',
     enemyPoolId: 'spider-nest-enemies',
     bossId: 'giant-spider',

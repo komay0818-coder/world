@@ -28,6 +28,7 @@ assert.equal(policy.getMap('spider-nest').max, 19);
 assert.equal(policy.getMap('spider-nest').enemyPoolId, 'spider-nest-enemies');
 assert.equal(policy.getMap('spider-nest').bossId, 'giant-spider');
 assert.equal(policy.getMap('spider-nest').contentStatus, 'monster-foundation');
+assert.equal(policy.getMap('spider-nest').background, 'assets/spider-nest-background.png');
 assert.equal(policy.getMap('spider-nest').story.completionObjectiveId, 'defeat-giant-spider');
 
 assert.deepEqual(policy.MAPS.map((map) => map.name), [
