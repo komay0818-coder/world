@@ -1569,7 +1569,11 @@ function getMonsterAttackPower(enemy, progress = getProgress(), currentHp = enem
   const plainsIrritable = PlainsDepthsPolicy.getIrritableMultiplier(enemy.id, currentHp, enemy.maxHp);
   const blackForestMultiplier = BlackForestEntrancePolicy.getCombatMultipliers(enemy.id, currentHp, enemy.maxHp).attack;
   const blackForestTrailMultiplier = BlackForestTrailPolicy.getCombatMultipliers(enemy.id, currentHp, enemy.maxHp).attack;
-  if (enemy.mapId) return Math.max(1, Math.round((enemy.attack || 1) * randomMultiplier * bloodFrenzy * irritable * plainsIrritable * blackForestMultiplier * blackForestTrailMultiplier));
+  const commandMultiplier = enemy.mapId === 'black-forest-trail' && Date.now() < (battle.blackstoneCommandUntil || 0)
+    ? 1 + BlackForestTrailPolicy.CAPTAIN.commandAttackBonus : 1;
+  const beastCommandMultiplier = enemy.id === 'blackstonePoisonSpider' && Date.now() < (battle.blackstoneSpiderCommandUntil || 0)
+    ? 1 + BlackForestTrailPolicy.BEASTMASTER.spiderAttackBonus : 1;
+  if (enemy.mapId) return Math.max(1, Math.round((enemy.attack || 1) * randomMultiplier * bloodFrenzy * irritable * plainsIrritable * blackForestMultiplier * blackForestTrailMultiplier * commandMultiplier * beastCommandMultiplier));
   const map = getActiveMap(progress);
   const monsterLevel = Math.min(map.max, Math.max(map.min, progress.level));
   const levelMultiplier = 1 + (monsterLevel - 1) * .10;
@@ -1583,7 +1587,9 @@ function getMonsterAttackInterval(enemy, currentHp = enemy.maxHp) {
   const plainsIrritable = PlainsDepthsPolicy.getIrritableMultiplier(enemy.id, currentHp, enemy.maxHp);
   const blackForestMultiplier = BlackForestEntrancePolicy.getCombatMultipliers(enemy.id, currentHp, enemy.maxHp).attackSpeed;
   const blackForestTrailMultiplier = BlackForestTrailPolicy.getCombatMultipliers(enemy.id, currentHp, enemy.maxHp).attackSpeed;
-  return Math.max(250, (enemy.attackInterval || (1000 / (enemy.attackSpeed || 1))) / bloodFrenzy / irritable / plainsIrritable / blackForestMultiplier / blackForestTrailMultiplier);
+  const beastCommandMultiplier = enemy.id === 'blackstonePoisonSpider' && Date.now() < (battle.blackstoneSpiderCommandUntil || 0)
+    ? 1 + BlackForestTrailPolicy.BEASTMASTER.spiderAttackSpeedBonus : 1;
+  return Math.max(250, (enemy.attackInterval || (1000 / (enemy.attackSpeed || 1))) / bloodFrenzy / irritable / plainsIrritable / blackForestMultiplier / blackForestTrailMultiplier / beastCommandMultiplier);
 }
 
 function createEnemyAttackSchedule(enemyTypes, startAt = Date.now(), mapId = getActiveMap(getProgress()).id, enemyLevels = []) {
@@ -2453,6 +2459,10 @@ function createBattlePartyMember(slot, slotIndex, mainId, now = Date.now()) {
     shield: 0,
     stunnedUntil: 0,
     bleed: null,
+    blackstoneMarkedUntil: 0,
+    blackstoneArmorBreakUntil: 0,
+    blackstoneAttackSpeedPenaltyUntil: 0,
+    blackstoneAttackSpeedPenalty: 0,
     reviveAt: null,
     undeadRevived: false,
     hunterAttackCount: 0,
@@ -3116,6 +3126,12 @@ function queueDefeatedEnemies() {
   }
   battle.enemyHps.forEach((hp, index) => {
     if (hp > 0 || battle.enemyRespawns[index] !== null) return;
+    if (battle.enemyTrailSummoned?.[index]) {
+      battle.enemyHps[index] = 0;
+      battle.enemyNextAttackAt[index] = null;
+      battle.enemyRespawns[index] = -1;
+      return;
+    }
     battle.enemyHps[index] = 0;
     battle.enemyNextAttackAt[index] = null;
     const respawnTicks = getMonsterRespawnTicks() + battle.enemyRespawns.filter((timer) => timer !== null).length;
@@ -3149,10 +3165,17 @@ function applyDamageToMonster(index, baseDamage, profile, options = {}) {
       return { finalDamage: 0, missed: true, evaded: true, parried: false };
     }
   }
-  const trailDefenseMultiplier = BlackForestTrailPolicy.getCombatMultipliers(enemy.id, battle.enemyHps[index], enemy.maxHp).defense;
+  const trailMultipliers = BlackForestTrailPolicy.getCombatMultipliers(enemy.id, battle.enemyHps[index], enemy.maxHp);
+  const captainShieldActive = enemy.id === 'blackstoneCaptain' && Date.now() < (battle.enemyCaptainShieldUntil?.[index] || 0);
+  const defendedEnemy = {
+    ...enemy,
+    defense: Math.max(0, Math.round(enemy.defense * trailMultipliers.defense)),
+    evasion: (enemy.evasion || 0) + (trailMultipliers.evasion || 0),
+    parry: (enemy.parry || 0) + (captainShieldActive ? BlackForestTrailPolicy.CAPTAIN.shieldParryBonus : 0)
+  };
   const result = MonsterDefense.resolveDamage({
     baseDamage: adjustedBaseDamage,
-    monster: trailDefenseMultiplier === 1 ? enemy : { ...enemy, defense: Math.max(0, Math.round(enemy.defense * trailDefenseMultiplier)) },
+    monster: defendedEnemy,
     damageType: profile.damageType,
     attackRange: profile.attackRange,
     canEvade: options.canEvade !== false,
@@ -3174,6 +3197,16 @@ function applyDamageToMonster(index, baseDamage, profile, options = {}) {
     attacker.shield = Math.max(0, (attacker.shield || 0) - absorbed);
     attacker.currentHp = Math.max(0, attacker.currentHp - (counterDamage - absorbed));
     logBattle(`↩【${enemy.name}】招架後反擊，對${attacker.name}造成 ${counterDamage - absorbed} 傷害。`, 'damage-taken');
+    defeatPartyMember(attacker);
+  }
+  if (result.parried && captainShieldActive && attacker?.alive) {
+    const counterStats = getCharacterStats(attacker.level, attacker.progress, attacker.character);
+    const counterRaw = Math.max(1, getMonsterAttackPower(enemy, progress, battle.enemyHps[index]) * BlackForestTrailPolicy.CAPTAIN.counterDamageMultiplier);
+    const counterDamage = MonsterDefense.resolvePlayerDamage({ baseDamage: counterRaw, defense: counterStats.defense, damageReduction: counterStats.damageReduction }).finalDamage;
+    const absorbed = Math.min(attacker.shield || 0, counterDamage);
+    attacker.shield = Math.max(0, (attacker.shield || 0) - absorbed);
+    attacker.currentHp = Math.max(0, attacker.currentHp - (counterDamage - absorbed));
+    logBattle(`↩【${enemy.name}】以【盾架反擊】對${attacker.name}造成 ${counterDamage - absorbed} 傷害。`, 'damage-taken');
     defeatPartyMember(attacker);
   }
   battle.enemyHps[index] -= result.finalDamage;
@@ -3341,7 +3374,10 @@ function processPartyMemberAttacks(now = Date.now()) {
       resource: `${member.resourceType}:${Math.floor(member.resourceCurrent)}/${member.resourceMax}`
     });
     const exhaustedMultiplier = member.manaExhausted ? 1.25 : 1;
-    PartyPolicy.scheduleNextAttack(member, now, member.attackSpeed, exhaustedMultiplier);
+    const trailSlowMultiplier = now < (member.blackstoneAttackSpeedPenaltyUntil || 0)
+      ? 1 / Math.max(.1, 1 - (member.blackstoneAttackSpeedPenalty || 0))
+      : 1;
+    PartyPolicy.scheduleNextAttack(member, now, member.attackSpeed, exhaustedMultiplier * trailSlowMultiplier);
   }
 }
 
@@ -3596,14 +3632,18 @@ function inflictBlackForestDot(member, enemy, effect, now = Date.now()) {
 
 function inflictBlackForestTrailPoison(member, enemy, now = Date.now()) {
   const rule = BlackForestTrailPolicy.POISON;
+  const existingStacks = member.bleed?.effectName === '黑石毒素' ? member.bleed.stacks || 1 : 0;
+  const stacks = Math.min(rule.maxStacks, existingStacks + 1);
+  const baseTickDamage = Math.max(1, Math.ceil((Number(enemy.attack) || 1) * rule.attackRatio));
   member.bleed = {
     effectName: '黑石毒素',
     tickMs: rule.tickMs,
-    tickDamage: Math.max(1, Math.ceil((Number(enemy.attack) || 1) * rule.attackRatio)),
+    stacks,
+    tickDamage: baseTickDamage * stacks,
     nextTickAt: now + rule.tickMs,
     expiresAt: now + rule.durationMs
   };
-  logBattle(`${member.name} 受到 ${enemy.name} 的黑石毒素效果。`, 'system');
+  logBattle(`${member.name} 受到 ${enemy.name} 的黑石毒素效果（${stacks}／${rule.maxStacks} 層）。`, 'system');
 }
 
 function processPartyMemberBleed(member, now = Date.now()) {
@@ -3628,6 +3668,58 @@ function processPartyMemberBleed(member, now = Date.now()) {
   return true;
 }
 
+function hasSummonedBlackstoneSpider() {
+  return (battle.enemyTrailSummoned || []).some((summoned, index) => summoned
+    && battle.enemyTypes[index] === 'blackstonePoisonSpider' && battle.enemyHps[index] > 0);
+}
+
+function summonBlackstonePoisonSpider(beastmasterIndex, now = Date.now()) {
+  if (hasSummonedBlackstoneSpider()) return false;
+  const type = 'blackstonePoisonSpider';
+  const spider = BlackForestTrailPolicy.getCombatMonster(type);
+  if (!spider) return false;
+  if (!battle.enemyTrailSummoned) battle.enemyTrailSummoned = battle.enemyTypes.map(() => false);
+  const reusedIndex = battle.enemyTrailSummoned.findIndex((summoned, index) => summoned && battle.enemyHps[index] <= 0);
+  if (reusedIndex >= 0) {
+    battle.enemyTypes[reusedIndex] = type;
+    battle.enemyLevels[reusedIndex] = 17;
+    battle.enemyHps[reusedIndex] = Math.max(1, Math.round(spider.maxHp * .70));
+    battle.enemyRespawns[reusedIndex] = null;
+    battle.enemySpawnedAt[reusedIndex] = now;
+    battle.enemyDots[reusedIndex] = [];
+    battle.enemyDamages[reusedIndex] = [];
+    battle.enemyNextAttackAt[reusedIndex] = now + getMonsterAttackInterval(spider);
+    battle.enemyBoarEnraged[reusedIndex] = false;
+    playMonsterAttackAnimation(beastmasterIndex, false);
+    logBattle('🕷【黑石訓獸師】施放【放養蜘蛛】，一隻削弱版黑石毒蜘蛛加入戰鬥！', 'spawn');
+    return true;
+  }
+  battle.enemyTypes.push(type);
+  battle.enemyLevels.push(17);
+  battle.enemyHps.push(Math.max(1, Math.round(spider.maxHp * .70)));
+  battle.enemyRespawns.push(null);
+  battle.enemySpawnedAt.push(now);
+  battle.enemyDots.push([]);
+  battle.enemyDamages.push([]);
+  battle.enemyNextAttackAt.push(now + getMonsterAttackInterval(spider));
+  battle.enemyBoarEnraged.push(false);
+  battle.enemyTrailSummoned.push(true);
+  playMonsterAttackAnimation(beastmasterIndex, false);
+  logBattle('🕷【黑石訓獸師】施放【放養蜘蛛】，一隻削弱版黑石毒蜘蛛加入戰鬥！', 'spawn');
+  return true;
+}
+
+function applyBlackstoneAttackSpeedPenalty(member, penalty, durationMs, now, sourceName) {
+  member.blackstoneAttackSpeedPenalty = Math.max(member.blackstoneAttackSpeedPenalty || 0, penalty);
+  member.blackstoneAttackSpeedPenaltyUntil = Math.max(member.blackstoneAttackSpeedPenaltyUntil || 0, now + durationMs);
+  logBattle(`${member.name} 受到【${sourceName}】，攻擊速度降低 ${Math.round(penalty * 100)}%！`, 'system');
+}
+
+function activateBlackstoneCommand(durationMs, now, sourceName) {
+  battle.blackstoneCommandUntil = Math.max(battle.blackstoneCommandUntil || 0, now + durationMs);
+  logBattle(`📣【${sourceName}】施放【隊長號令】，全體黑石怪攻擊提高 15%，持續 6 秒！`, 'system');
+}
+
 function defeatPartyMember(member, now = Date.now()) {
   if (member.currentHp > 0 || !member.alive) return false;
   if (member.character.race === 'undead' && !member.undeadRevived && Math.random() < .35) {
@@ -3641,6 +3733,10 @@ function defeatPartyMember(member, now = Date.now()) {
   member.targetIndex = -1;
   member.bleed = null;
   member.stunnedUntil = 0;
+  member.blackstoneMarkedUntil = 0;
+  member.blackstoneArmorBreakUntil = 0;
+  member.blackstoneAttackSpeedPenaltyUntil = 0;
+  member.blackstoneAttackSpeedPenalty = 0;
   member.nextAttackAt = Number.POSITIVE_INFINITY;
   member.reviveAt = member.isMain ? null : now + PARTY_REVIVE_DELAY_MS;
   logPartyDebug('死亡事件', { memberId: member.id, memberName: member.name, at: now });
@@ -3661,6 +3757,10 @@ function reviveDefeatedTeammates(now = Date.now()) {
     member.shield = 0;
     member.bleed = null;
     member.stunnedUntil = 0;
+    member.blackstoneMarkedUntil = 0;
+    member.blackstoneArmorBreakUntil = 0;
+    member.blackstoneAttackSpeedPenaltyUntil = 0;
+    member.blackstoneAttackSpeedPenalty = 0;
     member.nextAttackAt = now + 1000;
     member.targetIndex = -1;
     member.reviveAt = null;
@@ -3684,6 +3784,10 @@ function resetPartyAfterDefeat(now = Date.now()) {
     member.undeadRevived = false;
     member.bleed = null;
     member.stunnedUntil = 0;
+    member.blackstoneMarkedUntil = 0;
+    member.blackstoneArmorBreakUntil = 0;
+    member.blackstoneAttackSpeedPenaltyUntil = 0;
+    member.blackstoneAttackSpeedPenalty = 0;
     member.nextAttackAt = now + 1000;
     member.targetIndex = -1;
     member.reviveAt = null;
@@ -3779,17 +3883,47 @@ function enemyAttackTick() {
     const blackForestAction = getActiveMap(progress).id === 'black-forest-entrance'
       ? BlackForestEntrancePolicy.resolveAction(enemy.id, Math.random(), target.currentHp / target.maxHp, enemyCurrentHp, enemy.maxHp)
       : 'attack';
-    const blackForestTrailAction = getActiveMap(progress).id === 'black-forest-trail'
+    let blackForestTrailAction = getActiveMap(progress).id === 'black-forest-trail'
       ? BlackForestTrailPolicy.resolveAction(enemy.id, Math.random(), target.currentHp / target.maxHp, enemyCurrentHp, enemy.maxHp)
       : 'attack';
+    if (blackForestTrailAction === 'beast-command') {
+      battle.blackstoneSpiderCommandUntil = Math.max(battle.blackstoneSpiderCommandUntil || 0, now + BlackForestTrailPolicy.BEASTMASTER.commandDurationMs);
+      logBattle('⛓【黑石訓獸師】施放【鞭策】，黑石毒蜘蛛攻擊與攻速提高 20%，持續 6 秒！', 'system');
+      playMonsterAttackAnimation(enemyIndex, false);
+      continue;
+    }
+    if (blackForestTrailAction === 'release-spider') {
+      if (summonBlackstonePoisonSpider(enemyIndex, now)) continue;
+      blackForestTrailAction = 'attack';
+    }
+    if (blackForestTrailAction === 'captain-command') {
+      activateBlackstoneCommand(BlackForestTrailPolicy.CAPTAIN.commandDurationMs, now, enemy.name);
+      playMonsterAttackAnimation(enemyIndex, false);
+      continue;
+    }
+    if (blackForestTrailAction === 'shield-counter') {
+      if (!battle.enemyCaptainShieldUntil) battle.enemyCaptainShieldUntil = battle.enemyTypes.map(() => 0);
+      battle.enemyCaptainShieldUntil[enemyIndex] = now + BlackForestTrailPolicy.CAPTAIN.shieldDurationMs;
+      logBattle(`🛡【${enemy.name}】進入【盾架反擊】，招架提高並會反擊，持續 5 秒！`, 'system');
+      playMonsterAttackAnimation(enemyIndex, false);
+      continue;
+    }
     const activeDamageMultiplier = PlainsDepthsPolicy.getActiveDamageMultiplier(plainsAction)
       * BlackForestEntrancePolicy.getDamageMultiplier(blackForestAction)
       * BlackForestTrailPolicy.getDamageMultiplier(blackForestTrailAction);
-    const rawDamage = getMonsterAttackPower(enemy, progress, enemyCurrentHp) * activeDamageMultiplier * (critical ? 1.5 : 1);
+    const marked = now < (target.blackstoneMarkedUntil || 0);
+    const markedHumanBonus = marked && enemy.faction === 'blackstone-bandits'
+      ? 1 + BlackForestTrailPolicy.MARK.blackstoneHumanDamageBonus : 1;
+    const markedArcherBonus = marked && enemy.id === 'blackstoneArcher'
+      ? 1 + BlackForestTrailPolicy.MARK.archerDamageBonus : 1;
+    const rawDamage = getMonsterAttackPower(enemy, progress, enemyCurrentHp) * activeDamageMultiplier * markedHumanBonus * markedArcherBonus * (critical ? 1.5 : 1);
     const parried = !dodged && Math.random() < stats.parry;
+    const armorBreakMultiplier = now < (target.blackstoneArmorBreakUntil || 0)
+      ? 1 - BlackForestTrailPolicy.RAIDER.armorBreakPenalty : 1;
+    const piercingMultiplier = 1 - BlackForestTrailPolicy.getDefenseIgnore(blackForestTrailAction);
     let damage = dodged ? 0 : MonsterDefense.resolvePlayerDamage({
       baseDamage: rawDamage,
-      defense: stats.defense,
+      defense: Math.max(0, Math.round(stats.defense * armorBreakMultiplier * piercingMultiplier)),
       damageReduction: stats.damageReduction
     }).finalDamage;
     if (parried) damage = Math.max(1, Math.ceil(damage * .5));
@@ -3837,10 +3971,20 @@ function enemyAttackTick() {
     if (!dodged && damage > 0 && blackForestAction === 'leaf-storm') logBattle(`🍃【${enemy.name}】施放【落葉風暴】！`, 'system');
     if (!dodged && damage > 0 && ['venom-fang', 'venom-flask'].includes(blackForestTrailAction)) inflictBlackForestTrailPoison(target, enemy, now);
     if (!dodged && damage > 0 && blackForestTrailAction === 'webbed-strike') {
-      target.stunnedUntil = Math.max(target.stunnedUntil || 0, now + BlackForestTrailPolicy.CONTROL.webDurationMs);
-      logBattle(`🕸【${enemy.name}】施放【蛛絲纏擊】，${target.name}受困 2 秒！`, 'system');
+      applyBlackstoneAttackSpeedPenalty(target, BlackForestTrailPolicy.CONTROL.webAttackSpeedPenalty, BlackForestTrailPolicy.CONTROL.webDurationMs, now, '蛛絲纏繞');
     }
-    const blackForestTrailActionNames = { 'scouting-mark': '偵察標記', 'armor-break': '破甲劈砍', intercept: '攔截', 'piercing-arrow': '穿甲箭', 'aimed-shot': '狙擊', 'venom-flask': '毒液瓶', 'beast-whip': '馭獸鞭擊', 'rallying-strike': '隊長號令', 'captain-execution': '斬首', 'centurion-cleave': '破甲重斧', 'centurion-command': '百夫長號令', 'execution-axe': '處刑重斧' };
+    if (!dodged && damage > 0 && blackForestTrailAction === 'scouting-mark') {
+      target.blackstoneMarkedUntil = now + BlackForestTrailPolicy.MARK.durationMs;
+      logBattle(`🎯【${enemy.name}】施放【偵察標記】，${target.name}受到黑石人形怪傷害提高 12%，持續 5 秒！`, 'system');
+    }
+    if (!dodged && damage > 0 && blackForestTrailAction === 'armor-break') {
+      target.blackstoneArmorBreakUntil = now + BlackForestTrailPolicy.RAIDER.armorBreakDurationMs;
+      logBattle(`🪓【${enemy.name}】施放【破甲劈砍】，${target.name}防禦降低 15%，持續 5 秒！`, 'system');
+    }
+    if (!dodged && damage > 0 && blackForestTrailAction === 'intercept') {
+      applyBlackstoneAttackSpeedPenalty(target, BlackForestTrailPolicy.RAIDER.interceptAttackSpeedPenalty, BlackForestTrailPolicy.RAIDER.interceptDurationMs, now, '攔截');
+    }
+    const blackForestTrailActionNames = { 'piercing-arrow': '穿甲箭', 'aimed-shot': '狙擊', 'venom-flask': '毒液瓶', 'captain-execution': '斬首', 'centurion-cleave': '破甲重斧', 'centurion-command': '百夫長號令', 'execution-axe': '處刑重斧' };
     if (!dodged && damage > 0 && blackForestTrailActionNames[blackForestTrailAction]) logBattle(`⚔【${enemy.name}】施放【${blackForestTrailActionNames[blackForestTrailAction]}】！`, 'system');
 
     if (dodged) {
@@ -3915,7 +4059,7 @@ function openBattle() {
   const sessionId = ++battleSessionSequence;
   const partyMembers = buildBattlePartyMembers(battleStart);
   const mainMember = partyMembers.find((member) => member.isMain) || partyMembers[0];
-  battle = { enemyTypes, enemyLevels, enemyHps, partyMembers, playerHp: mainMember?.currentHp || getMaxHp(progress.level, progress), playerMana: mainMember?.resourceCurrent || 0, playerArrows: mainMember?.resourceType === 'arrows' ? mainMember.resourceCurrent : 0, playerShield: 0, playerStunnedUntil: 0, playerBleed: null, manaExhausted: false, playerAttackCharge: 0, hunterAttackCount: 0, lastManaRegenAt: battleStart, lastResourceUpdatedAt: battleStart, lastArrowRecoveryAt: battleStart, lastCorruptionTickAt: battleStart, enemyNextAttackAt: createEnemyAttackSchedule(enemyTypes, battleStart, currentMap.id, enemyLevels), enemyBoarEnraged: enemyTypes.map(() => false), blackstoneRoarUntil: 0, globalSkillReadyAt: 0, undeadRevived: false, skillCooldowns: {}, enemyRespawns: enemyTypes.map(() => null), enemySpawnedAt: enemyTypes.map((_, index) => battleStart + index), enemyDots: enemyTypes.map(() => []), monsterMoveSpeed: 200, targetIndexes: [], enemyDamages: enemyTypes.map(() => []), damageTimers: [], rewardedEnemyIndexes: new Set(), isDungeon, dungeonId: isDungeon ? currentMap.id : null, dungeonWave: isDungeon ? 1 : 0, dungeonComplete: false, waveTransitioning: false, goblinScoutSummons: 0 };
+  battle = { enemyTypes, enemyLevels, enemyHps, partyMembers, playerHp: mainMember?.currentHp || getMaxHp(progress.level, progress), playerMana: mainMember?.resourceCurrent || 0, playerArrows: mainMember?.resourceType === 'arrows' ? mainMember.resourceCurrent : 0, playerShield: 0, playerStunnedUntil: 0, playerBleed: null, manaExhausted: false, playerAttackCharge: 0, hunterAttackCount: 0, lastManaRegenAt: battleStart, lastResourceUpdatedAt: battleStart, lastArrowRecoveryAt: battleStart, lastCorruptionTickAt: battleStart, enemyNextAttackAt: createEnemyAttackSchedule(enemyTypes, battleStart, currentMap.id, enemyLevels), enemyBoarEnraged: enemyTypes.map(() => false), enemyTrailSummoned: enemyTypes.map(() => false), enemyCaptainShieldUntil: enemyTypes.map(() => 0), blackstoneRoarUntil: 0, blackstoneCommandUntil: 0, blackstoneSpiderCommandUntil: 0, globalSkillReadyAt: 0, undeadRevived: false, skillCooldowns: {}, enemyRespawns: enemyTypes.map(() => null), enemySpawnedAt: enemyTypes.map((_, index) => battleStart + index), enemyDots: enemyTypes.map(() => []), monsterMoveSpeed: 200, targetIndexes: [], enemyDamages: enemyTypes.map(() => []), damageTimers: [], rewardedEnemyIndexes: new Set(), isDungeon, dungeonId: isDungeon ? currentMap.id : null, dungeonWave: isDungeon ? 1 : 0, dungeonComplete: false, waveTransitioning: false, goblinScoutSummons: 0 };
   battle.sessionId = sessionId;
   clearBattleLog();
   if (pendingOfflineReport) {
