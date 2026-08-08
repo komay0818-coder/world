@@ -5,6 +5,11 @@ assert.equal(policy.RULES.gameplayType, 'outpost-siege');
 assert.equal(policy.RULES.objectiveCount, 5);
 assert.equal(policy.RULES.outpostDamageReduction, null);
 assert.equal(policy.RULES.outpostShield, null);
+assert.deepEqual(policy.OUTPOSTS.map((outpost) => outpost.name), ['補給站']);
+assert.deepEqual(policy.getOutpost('blackstone-supply-station'), {
+  id: 'blackstone-supply-station', name: '補給站', image: 'assets/blackstone-supply-station.png', effect: null, implemented: false
+});
+assert.equal(policy.getOutpost('unknown'), null);
 assert.deepEqual(policy.MONSTERS.map((monster) => monster.name), ['黑石守衛', '黑石弩手', '黑石狂戰士', '黑石戰犬', '黑石獅衛', '黑石蠻角勇士', '黑石督軍']);
 assert.deepEqual(policy.MONSTERS.map((monster) => monster.rank), ['normal', 'normal', 'normal', 'normal', 'elite', 'elite', 'boss']);
 assert.deepEqual(policy.MONSTERS.map((monster) => monster.race), ['human', 'goblin', 'orc', 'beast', 'lionkin', 'bullkin', 'orc']);
@@ -47,6 +52,9 @@ assert.equal(bullhornWarrior[25], 6, 'the Blackstone bullhorn warrior uses RGBA 
 const warlord = fs.readFileSync(path.join(__dirname, '..', policy.getMonster('blackstone-warlord').image));
 assert.equal(warlord.subarray(1, 4).toString(), 'PNG', 'the Blackstone warlord is a PNG asset');
 assert.equal(warlord[25], 6, 'the Blackstone warlord uses RGBA color with transparency');
+const supplyStation = fs.readFileSync(path.join(__dirname, '..', policy.getOutpost('blackstone-supply-station').image));
+assert.equal(supplyStation.subarray(1, 4).toString(), 'PNG', 'the Blackstone supply station is a PNG asset');
+assert.equal(supplyStation[25], 6, 'the Blackstone supply station uses RGBA color with transparency');
 assert.equal(policy.rollRequiredKills(() => 0), 10);
 assert.equal(policy.rollRequiredKills(() => .999999), 70);
 let state = policy.createState(() => 0);

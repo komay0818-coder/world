@@ -52,6 +52,12 @@
   function getMonster(monsterId) { return MONSTER_BY_ID.get(monsterId) || null; }
   function getMonstersByRank(rank) { return MONSTERS.filter((entry) => entry.rank === rank); }
 
+  const OUTPOSTS = Object.freeze([
+    Object.freeze({ id: 'blackstone-supply-station', name: '補給站', image: 'assets/blackstone-supply-station.png', effect: null, implemented: false })
+  ]);
+  const OUTPOST_BY_ID = new Map(OUTPOSTS.map((entry) => [entry.id, entry]));
+  function getOutpost(outpostId) { return OUTPOST_BY_ID.get(outpostId) || null; }
+
   function rollRequiredKills(random = Math.random) {
     const roll = Math.max(0, Math.min(.999999, Number(random()) || 0));
     return RULES.minKillsPerOutpost + Math.floor(roll * (RULES.maxKillsPerOutpost - RULES.minKillsPerOutpost + 1));
@@ -100,5 +106,5 @@
     return { active, attackBonus: active ? RULES.enrageAttackBonus : 0, attackSpeedBonus: active ? RULES.enrageAttackSpeedBonus : 0, remainingMs: active ? state.enragedUntil - now : 0 };
   }
 
-  return Object.freeze({ RULES, MONSTERS, getMonster, getMonstersByRank, rollRequiredKills, createState, normalizeState, recordMonsterKill, destroyOutpost, getEnrage });
+  return Object.freeze({ RULES, MONSTERS, OUTPOSTS, getMonster, getMonstersByRank, getOutpost, rollRequiredKills, createState, normalizeState, recordMonsterKill, destroyOutpost, getEnrage });
 });

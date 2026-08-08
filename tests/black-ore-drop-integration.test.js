@@ -12,6 +12,6 @@ assert.match(script, /VillageUpgradePolicy\.grantMapDrops\(progress, currentMap\
 assert.doesNotMatch(crafting, /blackOre: Object\.freeze/, 'black ore has one canonical material definition in the drop policy');
 assert.match(index, /chapter-one-material-drop-policy\.js\?v=20260806-black-ore-drops-v2/, 'the material policy cache key changes');
 assert.match(index, /script\.js\?v=20260809-spider-combat-v131/, 'the integration cache key changes');
-assert.match(index, /VER\. 0\.4\.37/, 'the game version includes the Blackstone lion guard artwork');
+assert.match(index, /VER\. 0\.4\.38/, 'the game version includes the Blackstone supply station artwork');
 
 console.log('black-ore-drop-integration: assertions passed');
