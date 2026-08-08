@@ -54,7 +54,8 @@
 
   const OUTPOSTS = Object.freeze([
     Object.freeze({ id: 'blackstone-supply-station', name: '補給站', image: 'assets/blackstone-supply-station.png', effect: null, implemented: false }),
-    Object.freeze({ id: 'blackstone-barracks', name: '兵營', image: 'assets/blackstone-barracks.png', effect: null, implemented: false })
+    Object.freeze({ id: 'blackstone-barracks', name: '兵營', image: 'assets/blackstone-barracks.png', effect: null, implemented: false }),
+    Object.freeze({ id: 'blackstone-armory', name: '軍械庫', image: 'assets/blackstone-armory.png', effect: null, implemented: false })
   ]);
   const OUTPOST_BY_ID = new Map(OUTPOSTS.map((entry) => [entry.id, entry]));
   function getOutpost(outpostId) { return OUTPOST_BY_ID.get(outpostId) || null; }
