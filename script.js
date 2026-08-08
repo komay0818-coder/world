@@ -589,7 +589,8 @@ const monsterTypes = EquipmentDropPolicy.applyDefaultLootConfigs({
   moonboneSentinel: { id: 'moonboneSentinel', name: '月骨守衛', maxHp: 1120, attack: 25, defense: 32, evasion: 3, parry: 10, damageReduction: 14, artClass: 'dungeon-moonbone dungeon-monster-art', xp: 32, gold: 78, isElite: true, lootSource: 'dungeonElite' },
   blightOracle: { id: 'blightOracle', name: '疫木神諭', maxHp: 860, attack: 30, defense: 16, evasion: 10, parry: 3, damageReduction: 12, artClass: 'dungeon-oracle dungeon-monster-art', xp: 32, gold: 76, isElite: true, lootSource: 'dungeonElite' },
   eclipseSovereign: { id: 'eclipseSovereign', name: '蝕月鹿王', maxHp: 5200, attack: 39, defense: 45, evasion: 8, parry: 12, damageReduction: 18, artClass: 'dungeon-boss dungeon-monster-art', xp: 180, gold: 620, isBoss: true, lootSource: 'dungeonBoss' },
-  ...PlainsDepthsPolicy.MONSTER_TYPES
+  ...PlainsDepthsPolicy.MONSTER_TYPES,
+  ...Object.fromEntries(BlackForestEntrancePolicy.MONSTERS.map((entry) => [entry.combatId, BlackForestEntrancePolicy.toCombatMonster(entry)]))
 });
 const normalMonsterIds = ['goblin', 'wolf', 'boar'];
 const eliteMonsterIds = ['goblinOverlord', 'wolfAlpha', 'boarTyrant'];
@@ -599,6 +600,7 @@ const mapMonsterPools = {
   wolfDen: { normal: ['plainsWolfPup', 'denForestWolf'], rare: ['lostGoblin'], rareChance: .10, elite: ['ragingWolf'], boss: ['greatfangWolf'] },
   boarWoods: { normal: ['boarPiglet', 'forestBoar'], rare: ['lostGoblin'], rareChance: .10, elite: ['irritableBoar'], boss: ['boarKing'] },
   plainsDepths: PlainsDepthsPolicy.MONSTER_POOL,
+  blackForestEntrance: BlackForestEntrancePolicy.getCombatPool(),
   beginner: { normal: normalMonsterIds, elite: eliteMonsterIds, boss: bossMonsterIds },
   blackForest: { normal: ['nightGoblin', 'shadowWolf', 'thornBoar'], elite: ['forestShaman', 'moonfangAlpha', 'thornbackTyrant'], boss: ['forestGuardian'] }
 };
@@ -1422,6 +1424,7 @@ function getMonsterPool(level = getProgress().level) {
   if (mapId === 'wolf-den') return mapMonsterPools.wolfDen;
   if (mapId === 'boar-woods') return mapMonsterPools.boarWoods;
   if (mapId === 'plains-depths') return mapMonsterPools.plainsDepths;
+  if (mapId === 'black-forest-entrance') return mapMonsterPools.blackForestEntrance;
   return mapId === 'black-forest' ? mapMonsterPools.blackForest : mapMonsterPools.beginner;
 }
 
@@ -1460,6 +1463,7 @@ function createDungeonWaveTypes(wave, mapId = battle.dungeonId || getActiveMap(g
 }
 
 function getMonsterDefinitionForMap(type, mapId = battle.dungeonId || getActiveMap(getProgress()).id, level = null) {
+  if (mapId === 'black-forest-entrance') return BlackForestEntrancePolicy.getCombatMonster(type, level) || monsterTypes.goblin;
   const monster = monsterTypes[type] || monsterTypes.goblin;
   const chapterMonster = ChapterOneLevelPolicy.scaleMonster(monster, mapId, level);
   const dungeonMonster = GoblinCampPolicy.scaleMonster(chapterMonster, mapId === 'goblin-camp');
@@ -1472,7 +1476,9 @@ function getMonsterDefinitionForMap(type, mapId = battle.dungeonId || getActiveM
 }
 
 function createEnemyLevels(enemyTypes, mapId, random = Math.random) {
-  return enemyTypes.map((type) => ChapterOneLevelPolicy.rollLevel(mapId, type, random()) ?? null);
+  return enemyTypes.map((type) => mapId === 'black-forest-entrance'
+    ? BlackForestEntrancePolicy.rollLevel(type, random())
+    : ChapterOneLevelPolicy.rollLevel(mapId, type, random()) ?? null);
 }
 
 function loadDungeonWave(wave) {
@@ -1555,7 +1561,8 @@ function getMonsterAttackPower(enemy, progress = getProgress(), currentHp = enem
   const bloodFrenzy = WolfDenPolicy.getBloodFrenzyMultiplier(enemy.id, isPlayerBleeding());
   const irritable = BoarWoodsPolicy.getIrritableMultiplier(enemy.id, currentHp, enemy.maxHp);
   const plainsIrritable = PlainsDepthsPolicy.getIrritableMultiplier(enemy.id, currentHp, enemy.maxHp);
-  if (enemy.mapId) return Math.max(1, Math.round((enemy.attack || 1) * randomMultiplier * bloodFrenzy * irritable * plainsIrritable));
+  const blackForestMultiplier = BlackForestEntrancePolicy.getCombatMultipliers(enemy.id, currentHp, enemy.maxHp).attack;
+  if (enemy.mapId) return Math.max(1, Math.round((enemy.attack || 1) * randomMultiplier * bloodFrenzy * irritable * plainsIrritable * blackForestMultiplier));
   const map = getActiveMap(progress);
   const monsterLevel = Math.min(map.max, Math.max(map.min, progress.level));
   const levelMultiplier = 1 + (monsterLevel - 1) * .10;
@@ -1567,7 +1574,8 @@ function getMonsterAttackInterval(enemy, currentHp = enemy.maxHp) {
   const bloodFrenzy = WolfDenPolicy.getBloodFrenzyMultiplier(enemy.id, isPlayerBleeding());
   const irritable = BoarWoodsPolicy.getIrritableMultiplier(enemy.id, currentHp, enemy.maxHp);
   const plainsIrritable = PlainsDepthsPolicy.getIrritableMultiplier(enemy.id, currentHp, enemy.maxHp);
-  return Math.max(250, (enemy.attackInterval || (1000 / (enemy.attackSpeed || 1))) / bloodFrenzy / irritable / plainsIrritable);
+  const blackForestMultiplier = BlackForestEntrancePolicy.getCombatMultipliers(enemy.id, currentHp, enemy.maxHp).attackSpeed;
+  return Math.max(250, (enemy.attackInterval || (1000 / (enemy.attackSpeed || 1))) / bloodFrenzy / irritable / plainsIrritable / blackForestMultiplier);
 }
 
 function createEnemyAttackSchedule(enemyTypes, startAt = Date.now(), mapId = getActiveMap(getProgress()).id, enemyLevels = []) {
@@ -3565,6 +3573,18 @@ function inflictPartyMemberBleed(member, enemy, now = Date.now()) {
   logBattle(`${member.name} 受到 ${enemy.name} 的流血效果。`, 'system');
 }
 
+function inflictBlackForestDot(member, enemy, effect, now = Date.now()) {
+  const rule = effect === 'poison' ? BlackForestEntrancePolicy.POISON : BlackForestEntrancePolicy.BLEED;
+  member.bleed = {
+    effectName: effect === 'poison' ? '中毒' : '流血',
+    tickMs: rule.tickMs,
+    tickDamage: Math.max(1, Math.ceil((Number(enemy.attack) || 1) * rule.attackRatio)),
+    nextTickAt: now + rule.tickMs,
+    expiresAt: now + rule.durationMs
+  };
+  logBattle(`${member.name} 受到 ${enemy.name} 的${member.bleed.effectName}效果。`, 'system');
+}
+
 function processPartyMemberBleed(member, now = Date.now()) {
   const bleed = member.bleed;
   if (!bleed) return false;
@@ -3573,14 +3593,16 @@ function processPartyMemberBleed(member, now = Date.now()) {
     return true;
   }
   if (now < bleed.nextTickAt) return false;
-  const ticks = Math.max(1, Math.floor((now - bleed.nextTickAt) / WolfDenPolicy.BLEED_TICK_MS) + 1);
+  const tickMs = bleed.tickMs || WolfDenPolicy.BLEED_TICK_MS;
+  const ticks = Math.max(1, Math.floor((now - bleed.nextTickAt) / tickMs) + 1);
   const damage = bleed.tickDamage * ticks;
-  bleed.nextTickAt += WolfDenPolicy.BLEED_TICK_MS * ticks;
+  bleed.nextTickAt += tickMs * ticks;
   member.currentHp = Math.max(0, member.currentHp - damage);
-  logBattle(`${member.name} 因流血受到 ${damage} 點傷害。`, 'damage-taken', {
+  const effectName = bleed.effectName || '流血';
+  logBattle(`${member.name} 因${effectName}受到 ${damage} 點傷害。`, 'damage-taken', {
     aggregateKey: `enemy-bleed-${member.id}`,
     damage,
-    summary: `${member.name} 的流血傷害`
+    summary: `${member.name} 的${effectName}傷害`
   });
   return true;
 }
@@ -3716,7 +3738,10 @@ function enemyAttackTick() {
       if (action === 'summon-scout' && summonGoblinScout(enemyIndex, now)) continue;
     }
 
-    const target = PartyPolicy.chooseRandomAliveMember(battle.partyMembers, Math.random);
+    const aliveMembers = battle.partyMembers.filter((member) => member.alive);
+    const target = enemy.id === 'blackForestHunter'
+      ? aliveMembers.sort((first, second) => first.currentHp / first.maxHp - second.currentHp / second.maxHp)[0]
+      : PartyPolicy.chooseRandomAliveMember(battle.partyMembers, Math.random);
     if (!target) break;
     logPartyDebug('怪物選擇隊員', {
       attackerId: battle.enemyTypes[enemyIndex],
@@ -3730,7 +3755,11 @@ function enemyAttackTick() {
       : 1 - stats.dodge;
     const dodged = Math.random() >= monsterHitChance;
     const critical = !dodged && Math.random() < (enemy.isBoss ? .15 : enemy.isElite ? .10 : .05);
-    const activeDamageMultiplier = PlainsDepthsPolicy.getActiveDamageMultiplier(plainsAction);
+    const blackForestAction = getActiveMap(progress).id === 'black-forest-entrance'
+      ? BlackForestEntrancePolicy.resolveAction(enemy.id, Math.random(), target.currentHp / target.maxHp, enemyCurrentHp, enemy.maxHp)
+      : 'attack';
+    const activeDamageMultiplier = PlainsDepthsPolicy.getActiveDamageMultiplier(plainsAction)
+      * BlackForestEntrancePolicy.getDamageMultiplier(blackForestAction);
     const rawDamage = getMonsterAttackPower(enemy, progress, enemyCurrentHp) * activeDamageMultiplier * (critical ? 1.5 : 1);
     const parried = !dodged && Math.random() < stats.parry;
     let damage = dodged ? 0 : MonsterDefense.resolvePlayerDamage({
@@ -3767,6 +3796,20 @@ function enemyAttackTick() {
     }
     if (!dodged && damage > 0 && plainsAction === 'dive') logBattle(`🦅【${enemy.name}】施放【俯衝】，造成雙倍傷害！`, 'system');
     if (!dodged && damage > 0 && plainsAction === 'smash') logBattle(`💢【${enemy.name}】施放【猛擊】，攻擊傷害提高！`, 'system');
+    if (!dodged && damage > 0 && blackForestAction === 'shadow-bite') inflictBlackForestDot(target, enemy, 'bleed', now);
+    if (!dodged && damage > 0 && blackForestAction === 'venom-fang') inflictBlackForestDot(target, enemy, 'poison', now);
+    if (!dodged && damage > 0 && blackForestAction === 'charge') {
+      target.stunnedUntil = Math.max(target.stunnedUntil || 0, now + BlackForestEntrancePolicy.CONTROL.chargeStunMs);
+      logBattle(`💥【${enemy.name}】施放【衝撞】，${target.name}暈眩 1 秒！`, 'system');
+    }
+    if (!dodged && damage > 0 && blackForestAction === 'entangling-roots') {
+      target.stunnedUntil = Math.max(target.stunnedUntil || 0, now + BlackForestEntrancePolicy.CONTROL.rootDurationMs);
+      logBattle(`🌿【${enemy.name}】施放【纏繞根鬚】，${target.name}受困 4 秒！`, 'system');
+    }
+    if (!dodged && damage > 0 && blackForestAction === 'binding-arrow') logBattle(`🏹【${enemy.name}】施放【束縛箭】！`, 'system');
+    if (!dodged && damage > 0 && blackForestAction === 'execution-arrow') logBattle(`🏹【${enemy.name}】對低生命目標施放【處決箭】！`, 'system');
+    if (!dodged && damage > 0 && blackForestAction === 'root-strike') logBattle(`🌳【${enemy.name}】施放【根鬚重擊】！`, 'system');
+    if (!dodged && damage > 0 && blackForestAction === 'leaf-storm') logBattle(`🍃【${enemy.name}】施放【落葉風暴】！`, 'system');
 
     if (dodged) {
       logBattle(`${target.name} 閃避了 ${enemy.name} 的攻擊。`, 'damage-taken');
