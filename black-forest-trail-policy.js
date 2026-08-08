@@ -11,6 +11,7 @@
     order: 2,
     level: 17,
     name: '黑森林小徑',
+    background: 'assets/black-forest-trail-background.png',
     primaryFaction: 'blackstone-bandits',
     enemyPoolId: 'black-forest-trail-enemies',
     bossId: 'blackstone-centurion',

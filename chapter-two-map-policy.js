@@ -59,6 +59,7 @@
       min: 17,
       max: 17,
       contentStatus: 'monster-foundation',
+      background: 'assets/black-forest-trail-background.png',
       enemyPoolId: 'black-forest-trail-enemies',
       bossId: 'blackstone-centurion',
       primaryFaction: 'blackstone-bandits',

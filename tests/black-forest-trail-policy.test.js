@@ -1,4 +1,6 @@
 const assert = require('node:assert/strict');
+const fs = require('node:fs');
+const path = require('node:path');
 const policy = require('../black-forest-trail-policy.js');
 
 assert.equal(policy.MAP.id, 'black-forest-trail');
@@ -7,6 +9,7 @@ assert.equal(policy.MAP.order, 2);
 assert.equal(policy.MAP.level, 17);
 assert.equal(policy.MAP.enemyPoolId, 'black-forest-trail-enemies');
 assert.equal(policy.MAP.bossId, 'blackstone-centurion');
+assert.equal(policy.MAP.background, 'assets/black-forest-trail-background.png');
 assert.equal(policy.MAP.implemented, false);
 assert.equal(policy.MAP.contentStatus, 'monster-foundation');
 assert.deepEqual(policy.MONSTERS.map((monster) => monster.name), [
@@ -27,5 +30,8 @@ assert.ok(policy.STORY.discoveries.includes('poison-spider-husbandry'));
 assert.ok(policy.MONSTERS.every((monster) => monster.level === 17 && monster.image === null && monster.stats === null
   && monster.dropTableId === null && monster.aiProfileId === null && monster.skillIds.length === 0 && monster.implemented === false));
 assert.equal(policy.getMonster('unknown'), null);
+const background = fs.readFileSync(path.join(__dirname, '..', policy.MAP.background));
+assert.equal(background.subarray(1, 4).toString(), 'PNG', 'the Black Forest trail background is a PNG asset');
+assert.equal(background[25], 2, 'the Black Forest trail background uses RGB color');
 
 console.log('black-forest-trail-policy: assertions passed');
