@@ -11,7 +11,7 @@ assert.match(script, /grantMaterialDrops\(progress, currentMap\.id, enemy\)/, 'r
 assert.match(script, /VillageUpgradePolicy\.grantMapDrops\(progress, currentMap\.id\)/, 'reward settlement also grants map-based building black ore');
 assert.doesNotMatch(crafting, /blackOre: Object\.freeze/, 'black ore has one canonical material definition in the drop policy');
 assert.match(index, /chapter-one-material-drop-policy\.js\?v=20260806-black-ore-drops-v2/, 'the material policy cache key changes');
-assert.match(index, /script\.js\?v=20260808-entrance-combat-v128/, 'the integration cache key changes');
-assert.match(index, /VER\. 0\.4\.17/, 'the game version includes the Blackstone captain artwork');
+assert.match(index, /script\.js\?v=20260809-trail-combat-v129/, 'the integration cache key changes');
+assert.match(index, /VER\. 0\.4\.18/, 'the game version includes Black Forest trail combat');
 
 console.log('black-ore-drop-integration: assertions passed');

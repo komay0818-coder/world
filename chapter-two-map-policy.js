@@ -58,7 +58,8 @@
     map('black-forest-trail', 2, '黑森林小徑', {
       min: 17,
       max: 17,
-      contentStatus: 'monster-foundation',
+      implemented: true,
+      contentStatus: 'combat-ready',
       background: 'assets/black-forest-trail-background.png',
       enemyPoolId: 'black-forest-trail-enemies',
       bossId: 'blackstone-centurion',

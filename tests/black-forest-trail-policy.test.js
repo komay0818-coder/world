@@ -10,8 +10,8 @@ assert.equal(policy.MAP.level, 17);
 assert.equal(policy.MAP.enemyPoolId, 'black-forest-trail-enemies');
 assert.equal(policy.MAP.bossId, 'blackstone-centurion');
 assert.equal(policy.MAP.background, 'assets/black-forest-trail-background.png');
-assert.equal(policy.MAP.implemented, false);
-assert.equal(policy.MAP.contentStatus, 'monster-foundation');
+assert.equal(policy.MAP.implemented, true);
+assert.equal(policy.MAP.contentStatus, 'combat-ready');
 assert.deepEqual(policy.MONSTERS.map((monster) => monster.name), [
   '黑石斥候', '黑石掠奪者', '黑石弓箭手', '黑石毒蜘蛛', '黑石訓獸師', '黑石隊長', '黑石百夫長'
 ]);
@@ -32,10 +32,37 @@ assert.equal(policy.STORY.completionObjectiveId, 'defeat-blackstone-centurion');
 assert.equal(policy.STORY.completionClueId, 'spider-nest-route-clue');
 assert.ok(policy.STORY.discoveries.includes('patrol-and-supply-route'));
 assert.ok(policy.STORY.discoveries.includes('poison-spider-husbandry'));
-assert.ok(policy.MONSTERS.every((monster) => monster.level === 17 && monster.stats === null
-  && monster.dropTableId === null && monster.aiProfileId === null && monster.skillIds.length === 0 && monster.implemented === false));
+assert.ok(policy.MONSTERS.every((monster) => monster.level[0] === 17 && monster.level[1] === 17 && monster.stats.maxHp > 0
+  && monster.stats.attack > 0 && monster.stats.defense >= 0 && monster.stats.attackSpeed > 0
+  && monster.dropTableId === 'black-forest-trail-pending' && monster.aiProfileId !== null
+  && monster.skillIds.length > 0 && monster.implemented === true));
 assert.ok(policy.MONSTERS.filter((monster) => !['blackstone-poison-spider', 'blackstone-archer', 'blackstone-beastmaster', 'blackstone-captain', 'blackstone-centurion'].includes(monster.id)).every((monster) => monster.image === null));
 assert.equal(policy.getMonster('unknown'), null);
+assert.deepEqual(policy.getCombatPool(), {
+  normal: ['blackstoneTrailScout', 'blackstoneTrailRaider', 'blackstoneArcher', 'blackstonePoisonSpider'],
+  elite: ['blackstoneBeastmaster', 'blackstoneCaptain'],
+  boss: ['blackstoneCenturion']
+});
+assert.equal(policy.getCombatMonster('blackstoneTrailScout').maxHp, 190);
+assert.equal(policy.getCombatMonster('blackstoneTrailRaider').defense, 22);
+assert.equal(policy.getCombatMonster('blackstoneArcher').attack, 35);
+assert.equal(policy.getCombatMonster('blackstonePoisonSpider').attackSpeed, 1.15);
+assert.equal(policy.getCombatMonster('blackstoneBeastmaster').isElite, true);
+assert.equal(policy.getCombatMonster('blackstoneCaptain').maxHp, 880);
+assert.equal(policy.getCombatMonster('blackstoneCenturion').maxHp, 2800);
+assert.equal(policy.resolveAction('blackstoneTrailScout', .29), 'scouting-mark');
+assert.equal(policy.resolveAction('blackstoneTrailRaider', .24), 'armor-break');
+assert.equal(policy.resolveAction('blackstoneArcher', .09), 'aimed-shot');
+assert.equal(policy.resolveAction('blackstonePoisonSpider', .29), 'venom-fang');
+assert.equal(policy.resolveAction('blackstonePoisonSpider', .35), 'webbed-strike');
+assert.equal(policy.resolveAction('blackstoneBeastmaster', .24), 'venom-flask');
+assert.equal(policy.resolveAction('blackstoneCaptain', .14, .34), 'captain-execution');
+assert.equal(policy.getPhase('blackstoneCenturion', 1900, 2800), 2);
+assert.equal(policy.getPhase('blackstoneCenturion', 900, 2800), 3);
+assert.deepEqual(policy.getCombatMultipliers('blackstoneCenturion', 1900, 2800), { attack: 1.1, attackSpeed: 1.05, defense: 1 });
+assert.equal(policy.resolveAction('blackstoneCenturion', .14, .34, 900, 2800), 'execution-axe');
+assert.deepEqual(policy.getCombatMultipliers('blackstoneCenturion', 900, 2800), { attack: 1.2, attackSpeed: 1.15, defense: .85 });
+assert.equal(policy.getDamageMultiplier('execution-axe'), 2.1);
 const background = fs.readFileSync(path.join(__dirname, '..', policy.MAP.background));
 assert.equal(background.subarray(1, 4).toString(), 'PNG', 'the Black Forest trail background is a PNG asset');
 assert.equal(background[25], 2, 'the Black Forest trail background uses RGB color');
