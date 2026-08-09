@@ -9,6 +9,7 @@
     mapId: 'black-forest-depths',
     chapter: 2,
     name: '黑森林深處',
+    background: 'assets/black-forest-depths-background.png',
     enemyPoolId: 'black-forest-depths-enemies',
     bossId: 'heart-of-the-black-forest',
     implemented: false,

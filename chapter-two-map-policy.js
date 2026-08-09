@@ -111,6 +111,7 @@
     map('black-forest-depths', 6, '黑森林深處', {
       isFinalMap: true,
       contentStatus: 'monster-roster',
+      background: 'assets/black-forest-depths-background.png',
       enemyPoolId: 'black-forest-depths-enemies',
       bossId: 'heart-of-the-black-forest',
       environmentEffects: Object.freeze(['dense-fog']),

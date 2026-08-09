@@ -81,6 +81,7 @@ assert.equal(forestAltar.primaryFaction, 'corrupted-forest');
 assert.equal(policy.canEnter('forest-altar'), false);
 assert.equal(policy.getMap('black-forest-depths').isFinalMap, true);
 assert.equal(policy.getMap('black-forest-depths').contentStatus, 'monster-roster');
+assert.equal(policy.getMap('black-forest-depths').background, 'assets/black-forest-depths-background.png');
 assert.equal(policy.getMap('black-forest-depths').enemyPoolId, 'black-forest-depths-enemies');
 assert.equal(policy.getMap('black-forest-depths').bossId, 'heart-of-the-black-forest');
 assert.deepEqual(policy.getMap('black-forest-depths').environmentEffects, ['dense-fog']);

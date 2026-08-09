@@ -2,6 +2,7 @@ const assert = require('node:assert/strict');
 const policy = require('../black-forest-depths-policy.js');
 
 assert.equal(policy.RULES.name, '黑森林深處');
+assert.equal(policy.RULES.background, 'assets/black-forest-depths-background.png');
 assert.equal(policy.RULES.enemyPoolId, 'black-forest-depths-enemies');
 assert.equal(policy.RULES.bossId, 'heart-of-the-black-forest');
 assert.equal(policy.RULES.implemented, false);
@@ -18,6 +19,11 @@ assert.ok(policy.MONSTERS.filter((monster) => monster.id !== 'forest-spirit').ev
 assert.ok(policy.MONSTERS.every((monster) => monster.combatId === null && monster.image === null && monster.stats === null
   && monster.dropTableId === null && monster.skillIds.length === 0 && monster.aiProfileId === null && monster.implemented === false));
 assert.equal(policy.getMonster('unknown'), null);
+const fs = require('node:fs');
+const path = require('node:path');
+const background = fs.readFileSync(path.join(__dirname, '..', policy.RULES.background));
+assert.equal(background.subarray(1, 4).toString(), 'PNG', 'the black forest depths background is a PNG asset');
+assert.equal(background[25], 2, 'the black forest depths background uses RGB color');
 assert.equal(policy.RULES.denseFogAccuracyPenalty, .15);
 assert.equal(policy.RULES.denseFogUnavoidable, true);
 assert.equal(policy.RULES.bossAuraModifiers, null);
