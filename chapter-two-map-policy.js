@@ -112,7 +112,7 @@
       isFinalMap: true,
       min: 25,
       max: 25,
-      contentStatus: 'combat-foundation',
+      contentStatus: 'skill-foundation',
       background: 'assets/black-forest-depths-background.png',
       enemyPoolId: 'black-forest-depths-enemies',
       bossId: 'heart-of-the-black-forest',

@@ -1592,6 +1592,11 @@ function isPlayerBleeding(now = Date.now()) {
   return Boolean(battle.playerBleed && battle.playerBleed.expiresAt > now);
 }
 
+function getBlackForestDepthsCombatContext() {
+  const aliveCount = (battle.enemyHps || []).filter((hp) => hp > 0).length;
+  return { aliveAllies: Math.max(0, aliveCount - 1), bossAuraActive: hasAliveBoss() };
+}
+
 function getMonsterAttackPower(enemy, progress = getProgress(), currentHp = enemy.maxHp) {
   const randomMultiplier = .9 + Math.random() * .2;
   const bloodFrenzy = WolfDenPolicy.getBloodFrenzyMultiplier(enemy.id, isPlayerBleeding());
@@ -1602,6 +1607,7 @@ function getMonsterAttackPower(enemy, progress = getProgress(), currentHp = enem
   const spiderNestMultiplier = SpiderNestPolicy.getCombatMultipliers(enemy.id, currentHp, enemy.maxHp).attack;
   const strongholdMultiplier = BlackstoneStrongholdPolicy.getCombatMultipliers(enemy.id, currentHp, enemy.maxHp).attack;
   const forestAltarMultiplier = ForestAltarPolicy.getCombatMultipliers(enemy.id, currentHp, enemy.maxHp).attack;
+  const depthsMultiplier = BlackForestDepthsPolicy.getCombatMultipliers(enemy.id, currentHp, enemy.maxHp, getBlackForestDepthsCombatContext()).attack;
   const strongholdCommandMultiplier = enemy.mapId === 'blackstone-stronghold' && Date.now() < (battle.strongholdCommandUntil || 0)
     ? 1 + BlackstoneStrongholdPolicy.LION_GUARD.roarAttackBonus : 1;
   const strongholdEnrageMultiplier = enemy.mapId === 'blackstone-stronghold'
@@ -1612,7 +1618,7 @@ function getMonsterAttackPower(enemy, progress = getProgress(), currentHp = enem
     ? 1 + BlackForestTrailPolicy.BEASTMASTER.spiderAttackBonus : 1;
   const nestSpiderCommandMultiplier = ['spiderNestBlackstonePoisonSpider', 'venomSpitterSpider', 'webWeaver', 'giantSpider'].includes(enemy.id)
     && Date.now() < (battle.spiderNestCommandUntil || 0) ? 1 + SpiderNestPolicy.BEASTMASTER.spiderAttackBonus : 1;
-  if (enemy.mapId) return Math.max(1, Math.round((enemy.attack || 1) * randomMultiplier * bloodFrenzy * irritable * plainsIrritable * blackForestMultiplier * blackForestTrailMultiplier * spiderNestMultiplier * strongholdMultiplier * forestAltarMultiplier * strongholdCommandMultiplier * strongholdEnrageMultiplier * commandMultiplier * beastCommandMultiplier * nestSpiderCommandMultiplier));
+  if (enemy.mapId) return Math.max(1, Math.round((enemy.attack || 1) * randomMultiplier * bloodFrenzy * irritable * plainsIrritable * blackForestMultiplier * blackForestTrailMultiplier * spiderNestMultiplier * strongholdMultiplier * forestAltarMultiplier * depthsMultiplier * strongholdCommandMultiplier * strongholdEnrageMultiplier * commandMultiplier * beastCommandMultiplier * nestSpiderCommandMultiplier));
   const map = getActiveMap(progress);
   const monsterLevel = Math.min(map.max, Math.max(map.min, progress.level));
   const levelMultiplier = 1 + (monsterLevel - 1) * .10;
@@ -1629,13 +1635,14 @@ function getMonsterAttackInterval(enemy, currentHp = enemy.maxHp) {
   const spiderNestMultiplier = SpiderNestPolicy.getCombatMultipliers(enemy.id, currentHp, enemy.maxHp).attackSpeed;
   const strongholdMultiplier = BlackstoneStrongholdPolicy.getCombatMultipliers(enemy.id, currentHp, enemy.maxHp).attackSpeed;
   const forestAltarMultiplier = ForestAltarPolicy.getCombatMultipliers(enemy.id, currentHp, enemy.maxHp).attackSpeed;
+  const depthsMultiplier = BlackForestDepthsPolicy.getCombatMultipliers(enemy.id, currentHp, enemy.maxHp, getBlackForestDepthsCombatContext()).attackSpeed;
   const strongholdEnrageMultiplier = enemy.mapId === 'blackstone-stronghold'
     ? 1 + BlackstoneStrongholdPolicy.getEnrage(battle.blackstoneStrongholdState, Date.now()).attackSpeedBonus : 1;
   const beastCommandMultiplier = enemy.id === 'blackstonePoisonSpider' && Date.now() < (battle.blackstoneSpiderCommandUntil || 0)
     ? 1 + BlackForestTrailPolicy.BEASTMASTER.spiderAttackSpeedBonus : 1;
   const nestSpiderCommandMultiplier = ['spiderNestBlackstonePoisonSpider', 'venomSpitterSpider', 'webWeaver', 'giantSpider'].includes(enemy.id)
     && Date.now() < (battle.spiderNestCommandUntil || 0) ? 1 + SpiderNestPolicy.BEASTMASTER.spiderAttackSpeedBonus : 1;
-  return Math.max(250, (enemy.attackInterval || (1000 / (enemy.attackSpeed || 1))) / bloodFrenzy / irritable / plainsIrritable / blackForestMultiplier / blackForestTrailMultiplier / spiderNestMultiplier / strongholdMultiplier / forestAltarMultiplier / strongholdEnrageMultiplier / beastCommandMultiplier / nestSpiderCommandMultiplier);
+  return Math.max(250, (enemy.attackInterval || (1000 / (enemy.attackSpeed || 1))) / bloodFrenzy / irritable / plainsIrritable / blackForestMultiplier / blackForestTrailMultiplier / spiderNestMultiplier / strongholdMultiplier / forestAltarMultiplier / depthsMultiplier / strongholdEnrageMultiplier / beastCommandMultiplier / nestSpiderCommandMultiplier);
 }
 
 function createEnemyAttackSchedule(enemyTypes, startAt = Date.now(), mapId = getActiveMap(getProgress()).id, enemyLevels = []) {
@@ -3250,12 +3257,13 @@ function applyDamageToMonster(index, baseDamage, profile, options = {}) {
   const spiderNestMultipliers = SpiderNestPolicy.getCombatMultipliers(enemy.id, battle.enemyHps[index], enemy.maxHp);
   const strongholdMultipliers = BlackstoneStrongholdPolicy.getCombatMultipliers(enemy.id, battle.enemyHps[index], enemy.maxHp);
   const forestAltarMultipliers = ForestAltarPolicy.getCombatMultipliers(enemy.id, battle.enemyHps[index], enemy.maxHp);
+  const depthsMultipliers = BlackForestDepthsPolicy.getCombatMultipliers(enemy.id, battle.enemyHps[index], enemy.maxHp, getBlackForestDepthsCombatContext());
   const captainShieldActive = enemy.id === 'blackstoneCaptain' && Date.now() < (battle.enemyCaptainShieldUntil?.[index] || 0);
   const assassinDashActive = enemy.id === 'blackstoneVenombladeAssassin' && Date.now() < (battle.enemyAssassinDashUntil?.[index] || 0);
   const defendedEnemy = {
     ...enemy,
-    defense: Math.max(0, Math.round(enemy.defense * trailMultipliers.defense * spiderNestMultipliers.defense * strongholdMultipliers.defense * forestAltarMultipliers.defense)),
-    evasion: (enemy.evasion || 0) + (trailMultipliers.evasion || 0) + (spiderNestMultipliers.evasion || 0) + (strongholdMultipliers.evasion || 0) + (forestAltarMultipliers.evasion || 0) + (assassinDashActive ? SpiderNestPolicy.ASSASSIN.dashEvasionBonus : 0),
+    defense: Math.max(0, Math.round(enemy.defense * trailMultipliers.defense * spiderNestMultipliers.defense * strongholdMultipliers.defense * forestAltarMultipliers.defense * depthsMultipliers.defense)),
+    evasion: (enemy.evasion || 0) + (trailMultipliers.evasion || 0) + (spiderNestMultipliers.evasion || 0) + (strongholdMultipliers.evasion || 0) + (forestAltarMultipliers.evasion || 0) + (depthsMultipliers.evasion || 0) + (assassinDashActive ? SpiderNestPolicy.ASSASSIN.dashEvasionBonus : 0),
     parry: (enemy.parry || 0) + (captainShieldActive ? BlackForestTrailPolicy.CAPTAIN.shieldParryBonus : 0)
   };
   const result = MonsterDefense.resolveDamage({
@@ -3746,6 +3754,22 @@ function inflictPartyMemberBleed(member, enemy, now = Date.now()) {
   logBattle(`${member.name} 受到 ${enemy.name} 的流血效果。`, 'system');
 }
 
+function healBlackForestDepthsAlly(healerIndex) {
+  const wounded = getWoundedEnemyIndexes();
+  if (!wounded.length) return false;
+  const targetIndex = wounded.sort((first, second) => (
+    battle.enemyHps[first] / getEnemyDefinition(first).maxHp
+    - battle.enemyHps[second] / getEnemyDefinition(second).maxHp
+  ))[0];
+  const target = getEnemyDefinition(targetIndex);
+  const heal = Math.max(1, Math.ceil(target.maxHp * BlackForestDepthsPolicy.SKILLS.forestSpirit.healRatio));
+  const restored = Math.min(heal, target.maxHp - battle.enemyHps[targetIndex]);
+  battle.enemyHps[targetIndex] += restored;
+  playMonsterAttackAnimation(healerIndex, false);
+  logBattle(`🌿【森林之魂】施放【自然回響】，替【${target.name}】恢復 ${restored} 生命。`, 'enemy-healing');
+  return true;
+}
+
 function inflictBlackForestDot(member, enemy, effect, now = Date.now()) {
   const rule = effect === 'poison' ? BlackForestEntrancePolicy.POISON : BlackForestEntrancePolicy.BLEED;
   member.bleed = {
@@ -3772,6 +3796,17 @@ function inflictBlackForestTrailPoison(member, enemy, now = Date.now()) {
     expiresAt: now + rule.durationMs
   };
   logBattle(`${member.name} 受到 ${enemy.name} 的黑石毒素效果（${stacks}／${rule.maxStacks} 層）。`, 'system');
+}
+
+function inflictBlackForestDepthsCorruption(member, enemy, now = Date.now()) {
+  member.bleed = {
+    effectName: '深林腐化',
+    tickMs: 1000,
+    tickDamage: Math.max(2, Math.ceil((Number(enemy.attack) || 1) * .16)),
+    nextTickAt: now + 1000,
+    expiresAt: now + 5000
+  };
+  logBattle(`${member.name} 受到 ${enemy.name} 的深林腐化效果。`, 'system');
 }
 
 function getSpiderNestPoisonStacks(member) {
@@ -4114,6 +4149,10 @@ function enemyAttackTick() {
     const forestAltarAction = getActiveMap(progress).id === 'forest-altar'
       ? ForestAltarPolicy.resolveAction(enemy.id, Math.random())
       : 'attack';
+    const blackForestDepthsAction = getActiveMap(progress).id === 'black-forest-depths'
+      ? BlackForestDepthsPolicy.resolveAction(enemy.id, Math.random(), getWoundedEnemyIndexes().length > 0)
+      : 'attack';
+    if (blackForestDepthsAction === 'nature-echo' && healBlackForestDepthsAlly(enemyIndex)) continue;
     if (strongholdAction === 'lion-roar' || strongholdAction === 'warlord-command') {
       battle.strongholdCommandUntil = Math.max(battle.strongholdCommandUntil || 0, now + BlackstoneStrongholdPolicy.LION_GUARD.roarDurationMs);
       logBattle(`📣【${enemy.name}】施放【${strongholdAction === 'lion-roar' ? '獅吼' : '督軍號令'}】，黑石據點敵軍攻擊提高 15%，持續 6 秒！`, 'system');
@@ -4170,7 +4209,8 @@ function enemyAttackTick() {
       * BlackForestTrailPolicy.getDamageMultiplier(blackForestTrailAction)
       * SpiderNestPolicy.getDamageMultiplier(spiderNestAction, poisonStacks)
       * BlackstoneStrongholdPolicy.getDamageMultiplier(strongholdAction)
-      * ForestAltarPolicy.getDamageMultiplier(forestAltarAction);
+      * ForestAltarPolicy.getDamageMultiplier(forestAltarAction)
+      * BlackForestDepthsPolicy.getDamageMultiplier(blackForestDepthsAction);
     const marked = now < (target.blackstoneMarkedUntil || 0);
     const markedHumanBonus = marked && enemy.faction === 'blackstone-bandits'
       ? 1 + BlackForestTrailPolicy.MARK.blackstoneHumanDamageBonus : 1;
@@ -4279,6 +4319,19 @@ function enemyAttackTick() {
     }
     const forestAltarActionNames = { 'corrupted-bite': '腐化撕咬', 'blackstone-heavy-slash': '黑石重斬', 'corruption-flame': '腐化之焰' };
     if (!dodged && damage > 0 && forestAltarActionNames[forestAltarAction]) logBattle(`⚔【${enemy.name}】施放【${forestAltarActionNames[forestAltarAction]}】！`, 'system');
+    if (!dodged && damage > 0 && blackForestDepthsAction === 'depths-shadow-bite') inflictPartyMemberBleed(target, enemy, now);
+    if (!dodged && damage > 0 && ['spore-eruption', 'corruption-pulse'].includes(blackForestDepthsAction)) inflictBlackForestDepthsCorruption(target, enemy, now);
+    if (!dodged && damage > 0 && blackForestDepthsAction === 'corrupted-heavy-axe') {
+      target.blackstoneArmorBreakUntil = now + BlackForestDepthsPolicy.SKILLS.corruptedBlackstoneCenturion.durationMs;
+      logBattle(`🪓【${enemy.name}】施放【腐化重斧】，${target.name}防禦降低 15%，持續 5 秒！`, 'system');
+    }
+    const depthsControl = BlackForestDepthsPolicy.getControlEffect(blackForestDepthsAction);
+    if (!dodged && damage > 0 && depthsControl) {
+      const depthsControlNames = { 'corrupted-root-entangle': '腐根纏繞', 'withering-storm': '凋零風暴' };
+      applyBlackstoneAttackSpeedPenalty(target, depthsControl.attackSpeedPenalty, depthsControl.durationMs, now, depthsControlNames[blackForestDepthsAction]);
+    }
+    const depthsActionNames = { 'depths-shadow-bite': '暗影撕咬', 'spore-eruption': '孢子噴發', 'corruption-pulse': '腐化脈衝' };
+    if (!dodged && damage > 0 && depthsActionNames[blackForestDepthsAction]) logBattle(`⚔【${enemy.name}】施放【${depthsActionNames[blackForestDepthsAction]}】！`, 'system');
 
     if (dodged) {
       logBattle(`${target.name} 閃避了 ${enemy.name} 的攻擊。`, 'damage-taken');
