@@ -52,44 +52,70 @@
   function getMonster(monsterId) { return MONSTER_BY_ID.get(monsterId) || null; }
   function getMonstersByRank(rank) { return MONSTERS.filter((entry) => entry.rank === rank); }
 
+  function outpost(id, name, image, effect) {
+    return Object.freeze({ id, name, image, effect: Object.freeze(effect), implemented: true });
+  }
+
   const OUTPOSTS = Object.freeze([
-    Object.freeze({ id: 'blackstone-supply-station', name: '補給站', image: 'assets/blackstone-supply-station.png', effect: null, implemented: false }),
-    Object.freeze({ id: 'blackstone-barracks', name: '兵營', image: 'assets/blackstone-barracks.png', effect: null, implemented: false }),
-    Object.freeze({ id: 'blackstone-armory', name: '軍械庫', image: 'assets/blackstone-armory.png', effect: null, implemented: false }),
-    Object.freeze({ id: 'blackstone-watchtower', name: '哨塔', image: 'assets/blackstone-watchtower.png', effect: null, implemented: false }),
-    Object.freeze({ id: 'blackstone-command-tent', name: '指揮帳篷', image: 'assets/blackstone-command-tent.png', effect: null, implemented: false })
+    outpost('blackstone-supply-station', '補給站', 'assets/blackstone-supply-station.png', { stat: 'healthRegenPerSecond', operation: 'add-max-health-ratio', value: .01, label: '敵軍每秒恢復 1% 最大生命' }),
+    outpost('blackstone-barracks', '兵營', 'assets/blackstone-barracks.png', { stat: 'maxHealth', operation: 'multiply', value: .20, label: '敵軍最大生命提高 20%' }),
+    outpost('blackstone-armory', '軍械庫', 'assets/blackstone-armory.png', { stat: 'attack', operation: 'multiply', value: .15, label: '敵軍攻擊提高 15%' }),
+    outpost('blackstone-watchtower', '哨塔', 'assets/blackstone-watchtower.png', { stat: 'criticalChance', operation: 'add', value: .10, label: '敵軍暴擊率提高 10%' }),
+    outpost('blackstone-command-tent', '指揮帳篷', 'assets/blackstone-command-tent.png', { stat: 'attackSpeed', operation: 'multiply', value: .15, label: '敵軍攻速提高 15%' })
   ]);
   const OUTPOST_BY_ID = new Map(OUTPOSTS.map((entry) => [entry.id, entry]));
   function getOutpost(outpostId) { return OUTPOST_BY_ID.get(outpostId) || null; }
+  function getOutpostEffect(outpostId) { return getOutpost(outpostId)?.effect || null; }
+
+  function normalizeRandom(random = Math.random) {
+    return Math.max(0, Math.min(.999999, Number(random()) || 0));
+  }
+
+  function rollOutpostId(availableOutpostIds = OUTPOSTS.map((entry) => entry.id), random = Math.random) {
+    const available = [...new Set(availableOutpostIds)].filter((id) => OUTPOST_BY_ID.has(id));
+    if (!available.length) return null;
+    return available[Math.floor(normalizeRandom(random) * available.length)];
+  }
 
   function rollRequiredKills(random = Math.random) {
-    const roll = Math.max(0, Math.min(.999999, Number(random()) || 0));
+    const roll = normalizeRandom(random);
     return RULES.minKillsPerOutpost + Math.floor(roll * (RULES.maxKillsPerOutpost - RULES.minKillsPerOutpost + 1));
   }
 
   function createState(random = Math.random) {
-    return { destroyedOutposts: 0, killsSinceOutpost: 0, nextOutpostAtKills: rollRequiredKills(random), outpostActive: false, bossSpawned: false, enragedUntil: 0 };
+    return { destroyedOutposts: 0, destroyedOutpostIds: [], availableOutpostIds: OUTPOSTS.map((entry) => entry.id), activeOutpostId: null, killsSinceOutpost: 0, nextOutpostAtKills: rollRequiredKills(random), outpostActive: false, bossSpawned: false, enragedUntil: 0 };
   }
 
   function normalizeState(saved, random = Math.random) {
     const source = saved && typeof saved === 'object' ? saved : {};
     const destroyedOutposts = Math.min(RULES.objectiveCount, Math.max(0, Math.floor(Number(source.destroyedOutposts) || 0)));
+    const destroyedOutpostIds = [...new Set(Array.isArray(source.destroyedOutpostIds) ? source.destroyedOutpostIds : [])].filter((id) => OUTPOST_BY_ID.has(id)).slice(0, destroyedOutposts);
+    const availableOutpostIds = OUTPOSTS.map((entry) => entry.id).filter((id) => !destroyedOutpostIds.includes(id));
+    const sourceActiveOutpostId = OUTPOST_BY_ID.has(source.activeOutpostId) && availableOutpostIds.includes(source.activeOutpostId) ? source.activeOutpostId : null;
+    const outpostActive = destroyedOutposts < RULES.objectiveCount && Boolean(source.outpostActive);
+    const activeOutpostId = outpostActive ? (sourceActiveOutpostId || rollOutpostId(availableOutpostIds, random)) : null;
     const nextOutpostAtKills = Math.min(RULES.maxKillsPerOutpost, Math.max(RULES.minKillsPerOutpost, Math.floor(Number(source.nextOutpostAtKills) || rollRequiredKills(random))));
     return {
       destroyedOutposts,
+      destroyedOutpostIds,
+      availableOutpostIds,
+      activeOutpostId,
       killsSinceOutpost: Math.max(0, Math.floor(Number(source.killsSinceOutpost) || 0)),
       nextOutpostAtKills,
-      outpostActive: destroyedOutposts < RULES.objectiveCount && Boolean(source.outpostActive),
+      outpostActive,
       bossSpawned: destroyedOutposts >= RULES.objectiveCount || Boolean(source.bossSpawned),
       enragedUntil: Math.max(0, Number(source.enragedUntil) || 0)
     };
   }
 
-  function recordMonsterKill(state) {
-    const next = normalizeState(state);
+  function recordMonsterKill(state, random = Math.random) {
+    const next = normalizeState(state, random);
     if (next.bossSpawned || next.outpostActive) return next;
     next.killsSinceOutpost += 1;
-    if (next.killsSinceOutpost >= next.nextOutpostAtKills || next.killsSinceOutpost >= RULES.maxKillsPerOutpost) next.outpostActive = true;
+    if (next.killsSinceOutpost >= next.nextOutpostAtKills || next.killsSinceOutpost >= RULES.maxKillsPerOutpost) {
+      next.outpostActive = true;
+      next.activeOutpostId = rollOutpostId(next.availableOutpostIds, random);
+    }
     return next;
   }
 
@@ -97,12 +123,16 @@
     const next = normalizeState(state, options.random);
     if (!next.outpostActive || next.bossSpawned) return { ok: false, reason: 'no-active-outpost', state: next };
     next.destroyedOutposts += 1;
+    if (next.activeOutpostId && !next.destroyedOutpostIds.includes(next.activeOutpostId)) next.destroyedOutpostIds.push(next.activeOutpostId);
+    next.availableOutpostIds = OUTPOSTS.map((entry) => entry.id).filter((id) => !next.destroyedOutpostIds.includes(id));
+    const destroyedOutpostId = next.activeOutpostId;
+    next.activeOutpostId = null;
     next.outpostActive = false;
     next.killsSinceOutpost = 0;
     next.enragedUntil = Math.max(0, Number(options.now) || Date.now()) + RULES.enrageDurationMs;
     next.bossSpawned = next.destroyedOutposts >= RULES.objectiveCount;
     next.nextOutpostAtKills = next.bossSpawned ? 0 : rollRequiredKills(options.random);
-    return { ok: true, state: next, triggerEnrage: true, spawnBoss: next.bossSpawned };
+    return { ok: true, state: next, destroyedOutpostId, effectRemoved: getOutpostEffect(destroyedOutpostId), triggerEnrage: true, spawnBoss: next.bossSpawned };
   }
 
   function getEnrage(state, now = Date.now()) {
@@ -110,5 +140,5 @@
     return { active, attackBonus: active ? RULES.enrageAttackBonus : 0, attackSpeedBonus: active ? RULES.enrageAttackSpeedBonus : 0, remainingMs: active ? state.enragedUntil - now : 0 };
   }
 
-  return Object.freeze({ RULES, MONSTERS, OUTPOSTS, getMonster, getMonstersByRank, getOutpost, rollRequiredKills, createState, normalizeState, recordMonsterKill, destroyOutpost, getEnrage });
+  return Object.freeze({ RULES, MONSTERS, OUTPOSTS, getMonster, getMonstersByRank, getOutpost, getOutpostEffect, rollOutpostId, rollRequiredKills, createState, normalizeState, recordMonsterKill, destroyOutpost, getEnrage });
 });

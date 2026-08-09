@@ -6,21 +6,11 @@ assert.equal(policy.RULES.objectiveCount, 5);
 assert.equal(policy.RULES.outpostDamageReduction, null);
 assert.equal(policy.RULES.outpostShield, null);
 assert.deepEqual(policy.OUTPOSTS.map((outpost) => outpost.name), ['補給站', '兵營', '軍械庫', '哨塔', '指揮帳篷']);
-assert.deepEqual(policy.getOutpost('blackstone-supply-station'), {
-  id: 'blackstone-supply-station', name: '補給站', image: 'assets/blackstone-supply-station.png', effect: null, implemented: false
-});
-assert.deepEqual(policy.getOutpost('blackstone-barracks'), {
-  id: 'blackstone-barracks', name: '兵營', image: 'assets/blackstone-barracks.png', effect: null, implemented: false
-});
-assert.deepEqual(policy.getOutpost('blackstone-armory'), {
-  id: 'blackstone-armory', name: '軍械庫', image: 'assets/blackstone-armory.png', effect: null, implemented: false
-});
-assert.deepEqual(policy.getOutpost('blackstone-watchtower'), {
-  id: 'blackstone-watchtower', name: '哨塔', image: 'assets/blackstone-watchtower.png', effect: null, implemented: false
-});
-assert.deepEqual(policy.getOutpost('blackstone-command-tent'), {
-  id: 'blackstone-command-tent', name: '指揮帳篷', image: 'assets/blackstone-command-tent.png', effect: null, implemented: false
-});
+assert.deepEqual(policy.OUTPOSTS.map((outpost) => outpost.effect.label), [
+  '敵軍每秒恢復 1% 最大生命', '敵軍最大生命提高 20%', '敵軍攻擊提高 15%', '敵軍暴擊率提高 10%', '敵軍攻速提高 15%'
+]);
+assert.ok(policy.OUTPOSTS.every((outpost) => outpost.implemented && Object.isFrozen(outpost.effect)));
+assert.equal(policy.getOutpostEffect('blackstone-armory').value, .15);
 assert.equal(policy.getOutpost('unknown'), null);
 assert.deepEqual(policy.MONSTERS.map((monster) => monster.name), ['黑石守衛', '黑石弩手', '黑石狂戰士', '黑石戰犬', '黑石獅衛', '黑石蠻角勇士', '黑石督軍']);
 assert.deepEqual(policy.MONSTERS.map((monster) => monster.rank), ['normal', 'normal', 'normal', 'normal', 'elite', 'elite', 'boss']);
@@ -81,21 +71,35 @@ assert.equal(commandTent.subarray(1, 4).toString(), 'PNG', 'the Blackstone comma
 assert.equal(commandTent[25], 6, 'the Blackstone command tent uses RGBA color with transparency');
 assert.equal(policy.rollRequiredKills(() => 0), 10);
 assert.equal(policy.rollRequiredKills(() => .999999), 70);
+assert.equal(policy.rollOutpostId(undefined, () => 0), 'blackstone-supply-station');
+assert.equal(policy.rollOutpostId(undefined, () => .999999), 'blackstone-command-tent');
+assert.equal(policy.rollOutpostId(['unknown'], () => 0), null);
 let state = policy.createState(() => 0);
-for (let kill = 1; kill < 10; kill += 1) state = policy.recordMonsterKill(state);
+assert.equal(state.availableOutpostIds.length, 5);
+for (let kill = 1; kill < 10; kill += 1) state = policy.recordMonsterKill(state, () => 0);
 assert.equal(state.outpostActive, false);
-state = policy.recordMonsterKill(state);
+state = policy.recordMonsterKill(state, () => 0);
 assert.equal(state.outpostActive, true);
+assert.equal(state.activeOutpostId, 'blackstone-supply-station');
+const destroyedIds = [];
 for (let outpost = 1; outpost <= 5; outpost += 1) {
   const result = policy.destroyOutpost(state, { now: 1000 * outpost, random: () => 0 });
   assert.equal(result.ok, true);
+  destroyedIds.push(result.destroyedOutpostId);
+  assert.ok(result.effectRemoved);
   assert.equal(result.state.enragedUntil, 1000 * outpost + 15000);
   assert.deepEqual(policy.getEnrage(result.state, 1000 * outpost), { active: true, attackBonus: .30, attackSpeedBonus: .30, remainingMs: 15000 });
   state = result.state;
-  if (outpost < 5) for (let kill = 0; kill < 10; kill += 1) state = policy.recordMonsterKill(state);
+  if (outpost < 5) {
+    for (let kill = 0; kill < 10; kill += 1) state = policy.recordMonsterKill(state, () => 0);
+    assert.ok(state.activeOutpostId);
+  }
 }
 assert.equal(state.destroyedOutposts, 5);
 assert.equal(state.bossSpawned, true);
+assert.deepEqual(destroyedIds, policy.OUTPOSTS.map((outpost) => outpost.id));
+assert.equal(new Set(destroyedIds).size, 5);
+assert.deepEqual(state.availableOutpostIds, []);
 let guarantee = policy.createState(() => .999999);
 for (let kill = 0; kill < 69; kill += 1) guarantee = policy.recordMonsterKill(guarantee);
 assert.equal(guarantee.outpostActive, false);
