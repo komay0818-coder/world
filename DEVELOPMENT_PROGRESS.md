@@ -1005,3 +1005,13 @@ Boss：
 - 圖片 SHA-256：`136E95DFB35CAF992FA0E03442DCEFF52D8B4C8DB78EE41106461D164B1788ED`。
 - 本次只加入圖片，不設定腐化森林狼戰鬥數值、技能、AI、掉落，也不開放森林祭壇。
 - 50 個 JavaScript 測試檔、36 個根目錄 JavaScript 語法檢查，以及 `git diff --check` 全部通過。
+
+## 2026-08-10 荊棘魔藤透明圖片
+
+- 星辰 DEV 版本由 `0.4.49` 更新為 `0.4.50`。
+- 新增荊棘魔藤透明圖片 `assets/thorn-demon-vine.png`，並套用到森林祭壇普通怪物 `thorn-demon-vine`。
+- 圖片以使用者提供的原圖為基礎，保留藤蔓輪廓、尖刺與紫色光效，移除灰色背景、地面碎屑及陰影後輸出透明 PNG。
+- 圖片尺寸為 `1179 × 1334` RGBA PNG，Alpha 範圍完整，四角透明且主體未裁切。
+- 圖片 SHA-256：`EDC1F10F1EAC4A81AD4F6769BF9C74C019FD4FBDFB315623483834A8D0CAB16C`。
+- 目前只新增圖片路徑；怪物數值、技能、掉落物與戰鬥實作仍維持未設定。
+- 50 個 JavaScript 測試檔、36 個根目錄 JavaScript 語法檢查與 `git diff --check` 均通過。
