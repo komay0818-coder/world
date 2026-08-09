@@ -30,7 +30,7 @@
   }
 
   const MONSTERS = Object.freeze([
-    monster('corrupted-forest-wolf', '腐化森林狼', 'normal', 'purple-corruption'),
+    monster('corrupted-forest-wolf', '腐化森林狼', 'normal', 'purple-corruption', { image: 'assets/corrupted-forest-wolf.png' }),
     monster('corrupted-treant', '腐化樹妖', 'normal', 'purple-corruption', { image: 'assets/corrupted-treant.png' }),
     monster('dark-spore-beast', '黑暗孢子獸', 'normal', 'purple-corruption', { image: 'assets/dark-spore-beast.png' }),
     monster('forest-spirit', '森林之魂', 'normal', 'green-nature', { image: 'assets/forest-spirit.png' }),
