@@ -15,8 +15,8 @@ assert.match(index, /black-forest-entrance-policy\.js[\s\S]*chapter-two-map-poli
 assert.match(index, /black-forest-trail-policy\.js[\s\S]*chapter-two-map-policy\.js/);
 assert.match(index, /spider-nest-policy\.js[\s\S]*chapter-two-map-policy\.js/);
 assert.match(index, /forest-altar-policy\.js[\s\S]*chapter-two-map-policy\.js/);
-assert.match(index, /VER\. 0\.4\.65/);
-assert.match(index, /black-forest-depths-policy\.js\?v=20260810-depths-spirit-image-v7/);
+assert.match(index, /VER\. 0\.4\.66/);
+assert.match(index, /black-forest-depths-policy\.js\?v=20260810-depths-spore-image-v8/);
 assert.match(index, /blackstone-stronghold-policy\.js\?v=20260810-outpost-objective-v17/);
 assert.match(index, /black-forest-trail-policy\.js\?v=20260809-trail-balance-v10/);
 assert.match(index, /spider-nest-policy\.js\?v=20260809-spider-combat-v9/);
