@@ -33,7 +33,7 @@
     monster('corrupted-forest-wolf', '腐化森林狼', 'normal', 'purple-corruption'),
     monster('corrupted-treant', '腐化樹妖', 'normal', 'purple-corruption'),
     monster('dark-spore-beast', '黑暗孢子獸', 'normal', 'purple-corruption'),
-    monster('forest-spirit', '森林之魂', 'normal', 'green-nature'),
+    monster('forest-spirit', '森林之魂', 'normal', 'green-nature', { image: 'assets/forest-spirit.png' }),
     monster('corrupted-blackstone-centurion', '腐化黑石百夫長', 'elite', 'purple-corruption', { image: 'assets/corrupted-blackstone-centurion.png' }),
     monster('corrupted-fallen-druid', '腐化墮落德魯伊', 'elite', 'purple-corruption', { image: 'assets/corrupted-fallen-druid.png' }),
     monster('heart-of-the-black-forest', '黑森林之心', 'boss', 'purple-corruption', { image: 'assets/heart-of-the-black-forest.png' })
