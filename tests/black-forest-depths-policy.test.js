@@ -18,7 +18,8 @@ assert.equal(policy.getMonster('forest-spirit').visualEnergy, 'green-nature');
 assert.ok(policy.MONSTERS.filter((monster) => monster.id !== 'forest-spirit').every((monster) => monster.visualEnergy === 'purple-corruption'));
 assert.equal(policy.getMonster('heart-of-the-black-forest').image, 'assets/heart-of-the-black-forest.png');
 assert.equal(policy.getMonster('corrupted-fallen-druid').image, 'assets/corrupted-fallen-druid.png');
-assert.equal(policy.MONSTERS.filter((monster) => monster.image !== null).length, 2);
+assert.equal(policy.getMonster('corrupted-blackstone-centurion').image, 'assets/corrupted-blackstone-centurion.png');
+assert.equal(policy.MONSTERS.filter((monster) => monster.image !== null).length, 3);
 assert.ok(policy.MONSTERS.every((monster) => monster.combatId === null && monster.stats === null
   && monster.dropTableId === null && monster.skillIds.length === 0 && monster.aiProfileId === null && monster.implemented === false));
 assert.equal(policy.getMonster('unknown'), null);
@@ -33,6 +34,9 @@ assert.equal(heart[25], 6, 'the heart of the black forest uses RGBA color with t
 const druid = fs.readFileSync(path.join(__dirname, '..', policy.getMonster('corrupted-fallen-druid').image));
 assert.equal(druid.subarray(1, 4).toString(), 'PNG', 'the corrupted fallen druid is a PNG asset');
 assert.equal(druid[25], 2, 'the corrupted fallen druid preserves the supplied RGB artwork');
+const centurion = fs.readFileSync(path.join(__dirname, '..', policy.getMonster('corrupted-blackstone-centurion').image));
+assert.equal(centurion.subarray(1, 4).toString(), 'PNG', 'the corrupted blackstone centurion is a PNG asset');
+assert.equal(centurion[25], 2, 'the corrupted blackstone centurion preserves the supplied RGB artwork');
 assert.equal(policy.RULES.denseFogAccuracyPenalty, .15);
 assert.equal(policy.RULES.denseFogUnavoidable, true);
 assert.equal(policy.RULES.bossAuraModifiers, null);
