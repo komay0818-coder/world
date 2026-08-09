@@ -15,11 +15,11 @@ assert.match(index, /black-forest-entrance-policy\.js[\s\S]*chapter-two-map-poli
 assert.match(index, /black-forest-trail-policy\.js[\s\S]*chapter-two-map-policy\.js/);
 assert.match(index, /spider-nest-policy\.js[\s\S]*chapter-two-map-policy\.js/);
 assert.match(index, /forest-altar-policy\.js[\s\S]*chapter-two-map-policy\.js/);
-assert.match(index, /VER\. 0\.4\.48/);
+assert.match(index, /VER\. 0\.4\.49/);
 assert.match(index, /blackstone-stronghold-policy\.js\?v=20260810-outpost-objective-v17/);
 assert.match(index, /black-forest-trail-policy\.js\?v=20260809-trail-balance-v10/);
 assert.match(index, /spider-nest-policy\.js\?v=20260809-spider-combat-v9/);
-assert.match(index, /forest-altar-policy\.js\?v=20260810-monster-roster-v1/);
+assert.match(index, /forest-altar-policy\.js\?v=20260810-corrupted-wolf-v2/);
 assert.match(index, /chapter-two-map-policy\.js\?v=20260810-forest-altar-roster-v11/);
 assert.match(index, /script\.js\?v=20260810-stronghold-objective-v133/);
 assert.match(index, /VER\. \d+\.\d+\.\d+/, 'the game exposes a semantic version');

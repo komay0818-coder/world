@@ -17,9 +17,16 @@ assert.deepEqual(policy.getMonsterPool(), {
   boss: ['corrupted-altar-guardian']
 });
 assert.equal(policy.getMonster('fallen-druid').name, '墮落德魯伊');
+assert.equal(policy.getMonster('corrupted-forest-wolf').image, 'assets/corrupted-forest-wolf.png');
 assert.equal(policy.getMonster('unknown'), null);
 assert.ok(policy.MONSTERS.every((monster) => monster.chapter === 2 && monster.mapId === 'forest-altar'));
-assert.ok(policy.MONSTERS.every((monster) => monster.image === null && monster.stats === null
+assert.equal(policy.MONSTERS.filter((monster) => monster.image !== null).length, 1);
+assert.ok(policy.MONSTERS.every((monster) => monster.stats === null
   && monster.dropTableId === null && monster.skillIds.length === 0 && monster.aiProfileId === null && monster.implemented === false));
+const fs = require('node:fs');
+const path = require('node:path');
+const wolf = fs.readFileSync(path.join(__dirname, '..', policy.getMonster('corrupted-forest-wolf').image));
+assert.equal(wolf.subarray(1, 4).toString(), 'PNG', 'the corrupted forest wolf is a PNG asset');
+assert.equal(wolf[25], 6, 'the corrupted forest wolf uses RGBA color with transparency');
 
 console.log('forest-altar-policy: assertions passed');

@@ -995,3 +995,13 @@ Boss：
 - 森林祭壇地圖已連結 `forest-altar-enemies` 敵人池與 `corrupted-altar-guardian` Boss，內容狀態標記為 `monster-roster`。
 - 本次僅建立名稱與分類；怪物數值、技能、掉落物、圖片路徑及 AI 均維持未設定，地圖仍不可進入。
 - 50 個 JavaScript 測試檔、36 個根目錄 JavaScript 語法檢查，以及 `git diff --check` 全部通過。
+
+## 2026-08-10 腐化森林狼透明圖片
+
+- 遊戲版本由 `0.4.48` 更新為修訂版 `0.4.49`。
+- 新增腐化森林狼透明背景圖片 `assets/corrupted-forest-wolf.png`，並連結森林祭壇的 `corrupted-forest-wolf` 普通怪資料。
+- 使用圖片編輯與綠色色鍵去背，移除灰色背景與地面陰影；完整保留狼身、四足利爪、牙齒、尾部、鋸齒毛尖、腐化滴落物與分離的紫色火焰碎片。
+- 成品尺寸為 `1397 × 1126` RGBA PNG，四角完全透明、Alpha 範圍完整，未檢出不透明綠色色鍵殘留。
+- 圖片 SHA-256：`136E95DFB35CAF992FA0E03442DCEFF52D8B4C8DB78EE41106461D164B1788ED`。
+- 本次只加入圖片，不設定腐化森林狼戰鬥數值、技能、AI、掉落，也不開放森林祭壇。
+- 50 個 JavaScript 測試檔、36 個根目錄 JavaScript 語法檢查，以及 `git diff --check` 全部通過。

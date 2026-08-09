@@ -16,7 +16,7 @@
     contentStatus: 'monster-roster'
   });
 
-  function monster(id, name, rank) {
+  function monster(id, name, rank, options = {}) {
     return Object.freeze({
       id,
       name,
@@ -28,12 +28,13 @@
       dropTableId: null,
       skillIds: Object.freeze([]),
       aiProfileId: null,
-      implemented: false
+      implemented: false,
+      ...options
     });
   }
 
   const MONSTERS = Object.freeze([
-    monster('corrupted-forest-wolf', '腐化森林狼', 'normal'),
+    monster('corrupted-forest-wolf', '腐化森林狼', 'normal', { image: 'assets/corrupted-forest-wolf.png' }),
     monster('thorn-demon-vine', '荊棘魔藤', 'normal'),
     monster('corrupted-blackstone-soldier', '腐化黑石士兵', 'normal'),
     monster('altar-guard', '祭壇守衛', 'elite'),
