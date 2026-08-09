@@ -21,7 +21,8 @@ assert.equal(policy.getMonster('corrupted-fallen-druid').image, 'assets/corrupte
 assert.equal(policy.getMonster('corrupted-blackstone-centurion').image, 'assets/corrupted-blackstone-centurion.png');
 assert.equal(policy.getMonster('forest-spirit').image, 'assets/forest-spirit.png');
 assert.equal(policy.getMonster('dark-spore-beast').image, 'assets/dark-spore-beast.png');
-assert.equal(policy.MONSTERS.filter((monster) => monster.image !== null).length, 5);
+assert.equal(policy.getMonster('corrupted-treant').image, 'assets/corrupted-treant.png');
+assert.equal(policy.MONSTERS.filter((monster) => monster.image !== null).length, 6);
 assert.ok(policy.MONSTERS.every((monster) => monster.combatId === null && monster.stats === null
   && monster.dropTableId === null && monster.skillIds.length === 0 && monster.aiProfileId === null && monster.implemented === false));
 assert.equal(policy.getMonster('unknown'), null);
@@ -45,6 +46,9 @@ assert.equal(spirit[25], 6, 'the forest spirit uses RGBA color with transparency
 const sporeBeast = fs.readFileSync(path.join(__dirname, '..', policy.getMonster('dark-spore-beast').image));
 assert.equal(sporeBeast.subarray(1, 4).toString(), 'PNG', 'the dark spore beast is a PNG asset');
 assert.equal(sporeBeast[25], 6, 'the dark spore beast uses RGBA color with transparency');
+const treant = fs.readFileSync(path.join(__dirname, '..', policy.getMonster('corrupted-treant').image));
+assert.equal(treant.subarray(1, 4).toString(), 'PNG', 'the corrupted treant is a PNG asset');
+assert.equal(treant[25], 2, 'the corrupted treant preserves the supplied RGB artwork');
 assert.equal(policy.RULES.denseFogAccuracyPenalty, .15);
 assert.equal(policy.RULES.denseFogUnavoidable, true);
 assert.equal(policy.RULES.bossAuraModifiers, null);
