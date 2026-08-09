@@ -1593,6 +1593,7 @@ function getMonsterAttackPower(enemy, progress = getProgress(), currentHp = enem
   const blackForestTrailMultiplier = BlackForestTrailPolicy.getCombatMultipliers(enemy.id, currentHp, enemy.maxHp).attack;
   const spiderNestMultiplier = SpiderNestPolicy.getCombatMultipliers(enemy.id, currentHp, enemy.maxHp).attack;
   const strongholdMultiplier = BlackstoneStrongholdPolicy.getCombatMultipliers(enemy.id, currentHp, enemy.maxHp).attack;
+  const forestAltarMultiplier = ForestAltarPolicy.getCombatMultipliers(enemy.id, currentHp, enemy.maxHp).attack;
   const strongholdCommandMultiplier = enemy.mapId === 'blackstone-stronghold' && Date.now() < (battle.strongholdCommandUntil || 0)
     ? 1 + BlackstoneStrongholdPolicy.LION_GUARD.roarAttackBonus : 1;
   const strongholdEnrageMultiplier = enemy.mapId === 'blackstone-stronghold'
@@ -1603,7 +1604,7 @@ function getMonsterAttackPower(enemy, progress = getProgress(), currentHp = enem
     ? 1 + BlackForestTrailPolicy.BEASTMASTER.spiderAttackBonus : 1;
   const nestSpiderCommandMultiplier = ['spiderNestBlackstonePoisonSpider', 'venomSpitterSpider', 'webWeaver', 'giantSpider'].includes(enemy.id)
     && Date.now() < (battle.spiderNestCommandUntil || 0) ? 1 + SpiderNestPolicy.BEASTMASTER.spiderAttackBonus : 1;
-  if (enemy.mapId) return Math.max(1, Math.round((enemy.attack || 1) * randomMultiplier * bloodFrenzy * irritable * plainsIrritable * blackForestMultiplier * blackForestTrailMultiplier * spiderNestMultiplier * strongholdMultiplier * strongholdCommandMultiplier * strongholdEnrageMultiplier * commandMultiplier * beastCommandMultiplier * nestSpiderCommandMultiplier));
+  if (enemy.mapId) return Math.max(1, Math.round((enemy.attack || 1) * randomMultiplier * bloodFrenzy * irritable * plainsIrritable * blackForestMultiplier * blackForestTrailMultiplier * spiderNestMultiplier * strongholdMultiplier * forestAltarMultiplier * strongholdCommandMultiplier * strongholdEnrageMultiplier * commandMultiplier * beastCommandMultiplier * nestSpiderCommandMultiplier));
   const map = getActiveMap(progress);
   const monsterLevel = Math.min(map.max, Math.max(map.min, progress.level));
   const levelMultiplier = 1 + (monsterLevel - 1) * .10;
@@ -1619,13 +1620,14 @@ function getMonsterAttackInterval(enemy, currentHp = enemy.maxHp) {
   const blackForestTrailMultiplier = BlackForestTrailPolicy.getCombatMultipliers(enemy.id, currentHp, enemy.maxHp).attackSpeed;
   const spiderNestMultiplier = SpiderNestPolicy.getCombatMultipliers(enemy.id, currentHp, enemy.maxHp).attackSpeed;
   const strongholdMultiplier = BlackstoneStrongholdPolicy.getCombatMultipliers(enemy.id, currentHp, enemy.maxHp).attackSpeed;
+  const forestAltarMultiplier = ForestAltarPolicy.getCombatMultipliers(enemy.id, currentHp, enemy.maxHp).attackSpeed;
   const strongholdEnrageMultiplier = enemy.mapId === 'blackstone-stronghold'
     ? 1 + BlackstoneStrongholdPolicy.getEnrage(battle.blackstoneStrongholdState, Date.now()).attackSpeedBonus : 1;
   const beastCommandMultiplier = enemy.id === 'blackstonePoisonSpider' && Date.now() < (battle.blackstoneSpiderCommandUntil || 0)
     ? 1 + BlackForestTrailPolicy.BEASTMASTER.spiderAttackSpeedBonus : 1;
   const nestSpiderCommandMultiplier = ['spiderNestBlackstonePoisonSpider', 'venomSpitterSpider', 'webWeaver', 'giantSpider'].includes(enemy.id)
     && Date.now() < (battle.spiderNestCommandUntil || 0) ? 1 + SpiderNestPolicy.BEASTMASTER.spiderAttackSpeedBonus : 1;
-  return Math.max(250, (enemy.attackInterval || (1000 / (enemy.attackSpeed || 1))) / bloodFrenzy / irritable / plainsIrritable / blackForestMultiplier / blackForestTrailMultiplier / spiderNestMultiplier / strongholdMultiplier / strongholdEnrageMultiplier / beastCommandMultiplier / nestSpiderCommandMultiplier);
+  return Math.max(250, (enemy.attackInterval || (1000 / (enemy.attackSpeed || 1))) / bloodFrenzy / irritable / plainsIrritable / blackForestMultiplier / blackForestTrailMultiplier / spiderNestMultiplier / strongholdMultiplier / forestAltarMultiplier / strongholdEnrageMultiplier / beastCommandMultiplier / nestSpiderCommandMultiplier);
 }
 
 function createEnemyAttackSchedule(enemyTypes, startAt = Date.now(), mapId = getActiveMap(getProgress()).id, enemyLevels = []) {
@@ -3239,12 +3241,13 @@ function applyDamageToMonster(index, baseDamage, profile, options = {}) {
   const trailMultipliers = BlackForestTrailPolicy.getCombatMultipliers(enemy.id, battle.enemyHps[index], enemy.maxHp);
   const spiderNestMultipliers = SpiderNestPolicy.getCombatMultipliers(enemy.id, battle.enemyHps[index], enemy.maxHp);
   const strongholdMultipliers = BlackstoneStrongholdPolicy.getCombatMultipliers(enemy.id, battle.enemyHps[index], enemy.maxHp);
+  const forestAltarMultipliers = ForestAltarPolicy.getCombatMultipliers(enemy.id, battle.enemyHps[index], enemy.maxHp);
   const captainShieldActive = enemy.id === 'blackstoneCaptain' && Date.now() < (battle.enemyCaptainShieldUntil?.[index] || 0);
   const assassinDashActive = enemy.id === 'blackstoneVenombladeAssassin' && Date.now() < (battle.enemyAssassinDashUntil?.[index] || 0);
   const defendedEnemy = {
     ...enemy,
-    defense: Math.max(0, Math.round(enemy.defense * trailMultipliers.defense * spiderNestMultipliers.defense * strongholdMultipliers.defense)),
-    evasion: (enemy.evasion || 0) + (trailMultipliers.evasion || 0) + (spiderNestMultipliers.evasion || 0) + (strongholdMultipliers.evasion || 0) + (assassinDashActive ? SpiderNestPolicy.ASSASSIN.dashEvasionBonus : 0),
+    defense: Math.max(0, Math.round(enemy.defense * trailMultipliers.defense * spiderNestMultipliers.defense * strongholdMultipliers.defense * forestAltarMultipliers.defense)),
+    evasion: (enemy.evasion || 0) + (trailMultipliers.evasion || 0) + (spiderNestMultipliers.evasion || 0) + (strongholdMultipliers.evasion || 0) + (forestAltarMultipliers.evasion || 0) + (assassinDashActive ? SpiderNestPolicy.ASSASSIN.dashEvasionBonus : 0),
     parry: (enemy.parry || 0) + (captainShieldActive ? BlackForestTrailPolicy.CAPTAIN.shieldParryBonus : 0)
   };
   const result = MonsterDefense.resolveDamage({
@@ -4100,6 +4103,9 @@ function enemyAttackTick() {
     const strongholdAction = getActiveMap(progress).id === 'blackstone-stronghold'
       ? BlackstoneStrongholdPolicy.resolveAction(enemy.id, Math.random(), target.currentHp / target.maxHp, enemyCurrentHp, enemy.maxHp)
       : 'attack';
+    const forestAltarAction = getActiveMap(progress).id === 'forest-altar'
+      ? ForestAltarPolicy.resolveAction(enemy.id, Math.random())
+      : 'attack';
     if (strongholdAction === 'lion-roar' || strongholdAction === 'warlord-command') {
       battle.strongholdCommandUntil = Math.max(battle.strongholdCommandUntil || 0, now + BlackstoneStrongholdPolicy.LION_GUARD.roarDurationMs);
       logBattle(`📣【${enemy.name}】施放【${strongholdAction === 'lion-roar' ? '獅吼' : '督軍號令'}】，黑石據點敵軍攻擊提高 15%，持續 6 秒！`, 'system');
@@ -4155,7 +4161,8 @@ function enemyAttackTick() {
       * BlackForestEntrancePolicy.getDamageMultiplier(blackForestAction)
       * BlackForestTrailPolicy.getDamageMultiplier(blackForestTrailAction)
       * SpiderNestPolicy.getDamageMultiplier(spiderNestAction, poisonStacks)
-      * BlackstoneStrongholdPolicy.getDamageMultiplier(strongholdAction);
+      * BlackstoneStrongholdPolicy.getDamageMultiplier(strongholdAction)
+      * ForestAltarPolicy.getDamageMultiplier(forestAltarAction);
     const marked = now < (target.blackstoneMarkedUntil || 0);
     const markedHumanBonus = marked && enemy.faction === 'blackstone-bandits'
       ? 1 + BlackForestTrailPolicy.MARK.blackstoneHumanDamageBonus : 1;
@@ -4256,6 +4263,14 @@ function enemyAttackTick() {
     }
     const strongholdActionNames = { 'armor-piercing-bolt': '穿甲弩箭', 'aimed-volley': '瞄準齊射', 'twin-axe-cleave': '雙斧橫掃', 'hunting-pounce': '狩獵撲擊', 'crushing-hammer': '碎甲重錘', 'seismic-smash': '震地重擊', 'warhammer-sweep': '戰錘橫掃', 'warlord-execution': '督軍處決' };
     if (!dodged && damage > 0 && strongholdActionNames[strongholdAction]) logBattle(`⚔【${enemy.name}】施放【${strongholdActionNames[strongholdAction]}】！`, 'system');
+    if (!dodged && damage > 0 && ['corrupted-bite', 'corruption-flame'].includes(forestAltarAction)) inflictPartyMemberBleed(target, enemy, now);
+    const forestAltarControl = ForestAltarPolicy.getControlEffect(forestAltarAction);
+    if (!dodged && damage > 0 && forestAltarControl) {
+      const forestAltarControlNames = { 'thorn-entangle': '荊棘纏繞', 'rune-shock': '符文震擊', 'withering-touch': '凋零之觸', 'root-sweep': '根鬚橫掃' };
+      applyBlackstoneAttackSpeedPenalty(target, forestAltarControl.attackSpeedPenalty, forestAltarControl.durationMs, now, forestAltarControlNames[forestAltarAction]);
+    }
+    const forestAltarActionNames = { 'corrupted-bite': '腐化撕咬', 'blackstone-heavy-slash': '黑石重斬', 'corruption-flame': '腐化之焰' };
+    if (!dodged && damage > 0 && forestAltarActionNames[forestAltarAction]) logBattle(`⚔【${enemy.name}】施放【${forestAltarActionNames[forestAltarAction]}】！`, 'system');
 
     if (dodged) {
       logBattle(`${target.name} 閃避了 ${enemy.name} 的攻擊。`, 'damage-taken');

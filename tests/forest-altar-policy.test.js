@@ -8,7 +8,7 @@ assert.equal(policy.MAP.background, 'assets/forest-altar-background.png');
 assert.equal(policy.MAP.enemyPoolId, 'forest-altar-enemies');
 assert.equal(policy.MAP.bossId, 'corrupted-altar-guardian');
 assert.equal(policy.MAP.implemented, false);
-assert.equal(policy.MAP.contentStatus, 'combat-foundation');
+assert.equal(policy.MAP.contentStatus, 'skill-foundation');
 assert.deepEqual(policy.MONSTERS.map((monster) => monster.name), [
   '腐化森林狼', '荊棘魔藤', '腐化黑石士兵', '祭壇守衛', '腐化黑石祭司', '墮落德魯伊', '腐化祭壇守護者'
 ]);
@@ -36,7 +36,7 @@ assert.ok(policy.MONSTERS.every((monster) => monster.chapter === 2 && monster.ma
 assert.equal(policy.MONSTERS.filter((monster) => monster.image !== null).length, 7);
 assert.ok(policy.MONSTERS.every((monster) => monster.level === 23 && monster.stats !== null
   && monster.combatId !== null && monster.role !== null && monster.dropTableId === null
-  && monster.skillIds.length === 0 && monster.aiProfileId === null && monster.implemented === false));
+  && monster.skillIds.length === 2 && monster.aiProfileId !== null && monster.implemented === false));
 assert.deepEqual(policy.MONSTERS.map((monster) => monster.stats), [
   { maxHp: 480, attack: 68, defense: 30, evasion: 17, parry: 0, damageReduction: 5, attackSpeed: 1.40, xp: 65, gold: 32 },
   { maxHp: 650, attack: 59, defense: 52, evasion: 2, parry: 0, damageReduction: 12, attackSpeed: .75, xp: 68, gold: 34 },
@@ -54,8 +54,25 @@ assert.equal(policy.getCombatMonster('corruptedBlackstoneSoldier').faction, 'cor
 assert.equal(policy.getCombatMonster('altarGuard').isElite, true);
 assert.equal(policy.getCombatMonster('corruptedAltarGuardian').isBoss, true);
 assert.equal(policy.getCombatMonster('corruptedAltarGuardian').maxHp, 8000);
-assert.deepEqual(policy.getCombatMonster('fallenDruid').skillIds, []);
+assert.deepEqual(policy.getCombatMonster('fallenDruid').skillIds, ['withering-touch', 'spreading-corruption']);
 assert.equal(policy.getCombatMonster('unknown'), null);
+assert.equal(policy.resolveAction('corruptedForestWolf', .10), 'corrupted-bite');
+assert.equal(policy.resolveAction('corruptedForestWolf', .25), 'attack');
+assert.equal(policy.resolveAction('corruptedAltarGuardian', .10), 'root-sweep');
+assert.equal(policy.getDamageMultiplier('blackstone-heavy-slash'), 1.32);
+assert.equal(policy.getDamageMultiplier('attack'), 1);
+assert.deepEqual(policy.getControlEffect('thorn-entangle'), { attackSpeedPenalty: .20, durationMs: 4000 });
+assert.equal(policy.getControlEffect('blackstone-heavy-slash'), null);
+assert.deepEqual(policy.getCombatMultipliers('corruptedForestWolf', 190, 480), { attack: 1.15, attackSpeed: 1.20, defense: 1, evasion: 0 });
+assert.deepEqual(policy.getCombatMultipliers('thornDemonVine', 300, 650), { attack: 1, attackSpeed: 1, defense: 1.20, evasion: 0 });
+assert.deepEqual(policy.getCombatMultipliers('corruptedBlackstoneSoldier', 350, 720), { attack: 1, attackSpeed: 1, defense: 1.25, evasion: 0 });
+assert.deepEqual(policy.getCombatMultipliers('altarGuard', 1900, 1900), { attack: 1, attackSpeed: 1, defense: 1.15, evasion: 0 });
+assert.deepEqual(policy.getCombatMultipliers('corruptedBlackstonePriest', 500, 1450), { attack: 1.20, attackSpeed: 1, defense: .90, evasion: 0 });
+assert.deepEqual(policy.getCombatMultipliers('fallenDruid', 800, 1700), { attack: 1.15, attackSpeed: 1, defense: 1, evasion: 0 });
+assert.equal(policy.getBossPhase('corruptedAltarGuardian', 8000, 8000), 1);
+assert.equal(policy.getBossPhase('corruptedAltarGuardian', 5000, 8000), 2);
+assert.equal(policy.getBossPhase('corruptedAltarGuardian', 2500, 8000), 3);
+assert.deepEqual(policy.getCombatMultipliers('corruptedAltarGuardian', 2500, 8000), { attack: 1.25, attackSpeed: 1.20, defense: .90, evasion: 0 });
 const fs = require('node:fs');
 const path = require('node:path');
 const wolf = fs.readFileSync(path.join(__dirname, '..', policy.getMonster('corrupted-forest-wolf').image));
