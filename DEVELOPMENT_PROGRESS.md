@@ -1035,3 +1035,13 @@ Boss：
 - 圖片 SHA-256：`4E7E74D3AA7FB4AF0CF8D79387256BA11A65252A834D71522BDB812ACB615DEA`。
 - 目前只新增圖片路徑；怪物數值、技能、掉落物與戰鬥實作仍維持未設定。
 - 50 個 JavaScript 測試檔、36 個根目錄 JavaScript 語法檢查與 `git diff --check` 均通過。
+
+## 2026-08-10 腐化黑石祭司透明圖片
+
+- 星辰 DEV 版本由 `0.4.52` 更新為 `0.4.53`。
+- 新增腐化黑石祭司透明圖片 `assets/corrupted-blackstone-priest.png`，並套用到森林祭壇菁英怪物 `corrupted-blackstone-priest`。
+- 圖片以使用者提供的原圖為基礎，保留完整冠角、法杖與吊飾、長袍及手中紫色魔焰，移除灰色背景、地面與陰影後輸出透明 PNG。
+- 圖片尺寸為 `1196 × 1315` RGBA PNG，Alpha 範圍完整，四角透明且法杖、火星與袍角未裁切。
+- 圖片 SHA-256：`001CC87D32AE1B4F2C516746DB1C402EBD5A1EA2EC7950E8551CF559EFC59A8A`。
+- 目前只新增圖片路徑；怪物數值、技能、掉落物與戰鬥實作仍維持未設定。
+- 50 個 JavaScript 測試檔、36 個根目錄 JavaScript 語法檢查與 `git diff --check` 均通過。

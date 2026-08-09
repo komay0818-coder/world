@@ -38,7 +38,7 @@
     monster('thorn-demon-vine', '荊棘魔藤', 'normal', { image: 'assets/thorn-demon-vine.png' }),
     monster('corrupted-blackstone-soldier', '腐化黑石士兵', 'normal', { image: 'assets/corrupted-blackstone-soldier.png' }),
     monster('altar-guard', '祭壇守衛', 'elite', { image: 'assets/altar-guard.png' }),
-    monster('corrupted-blackstone-priest', '腐化黑石祭司', 'elite'),
+    monster('corrupted-blackstone-priest', '腐化黑石祭司', 'elite', { image: 'assets/corrupted-blackstone-priest.png' }),
     monster('fallen-druid', '墮落德魯伊', 'elite'),
     monster('corrupted-altar-guardian', '腐化祭壇守護者', 'boss')
   ]);
