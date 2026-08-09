@@ -3,6 +3,7 @@ const policy = require('../forest-altar-policy.js');
 
 assert.equal(policy.MAP.id, 'forest-altar');
 assert.equal(policy.MAP.name, '森林祭壇');
+assert.equal(policy.MAP.background, 'assets/forest-altar-background.png');
 assert.equal(policy.MAP.enemyPoolId, 'forest-altar-enemies');
 assert.equal(policy.MAP.bossId, 'corrupted-altar-guardian');
 assert.equal(policy.MAP.implemented, false);
@@ -52,5 +53,8 @@ assert.equal(druid[25], 6, 'the fallen druid uses RGBA color with transparency')
 const boss = fs.readFileSync(path.join(__dirname, '..', policy.getMonster('corrupted-altar-guardian').image));
 assert.equal(boss.subarray(1, 4).toString(), 'PNG', 'the corrupted altar guardian is a PNG asset');
 assert.equal(boss[25], 6, 'the corrupted altar guardian uses RGBA color with transparency');
+const background = fs.readFileSync(path.join(__dirname, '..', policy.MAP.background));
+assert.equal(background.subarray(1, 4).toString(), 'PNG', 'the forest altar background is a PNG asset');
+assert.equal(background[25], 2, 'the forest altar background uses RGB color');
 
 console.log('forest-altar-policy: assertions passed');

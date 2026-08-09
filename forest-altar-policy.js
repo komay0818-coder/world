@@ -10,6 +10,7 @@
     chapter: 2,
     order: 5,
     name: '森林祭壇',
+    background: 'assets/forest-altar-background.png',
     enemyPoolId: 'forest-altar-enemies',
     bossId: 'corrupted-altar-guardian',
     implemented: false,

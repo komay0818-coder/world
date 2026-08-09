@@ -12,6 +12,6 @@ assert.match(script, /VillageUpgradePolicy\.grantMapDrops\(progress, currentMap\
 assert.doesNotMatch(crafting, /blackOre: Object\.freeze/, 'black ore has one canonical material definition in the drop policy');
 assert.match(index, /chapter-one-material-drop-policy\.js\?v=20260806-black-ore-drops-v2/, 'the material policy cache key changes');
 assert.match(index, /script\.js\?v=20260810-stronghold-objective-v133/, 'the integration cache key changes');
-assert.match(index, /VER\. 0\.4\.55/, 'the game version includes the corrupted altar guardian artwork');
+assert.match(index, /VER\. 0\.4\.56/, 'the game version includes the forest altar background');
 
 console.log('black-ore-drop-integration: assertions passed');

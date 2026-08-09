@@ -71,6 +71,10 @@ assert.equal(policy.getDungeon('blackstone-stronghold').finalBossId, 'blackstone
 assert.equal(policy.canEnter('blackstone-stronghold'), false, 'placeholder dungeon cannot be entered');
 const forestAltar = policy.getMap('forest-altar');
 assert.equal(forestAltar.contentStatus, 'monster-roster');
+assert.equal(forestAltar.background, 'assets/forest-altar-background.png');
+const forestAltarBackground = fs.readFileSync(path.join(__dirname, '..', forestAltar.background));
+assert.equal(forestAltarBackground.subarray(1, 4).toString(), 'PNG', 'the Forest Altar background is a PNG asset');
+assert.equal(forestAltarBackground[25], 2, 'the Forest Altar background uses RGB color');
 assert.equal(forestAltar.enemyPoolId, 'forest-altar-enemies');
 assert.equal(forestAltar.bossId, 'corrupted-altar-guardian');
 assert.equal(forestAltar.primaryFaction, 'corrupted-forest');
