@@ -19,9 +19,10 @@ assert.deepEqual(policy.getMonsterPool(), {
 assert.equal(policy.getMonster('fallen-druid').name, '墮落德魯伊');
 assert.equal(policy.getMonster('corrupted-forest-wolf').image, 'assets/corrupted-forest-wolf.png');
 assert.equal(policy.getMonster('thorn-demon-vine').image, 'assets/thorn-demon-vine.png');
+assert.equal(policy.getMonster('corrupted-blackstone-soldier').image, 'assets/corrupted-blackstone-soldier.png');
 assert.equal(policy.getMonster('unknown'), null);
 assert.ok(policy.MONSTERS.every((monster) => monster.chapter === 2 && monster.mapId === 'forest-altar'));
-assert.equal(policy.MONSTERS.filter((monster) => monster.image !== null).length, 2);
+assert.equal(policy.MONSTERS.filter((monster) => monster.image !== null).length, 3);
 assert.ok(policy.MONSTERS.every((monster) => monster.stats === null
   && monster.dropTableId === null && monster.skillIds.length === 0 && monster.aiProfileId === null && monster.implemented === false));
 const fs = require('node:fs');
@@ -32,5 +33,8 @@ assert.equal(wolf[25], 6, 'the corrupted forest wolf uses RGBA color with transp
 const vine = fs.readFileSync(path.join(__dirname, '..', policy.getMonster('thorn-demon-vine').image));
 assert.equal(vine.subarray(1, 4).toString(), 'PNG', 'the thorn demon vine is a PNG asset');
 assert.equal(vine[25], 6, 'the thorn demon vine uses RGBA color with transparency');
+const soldier = fs.readFileSync(path.join(__dirname, '..', policy.getMonster('corrupted-blackstone-soldier').image));
+assert.equal(soldier.subarray(1, 4).toString(), 'PNG', 'the corrupted blackstone soldier is a PNG asset');
+assert.equal(soldier[25], 6, 'the corrupted blackstone soldier uses RGBA color with transparency');
 
 console.log('forest-altar-policy: assertions passed');

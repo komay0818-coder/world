@@ -1015,3 +1015,13 @@ Boss：
 - 圖片 SHA-256：`EDC1F10F1EAC4A81AD4F6769BF9C74C019FD4FBDFB315623483834A8D0CAB16C`。
 - 目前只新增圖片路徑；怪物數值、技能、掉落物與戰鬥實作仍維持未設定。
 - 50 個 JavaScript 測試檔、36 個根目錄 JavaScript 語法檢查與 `git diff --check` 均通過。
+
+## 2026-08-10 腐化黑石士兵透明圖片
+
+- 星辰 DEV 版本由 `0.4.50` 更新為 `0.4.51`。
+- 新增腐化黑石士兵透明圖片 `assets/corrupted-blackstone-soldier.png`，並套用到森林祭壇普通怪物 `corrupted-blackstone-soldier`。
+- 圖片以使用者提供的原圖為基礎，保留全身黑石盔甲、長柄雙刃斧與紫色腐化火焰，移除灰色背景、地面與陰影後輸出透明 PNG。
+- 圖片尺寸為 `1154 × 1363` RGBA PNG，Alpha 範圍完整，四角透明且武器與主體未裁切。
+- 圖片 SHA-256：`F06A03FD3847CDE286019AFB697EE692B89AED80DC366DF4FA36F38D2E7F3F9F`。
+- 目前只新增圖片路徑；怪物數值、技能、掉落物與戰鬥實作仍維持未設定。
+- 50 個 JavaScript 測試檔、36 個根目錄 JavaScript 語法檢查與 `git diff --check` 均通過。
