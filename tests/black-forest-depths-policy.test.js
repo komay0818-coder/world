@@ -6,7 +6,8 @@ assert.equal(policy.RULES.background, 'assets/black-forest-depths-background.png
 assert.equal(policy.RULES.enemyPoolId, 'black-forest-depths-enemies');
 assert.equal(policy.RULES.bossId, 'heart-of-the-black-forest');
 assert.equal(policy.RULES.implemented, false);
-assert.equal(policy.RULES.contentStatus, 'monster-roster');
+assert.equal(policy.RULES.level, 25);
+assert.equal(policy.RULES.contentStatus, 'combat-foundation');
 assert.deepEqual(policy.RULES.visualDirection, { primaryEnergy: 'purple-corruption', forestSpiritEnergy: 'green-nature' });
 assert.deepEqual(policy.MONSTERS.map((monster) => monster.name), ['腐化森林狼', '腐化樹妖', '黑暗孢子獸', '森林之魂', '腐化黑石百夫長', '腐化墮落德魯伊', '黑森林之心']);
 assert.deepEqual(policy.getMonsterPool(), {
@@ -24,8 +25,29 @@ assert.equal(policy.getMonster('dark-spore-beast').image, 'assets/dark-spore-bea
 assert.equal(policy.getMonster('corrupted-treant').image, 'assets/corrupted-treant.png');
 assert.equal(policy.getMonster('corrupted-forest-wolf').image, 'assets/corrupted-forest-wolf.png');
 assert.equal(policy.MONSTERS.filter((monster) => monster.image !== null).length, 7);
-assert.ok(policy.MONSTERS.every((monster) => monster.combatId === null && monster.stats === null
+assert.deepEqual(policy.getCombatPool(), {
+  normal: ['depthsCorruptedForestWolf', 'corruptedTreant', 'darkSporeBeast', 'forestSpirit'],
+  elite: ['corruptedBlackstoneCenturion', 'corruptedFallenDruid'],
+  boss: ['heartOfTheBlackForest']
+});
+assert.ok(policy.MONSTERS.every((monster) => monster.level === 25 && monster.combatId !== null && monster.role !== null && monster.stats !== null
   && monster.dropTableId === null && monster.skillIds.length === 0 && monster.aiProfileId === null && monster.implemented === false));
+assert.deepEqual(policy.MONSTERS.map((monster) => monster.stats), [
+  { maxHp: 650, attack: 82, defense: 35, evasion: 19, parry: 0, damageReduction: 6, attackSpeed: 1.50, xp: 82, gold: 41 },
+  { maxHp: 980, attack: 76, defense: 72, evasion: 3, parry: 8, damageReduction: 18, attackSpeed: .78, xp: 88, gold: 45 },
+  { maxHp: 820, attack: 88, defense: 48, evasion: 7, parry: 0, damageReduction: 10, attackSpeed: .95, xp: 92, gold: 48 },
+  { maxHp: 760, attack: 72, defense: 44, evasion: 16, parry: 0, damageReduction: 8, attackSpeed: 1.10, xp: 90, gold: 50 },
+  { maxHp: 2700, attack: 110, defense: 92, evasion: 4, parry: 18, damageReduction: 22, attackSpeed: .88, xp: 340, gold: 210 },
+  { maxHp: 2350, attack: 116, defense: 65, evasion: 10, parry: 6, damageReduction: 14, attackSpeed: 1, xp: 360, gold: 225 },
+  { maxHp: 12000, attack: 132, defense: 105, evasion: 5, parry: 12, damageReduction: 24, attackSpeed: .92, xp: 1500, gold: 900 }
+]);
+assert.equal(policy.rollLevel('heartOfTheBlackForest'), 25);
+assert.equal(policy.rollLevel('unknown'), null);
+assert.equal(policy.getCombatMonster('forestSpirit').faction, 'forest-nature');
+assert.equal(policy.getCombatMonster('corruptedBlackstoneCenturion').isElite, true);
+assert.equal(policy.getCombatMonster('heartOfTheBlackForest').isBoss, true);
+assert.equal(policy.getCombatMonster('heartOfTheBlackForest').maxHp, 12000);
+assert.equal(policy.getCombatMonster('unknown'), null);
 assert.equal(policy.getMonster('unknown'), null);
 const fs = require('node:fs');
 const path = require('node:path');
