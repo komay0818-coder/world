@@ -69,6 +69,12 @@ assert.equal(policy.getDungeon('blackstone-stronghold').encounterPolicyId, 'blac
 assert.equal(policy.getDungeon('blackstone-stronghold').contentStatus, 'monster-roster');
 assert.equal(policy.getDungeon('blackstone-stronghold').finalBossId, 'blackstone-warlord');
 assert.equal(policy.canEnter('blackstone-stronghold'), false, 'placeholder dungeon cannot be entered');
+const forestAltar = policy.getMap('forest-altar');
+assert.equal(forestAltar.contentStatus, 'monster-roster');
+assert.equal(forestAltar.enemyPoolId, 'forest-altar-enemies');
+assert.equal(forestAltar.bossId, 'corrupted-altar-guardian');
+assert.equal(forestAltar.primaryFaction, 'corrupted-forest');
+assert.equal(policy.canEnter('forest-altar'), false);
 assert.equal(policy.getMap('black-forest-depths').isFinalMap, true);
 assert.deepEqual(policy.getMap('black-forest-depths').environmentEffects, ['dense-fog']);
 assert.equal(policy.getMap('black-forest-depths').bossAuraPolicyId, 'black-forest-depths-boss-aura');

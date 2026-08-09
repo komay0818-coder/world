@@ -101,6 +101,10 @@
       story: Object.freeze({ previousMapId: 'spider-nest', nextMapId: 'forest-altar', objectiveId: null })
     }),
     map('forest-altar', 5, '森林祭壇', {
+      contentStatus: 'monster-roster',
+      enemyPoolId: 'forest-altar-enemies',
+      bossId: 'corrupted-altar-guardian',
+      primaryFaction: 'corrupted-forest',
       story: Object.freeze({ previousMapId: 'blackstone-stronghold', nextMapId: 'black-forest-depths', objectiveId: null })
     }),
     map('black-forest-depths', 6, '黑森林深處', {
