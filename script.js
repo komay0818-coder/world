@@ -1585,7 +1585,7 @@ function getEnemyDefinition(index) {
   const enemy = getMonsterDefinitionForMap(battle.enemyTypes[index], battle.dungeonId || getActiveMap(getProgress()).id, battle.enemyLevels?.[index]);
   const summonProfile = battle.enemySummonProfiles?.[index];
   if (!summonProfile) return enemy;
-  return { ...enemy, maxHp: Math.max(1, Math.round(enemy.maxHp * summonProfile.hpRatio)), attack: Math.max(1, Math.round(enemy.attack * summonProfile.attackRatio)) };
+  return { ...enemy, name: summonProfile.name || enemy.name, maxHp: Math.max(1, Math.round(enemy.maxHp * summonProfile.hpRatio)), attack: Math.max(1, Math.round(enemy.attack * summonProfile.attackRatio)) };
 }
 
 function isPlayerBleeding(now = Date.now()) {
@@ -1594,7 +1594,8 @@ function isPlayerBleeding(now = Date.now()) {
 
 function getBlackForestDepthsCombatContext() {
   const aliveCount = (battle.enemyHps || []).filter((hp) => hp > 0).length;
-  return { aliveAllies: Math.max(0, aliveCount - 1), bossAuraActive: hasAliveBoss() };
+  const forestSpiritAlive = (battle.enemyTypes || []).some((type, index) => type === 'forestSpirit' && battle.enemyHps[index] > 0);
+  return { aliveAllies: Math.max(0, aliveCount - 1), bossAuraActive: hasAliveBoss(), forestSpiritAlive };
 }
 
 function getMonsterAttackPower(enemy, progress = getProgress(), currentHp = enemy.maxHp) {
@@ -3151,6 +3152,7 @@ function processEnemyRespawns() {
       if (battle.enemySummonProfiles) battle.enemySummonProfiles[index] = null;
       if (battle.enemyAssassinDashUntil) battle.enemyAssassinDashUntil[index] = 0;
       if (battle.enemySpiderNestPhase) battle.enemySpiderNestPhase[index] = 1;
+      if (battle.enemyDepthsPhase) battle.enemyDepthsPhase[index] = 1;
       battle.enemyHps[index] = getEnemyDefinition(index).maxHp;
       battle.enemySpawnedAt[index] = Date.now();
       battle.enemyDots[index] = [];
@@ -3871,6 +3873,46 @@ function summonSpiderNestMonster(type, summonerIndex, hpRatio, attackRatio, limi
   return true;
 }
 
+function summonBlackForestDepthsRoot(summonerIndex, now = Date.now()) {
+  const type = 'corruptedTreant';
+  const summonCount = (battle.enemyTrailSummoned || []).filter((summoned, index) => summoned
+    && battle.enemyTypes[index] === type && battle.enemyHps[index] > 0).length;
+  if (summonCount >= BlackForestDepthsPolicy.BOSS.rootSummonLimit) return false;
+  if (!battle.enemyTrailSummoned) battle.enemyTrailSummoned = battle.enemyTypes.map(() => false);
+  if (!battle.enemySummonProfiles) battle.enemySummonProfiles = battle.enemyTypes.map(() => null);
+  const profile = { hpRatio: BlackForestDepthsPolicy.BOSS.rootSummonHpRatio, attackRatio: BlackForestDepthsPolicy.BOSS.rootSummonAttackRatio, name: '腐化根鬚' };
+  const reusedIndex = battle.enemyTrailSummoned.findIndex((summoned, index) => summoned && battle.enemyHps[index] <= 0);
+  const index = reusedIndex >= 0 ? reusedIndex : battle.enemyTypes.length;
+  if (reusedIndex >= 0) {
+    battle.enemyTypes[index] = type;
+    battle.enemyLevels[index] = BlackForestDepthsPolicy.RULES.level;
+    battle.enemyRespawns[index] = null;
+    battle.enemySpawnedAt[index] = now;
+    battle.enemyDots[index] = [];
+    battle.enemyDamages[index] = [];
+    battle.enemyTrailSummoned[index] = true;
+    battle.enemySummonProfiles[index] = profile;
+  } else {
+    battle.enemyTypes.push(type);
+    battle.enemyLevels.push(BlackForestDepthsPolicy.RULES.level);
+    battle.enemyRespawns.push(null);
+    battle.enemySpawnedAt.push(now);
+    battle.enemyDots.push([]);
+    battle.enemyDamages.push([]);
+    battle.enemyTrailSummoned.push(true);
+    battle.enemySummonProfiles.push(profile);
+    battle.enemyBoarEnraged.push(false);
+    battle.enemyNextAttackAt.push(null);
+    battle.enemyDepthsPhase?.push(1);
+  }
+  const summoned = getEnemyDefinition(index);
+  battle.enemyHps[index] = summoned.maxHp;
+  battle.enemyNextAttackAt[index] = now + getMonsterAttackInterval(summoned);
+  playMonsterAttackAnimation(summonerIndex, false);
+  logBattle('🌑【黑森林之心】喚醒【腐化根鬚】，深林的根系加入戰鬥！', 'spawn');
+  return true;
+}
+
 function processPartyMemberBleed(member, now = Date.now()) {
   const bleed = member.bleed;
   if (!bleed) return false;
@@ -4143,6 +4185,21 @@ function enemyAttackTick() {
           ? countAliveSpiderNestSummons('venomSpitterSpider') < SpiderNestPolicy.BEASTMASTER.summonLimit
           : countAliveSpiderNestSummons('spiderNestBlackstonePoisonSpider') < SpiderNestPolicy.BOSS.summonLimit)
       : 'attack';
+    const blackForestDepthsActive = getActiveMap(progress).id === 'black-forest-depths';
+    if (blackForestDepthsActive && enemy.id === 'heartOfTheBlackForest') {
+      if (!battle.enemyDepthsPhase) battle.enemyDepthsPhase = battle.enemyTypes.map(() => 1);
+      const depthsPhase = BlackForestDepthsPolicy.getBossPhase(enemy.id, enemyCurrentHp, enemy.maxHp);
+      const previousDepthsPhase = battle.enemyDepthsPhase[enemyIndex] || 1;
+      battle.enemyDepthsPhase[enemyIndex] = depthsPhase;
+      if (depthsPhase >= 2 && previousDepthsPhase < 2) {
+        logBattle('🌑【黑森林之心】進入第二階段【根脈甦醒】，攻擊提高 15%！', 'system');
+        summonBlackForestDepthsRoot(enemyIndex, now);
+      }
+      if (depthsPhase >= 3 && previousDepthsPhase < 3) {
+        logBattle('💜【黑森林之心】進入第三階段【核心崩裂】，攻擊與攻速大幅提高，但防禦降低！', 'system');
+        summonBlackForestDepthsRoot(enemyIndex, now);
+      }
+    }
     const strongholdAction = getActiveMap(progress).id === 'blackstone-stronghold'
       ? BlackstoneStrongholdPolicy.resolveAction(enemy.id, Math.random(), target.currentHp / target.maxHp, enemyCurrentHp, enemy.maxHp)
       : 'attack';

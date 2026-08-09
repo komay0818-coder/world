@@ -14,7 +14,7 @@
     enemyPoolId: 'black-forest-depths-enemies',
     bossId: 'heart-of-the-black-forest',
     implemented: false,
-    contentStatus: 'skill-foundation',
+    contentStatus: 'combat-ready',
     denseFogAccuracyPenalty: .15,
     denseFogUnavoidable: true,
     bossAuraModifiers: Object.freeze({ attackBonus: .10, defenseBonus: .10 }),
@@ -29,6 +29,18 @@
     corruptedBlackstoneCenturion: Object.freeze({ active: 'corrupted-heavy-axe', passive: 'blackstone-command', chance: .24, damage: 1.40, armorBreak: .15, durationMs: 5000 }),
     corruptedFallenDruid: Object.freeze({ active: 'withering-storm', passive: 'deep-forest-corruption', chance: .26, damage: 1.25, slow: .20, durationMs: 4000, threshold: .50 }),
     heartOfTheBlackForest: Object.freeze({ active: 'corruption-pulse', passive: 'black-forest-core', chance: .28, damage: 1.35 })
+  });
+  const BOSS = Object.freeze({
+    phaseTwoThreshold: .70,
+    phaseThreeThreshold: .35,
+    phaseTwoAttackBonus: .15,
+    phaseThreeAttackBonus: .30,
+    phaseThreeAttackSpeedBonus: .25,
+    phaseThreeDefensePenalty: .15,
+    rootSummonHpRatio: .55,
+    rootSummonAttackRatio: .70,
+    rootSummonLimit: 2,
+    weakenedAuraBonus: .05
   });
 
   function monster(id, name, rank, visualEnergy, options = {}) {
@@ -78,6 +90,11 @@
   function getCombatMonster(monsterId) {
     return toCombatMonster(MONSTERS.find((entry) => entry.id === monsterId || entry.combatId === monsterId));
   }
+  function getBossPhase(monsterId, currentHp, maxHp) {
+    if (!['heart-of-the-black-forest', 'heartOfTheBlackForest'].includes(monsterId) || !(Number(maxHp) > 0)) return 1;
+    const ratio = Math.max(0, Number(currentHp) || 0) / Number(maxHp);
+    return ratio <= BOSS.phaseThreeThreshold ? 3 : ratio <= BOSS.phaseTwoThreshold ? 2 : 1;
+  }
   function getCombatMultipliers(monsterId, currentHp, maxHp, context = {}) {
     const ratio = Number(maxHp) > 0 ? Math.max(0, Number(currentHp) || 0) / Number(maxHp) : 1;
     let attack = 1, attackSpeed = 1, defense = 1, evasion = 0;
@@ -87,9 +104,13 @@
     if (monsterId === 'forestSpirit') evasion += .08;
     if (monsterId === 'corruptedBlackstoneCenturion') attack *= 1 + Math.min(4, Math.max(0, Number(context.aliveAllies) || 0)) * .04;
     if (monsterId === 'corruptedFallenDruid' && ratio <= .50) attack *= 1.20;
+    const phase = getBossPhase(monsterId, currentHp, maxHp);
+    if (phase === 3) { attack *= 1 + BOSS.phaseThreeAttackBonus; attackSpeed *= 1 + BOSS.phaseThreeAttackSpeedBonus; defense *= 1 - BOSS.phaseThreeDefensePenalty; }
+    else if (phase === 2) attack *= 1 + BOSS.phaseTwoAttackBonus;
     if (context.bossAuraActive && monsterId !== 'heartOfTheBlackForest') {
-      attack *= 1 + RULES.bossAuraModifiers.attackBonus;
-      defense *= 1 + RULES.bossAuraModifiers.defenseBonus;
+      const auraBonus = context.forestSpiritAlive ? BOSS.weakenedAuraBonus : RULES.bossAuraModifiers.attackBonus;
+      attack *= 1 + auraBonus;
+      defense *= 1 + auraBonus;
     }
     return { attack, attackSpeed, defense, evasion };
   }
@@ -116,12 +137,15 @@
   function getBossAura(enemies) {
     const roster = Array.isArray(enemies) ? enemies : [];
     const bossAlive = roster.some((enemy) => enemy?.isBoss && enemy.currentHp > 0);
+    const forestSpiritAlive = roster.some((enemy) => ['forest-spirit', 'forestSpirit'].includes(enemy?.id) && enemy.currentHp > 0);
+    const auraBonus = forestSpiritAlive ? BOSS.weakenedAuraBonus : RULES.bossAuraModifiers.attackBonus;
     return {
       active: bossAlive,
       affectedEnemyIds: bossAlive ? roster.filter((enemy) => !enemy?.isBoss && enemy?.currentHp > 0).map((enemy) => enemy.id) : [],
-      modifiers: bossAlive ? RULES.bossAuraModifiers : null
+      weakenedByForestSpirit: bossAlive && forestSpiritAlive,
+      modifiers: bossAlive ? Object.freeze({ attackBonus: auraBonus, defenseBonus: auraBonus }) : null
     };
   }
 
-  return Object.freeze({ RULES, SKILLS, MONSTERS, getMonster, getMonstersByRank, getMonsterPool, getCombatPool, rollLevel, toCombatMonster, getCombatMonster, getCombatMultipliers, resolveAction, getDamageMultiplier, getControlEffect, applyDenseFogAccuracy, getBossAura });
+  return Object.freeze({ RULES, SKILLS, BOSS, MONSTERS, getMonster, getMonstersByRank, getMonsterPool, getCombatPool, rollLevel, toCombatMonster, getCombatMonster, getBossPhase, getCombatMultipliers, resolveAction, getDamageMultiplier, getControlEffect, applyDenseFogAccuracy, getBossAura });
 });
