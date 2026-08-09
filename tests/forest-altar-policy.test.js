@@ -8,7 +8,7 @@ assert.equal(policy.MAP.background, 'assets/forest-altar-background.png');
 assert.equal(policy.MAP.enemyPoolId, 'forest-altar-enemies');
 assert.equal(policy.MAP.bossId, 'corrupted-altar-guardian');
 assert.equal(policy.MAP.implemented, false);
-assert.equal(policy.MAP.contentStatus, 'monster-foundation');
+assert.equal(policy.MAP.contentStatus, 'combat-foundation');
 assert.deepEqual(policy.MONSTERS.map((monster) => monster.name), [
   '腐化森林狼', '荊棘魔藤', '腐化黑石士兵', '祭壇守衛', '腐化黑石祭司', '墮落德魯伊', '腐化祭壇守護者'
 ]);
@@ -17,6 +17,11 @@ assert.deepEqual(policy.getMonsterPool(), {
   normal: ['corrupted-forest-wolf', 'thorn-demon-vine', 'corrupted-blackstone-soldier'],
   elite: ['altar-guard', 'corrupted-blackstone-priest', 'fallen-druid'],
   boss: ['corrupted-altar-guardian']
+});
+assert.deepEqual(policy.getCombatPool(), {
+  normal: ['corruptedForestWolf', 'thornDemonVine', 'corruptedBlackstoneSoldier'],
+  elite: ['altarGuard', 'corruptedBlackstonePriest', 'fallenDruid'],
+  boss: ['corruptedAltarGuardian']
 });
 assert.equal(policy.getMonster('fallen-druid').name, '墮落德魯伊');
 assert.equal(policy.getMonster('corrupted-forest-wolf').image, 'assets/corrupted-forest-wolf.png');
@@ -30,7 +35,8 @@ assert.equal(policy.getMonster('unknown'), null);
 assert.ok(policy.MONSTERS.every((monster) => monster.chapter === 2 && monster.mapId === 'forest-altar'));
 assert.equal(policy.MONSTERS.filter((monster) => monster.image !== null).length, 7);
 assert.ok(policy.MONSTERS.every((monster) => monster.level === 23 && monster.stats !== null
-  && monster.dropTableId === null && monster.skillIds.length === 0 && monster.aiProfileId === null && monster.implemented === false));
+  && monster.combatId !== null && monster.role !== null && monster.dropTableId === null
+  && monster.skillIds.length === 0 && monster.aiProfileId === null && monster.implemented === false));
 assert.deepEqual(policy.MONSTERS.map((monster) => monster.stats), [
   { maxHp: 480, attack: 68, defense: 30, evasion: 17, parry: 0, damageReduction: 5, attackSpeed: 1.40, xp: 65, gold: 32 },
   { maxHp: 650, attack: 59, defense: 52, evasion: 2, parry: 0, damageReduction: 12, attackSpeed: .75, xp: 68, gold: 34 },
@@ -40,6 +46,16 @@ assert.deepEqual(policy.MONSTERS.map((monster) => monster.stats), [
   { maxHp: 1700, attack: 91, defense: 57, evasion: 8, parry: 7, damageReduction: 12, attackSpeed: .92, xp: 260, gold: 155 },
   { maxHp: 8000, attack: 108, defense: 86, evasion: 4, parry: 12, damageReduction: 20, attackSpeed: .88, xp: 950, gold: 560 }
 ]);
+assert.equal(policy.rollLevel('corruptedForestWolf'), 23);
+assert.equal(policy.rollLevel('corrupted-altar-guardian'), 23);
+assert.equal(policy.rollLevel('unknown'), null);
+assert.equal(policy.getCombatMonster('corruptedForestWolf').image, 'assets/corrupted-forest-wolf.png');
+assert.equal(policy.getCombatMonster('corruptedBlackstoneSoldier').faction, 'corrupted-blackstone');
+assert.equal(policy.getCombatMonster('altarGuard').isElite, true);
+assert.equal(policy.getCombatMonster('corruptedAltarGuardian').isBoss, true);
+assert.equal(policy.getCombatMonster('corruptedAltarGuardian').maxHp, 8000);
+assert.deepEqual(policy.getCombatMonster('fallenDruid').skillIds, []);
+assert.equal(policy.getCombatMonster('unknown'), null);
 const fs = require('node:fs');
 const path = require('node:path');
 const wolf = fs.readFileSync(path.join(__dirname, '..', policy.getMonster('corrupted-forest-wolf').image));

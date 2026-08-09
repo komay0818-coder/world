@@ -593,7 +593,8 @@ const monsterTypes = EquipmentDropPolicy.applyDefaultLootConfigs({
   ...Object.fromEntries(BlackForestEntrancePolicy.MONSTERS.map((entry) => [entry.combatId, BlackForestEntrancePolicy.toCombatMonster(entry)])),
   ...Object.fromEntries(BlackForestTrailPolicy.MONSTERS.map((entry) => [entry.combatId, BlackForestTrailPolicy.toCombatMonster(entry)])),
   ...Object.fromEntries(SpiderNestPolicy.MONSTERS.map((entry) => [entry.combatId, SpiderNestPolicy.toCombatMonster(entry)])),
-  ...Object.fromEntries(BlackstoneStrongholdPolicy.MONSTERS.map((entry) => [entry.combatId, BlackstoneStrongholdPolicy.toCombatMonster(entry)]))
+  ...Object.fromEntries(BlackstoneStrongholdPolicy.MONSTERS.map((entry) => [entry.combatId, BlackstoneStrongholdPolicy.toCombatMonster(entry)])),
+  ...Object.fromEntries(ForestAltarPolicy.MONSTERS.map((entry) => [entry.combatId, ForestAltarPolicy.toCombatMonster(entry)]))
 });
 const normalMonsterIds = ['goblin', 'wolf', 'boar'];
 const eliteMonsterIds = ['goblinOverlord', 'wolfAlpha', 'boarTyrant'];
@@ -607,6 +608,7 @@ const mapMonsterPools = {
   blackForestTrail: BlackForestTrailPolicy.getCombatPool(),
   spiderNest: SpiderNestPolicy.getCombatPool(),
   blackstoneStronghold: BlackstoneStrongholdPolicy.getCombatPool(),
+  forestAltar: ForestAltarPolicy.getCombatPool(),
   beginner: { normal: normalMonsterIds, elite: eliteMonsterIds, boss: bossMonsterIds },
   blackForest: { normal: ['nightGoblin', 'shadowWolf', 'thornBoar'], elite: ['forestShaman', 'moonfangAlpha', 'thornbackTyrant'], boss: ['forestGuardian'] }
 };
@@ -1434,6 +1436,7 @@ function getMonsterPool(level = getProgress().level) {
   if (mapId === 'black-forest-trail') return mapMonsterPools.blackForestTrail;
   if (mapId === 'spider-nest') return mapMonsterPools.spiderNest;
   if (mapId === 'blackstone-stronghold') return mapMonsterPools.blackstoneStronghold;
+  if (mapId === 'forest-altar') return mapMonsterPools.forestAltar;
   return mapId === 'black-forest' ? mapMonsterPools.blackForest : mapMonsterPools.beginner;
 }
 
@@ -1479,6 +1482,7 @@ function getMonsterDefinitionForMap(type, mapId = battle.dungeonId || getActiveM
     const monster = BlackstoneStrongholdPolicy.getCombatMonster(type) || monsterTypes.goblin;
     return BlackstoneStrongholdPolicy.applyOutpostEffect(monster, battle.blackstoneStrongholdState?.activeOutpostId);
   }
+  if (mapId === 'forest-altar') return ForestAltarPolicy.getCombatMonster(type) || monsterTypes.goblin;
   const monster = monsterTypes[type] || monsterTypes.goblin;
   const chapterMonster = ChapterOneLevelPolicy.scaleMonster(monster, mapId, level);
   const dungeonMonster = GoblinCampPolicy.scaleMonster(chapterMonster, mapId === 'goblin-camp');

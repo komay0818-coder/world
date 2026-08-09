@@ -70,7 +70,7 @@ assert.equal(policy.getDungeon('blackstone-stronghold').contentStatus, 'monster-
 assert.equal(policy.getDungeon('blackstone-stronghold').finalBossId, 'blackstone-warlord');
 assert.equal(policy.canEnter('blackstone-stronghold'), false, 'placeholder dungeon cannot be entered');
 const forestAltar = policy.getMap('forest-altar');
-assert.equal(forestAltar.contentStatus, 'monster-foundation');
+assert.equal(forestAltar.contentStatus, 'combat-foundation');
 assert.equal(forestAltar.background, 'assets/forest-altar-background.png');
 const forestAltarBackground = fs.readFileSync(path.join(__dirname, '..', forestAltar.background));
 assert.equal(forestAltarBackground.subarray(1, 4).toString(), 'PNG', 'the Forest Altar background is a PNG asset');
