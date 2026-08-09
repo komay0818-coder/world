@@ -20,11 +20,12 @@
     visualDirection: Object.freeze({ primaryEnergy: 'purple-corruption', forestSpiritEnergy: 'green-nature' })
   });
 
-  function monster(id, name, rank, visualEnergy) {
+  function monster(id, name, rank, visualEnergy, options = {}) {
     return Object.freeze({
       id, name, rank, chapter: RULES.chapter, mapId: RULES.mapId,
       visualEnergy, combatId: null, image: null, stats: null,
-      dropTableId: null, skillIds: Object.freeze([]), aiProfileId: null, implemented: false
+      dropTableId: null, skillIds: Object.freeze([]), aiProfileId: null, implemented: false,
+      ...options
     });
   }
 
@@ -35,7 +36,7 @@
     monster('forest-spirit', '森林之魂', 'normal', 'green-nature'),
     monster('corrupted-blackstone-centurion', '腐化黑石百夫長', 'elite', 'purple-corruption'),
     monster('corrupted-fallen-druid', '腐化墮落德魯伊', 'elite', 'purple-corruption'),
-    monster('heart-of-the-black-forest', '黑森林之心', 'boss', 'purple-corruption')
+    monster('heart-of-the-black-forest', '黑森林之心', 'boss', 'purple-corruption', { image: 'assets/heart-of-the-black-forest.png' })
   ]);
   const MONSTER_BY_ID = new Map(MONSTERS.map((entry) => [entry.id, entry]));
   function getMonster(monsterId) { return MONSTER_BY_ID.get(monsterId) || null; }

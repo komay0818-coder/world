@@ -1116,3 +1116,10 @@ Boss：
 - 新增 `assets/black-forest-depths-background.png`，並連接黑森林深處地圖與規則資料。
 - 圖片為 `1672 × 941` RGB PNG，SHA-256：`AFF4B1B116B8B642A701F510BD8A555F18B7F608C5DF5C56EDBA75C04F0C66E8`。
 - 地圖仍維持不可進入；怪物圖片、數值、技能、AI 與掉落物尚未設定。
+
+## 2026-08-10 黑森林之心圖片
+
+- 星辰 DEV 版本由 `0.4.61` 更新為 `0.4.62`。
+- 新增 `assets/heart-of-the-black-forest.png`，並連接黑森林深處 Boss「黑森林之心」。
+- 圖片為 `1254 × 1254` RGBA PNG，保留透明背景；SHA-256：`854626274E3CDC8452EB7F0F14D536C619804DA7AE6E08ECDB1172221ACE6CDF`。
+- Boss 數值、技能、AI 與掉落物仍未設定，黑森林深處保持不可進入。

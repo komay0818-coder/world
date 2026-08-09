@@ -16,7 +16,9 @@ assert.deepEqual(policy.getMonsterPool(), {
 });
 assert.equal(policy.getMonster('forest-spirit').visualEnergy, 'green-nature');
 assert.ok(policy.MONSTERS.filter((monster) => monster.id !== 'forest-spirit').every((monster) => monster.visualEnergy === 'purple-corruption'));
-assert.ok(policy.MONSTERS.every((monster) => monster.combatId === null && monster.image === null && monster.stats === null
+assert.equal(policy.getMonster('heart-of-the-black-forest').image, 'assets/heart-of-the-black-forest.png');
+assert.equal(policy.MONSTERS.filter((monster) => monster.image !== null).length, 1);
+assert.ok(policy.MONSTERS.every((monster) => monster.combatId === null && monster.stats === null
   && monster.dropTableId === null && monster.skillIds.length === 0 && monster.aiProfileId === null && monster.implemented === false));
 assert.equal(policy.getMonster('unknown'), null);
 const fs = require('node:fs');
@@ -24,6 +26,9 @@ const path = require('node:path');
 const background = fs.readFileSync(path.join(__dirname, '..', policy.RULES.background));
 assert.equal(background.subarray(1, 4).toString(), 'PNG', 'the black forest depths background is a PNG asset');
 assert.equal(background[25], 2, 'the black forest depths background uses RGB color');
+const heart = fs.readFileSync(path.join(__dirname, '..', policy.getMonster('heart-of-the-black-forest').image));
+assert.equal(heart.subarray(1, 4).toString(), 'PNG', 'the heart of the black forest is a PNG asset');
+assert.equal(heart[25], 6, 'the heart of the black forest uses RGBA color with transparency');
 assert.equal(policy.RULES.denseFogAccuracyPenalty, .15);
 assert.equal(policy.RULES.denseFogUnavoidable, true);
 assert.equal(policy.RULES.bossAuraModifiers, null);
