@@ -29,8 +29,46 @@ assert.equal(policy.getMonster('blackstone-bullhorn-warrior').image, 'assets/bla
 assert.equal(policy.getMonster('blackstone-warlord').image, 'assets/blackstone-warlord.png');
 assert.equal(policy.getMonster('unknown'), null);
 assert.ok(policy.MONSTERS.every((monster) => monster.image !== null));
-assert.ok(policy.MONSTERS.every((monster) => monster.stats === null
-  && monster.dropTableId === null && monster.aiProfileId === null && monster.skillIds.length === 0 && monster.implemented === false));
+assert.ok(policy.MONSTERS.every((monster) => monster.level === 21 && monster.stats
+  && monster.dropTableId === 'blackstone-stronghold-pending' && monster.aiProfileId
+  && monster.skillIds.length > 0 && monster.implemented === true));
+assert.deepEqual(policy.getMonster('blackstone-guard').stats, { maxHp: 520, attack: 54, defense: 48, evasion: 2, parry: 18, damageReduction: 14, attackSpeed: .78, xp: 55, gold: 28 });
+assert.deepEqual(policy.getMonster('blackstone-crossbowman').stats, { maxHp: 340, attack: 66, defense: 25, evasion: 10, parry: 3, damageReduction: 3, attackSpeed: 1, xp: 54, gold: 29 });
+assert.deepEqual(policy.getMonster('blackstone-berserker').stats, { maxHp: 440, attack: 62, defense: 28, evasion: 6, parry: 8, damageReduction: 5, attackSpeed: 1.15, xp: 58, gold: 31 });
+assert.deepEqual(policy.getMonster('blackstone-warhound').stats, { maxHp: 380, attack: 55, defense: 24, evasion: 17, parry: 0, damageReduction: 4, attackSpeed: 1.4, xp: 56, gold: 27 });
+assert.deepEqual(policy.getMonster('blackstone-lion-guard').stats, { maxHp: 1250, attack: 82, defense: 58, evasion: 8, parry: 14, damageReduction: 12, attackSpeed: .9, xp: 180, gold: 105 });
+assert.deepEqual(policy.getMonster('blackstone-bullhorn-warrior').stats, { maxHp: 1550, attack: 78, defense: 64, evasion: 3, parry: 8, damageReduction: 16, attackSpeed: .75, xp: 195, gold: 115 });
+assert.deepEqual(policy.getMonster('blackstone-warlord').stats, { maxHp: 6200, attack: 96, defense: 78, evasion: 4, parry: 16, damageReduction: 18, attackSpeed: .88, xp: 750, gold: 450 });
+assert.deepEqual(policy.getCombatPool(), {
+  normal: ['blackstoneStrongholdGuard', 'blackstoneStrongholdCrossbowman', 'blackstoneStrongholdBerserker', 'blackstoneStrongholdWarhound'],
+  elite: ['blackstoneStrongholdLionGuard', 'blackstoneStrongholdBullhornWarrior'],
+  boss: ['blackstoneStrongholdWarlord']
+});
+assert.equal(policy.getCombatMonster('blackstoneStrongholdWarlord').maxHp, 6200);
+assert.equal(policy.getCombatMonster('blackstone-guard').defense, 48);
+assert.equal(policy.rollLevel('blackstoneStrongholdWarhound'), 21);
+assert.equal(policy.rollLevel('unknown'), null);
+assert.equal(policy.resolveAction('blackstoneStrongholdGuard', .10), 'shield-bash');
+assert.equal(policy.resolveAction('blackstoneStrongholdCrossbowman', .05), 'aimed-volley');
+assert.equal(policy.resolveAction('blackstoneStrongholdCrossbowman', .20), 'armor-piercing-bolt');
+assert.equal(policy.resolveAction('blackstoneStrongholdBerserker', .20), 'twin-axe-cleave');
+assert.equal(policy.resolveAction('blackstoneStrongholdWarhound', .10), 'hunting-pounce');
+assert.equal(policy.resolveAction('blackstoneStrongholdWarhound', .30), 'rending-bite');
+assert.equal(policy.resolveAction('blackstoneStrongholdLionGuard', .10), 'lion-roar');
+assert.equal(policy.resolveAction('blackstoneStrongholdLionGuard', .30), 'crushing-hammer');
+assert.equal(policy.resolveAction('blackstoneStrongholdBullhornWarrior', .10), 'bullhorn-stampede');
+assert.equal(policy.resolveAction('blackstoneStrongholdBullhornWarrior', .30), 'seismic-smash');
+assert.equal(policy.getBossPhase('blackstoneStrongholdWarlord', 6200, 6200), 1);
+assert.equal(policy.getBossPhase('blackstoneStrongholdWarlord', 4000, 6200), 2);
+assert.equal(policy.getBossPhase('blackstoneStrongholdWarlord', 2000, 6200), 3);
+assert.equal(policy.resolveAction('blackstoneStrongholdWarlord', .10, .25, 2000, 6200), 'warlord-execution');
+assert.equal(policy.resolveAction('blackstoneStrongholdWarlord', .10, 1, 4000, 6200), 'warlord-command');
+assert.equal(policy.resolveAction('blackstoneStrongholdWarlord', .30, 1, 6200, 6200), 'warhammer-sweep');
+assert.deepEqual(policy.getCombatMultipliers('blackstoneStrongholdGuard', 200, 520), { attack: 1, attackSpeed: 1, defense: 1.25, evasion: 0 });
+assert.deepEqual(policy.getCombatMultipliers('blackstoneStrongholdBerserker', 150, 440), { attack: 1.25, attackSpeed: 1.2, defense: .85, evasion: 0 });
+assert.deepEqual(policy.getCombatMultipliers('blackstoneStrongholdWarlord', 2000, 6200), { attack: 1.25, attackSpeed: 1.15, defense: .9, evasion: 0 });
+assert.equal(policy.getDamageMultiplier('seismic-smash'), 1.7);
+assert.equal(policy.getDefenseIgnore('armor-piercing-bolt'), .35);
 const fs = require('node:fs');
 const path = require('node:path');
 const guard = fs.readFileSync(path.join(__dirname, '..', policy.getMonster('blackstone-guard').image));
