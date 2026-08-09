@@ -40,7 +40,7 @@
     monster('altar-guard', '祭壇守衛', 'elite', { image: 'assets/altar-guard.png' }),
     monster('corrupted-blackstone-priest', '腐化黑石祭司', 'elite', { image: 'assets/corrupted-blackstone-priest.png' }),
     monster('fallen-druid', '墮落德魯伊', 'elite', { image: 'assets/fallen-druid.png' }),
-    monster('corrupted-altar-guardian', '腐化祭壇守護者', 'boss')
+    monster('corrupted-altar-guardian', '腐化祭壇守護者', 'boss', { image: 'assets/corrupted-altar-guardian.png' })
   ]);
 
   const MONSTER_BY_ID = new Map(MONSTERS.map((entry) => [entry.id, entry]));

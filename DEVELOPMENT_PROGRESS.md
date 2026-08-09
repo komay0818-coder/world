@@ -1055,3 +1055,13 @@ Boss：
 - 圖片 SHA-256：`A01F9C5BD77239ACE76C2089C0CDF88F55EA5AB41A72B0117AD6829BF95FA161`。
 - 目前只新增圖片路徑；怪物數值、技能、掉落物與戰鬥實作仍維持未設定。
 - 50 個 JavaScript 測試檔、36 個根目錄 JavaScript 語法檢查與 `git diff --check` 均通過。
+
+## 2026-08-10 腐化祭壇守護者透明圖片
+
+- 星辰 DEV 版本由 `0.4.54` 更新為 `0.4.55`。
+- 新增腐化祭壇守護者透明圖片 `assets/corrupted-altar-guardian.png`，並套用到森林祭壇 Boss `corrupted-altar-guardian`。
+- 圖片以使用者提供的原圖為基礎，保留完整樹冠、雙臂、藤蔓、根系、頂部晶體、胸口符文與全部懸浮黑石，移除灰色背景、地面與陰影後輸出透明 PNG。
+- 圖片尺寸為 `1175 × 1338` RGBA PNG，Alpha 範圍完整，四角透明且所有晶體、樹枝與根部未裁切。
+- 圖片 SHA-256：`C3EFBEBB56D84643102073E1E674C4197104ECDF76F1E978900C5FA6E304635B`。
+- 森林祭壇目前 7 隻怪物均已有圖片；數值、技能、掉落物與戰鬥實作仍維持未設定。
+- 50 個 JavaScript 測試檔、36 個根目錄 JavaScript 語法檢查與 `git diff --check` 均通過。
