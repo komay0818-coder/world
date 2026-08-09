@@ -1591,13 +1591,15 @@ function getMonsterAttackPower(enemy, progress = getProgress(), currentHp = enem
   const strongholdMultiplier = BlackstoneStrongholdPolicy.getCombatMultipliers(enemy.id, currentHp, enemy.maxHp).attack;
   const strongholdCommandMultiplier = enemy.mapId === 'blackstone-stronghold' && Date.now() < (battle.strongholdCommandUntil || 0)
     ? 1 + BlackstoneStrongholdPolicy.LION_GUARD.roarAttackBonus : 1;
+  const strongholdEnrageMultiplier = enemy.mapId === 'blackstone-stronghold'
+    ? 1 + BlackstoneStrongholdPolicy.getEnrage(battle.blackstoneStrongholdState, Date.now()).attackBonus : 1;
   const commandMultiplier = enemy.mapId === 'black-forest-trail' && Date.now() < (battle.blackstoneCommandUntil || 0)
     ? 1 + BlackForestTrailPolicy.CAPTAIN.commandAttackBonus : 1;
   const beastCommandMultiplier = enemy.id === 'blackstonePoisonSpider' && Date.now() < (battle.blackstoneSpiderCommandUntil || 0)
     ? 1 + BlackForestTrailPolicy.BEASTMASTER.spiderAttackBonus : 1;
   const nestSpiderCommandMultiplier = ['spiderNestBlackstonePoisonSpider', 'venomSpitterSpider', 'webWeaver', 'giantSpider'].includes(enemy.id)
     && Date.now() < (battle.spiderNestCommandUntil || 0) ? 1 + SpiderNestPolicy.BEASTMASTER.spiderAttackBonus : 1;
-  if (enemy.mapId) return Math.max(1, Math.round((enemy.attack || 1) * randomMultiplier * bloodFrenzy * irritable * plainsIrritable * blackForestMultiplier * blackForestTrailMultiplier * spiderNestMultiplier * strongholdMultiplier * strongholdCommandMultiplier * commandMultiplier * beastCommandMultiplier * nestSpiderCommandMultiplier));
+  if (enemy.mapId) return Math.max(1, Math.round((enemy.attack || 1) * randomMultiplier * bloodFrenzy * irritable * plainsIrritable * blackForestMultiplier * blackForestTrailMultiplier * spiderNestMultiplier * strongholdMultiplier * strongholdCommandMultiplier * strongholdEnrageMultiplier * commandMultiplier * beastCommandMultiplier * nestSpiderCommandMultiplier));
   const map = getActiveMap(progress);
   const monsterLevel = Math.min(map.max, Math.max(map.min, progress.level));
   const levelMultiplier = 1 + (monsterLevel - 1) * .10;
@@ -1613,11 +1615,13 @@ function getMonsterAttackInterval(enemy, currentHp = enemy.maxHp) {
   const blackForestTrailMultiplier = BlackForestTrailPolicy.getCombatMultipliers(enemy.id, currentHp, enemy.maxHp).attackSpeed;
   const spiderNestMultiplier = SpiderNestPolicy.getCombatMultipliers(enemy.id, currentHp, enemy.maxHp).attackSpeed;
   const strongholdMultiplier = BlackstoneStrongholdPolicy.getCombatMultipliers(enemy.id, currentHp, enemy.maxHp).attackSpeed;
+  const strongholdEnrageMultiplier = enemy.mapId === 'blackstone-stronghold'
+    ? 1 + BlackstoneStrongholdPolicy.getEnrage(battle.blackstoneStrongholdState, Date.now()).attackSpeedBonus : 1;
   const beastCommandMultiplier = enemy.id === 'blackstonePoisonSpider' && Date.now() < (battle.blackstoneSpiderCommandUntil || 0)
     ? 1 + BlackForestTrailPolicy.BEASTMASTER.spiderAttackSpeedBonus : 1;
   const nestSpiderCommandMultiplier = ['spiderNestBlackstonePoisonSpider', 'venomSpitterSpider', 'webWeaver', 'giantSpider'].includes(enemy.id)
     && Date.now() < (battle.spiderNestCommandUntil || 0) ? 1 + SpiderNestPolicy.BEASTMASTER.spiderAttackSpeedBonus : 1;
-  return Math.max(250, (enemy.attackInterval || (1000 / (enemy.attackSpeed || 1))) / bloodFrenzy / irritable / plainsIrritable / blackForestMultiplier / blackForestTrailMultiplier / spiderNestMultiplier / strongholdMultiplier / beastCommandMultiplier / nestSpiderCommandMultiplier);
+  return Math.max(250, (enemy.attackInterval || (1000 / (enemy.attackSpeed || 1))) / bloodFrenzy / irritable / plainsIrritable / blackForestMultiplier / blackForestTrailMultiplier / spiderNestMultiplier / strongholdMultiplier / strongholdEnrageMultiplier / beastCommandMultiplier / nestSpiderCommandMultiplier);
 }
 
 function createEnemyAttackSchedule(enemyTypes, startAt = Date.now(), mapId = getActiveMap(getProgress()).id, enemyLevels = []) {
@@ -2767,6 +2771,27 @@ function renderBattlePartyStatus() {
   }).join('');
 }
 
+function renderStrongholdObjective(currentMap = getActiveMap(getProgress())) {
+  const field = document.querySelector('.battle-field');
+  if (!field) return;
+  let panel = document.querySelector('#stronghold-objective');
+  if (!panel) {
+    panel = document.createElement('aside');
+    panel.id = 'stronghold-objective';
+    panel.className = 'stronghold-objective hidden';
+    field.appendChild(panel);
+  }
+  const state = battle.blackstoneStrongholdState;
+  const visible = currentMap.id === 'blackstone-stronghold' && Boolean(state);
+  panel.classList.toggle('hidden', !visible);
+  if (!visible) return;
+  const outpost = state.outpostActive ? BlackstoneStrongholdPolicy.getOutpost(state.activeOutpostId) : null;
+  const enrage = BlackstoneStrongholdPolicy.getEnrage(state);
+  const hpPercent = outpost && state.activeOutpostMaxHp > 0 ? Math.max(0, state.activeOutpostHp / state.activeOutpostMaxHp * 100) : 0;
+  panel.innerHTML = outpost ? `<img src="${outpost.image}" alt="${outpost.name}"><div class="stronghold-objective-copy"><small>據點 ${state.destroyedOutposts + 1}／${BlackstoneStrongholdPolicy.RULES.objectiveCount}</small><strong>${outpost.name}</strong><span>${outpost.effect.label}</span><div class="stronghold-outpost-hp"><i style="width:${hpPercent}%"></i></div><em>${state.activeOutpostHp}／${state.activeOutpostMaxHp} 耐久・隊伍自動集中攻擊</em></div>`
+    : `<div class="stronghold-objective-copy waiting"><small>黑石據點攻城</small><strong>${state.destroyedOutposts}／${BlackstoneStrongholdPolicy.RULES.objectiveCount} 座已摧毀</strong><span>${state.bossSpawned ? '黑石督軍已現身' : `再擊殺 ${Math.max(0, state.nextOutpostAtKills - state.killsSinceOutpost)} 隻怪物後發現下一座據點`}</span>${enrage.active ? `<em class="stronghold-enrage">敵軍狂暴 ${Math.ceil(enrage.remainingMs / 1000)} 秒</em>` : ''}</div>`;
+}
+
 function updateBattleUI() {
   syncLegacyBattleStateFromMain();
   const character = JSON.parse(localStorage.getItem('stardust-character'));
@@ -2933,6 +2958,7 @@ function rewardVictory(index) {
     logPartyDebug('重複掉落事件已阻擋', { targetId: battle.enemyTypes?.[index], rewardKey });
     return;
   }
+  renderStrongholdObjective(currentMap);
   battle.rewardedEnemyIndexes.add(rewardKey);
   const progress = getProgress();
   const enemy = getEnemyDefinition(index);
@@ -3439,12 +3465,55 @@ function processBlackForestCorruption(now = Date.now()) {
   });
 }
 
+function spawnStrongholdWarlord(now = Date.now()) {
+  if (battle.enemyTypes.includes('blackstoneStrongholdWarlord')) return false;
+  const type = 'blackstoneStrongholdWarlord';
+  const enemy = BlackstoneStrongholdPolicy.getCombatMonster(type);
+  battle.enemyTypes.push(type);
+  battle.enemyLevels.push(BlackstoneStrongholdPolicy.RULES.level);
+  battle.enemyHps.push(enemy.maxHp);
+  battle.enemyRespawns.push(null);
+  battle.enemySpawnedAt.push(now);
+  battle.enemyDots.push([]);
+  battle.enemyDamages.push([]);
+  battle.enemyNextAttackAt.push(now + getMonsterAttackInterval(enemy));
+  battle.enemyBoarEnraged?.push(false);
+  battle.enemyTrailSummoned?.push(false);
+  battle.enemySummonProfiles?.push(null);
+  battle.enemyCaptainShieldUntil?.push(0);
+  battle.enemyAssassinDashUntil?.push(0);
+  battle.enemySpiderNestPhase?.push(1);
+  logBattle('♛ 五座據點皆已摧毀，【黑石督軍】率軍現身！', 'spawn');
+  showToast('⚠ BOSS 出現：黑石督軍');
+  return true;
+}
+
+function processStrongholdOutpost(now = Date.now()) {
+  if (getActiveMap(getProgress()).id !== 'blackstone-stronghold') return false;
+  const state = battle.blackstoneStrongholdState;
+  if (!state?.outpostActive || now - (battle.lastStrongholdOutpostAttackAt || 0) < 1000) return false;
+  battle.lastStrongholdOutpostAttackAt = now;
+  const damage = Math.max(1, Math.round((battle.partyMembers || []).filter((member) => member.alive).reduce((total, member) => total + member.stats.attack, 0) * .65));
+  const result = BlackstoneStrongholdPolicy.damageOutpost(state, damage, { now });
+  battle.blackstoneStrongholdState = result.state;
+  if (!result.ok) return false;
+  const outpost = BlackstoneStrongholdPolicy.getOutpost(result.destroyedOutpostId || state.activeOutpostId);
+  if (!result.destroyed) {
+    logBattle(`🏹 隊伍集中攻擊【${outpost?.name || '黑石據點'}】，造成 ${result.damage} 點耐久傷害。`, 'damage-dealt', { aggregateKey: 'stronghold-outpost', damage: result.damage, summary: '🏹 隊伍攻擊黑石據點' });
+    return true;
+  }
+  logBattle(`💥【${outpost?.name || '黑石據點'}】已摧毀，敵軍失去「${outpost?.effect.label || '據點增益'}」並狂暴 15 秒！`, 'progress');
+  if (result.spawnBoss) spawnStrongholdWarlord(now);
+  return true;
+}
+
 function battleTick() {
   if (!fighting) return;
   processEnemyRespawns();
   processEnemyDots();
   const now = Date.now();
   processBlackForestCorruption(now);
+  processStrongholdOutpost(now);
   reviveDefeatedTeammates(now);
   (battle.partyMembers || []).forEach((member) => updatePartyMemberResource(member, now));
   processPartyMemberAttacks(now);

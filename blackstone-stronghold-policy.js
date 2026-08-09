@@ -12,6 +12,8 @@
     objectiveCount: 5,
     minKillsPerOutpost: 10,
     maxKillsPerOutpost: 70,
+    baseOutpostHp: 1200,
+    outpostHpPerDestroyed: 300,
     outpostDamageReduction: null,
     outpostShield: null,
     enrageAttackBonus: .30,
@@ -157,8 +159,12 @@
     return RULES.minKillsPerOutpost + Math.floor(roll * (RULES.maxKillsPerOutpost - RULES.minKillsPerOutpost + 1));
   }
 
+  function getOutpostMaxHp(destroyedOutposts = 0) {
+    return RULES.baseOutpostHp + Math.min(RULES.objectiveCount - 1, Math.max(0, Math.floor(Number(destroyedOutposts) || 0))) * RULES.outpostHpPerDestroyed;
+  }
+
   function createState(random = Math.random) {
-    return { destroyedOutposts: 0, destroyedOutpostIds: [], availableOutpostIds: OUTPOSTS.map((entry) => entry.id), activeOutpostId: null, killsSinceOutpost: 0, nextOutpostAtKills: rollRequiredKills(random), outpostActive: false, bossSpawned: false, enragedUntil: 0 };
+    return { destroyedOutposts: 0, destroyedOutpostIds: [], availableOutpostIds: OUTPOSTS.map((entry) => entry.id), activeOutpostId: null, activeOutpostHp: 0, activeOutpostMaxHp: 0, killsSinceOutpost: 0, nextOutpostAtKills: rollRequiredKills(random), outpostActive: false, bossSpawned: false, enragedUntil: 0 };
   }
 
   function normalizeState(saved, random = Math.random) {
@@ -169,12 +175,17 @@
     const sourceActiveOutpostId = OUTPOST_BY_ID.has(source.activeOutpostId) && availableOutpostIds.includes(source.activeOutpostId) ? source.activeOutpostId : null;
     const outpostActive = destroyedOutposts < RULES.objectiveCount && Boolean(source.outpostActive);
     const activeOutpostId = outpostActive ? (sourceActiveOutpostId || rollOutpostId(availableOutpostIds, random)) : null;
+    const activeOutpostMaxHp = outpostActive ? getOutpostMaxHp(destroyedOutposts) : 0;
+    const savedOutpostHp = Number(source.activeOutpostHp);
+    const activeOutpostHp = outpostActive ? Math.min(activeOutpostMaxHp, savedOutpostHp > 0 ? savedOutpostHp : activeOutpostMaxHp) : 0;
     const nextOutpostAtKills = Math.min(RULES.maxKillsPerOutpost, Math.max(RULES.minKillsPerOutpost, Math.floor(Number(source.nextOutpostAtKills) || rollRequiredKills(random))));
     return {
       destroyedOutposts,
       destroyedOutpostIds,
       availableOutpostIds,
       activeOutpostId,
+      activeOutpostHp,
+      activeOutpostMaxHp,
       killsSinceOutpost: Math.max(0, Math.floor(Number(source.killsSinceOutpost) || 0)),
       nextOutpostAtKills,
       outpostActive,
@@ -190,6 +201,8 @@
     if (next.killsSinceOutpost >= next.nextOutpostAtKills || next.killsSinceOutpost >= RULES.maxKillsPerOutpost) {
       next.outpostActive = true;
       next.activeOutpostId = rollOutpostId(next.availableOutpostIds, random);
+      next.activeOutpostMaxHp = getOutpostMaxHp(next.destroyedOutposts);
+      next.activeOutpostHp = next.activeOutpostMaxHp;
     }
     return next;
   }
@@ -202,12 +215,24 @@
     next.availableOutpostIds = OUTPOSTS.map((entry) => entry.id).filter((id) => !next.destroyedOutpostIds.includes(id));
     const destroyedOutpostId = next.activeOutpostId;
     next.activeOutpostId = null;
+    next.activeOutpostHp = 0;
+    next.activeOutpostMaxHp = 0;
     next.outpostActive = false;
     next.killsSinceOutpost = 0;
     next.enragedUntil = Math.max(0, Number(options.now) || Date.now()) + RULES.enrageDurationMs;
     next.bossSpawned = next.destroyedOutposts >= RULES.objectiveCount;
     next.nextOutpostAtKills = next.bossSpawned ? 0 : rollRequiredKills(options.random);
     return { ok: true, state: next, destroyedOutpostId, effectRemoved: getOutpostEffect(destroyedOutpostId), triggerEnrage: true, spawnBoss: next.bossSpawned };
+  }
+
+  function damageOutpost(state, damage, options = {}) {
+    const next = normalizeState(state, options.random);
+    if (!next.outpostActive || !next.activeOutpostId) return { ok: false, reason: 'no-active-outpost', damage: 0, state: next };
+    const dealt = Math.min(next.activeOutpostHp, Math.max(0, Math.floor(Number(damage) || 0)));
+    next.activeOutpostHp -= dealt;
+    if (next.activeOutpostHp > 0) return { ok: true, destroyed: false, damage: dealt, state: next };
+    const result = destroyOutpost(next, options);
+    return { ...result, destroyed: result.ok, damage: dealt };
   }
 
   function getEnrage(state, now = Date.now()) {
@@ -218,5 +243,5 @@
   return Object.freeze({ RULES, GUARD, CROSSBOWMAN, BERSERKER, WARHOUND, LION_GUARD, BULLHORN, WARLORD, MONSTERS, OUTPOSTS,
     getMonster, getMonstersByRank, rollLevel, toCombatMonster, getCombatMonster, getCombatPool, getBossPhase, getCombatMultipliers,
     resolveAction, getDamageMultiplier, getDefenseIgnore, getOutpost, getOutpostEffect, applyOutpostEffect, rollOutpostId, rollRequiredKills,
-    createState, normalizeState, recordMonsterKill, destroyOutpost, getEnrage });
+    createState, normalizeState, recordMonsterKill, getOutpostMaxHp, damageOutpost, destroyOutpost, getEnrage });
 });

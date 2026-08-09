@@ -229,6 +229,32 @@
 #enemy-squad .elite .monster-slot-hp i { background: linear-gradient(90deg, #5646a4, #8e70dd); }
 #enemy-squad .boss .monster-slot-hp i { background: linear-gradient(90deg, #9e2825, #df7a31); }
 
+.stronghold-objective {
+  position: absolute;
+  z-index: 26;
+  left: 18px;
+  bottom: 18px;
+  display: flex;
+  width: min(430px, calc(100% - 36px));
+  min-height: 112px;
+  gap: 14px;
+  padding: 12px;
+  border: 1px solid rgba(207, 155, 73, .62);
+  border-radius: 12px;
+  background: linear-gradient(135deg, rgba(36, 24, 18, .94), rgba(16, 20, 23, .94));
+  box-shadow: 0 14px 32px rgba(0, 0, 0, .42), inset 0 0 24px rgba(174, 91, 35, .12);
+  color: #eadcc2;
+}
+.stronghold-objective.hidden { display: none; }
+.stronghold-objective > img { width: 104px; height: 88px; object-fit: contain; filter: drop-shadow(0 7px 8px rgba(0, 0, 0, .55)); }
+.stronghold-objective-copy { display: grid; flex: 1; align-content: center; gap: 4px; min-width: 0; }
+.stronghold-objective-copy small { color: #d5a55f; font-size: 10px; letter-spacing: .08em; }
+.stronghold-objective-copy strong { font-size: 17px; color: #fff0cf; }
+.stronghold-objective-copy span, .stronghold-objective-copy em { font-size: 10px; font-style: normal; color: #c8baa3; }
+.stronghold-outpost-hp { overflow: hidden; height: 9px; border: 1px solid rgba(255,255,255,.14); border-radius: 999px; background: rgba(0,0,0,.42); }
+.stronghold-outpost-hp i { display: block; height: 100%; background: linear-gradient(90deg, #9b352b, #e08a37); transition: width .25s ease; }
+.stronghold-enrage { color: #ff8b72 !important; font-weight: 700; }
+
 .monster-empty-slot {
   display: grid;
   place-items: center;
@@ -276,6 +302,9 @@
 }
 
 @media (max-width: 700px) {
+  .stronghold-objective { left: 8px; bottom: 8px; width: calc(100% - 16px); min-height: 84px; padding: 8px; }
+  .stronghold-objective > img { width: 72px; height: 66px; }
+  .stronghold-objective-copy strong { font-size: 13px; }
   .battle-field #enemy-squad.monster-slot-grid {
     top: auto !important;
     right: 8px !important;
