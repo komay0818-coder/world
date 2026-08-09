@@ -11,6 +11,11 @@ assert.deepEqual(policy.OUTPOSTS.map((outpost) => outpost.effect.label), [
 ]);
 assert.ok(policy.OUTPOSTS.every((outpost) => outpost.implemented && Object.isFrozen(outpost.effect)));
 assert.equal(policy.getOutpostEffect('blackstone-armory').value, .15);
+assert.equal(policy.applyOutpostEffect({ attack: 100 }, 'blackstone-armory').attack, 115);
+assert.equal(policy.applyOutpostEffect({ maxHp: 100 }, 'blackstone-barracks').maxHp, 120);
+assert.equal(policy.applyOutpostEffect({ attackSpeed: 1 }, 'blackstone-command-tent').attackSpeed, 1.15);
+assert.equal(policy.applyOutpostEffect({ criticalChance: .05 }, 'blackstone-watchtower').criticalChance, .15);
+assert.equal(policy.applyOutpostEffect({ maxHp: 100 }, 'blackstone-supply-station').healthRegenPerSecond, .01);
 assert.equal(policy.getOutpost('unknown'), null);
 assert.deepEqual(policy.MONSTERS.map((monster) => monster.name), ['黑石守衛', '黑石弩手', '黑石狂戰士', '黑石戰犬', '黑石獅衛', '黑石蠻角勇士', '黑石督軍']);
 assert.deepEqual(policy.MONSTERS.map((monster) => monster.rank), ['normal', 'normal', 'normal', 'normal', 'elite', 'elite', 'boss']);

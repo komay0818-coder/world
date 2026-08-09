@@ -130,6 +130,17 @@
   const OUTPOST_BY_ID = new Map(OUTPOSTS.map((entry) => [entry.id, entry]));
   function getOutpost(outpostId) { return OUTPOST_BY_ID.get(outpostId) || null; }
   function getOutpostEffect(outpostId) { return getOutpost(outpostId)?.effect || null; }
+  function applyOutpostEffect(stats, outpostId) {
+    const next = { ...(stats || {}) };
+    const effect = getOutpostEffect(outpostId);
+    if (!effect) return next;
+    if (effect.stat === 'maxHealth') next.maxHp = Math.max(1, Math.round((Number(next.maxHp) || 1) * (1 + effect.value)));
+    else if (effect.stat === 'attack') next.attack = Math.max(1, Math.round((Number(next.attack) || 1) * (1 + effect.value)));
+    else if (effect.stat === 'attackSpeed') next.attackSpeed = Math.max(.1, (Number(next.attackSpeed) || 1) * (1 + effect.value));
+    else if (effect.stat === 'criticalChance') next.criticalChance = Number(Math.min(1, Math.max(0, (Number(next.criticalChance) || 0) + effect.value)).toFixed(6));
+    else if (effect.stat === 'healthRegenPerSecond') next.healthRegenPerSecond = Math.max(0, (Number(next.healthRegenPerSecond) || 0) + effect.value);
+    return next;
+  }
 
   function normalizeRandom(random = Math.random) {
     return Math.max(0, Math.min(.999999, Number(random()) || 0));
@@ -206,6 +217,6 @@
 
   return Object.freeze({ RULES, GUARD, CROSSBOWMAN, BERSERKER, WARHOUND, LION_GUARD, BULLHORN, WARLORD, MONSTERS, OUTPOSTS,
     getMonster, getMonstersByRank, rollLevel, toCombatMonster, getCombatMonster, getCombatPool, getBossPhase, getCombatMultipliers,
-    resolveAction, getDamageMultiplier, getDefenseIgnore, getOutpost, getOutpostEffect, rollOutpostId, rollRequiredKills,
+    resolveAction, getDamageMultiplier, getDefenseIgnore, getOutpost, getOutpostEffect, applyOutpostEffect, rollOutpostId, rollRequiredKills,
     createState, normalizeState, recordMonsterKill, destroyOutpost, getEnrage });
 });
