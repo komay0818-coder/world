@@ -3,11 +3,12 @@ const policy = require('../forest-altar-policy.js');
 
 assert.equal(policy.MAP.id, 'forest-altar');
 assert.equal(policy.MAP.name, '森林祭壇');
+assert.equal(policy.MAP.level, 23);
 assert.equal(policy.MAP.background, 'assets/forest-altar-background.png');
 assert.equal(policy.MAP.enemyPoolId, 'forest-altar-enemies');
 assert.equal(policy.MAP.bossId, 'corrupted-altar-guardian');
 assert.equal(policy.MAP.implemented, false);
-assert.equal(policy.MAP.contentStatus, 'monster-roster');
+assert.equal(policy.MAP.contentStatus, 'monster-foundation');
 assert.deepEqual(policy.MONSTERS.map((monster) => monster.name), [
   '腐化森林狼', '荊棘魔藤', '腐化黑石士兵', '祭壇守衛', '腐化黑石祭司', '墮落德魯伊', '腐化祭壇守護者'
 ]);
@@ -28,8 +29,17 @@ assert.equal(policy.getMonster('corrupted-altar-guardian').image, 'assets/corrup
 assert.equal(policy.getMonster('unknown'), null);
 assert.ok(policy.MONSTERS.every((monster) => monster.chapter === 2 && monster.mapId === 'forest-altar'));
 assert.equal(policy.MONSTERS.filter((monster) => monster.image !== null).length, 7);
-assert.ok(policy.MONSTERS.every((monster) => monster.stats === null
+assert.ok(policy.MONSTERS.every((monster) => monster.level === 23 && monster.stats !== null
   && monster.dropTableId === null && monster.skillIds.length === 0 && monster.aiProfileId === null && monster.implemented === false));
+assert.deepEqual(policy.MONSTERS.map((monster) => monster.stats), [
+  { maxHp: 480, attack: 68, defense: 30, evasion: 17, parry: 0, damageReduction: 5, attackSpeed: 1.40, xp: 65, gold: 32 },
+  { maxHp: 650, attack: 59, defense: 52, evasion: 2, parry: 0, damageReduction: 12, attackSpeed: .75, xp: 68, gold: 34 },
+  { maxHp: 720, attack: 65, defense: 60, evasion: 3, parry: 15, damageReduction: 15, attackSpeed: .82, xp: 72, gold: 37 },
+  { maxHp: 1900, attack: 88, defense: 76, evasion: 3, parry: 10, damageReduction: 18, attackSpeed: .78, xp: 240, gold: 135 },
+  { maxHp: 1450, attack: 96, defense: 48, evasion: 10, parry: 5, damageReduction: 9, attackSpeed: 1, xp: 225, gold: 145 },
+  { maxHp: 1700, attack: 91, defense: 57, evasion: 8, parry: 7, damageReduction: 12, attackSpeed: .92, xp: 260, gold: 155 },
+  { maxHp: 8000, attack: 108, defense: 86, evasion: 4, parry: 12, damageReduction: 20, attackSpeed: .88, xp: 950, gold: 560 }
+]);
 const fs = require('node:fs');
 const path = require('node:path');
 const wolf = fs.readFileSync(path.join(__dirname, '..', policy.getMonster('corrupted-forest-wolf').image));

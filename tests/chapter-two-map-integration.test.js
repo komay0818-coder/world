@@ -15,12 +15,12 @@ assert.match(index, /black-forest-entrance-policy\.js[\s\S]*chapter-two-map-poli
 assert.match(index, /black-forest-trail-policy\.js[\s\S]*chapter-two-map-policy\.js/);
 assert.match(index, /spider-nest-policy\.js[\s\S]*chapter-two-map-policy\.js/);
 assert.match(index, /forest-altar-policy\.js[\s\S]*chapter-two-map-policy\.js/);
-assert.match(index, /VER\. 0\.4\.56/);
+assert.match(index, /VER\. 0\.4\.57/);
 assert.match(index, /blackstone-stronghold-policy\.js\?v=20260810-outpost-objective-v17/);
 assert.match(index, /black-forest-trail-policy\.js\?v=20260809-trail-balance-v10/);
 assert.match(index, /spider-nest-policy\.js\?v=20260809-spider-combat-v9/);
-assert.match(index, /forest-altar-policy\.js\?v=20260810-altar-background-v9/);
-assert.match(index, /chapter-two-map-policy\.js\?v=20260810-altar-background-v12/);
+assert.match(index, /forest-altar-policy\.js\?v=20260810-altar-stats-v10/);
+assert.match(index, /chapter-two-map-policy\.js\?v=20260810-altar-foundation-v13/);
 assert.match(index, /script\.js\?v=20260810-stronghold-objective-v133/);
 assert.match(index, /VER\. \d+\.\d+\.\d+/, 'the game exposes a semantic version');
 assert.match(script, /\.\.\.ChapterTwoMapPolicy\.MAPS/, 'chapter-two maps join the shared progression data');
