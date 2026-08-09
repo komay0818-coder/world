@@ -110,6 +110,9 @@
     }),
     map('black-forest-depths', 6, '黑森林深處', {
       isFinalMap: true,
+      contentStatus: 'monster-roster',
+      enemyPoolId: 'black-forest-depths-enemies',
+      bossId: 'heart-of-the-black-forest',
       environmentEffects: Object.freeze(['dense-fog']),
       bossAuraPolicyId: 'black-forest-depths-boss-aura',
       story: Object.freeze({ previousMapId: 'forest-altar', nextMapId: null, objectiveId: null })
