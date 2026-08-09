@@ -932,3 +932,14 @@ Boss：
 - 本次只加入圖片與預留資料；指揮帳篷效果維持 `null`、`implemented: false`，尚未加入隨機據點流程，也不開放黑石據點。
 - 49 個 JavaScript 測試檔、政策與主程式語法，以及 `git diff --check` 均通過。
 - 程式／素材提交：`d072aed`；全程僅在 `dev` 開發，未修改或合併 `main`，推送前已確認遠端無分歧。
+
+## 2026-08-10 新工作交接快照：黑石據點素材完成
+
+- 接續工作目錄：`C:\Users\User\OneDrive\文件\放置\.github-pages`；只能使用 `dev` 分支，不修改或合併 `main`。
+- 目前遊戲版本為 `0.4.43`；本次交接前 `dev` 與 `origin/dev` 已同步至 `768ebf5`，`main` 與 `origin/main` 仍同為 `0e8b22a5d0d6d10063548ac7ea6a1bf1b14e453c`。
+- 黑石據點背景已完成：`assets/blackstone-stronghold-background.png`，並已連結 `chapter-two-map-policy.js` 的 `blackstone-stronghold`。
+- 7 隻怪物圖片與名冊皆已完成：黑石守衛、黑石弩手、黑石狂戰士、黑石戰犬、黑石獅衛、黑石蠻角勇士、黑石督軍；資料集中於 `blackstone-stronghold-policy.js`，所有怪物的 `stats`、正式技能、AI、掉落及 `implemented` 仍未設定。
+- 5 種據點透明圖片與預留資料皆已完成：補給站、兵營、軍械庫、哨塔、指揮帳篷；`effect` 仍為 `null`、`implemented` 仍為 `false`，尚未加入隨機抽選、據點耐久／護盾、摧毀效果或畫面流程。
+- 既有框架會在擊殺 `10–70` 隻怪後出現據點；摧毀 5 座據點後生成黑石督軍，摧毀據點會令敵方攻擊與攻速提高 30%，持續 15 秒。這些政策函式已有測試，但尚未接成可進入、可操作的完整副本。
+- 黑石據點地圖目前 `implemented: false`、`contentStatus: 'monster-roster'`，玩家仍不可進入；下次建議從「5 種據點效果與隨機抽選規則」開始，再實裝怪物數值／技能、據點戰鬥 UI、掉落與通關流程，最後才把地圖切換為可進入。
+- 最近一次完整驗證：49 個 JavaScript 測試檔、所有根目錄 JavaScript 語法與 `git diff --check` 全部通過。
