@@ -3,6 +3,8 @@ const fs = require('fs');
 const path = require('path');
 
 const script = fs.readFileSync(path.join(__dirname, '..', 'script.js'), 'utf8');
+const index = fs.readFileSync(path.join(__dirname, '..', 'index.html'), 'utf8');
+assert.match(index, /script\.js\?v=20260810-reward-fix-v139/, 'the live page cache-busts the reward-flow fix');
 const html = fs.readFileSync(path.join(__dirname, '..', 'index.html'), 'utf8');
 
 assert.match(html, /equipment-drop-policy\.js/, 'drop policy loads before the main game script');
