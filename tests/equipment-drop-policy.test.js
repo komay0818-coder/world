@@ -120,6 +120,20 @@ assert.deepEqual(dropPolicy.getTemplatesFromPools(['missing_pool'], badOptions.w
 assert.equal(dropPolicy.createEquipmentDropInstance(null, badOptions), null);
 assert.ok(badWarnings.length >= 4, 'invalid weights, pools and templates produce clear warnings');
 
+const chapterTwoNormal = { id: 'corruptedForestWolf', mapId: 'black-forest-depths', lootConfig: dropPolicy.CHAPTER_TWO_LOOT_CONFIGS.normal };
+const chapterTwoBoss = { id: 'heartOfBlackForest', mapId: 'black-forest-depths', isBoss: true, lootConfig: dropPolicy.CHAPTER_TWO_LOOT_CONFIGS.boss };
+const chapterTwoGreen = dropPolicy.grantEquipmentDrop({ inventory: [] }, chapterTwoNormal, { random: sequence([0, 0, 0, 0]), instanceIdFactory: () => 'eq-c2-green' });
+assert.equal(chapterTwoGreen.rarity, 'uncommon', 'chapter two never drops white equipment');
+assert.equal(chapterTwoGreen.affixChapter, 2);
+assert.equal(chapterTwoGreen.chapter, 2);
+assert.equal(chapterTwoGreen.imageStatus, 'pending');
+assert.ok(dropPolicy.CHAPTER_TWO_TEMPLATES.some((template) => template.id === chapterTwoGreen.templateId), 'chapter two uses only its exclusive series');
+const chapterTwoBlue = dropPolicy.grantEquipmentDrop({ inventory: [] }, chapterTwoNormal, { random: sequence([0, .99, 0, 0]), instanceIdFactory: () => 'eq-c2-blue' });
+assert.equal(chapterTwoBlue.rarity, 'rare', 'blue is the primary chapter-two quality');
+const chapterTwoPurple = dropPolicy.grantEquipmentDrop({ inventory: [] }, chapterTwoBoss, { random: sequence([0, .999, 0, 0]), instanceIdFactory: () => 'eq-c2-purple' });
+assert.equal(chapterTwoPurple.rarity, 'epic', 'chapter-two bosses can roll the low-rate purple tier');
+assert.equal(dropPolicy.rollChapterRarity(2, { common: 100 }, 0, false, () => {}), null, 'chapter-two quality guard rejects white even in an invalid override');
+
 const duplicateWarnings = [];
 const duplicateProgress = { inventory: [{ id: 'duplicate', instanceId: 'duplicate' }] };
 const duplicate = dropPolicy.grantEquipmentDrop(duplicateProgress, bossEnemy, {

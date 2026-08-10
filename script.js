@@ -1696,6 +1696,12 @@ function getEquipmentStats(progress = getProgress()) {
     maxHp: affixes.maxHp || 0,
     hpRegeneration: affixes.hpRegeneration || 0,
     skillDamagePercent: (affixes.skillDamagePercent || 0) / 100,
+    eliteDamagePercent: (affixes.eliteDamagePercent || 0) / 100,
+    bossDamagePercent: (affixes.bossDamagePercent || 0) / 100,
+    basicAttackDamagePercent: (affixes.basicAttackDamagePercent || 0) / 100,
+    killHealthRecoveryPercent: (affixes.killHealthRecoveryPercent || 0) / 100,
+    killResourceRecoveryPercent: (affixes.killResourceRecoveryPercent || 0) / 100,
+    poisonResistancePercent: (affixes.poisonResistancePercent || 0) / 100,
     maxHpPercent: (affixes.maxHpPercent || 0) / 100,
     defensePercent: (affixes.defensePercent || 0) / 100,
     accuracyPercent: (affixes.accuracyPercent || 0) / 100,
@@ -2980,11 +2986,11 @@ function rewardVictory(index) {
     logPartyDebug('重複掉落事件已阻擋', { targetId: battle.enemyTypes?.[index], rewardKey });
     return;
   }
-  renderStrongholdObjective(currentMap);
   battle.rewardedEnemyIndexes.add(rewardKey);
   const progress = getProgress();
   const enemy = getEnemyDefinition(index);
   const currentMap = getActiveMap(progress);
+  renderStrongholdObjective(currentMap);
   if (currentMap.id === 'blackstone-stronghold' && battle.blackstoneStrongholdState) {
     const previousActive = battle.blackstoneStrongholdState.outpostActive;
     battle.blackstoneStrongholdState = BlackstoneStrongholdPolicy.recordMonsterKill(battle.blackstoneStrongholdState);
@@ -3247,7 +3253,10 @@ function applyDamageToMonster(index, baseDamage, profile, options = {}) {
   const character = attacker?.character || JSON.parse(localStorage.getItem('stardust-character') || 'null');
   const attackerStats = attacker?.stats || getCharacterStats(progress.level, progress, character);
   const magicDamageBonus = profile.damageType === 'magic' ? attackerStats.magicDamageBonus : 0;
-  const adjustedBaseDamage = EquipmentPolicy.applyMagicDamageBonus(baseDamage, magicDamageBonus);
+  const rankMultiplier = enemy.isBoss ? 1 + (attackerStats.bossDamagePercent || 0) : enemy.isElite ? 1 + (attackerStats.eliteDamagePercent || 0) : 1;
+  const attackKindMultiplier = options.attackKind === 'skill' ? 1 + (attackerStats.skillDamagePercent || 0) : options.attackKind === 'basic' ? 1 + (attackerStats.basicAttackDamagePercent || 0) : 1;
+  const magicAdjustedDamage = EquipmentPolicy.applyMagicDamageBonus(baseDamage, magicDamageBonus);
+  const adjustedBaseDamage = magicAdjustedDamage * rankMultiplier * attackKindMultiplier;
   if (enemy.mapId) {
     const hitChance = ChapterOneLevelPolicy.getPlayerHitChance(progress.level, enemy.level, attackerStats.accuracy, 0);
     if (Math.random() >= hitChance) {
@@ -3304,7 +3313,14 @@ function applyDamageToMonster(index, baseDamage, profile, options = {}) {
     logBattle(`↩【${enemy.name}】以【盾架反擊】對${attacker.name}造成 ${counterDamage - absorbed} 傷害。`, 'damage-taken');
     defeatPartyMember(attacker);
   }
+  const wasAlive = battle.enemyHps[index] > 0;
   battle.enemyHps[index] -= result.finalDamage;
+  if (wasAlive && battle.enemyHps[index] <= 0 && attacker?.alive) {
+    const hpRecovery = Math.ceil((attacker.maxHp || 0) * (attackerStats.killHealthRecoveryPercent || 0));
+    const resourceRecovery = Math.ceil((attacker.resourceMax || 0) * (attackerStats.killResourceRecoveryPercent || 0));
+    if (hpRecovery > 0) attacker.currentHp = Math.min(attacker.maxHp, attacker.currentHp + hpRecovery);
+    if (resourceRecovery > 0) attacker.resourceCurrent = Math.min(attacker.resourceMax, attacker.resourceCurrent + resourceRecovery);
+  }
   if (options.showDamage !== false) showEnemyDamage([index], result.finalDamage, options.effectType || 'normal');
   return result;
 }
@@ -3342,7 +3358,7 @@ function useAutoSkillForMember(member, now = Date.now()) {
     const companionMultiplier = skill.id === 'companion' && member.level >= 8 ? 1.15 + (getPassiveSkillUpgradeLevel(progress, 'hunter', '野性夥伴') - 1) * .10 : 1;
     const damage = Math.max(1, Math.ceil(stats.attack * skill.power * getSkillPowerMultiplier(progress, member.job, skill) * companionMultiplier * (critical ? 1.5 : 1)));
     const profile = getPlayerAttackProfile(character, skill);
-    const resolvedTargets = targets.map((index) => ({ index, result: applyDamageToMonster(index, damage, profile, { attacker: member }) }));
+    const resolvedTargets = targets.map((index) => ({ index, result: applyDamageToMonster(index, damage, profile, { attacker: member, attackKind: 'skill' }) }));
     const hits = resolvedTargets.filter((target) => !target.result.evaded);
     if (skill.id === 'fireball') hits.forEach((target) => applyDot(target.index, 'burn', Math.max(1, Math.ceil(target.result.finalDamage * .18 * stats.dotMultiplier)), 4));
     if (skill.id === 'poison-blade') hits.forEach((target) => applyDot(target.index, 'poison', Math.max(1, Math.ceil(target.result.finalDamage * .15 * stats.dotMultiplier)), 5));
@@ -3449,13 +3465,13 @@ function processPartyMemberAttacks(now = Date.now()) {
     const hit = Math.max(1, Math.ceil(baseHit * (instinctTriggered ? hunterInstinct.multiplier : 1)));
     const enemy = getEnemyDefinition(targetIndex);
     const profile = getPlayerAttackProfile(member.character);
-    const result = applyDamageToMonster(targetIndex, hit, profile, { attacker: member });
+    const result = applyDamageToMonster(targetIndex, hit, profile, { attacker: member, attackKind: 'basic' });
     if (member.isMain) playPlayerAttackAnimation();
     if (!result.evaded) {
       if (member.resourceType === 'rage') member.resourceCurrent = WarriorResourcePolicy.gainFromAttack(member.resourceCurrent);
       logBattle(`⚔ ${member.name}對【${enemy.name}】造成 ${result.finalDamage} 傷害${critical ? '（暴擊）' : ''}${orcRage ? '（狂怒）' : ''}${instinctTriggered ? '（獵人本能）' : ''}`, 'damage-dealt', { aggregateKey: `member-${member.id}-${battle.enemyTypes[targetIndex]}`, damage: result.finalDamage, summary: `⚔ ${member.name}攻擊【${enemy.name}】` });
       if (instinctTriggered && hunterInstinct.extraAttack && battle.enemyHps[targetIndex] > 0) {
-        const extra = applyDamageToMonster(targetIndex, baseHit, profile, { attacker: member });
+        const extra = applyDamageToMonster(targetIndex, baseHit, profile, { attacker: member, attackKind: 'basic' });
         if (!extra.evaded) logBattle(`➶ ${member.name}的【獵人本能】額外造成 ${extra.finalDamage} 傷害。`, 'damage-dealt');
       }
     }
@@ -3774,10 +3790,11 @@ function healBlackForestDepthsAlly(healerIndex) {
 
 function inflictBlackForestDot(member, enemy, effect, now = Date.now()) {
   const rule = effect === 'poison' ? BlackForestEntrancePolicy.POISON : BlackForestEntrancePolicy.BLEED;
+  const poisonMultiplier = effect === 'poison' ? Math.max(0, 1 - (member.stats?.poisonResistancePercent || 0)) : 1;
   member.bleed = {
     effectName: effect === 'poison' ? '中毒' : '流血',
     tickMs: rule.tickMs,
-    tickDamage: Math.max(1, Math.ceil((Number(enemy.attack) || 1) * rule.attackRatio)),
+    tickDamage: Math.max(1, Math.ceil((Number(enemy.attack) || 1) * rule.attackRatio * poisonMultiplier)),
     nextTickAt: now + rule.tickMs,
     expiresAt: now + rule.durationMs
   };
@@ -3788,7 +3805,7 @@ function inflictBlackForestTrailPoison(member, enemy, now = Date.now()) {
   const rule = BlackForestTrailPolicy.POISON;
   const existingStacks = member.bleed?.effectName === '黑石毒素' ? member.bleed.stacks || 1 : 0;
   const stacks = Math.min(rule.maxStacks, existingStacks + 1);
-  const baseTickDamage = Math.max(1, Math.ceil((Number(enemy.attack) || 1) * rule.attackRatio));
+  const baseTickDamage = Math.max(1, Math.ceil((Number(enemy.attack) || 1) * rule.attackRatio * Math.max(0, 1 - (member.stats?.poisonResistancePercent || 0))));
   member.bleed = {
     effectName: '黑石毒素',
     tickMs: rule.tickMs,

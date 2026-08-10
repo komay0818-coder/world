@@ -3,7 +3,8 @@
   if (typeof module === 'object' && module.exports) module.exports = api;
   else root.EquipmentAffixPolicy = api;
 }(typeof globalThis !== 'undefined' ? globalThis : this, function createEquipmentAffixPolicy() {
-  const SCHEMA_VERSION = 3;
+  const SCHEMA_VERSION = 4;
+  const GENERAL_AFFIX_TIER_MULTIPLIERS = Object.freeze({ 1: 1, 2: 1.5 });
   const QUALITY = Object.freeze({ common: 'common', uncommon: 'uncommon', rare: 'rare', epic: 'epic', legendary: 'legendary' });
   const QUALITY_LABELS = Object.freeze({ common: '白色', uncommon: '綠色', rare: '藍色', epic: '紫色', legendary: '傳奇' });
   const QUALITY_AFFIX_RULES = Object.freeze({
@@ -34,7 +35,7 @@
       mutuallyExclusiveWith: Object.freeze(options.mutuallyExclusiveWith || []), disabledReason: options.disabledReason || ''
     });
   }
-  const EQUIPMENT_AFFIXES = Object.freeze({
+  const BASE_EQUIPMENT_AFFIXES = Object.freeze({
     attack_flat: affix('attack_flat', '攻擊', 'attackFlat', 4, '', 9, ['weapon', 'armor']),
     skill_damage_percent: affix('skill_damage_percent', '技能傷害', 'skillDamagePercent', 5, '%', 6, ['weapon', 'armor']),
     max_hp_flat: affix('max_hp_flat', '生命', 'maxHp', 20, '', 9, ['weapon', 'armor', 'accessory']),
@@ -55,6 +56,17 @@
     chapter3_berserker_master: affix('chapter3_berserker_master', '狂戰大師', null, null, '', 2, ['weapon'], { type: AFFIX_TYPES.COMPOSITE, unlockChapter: 3, qualities: ['epic', 'legendary'], isComposite: true, components: [{ stat: 'attackFlat', value: 4, unit: '' }, { stat: 'attackSpeedPercent', value: 5, unit: '%' }, { stat: 'criticalChance', value: 3, unit: '%' }], mutuallyExclusiveWith: ['chapter2_berserker', 'attack_flat', 'attack_speed_percent', 'critical_chance'] }),
     mage_fireball_damage: affix('mage_fireball_damage', '火球傷害（格式範例）', 'skillDamagePercent', 5, '%', 3, ['weapon', 'accessory'], { type: AFFIX_TYPES.SKILL, unlockChapter: 2, qualities: ['uncommon', 'rare', 'epic'], jobId: 'mage', skillId: 'fireball' })
   });
+  const CHAPTER_TWO_AFFIXES = Object.freeze({
+    skill_damage_percent: affix('skill_damage_percent', '技能傷害', 'skillDamagePercent', 8, '%', 6, ['weapon', 'armor'], { unlockChapter: 2 }),
+    cooldown_speed_percent: affix('cooldown_speed_percent', '技能冷卻恢復速度', 'cooldownSpeedPercent', 8, '%', 5, ['armor', 'accessory'], { unlockChapter: 2, exclusionGroups: ['speed'] }),
+    elite_damage_percent: affix('elite_damage_percent', '對菁英怪物傷害', 'eliteDamagePercent', 8, '%', 6, ['weapon', 'accessory'], { unlockChapter: 2 }),
+    boss_damage_percent: affix('boss_damage_percent', '對 Boss 傷害', 'bossDamagePercent', 8, '%', 5, ['weapon', 'accessory'], { unlockChapter: 2 }),
+    basic_attack_damage_percent: affix('basic_attack_damage_percent', '普攻傷害', 'basicAttackDamagePercent', 8, '%', 6, ['weapon', 'armor'], { unlockChapter: 2 }),
+    kill_health_recovery_percent: affix('kill_health_recovery_percent', '擊殺回復生命', 'killHealthRecoveryPercent', 3, '%', 5, ['armor', 'accessory'], { unlockChapter: 2 }),
+    kill_resource_recovery_percent: affix('kill_resource_recovery_percent', '擊殺回復主要資源', 'killResourceRecoveryPercent', 5, '%', 5, ['weapon', 'accessory'], { unlockChapter: 2 }),
+    poison_resistance_percent: affix('poison_resistance_percent', '中毒抗性', 'poisonResistancePercent', 15, '%', 6, ['armor', 'accessory'], { unlockChapter: 2 })
+  });
+  const EQUIPMENT_AFFIXES = Object.freeze({ ...BASE_EQUIPMENT_AFFIXES, ...CHAPTER_TWO_AFFIXES });
   function specialAbility(id, name, description, options = {}) {
     return Object.freeze({ id, name, description, type: options.type || 'special', value: options.value ?? null, unlockChapter: Math.max(1, Number(options.unlockChapter) || 1), qualities: Object.freeze(options.qualities || ['epic', 'legendary']), allowedGroups: Object.freeze(options.allowedGroups || ['weapon', 'armor', 'accessory']), allowedSlots: Object.freeze(options.allowedSlots || []), weight: Math.max(0, Number(options.weight) || 1), isComposite: false, isSpecialAbility: true, jobId: options.jobId || null, skillId: options.skillId || null, isSpecialSkillEffect: Boolean(options.isSpecialSkillEffect), mutuallyExclusiveWith: Object.freeze(options.mutuallyExclusiveWith || []), enabled: options.enabled !== false });
   }
@@ -105,14 +117,22 @@
       && (!definition.allowedSlots.length || definition.allowedSlots.includes(item?.slot))
       && isJobCompatible(definition, item, context));
   }
-  function materializeAffix(id, source = 'random') {
-    const definition = EQUIPMENT_AFFIXES[id];
-    return definition?.enabled ? { id, name: definition.name, type: definition.type, stat: definition.stat, value: definition.value, unit: definition.unit, components: definition.components.map((entry) => ({ ...entry })), isComposite: definition.isComposite, jobId: definition.jobId, skillId: definition.skillId, source } : null;
+  function getGeneralAffixTierMultiplier(chapter) {
+    const tier = Math.min(2, normalizeChapter(chapter));
+    return GENERAL_AFFIX_TIER_MULTIPLIERS[tier] || 1;
   }
-  function normalizeAffix(raw, source = raw?.source || 'random') {
+  function materializeAffix(id, source = 'random', chapter = 1) {
+    const definition = EQUIPMENT_AFFIXES[id];
+    if (!definition?.enabled) return null;
+    const valueTier = definition.unlockChapter === 1 ? Math.min(2, normalizeChapter(chapter)) : 1;
+    const multiplier = definition.unlockChapter === 1 ? getGeneralAffixTierMultiplier(chapter) : 1;
+    const components = definition.components.map((entry) => ({ ...entry, value: Math.round((Number(entry.value) || 0) * multiplier) }));
+    return { id, name: definition.name, type: definition.type, stat: definition.stat, value: components.length === 1 ? components[0].value : definition.value, unit: definition.unit, components, isComposite: definition.isComposite, jobId: definition.jobId, skillId: definition.skillId, source, valueTier };
+  }
+  function normalizeAffix(raw, source = raw?.source || 'random', chapter = 1) {
     const definition = EQUIPMENT_AFFIXES[raw?.id];
     if (!definition?.enabled) return null;
-    return materializeAffix(definition.id, source);
+    return materializeAffix(definition.id, source, chapter);
   }
   function conflicts(candidate, selected) {
     const candidateStats = candidate.components.map((entry) => entry.stat);
@@ -135,14 +155,14 @@
     while (result.length < count) {
       const candidate = weightedPick(getAvailableAffixes(item, [...selected, ...result], context), random);
       if (!candidate) break;
-      result.push(materializeAffix(candidate.id, 'random'));
+      result.push(materializeAffix(candidate.id, 'random', context.chapter));
     }
     return result;
   }
   function getFixedAffixes(template, count, context = {}) {
     const group = getEquipmentGroup(template);
     const configured = Array.isArray(template?.fixedAffixIds) ? template.fixedAffixIds : DEFAULT_FIXED_AFFIXES[group] || [];
-    return configured.filter((id) => isDefinitionUnlocked(EQUIPMENT_AFFIXES[id], template, context)).map((id) => materializeAffix(id, 'fixed')).filter(Boolean).slice(0, count);
+    return configured.filter((id) => isDefinitionUnlocked(EQUIPMENT_AFFIXES[id], template, context)).map((id) => materializeAffix(id, 'fixed', context.chapter)).filter(Boolean).slice(0, count);
   }
   function rollSpecialAbility(template, quality, random, chance, context = {}) {
     if (!['epic', 'legendary'].includes(quality) || random() >= chance) return null;
@@ -163,16 +183,17 @@
   }
   function normalizeEquipment(item) {
     if (!item || item.kind !== 'equipment') return item;
-    if (item.affixSchemaVersion === SCHEMA_VERSION) {
-      const fixedAffixes = (item.fixedAffixes || []).map((entry) => normalizeAffix(entry, 'fixed')).filter(Boolean);
-      const randomAffixes = (item.randomAffixes || []).map((entry) => normalizeAffix(entry, 'random')).filter((entry) => entry && !conflicts(EQUIPMENT_AFFIXES[entry.id], fixedAffixes)).filter(Boolean);
+    if (Array.isArray(item.fixedAffixes) || Array.isArray(item.randomAffixes)) {
+      const chapter = normalizeChapter(item.affixChapter);
+      const fixedAffixes = (item.fixedAffixes || []).map((entry) => normalizeAffix(entry, 'fixed', chapter)).filter(Boolean);
+      const randomAffixes = (item.randomAffixes || []).map((entry) => normalizeAffix(entry, 'random', chapter)).filter((entry) => entry && !conflicts(EQUIPMENT_AFFIXES[entry.id], fixedAffixes)).filter(Boolean);
       return { ...item, quality: normalizeQuality(item.quality || item.rarity), rarity: normalizeQuality(item.rarity || item.quality), fixedAffixes, randomAffixes, affixes: [...fixedAffixes, ...randomAffixes] };
     }
     const legacyAffixes = (item.affixes || []).map((entry) => normalizeAffix(entry, entry.source || 'random')).filter(Boolean);
     return { ...item, quality: normalizeQuality(item.quality || item.rarity), rarity: normalizeQuality(item.rarity || item.quality), affixes: legacyAffixes };
   }
   function rollEquipmentAffix(item, randomValue = Math.random(), context = {}) { return rollEquipmentAffixes(item, 1, () => randomValue, 1, [], context)[0] || null; }
-  function getDefinitionComponents(entry) { return EQUIPMENT_AFFIXES[entry?.id]?.components || []; }
+  function getDefinitionComponents(entry) { return Array.isArray(entry?.components) ? entry.components : EQUIPMENT_AFFIXES[entry?.id]?.components || []; }
   function getAffixValue(item, stat) { return (item?.affixes || []).reduce((sum, entry) => sum + getDefinitionComponents(entry).filter((component) => component.stat === stat).reduce((subtotal, component) => subtotal + (Number(component.value) || 0), 0), 0); }
   function getEquippedAffixStats(equipmentBySlot) { return Object.values(equipmentBySlot || {}).filter(Boolean).reduce((totals, item) => { (item.affixes || []).forEach((entry) => getDefinitionComponents(entry).forEach((component) => { totals[component.stat] = (totals[component.stat] || 0) + (Number(component.value) || 0); })); return totals; }, {}); }
   function formatAffix(entry) { const definition = EQUIPMENT_AFFIXES[entry?.id]; if (!definition?.enabled) return ''; if (definition.components.length === 1) return `${definition.name} +${definition.components[0].value}${definition.components[0].unit || ''}`; return `${definition.name}（${definition.components.map((component) => `${component.stat} +${component.value}${component.unit || ''}`).join('、')}）`; }

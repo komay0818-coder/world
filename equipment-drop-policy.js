@@ -5,6 +5,22 @@
   if (typeof module === 'object' && module.exports) module.exports = api;
   else root.EquipmentDropPolicy = api;
 }(typeof globalThis !== 'undefined' ? globalThis : this, function createEquipmentDropPolicy(EquipmentPolicy, EquipmentAffixPolicy) {
+  function chapterTwoTemplate(id, name, slot, stats, options = {}) {
+    return Object.freeze({ id, name, kind: 'equipment', slot, chapter: 2, affixChapter: 2, series: options.series || 'black-forest', image: null, imageStatus: 'pending', allowedJobs: Object.freeze(options.allowedJobs || []), ...stats, ...options });
+  }
+  const CHAPTER_TWO_TEMPLATES = Object.freeze([
+    chapterTwoTemplate('blackwood-longsword', '黑木長劍', 'weapon', { attackMin: 30, attackMax: 38, attackSpeed: 1.05 }, { weaponType: 'sword', allowedJobs: ['warrior'] }),
+    chapterTwoTemplate('corrupted-crystal-battleaxe', '腐晶戰斧', 'weapon', { attackMin: 34, attackMax: 45, attackSpeed: .82 }, { weaponType: 'axe', allowedJobs: ['warrior'] }),
+    chapterTwoTemplate('duskwood-longbow', '暮林長弓', 'weapon', { attackMin: 29, attackMax: 40, attackSpeed: 1.12 }, { weaponType: 'bow', allowedJobs: ['archer'] }),
+    chapterTwoTemplate('shadowfang-dagger', '暗影獠牙', 'weapon', { attackMin: 25, attackMax: 34, attackSpeed: 1.35 }, { weaponType: 'dagger', allowedJobs: ['rogue'] }),
+    chapterTwoTemplate('corrupted-branch-staff', '腐枝法杖', 'weapon', { attackMin: 31, attackMax: 42, attackSpeed: .95, mana: 24 }, { weaponType: 'staff', allowedJobs: ['mage'] }),
+    chapterTwoTemplate('blackstone-corrupted-plate', '黑石腐晶戰甲', 'armor', { defense: 30, hp: 58 }, { armorType: 'heavy', allowedJobs: ['warrior'] }),
+    chapterTwoTemplate('blackstone-corrupted-helm', '黑石腐晶戰盔', 'head', { defense: 18, hp: 32 }, { armorType: 'heavy', allowedJobs: ['warrior'] }),
+    chapterTwoTemplate('deepwood-hunter-vest', '深林獵裝', 'armor', { defense: 23, hp: 38, dodge: 3 }, { armorType: 'light', allowedJobs: ['archer', 'rogue'] }),
+    chapterTwoTemplate('deepwood-hunter-hood', '深林兜帽', 'head', { defense: 14, hp: 24, dodge: 2 }, { armorType: 'light', allowedJobs: ['archer', 'rogue'] }),
+    chapterTwoTemplate('spiritweave-robe', '靈森法袍', 'armor', { defense: 17, hp: 30, mana: 38 }, { armorType: 'cloth', allowedJobs: ['mage'] }),
+    chapterTwoTemplate('spiritweave-crown', '靈森冠帽', 'head', { defense: 10, hp: 18, mana: 24 }, { armorType: 'cloth', allowedJobs: ['mage'] })
+  ]);
   const EQUIPMENT_POOLS = Object.freeze({
     plains_common_weapons: Object.freeze([
       'short-iron-sword', 'logging-hatchet', 'hunter-shortbow', 'rusty-dagger', 'apprentice-staff'
@@ -14,7 +30,9 @@
       'starter-recruit-iron-helmet', 'leather-hood', 'apprentice-mage-hat',
       'starter-recruit-iron-gauntlets', 'rough-leather-gloves', 'apprentice-gloves',
       'starter-recruit-iron-boots', 'leather-short-boots', 'apprentice-cloth-shoes'
-    ])
+    ]),
+    black_forest_weapons: Object.freeze(CHAPTER_TWO_TEMPLATES.filter((item) => item.slot === 'weapon').map((item) => item.id)),
+    black_forest_armor: Object.freeze(CHAPTER_TWO_TEMPLATES.filter((item) => item.slot !== 'weapon').map((item) => item.id))
   });
 
   // Phase-one QA values. Replace this one table when production rates are decided.
@@ -35,10 +53,17 @@
       equipmentPools: Object.freeze(['plains_common_weapons', 'plains_common_armor'])
     })
   });
+  const CHAPTER_TWO_LOOT_CONFIGS = Object.freeze({
+    normal: Object.freeze({ chapter: 2, equipmentDropRate: .25, rarityWeights: Object.freeze({ uncommon: 25, rare: 75 }), equipmentPools: Object.freeze(['black_forest_weapons', 'black_forest_armor']) }),
+    elite: Object.freeze({ chapter: 2, equipmentDropRate: .40, rarityWeights: Object.freeze({ uncommon: 10, rare: 90 }), equipmentPools: Object.freeze(['black_forest_weapons', 'black_forest_armor']) }),
+    boss: Object.freeze({ chapter: 2, equipmentDropRate: 1, rarityWeights: Object.freeze({ rare: 98, epic: 2 }), equipmentPools: Object.freeze(['black_forest_weapons', 'black_forest_armor']) }),
+    specialDungeon: Object.freeze({ chapter: 2, specialDungeon: true, equipmentDropRate: .50, rarityWeights: Object.freeze({ rare: 99, epic: 1 }), equipmentPools: Object.freeze(['black_forest_weapons', 'black_forest_armor']) })
+  });
 
   const TEMPLATE_INDEX = new Map([
     ...Object.values(EquipmentPolicy?.WEAPON_CATALOG || {}),
-    ...Object.values(EquipmentPolicy?.ARMOR_CATALOG || {})
+    ...Object.values(EquipmentPolicy?.ARMOR_CATALOG || {}),
+    ...CHAPTER_TWO_TEMPLATES
   ].map((template) => [template.id, template]));
 
   const BASE_STAT_KEYS = Object.freeze([
@@ -80,7 +105,25 @@
     ], randomValue, warningHandler);
   }
 
+  function getEnemyChapter(enemy) {
+    if (Number(enemy?.chapter) >= 2 || Number(enemy?.lootConfig?.chapter) >= 2) return 2;
+    const mapId = String(enemy?.mapId || '');
+    return ['black-forest', 'blackstone', 'forest-altar', 'spider-nest'].some((token) => mapId.includes(token)) ? 2 : 1;
+  }
+
+  function rollChapterRarity(chapter, rarityWeights, randomValue, allowEpic, warningHandler) {
+    if (chapter < 2) return rollRarity(rarityWeights, randomValue, warningHandler);
+    const weights = { ...(rarityWeights || {}), common: 0, legendary: 0 };
+    if (!allowEpic) weights.epic = 0;
+    return rollRarity(weights, randomValue, warningHandler);
+  }
+
   function getDefaultLootConfig(enemy) {
+    if (getEnemyChapter(enemy) >= 2) {
+      if (enemy?.isBoss) return CHAPTER_TWO_LOOT_CONFIGS.boss;
+      if (enemy?.isElite) return CHAPTER_TWO_LOOT_CONFIGS.elite;
+      return CHAPTER_TWO_LOOT_CONFIGS.normal;
+    }
     if (enemy?.isBoss) return TEST_LOOT_CONFIGS.boss;
     if (enemy?.isElite) return TEST_LOOT_CONFIGS.elite;
     return TEST_LOOT_CONFIGS.normal;
@@ -210,9 +253,10 @@
     const random = typeof options.random === 'function' ? options.random : Math.random;
     const dropRate = Math.min(1, Math.max(0, Number(config.equipmentDropRate) || 0));
     if (random() >= dropRate) return null;
-    const rarity = rollRarity(config.rarityWeights, random(), warningHandler);
+    const chapter = Math.max(1, Number(options.chapter || enemy.chapter || config.chapter) || 1);
+    const rarity = rollChapterRarity(chapter, config.rarityWeights, random(), Boolean(enemy?.isBoss || config.specialDungeon), warningHandler);
     if (!rarity) return null;
-    const templates = getTemplatesFromPools(config.equipmentPools, warningHandler);
+    const templates = getTemplatesFromPools(config.equipmentPools, warningHandler).filter((template) => chapter < 2 || Number(template.chapter) === chapter);
     if (!templates.length) {
       warn('指定的裝備池沒有任何合法模板，已略過本次掉落。', config.equipmentPools, warningHandler);
       return null;
@@ -224,7 +268,7 @@
       instanceIdFactory: options.instanceIdFactory,
       obtainedFrom: enemy.id || enemy.name || 'unknown-monster',
       obtainedAt: options.obtainedAt || Date.now(),
-      chapter: options.chapter || enemy.chapter || enemy.lootConfig?.chapter || 1,
+      chapter,
       jobId: options.jobId,
       warningHandler
     });
@@ -239,11 +283,14 @@
   }
 
   return {
+    CHAPTER_TWO_TEMPLATES,
     EQUIPMENT_POOLS,
     TEST_LOOT_CONFIGS,
+    CHAPTER_TWO_LOOT_CONFIGS,
     getDefaultLootConfig,
     applyDefaultLootConfigs,
     rollRarity,
+    rollChapterRarity,
     getTemplatesFromPools,
     createInstanceId,
     createEquipmentDropInstance,

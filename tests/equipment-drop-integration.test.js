@@ -11,6 +11,7 @@ assert.match(script, /plainsRabbit:.*lootConfig: EquipmentDropPolicy\.TEST_LOOT_
 assert.match(script, /ragingWolf:.*lootConfig: EquipmentDropPolicy\.TEST_LOOT_CONFIGS\.elite/, 'an elite monster has phase-one loot data');
 assert.match(script, /greatfangWolf:.*lootConfig: EquipmentDropPolicy\.TEST_LOOT_CONFIGS\.boss/, 'a boss has phase-one loot data');
 assert.match(script, /function rewardVictory\(index\)[\s\S]*EquipmentDropPolicy\.grantEquipmentDrop\(progress, enemy\)/, 'rewardVictory enters the equipment drop flow');
+assert.match(script, /const currentMap = getActiveMap\(progress\);\s*renderStrongholdObjective\(currentMap\);/, 'rewardVictory resolves the active map before rendering map objectives');
 assert.match(script, /ChapterOneMaterialDropPolicy\.grantMaterialDrops\(progress, currentMap\.id, enemy\)/, 'rewardVictory grants map and monster-specific materials through the shared inventory');
 assert.match(script, /materialDrops\.push\(\.\.\.VillageUpgradePolicy\.grantMapDrops\(progress, currentMap\.id\)\)/, 'independent building materials are added without replacing equipment materials');
 assert.match(script, /materialDrops\.forEach[\s\S]*材料掉落/, 'material drops are shown in the battle loot log');
