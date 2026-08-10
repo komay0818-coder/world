@@ -11,7 +11,7 @@ assert.match(script, /grantMaterialDrops\(progress, currentMap\.id, enemy\)/, 'r
 assert.match(script, /VillageUpgradePolicy\.grantMapDrops\(progress, currentMap\.id\)/, 'reward settlement also grants map-based building black ore');
 assert.doesNotMatch(crafting, /blackOre: Object\.freeze/, 'black ore has one canonical material definition in the drop policy');
 assert.match(index, /chapter-one-material-drop-policy\.js\?v=20260806-black-ore-drops-v2/, 'the material policy cache key changes');
-assert.match(index, /script\.js\?v=20260810-equipment-affix-ui-v140/, 'the integration cache key changes');
+assert.match(index, /world\/6f3ec281ec12e348743419cd249ed610da5d73e4\/script\.js/, 'the integration script uses an immutable deployment path');
 assert.match(index, /VER\. 0\.4\.74/, 'the game version includes the equipment-affix UI update');
 
 console.log('black-ore-drop-integration: assertions passed');
