@@ -12,7 +12,7 @@
   if (typeof module === 'object' && module.exports) module.exports = api;
   else root.CraftingPolicy = api;
 }(typeof globalThis !== 'undefined' ? globalThis : this, function createCraftingPolicy(RecipePolicy, MaterialPolicy, EquipmentAffixPolicy) {
-  const INVENTORY_CAPACITY = 120;
+  const INVENTORY_CAPACITY = 1000;
   const RARITIES = Object.freeze({
     uncommon: Object.freeze({ id: 'uncommon', label: '綠色', fixedAffixCount: 1, randomAffixCount: 2, affixCount: 3, workshopLevel: 1, stoneId: 'equipment-stone-uncommon' }),
     rare: Object.freeze({ id: 'rare', label: '藍色', fixedAffixCount: 2, randomAffixCount: 3, affixCount: 5, workshopLevel: 1, stoneId: 'equipment-stone-rare' }),

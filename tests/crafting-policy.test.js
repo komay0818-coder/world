@@ -1,5 +1,6 @@
 const assert = require('node:assert/strict');
 const CraftingPolicy = require('../crafting-policy.js');
+assert.equal(CraftingPolicy.INVENTORY_CAPACITY, 1000, 'the expanded backpack supports one thousand inventory entries');
 
 function seeded(seed = 1) {
   let state = seed >>> 0;
