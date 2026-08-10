@@ -5,6 +5,7 @@ const path = require('path');
 const source = fs.readFileSync(path.join(__dirname, '..', 'script.js'), 'utf8');
 const html = fs.readFileSync(path.join(__dirname, '..', 'index.html'), 'utf8');
 const gameCss = fs.readFileSync(path.join(__dirname, '..', 'styles', 'game.css'), 'utf8');
+const appCss = fs.readFileSync(path.join(__dirname, '..', 'style.css'), 'utf8');
 
 assert.match(html, /equipment-affix-policy\.js/, 'affix policy loads before the main game script');
 assert.match(source, /equipmentAffixMigrationVersion !== 'green-affix-v1'/, 'legacy saves receive the affix compatibility migration');
@@ -15,6 +16,13 @@ assert.match(source, /equipment\.defensePercent/, 'defense affixes feed the char
 assert.match(source, /equipment\.criticalChance/, 'critical chance affixes feed the character calculation');
 assert.match(source, /equipment\.attackSpeedPercent/, 'attack-speed affixes feed the character calculation');
 assert.match(source, /EquipmentAffixPolicy\.formatAffix\(entry\)/, 'inventory, comparison and worn views share the affix text renderer');
+assert.match(source, /function equipmentDetailsHtml\(item\)/, 'equipment inventory rows use a dedicated details renderer');
+assert.match(source, /equipment-affix-title">裝備詞綴/, 'the affix section has a clear title');
+assert.match(source, /source === '固定'/, 'affixes expose fixed and random source labels');
+assert.match(source, /equipment-affix-value/, 'affix values have a dedicated emphasis element');
+assert.match(appCss, /\.equipment-affix-section\{[^}]*border-top:/, 'base stats and affixes are separated visually');
+assert.match(appCss, /\.equipment-affix-line\{[^}]*grid-template-columns:/, 'each affix renders on its own aligned line');
+assert.match(appCss, /\.equipment-affix-value\{[^}]*font-weight:900/, 'affix values use strong emphasis');
 assert.match(source, /affixes: item\.affixes \|\| \[\]/, 'stacking distinguishes equipment with different affixes');
 assert.doesNotMatch(source, /equipmentScore|equipmentValue|評分/, 'inventory and comparison no longer expose equipment scores');
 assert.doesNotMatch(gameCss, /equipment-score|score-difference/, 'removed score UI has no stale styles');

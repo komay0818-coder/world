@@ -1897,6 +1897,28 @@ function itemStatsText(item) {
   return parts.join('　') || item.description || '';
 }
 
+function equipmentAffixLineHtml(entry, item) {
+  const text = EquipmentAffixPolicy.formatAffix(entry);
+  if (!text) return '';
+  const valueMatch = text.match(/^(.*?)(\s+\+[^\s]+)$/);
+  const name = valueMatch ? valueMatch[1] : text;
+  const value = valueMatch ? valueMatch[2].trim() : '';
+  const fixedIds = new Set((item.fixedAffixes || []).map((affix) => affix.id));
+  const source = entry.source === 'fixed' || fixedIds.has(entry.id) ? '固定' : '隨機';
+  return `<div class="equipment-affix-line"><span class="equipment-affix-source ${source === '固定' ? 'is-fixed' : 'is-random'}">${source}</span><span class="equipment-affix-name">${name}</span>${value ? `<strong class="equipment-affix-value">${value}</strong>` : ''}</div>`;
+}
+
+function equipmentDetailsHtml(item) {
+  if (item?.kind !== 'equipment') return itemStatsText(item);
+  const baseText = itemStatsText({ ...item, affix: null, affixes: [], fixedAffixes: [], randomAffixes: [], specialAbility: null, legendaryAbility: null });
+  const baseStats = baseText.split('　').filter(Boolean).map((part) => {
+    const statMatch = part.match(/^(.+?)(\s+)([-+]?\d.*)$/);
+    return statMatch ? `<span class="equipment-base-stat"><strong>${statMatch[1]}</strong><span>${statMatch[3]}</span></span>` : `<span class="equipment-base-stat">${part}</span>`;
+  }).join('');
+  const affixLines = (item.affixes || []).map((entry) => equipmentAffixLineHtml(entry, item)).filter(Boolean);
+  return `<span class="equipment-base-stats">${baseStats}</span>${affixLines.length ? `<span class="equipment-affix-section"><span class="equipment-affix-title">裝備詞綴</span>${affixLines.join('')}</span>` : ''}`;
+}
+
 function itemCategory(item) {
   if (item.kind === 'consumable' || item.kind === 'material' || item.kind === 'recipe') return 'consumable';
   if (item.kind === 'equipment' && ['weapon', 'offhand'].includes(item.slot)) return 'weapon';
@@ -1999,10 +2021,10 @@ function renderInventory(view = 'inventory') {
     const junkBadge = junkCandidate ? '<span class="junk-badge" title="不能裝備的廢品" aria-label="不能裝備的廢品">🗑</span>' : '';
     const visual = item.kind === 'equipment' ? `<img src="${itemImagePath(item)}" alt="" class="equipment-item-image">` : item.icon || '◈';
     const currentItem = item.kind === 'equipment' ? progress.equipment[item.slot] : null;
-    const comparison = item.kind === 'equipment' && !equipped ? `<aside class="equipment-compare-tooltip"><strong>目前穿戴・${equipmentSlots[item.slot]?.label || item.slot}</strong>${currentItem ? `<div><span class="compare-item-icon"><img src="${itemImagePath(currentItem)}" alt=""></span><p><b>${currentItem.name}</b><small>${itemStatsText(currentItem)}</small></p></div>` : '<p class="compare-empty">此欄位目前沒有穿戴裝備</p>'}</aside>` : '';
+    const comparison = item.kind === 'equipment' && !equipped ? `<aside class="equipment-compare-tooltip"><strong>目前穿戴・${equipmentSlots[item.slot]?.label || item.slot}</strong>${currentItem ? `<div><span class="compare-item-icon"><img src="${itemImagePath(currentItem)}" alt=""></span><p><b>${currentItem.name}</b><small>${equipmentDetailsHtml(currentItem)}</small></p></div>` : '<p class="compare-empty">此欄位目前沒有穿戴裝備</p>'}</aside>` : '';
     const equipSlots = item.kind === 'equipment' ? EquipmentPolicy.getEquipSlots(item, character?.job) : [];
     const equipControls = equipSlots.map((targetSlot) => `<button type="button" data-equip-id="${item.id}" data-equip-slot="${targetSlot}">${equipSlots.length > 1 ? targetSlot === 'weapon' ? '裝主手' : '裝副手' : '穿戴'}</button>`).join('');
-    return `<article class="inventory-item ${itemQualityClass(item)} ${equipped ? 'is-equipped' : ''} ${!wearable ? 'incompatible' : ''} ${selectedCount === stackIds.length && selectedCount ? 'sale-selected' : selectedCount ? 'sale-partial' : ''}" tabindex="${item.kind === 'equipment' && !equipped ? '0' : '-1'}">${junkBadge}<span class="item-icon">${visual}</span><div><b>${item.name}${stackQuantity > 1 ? ` ×${stackQuantity}` : ''}${equipped ? '<mark>已穿戴</mark>' : ''}</b><small>${slot}${slot ? '　' : ''}${itemStatsText(item)}</small></div>${item.kind === 'equipment' && !equipped ? wearable && equipControls ? equipControls : '<span class="equip-blocked">無法穿戴</span>' : ''}${comparison}</article>`;
+    return `<article class="inventory-item ${itemQualityClass(item)} ${equipped ? 'is-equipped' : ''} ${!wearable ? 'incompatible' : ''} ${selectedCount === stackIds.length && selectedCount ? 'sale-selected' : selectedCount ? 'sale-partial' : ''}" tabindex="${item.kind === 'equipment' && !equipped ? '0' : '-1'}">${junkBadge}<span class="item-icon">${visual}</span><div><b>${item.name}${stackQuantity > 1 ? ` ×${stackQuantity}` : ''}${equipped ? '<mark>已穿戴</mark>' : ''}</b><small>${slot}${slot ? '　' : ''}${item.kind === 'equipment' ? equipmentDetailsHtml(item) : itemStatsText(item)}</small></div>${item.kind === 'equipment' && !equipped ? wearable && equipControls ? equipControls : '<span class="equip-blocked">無法穿戴</span>' : ''}${comparison}</article>`;
   };
   const categoryTabs = [
     ['weapon', '武器'],
