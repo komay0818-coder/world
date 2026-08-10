@@ -1,0 +1,50 @@
+const assert = require('assert');
+const DropLookupPolicy = require('../drop-lookup-policy.js');
+const MaterialPolicy = require('../chapter-one-material-drop-policy.js');
+const RecipePolicy = require('../chapter-one-recipe-drop-policy.js');
+const SkillPolicy = require('../skill-upgrade-policy.js');
+const BossPolicy = require('../chapter-boss-drop-policy.js');
+
+const normalLoot = { equipmentDropRate: .25, rarityWeights: { common: 60, uncommon: 40 } };
+const bossLoot = { equipmentDropRate: 1, rarityWeights: { common: 20, uncommon: 80 } };
+const maps = [
+  { id: 'wolf-den', name: '狼穴', chapter: 1, regionOf: 'beginner-plains', implemented: true },
+  { id: 'plains-depths', name: '平原深處', chapter: 1, regionOf: 'beginner-plains', implemented: true },
+  { id: 'black-forest-trail', name: '黑森林小徑', chapter: 2, regionOf: 'black-forest', implemented: true }
+];
+const monsters = {
+  denForestWolf: { id: 'denForestWolf', name: '森林狼', lootConfig: normalLoot },
+  greatfangWolf: { id: 'greatfangWolf', name: '巨牙狼', isBoss: true, lootConfig: bossLoot },
+  blackstoneLeader: { id: 'blackstoneLeader', name: '黑石首領', isBoss: true, lootConfig: bossLoot },
+  wanderingBlackKnight: { id: 'wanderingBlackKnight', name: '流浪黑騎士', lootConfig: normalLoot },
+  trailWolf: { id: 'trailWolf', name: '黑森林狼', lootConfig: { equipmentDropRate: .25, rarityWeights: { uncommon: 25, rare: 75 } } }
+};
+const mapPools = {
+  'wolf-den': { normal: ['denForestWolf'], boss: ['greatfangWolf'] },
+  'plains-depths': { normal: ['wanderingBlackKnight'], boss: ['blackstoneLeader'] },
+  'black-forest-trail': { normal: ['trailWolf'] }
+};
+const items = DropLookupPolicy.buildIndex({ maps, mapPools, monsters, materialPolicy: MaterialPolicy, recipePolicy: RecipePolicy, skillPolicy: SkillPolicy, bossPolicy: BossPolicy });
+
+const wolfFang = items.find((item) => item.id === 'wolf-fang');
+assert(wolfFang, '狼牙應由現有材料掉落設定建立索引');
+assert(wolfFang.sources.some((source) => source.monsterId === 'denForestWolf' && source.rate === .05));
+assert(wolfFang.sources.some((source) => source.monsterId === 'greatfangWolf' && source.rate === .05));
+
+const greenRecipe = items.find((item) => item.id === 'recipe-green-wrist');
+assert.strictEqual(greenRecipe.sources[0].rate, 1 / 3, 'Boss 必掉三選一配方應顯示單件 1/3 機率');
+const rareRecipe = items.find((item) => item.id === 'recipe-black-knight-rare-shoulders');
+assert.strictEqual(rareRecipe.sources[0].rate, .01);
+
+const beginnerBook = items.find((item) => item.id === 'beginner_skill_book');
+assert(beginnerBook.sources.every((source) => monsters[source.monsterId].isBoss), '技能書只應列出 Boss');
+const intermediatePage = items.find((item) => item.id === 'intermediate_skill_page');
+assert(intermediatePage.sources.some((source) => source.monsterId === 'trailWolf' && source.rate === .08));
+
+const blue = items.find((item) => item.id === 'equipment-rare');
+assert(blue.sources.some((source) => source.monsterId === 'trailWolf' && Math.abs(source.rate - .1875) < 1e-9));
+assert.strictEqual(DropLookupPolicy.filterItems(items, '狼牙', 'material').length, 1);
+assert(DropLookupPolicy.filterItems(items, '', 'equipment', 'black-forest-trail').length > 0);
+assert.strictEqual(DropLookupPolicy.percent(.333333), '33.33%');
+
+console.log('drop lookup policy tests passed');

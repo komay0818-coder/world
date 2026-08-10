@@ -1,0 +1,52 @@
+(function attachDropLookupPolicy(root, factory) {
+  const api = factory();
+  if (typeof module === 'object' && module.exports) module.exports = api;
+  else root.DropLookupPolicy = api;
+}(typeof globalThis !== 'undefined' ? globalThis : this, function createDropLookupPolicy() {
+  'use strict';
+  const QUALITY_NAMES = Object.freeze({ common: '白色裝備', uncommon: '綠色裝備', rare: '藍色裝備', epic: '紫色裝備', legendary: '傳奇裝備' });
+  const CATEGORY_NAMES = Object.freeze({ equipment: '裝備', material: '材料', recipe: '配方', skill: '技能材料' });
+  function percent(rate) { const value = Math.max(0, Math.min(1, Number(rate) || 0)) * 100; return `${Number.isInteger(value) ? value : Number(value.toFixed(2))}%`; }
+  function uniqueMonsterIds(pool) { return [...new Set(['normal', 'rare', 'elite', 'boss'].flatMap((rank) => pool?.[rank] || []))]; }
+  function addSource(index, item, source) {
+    if (!item?.id || !source?.mapId || !source?.monsterId) return;
+    const current = index.get(item.id) || { ...item, sources: [] };
+    const key = `${source.mapId}:${source.monsterId}:${source.rate}:${source.note || ''}`;
+    if (!current.sources.some((entry) => entry.key === key)) current.sources.push({ ...source, key });
+    index.set(item.id, current);
+  }
+  function buildIndex(options = {}) {
+    const index = new Map();
+    const maps = (options.maps || []).filter((map) => map?.regionOf);
+    const mapPools = options.mapPools || {}, monsters = options.monsters || {};
+    const materials = options.materialPolicy?.MATERIALS || {}, recipes = options.recipePolicy?.RECIPES || {}, skillMaterials = options.skillPolicy?.MATERIALS || {};
+    const materialById = new Map(Object.values(materials).map((item) => [item.id, item]));
+    const recipeById = new Map(Object.values(recipes).map((item) => [item.id, item]));
+    const skillById = new Map(Object.values(skillMaterials).map((item) => [item.id, item]));
+    maps.forEach((map) => uniqueMonsterIds(mapPools[map.id]).forEach((monsterId) => {
+      const monster = monsters[monsterId]; if (!monster) return;
+      const sourceBase = { chapter: map.chapter, mapId: map.id, mapName: map.name, monsterId, monsterName: monster.name };
+      (options.materialPolicy?.MAP_DROP_CONFIGS?.[map.id] || []).forEach((drop) => { const item = materialById.get(drop.materialId); addSource(index, item && { ...item, category: 'material', typeLabel: '製作材料' }, { ...sourceBase, rate: drop.dropRate }); });
+      (options.materialPolicy?.MONSTER_DROP_CONFIGS?.[monsterId] || []).forEach((drop) => { const item = materialById.get(drop.materialId); addSource(index, item && { ...item, category: 'material', typeLabel: '製作材料' }, { ...sourceBase, rate: drop.dropRate, amount: drop.amount || 1 }); });
+      (options.skillPolicy?.DROP_CONFIG?.[map.chapter]?.materials || []).filter((drop) => !drop.bossOnly || monster.isBoss).forEach((drop) => { const item = skillById.get(drop.materialId); addSource(index, item && { ...item, category: 'skill', typeLabel: '技能材料' }, { ...sourceBase, rate: drop.chance, amount: drop.amount || 1 }); });
+      const loot = monster.lootConfig;
+      if (loot?.equipmentDropRate && loot.rarityWeights) {
+        const total = Object.values(loot.rarityWeights).reduce((sum, weight) => sum + Math.max(0, Number(weight) || 0), 0);
+        Object.entries(loot.rarityWeights).forEach(([quality, weight]) => { if (!QUALITY_NAMES[quality] || !(Number(weight) > 0) || total <= 0) return; addSource(index, { id: `equipment-${quality}`, name: QUALITY_NAMES[quality], category: 'equipment', typeLabel: '裝備品質' }, { ...sourceBase, rate: Number(loot.equipmentDropRate) * Number(weight) / total, note: '一般裝備池' }); });
+      }
+    }));
+    Object.entries(options.recipePolicy?.RARE_DROP_SOURCES || {}).forEach(([monsterId, source]) => {
+      const map = maps.find((entry) => entry.id === source.mapId), item = recipeById.get(source.recipeItemId);
+      addSource(index, item && { ...item, category: 'recipe', typeLabel: '配方' }, { chapter: map?.chapter || item?.chapter || 1, mapId: source.mapId, mapName: map?.name || source.mapId, monsterId, monsterName: monsters[monsterId]?.name || monsterId, rate: source.dropRate });
+    });
+    const greenRecipes = options.recipePolicy?.GREEN_PLAINS_DEPTHS_RECIPES || [], bossId = 'blackstoneLeader', bossMap = maps.find((entry) => entry.id === 'plains-depths');
+    greenRecipes.forEach((recipeId) => { const item = recipeById.get(recipeId); addSource(index, item && { ...item, category: 'recipe', typeLabel: '配方' }, { chapter: 1, mapId: 'plains-depths', mapName: bossMap?.name || '平原深處', monsterId: bossId, monsterName: monsters[bossId]?.name || '黑石首領', rate: 1 / Math.max(1, greenRecipes.length), note: 'Boss 必掉配方三選一' }); });
+    if (options.bossPolicy?.getChapterDropRate) {
+      const map = maps.find((entry) => entry.id === 'plains-depths'), monster = monsters.blackstoneLeader;
+      addSource(index, { id: 'chapter-1-boss-blue', name: 'Boss 藍色裝備', category: 'equipment', typeLabel: 'Boss 裝備' }, { chapter: 1, mapId: 'plains-depths', mapName: map?.name || '平原深處', monsterId: 'blackstoneLeader', monsterName: monster?.name || '黑石首領', rate: options.bossPolicy.getChapterDropRate(1), note: '章節最終 Boss 額外掉落' });
+    }
+    return [...index.values()].map((item) => ({ ...item, sources: item.sources.map(({ key, ...source }) => source) }));
+  }
+  function filterItems(items, query = '', category = 'all', mapId = '') { const term = String(query || '').trim().toLocaleLowerCase('zh-Hant'); return (items || []).filter((item) => (category === 'all' || item.category === category) && (!mapId || item.sources.some((source) => source.mapId === mapId)) && (!term || item.name.toLocaleLowerCase('zh-Hant').includes(term))); }
+  return Object.freeze({ QUALITY_NAMES, CATEGORY_NAMES, percent, uniqueMonsterIds, buildIndex, filterItems });
+}));
