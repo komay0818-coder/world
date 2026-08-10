@@ -9,15 +9,24 @@
     return Object.freeze({ id, name, kind: 'equipment', slot, chapter: 2, affixChapter: 2, series: options.series || 'black-forest', image: null, imageStatus: 'pending', allowedJobs: Object.freeze(options.allowedJobs || []), ...stats, ...options });
   }
   const CHAPTER_TWO_TEMPLATES = Object.freeze([
-    chapterTwoTemplate('blackwood-longsword', '黑木長劍', 'weapon', { attackMin: 30, attackMax: 38, attackSpeed: 1.05 }, { weaponType: 'sword', allowedJobs: ['warrior'] }),
-    chapterTwoTemplate('corrupted-crystal-battleaxe', '腐晶戰斧', 'weapon', { attackMin: 34, attackMax: 45, attackSpeed: .82 }, { weaponType: 'axe', allowedJobs: ['warrior'] }),
-    chapterTwoTemplate('duskwood-longbow', '暮林長弓', 'weapon', { attackMin: 29, attackMax: 40, attackSpeed: 1.12 }, { weaponType: 'bow', allowedJobs: ['archer'] }),
-    chapterTwoTemplate('shadowfang-dagger', '暗影獠牙', 'weapon', { attackMin: 25, attackMax: 34, attackSpeed: 1.35 }, { weaponType: 'dagger', allowedJobs: ['rogue'] }),
-    chapterTwoTemplate('corrupted-branch-staff', '腐枝法杖', 'weapon', { attackMin: 31, attackMax: 42, attackSpeed: .95, mana: 24 }, { weaponType: 'staff', allowedJobs: ['mage'] }),
+    chapterTwoTemplate('forest-guard-longsword', '林衛長劍', 'weapon', { attackMin: 22, attackMax: 29, attackSpeed: 1.35 }, { weaponType: 'one-handed-sword', allowedJobs: ['warrior', 'assassin'] }),
+    chapterTwoTemplate('mercenary-broadsword', '傭兵闊劍', 'weapon', { attackMin: 25, attackMax: 33, attackSpeed: 1.15 }, { weaponType: 'one-handed-sword', allowedJobs: ['warrior', 'assassin'] }),
+    chapterTwoTemplate('woodcutter-greatsword', '斬木巨劍', 'weapon', { attackMin: 38, attackMax: 50, attackSpeed: .78 }, { weaponType: 'two-handed-sword', allowedJobs: ['warrior'] }),
+    chapterTwoTemplate('black-iron-greatsword', '黑鐵重劍', 'weapon', { attackMin: 43, attackMax: 57, attackSpeed: .65 }, { weaponType: 'two-handed-sword', allowedJobs: ['warrior'] }),
+    chapterTwoTemplate('forest-felling-axe', '伐林戰斧', 'weapon', { attackMin: 24, attackMax: 32, attackSpeed: 1.05 }, { weaponType: 'one-handed-axe', allowedJobs: ['warrior', 'assassin'] }),
+    chapterTwoTemplate('bonebreaker-hatchet', '裂骨手斧', 'weapon', { attackMin: 27, attackMax: 36, attackSpeed: .90 }, { weaponType: 'one-handed-axe', allowedJobs: ['warrior', 'assassin'] }),
+    chapterTwoTemplate('greatwood-battleaxe', '巨木戰斧', 'weapon', { attackMin: 41, attackMax: 54, attackSpeed: .68 }, { weaponType: 'two-handed-axe', allowedJobs: ['warrior'] }),
+    chapterTwoTemplate('armorbreaker-greataxe', '破甲重斧', 'weapon', { attackMin: 46, attackMax: 61, attackSpeed: .55 }, { weaponType: 'two-handed-axe', allowedJobs: ['warrior'] }),
+    chapterTwoTemplate('venomfang-dagger', '毒牙匕首', 'weapon', { attackMin: 19, attackMax: 26, attackSpeed: 1.75 }, { weaponType: 'one-handed-dagger', allowedJobs: ['assassin'] }),
+    chapterTwoTemplate('darkwood-shortblade', '暗林短刃', 'weapon', { attackMin: 22, attackMax: 29, attackSpeed: 1.55 }, { weaponType: 'one-handed-dagger', allowedJobs: ['assassin'] }),
+    chapterTwoTemplate('longbranch-hunting-bow', '長枝獵弓', 'weapon', { attackMin: 24, attackMax: 33, attackSpeed: 1.08 }, { weaponType: 'bow', allowedJobs: ['hunter'] }),
+    chapterTwoTemplate('forest-piercing-longbow', '穿林長弓', 'weapon', { attackMin: 28, attackMax: 38, attackSpeed: .88 }, { weaponType: 'bow', allowedJobs: ['hunter'] }),
+    chapterTwoTemplate('ancient-wood-wand', '古木魔杖', 'weapon', { attackMin: 23, attackMax: 31, attackSpeed: 1.15, mana: 20 }, { weaponType: 'one-handed-wand', allowedJobs: ['mage', 'priest'] }),
+    chapterTwoTemplate('spore-wand', '孢子魔杖', 'weapon', { attackMin: 26, attackMax: 35, attackSpeed: 1.00, mana: 26 }, { weaponType: 'one-handed-wand', allowedJobs: ['mage', 'priest'] }),
     chapterTwoTemplate('blackstone-corrupted-plate', '黑石腐晶戰甲', 'armor', { defense: 30, hp: 58 }, { armorType: 'heavy', allowedJobs: ['warrior'] }),
     chapterTwoTemplate('blackstone-corrupted-helm', '黑石腐晶戰盔', 'head', { defense: 18, hp: 32 }, { armorType: 'heavy', allowedJobs: ['warrior'] }),
-    chapterTwoTemplate('deepwood-hunter-vest', '深林獵裝', 'armor', { defense: 23, hp: 38, dodge: 3 }, { armorType: 'light', allowedJobs: ['archer', 'rogue'] }),
-    chapterTwoTemplate('deepwood-hunter-hood', '深林兜帽', 'head', { defense: 14, hp: 24, dodge: 2 }, { armorType: 'light', allowedJobs: ['archer', 'rogue'] }),
+    chapterTwoTemplate('deepwood-hunter-vest', '深林獵裝', 'armor', { defense: 23, hp: 38, dodge: 3 }, { armorType: 'light', allowedJobs: ['hunter', 'assassin'] }),
+    chapterTwoTemplate('deepwood-hunter-hood', '深林兜帽', 'head', { defense: 14, hp: 24, dodge: 2 }, { armorType: 'light', allowedJobs: ['hunter', 'assassin'] }),
     chapterTwoTemplate('spiritweave-robe', '靈森法袍', 'armor', { defense: 17, hp: 30, mana: 38 }, { armorType: 'cloth', allowedJobs: ['mage'] }),
     chapterTwoTemplate('spiritweave-crown', '靈森冠帽', 'head', { defense: 10, hp: 18, mana: 24 }, { armorType: 'cloth', allowedJobs: ['mage'] })
   ]);
