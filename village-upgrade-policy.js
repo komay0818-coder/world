@@ -7,7 +7,7 @@
 
   const MATERIALS = Object.freeze({
     buildingWolfFur: Object.freeze({ id: 'building-wolf-fur', kind: 'material', materialType: 'building-upgrade', chapter: 1, icon: '🐺', name: '狼毛', description: '第一章建築升級材料；由狼穴取得。' }),
-    buildingWolfFang: Object.freeze({ id: 'building-wolf-fang', kind: 'material', materialType: 'building-upgrade', chapter: 1, icon: '🦷', name: '狼牙', description: '第一章建築升級材料；由狼穴取得。' }),
+    buildingWolfFang: Object.freeze({ id: 'wolf-fang', kind: 'material', materialType: 'monster-crafting', rarity: 'rare', chapter: 1, icon: '🦷', name: '狼牙', description: '從狼穴怪物身上取得的稀有製作材料，也可用於升級建築。' }),
     buildingHardHide: Object.freeze({ id: 'building-hard-hide', kind: 'material', materialType: 'building-upgrade', chapter: 1, icon: '▰', name: '硬皮', description: '第一章建築升級材料；由野豬林取得。' }),
     buildingBoarTusk: Object.freeze({ id: 'building-boar-tusk', kind: 'material', materialType: 'building-upgrade', chapter: 1, icon: '🦷', name: '獠牙', description: '第一章建築升級材料；由野豬林取得。' }),
     buildingIronOre: Object.freeze({ id: 'building-iron-ore', kind: 'material', materialType: 'building-upgrade', chapter: 1, icon: '⛏', name: '鐵礦石', description: '第一章建築升級材料；由哥布林營地取得。' }),
@@ -16,8 +16,7 @@
 
   const MAP_DROP_CONFIGS = Object.freeze({
     'wolf-den': Object.freeze([
-      Object.freeze({ materialId: MATERIALS.buildingWolfFur.id, dropRate: .25, amount: 1 }),
-      Object.freeze({ materialId: MATERIALS.buildingWolfFang.id, dropRate: .05, amount: 1 })
+      Object.freeze({ materialId: MATERIALS.buildingWolfFur.id, dropRate: .25, amount: 1 })
     ]),
     'boar-woods': Object.freeze([
       Object.freeze({ materialId: MATERIALS.buildingHardHide.id, dropRate: .25, amount: 1 }),
@@ -36,8 +35,8 @@
     workshop: Object.freeze({ chapter: 1, targetLevel: 2, gold: 15000, materials: Object.freeze({ 'building-wolf-fur': 150, 'building-hard-hide': 150 }) }),
     blacksmith: Object.freeze({ chapter: 1, targetLevel: 2, gold: 15000, materials: Object.freeze({ 'building-iron-ore': 200, 'building-black-ore': 100 }) }),
     furnace: Object.freeze({ chapter: 1, targetLevel: 2, gold: 15000, materials: Object.freeze({ 'building-iron-ore': 150, 'building-black-ore': 150 }) }),
-    alchemy: Object.freeze({ chapter: 1, targetLevel: 2, gold: 15000, materials: Object.freeze({ 'building-wolf-fang': 50, 'building-boar-tusk': 50, 'building-black-ore': 50 }) }),
-    rune: Object.freeze({ chapter: 1, targetLevel: 2, gold: 15000, materials: Object.freeze({ 'building-black-ore': 250, 'building-wolf-fang': 25, 'building-boar-tusk': 25 }) })
+    alchemy: Object.freeze({ chapter: 1, targetLevel: 2, gold: 15000, materials: Object.freeze({ 'wolf-fang': 50, 'building-boar-tusk': 50, 'building-black-ore': 50 }) }),
+    rune: Object.freeze({ chapter: 1, targetLevel: 2, gold: 15000, materials: Object.freeze({ 'building-black-ore': 250, 'wolf-fang': 25, 'building-boar-tusk': 25 }) })
   });
 
   const MATERIAL_BY_ID = new Map(Object.values(MATERIALS).map((material) => [material.id, material]));
@@ -50,6 +49,16 @@
     return (Array.isArray(inventory) ? inventory : [])
       .filter((item) => item?.id === materialId)
       .reduce((total, item) => total + Math.max(0, Number(item.quantity) || 0), 0);
+  }
+
+  function normalizeWolfFangInventory(inventory) {
+    const items = Array.isArray(inventory) ? inventory : [];
+    const fangItems = items.filter((item) => ['wolf-fang', 'building-wolf-fang'].includes(item?.id));
+    if (!fangItems.some((item) => item.id === 'building-wolf-fang')) return items;
+    const quantity = fangItems.reduce((sum, item) => sum + Math.max(0, Number(item.quantity) || 0), 0);
+    const normalized = items.filter((item) => !['wolf-fang', 'building-wolf-fang'].includes(item?.id));
+    if (quantity > 0) normalized.push({ ...MATERIALS.buildingWolfFang, quantity });
+    return normalized;
   }
 
   function addMaterial(inventory, materialId, amount) {
@@ -113,5 +122,5 @@
     return { ok: true, requirement, level: requirement.targetLevel };
   }
 
-  return Object.freeze({ MATERIALS, MAP_DROP_CONFIGS, CHAPTER_LEVEL_CAPS, LEVEL_TWO_COSTS, getMaterial, getQuantity, grantMapDrops, getRequirement, canUpgrade, upgrade });
+  return Object.freeze({ MATERIALS, MAP_DROP_CONFIGS, CHAPTER_LEVEL_CAPS, LEVEL_TWO_COSTS, getMaterial, getQuantity, normalizeWolfFangInventory, grantMapDrops, getRequirement, canUpgrade, upgrade });
 });
