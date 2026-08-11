@@ -12,7 +12,10 @@ assert.match(html, /id="player-battle-stage"/, 'player party has a shared battle
 assert.match(html, /id="player-stage-info"/, 'main player information floats near the battlefield art');
 assert.match(css, /grid-template-columns: repeat\(4, minmax\(0, 1fr\)\)/, 'desktop enemies share a four-unit battlefield row');
 assert.match(css, /#enemy-squad \.monster-battle-slot[\s\S]*?border: 0 !important;[\s\S]*?background: none !important;/, 'individual monster cards have no frame or background');
-assert.match(css, /\.monster-battle-slot\.boss \.monster-slot-image \{ scale: 1\.48 !important; \}/, 'boss art is visually larger without a separate card');
+assert.match(css, /\.monster-battle-slot\.boss \.monster-slot-image \{ scale: 1\.3 !important; \}/, 'boss visuals remain distinct without overwhelming the battlefield');
+assert.match(css, /top: 16% !important;/, 'desktop enemy formation moves closer to the player formation');
+assert.match(css, /\.battle-field \.player-stage-info \{ left: 50%; translate: -50% 0; \}/, 'main player information follows the player art horizontally');
+assert.match(css, /\.battle-field \.player-grounding \{[\s\S]*?background: rgba\(0, 0, 0, \.28\) !important;/, 'main player has a subtle grounding shadow');
 assert.match(css, /\.player-battle-stage[\s\S]*?justify-content: center;/, 'party units auto-center on their shared ground');
 assert.match(script, /battleCharacterArt\[`\$\{member\.character\.race\}:\$\{member\.character\.job\}`\]/, 'party display reuses existing character art');
 assert.match(script, /其餘 \$\{reserveCount\}/, 'overflow enemies are not described as a front or back row');

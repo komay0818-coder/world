@@ -546,3 +546,73 @@ body:has(.battle-screen:not(.hidden)) .toast {
   #enemy-squad .monster-slot-hp { height: 6px !important; }
   #enemy-squad .reserve-indicator { top: -32px !important; font-size: 7px; }
 }
+
+/* 0.4.82: tighten battlefield spacing and visually bind status panels to units. */
+@media (min-width: 701px) {
+  .battle-field #enemy-squad.monster-slot-grid { top: 16% !important; }
+
+  #enemy-squad .monster-slot-header {
+    width: calc(100% - 16px);
+    min-height: 32px;
+    margin: 0 auto;
+    padding: 3px 6px;
+    transform: translateY(7px);
+    background: linear-gradient(90deg, rgba(3, 10, 17, .82), rgba(3, 10, 17, .52));
+  }
+
+  #enemy-squad .monster-status-row { position: relative; z-index: 6; top: -6px; }
+  #enemy-squad .monster-slot-hp { position: relative; z-index: 6; top: -7px; }
+}
+
+#enemy-squad .monster-battle-slot::before {
+  right: 16% !important;
+  left: 16% !important;
+  height: 12px !important;
+  background: rgba(0, 0, 0, .27) !important;
+}
+
+#enemy-squad .monster-battle-slot.elite .monster-slot-image { scale: 1.1 !important; }
+#enemy-squad .monster-battle-slot.boss .monster-slot-image { scale: 1.3 !important; }
+#enemy-squad .monster-battle-slot.boss .monster-slot-hp { height: 10px !important; }
+
+.battle-field .player-stage-info { left: 50%; translate: -50% 0; }
+
+.battle-field:has(#player-battle-stage[data-count="1"]) .player-stage-info,
+.battle-field:has(#player-battle-stage[data-count="1"]) .player-grounding { left: 40% !important; }
+.battle-field:has(#player-battle-stage[data-count="2"]) .player-stage-info,
+.battle-field:has(#player-battle-stage[data-count="2"]) .player-grounding { left: 34% !important; }
+.battle-field:has(#player-battle-stage[data-count="3"]) .player-stage-info,
+.battle-field:has(#player-battle-stage[data-count="3"]) .player-grounding { left: 26% !important; }
+
+.battle-field .player-grounding {
+  z-index: 7 !important;
+  left: 50% !important;
+  bottom: 1.4% !important;
+  width: clamp(82px, 14%, 140px) !important;
+  height: 13px !important;
+  border: 0 !important;
+  border-radius: 50% !important;
+  background: rgba(0, 0, 0, .28) !important;
+  box-shadow: none !important;
+  filter: blur(5px) !important;
+  opacity: 1 !important;
+  translate: -50% 0;
+  transform: none !important;
+}
+
+.player-stage-unit::after {
+  right: 18%;
+  left: 18%;
+  height: 11px;
+  background: rgba(0, 0, 0, .27);
+}
+
+@media (max-width: 700px) {
+  .battle-field .player-stage-info { bottom: 29%; left: 50%; translate: -50% 0; }
+  .battle-field:has(#player-battle-stage[data-count="1"]) .player-stage-info,
+  .battle-field:has(#player-battle-stage[data-count="1"]) .player-grounding { left: 38% !important; }
+  .battle-field:has(#player-battle-stage[data-count="2"]) .player-stage-info,
+  .battle-field:has(#player-battle-stage[data-count="2"]) .player-grounding { left: 30% !important; }
+  .battle-field:has(#player-battle-stage[data-count="3"]) .player-stage-info,
+  .battle-field:has(#player-battle-stage[data-count="3"]) .player-grounding { left: 20% !important; }
+}
