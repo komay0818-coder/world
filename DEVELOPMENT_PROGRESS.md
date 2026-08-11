@@ -5,6 +5,7 @@
 - 新增 `assets/woodcutter-greatsword.png` 並套用至「斬木巨劍」。
 - 新增 `assets/black-iron-greatsword.png` 並套用至「黑鐵重劍」。
 - 新掉落與既有存檔中的同款巨劍都會顯示新圖片；不修改武器數值、職業限制與掉落設定。
+- 圖片功能提交：`78d10e602d1799435ec4bab1c3e93dffc54b3d29`；入口頁已鎖定該提交的 `script.js`。
 
 ## 2026-08-12 第二章武器圖片（0.4.92）
 
