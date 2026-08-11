@@ -9,8 +9,8 @@
     return Object.freeze({ id, name, kind: 'equipment', slot, chapter: 2, affixChapter: 2, series: options.series || 'black-forest', image: null, imageStatus: 'pending', allowedJobs: Object.freeze(options.allowedJobs || []), ...stats, ...options });
   }
   const CHAPTER_TWO_TEMPLATES = Object.freeze([
-    chapterTwoTemplate('forest-guard-longsword', '林衛長劍', 'weapon', { attackMin: 22, attackMax: 29, attackSpeed: 1.35 }, { weaponType: 'one-handed-sword', allowedJobs: ['warrior', 'assassin'] }),
-    chapterTwoTemplate('mercenary-broadsword', '傭兵闊劍', 'weapon', { attackMin: 25, attackMax: 33, attackSpeed: 1.15 }, { weaponType: 'one-handed-sword', allowedJobs: ['warrior', 'assassin'] }),
+    chapterTwoTemplate('forest-guard-longsword', '林衛長劍', 'weapon', { attackMin: 22, attackMax: 29, attackSpeed: 1.35 }, { weaponType: 'one-handed-sword', image: 'assets/forest-guard-longsword.png', imageStatus: 'ready', allowedJobs: ['warrior', 'assassin'] }),
+    chapterTwoTemplate('mercenary-broadsword', '傭兵闊劍', 'weapon', { attackMin: 25, attackMax: 33, attackSpeed: 1.15 }, { weaponType: 'one-handed-sword', image: 'assets/mercenary-broadsword.png', imageStatus: 'ready', allowedJobs: ['warrior', 'assassin'] }),
     chapterTwoTemplate('woodcutter-greatsword', '斬木巨劍', 'weapon', { attackMin: 38, attackMax: 50, attackSpeed: .78 }, { weaponType: 'two-handed-sword', allowedJobs: ['warrior'] }),
     chapterTwoTemplate('black-iron-greatsword', '黑鐵重劍', 'weapon', { attackMin: 43, attackMax: 57, attackSpeed: .65 }, { weaponType: 'two-handed-sword', allowedJobs: ['warrior'] }),
     chapterTwoTemplate('forest-felling-axe', '伐林戰斧', 'weapon', { attackMin: 24, attackMax: 32, attackSpeed: 1.05 }, { weaponType: 'one-handed-axe', allowedJobs: ['warrior', 'assassin'] }),

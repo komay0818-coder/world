@@ -126,7 +126,8 @@ const chapterTwoGreen = dropPolicy.grantEquipmentDrop({ inventory: [] }, chapter
 assert.equal(chapterTwoGreen.rarity, 'uncommon', 'chapter two never drops white equipment');
 assert.equal(chapterTwoGreen.affixChapter, 2);
 assert.equal(chapterTwoGreen.chapter, 2);
-assert.equal(chapterTwoGreen.imageStatus, 'pending');
+assert.equal(chapterTwoGreen.imageStatus, 'ready');
+assert.equal(chapterTwoGreen.image, 'assets/forest-guard-longsword.png');
 assert.ok(dropPolicy.CHAPTER_TWO_TEMPLATES.some((template) => template.id === chapterTwoGreen.templateId), 'chapter two uses only its exclusive series');
 const chapterTwoBlue = dropPolicy.grantEquipmentDrop({ inventory: [] }, chapterTwoNormal, { random: sequence([0, .99, 0, 0]), instanceIdFactory: () => 'eq-c2-blue' });
 assert.equal(chapterTwoBlue.rarity, 'rare', 'blue is the primary chapter-two quality');
@@ -139,9 +140,13 @@ assert.deepEqual(chapterTwoWeapons.map((template) => template.name), ['林衛長
 chapterTwoWeapons.forEach((template) => {
   assert.equal(template.chapter, 2);
   assert.equal(template.affixChapter, 2);
-  assert.equal(template.imageStatus, 'pending');
   assert.ok(dropPolicy.EQUIPMENT_POOLS.black_forest_weapons.includes(template.id));
 });
+assert.equal(chapterTwoWeapons.find((template) => template.id === 'forest-guard-longsword').image, 'assets/forest-guard-longsword.png');
+assert.equal(chapterTwoWeapons.find((template) => template.id === 'forest-guard-longsword').imageStatus, 'ready');
+assert.equal(chapterTwoWeapons.find((template) => template.id === 'mercenary-broadsword').image, 'assets/mercenary-broadsword.png');
+assert.equal(chapterTwoWeapons.find((template) => template.id === 'mercenary-broadsword').imageStatus, 'ready');
+chapterTwoWeapons.filter((template) => !['forest-guard-longsword', 'mercenary-broadsword'].includes(template.id)).forEach((template) => assert.equal(template.imageStatus, 'pending'));
 assert.deepEqual(equipmentPolicy.getEquipSlots(chapterTwoWeapons.find((item) => item.name === '林衛長劍'), 'assassin'), ['weapon', 'offhand']);
 assert.deepEqual(equipmentPolicy.getEquipSlots(chapterTwoWeapons.find((item) => item.name === '黑鐵重劍'), 'assassin'), []);
 assert.deepEqual(equipmentPolicy.getEquipSlots(chapterTwoWeapons.find((item) => item.name === '穿林長弓'), 'hunter'), ['weapon']);

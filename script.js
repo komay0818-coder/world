@@ -725,8 +725,18 @@ function createStarterEquipment(job = 'warrior') {
   return equipment;
 }
 
+const equipmentVisualByTemplateId = {
+  'forest-guard-longsword': 'assets/forest-guard-longsword.png',
+  'mercenary-broadsword': 'assets/mercenary-broadsword.png'
+};
+
 function applyEquipmentVisual(item) {
   if (!item || item.kind !== 'equipment') return item;
+  const templateId = item.templateId || item.baseItemId;
+  const image = equipmentVisualByTemplateId[templateId]
+    || (item.name === '林衛長劍' ? equipmentVisualByTemplateId['forest-guard-longsword'] : '')
+    || (item.name === '傭兵闊劍' ? equipmentVisualByTemplateId['mercenary-broadsword'] : '');
+  if (image) return { ...item, image, imageStatus: 'ready' };
   return item;
 }
 
@@ -773,10 +783,10 @@ function getProgress() {
       localStorage.setItem('stardust-progress', JSON.stringify(saved));
     }
   }
-  if (saved.equipmentVisualMigrationVersion !== 'individual-item-images-v3') {
+  if (saved.equipmentVisualMigrationVersion !== 'chapter-two-sword-images-v4') {
     saved.inventory = (Array.isArray(saved.inventory) ? saved.inventory : []).map(applyEquipmentVisual);
     saved.equipment = Object.fromEntries(Object.entries(saved.equipment || {}).map(([slot, item]) => [slot, applyEquipmentVisual(item)]));
-    saved.equipmentVisualMigrationVersion = 'individual-item-images-v3';
+    saved.equipmentVisualMigrationVersion = 'chapter-two-sword-images-v4';
     localStorage.setItem('stardust-progress', JSON.stringify(saved));
   }
   if (saved.bowVisualMigrationVersion !== 'hunter-bow-image-v1') {
