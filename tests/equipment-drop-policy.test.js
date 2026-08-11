@@ -162,7 +162,11 @@ assert.equal(chapterTwoWeapons.find((template) => template.id === 'longbranch-hu
 assert.equal(chapterTwoWeapons.find((template) => template.id === 'longbranch-hunting-bow').imageStatus, 'ready');
 assert.equal(chapterTwoWeapons.find((template) => template.id === 'forest-piercing-longbow').image, 'assets/forest-piercing-longbow.png');
 assert.equal(chapterTwoWeapons.find((template) => template.id === 'forest-piercing-longbow').imageStatus, 'ready');
-chapterTwoWeapons.filter((template) => !['forest-guard-longsword', 'mercenary-broadsword', 'woodcutter-greatsword', 'black-iron-greatsword', 'forest-felling-axe', 'bonebreaker-hatchet', 'greatwood-battleaxe', 'armorbreaker-greataxe', 'longbranch-hunting-bow', 'forest-piercing-longbow'].includes(template.id)).forEach((template) => assert.equal(template.imageStatus, 'pending'));
+assert.equal(chapterTwoWeapons.find((template) => template.id === 'venomfang-dagger').image, 'assets/venomfang-dagger.png');
+assert.equal(chapterTwoWeapons.find((template) => template.id === 'venomfang-dagger').imageStatus, 'ready');
+assert.equal(chapterTwoWeapons.find((template) => template.id === 'darkwood-shortblade').image, 'assets/darkwood-shortblade.png');
+assert.equal(chapterTwoWeapons.find((template) => template.id === 'darkwood-shortblade').imageStatus, 'ready');
+chapterTwoWeapons.filter((template) => !['forest-guard-longsword', 'mercenary-broadsword', 'woodcutter-greatsword', 'black-iron-greatsword', 'forest-felling-axe', 'bonebreaker-hatchet', 'greatwood-battleaxe', 'armorbreaker-greataxe', 'longbranch-hunting-bow', 'forest-piercing-longbow', 'venomfang-dagger', 'darkwood-shortblade'].includes(template.id)).forEach((template) => assert.equal(template.imageStatus, 'pending'));
 assert.deepEqual(equipmentPolicy.getEquipSlots(chapterTwoWeapons.find((item) => item.name === '林衛長劍'), 'assassin'), ['weapon', 'offhand']);
 assert.deepEqual(equipmentPolicy.getEquipSlots(chapterTwoWeapons.find((item) => item.name === '黑鐵重劍'), 'assassin'), []);
 assert.deepEqual(equipmentPolicy.getEquipSlots(chapterTwoWeapons.find((item) => item.name === '穿林長弓'), 'hunter'), ['weapon']);

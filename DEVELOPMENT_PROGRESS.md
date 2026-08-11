@@ -1,5 +1,11 @@
 # 星塵放置所－目前遊戲規畫
 
+## 2026-08-12 第二章匕首圖片（0.4.98）
+
+- 新增 `assets/venomfang-dagger.png` 並套用至「毒牙匕首」。
+- 新增 `assets/darkwood-shortblade.png` 並套用至「暗林短刃」。
+- 新掉落與既有存檔中的同款匕首都會顯示新圖片；不修改武器數值、職業限制與掉落設定。
+
 ## 2026-08-12 第二章獵弓圖片（0.4.97）
 
 - 新增 `assets/longbranch-hunting-bow.png` 並套用至「長枝獵弓」。

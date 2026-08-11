@@ -15,6 +15,8 @@ assert.match(script, /'greatwood-battleaxe': 'assets\/greatwood-battleaxe\.png'/
 assert.match(script, /'armorbreaker-greataxe': 'assets\/armorbreaker-greataxe\.png'/, 'armorbreaker greataxe artwork migrates into existing items');
 assert.match(script, /'longbranch-hunting-bow': 'assets\/longbranch-hunting-bow\.png'/, 'longbranch hunting bow artwork migrates into existing items');
 assert.match(script, /'forest-piercing-longbow': 'assets\/forest-piercing-longbow\.png'/, 'forest piercing longbow artwork migrates into existing items');
+assert.match(script, /'venomfang-dagger': 'assets\/venomfang-dagger\.png'/, 'venom fang dagger artwork migrates into existing items');
+assert.match(script, /'darkwood-shortblade': 'assets\/darkwood-shortblade\.png'/, 'darkwood shortblade artwork migrates into existing items');
 const html = fs.readFileSync(path.join(__dirname, '..', 'index.html'), 'utf8');
 
 assert.match(html, /equipment-drop-policy\.js/, 'drop policy loads before the main game script');
