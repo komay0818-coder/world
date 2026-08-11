@@ -758,3 +758,46 @@ body:has(.battle-screen:not(.hidden)) .toast.show {
     --unit-scale-boss: 1.49;
   }
 }
+
+/* 0.4.89: enlarge the shared player unit box; four party anchors still fit without overlap. */
+@media (min-width: 701px) {
+  .battle-field #battle-player-art[aria-label] {
+    width: clamp(120px, 14vw, 180px) !important;
+    height: 33% !important;
+  }
+
+  .battle-field .player-battle-stage {
+    height: 33% !important;
+  }
+
+  .battle-field .player-stage-unit {
+    width: clamp(120px, 14vw, 180px) !important;
+  }
+
+  .battle-field:has(#player-battle-stage[data-count="1"]) #battle-player-art[aria-label] { left: 38% !important; }
+  .player-battle-stage[data-count="1"] .player-stage-unit:nth-child(1) { left: 62% !important; }
+
+  .battle-field:has(#player-battle-stage[data-count="2"]) #battle-player-art[aria-label] { left: 26% !important; }
+  .player-battle-stage[data-count="2"] .player-stage-unit:nth-child(1) { left: 50% !important; }
+  .player-battle-stage[data-count="2"] .player-stage-unit:nth-child(2) { left: 74% !important; }
+
+  .battle-field:has(#player-battle-stage[data-count="3"]) #battle-player-art[aria-label] { left: 14% !important; }
+  .player-battle-stage[data-count="3"] .player-stage-unit:nth-child(1) { left: 38% !important; }
+  .player-battle-stage[data-count="3"] .player-stage-unit:nth-child(2) { left: 62% !important; }
+  .player-battle-stage[data-count="3"] .player-stage-unit:nth-child(3) { left: 86% !important; }
+}
+
+@media (max-width: 700px) {
+  .battle-field #battle-player-art[aria-label] {
+    width: clamp(66px, 20vw, 88px) !important;
+    height: 25% !important;
+  }
+
+  .battle-field .player-battle-stage {
+    height: 25% !important;
+  }
+
+  .battle-field .player-stage-unit {
+    width: clamp(66px, 20vw, 88px) !important;
+  }
+}
