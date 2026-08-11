@@ -1,5 +1,11 @@
 # 星塵放置所－目前遊戲規畫
 
+## 2026-08-12 第二章戰斧圖片（0.4.94）
+
+- 新增 `assets/forest-felling-axe.png` 並套用至「伐林戰斧」。
+- 新增 `assets/bonebreaker-hatchet.png` 並套用至「裂骨手斧」。
+- 新掉落與既有存檔中的同款戰斧都會顯示新圖片；不修改武器數值、職業限制與掉落設定。
+
 ## 2026-08-12 第二章巨劍圖片（0.4.93）
 
 - 新增 `assets/woodcutter-greatsword.png` 並套用至「斬木巨劍」。

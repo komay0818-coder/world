@@ -150,7 +150,11 @@ assert.equal(chapterTwoWeapons.find((template) => template.id === 'woodcutter-gr
 assert.equal(chapterTwoWeapons.find((template) => template.id === 'woodcutter-greatsword').imageStatus, 'ready');
 assert.equal(chapterTwoWeapons.find((template) => template.id === 'black-iron-greatsword').image, 'assets/black-iron-greatsword.png');
 assert.equal(chapterTwoWeapons.find((template) => template.id === 'black-iron-greatsword').imageStatus, 'ready');
-chapterTwoWeapons.filter((template) => !['forest-guard-longsword', 'mercenary-broadsword', 'woodcutter-greatsword', 'black-iron-greatsword'].includes(template.id)).forEach((template) => assert.equal(template.imageStatus, 'pending'));
+assert.equal(chapterTwoWeapons.find((template) => template.id === 'forest-felling-axe').image, 'assets/forest-felling-axe.png');
+assert.equal(chapterTwoWeapons.find((template) => template.id === 'forest-felling-axe').imageStatus, 'ready');
+assert.equal(chapterTwoWeapons.find((template) => template.id === 'bonebreaker-hatchet').image, 'assets/bonebreaker-hatchet.png');
+assert.equal(chapterTwoWeapons.find((template) => template.id === 'bonebreaker-hatchet').imageStatus, 'ready');
+chapterTwoWeapons.filter((template) => !['forest-guard-longsword', 'mercenary-broadsword', 'woodcutter-greatsword', 'black-iron-greatsword', 'forest-felling-axe', 'bonebreaker-hatchet'].includes(template.id)).forEach((template) => assert.equal(template.imageStatus, 'pending'));
 assert.deepEqual(equipmentPolicy.getEquipSlots(chapterTwoWeapons.find((item) => item.name === '林衛長劍'), 'assassin'), ['weapon', 'offhand']);
 assert.deepEqual(equipmentPolicy.getEquipSlots(chapterTwoWeapons.find((item) => item.name === '黑鐵重劍'), 'assassin'), []);
 assert.deepEqual(equipmentPolicy.getEquipSlots(chapterTwoWeapons.find((item) => item.name === '穿林長弓'), 'hunter'), ['weapon']);
