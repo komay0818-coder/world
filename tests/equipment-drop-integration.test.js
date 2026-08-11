@@ -7,6 +7,8 @@ const index = fs.readFileSync(path.join(__dirname, '..', 'index.html'), 'utf8');
 assert.match(index, /world\/c509279e4402c93193f759208e601bda052aefe0\/script\.js/, 'the live page pins the current game UI to an immutable commit');
 assert.match(script, /'forest-guard-longsword': 'assets\/forest-guard-longsword\.png'/, 'forest guard sword artwork migrates into existing items');
 assert.match(script, /'mercenary-broadsword': 'assets\/mercenary-broadsword\.png'/, 'mercenary broadsword artwork migrates into existing items');
+assert.match(script, /'woodcutter-greatsword': 'assets\/woodcutter-greatsword\.png'/, 'woodcutter greatsword artwork migrates into existing items');
+assert.match(script, /'black-iron-greatsword': 'assets\/black-iron-greatsword\.png'/, 'black iron greatsword artwork migrates into existing items');
 const html = fs.readFileSync(path.join(__dirname, '..', 'index.html'), 'utf8');
 
 assert.match(html, /equipment-drop-policy\.js/, 'drop policy loads before the main game script');
