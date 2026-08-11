@@ -1,5 +1,11 @@
 # 星塵放置所－目前遊戲規畫
 
+## 2026-08-12 第二章獵弓圖片（0.4.97）
+
+- 新增 `assets/longbranch-hunting-bow.png` 並套用至「長枝獵弓」。
+- 新增 `assets/forest-piercing-longbow.png` 並套用至「穿林長弓」。
+- 新掉落與既有存檔中的同款獵弓都會顯示新圖片；不修改武器數值、職業限制與掉落設定。
+
 ## 2026-08-12 獵人寵物頭像（0.4.96）
 
 - 新增 `assets/hunter-companion-human-icon.png`，套用至人類獵人的王國獵犬頭像。
