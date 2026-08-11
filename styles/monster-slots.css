@@ -736,14 +736,16 @@ body:has(.battle-screen:not(.hidden)) .toast.show {
   --unit-scale-humanoid: .92;
   --unit-scale-beast: 1.3;
   --unit-scale-large: 1.25;
-  --unit-scale-boss: 1.45;
 }
 
-#enemy-squad .monster-battle-slot.visual-size-small .monster-slot-image { scale: calc(var(--unit-scale-small) * var(--unit-art-correction, 1)) !important; }
-#enemy-squad .monster-battle-slot.visual-size-humanoid .monster-slot-image { scale: calc(var(--unit-scale-humanoid) * var(--unit-art-correction, 1)) !important; }
-#enemy-squad .monster-battle-slot.visual-size-beast .monster-slot-image { scale: calc(var(--unit-scale-beast) * var(--unit-art-correction, 1)) !important; }
-#enemy-squad .monster-battle-slot.visual-size-large .monster-slot-image { scale: calc(var(--unit-scale-large) * var(--unit-art-correction, 1)) !important; }
-#enemy-squad .monster-battle-slot.visual-size-boss .monster-slot-image { scale: calc(var(--unit-scale-boss) * var(--unit-art-correction, 1)) !important; }
+#enemy-squad .monster-battle-slot { --unit-rank-scale: 1; }
+#enemy-squad .monster-battle-slot.elite,
+#enemy-squad .monster-battle-slot.boss { --unit-rank-scale: 1.08; }
+
+#enemy-squad .monster-battle-slot.visual-size-small .monster-slot-image { scale: calc(var(--unit-scale-small) * var(--unit-art-correction, 1) * var(--unit-rank-scale)) !important; }
+#enemy-squad .monster-battle-slot.visual-size-humanoid .monster-slot-image { scale: calc(var(--unit-scale-humanoid) * var(--unit-art-correction, 1) * var(--unit-rank-scale)) !important; }
+#enemy-squad .monster-battle-slot.visual-size-beast .monster-slot-image { scale: calc(var(--unit-scale-beast) * var(--unit-art-correction, 1) * var(--unit-rank-scale)) !important; }
+#enemy-squad .monster-battle-slot.visual-size-large .monster-slot-image { scale: calc(var(--unit-scale-large) * var(--unit-art-correction, 1) * var(--unit-rank-scale)) !important; }
 
 #enemy-squad .monster-battle-slot[class*="visual-size-"] .monster-slot-image {
   transform-origin: center bottom;
@@ -755,7 +757,6 @@ body:has(.battle-screen:not(.hidden)) .toast.show {
     --unit-scale-humanoid: .96;
     --unit-scale-beast: 1.34;
     --unit-scale-large: 1.29;
-    --unit-scale-boss: 1.49;
   }
 }
 

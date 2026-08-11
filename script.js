@@ -619,13 +619,10 @@ const monsterVisualSizeOverrides = {
 // padding. New monsters can provide visualScaleCorrection on their definition.
 const monsterVisualScaleCorrections = {
   plainsRabbit: 1.15,
-  plainsGoblinYoung: .9,
-  greatfangWolf: 1.35,
-  boarKing: 1.25
+  plainsGoblinYoung: .9
 };
 
 function getMonsterVisualSize(enemy = {}) {
-  if (enemy.isBoss) return 'boss';
   if (enemy.visualSize) return enemy.visualSize;
   if (monsterVisualSizeOverrides[enemy.id]) return monsterVisualSizeOverrides[enemy.id];
   const identity = `${enemy.id || ''} ${enemy.name || ''}`.toLowerCase();
