@@ -732,9 +732,9 @@ body:has(.battle-screen:not(.hidden)) .toast.show {
 
 /* 0.4.88: shared visible-body scale, calibrated against player vs lost goblin. */
 .battle-field {
-  --unit-scale-small: .42;
+  --unit-scale-small: .45;
   --unit-scale-humanoid: .68;
-  --unit-scale-beast: .64;
+  --unit-scale-beast: .72;
   --unit-scale-large: .86;
   --unit-scale-boss: 1.02;
 }
@@ -745,11 +745,15 @@ body:has(.battle-screen:not(.hidden)) .toast.show {
 #enemy-squad .monster-battle-slot.visual-size-large .monster-slot-image { scale: var(--unit-scale-large) !important; }
 #enemy-squad .monster-battle-slot.visual-size-boss .monster-slot-image { scale: var(--unit-scale-boss) !important; }
 
+#enemy-squad .monster-battle-slot[class*="visual-size-"] .monster-slot-image {
+  transform-origin: center bottom;
+}
+
 @media (max-width: 700px) {
   .battle-field {
-    --unit-scale-small: .46;
+    --unit-scale-small: .49;
     --unit-scale-humanoid: .72;
-    --unit-scale-beast: .68;
+    --unit-scale-beast: .76;
     --unit-scale-large: .88;
     --unit-scale-boss: 1.02;
   }

@@ -4,7 +4,7 @@ const path = require('path');
 
 const script = fs.readFileSync(path.join(__dirname, '..', 'script.js'), 'utf8');
 const index = fs.readFileSync(path.join(__dirname, '..', 'index.html'), 'utf8');
-assert.match(index, /world\/bfad44a3b429377193450b772181db36047a2d41\/script\.js/, 'the live page pins the current game UI to an immutable commit');
+assert.match(index, /world\/69cde265f9550b26e6ad759c57f2c1403ae30519\/script\.js/, 'the live page pins the current game UI to an immutable commit');
 const html = fs.readFileSync(path.join(__dirname, '..', 'index.html'), 'utf8');
 
 assert.match(html, /equipment-drop-policy\.js/, 'drop policy loads before the main game script');

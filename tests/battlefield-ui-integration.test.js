@@ -31,8 +31,9 @@ assert.match(script, /function getMonsterVisualSize\(enemy = \{\}\)/, 'monster v
 assert.match(script, /if \(enemy\.isBoss\) return 'boss';[\s\S]*?return 'humanoid';/, 'visual-size resolver preserves boss, large, beast, small, and humanoid categories');
 assert.match(script, /class="enemy-unit monster-battle-slot visual-size-\$\{visualSize\}/, 'enemy slots expose their visual-size category to CSS');
 assert.match(script, /data-visual-size="humanoid" data-member-id=/, 'party players share the humanoid visual baseline');
-assert.match(css, /--unit-scale-small: \.42;[\s\S]*?--unit-scale-humanoid: \.68;[\s\S]*?--unit-scale-beast: \.64;[\s\S]*?--unit-scale-large: \.86;[\s\S]*?--unit-scale-boss: 1\.02;/, 'desktop visual-body scale preserves the requested creature size hierarchy');
+assert.match(css, /--unit-scale-small: \.45;[\s\S]*?--unit-scale-humanoid: \.68;[\s\S]*?--unit-scale-beast: \.72;[\s\S]*?--unit-scale-large: \.86;[\s\S]*?--unit-scale-boss: 1\.02;/, 'desktop visual-body scale preserves the requested creature size hierarchy');
 assert.match(css, /visual-size-humanoid \.monster-slot-image \{ scale: var\(--unit-scale-humanoid\) !important; \}/, 'lost goblin and other humanoids use the calibrated player-height baseline');
+assert.match(css, /\[class\*="visual-size-"\] \.monster-slot-image \{[\s\S]*?transform-origin: center bottom;/, 'category scaling preserves every monster foot baseline');
 assert.match(script, /其餘 \$\{reserveCount\}/, 'overflow enemies are not described as a front or back row');
 assert.match(script, /data-member-id="\$\{member\.id\}"/, 'party battlefield units have stable animation targets');
 assert.match(script, /playPartyMemberCombatAnimation\(member,[\s\S]*?kind: 'skill', skillName: skill\.name/, 'skills animate every party member and expose the skill name');
