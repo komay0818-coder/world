@@ -22,7 +22,7 @@ assert.match(index, /black-forest-trail-policy\.js\?v=20260809-trail-balance-v10
 assert.match(index, /spider-nest-policy\.js\?v=20260809-spider-combat-v9/);
 assert.match(index, /forest-altar-policy\.js\?v=20260810-altar-skills-v12/);
 assert.match(index, /chapter-two-map-policy\.js\?v=20260810-depths-boss-v20/);
-assert.match(index, /world\/dfcffd3b95e6ceed746c3a05b26dae74a9331925\/script\.js/);
+assert.match(index, /world\/7142a00c3bdb55859c86719f43c08af67f6439e1\/script\.js/);
 assert.match(index, /VER\. \d+\.\d+\.\d+/, 'the game exposes a semantic version');
 assert.match(script, /\.\.\.ChapterTwoMapPolicy\.MAPS/, 'chapter-two maps join the shared progression data');
 assert.match(script, /blackForestEntrance: BlackForestEntrancePolicy\.getCombatPool\(\)/);
