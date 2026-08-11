@@ -2411,7 +2411,7 @@ function renderEnemySquad() {
     return `<article id="enemy-${index}" class="enemy-unit monster-battle-slot ${focusClass} ${rank.className} ${battle.targetIndexes.includes(index) ? 'targeted hit' : ''}" data-display-slot="${displaySlot}" data-enemy-index="${index}" role="gridcell" aria-label="${enemy.name}，等級 ${monsterLevel}"><header class="monster-slot-header"><div class="monster-slot-title"><b>${enemy.name}</b><small>Lv. ${monsterLevel}</small></div>${rankBadge}</header><div class="monster-image-frame"><img class="monster-slot-image" src="${imagePath}" alt="${enemy.name}" draggable="false">${damageEvents}</div><div class="monster-status-row" aria-label="異常狀態">${statusIcons}</div><div class="hp-track enemy-track monster-slot-hp" role="progressbar" aria-label="${enemy.name}生命" aria-valuemin="0" aria-valuemax="${enemy.maxHp}" aria-valuenow="${Math.max(0, hp)}"><i style="width:${hpPercent}%"></i></div></article>`;
   }).join('');
   const reserveLabel = reserveCount > 0
-    ? `<div class="reserve-indicator"><b>後備 ${reserveCount}</b><span>等待進場</span></div>`
+    ? `<div class="reserve-indicator"><b>其餘 ${reserveCount}</b><span>等待顯示</span></div>`
     : '';
   squad.innerHTML = visibleEnemies + reserveLabel;
 }
@@ -2884,6 +2884,18 @@ function renderBattlePartyStatus() {
       <em>${lifeStatus}</em>
     </article>`;
   }).join('');
+  const playerStage = document.querySelector('#player-battle-stage');
+  if (playerStage) {
+    playerStage.dataset.count = String(teammates.length);
+    playerStage.innerHTML = teammates.map((member) => {
+      const hpPercent = Math.max(0, Math.min(100, member.currentHp / member.maxHp * 100));
+      const resourceMax = Math.max(1, getMaxCombatResourceForMember(member.character, member.progress));
+      const resourcePercent = Math.max(0, Math.min(100, member.resourceCurrent / resourceMax * 100));
+      const art = battleCharacterArt[`${member.character.race}:${member.character.job}`] || '';
+      const jobName = classes.find((job) => job.id === member.character.job)?.name || member.character.job;
+      return `<article class="player-stage-unit ${member.alive ? '' : 'is-dead'}" data-job="${member.character.job}"><div class="player-stage-floating"><b>${member.name}</b><small>${jobName}・Lv.${member.level}</small><span class="player-stage-hp"><i style="width:${hpPercent}%"></i></span><span class="player-stage-resource"><i style="width:${resourcePercent}%"></i></span></div><div class="player-stage-art" style="background-image:url('${art}')" aria-label="${member.name}"></div></article>`;
+    }).join('');
+  }
 }
 
 function renderStrongholdObjective(currentMap = getActiveMap(getProgress())) {
@@ -2930,6 +2942,13 @@ function updateBattleUI() {
   raceTotem.className = `race-totem race-${character.race}`;
   document.querySelector('#job-mark').textContent = jobMarks[character.job] || '✦';
   document.querySelector('#battle-level').textContent = progress.level;
+  const playerStageInfo = document.querySelector('#player-stage-info');
+  if (playerStageInfo) {
+    const hpPercent = Math.max(0, Math.min(100, battle.playerHp / maxHp * 100));
+    const resourceCurrent = usesArrows ? battle.playerArrows : battle.playerMana;
+    const resourcePercent = Math.max(0, Math.min(100, resourceCurrent / Math.max(1, maxMana) * 100));
+    playerStageInfo.innerHTML = `<b>${character.name}</b><small>${classes.find((job) => job.id === character.job)?.name || character.job}・Lv.${progress.level}</small><span class="player-stage-hp"><i style="width:${hpPercent}%"></i></span><span class="player-stage-resource"><i style="width:${resourcePercent}%"></i></span>`;
+  }
   const currentMap = getActiveMap(progress);
   const mapName = document.querySelector('#battle-title');
   if (mapName) mapName.textContent = currentMap.dungeon ? `${currentMap.name}・第 ${battle.dungeonWave || 1} 波` : currentMap.name;

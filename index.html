@@ -39,7 +39,7 @@
         <p class="hint">可隨時從設定中變更</p>
         <button class="primary-button" type="submit"><span>開始旅程</span><b>→</b></button>
       </form>
-      <p class="version">VER. 0.4.77　·　離線也會持續累積</p>
+      <p class="version">VER. 0.4.78　·　離線也會持續累積</p>
     </section>
 
     <section id="menu-screen" class="screen menu-screen hidden" aria-labelledby="menu-title">
@@ -150,9 +150,12 @@
         <div class="terrain terrain-one"></div><div class="terrain terrain-two"></div>
         <div class="player-grounding" aria-hidden="true"></div>
         <div id="damage-float" class="damage-float"></div>
+        <div class="battlefield-zone-label enemy-zone-label" aria-hidden="true">敵方戰場</div>
         <div id="battle-player-art" class="battle-player-art hidden" aria-label="人類獵人"></div>
+        <div id="player-stage-info" class="player-stage-info" aria-label="玩家戰場資訊"></div>
+        <div id="player-battle-stage" class="player-battle-stage" aria-label="玩家隊伍站場"></div>
         <div id="hunter-companion" class="hunter-companion hidden" aria-label="獵人戰寵"><span></span><small>戰寵</small></div>
-        <div id="enemy-squad" class="enemy-squad monster-slot-grid" role="grid" aria-label="怪物戰鬥槽"></div>
+        <div id="enemy-squad" class="enemy-squad monster-slot-grid" role="grid" aria-label="敵方戰場"></div>
         <div class="battle-status"><span><b>⚔</b> 自動戰鬥中 · <strong id="enemy-count">5</strong> 隻敵人</span><span><b>✦</b> <strong id="gold-count">0</strong> 金幣</span></div>
       </div>
       <div class="battle-bottom"><div class="combat-log"><p>戰鬥紀錄</p><div id="combat-log-lines" aria-live="polite"></div></div><section class="skill-panel" aria-labelledby="skill-panel-title"><div class="skill-panel-head"><strong id="skill-panel-title">技能</strong><small id="skill-resource-status">自動施放</small></div><button id="potion-button" class="potion-button" type="button"><span>🧪</span><span>治癒藥水</span><b id="potion-count">5</b></button><button id="mana-potion-button" class="potion-button" type="button"><span>🔷</span><span>魔法藥水</span><b id="mana-potion-count">0</b></button><div id="skill-list" class="skill-list"></div></section><nav class="battle-menu" aria-label="遊戲選單"><button class="battle-menu-button ability-button" type="button" data-menu-action="能力"><span>◆</span><b>能力</b><small>數值</small></button><button class="battle-menu-button" type="button" data-menu-action="背包"><span>🎒</span><b>背包</b><small>道具</small></button><button class="battle-menu-button" type="button" data-menu-action="裝備"><span>⚔</span><b>裝備</b><small>角色</small></button><button class="battle-menu-button" type="button" data-menu-action="隊伍"><span>👥</span><b>隊伍</b><small>編組</small></button><button class="battle-menu-button collection-button" type="button" data-menu-action="收藏品"><span>♛</span><b>收藏品</b><small>永久能力</small></button><button class="battle-menu-button" type="button" data-menu-action="材料"><span>◆</span><b>材料</b><small>持有</small></button><button class="battle-menu-button village-button" type="button" data-menu-action="村莊"><span>⌂</span><b>村莊</b><small>建築</small></button><button class="battle-menu-button drop-lookup-button" type="button" data-menu-action="掉落"><span>⌕</span><b>掉落</b><small>來源</small></button></nav></div>

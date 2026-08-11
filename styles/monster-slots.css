@@ -229,6 +229,170 @@
 #enemy-squad .elite .monster-slot-hp i { background: linear-gradient(90deg, #5646a4, #8e70dd); }
 #enemy-squad .boss .monster-slot-hp i { background: linear-gradient(90deg, #9e2825, #df7a31); }
 
+/* Battlefield presentation v1: shared ground plates, no per-unit cards. */
+.battle-field::before {
+  content: "";
+  position: absolute;
+  z-index: 4;
+  inset: 5% 2.5% 43%;
+  border: 1px solid rgba(150, 187, 207, .18);
+  border-radius: 24px 24px 42px 42px;
+  background: radial-gradient(ellipse at 50% 100%, rgba(5, 12, 20, .52), rgba(7, 16, 27, .34) 55%, rgba(4, 10, 18, .15));
+  box-shadow: inset 0 -28px 48px rgba(0, 0, 0, .22), 0 18px 42px rgba(0, 0, 0, .12);
+  pointer-events: none;
+}
+
+.battle-field::after {
+  content: "";
+  position: absolute;
+  z-index: 4;
+  inset: 61% 3% 2%;
+  border: 1px solid rgba(130, 185, 197, .16);
+  border-radius: 48px 48px 18px 18px;
+  background: radial-gradient(ellipse at 50% 0, rgba(8, 22, 31, .25), rgba(3, 12, 20, .45) 72%);
+  box-shadow: inset 0 24px 44px rgba(0, 0, 0, .16);
+  pointer-events: none;
+}
+
+.battlefield-zone-label {
+  position: absolute;
+  z-index: 11;
+  top: 7%;
+  left: 50%;
+  translate: -50% 0;
+  padding: 3px 12px;
+  border-radius: 999px;
+  background: rgba(3, 12, 20, .46);
+  color: rgba(218, 234, 244, .72);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: .18em;
+  pointer-events: none;
+}
+
+.battle-field #enemy-squad.monster-slot-grid {
+  z-index: 9 !important;
+  top: 11% !important;
+  right: 4% !important;
+  bottom: auto !important;
+  left: 4% !important;
+  grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+  grid-template-rows: minmax(0, 1fr) !important;
+  align-items: end !important;
+  gap: clamp(8px, 1.6vw, 24px) !important;
+  width: auto !important;
+  height: 43% !important;
+}
+
+#enemy-squad .monster-battle-slot {
+  display: grid !important;
+  grid-template-rows: auto minmax(0, 1fr) auto auto !important;
+  align-self: end;
+  height: 100% !important;
+  padding: 0 4px 5px !important;
+  overflow: visible !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: none !important;
+  box-shadow: none !important;
+}
+
+#enemy-squad .monster-battle-slot::before {
+  top: auto !important;
+  right: 10% !important;
+  bottom: -3px !important;
+  left: 10% !important;
+  width: auto !important;
+  height: 14px !important;
+  border: 0 !important;
+  border-radius: 50% !important;
+  background: rgba(0, 0, 0, .34) !important;
+  filter: blur(5px);
+  transform: none !important;
+}
+
+#enemy-squad .monster-battle-slot::after { display: none !important; }
+#enemy-squad .monster-battle-slot.empty-slot { opacity: .18 !important; }
+#enemy-squad .monster-battle-slot.empty-slot::before { display: none !important; }
+.monster-empty-slot { align-self: end; padding-bottom: 25%; }
+
+.monster-slot-header {
+  z-index: 5;
+  align-items: center;
+  min-height: 36px;
+  padding: 4px 6px;
+  border-radius: 8px;
+  background: linear-gradient(90deg, rgba(3, 10, 17, .7), rgba(3, 10, 17, .28));
+  backdrop-filter: blur(3px);
+}
+
+#enemy-squad .monster-slot-title b { font-size: clamp(11px, 1vw, 15px) !important; }
+#enemy-squad .monster-slot-title small { color: #d1dbe2 !important; font-size: 9px !important; }
+.monster-rank-badge { background: rgba(5, 11, 18, .72); }
+.monster-image-frame { overflow: visible; background: none !important; }
+#enemy-squad .monster-slot-image {
+  filter: drop-shadow(0 9px 5px rgba(0, 0, 0, .6)) drop-shadow(0 0 3px rgba(203, 226, 238, .2)) !important;
+}
+#enemy-squad .monster-battle-slot.elite .monster-slot-image { scale: 1.12 !important; }
+#enemy-squad .monster-battle-slot.boss .monster-slot-image { scale: 1.48 !important; }
+#enemy-squad .monster-battle-slot.boss .monster-slot-title b { color: #ffe4a3 !important; font-size: clamp(13px, 1.15vw, 18px) !important; }
+#enemy-squad .monster-status-row { min-height: 18px; padding: 0 5px; }
+#enemy-squad .monster-slot-hp { width: calc(100% - 10px) !important; height: 8px !important; margin: 2px 5px 0 !important; }
+#enemy-squad .monster-battle-slot.boss .monster-slot-hp { height: 12px !important; border-color: rgba(255, 205, 103, .62) !important; box-shadow: 0 0 9px rgba(212, 112, 41, .3) !important; }
+
+.player-stage-info {
+  position: absolute;
+  z-index: 12;
+  left: clamp(16px, 4%, 54px);
+  bottom: 31%;
+  width: clamp(130px, 18%, 210px);
+  padding: 6px 8px;
+  border-radius: 8px;
+  background: linear-gradient(90deg, rgba(3, 12, 20, .72), rgba(3, 12, 20, .28));
+  text-shadow: 0 1px 4px #000;
+}
+.player-stage-info b,.player-stage-info small { display: block; }
+.player-stage-info b { font-size: 13px; }.player-stage-info small { color: #d1deea; font-size: 9px; }
+.player-stage-hp,.player-stage-resource { display: block; height: 5px; margin-top: 4px; overflow: hidden; border-radius: 999px; background: rgba(0,0,0,.55); }
+.player-stage-hp i,.player-stage-resource i { display: block; height: 100%; background: linear-gradient(90deg,#4bc779,#a9e469); }
+.player-stage-resource i { background: linear-gradient(90deg,#4e91e4,#a37ce6); }
+
+.player-battle-stage {
+  position: absolute;
+  z-index: 8;
+  right: 3%;
+  bottom: 2%;
+  left: 23%;
+  display: flex;
+  align-items: end;
+  justify-content: center;
+  gap: clamp(12px, 3vw, 46px);
+  height: 35%;
+  pointer-events: none;
+}
+.player-stage-unit { position: relative; width: clamp(112px, 15vw, 190px); height: 100%; }
+.player-stage-unit::after { content:""; position:absolute; right:12%; bottom:1px; left:12%; height:13px; border-radius:50%; background:rgba(0,0,0,.38); filter:blur(5px); }
+.player-stage-art { position:absolute; z-index:1; inset:20px 0 0; background-position:center bottom; background-size:contain; background-repeat:no-repeat; filter:drop-shadow(0 9px 5px rgba(0,0,0,.58)) drop-shadow(0 0 3px rgba(203,226,238,.18)); }
+.player-stage-floating { position:absolute; z-index:3; top:0; right:2%; left:2%; padding:5px 7px; border-radius:8px; background:linear-gradient(90deg,rgba(3,12,20,.7),rgba(3,12,20,.25)); text-shadow:0 1px 4px #000; }
+.player-stage-floating b,.player-stage-floating small { display:block; }.player-stage-floating b{font-size:11px}.player-stage-floating small{color:#d1deea;font-size:8px}.player-stage-unit.is-dead{opacity:.42;filter:grayscale(1)}
+.battle-field #battle-player-art { z-index: 8 !important; filter: drop-shadow(0 10px 6px rgba(0,0,0,.62)) drop-shadow(0 0 3px rgba(203,226,238,.18)) !important; }
+
+@media (max-width: 700px) {
+  .battlefield-zone-label { top: 5%; font-size: 7px; }
+  .battle-field #enemy-squad.monster-slot-grid { top: 8% !important; right: 2% !important; left: 35% !important; grid-template-columns: repeat(2,minmax(0,1fr)) !important; grid-template-rows: repeat(2,minmax(0,1fr)) !important; gap: 3px 7px !important; height: 53% !important; }
+  #enemy-squad .monster-battle-slot { padding: 0 2px 3px !important; }
+  .monster-slot-header { min-height: 22px; padding: 2px 3px; }
+  #enemy-squad .monster-slot-title b { font-size: 8px !important; }
+  #enemy-squad .monster-slot-title small,.monster-rank-badge { font-size: 6px !important; }
+  #enemy-squad .monster-status-row { min-height: 10px; }
+  #enemy-squad .monster-slot-hp { height: 5px !important; }
+  #enemy-squad .monster-battle-slot.boss .monster-slot-hp { height: 7px !important; }
+  .player-stage-info { left: 4px; bottom: 5px; width: 108px; padding: 4px; }
+  .player-stage-info b { font-size: 9px; }.player-stage-info small { font-size: 6px; }
+  .player-battle-stage { right: 1%; bottom: 1%; left: 34%; height: 32%; gap: 4px; }
+  .player-stage-unit { width: clamp(70px,22vw,105px); }.player-stage-floating{padding:3px}.player-stage-floating b{font-size:8px}.player-stage-floating small{font-size:6px}
+}
+
 .stronghold-objective {
   position: absolute;
   z-index: 26;
