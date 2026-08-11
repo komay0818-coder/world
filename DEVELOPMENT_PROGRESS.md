@@ -1232,3 +1232,14 @@ Boss：
 - 功能提交：`fe22bd63c807cebc97eaf8e5bb24fdcb67b7234e`；入口頁已鎖定該提交的 `styles/monster-slots.css`。
 - 驗證狀態：52 項 JavaScript 測試與 `git diff --check` 通過；線上不可變版本量測主角高度由約 `269px` 降為 `188px`，怪物仍維持約 `160 × 275px`，瀏覽器主控台無錯誤。
 - DEV 不可變測試網址：<https://raw.githack.com/komay0818-coder/world/e0a6b65/index.html>。
+
+## 2026-08-11 戰鬥功能列與掉落提示修正（0.4.81）
+
+- 星辰 DEV 版本由 `0.4.80` 更新為 `0.4.81`。
+- 移除與背包功能重複的「材料」按鈕及舊點擊處理；材料仍可從背包分類查看，資料與持有數量不受影響。
+- 底部功能列保留能力、背包、裝備、隊伍、收藏品、村莊、掉落共 7 項，改為 7 欄等寬配置，避免後兩項被裁切。
+- 戰鬥中的材料、戰利品與狀態提示由底部 28px 上移至功能列上方；桌面為 92px，窄螢幕為 82px 並納入安全區高度。
+- 未修改背包內容、物品掉落規則、掉落查詢索引或戰鬥邏輯。
+- 功能提交：`d5edf27e2a92445a308678ac85d35d3248e51a48`；入口頁已鎖定該提交的 `script.js` 與 `styles/monster-slots.css`。
+- 驗證狀態：52 項 JavaScript 測試、JavaScript 語法檢查與 `git diff --check` 通過；線上實測 7 個按鈕皆等寬顯示，「獲得材料」提示未遮擋功能列，點擊「掉落」可正常開啟並顯示 21 種掉落物，瀏覽器主控台無錯誤。
+- DEV 不可變測試網址：<https://raw.githack.com/komay0818-coder/world/133fcb7/index.html>。
