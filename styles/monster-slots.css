@@ -493,6 +493,27 @@
   45% { translate: -7px 4px; filter: brightness(1.18); }
 }
 
+/* Seven unique battle actions share one row; materials remain inside the backpack. */
+.battle-screen:not(.hidden) .battle-menu {
+  grid-template-columns: repeat(7, minmax(0, 1fr)) !important;
+}
+
+.battle-screen:not(.hidden) .battle-menu-button {
+  min-width: 0 !important;
+}
+
+/* Keep loot and status notifications above the persistent battle action bar. */
+body:has(.battle-screen:not(.hidden)) .toast {
+  bottom: calc(92px + env(safe-area-inset-bottom)) !important;
+  z-index: 9100;
+}
+
+@media (max-width: 700px) {
+  .battle-screen:not(.hidden) .battle-menu { gap: 3px !important; padding-right: 4px !important; padding-left: 4px !important; }
+  .battle-screen:not(.hidden) .battle-menu-button { padding-right: 1px !important; padding-left: 1px !important; }
+  body:has(.battle-screen:not(.hidden)) .toast { bottom: calc(82px + env(safe-area-inset-bottom)) !important; }
+}
+
 @media (max-width: 700px) {
   .stronghold-objective { left: 8px; bottom: 8px; width: calc(100% - 16px); min-height: 84px; padding: 8px; }
   .stronghold-objective > img { width: 72px; height: 66px; }

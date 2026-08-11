@@ -25,5 +25,9 @@ assert.match(css, /#battle-player-art\[aria-label\][\s\S]*?height: 32\.6667% !im
 assert.match(css, /\.player-battle-stage[\s\S]*?height: 24\.5%;/, 'party member stage is reduced to about seventy percent of its previous height');
 assert.match(css, /data-count="3"[\s\S]*?nth-child\(3\)[\s\S]*?left: 74%;/, 'desktop formation reserves distinct centered positions for four total players');
 assert.match(css, /@media \(max-width: 700px\)[\s\S]*?data-count="3"[\s\S]*?nth-child\(3\)[\s\S]*?left: 81%;/, 'mobile formation reserves distinct positions for four total players');
+assert.doesNotMatch(html, /data-menu-action="材料"/, 'materials no longer duplicate the backpack in the battle menu');
+assert.doesNotMatch(script, /button\.dataset\.menuAction === '材料'/, 'the removed material shortcut has no stale click handler');
+assert.match(css, /grid-template-columns: repeat\(7, minmax\(0, 1fr\)\) !important;/, 'the seven remaining battle actions share the full row');
+assert.match(css, /body:has\(\.battle-screen:not\(\.hidden\)\) \.toast[\s\S]*?bottom: calc\(92px/, 'battle loot notifications sit above the action bar');
 
 console.log('battlefield UI integration: assertions passed');

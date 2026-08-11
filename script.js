@@ -4806,7 +4806,6 @@ document.querySelectorAll('[data-menu-action]').forEach((button) => button.addEv
   if (button.dataset.menuAction === '能力') { renderCharacterAbilities(); return; }
   if (button.dataset.menuAction === '收藏品') { renderCollection(); return; }
   if (button.dataset.menuAction === '背包') { renderInventory('inventory'); return; }
-  if (button.dataset.menuAction === '材料') { inventoryCategory = 'consumable'; renderInventory('inventory'); return; }
   if (button.dataset.menuAction === '裝備') { renderInventory('equipment'); return; }
   if (button.dataset.menuAction === '隊伍') { renderParty(); return; }
   if (button.dataset.menuAction === '村莊') { openVillage(); return; }
