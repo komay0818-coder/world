@@ -14,7 +14,7 @@ assert.match(html, /id="battle-companion-icons" class="battle-companion-icons hi
 assert.doesNotMatch(html, /id="hunter-companion"/, 'legacy full-body hunter companion is removed from the battlefield');
 assert.match(css, /grid-template-columns: repeat\(4, minmax\(0, 1fr\)\)/, 'desktop enemies share a four-unit battlefield row');
 assert.match(css, /#enemy-squad \.monster-battle-slot[\s\S]*?border: 0 !important;[\s\S]*?background: none !important;/, 'individual monster cards have no frame or background');
-assert.match(css, /\.monster-battle-slot\.boss \.monster-slot-image \{ scale: 1\.3 !important; \}/, 'boss visuals remain distinct without overwhelming the battlefield');
+assert.match(css, /visual-size-boss \.monster-slot-image \{ scale: var\(--unit-scale-boss\) !important; \}/, 'boss visuals use the shared size hierarchy');
 assert.match(css, /top: 16% !important;/, 'desktop enemy formation moves closer to the player formation');
 assert.match(css, /\.battle-field \.player-stage-info \{ left: 50%; translate: -50% 0; \}/, 'main player information follows the player art horizontally');
 assert.match(css, /\.battle-field \.player-grounding \{[\s\S]*?background: rgba\(0, 0, 0, \.28\) !important;/, 'main player has a subtle grounding shadow');
@@ -27,6 +27,12 @@ assert.match(script, /const activeBattleCompanions = character\.job === 'hunter'
 assert.doesNotMatch(script, /companionName\.textContent/, 'companion tray does not add level, health, stats, or text panels');
 assert.match(css, /\.player-battle-stage[\s\S]*?justify-content: center;/, 'party units auto-center on their shared ground');
 assert.match(script, /battleCharacterArt\[`\$\{member\.character\.race\}:\$\{member\.character\.job\}`\]/, 'party display reuses existing character art');
+assert.match(script, /function getMonsterVisualSize\(enemy = \{\}\)/, 'monster visual sizing uses a reusable category resolver');
+assert.match(script, /if \(enemy\.isBoss\) return 'boss';[\s\S]*?return 'humanoid';/, 'visual-size resolver preserves boss, large, beast, small, and humanoid categories');
+assert.match(script, /class="enemy-unit monster-battle-slot visual-size-\$\{visualSize\}/, 'enemy slots expose their visual-size category to CSS');
+assert.match(script, /data-visual-size="humanoid" data-member-id=/, 'party players share the humanoid visual baseline');
+assert.match(css, /--unit-scale-small: \.42;[\s\S]*?--unit-scale-humanoid: \.68;[\s\S]*?--unit-scale-beast: \.64;[\s\S]*?--unit-scale-large: \.86;[\s\S]*?--unit-scale-boss: 1\.02;/, 'desktop visual-body scale preserves the requested creature size hierarchy');
+assert.match(css, /visual-size-humanoid \.monster-slot-image \{ scale: var\(--unit-scale-humanoid\) !important; \}/, 'lost goblin and other humanoids use the calibrated player-height baseline');
 assert.match(script, /其餘 \$\{reserveCount\}/, 'overflow enemies are not described as a front or back row');
 assert.match(script, /data-member-id="\$\{member\.id\}"/, 'party battlefield units have stable animation targets');
 assert.match(script, /playPartyMemberCombatAnimation\(member,[\s\S]*?kind: 'skill', skillName: skill\.name/, 'skills animate every party member and expose the skill name');

@@ -604,6 +604,27 @@ const monsterTypes = EquipmentDropPolicy.applyDefaultLootConfigs({
 const normalMonsterIds = ['goblin', 'wolf', 'boar'];
 const eliteMonsterIds = ['goblinOverlord', 'wolfAlpha', 'boarTyrant'];
 const bossMonsterIds = ['goblinKing'];
+
+// Visual-size categories describe the creature body, not its combat rank.
+// CSS values compensate for the taller enemy image frame; 1.0 means the
+// resulting visible body matches a standard humanoid player, not scale: 1.
+const monsterVisualSizeOverrides = {
+  plainsRabbit: 'small', plainsWolfPup: 'small', plainsSlime: 'small', plainsGoblinYoung: 'small',
+  boarPiglet: 'small', goblinTreasureChest: 'small',
+  boarTyrant: 'large', thornbackTyrant: 'large', forestGuardian: 'large',
+  rootExecutioner: 'large', moonboneSentinel: 'large'
+};
+
+function getMonsterVisualSize(enemy = {}) {
+  if (enemy.isBoss) return 'boss';
+  if (enemy.visualSize) return enemy.visualSize;
+  if (monsterVisualSizeOverrides[enemy.id]) return monsterVisualSizeOverrides[enemy.id];
+  const identity = `${enemy.id || ''} ${enemy.name || ''}`.toLowerCase();
+  if (/rabbit|slime|pup|piglet|spider|幼狼|小野豬|史萊姆|野兔/.test(identity)) return 'small';
+  if (/treant|guardian|tyrant|centurion|colossus|巨獸|暴君|古樹|樹人/.test(identity)) return 'large';
+  if (enemy.race === 'beast' || /wolf|boar|beast|bear|狼|野豬|猛獸/.test(identity)) return 'beast';
+  return 'humanoid';
+}
 const mapMonsterPools = {
   plainsEntrance: { normal: ['plainsRabbit', 'plainsWolfPup', 'plainsSlime', 'plainsGoblinYoung'], rare: ['lostGoblin'], rareChance: .10, elite: [], boss: [] },
   wolfDen: { normal: ['plainsWolfPup', 'denForestWolf'], rare: ['lostGoblin'], rareChance: .10, elite: ['ragingWolf'], boss: ['greatfangWolf'] },
@@ -2407,8 +2428,9 @@ function renderEnemySquad() {
     const focusClass = index === focusIndex ? 'focus-target' : 'support-target';
     const rankBadge = rank.label ? `<span class="monster-rank-badge">${rank.icon} ${rank.label}</span>` : '';
     const imagePath = enemy.image || MonsterDisplayPolicy.MONSTER_IMAGE_BY_TYPE[enemy.id] || MonsterDisplayPolicy.MONSTER_IMAGE_BY_TYPE.goblin;
+    const visualSize = getMonsterVisualSize(enemy);
     const hpPercent = Math.max(0, hp / enemy.maxHp * 100);
-    return `<article id="enemy-${index}" class="enemy-unit monster-battle-slot ${focusClass} ${rank.className} ${battle.targetIndexes.includes(index) ? 'targeted hit' : ''}" data-display-slot="${displaySlot}" data-enemy-index="${index}" role="gridcell" aria-label="${enemy.name}，等級 ${monsterLevel}"><header class="monster-slot-header"><div class="monster-slot-title"><b>${enemy.name}</b><small>Lv. ${monsterLevel}</small></div>${rankBadge}</header><div class="monster-image-frame"><img class="monster-slot-image" src="${imagePath}" alt="${enemy.name}" draggable="false">${damageEvents}</div><div class="monster-status-row" aria-label="異常狀態">${statusIcons}</div><div class="hp-track enemy-track monster-slot-hp" role="progressbar" aria-label="${enemy.name}生命" aria-valuemin="0" aria-valuemax="${enemy.maxHp}" aria-valuenow="${Math.max(0, hp)}"><i style="width:${hpPercent}%"></i></div></article>`;
+    return `<article id="enemy-${index}" class="enemy-unit monster-battle-slot visual-size-${visualSize} ${focusClass} ${rank.className} ${battle.targetIndexes.includes(index) ? 'targeted hit' : ''}" data-visual-size="${visualSize}" data-display-slot="${displaySlot}" data-enemy-index="${index}" role="gridcell" aria-label="${enemy.name}，等級 ${monsterLevel}"><header class="monster-slot-header"><div class="monster-slot-title"><b>${enemy.name}</b><small>Lv. ${monsterLevel}</small></div>${rankBadge}</header><div class="monster-image-frame"><img class="monster-slot-image" src="${imagePath}" alt="${enemy.name}" draggable="false">${damageEvents}</div><div class="monster-status-row" aria-label="異常狀態">${statusIcons}</div><div class="hp-track enemy-track monster-slot-hp" role="progressbar" aria-label="${enemy.name}生命" aria-valuemin="0" aria-valuemax="${enemy.maxHp}" aria-valuenow="${Math.max(0, hp)}"><i style="width:${hpPercent}%"></i></div></article>`;
   }).join('');
   const reserveLabel = reserveCount > 0
     ? `<div class="reserve-indicator"><b>其餘 ${reserveCount}</b><span>等待顯示</span></div>`
@@ -2888,7 +2910,7 @@ function renderBattlePartyStatus() {
       const resourcePercent = Math.max(0, Math.min(100, member.resourceCurrent / resourceMax * 100));
       const art = battleCharacterArt[`${member.character.race}:${member.character.job}`] || '';
       const jobName = classes.find((job) => job.id === member.character.job)?.name || member.character.job;
-      return `<article class="player-stage-unit ${member.alive ? '' : 'is-dead'}" data-member-id="${member.id}" data-job="${member.character.job}"><div class="player-stage-floating"><b>${member.name}</b><small>${jobName}・Lv.${member.level}</small><span class="player-stage-hp"><i style="width:${hpPercent}%"></i></span><span class="player-stage-resource"><i style="width:${resourcePercent}%"></i></span></div><div class="player-stage-art" style="background-image:url('${art}')" aria-label="${member.name}"></div></article>`;
+      return `<article class="player-stage-unit ${member.alive ? '' : 'is-dead'}" data-visual-size="humanoid" data-member-id="${member.id}" data-job="${member.character.job}"><div class="player-stage-floating"><b>${member.name}</b><small>${jobName}・Lv.${member.level}</small><span class="player-stage-hp"><i style="width:${hpPercent}%"></i></span><span class="player-stage-resource"><i style="width:${resourcePercent}%"></i></span></div><div class="player-stage-art" style="background-image:url('${art}')" aria-label="${member.name}"></div></article>`;
     }).join('');
   }
 }
@@ -4544,6 +4566,7 @@ function openBattle() {
     battlePlayerArt.classList.toggle('undead-art', character.race === 'undead' && Boolean(characterArt));
     battlePlayerArt.dataset.job = character.job;
     battlePlayerArt.dataset.race = character.race;
+    battlePlayerArt.dataset.visualSize = 'humanoid';
     const characterLayout = battleCharacterLayout[`${character.race}:${character.job}`];
     battlePlayerArt.style.setProperty('--character-scale', CHARACTER_SCALE * (characterLayout?.visibleScale || 1));
     battlePlayerArt.style.setProperty('--character-aspect', characterLayout?.aspect || '2048 / 1200');
