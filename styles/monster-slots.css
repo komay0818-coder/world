@@ -687,6 +687,11 @@ body:has(.battle-screen:not(.hidden)) .toast {
   box-shadow: 0 7px 18px rgba(0, 0, 0, .46), inset 0 0 0 2px rgba(255, 255, 255, .06);
 }
 
+.battle-field .battle-companion-icon.portrait {
+  background-position: center;
+  background-size: cover;
+}
+
 .battle-field .battle-companion-icon.attacking {
   animation: companionIconPulse .52s ease-out;
 }

@@ -1,5 +1,11 @@
 # 星塵放置所－目前遊戲規畫
 
+## 2026-08-12 獵人寵物頭像（0.4.96）
+
+- 新增 `assets/hunter-companion-human-icon.png`，套用至人類獵人的王國獵犬頭像。
+- 新增 `assets/hunter-companion-elf-icon.png`，套用至夜精靈／精靈獵人的月光山貓頭像。
+- 戰鬥畫面右下角寵物區優先使用專用頭像，其他種族保留原圖備援；不修改寵物戰鬥功能或數值。
+
 ## 2026-08-12 第二章重型戰斧圖片（0.4.95）
 
 - 新增 `assets/greatwood-battleaxe.png` 並套用至「巨木戰斧」。

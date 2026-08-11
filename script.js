@@ -66,8 +66,8 @@ const battleCharacterLayout = {
   'undead:priest': { aspect: '1122 / 1402', visibleScale: 1.044 }
 };
 const racialCompanions = {
-  human: { image: 'assets/companion-human-hunter.png', name: '王國獵犬' },
-  elf: { image: 'assets/companion-elf.png', name: '月光山貓' },
+  human: { image: 'assets/companion-human-hunter.png', icon: 'assets/hunter-companion-human-icon.png', portrait: true, name: '王國獵犬' },
+  elf: { image: 'assets/companion-elf.png', icon: 'assets/hunter-companion-elf-icon.png', portrait: true, name: '月光山貓' },
   orc: { image: 'assets/companion-orc.png', name: '獠牙戰狼' },
   undead: { image: 'assets/companion-undead.png', name: '亡靈獵犬' }
 };
@@ -2987,11 +2987,11 @@ function updateBattleUI() {
   const companionIcons = document.querySelector('#battle-companion-icons');
   const racialCompanion = racialCompanions[character.race] || racialCompanions.human;
   const activeBattleCompanions = character.job === 'hunter' && progress.level >= 5
-    ? [{ id: 'hunter-companion', image: racialCompanion.image, name: racialCompanion.name }]
+    ? [{ id: 'hunter-companion', image: racialCompanion.icon || racialCompanion.image, portrait: racialCompanion.portrait, name: racialCompanion.name }]
     : [];
   if (companionIcons) {
     companionIcons.classList.toggle('hidden', activeBattleCompanions.length === 0);
-    companionIcons.innerHTML = activeBattleCompanions.map((unit) => `<span class="battle-companion-icon" data-companion-id="${unit.id}" role="img" aria-label="${unit.name}" style="--companion-icon:url('${unit.image}')"></span>`).join('');
+    companionIcons.innerHTML = activeBattleCompanions.map((unit) => `<span class="battle-companion-icon ${unit.portrait ? 'portrait' : ''}" data-companion-id="${unit.id}" role="img" aria-label="${unit.name}" style="--companion-icon:url('${unit.image}')"></span>`).join('');
   }
   const currentDungeonDefinition = currentMap.dungeon ? getDungeonDefinition(currentMap.id) : null;
   const dungeonWaveText = currentMap.id === 'goblin-camp'
