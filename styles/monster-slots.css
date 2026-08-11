@@ -648,3 +648,27 @@ body:has(.battle-screen:not(.hidden)) .toast {
 .battle-field .player-stage-floating {
   display: none !important;
 }
+
+/* 0.4.85: compensate for party art padding so teammates match the main player visually. */
+.battle-field .player-stage-art {
+  scale: 1.28;
+  transform-origin: center bottom;
+}
+
+body:has(.battle-screen:not(.hidden)) .toast {
+  right: calc(var(--battle-right-column, 15%) + 18px) !important;
+  left: auto !important;
+  transform: translateY(20px) !important;
+}
+
+body:has(.battle-screen:not(.hidden)) .toast.show {
+  transform: translateY(0) !important;
+}
+
+@media (max-width: 700px) {
+  .battle-field .player-stage-art { scale: 1.28; }
+  body:has(.battle-screen:not(.hidden)) .toast {
+    right: 10px !important;
+    max-width: calc(100% - 20px);
+  }
+}
