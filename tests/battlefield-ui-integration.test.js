@@ -16,6 +16,7 @@ assert.match(css, /\.monster-battle-slot\.boss \.monster-slot-image \{ scale: 1\
 assert.match(css, /top: 16% !important;/, 'desktop enemy formation moves closer to the player formation');
 assert.match(css, /\.battle-field \.player-stage-info \{ left: 50%; translate: -50% 0; \}/, 'main player information follows the player art horizontally');
 assert.match(css, /\.battle-field \.player-grounding \{[\s\S]*?background: rgba\(0, 0, 0, \.28\) !important;/, 'main player has a subtle grounding shadow');
+assert.match(css, /\.battle-field \.player-stage-info,[\s\S]*?\.battle-field \.player-stage-floating \{[\s\S]*?display: none !important;/, 'main and party vitals are hidden over battlefield units');
 assert.match(css, /\.player-battle-stage[\s\S]*?justify-content: center;/, 'party units auto-center on their shared ground');
 assert.match(script, /battleCharacterArt\[`\$\{member\.character\.race\}:\$\{member\.character\.job\}`\]/, 'party display reuses existing character art');
 assert.match(script, /其餘 \$\{reserveCount\}/, 'overflow enemies are not described as a front or back row');

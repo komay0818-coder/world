@@ -642,3 +642,9 @@ body:has(.battle-screen:not(.hidden)) .toast {
     padding: 3px;
   }
 }
+
+/* 0.4.84: player vitals remain in the side HUD, not over battlefield units. */
+.battle-field .player-stage-info,
+.battle-field .player-stage-floating {
+  display: none !important;
+}
