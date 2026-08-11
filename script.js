@@ -2434,21 +2434,27 @@ function playMonsterAttackAnimation(enemyIndex, playerWasHit) {
   });
 }
 
-function playPlayerAttackAnimation() {
-  const fighter = document.querySelector('#player-fighter');
-  const art = document.querySelector('#battle-player-art');
-  const field = document.querySelector('.battle-field');
-  const character = JSON.parse(localStorage.getItem('stardust-character') || 'null');
-  const job = character?.job || art?.dataset.job || 'warrior';
-  fighter?.classList.remove('attack');
-  art?.classList.remove('attack');
-  if (art) art.dataset.job = job;
+function playPartyMemberCombatAnimation(member, targetIndexes = [], options = {}) {
+  const { kind = 'basic', skillName = '' } = options;
   requestAnimationFrame(() => {
-    fighter?.classList.add('attack');
-    art?.classList.add('attack');
-  });
-  if (field && art) {
-    const target = document.querySelector(`#enemy-${oldestAliveEnemyIndex()}`);
+    const field = document.querySelector('.battle-field');
+    const fighter = member.isMain
+      ? document.querySelector('#player-fighter')
+      : document.querySelector(`[data-member-id="${member.id}"]`);
+    const art = member.isMain
+      ? document.querySelector('#battle-player-art')
+      : fighter?.querySelector('.player-stage-art');
+    const target = document.querySelector(`#enemy-${targetIndexes[0] ?? oldestAliveEnemyIndex()}`);
+    if (!field || !art) return;
+    const actionClass = kind === 'skill' ? 'is-casting' : 'is-attacking';
+    fighter?.classList.remove('attack', 'is-attacking', 'is-casting');
+    art.classList.remove('attack', 'is-attacking', 'is-casting');
+    if (member.isMain) fighter?.classList.add('attack');
+    fighter?.classList.add(actionClass);
+    art.classList.add(actionClass);
+    art.dataset.job = member.job || member.character?.job || 'warrior';
+
+    const job = art.dataset.job;
     const fieldRect = field.getBoundingClientRect();
     const artRect = art.getBoundingClientRect();
     const targetRect = target?.getBoundingClientRect();
@@ -2457,18 +2463,19 @@ function playPlayerAttackAnimation() {
     const startY = artRect.top - fieldRect.top + artRect.height * (job === 'mage' || job === 'priest' ? .37 : .48);
     const targetX = targetRect ? targetRect.left - fieldRect.left + targetRect.width * .42 : fieldRect.width * .62;
     const targetY = targetRect ? targetRect.top - fieldRect.top + targetRect.height * .5 : fieldRect.height * .45;
-    effect.className = `character-attack-effect attack-effect-${job}`;
+    effect.className = `character-attack-effect attack-effect-${job} attack-kind-${kind}`;
     effect.style.setProperty('--attack-start-x', `${startX}px`);
     effect.style.setProperty('--attack-start-y', `${startY}px`);
     effect.style.setProperty('--attack-travel-x', `${targetX - startX}px`);
     effect.style.setProperty('--attack-travel-y', `${targetY - startY}px`);
+    if (skillName) effect.dataset.skillName = skillName;
     field.appendChild(effect);
-    setTimeout(() => effect.remove(), 760);
-  }
-  setTimeout(() => {
-    fighter?.classList.remove('attack');
-    art?.classList.remove('attack');
-  }, 620);
+    setTimeout(() => effect.remove(), 820);
+    setTimeout(() => {
+      fighter?.classList.remove('attack', actionClass);
+      art.classList.remove('attack', actionClass);
+    }, 680);
+  });
 }
 
 function playCompanionAttackAnimation(targetIndexes = []) {
@@ -2893,7 +2900,7 @@ function renderBattlePartyStatus() {
       const resourcePercent = Math.max(0, Math.min(100, member.resourceCurrent / resourceMax * 100));
       const art = battleCharacterArt[`${member.character.race}:${member.character.job}`] || '';
       const jobName = classes.find((job) => job.id === member.character.job)?.name || member.character.job;
-      return `<article class="player-stage-unit ${member.alive ? '' : 'is-dead'}" data-job="${member.character.job}"><div class="player-stage-floating"><b>${member.name}</b><small>${jobName}・Lv.${member.level}</small><span class="player-stage-hp"><i style="width:${hpPercent}%"></i></span><span class="player-stage-resource"><i style="width:${resourcePercent}%"></i></span></div><div class="player-stage-art" style="background-image:url('${art}')" aria-label="${member.name}"></div></article>`;
+      return `<article class="player-stage-unit ${member.alive ? '' : 'is-dead'}" data-member-id="${member.id}" data-job="${member.character.job}"><div class="player-stage-floating"><b>${member.name}</b><small>${jobName}・Lv.${member.level}</small><span class="player-stage-hp"><i style="width:${hpPercent}%"></i></span><span class="player-stage-resource"><i style="width:${resourcePercent}%"></i></span></div><div class="player-stage-art" style="background-image:url('${art}')" aria-label="${member.name}"></div></article>`;
     }).join('');
   }
 }
@@ -3474,7 +3481,7 @@ function useAutoSkillForMember(member, now = Date.now()) {
     member.skillCooldowns[skill.id] = now + skill.cooldown * skillCooldownMultiplier * 1000 / stats.cooldownSpeed;
     member.globalSkillReadyAt = now + 1000;
     const totalDamage = hits.reduce((total, target) => total + target.result.finalDamage, 0);
-    if (member.isMain && skill.id !== 'companion') playPlayerAttackAnimation();
+    if (skill.id !== 'companion') playPartyMemberCombatAnimation(member, (hits.length ? hits : resolvedTargets).map((target) => target.index), { kind: 'skill', skillName: skill.name });
     if (member.isMain && skill.id === 'companion') playCompanionAttackAnimation((hits.length ? hits : resolvedTargets).map((target) => target.index));
     if (hits.length) logBattle(`✦ ${member.name}施放【${skill.name}】，造成 ${totalDamage}${critical ? ' 暴擊' : ''}傷害。`, 'damage-dealt');
     logPartyDebug('技能施放', {
@@ -3572,7 +3579,7 @@ function processPartyMemberAttacks(now = Date.now()) {
     const enemy = getEnemyDefinition(targetIndex);
     const profile = getPlayerAttackProfile(member.character);
     const result = applyDamageToMonster(targetIndex, hit, profile, { attacker: member, attackKind: 'basic' });
-    if (member.isMain) playPlayerAttackAnimation();
+    playPartyMemberCombatAnimation(member, [targetIndex], { kind: 'basic' });
     if (!result.evaded) {
       if (member.resourceType === 'rage') member.resourceCurrent = WarriorResourcePolicy.gainFromAttack(member.resourceCurrent);
       logBattle(`⚔ ${member.name}對【${enemy.name}】造成 ${result.finalDamage} 傷害${critical ? '（暴擊）' : ''}${orcRage ? '（狂怒）' : ''}${instinctTriggered ? '（獵人本能）' : ''}`, 'damage-dealt', { aggregateKey: `member-${member.id}-${battle.enemyTypes[targetIndex]}`, damage: result.finalDamage, summary: `⚔ ${member.name}攻擊【${enemy.name}】` });

@@ -16,5 +16,10 @@ assert.match(css, /\.monster-battle-slot\.boss \.monster-slot-image \{ scale: 1\
 assert.match(css, /\.player-battle-stage[\s\S]*?justify-content: center;/, 'party units auto-center on their shared ground');
 assert.match(script, /battleCharacterArt\[`\$\{member\.character\.race\}:\$\{member\.character\.job\}`\]/, 'party display reuses existing character art');
 assert.match(script, /其餘 \$\{reserveCount\}/, 'overflow enemies are not described as a front or back row');
+assert.match(script, /data-member-id="\$\{member\.id\}"/, 'party battlefield units have stable animation targets');
+assert.match(script, /playPartyMemberCombatAnimation\(member,[\s\S]*?kind: 'skill', skillName: skill\.name/, 'skills animate every party member and expose the skill name');
+assert.match(script, /playPartyMemberCombatAnimation\(member, \[targetIndex\], \{ kind: 'basic' \}\)/, 'basic attacks animate every party member');
+assert.match(css, /\.character-attack-effect\.attack-kind-skill::after/, 'skill attacks show an in-field skill label');
+assert.match(css, /prefers-reduced-motion: reduce/, 'combat animation respects reduced-motion preferences');
 
 console.log('battlefield UI integration: assertions passed');
