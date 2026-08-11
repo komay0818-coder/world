@@ -5,6 +5,7 @@
 - 新增 `assets/longbranch-hunting-bow.png` 並套用至「長枝獵弓」。
 - 新增 `assets/forest-piercing-longbow.png` 並套用至「穿林長弓」。
 - 新掉落與既有存檔中的同款獵弓都會顯示新圖片；不修改武器數值、職業限制與掉落設定。
+- 圖片功能提交：`46216b68adedb108c47c01f036650843ddfa2054`；入口頁已鎖定該提交的 `script.js`。
 
 ## 2026-08-12 獵人寵物頭像（0.4.96）
 
