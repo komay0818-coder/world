@@ -24,7 +24,8 @@ assert.match(script, /playPartyMemberCombatAnimation\(member,[\s\S]*?kind: 'skil
 assert.match(script, /playPartyMemberCombatAnimation\(member, \[targetIndex\], \{ kind: 'basic' \}\)/, 'basic attacks animate every party member');
 assert.match(css, /\.character-attack-effect\.attack-kind-skill::after/, 'skill attacks show an in-field skill label');
 assert.match(css, /prefers-reduced-motion: reduce/, 'combat animation respects reduced-motion preferences');
-assert.match(css, /#battle-player-art\[aria-label\][\s\S]*?height: 32\.6667% !important;/, 'main player art is reduced to about seventy percent of its previous battlefield height');
+assert.match(css, /#battle-player-art\[aria-label\][\s\S]*?width: clamp\(80px, 10vw, 133px\) !important;[\s\S]*?height: 24\.5% !important;/, 'main player uses the same desktop unit box as party members');
+assert.match(css, /@media \(max-width: 700px\)[\s\S]*?#battle-player-art\[aria-label\][\s\S]*?width: clamp\(58px, 18vw, 78px\) !important;[\s\S]*?height: 22% !important;/, 'main player uses the same mobile unit box as party members');
 assert.match(css, /\.player-battle-stage[\s\S]*?height: 24\.5%;/, 'party member stage is reduced to about seventy percent of its previous height');
 assert.match(css, /data-count="3"[\s\S]*?nth-child\(3\)[\s\S]*?left: 74%;/, 'desktop formation reserves distinct centered positions for four total players');
 assert.match(css, /@media \(max-width: 700px\)[\s\S]*?data-count="3"[\s\S]*?nth-child\(3\)[\s\S]*?left: 81%;/, 'mobile formation reserves distinct positions for four total players');
