@@ -5,6 +5,7 @@
 - 新增 `assets/venomfang-dagger.png` 並套用至「毒牙匕首」。
 - 新增 `assets/darkwood-shortblade.png` 並套用至「暗林短刃」。
 - 新掉落與既有存檔中的同款匕首都會顯示新圖片；不修改武器數值、職業限制與掉落設定。
+- 圖片功能提交：`f7d10c4c324b588687f253dcbc903f2e8226bdbb`；入口頁已鎖定該提交的 `script.js`。
 
 ## 2026-08-12 第二章獵弓圖片（0.4.97）
 
