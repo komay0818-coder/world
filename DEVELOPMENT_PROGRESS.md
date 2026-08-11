@@ -5,6 +5,7 @@
 - 新增 `assets/hunter-companion-human-icon.png`，套用至人類獵人的王國獵犬頭像。
 - 新增 `assets/hunter-companion-elf-icon.png`，套用至夜精靈／精靈獵人的月光山貓頭像。
 - 戰鬥畫面右下角寵物區優先使用專用頭像，其他種族保留原圖備援；不修改寵物戰鬥功能或數值。
+- 頭像功能提交：`b6863b3dcef56f6eac53bf0f6917349226e1dfb0`；入口頁已鎖定該提交的 `script.js` 與 `styles/monster-slots.css`。
 
 ## 2026-08-12 第二章重型戰斧圖片（0.4.95）
 
