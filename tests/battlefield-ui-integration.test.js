@@ -53,5 +53,8 @@ assert.doesNotMatch(html, /data-menu-action="材料"/, 'materials no longer dupl
 assert.doesNotMatch(script, /button\.dataset\.menuAction === '材料'/, 'the removed material shortcut has no stale click handler');
 assert.match(css, /grid-template-columns: repeat\(7, minmax\(0, 1fr\)\) !important;/, 'the seven remaining battle actions share the full row');
 assert.match(css, /body:has\(\.battle-screen:not\(\.hidden\)\) \.toast[\s\S]*?bottom: calc\(92px/, 'battle loot notifications sit above the action bar');
+assert.match(script, /<main class="drop-lookup-simple">/, 'drop lookup uses a simple item-list layout');
+assert.doesNotMatch(script, /data-drop-map=|data-drop-travel=|drop-source-list/, 'drop lookup does not render map sources or travel actions');
+assert.match(script, /<article class="drop-result-card">[\s\S]*?item\.name[\s\S]*?item\.typeLabel/, 'drop cards only show the item identity and type');
 
 console.log('battlefield UI integration: assertions passed');

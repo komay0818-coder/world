@@ -234,8 +234,6 @@ let battleLogMode = 'player';
 let battleLogEntries = [];
 let dropLookupCategory = 'all';
 let dropLookupQuery = '';
-let dropLookupMapId = '';
-let dropLookupItemId = '';
 let battle = { enemyTypes: ['goblin', 'wolf', 'boar', 'goblin', 'wolf'], enemyHps: [45, 68, 82, 45, 68], playerHp: 100, playerMana: 100, playerShield: 0, manaExhausted: false, playerAttackCharge: 0, globalSkillReadyAt: 0, undeadRevived: false, skillCooldowns: {}, enemyRespawns: [null, null, null, null, null], enemySpawnedAt: [0, 1, 2, 3, 4], enemyNextAttackAt: [0, 0, 0, 0, 0], enemyDots: [[], [], [], [], []], monsterMoveSpeed: 200, targetIndexes: [], enemyDamages: [[], [], [], [], []], damageTimers: [] };
 let layoutEditMode = false;
 let activeLayoutDrag = null;
@@ -2179,29 +2177,12 @@ function isDropLookupMapUnlocked(map, progress = getProgress()) {
 
 function renderDropLookup() {
   const items = getDropLookupItems();
-  const filtered = DropLookupPolicy.filterItems(items, dropLookupQuery, dropLookupCategory, dropLookupMapId);
-  const selected = items.find((item) => item.id === dropLookupItemId) || null;
-  const progress = getProgress();
+  const filtered = DropLookupPolicy.filterItems(items, dropLookupQuery, dropLookupCategory);
   const categories = [['all', '全部'], ['equipment', '裝備'], ['material', '材料'], ['recipe', '配方'], ['skill', '技能材料']];
-  const chapterGroups = [
-    { chapter: 1, name: '第一章－初心者平原', maps: beginnerPlainsRegions },
-    { chapter: 2, name: '第二章－黑森林', maps: blackForestRegions }
-  ];
-  const mapBrowser = chapterGroups.map((group) => `<details class="drop-map-chapter" open><summary>${group.name}</summary><div>${group.maps.map((entry) => {
-    const map = mapProgression.find((candidate) => candidate.id === entry.id);
-    const count = items.filter((item) => item.sources.some((source) => source.mapId === entry.id)).length;
-    return `<button type="button" class="${dropLookupMapId === entry.id ? 'selected' : ''}" data-drop-map="${entry.id}" ${count ? '' : 'disabled'}><span>${map?.name || entry.name}</span><small>${count ? `${count} 種掉落` : '尚無掉落資料'}</small></button>`;
-  }).join('')}</div></details>`).join('');
   const resultCards = filtered.map((item) => {
-    const maps = [...new Set(item.sources.map((source) => source.mapName))].join('、');
-    return `<button type="button" class="drop-result-card ${selected?.id === item.id ? 'selected' : ''}" data-drop-item="${item.id}"><span>${item.icon || (item.category === 'equipment' ? '⚔' : '◆')}</span><div><b>${item.name}</b><small>${item.typeLabel}・${maps}</small></div><em>${item.sources.length} 個來源</em></button>`;
+    return `<article class="drop-result-card"><span>${item.icon || (item.category === 'equipment' ? '⚔' : '◆')}</span><div><b>${item.name}</b><small>${item.typeLabel}</small></div></article>`;
   }).join('');
-  const detail = selected ? `<section class="drop-detail"><header><div><small>${selected.typeLabel}</small><h3>${selected.name}</h3></div></header><div class="drop-source-list">${selected.sources.map((source) => {
-    const map = mapProgression.find((entry) => entry.id === source.mapId);
-    const unlocked = isDropLookupMapUnlocked(map, progress);
-    return `<article><div><b>第 ${source.chapter} 章・${source.mapName}</b><span>怪物：${source.monsterName}</span><span>掉落率：<strong>${DropLookupPolicy.percent(source.rate)}</strong>${source.amount > 1 ? `・數量 ×${source.amount}` : ''}</span>${source.note ? `<small>${source.note}</small>` : ''}</div><button type="button" data-drop-travel="${source.mapId}" ${unlocked ? '' : 'disabled'}>${unlocked ? (progress.selectedMapId === source.mapId ? '目前地圖' : '前往地圖') : '尚未解鎖'}</button></article>`;
-  }).join('')}</div></section>` : '<section class="drop-detail empty"><b>選擇一項掉落物</b><p>可查看來源地圖、怪物與目前實際掉落率。</p></section>';
-  document.querySelector('#drop-lookup-content').innerHTML = `<div class="drop-lookup-toolbar"><label><span>搜尋物品名稱</span><input type="search" data-drop-search value="${dropLookupQuery.replace(/&/g, '&amp;').replace(/"/g, '&quot;')}" placeholder="例如：狼牙、技能殘頁、配方"></label><nav>${categories.map(([id, label]) => `<button type="button" data-drop-category="${id}" class="${dropLookupCategory === id ? 'selected' : ''}">${label}</button>`).join('')}</nav></div><div class="drop-lookup-layout"><aside><button type="button" class="drop-map-all ${dropLookupMapId ? '' : 'selected'}" data-drop-map="">全部地圖</button>${mapBrowser}</aside><main><p class="drop-result-count">找到 ${filtered.length} 種掉落物</p><div class="drop-result-list">${resultCards || '<p class="drop-empty-result">沒有符合條件的掉落物。</p>'}</div>${detail}</main></div>`;
+  document.querySelector('#drop-lookup-content').innerHTML = `<div class="drop-lookup-toolbar"><label><span>搜尋物品名稱</span><input type="search" data-drop-search value="${dropLookupQuery.replace(/&/g, '&amp;').replace(/"/g, '&quot;')}" placeholder="例如：狼牙、技能殘頁、配方"></label><nav>${categories.map(([id, label]) => `<button type="button" data-drop-category="${id}" class="${dropLookupCategory === id ? 'selected' : ''}">${label}</button>`).join('')}</nav></div><main class="drop-lookup-simple"><p class="drop-result-count">共 ${filtered.length} 種掉落物</p><div class="drop-result-list">${resultCards || '<p class="drop-empty-result">沒有符合條件的掉落物。</p>'}</div></main>`;
   document.querySelector('#drop-lookup-modal').classList.remove('hidden');
 }
 
@@ -4867,13 +4848,7 @@ document.querySelector('#drop-lookup-close').addEventListener('click', () => doc
 document.querySelector('#drop-lookup-modal').addEventListener('click', (event) => {
   if (event.target === event.currentTarget) { event.currentTarget.classList.add('hidden'); return; }
   const category = event.target.closest('[data-drop-category]');
-  if (category) { dropLookupCategory = category.dataset.dropCategory; dropLookupItemId = ''; renderDropLookup(); return; }
-  const map = event.target.closest('[data-drop-map]');
-  if (map) { dropLookupMapId = map.dataset.dropMap; dropLookupItemId = ''; renderDropLookup(); return; }
-  const item = event.target.closest('[data-drop-item]');
-  if (item) { dropLookupItemId = item.dataset.dropItem; renderDropLookup(); return; }
-  const travel = event.target.closest('[data-drop-travel]');
-  if (travel && !travel.disabled) { document.querySelector('#drop-lookup-modal').classList.add('hidden'); selectAdventureMap(travel.dataset.dropTravel); }
+  if (category) { dropLookupCategory = category.dataset.dropCategory; renderDropLookup(); }
 });
 document.querySelector('#drop-lookup-modal').addEventListener('input', (event) => {
   if (!event.target.matches('[data-drop-search]')) return;
