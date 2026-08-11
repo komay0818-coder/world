@@ -643,6 +643,19 @@ body:has(.battle-screen:not(.hidden)) .toast {
   }
 }
 
+/* 0.4.87: every player unit shares one inset ground line inside the ally field. */
+.battle-field { --player-unit-ground-line: 7%; }
+
+.battle-field .player-battle-stage,
+.battle-field #battle-player-art[aria-label],
+.battle-field .player-grounding {
+  bottom: var(--player-unit-ground-line) !important;
+}
+
+@media (max-width: 700px) {
+  .battle-field { --player-unit-ground-line: 6%; }
+}
+
 /* 0.4.86: companions use a compact, extensible icon tray outside the unit field. */
 .battle-field .battle-companion-icons {
   position: absolute;
