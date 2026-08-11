@@ -2479,24 +2479,12 @@ function playPartyMemberCombatAnimation(member, targetIndexes = [], options = {}
 }
 
 function playCompanionAttackAnimation(targetIndexes = []) {
-  const companion = document.querySelector('#hunter-companion');
-  const field = document.querySelector('.battle-field');
-  const target = document.querySelector(`#enemy-${targetIndexes[0]}`);
-  if (!companion || companion.classList.contains('hidden')) return;
-  let strikeX = Math.min(240, Math.max(82, (field?.clientWidth || 420) * .24));
-  let strikeY = -28;
-  if (field && target) {
-    const companionRect = companion.getBoundingClientRect();
-    const targetRect = target.getBoundingClientRect();
-    strikeX = Math.min(260, Math.max(76, targetRect.left - companionRect.right + targetRect.width * .32));
-    strikeY = Math.min(34, Math.max(-105, targetRect.top + targetRect.height * .55 - (companionRect.top + companionRect.height * .5)));
-  }
-  companion.style.setProperty('--pet-strike-x', `${strikeX}px`);
-  companion.style.setProperty('--pet-strike-y', `${strikeY}px`);
-  companion.classList.remove('attacking');
-  void companion.offsetWidth;
-  companion.classList.add('attacking');
-  setTimeout(() => companion.classList.remove('attacking'), 720);
+  const companionIcon = document.querySelector('#battle-companion-icons .battle-companion-icon');
+  if (!companionIcon) return;
+  companionIcon.classList.remove('attacking');
+  void companionIcon.offsetWidth;
+  companionIcon.classList.add('attacking');
+  setTimeout(() => companionIcon.classList.remove('attacking'), 520);
 }
 
 function showEnemyDamage(indexes, damage, type = 'normal') {
@@ -2964,18 +2952,15 @@ function updateBattleUI() {
     battleField.dataset.mapId = currentMap.id;
     battleField.style.backgroundImage = `linear-gradient(rgba(13,29,36,.12),rgba(11,35,29,.22)), url('${currentMap.background || 'assets/beginner-plains-background.png'}')`;
   }
-  const companion = document.querySelector('#hunter-companion');
-  companion?.classList.toggle('hidden', character.job !== 'hunter' || progress.level < 5);
+  const companionIcons = document.querySelector('#battle-companion-icons');
   const racialCompanion = racialCompanions[character.race] || racialCompanions.human;
-  const companionArt = companion?.querySelector('span');
-  const companionName = companion?.querySelector('small');
-  if (companion) companion.dataset.race = character.race;
-  if (companionArt) {
-    const companionImage = `url("${racialCompanion.image}")`;
-    companionArt.style.setProperty('--companion-art', companionImage);
-    companionArt.style.backgroundImage = companionImage;
+  const activeBattleCompanions = character.job === 'hunter' && progress.level >= 5
+    ? [{ id: 'hunter-companion', image: racialCompanion.image, name: racialCompanion.name }]
+    : [];
+  if (companionIcons) {
+    companionIcons.classList.toggle('hidden', activeBattleCompanions.length === 0);
+    companionIcons.innerHTML = activeBattleCompanions.map((unit) => `<span class="battle-companion-icon" data-companion-id="${unit.id}" role="img" aria-label="${unit.name}" style="--companion-icon:url('${unit.image}')"></span>`).join('');
   }
-  if (companionName) companionName.textContent = racialCompanion.name;
   const currentDungeonDefinition = currentMap.dungeon ? getDungeonDefinition(currentMap.id) : null;
   const dungeonWaveText = currentMap.id === 'goblin-camp'
     ? `第 ${battle.dungeonWave || 1} 波`

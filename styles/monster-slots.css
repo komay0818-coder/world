@@ -643,6 +643,50 @@ body:has(.battle-screen:not(.hidden)) .toast {
   }
 }
 
+/* 0.4.86: companions use a compact, extensible icon tray outside the unit field. */
+.battle-field .battle-companion-icons {
+  position: absolute;
+  z-index: 24;
+  right: 18px;
+  bottom: 112px;
+  display: flex;
+  flex-wrap: wrap-reverse;
+  justify-content: flex-end;
+  width: min(220px, 34%);
+  gap: 8px;
+  pointer-events: none;
+}
+
+.battle-field .battle-companion-icons.hidden { display: none; }
+
+.battle-field .battle-companion-icon {
+  display: block;
+  width: 54px;
+  height: 54px;
+  overflow: hidden;
+  border: 1px solid rgba(154, 222, 239, .58);
+  border-radius: 50%;
+  background-color: rgba(5, 18, 27, .88);
+  background-image: var(--companion-icon);
+  background-position: center 30%;
+  background-size: 175% auto;
+  background-repeat: no-repeat;
+  box-shadow: 0 7px 18px rgba(0, 0, 0, .46), inset 0 0 0 2px rgba(255, 255, 255, .06);
+}
+
+.battle-field .battle-companion-icon.attacking {
+  animation: companionIconPulse .52s ease-out;
+}
+
+@keyframes companionIconPulse {
+  45% { scale: 1.12; filter: brightness(1.32); box-shadow: 0 0 16px rgba(91, 214, 255, .72); }
+}
+
+@media (max-width: 700px) {
+  .battle-field .battle-companion-icons { right: 8px; bottom: 96px; width: min(160px, 42%); gap: 5px; }
+  .battle-field .battle-companion-icon { width: 42px; height: 42px; }
+}
+
 /* 0.4.84: player vitals remain in the side HUD, not over battlefield units. */
 .battle-field .player-stage-info,
 .battle-field .player-stage-floating {

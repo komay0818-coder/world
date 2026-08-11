@@ -10,6 +10,8 @@ const css = fs.readFileSync(path.join(root, 'styles', 'monster-slots.css'), 'utf
 assert.match(html, /class="battlefield-zone-label enemy-zone-label"/, 'enemy battlefield has a shared label');
 assert.match(html, /id="player-battle-stage"/, 'player party has a shared battlefield display layer');
 assert.match(html, /id="player-stage-info"/, 'main player information floats near the battlefield art');
+assert.match(html, /id="battle-companion-icons" class="battle-companion-icons hidden"/, 'battlefield provides a generic companion icon tray');
+assert.doesNotMatch(html, /id="hunter-companion"/, 'legacy full-body hunter companion is removed from the battlefield');
 assert.match(css, /grid-template-columns: repeat\(4, minmax\(0, 1fr\)\)/, 'desktop enemies share a four-unit battlefield row');
 assert.match(css, /#enemy-squad \.monster-battle-slot[\s\S]*?border: 0 !important;[\s\S]*?background: none !important;/, 'individual monster cards have no frame or background');
 assert.match(css, /\.monster-battle-slot\.boss \.monster-slot-image \{ scale: 1\.3 !important; \}/, 'boss visuals remain distinct without overwhelming the battlefield');
@@ -19,6 +21,10 @@ assert.match(css, /\.battle-field \.player-grounding \{[\s\S]*?background: rgba\
 assert.match(css, /\.battle-field \.player-stage-info,[\s\S]*?\.battle-field \.player-stage-floating \{[\s\S]*?display: none !important;/, 'main and party vitals are hidden over battlefield units');
 assert.match(css, /\.battle-field \.player-stage-art \{[\s\S]*?scale: 1\.28;/, 'party art is optically enlarged to match the main player');
 assert.match(css, /body:has\(\.battle-screen:not\(\.hidden\)\) \.toast \{[\s\S]*?right: calc\(var\(--battle-right-column, 15%\) \+ 18px\) !important;[\s\S]*?left: auto !important;/, 'battle loot notifications align to the right of the battlefield');
+assert.match(css, /\.battle-field \.battle-companion-icons \{[\s\S]*?right: 18px;[\s\S]*?bottom: 112px;[\s\S]*?flex-wrap: wrap-reverse;/, 'companion icons occupy an extensible tray above the right-side notification area');
+assert.match(css, /\.battle-field \.battle-companion-icon \{[\s\S]*?width: 54px;[\s\S]*?height: 54px;/, 'companions render as compact icons');
+assert.match(script, /const activeBattleCompanions = character\.job === 'hunter'[\s\S]*?companionIcons\.innerHTML = activeBattleCompanions\.map/, 'generic companion collection renders the currently active hunter companion');
+assert.doesNotMatch(script, /companionName\.textContent/, 'companion tray does not add level, health, stats, or text panels');
 assert.match(css, /\.player-battle-stage[\s\S]*?justify-content: center;/, 'party units auto-center on their shared ground');
 assert.match(script, /battleCharacterArt\[`\$\{member\.character\.race\}:\$\{member\.character\.job\}`\]/, 'party display reuses existing character art');
 assert.match(script, /其餘 \$\{reserveCount\}/, 'overflow enemies are not described as a front or back row');

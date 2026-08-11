@@ -12,6 +12,6 @@ assert.match(script, /VillageUpgradePolicy\.grantMapDrops\(progress, currentMap\
 assert.doesNotMatch(crafting, /blackOre: Object\.freeze/, 'black ore has one canonical material definition in the drop policy');
 assert.match(index, /chapter-one-material-drop-policy\.js\?v=20260806-black-ore-drops-v2/, 'the material policy cache key changes');
 assert.match(index, /world\/d5edf27e2a92445a308678ac85d35d3248e51a48\/script\.js/, 'the integration script uses an immutable deployment path');
-assert.match(index, /VER\. 0\.4\.85/, 'the game version aligns party art and right-side loot notifications');
+assert.match(index, /VER\. 0\.4\.86/, 'the game version uses compact companion icons');
 
 console.log('black-ore-drop-integration: assertions passed');
