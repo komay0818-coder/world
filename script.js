@@ -615,6 +615,15 @@ const monsterVisualSizeOverrides = {
   rootExecutioner: 'large', moonboneSentinel: 'large'
 };
 
+// Optional per-asset correction for unusual aspect ratios or transparent
+// padding. New monsters can provide visualScaleCorrection on their definition.
+const monsterVisualScaleCorrections = {
+  plainsRabbit: 1.15,
+  plainsGoblinYoung: .9,
+  greatfangWolf: 1.35,
+  boarKing: 1.25
+};
+
 function getMonsterVisualSize(enemy = {}) {
   if (enemy.isBoss) return 'boss';
   if (enemy.visualSize) return enemy.visualSize;
@@ -2429,8 +2438,9 @@ function renderEnemySquad() {
     const rankBadge = rank.label ? `<span class="monster-rank-badge">${rank.icon} ${rank.label}</span>` : '';
     const imagePath = enemy.image || MonsterDisplayPolicy.MONSTER_IMAGE_BY_TYPE[enemy.id] || MonsterDisplayPolicy.MONSTER_IMAGE_BY_TYPE.goblin;
     const visualSize = getMonsterVisualSize(enemy);
+    const visualScaleCorrection = enemy.visualScaleCorrection || monsterVisualScaleCorrections[enemy.id] || 1;
     const hpPercent = Math.max(0, hp / enemy.maxHp * 100);
-    return `<article id="enemy-${index}" class="enemy-unit monster-battle-slot visual-size-${visualSize} ${focusClass} ${rank.className} ${battle.targetIndexes.includes(index) ? 'targeted hit' : ''}" data-visual-size="${visualSize}" data-display-slot="${displaySlot}" data-enemy-index="${index}" role="gridcell" aria-label="${enemy.name}，等級 ${monsterLevel}"><header class="monster-slot-header"><div class="monster-slot-title"><b>${enemy.name}</b><small>Lv. ${monsterLevel}</small></div>${rankBadge}</header><div class="monster-image-frame"><img class="monster-slot-image" src="${imagePath}" alt="${enemy.name}" draggable="false">${damageEvents}</div><div class="monster-status-row" aria-label="異常狀態">${statusIcons}</div><div class="hp-track enemy-track monster-slot-hp" role="progressbar" aria-label="${enemy.name}生命" aria-valuemin="0" aria-valuemax="${enemy.maxHp}" aria-valuenow="${Math.max(0, hp)}"><i style="width:${hpPercent}%"></i></div></article>`;
+    return `<article id="enemy-${index}" class="enemy-unit monster-battle-slot visual-size-${visualSize} ${focusClass} ${rank.className} ${battle.targetIndexes.includes(index) ? 'targeted hit' : ''}" data-visual-size="${visualSize}" style="--unit-art-correction:${visualScaleCorrection}" data-display-slot="${displaySlot}" data-enemy-index="${index}" role="gridcell" aria-label="${enemy.name}，等級 ${monsterLevel}"><header class="monster-slot-header"><div class="monster-slot-title"><b>${enemy.name}</b><small>Lv. ${monsterLevel}</small></div>${rankBadge}</header><div class="monster-image-frame"><img class="monster-slot-image" src="${imagePath}" alt="${enemy.name}" draggable="false">${damageEvents}</div><div class="monster-status-row" aria-label="異常狀態">${statusIcons}</div><div class="hp-track enemy-track monster-slot-hp" role="progressbar" aria-label="${enemy.name}生命" aria-valuemin="0" aria-valuemax="${enemy.maxHp}" aria-valuenow="${Math.max(0, hp)}"><i style="width:${hpPercent}%"></i></div></article>`;
   }).join('');
   const reserveLabel = reserveCount > 0
     ? `<div class="reserve-indicator"><b>其餘 ${reserveCount}</b><span>等待顯示</span></div>`
