@@ -9,6 +9,7 @@
 - 玩家與隊友標記為 `humanoid`，保留既有角色素材留白校正與四人水平配置；不修改敵我框架、資訊框、動畫、AI、技能、傷害、目標或戰鬥速度。
 - 功能提交：`69cde265f9550b26e6ad759c57f2c1403ae30519`；入口頁已鎖定該提交的 `script.js` 與 `styles/monster-slots.css`。
 - 最終倍率校正提交：`afbe293f52a387a75bb70d562ff1790d29b83b5c`；入口頁的 `styles/monster-slots.css` 已改鎖定此提交。
+- 素材寬高比與透明留白修正提交：`3d73147a01f30b02847c6740a060dac2c1683f85`；入口頁最終鎖定此提交的 `script.js` 與 `styles/monster-slots.css`。
 
 ## 2026-08-12 玩家站位移入我方戰場（0.4.87）
 

@@ -9,7 +9,7 @@ const appCss = fs.readFileSync(path.join(__dirname, '..', 'style.css'), 'utf8');
 
 assert.match(html, /equipment-affix-policy\.js/, 'affix policy loads before the main game script');
 assert.match(html, /world\/ee82aa384081c756bc8f336c8a509ee17d0a4f9f\/style\.css/, 'the affix UI stylesheet is pinned to its immutable commit');
-assert.match(html, /world\/69cde265f9550b26e6ad759c57f2c1403ae30519\/script\.js/, 'the affix UI renderer is pinned to its immutable commit');
+assert.match(html, /world\/3d73147a01f30b02847c6740a060dac2c1683f85\/script\.js/, 'the affix UI renderer is pinned to its immutable commit');
 assert.match(source, /equipmentAffixMigrationVersion !== 'green-affix-v1'/, 'legacy saves receive the affix compatibility migration');
 assert.match(source, /EquipmentAffixPolicy\.normalizeEquipment\(item\)/, 'inventory and equipped items are normalized on load');
 assert.match(source, /EquipmentAffixPolicy\.getEquippedAffixStats\(progress\.equipment\)/, 'stats read only the equipped item collection');
