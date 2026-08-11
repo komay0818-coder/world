@@ -26,6 +26,8 @@ assert.match(css, /\.battle-field \.battle-companion-icon \{[\s\S]*?width: 54px;
 assert.match(script, /const activeBattleCompanions = character\.job === 'hunter'[\s\S]*?companionIcons\.innerHTML = activeBattleCompanions\.map/, 'generic companion collection renders the currently active hunter companion');
 assert.match(script, /human: \{ image: 'assets\/companion-human-hunter\.png', icon: 'assets\/hunter-companion-human-icon\.png', portrait: true/, 'human hunters use the supplied dog portrait');
 assert.match(script, /elf: \{ image: 'assets\/companion-elf\.png', icon: 'assets\/hunter-companion-elf-icon\.png', portrait: true/, 'elf hunters use the supplied moon cat portrait');
+assert.match(script, /orc: \{ image: 'assets\/companion-orc\.png', icon: 'assets\/hunter-companion-orc-icon\.png', portrait: true/, 'orc hunters use the supplied war wolf portrait');
+assert.match(script, /undead: \{ image: 'assets\/companion-undead\.png', icon: 'assets\/hunter-companion-undead-icon\.png', portrait: true/, 'undead hunters use the supplied spectral hound portrait');
 assert.match(script, /racialCompanion\.icon \|\| racialCompanion\.image/, 'companion tray prefers portrait artwork while retaining a safe fallback');
 assert.match(css, /\.battle-companion-icon\.portrait \{[\s\S]*?background-position: center;[\s\S]*?background-size: cover;/, 'dedicated portraits preserve their complete framed composition');
 assert.doesNotMatch(script, /companionName\.textContent/, 'companion tray does not add level, health, stats, or text panels');

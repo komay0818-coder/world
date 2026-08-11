@@ -68,8 +68,8 @@ const battleCharacterLayout = {
 const racialCompanions = {
   human: { image: 'assets/companion-human-hunter.png', icon: 'assets/hunter-companion-human-icon.png', portrait: true, name: '王國獵犬' },
   elf: { image: 'assets/companion-elf.png', icon: 'assets/hunter-companion-elf-icon.png', portrait: true, name: '月光山貓' },
-  orc: { image: 'assets/companion-orc.png', name: '獠牙戰狼' },
-  undead: { image: 'assets/companion-undead.png', name: '亡靈獵犬' }
+  orc: { image: 'assets/companion-orc.png', icon: 'assets/hunter-companion-orc-icon.png', portrait: true, name: '獠牙戰狼' },
+  undead: { image: 'assets/companion-undead.png', icon: 'assets/hunter-companion-undead-icon.png', portrait: true, name: '亡靈獵犬' }
 };
 const classBaseStats = {
   warrior: { hp: 150, mana: 0, attack: 12, defense: 9, crit: .05, dodge: .03, attackSpeed: 1.0 },
