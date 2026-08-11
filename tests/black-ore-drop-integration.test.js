@@ -11,7 +11,7 @@ assert.match(script, /grantMaterialDrops\(progress, currentMap\.id, enemy\)/, 'r
 assert.match(script, /VillageUpgradePolicy\.grantMapDrops\(progress, currentMap\.id\)/, 'reward settlement also grants map-based building black ore');
 assert.doesNotMatch(crafting, /blackOre: Object\.freeze/, 'black ore has one canonical material definition in the drop policy');
 assert.match(index, /chapter-one-material-drop-policy\.js\?v=20260806-black-ore-drops-v2/, 'the material policy cache key changes');
-assert.match(index, /world\/3d73147a01f30b02847c6740a060dac2c1683f85\/script\.js/, 'the integration script uses an immutable deployment path');
+assert.match(index, /world\/16ab846ef36078c76bc3539a48ab1cabf84264dd\/script\.js/, 'the integration script uses an immutable deployment path');
 assert.match(index, /VER\. 0\.4\.90/, 'the game version separates monster rank from body size');
 
 console.log('black-ore-drop-integration: assertions passed');
