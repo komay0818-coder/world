@@ -360,17 +360,22 @@
 .player-battle-stage {
   position: absolute;
   z-index: 8;
-  right: 3%;
+  right: 0;
   bottom: 2%;
-  left: 23%;
-  display: flex;
+  left: 0;
+  display: block;
   align-items: end;
   justify-content: center;
-  gap: clamp(12px, 3vw, 46px);
-  height: 35%;
+  height: 24.5%;
   pointer-events: none;
 }
-.player-stage-unit { position: relative; width: clamp(112px, 15vw, 190px); height: 100%; }
+.player-stage-unit { position: absolute; bottom: 0; left: 50%; width: clamp(80px, 10vw, 133px); height: 100%; translate: -50% 0; }
+.player-battle-stage[data-count="1"] .player-stage-unit:nth-child(1) { left: 60%; }
+.player-battle-stage[data-count="2"] .player-stage-unit:nth-child(1) { left: 50%; }
+.player-battle-stage[data-count="2"] .player-stage-unit:nth-child(2) { left: 66%; }
+.player-battle-stage[data-count="3"] .player-stage-unit:nth-child(1) { left: 42%; }
+.player-battle-stage[data-count="3"] .player-stage-unit:nth-child(2) { left: 58%; }
+.player-battle-stage[data-count="3"] .player-stage-unit:nth-child(3) { left: 74%; }
 .player-stage-unit::after { content:""; position:absolute; right:12%; bottom:1px; left:12%; height:13px; border-radius:50%; background:rgba(0,0,0,.38); filter:blur(5px); }
 .player-stage-art { position:absolute; z-index:1; inset:20px 0 0; background-position:center bottom; background-size:contain; background-repeat:no-repeat; filter:drop-shadow(0 9px 5px rgba(0,0,0,.58)) drop-shadow(0 0 3px rgba(203,226,238,.18)); }
 .player-stage-floating { position:absolute; z-index:3; top:0; right:2%; left:2%; padding:5px 7px; border-radius:8px; background:linear-gradient(90deg,rgba(3,12,20,.7),rgba(3,12,20,.25)); text-shadow:0 1px 4px #000; }
@@ -385,7 +390,10 @@
   .player-stage-unit.is-attacking .player-stage-art,.player-stage-unit.is-casting .player-stage-art,.battle-player-art.is-attacking,.battle-player-art.is-casting { animation-duration:.01ms !important; }
   .character-attack-effect { animation-duration:.01ms !important; }
 }
-.battle-field #battle-player-art { z-index: 8 !important; filter: drop-shadow(0 10px 6px rgba(0,0,0,.62)) drop-shadow(0 0 3px rgba(203,226,238,.18)) !important; }
+.battle-field #battle-player-art[aria-label] { left: 50% !important; bottom: 1.5% !important; height: 32.6667% !important; z-index: 8 !important; filter: drop-shadow(0 10px 6px rgba(0,0,0,.62)) drop-shadow(0 0 3px rgba(203,226,238,.18)) !important; }
+.battle-field:has(#player-battle-stage[data-count="1"]) #battle-player-art[aria-label] { left: 40% !important; }
+.battle-field:has(#player-battle-stage[data-count="2"]) #battle-player-art[aria-label] { left: 34% !important; }
+.battle-field:has(#player-battle-stage[data-count="3"]) #battle-player-art[aria-label] { left: 26% !important; }
 
 @media (max-width: 700px) {
   .battlefield-zone-label { top: 5%; font-size: 7px; }
@@ -399,8 +407,18 @@
   #enemy-squad .monster-battle-slot.boss .monster-slot-hp { height: 7px !important; }
   .player-stage-info { left: 4px; bottom: 5px; width: 108px; padding: 4px; }
   .player-stage-info b { font-size: 9px; }.player-stage-info small { font-size: 6px; }
-  .player-battle-stage { right: 1%; bottom: 1%; left: 34%; height: 32%; gap: 4px; }
-  .player-stage-unit { width: clamp(70px,22vw,105px); }.player-stage-floating{padding:3px}.player-stage-floating b{font-size:8px}.player-stage-floating small{font-size:6px}
+  .player-battle-stage { right: 0; bottom: 1%; left: 0; height: 22%; }
+  .player-stage-unit { width: clamp(58px,18vw,78px); }.player-stage-floating{padding:3px}.player-stage-floating b{font-size:8px}.player-stage-floating small{font-size:6px}
+  .player-battle-stage[data-count="1"] .player-stage-unit:nth-child(1) { left: 62%; }
+  .player-battle-stage[data-count="2"] .player-stage-unit:nth-child(1) { left: 52%; }
+  .player-battle-stage[data-count="2"] .player-stage-unit:nth-child(2) { left: 72%; }
+  .player-battle-stage[data-count="3"] .player-stage-unit:nth-child(1) { left: 43%; }
+  .player-battle-stage[data-count="3"] .player-stage-unit:nth-child(2) { left: 62%; }
+  .player-battle-stage[data-count="3"] .player-stage-unit:nth-child(3) { left: 81%; }
+  .battle-field #battle-player-art[aria-label] { bottom: 1% !important; height: 28% !important; }
+  .battle-field:has(#player-battle-stage[data-count="1"]) #battle-player-art[aria-label] { left: 38% !important; }
+  .battle-field:has(#player-battle-stage[data-count="2"]) #battle-player-art[aria-label] { left: 30% !important; }
+  .battle-field:has(#player-battle-stage[data-count="3"]) #battle-player-art[aria-label] { left: 20% !important; }
 }
 
 .stronghold-objective {
