@@ -5,6 +5,7 @@
 - 新增 `assets/greatwood-battleaxe.png` 並套用至「巨木戰斧」。
 - 新增 `assets/armorbreaker-greataxe.png` 並套用至「破甲重斧」。
 - 新掉落與既有存檔中的同款重型戰斧都會顯示新圖片；不修改武器數值、職業限制與掉落設定。
+- 圖片功能提交：`08a17c37fa6921ae41f04012e0f15e26b6347d44`；入口頁已鎖定該提交的 `script.js`。
 
 ## 2026-08-12 第二章戰斧圖片（0.4.94）
 
