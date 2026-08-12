@@ -792,8 +792,32 @@ function applyEquipmentVisual(item) {
   return item;
 }
 
+const TAB_ACTIVE_CHARACTER_SLOT_KEY = 'stardust-tab-active-character-slot';
+
+function getActiveCharacterSlotIndex() {
+  const slots = JSON.parse(localStorage.getItem('stardust-character-slots') || '[]');
+  const legacyIndex = Number(localStorage.getItem('stardust-active-character-slot') || 0);
+  const storedTabIndex = sessionStorage.getItem(TAB_ACTIVE_CHARACTER_SLOT_KEY);
+  const tabIndex = storedTabIndex === null ? NaN : Number(storedTabIndex);
+  const requestedIndex = Number.isInteger(tabIndex) && tabIndex >= 0 ? tabIndex : legacyIndex;
+  return Array.isArray(slots) && slots[requestedIndex] ? requestedIndex : 0;
+}
+
+function setActiveCharacterSlotIndex(index) {
+  sessionStorage.setItem(TAB_ACTIVE_CHARACTER_SLOT_KEY, String(index));
+  localStorage.setItem('stardust-active-character-slot', String(index));
+}
+
+function getActiveCharacter() {
+  const slots = JSON.parse(localStorage.getItem('stardust-character-slots') || '[]');
+  return slots[getActiveCharacterSlotIndex()]?.character
+    || JSON.parse(localStorage.getItem('stardust-character') || 'null');
+}
+
 function getProgress() {
-  const saved = JSON.parse(localStorage.getItem('stardust-progress') || '{}');
+  const slots = JSON.parse(localStorage.getItem('stardust-character-slots') || '[]');
+  const slotProgress = Array.isArray(slots) ? slots[getActiveCharacterSlotIndex()]?.progress : null;
+  const saved = JSON.parse(JSON.stringify(slotProgress || JSON.parse(localStorage.getItem('stardust-progress') || '{}')));
   if (['black-forest', 'black-forest-altar'].includes(saved.selectedMapId)) {
     saved.selectedMapId = 'plains-entrance';
     saved.dungeonAdmission = false;
@@ -804,7 +828,7 @@ function getProgress() {
     delete saved.skillEssence;
   }
   if (saved.starterGearVersion !== 'starter-gear-v1') {
-    const character = JSON.parse(localStorage.getItem('stardust-character') || 'null');
+    const character = getActiveCharacter();
     if (character?.job) {
       const starterEquipment = createStarterEquipment(character.job);
       saved.equipment = { ...emptyEquipment(), ...(saved.equipment || {}) };
@@ -815,7 +839,7 @@ function getProgress() {
     localStorage.setItem('stardust-progress', JSON.stringify(saved));
   }
   if (saved.equipmentRetentionVersion !== 'planned-catalog-and-starter-v2') {
-    const character = JSON.parse(localStorage.getItem('stardust-character') || 'null');
+    const character = getActiveCharacter();
     const starterEquipment = createStarterEquipment(character?.job || 'warrior');
     saved.inventory = EquipmentPolicy.removeLegacyEquipmentFromInventory(saved.inventory);
     saved.equipment = Object.fromEntries(Object.entries({
@@ -827,7 +851,7 @@ function getProgress() {
     saved.equipmentRetentionVersion = 'planned-catalog-and-starter-v2';
     localStorage.setItem('stardust-progress', JSON.stringify(saved));
   }
-  const activeCharacterForQuiver = JSON.parse(localStorage.getItem('stardust-character') || 'null');
+  const activeCharacterForQuiver = getActiveCharacter();
   if (HunterArrowPolicy.isHunter(activeCharacterForQuiver?.job)) {
     saved.equipment = HunterArrowPolicy.ensureStarterQuiver({ ...emptyEquipment(), ...(saved.equipment || {}) });
     if (saved.hunterQuiverMigrationVersion !== 'hunter-quiver-resource-v1') {
@@ -876,7 +900,7 @@ function getProgress() {
     localStorage.setItem('stardust-progress', JSON.stringify(saved));
   }
   if (saved.jobRestrictionMigrationVersion !== 'job-restriction-v1') {
-    const character = JSON.parse(localStorage.getItem('stardust-character') || 'null');
+    const character = getActiveCharacter();
     const inventoryForRestrictions = Array.isArray(saved.inventory) ? saved.inventory : [];
     const equipmentForRestrictions = saved.equipment || {};
     Object.entries(equipmentForRestrictions).forEach(([slot, item]) => {
@@ -931,8 +955,8 @@ function getProgress() {
     crafting: CraftingPolicy.normalizeCraftingState(saved.crafting),
     village: VillagePolicy.normalizeVillageData(saved.village)
   };
-  const activeCharacter = JSON.parse(localStorage.getItem('stardust-character') || 'null');
-  const activeSlotIndex = Number(localStorage.getItem('stardust-active-character-slot') || 0);
+  const activeCharacter = getActiveCharacter();
+  const activeSlotIndex = getActiveCharacterSlotIndex();
   let partySlots = JSON.parse(localStorage.getItem('stardust-character-slots') || '[]');
   if (!Array.isArray(partySlots) || !partySlots.length) partySlots = activeCharacter ? [{ character: activeCharacter, progress: normalizedProgress }] : [];
   if (partySlots[activeSlotIndex]?.character) partySlots[activeSlotIndex] = { ...partySlots[activeSlotIndex], progress: normalizedProgress };
@@ -953,9 +977,9 @@ function getCharacterSlots() {
   if (!Array.isArray(slots)) slots = [];
   const legacyCharacter = JSON.parse(localStorage.getItem('stardust-character') || 'null');
   if (!slots.length && legacyCharacter) {
-    slots[0] = { character: legacyCharacter, progress: getProgress() };
+    slots[0] = { character: legacyCharacter, progress: JSON.parse(localStorage.getItem('stardust-progress') || '{}') };
     localStorage.setItem('stardust-character-slots', JSON.stringify(slots));
-    localStorage.setItem('stardust-active-character-slot', '0');
+    setActiveCharacterSlotIndex(0);
   }
   const idsBeforeRepair = slots.map((slot) => slot?.character?.id || '');
   PartyPolicy.ensureUniqueCharacterIds(slots);
@@ -966,8 +990,8 @@ function getCharacterSlots() {
 
 function normalizeCurrentParty(progress = getProgress()) {
   const slots = getCharacterSlots();
-  const mainSlotIndex = Number(localStorage.getItem('stardust-active-character-slot') || 0);
-  const character = JSON.parse(localStorage.getItem('stardust-character') || 'null');
+  const mainSlotIndex = getActiveCharacterSlotIndex();
+  const character = getActiveCharacter();
   if (slots[mainSlotIndex]?.character && character?.id !== slots[mainSlotIndex].character.id) {
     localStorage.setItem('stardust-character', JSON.stringify(slots[mainSlotIndex].character));
   }
@@ -985,11 +1009,11 @@ function getLockedFactionForCreation(slotIndex = creationSlotIndex) {
 }
 
 function syncActiveCharacterSlot(progressOverride = null) {
-  const character = JSON.parse(localStorage.getItem('stardust-character') || 'null');
+  const character = getActiveCharacter();
   if (!character) return;
-  const activeIndex = Number(localStorage.getItem('stardust-active-character-slot') || 0);
+  const activeIndex = getActiveCharacterSlotIndex();
   const slots = JSON.parse(localStorage.getItem('stardust-character-slots') || '[]');
-  slots[activeIndex] = { character, progress: progressOverride || JSON.parse(localStorage.getItem('stardust-progress') || '{}') };
+  slots[activeIndex] = { character, progress: progressOverride || slots[activeIndex]?.progress || JSON.parse(localStorage.getItem('stardust-progress') || '{}') };
   localStorage.setItem('stardust-character-slots', JSON.stringify(slots));
 }
 
@@ -1031,7 +1055,7 @@ function activateCharacterSlot(index) {
   syncActiveCharacterSlot();
   const slot = getCharacterSlots()[index];
   if (!slot) return;
-  localStorage.setItem('stardust-active-character-slot', String(index));
+  setActiveCharacterSlotIndex(index);
   localStorage.setItem('stardust-character', JSON.stringify(slot.character));
   localStorage.setItem('stardust-progress', JSON.stringify(slot.progress));
   document.querySelector('#character-roster-modal').classList.add('hidden');
@@ -1042,7 +1066,7 @@ function activateCharacterSlot(index) {
 function renderCharacterRoster() {
   syncActiveCharacterSlot();
   const slots = getCharacterSlots();
-  const activeIndex = Number(localStorage.getItem('stardust-active-character-slot') || 0);
+  const activeIndex = getActiveCharacterSlotIndex();
   const content = document.querySelector('#character-roster-content');
   content.innerHTML = [0, 1, 2, 3].map((index) => {
     const slot = slots[index];
@@ -1248,7 +1272,7 @@ function startAlchemy() {
   if (!window.confirm(`煉金將消耗這兩件裝備，完成時扣除 ${AlchemyPolicy.ALCHEMY_RULES.goldCost} 金幣，是否繼續？`)) return;
   alchemyBusy = true;
   const building = getVillageBuildingData('alchemy');
-  const character = JSON.parse(localStorage.getItem('stardust-character') || 'null');
+  const character = getActiveCharacter();
   const result = AlchemyPolicy.beginAlchemy(progress, alchemyInputItemIds, { buildingLevel: building.level, jobId: character?.job || null });
   alchemyBusy = false;
   if (!result.ok) { renderAlchemy(building, result.reason); return; }
@@ -1438,7 +1462,7 @@ function markPlayerActive() {
 }
 
 function claimOfflineRewards() {
-  const character = JSON.parse(localStorage.getItem('stardust-character') || 'null');
+  const character = getActiveCharacter();
   if (!character) return null;
   const progress = getProgress();
   const now = Date.now();
@@ -1836,7 +1860,7 @@ function getActiveMap(progress = getProgress()) {
   return mapProgression.find((map) => map.id === 'plains-entrance') || mapProgression[0];
 }
 
-function getCharacterStats(level, progress = getProgress(), character = JSON.parse(localStorage.getItem('stardust-character') || 'null')) {
+function getCharacterStats(level, progress = getProgress(), character = getActiveCharacter()) {
   const base = classBaseStats[character?.job] || classBaseStats.warrior;
   const race = raceAdjustments[character?.race] || raceAdjustments.human;
   const equipment = getEquipmentStats(progress);
@@ -1871,7 +1895,7 @@ function getCharacterStats(level, progress = getProgress(), character = JSON.par
   return { ...corruptedStats, accuracy: BlackForestDepthsPolicy.applyDenseFogAccuracy(corruptedStats.accuracy, activeMap.id) };
 }
 
-function getMaxHp(level, progress = getProgress(), character = JSON.parse(localStorage.getItem('stardust-character') || 'null')) {
+function getMaxHp(level, progress = getProgress(), character = getActiveCharacter()) {
   return getCharacterStats(level, progress, character).hp;
 }
 
@@ -2106,7 +2130,7 @@ function itemQualityLabel(item) {
 
 function renderInventory(view = 'inventory') {
   const progress = getProgress();
-  const character = JSON.parse(localStorage.getItem('stardust-character') || 'null');
+  const character = getActiveCharacter();
   const modal = document.querySelector('#inventory-modal');
   const title = document.querySelector('#inventory-title');
   const content = document.querySelector('#inventory-content');
@@ -2168,7 +2192,7 @@ function renderInventory(view = 'inventory') {
 }
 
 function renderCharacterAbilities() {
-  const character = JSON.parse(localStorage.getItem('stardust-character') || 'null');
+  const character = getActiveCharacter();
   if (!character) return;
   const progress = getProgress();
   const stats = getCharacterStats(progress.level, progress, character);
@@ -2252,7 +2276,7 @@ function renderDropLookup() {
 function renderMapSelector() {
   const progress = getProgress();
   const resources = getAccountResources();
-  const character = JSON.parse(localStorage.getItem('stardust-character') || 'null');
+  const character = getActiveCharacter();
   const stats = getCharacterStats(progress.level, progress, character);
   const activeMap = getActiveMap(progress);
   const maps = mapProgression.filter((map) => map.implemented && !map.regionOf);
@@ -2351,7 +2375,7 @@ function equipItem(itemId, preferredSlot = null) {
   const itemIndex = progress.inventory.findIndex((item) => item.id === itemId && item.kind === 'equipment');
   if (itemIndex < 0) return;
   const item = progress.inventory[itemIndex];
-  const character = JSON.parse(localStorage.getItem('stardust-character') || 'null');
+  const character = getActiveCharacter();
   const targetSlot = preferredSlot || item.slot;
   if (!character || !isItemWearableByCharacter(item, character, progress.level) || !EquipmentPolicy.canEquipInSlot(item, character.job, targetSlot)) {
     showToast('這件裝備不適合目前職業。');
@@ -2392,7 +2416,7 @@ function unequipItem(slot) {
   logBattle(`⚙ 已卸下【${item.name}】。`);
   renderInventory('equipment');
   if (fighting) {
-    const character = JSON.parse(localStorage.getItem('stardust-character') || 'null');
+  const character = getActiveCharacter();
     clearInterval(battleTimer);
     battleTimer = setInterval(battleTick, Math.round(1000 / getCharacterStats(progress.level, progress, character).attackSpeed));
     updateBattleUI();
@@ -2434,7 +2458,7 @@ function selectAllCommonEquipment() {
 
 function openSellConfirmation() {
   const progress = getProgress();
-  const character = JSON.parse(localStorage.getItem('stardust-character') || 'null');
+  const character = getActiveCharacter();
   const summary = InventorySalePolicy.summarizeSelection(progress.inventory, scrapSelection, (item) => getItemJunkContext(item, character, progress));
   if (!summary.count) return;
   document.querySelector('#sell-confirm-content').innerHTML = `<p>您選擇了 <b>${summary.count}</b> 件物品。</p><p>預計可獲得 <b>${summary.gold}</b> 金幣。</p><p>確定要販賣這些物品嗎？販賣後將無法復原。</p>${summary.containsJunkCandidate ? '<p class="sell-warning">⚠ 選擇的物品中包含「不能裝備的廢品」，販賣後將無法復原。</p>' : ''}<div class="sell-confirm-actions"><button type="button" data-cancel-sale>取消</button><button type="button" class="confirm-sale-button" data-confirm-sale>確認販賣</button></div>`;
@@ -2609,7 +2633,7 @@ function processEnemyDots() {
 function getKnownSkills(job, level) { return skillProgression[job] || []; }
 
 function getMaxMana(job, level) {
-  return getCharacterStats(level, getProgress(), { ...(JSON.parse(localStorage.getItem('stardust-character') || '{}')), job }).mana;
+  return getCharacterStats(level, getProgress(), { ...(getActiveCharacter() || {}), job }).mana;
 }
 
 function getMaxCombatResource(job, level) {
@@ -2698,7 +2722,7 @@ function buildBattlePartyMembers(now = Date.now()) {
     const slotIndex = slots.findIndex((slot) => slot?.character?.id === memberId);
     if (slotIndex < 0) return null;
     const slot = memberId === mainId
-      ? { character: JSON.parse(localStorage.getItem('stardust-character') || 'null'), progress }
+      ? { character: getActiveCharacter(), progress }
       : slots[slotIndex];
     return createBattlePartyMember(slot, slotIndex, mainId, now);
   }).filter(Boolean);
@@ -2741,7 +2765,7 @@ function syncMainBattleMemberFromLegacy() {
 function persistPartyRuntimeState() {
   if (!battle.partyMembers?.length) return;
   const slots = getCharacterSlots();
-  const activeIndex = Number(localStorage.getItem('stardust-active-character-slot') || 0);
+  const activeIndex = getActiveCharacterSlotIndex();
   const mainProgress = getProgress();
   battle.partyMembers.forEach((member) => {
     const state = {
@@ -2898,7 +2922,7 @@ function closeSkillDetailModal() {
 function renderSkillDetailModal() {
   const modal = document.querySelector('#skill-detail-modal');
   const content = document.querySelector('#skill-detail-content');
-  const character = JSON.parse(localStorage.getItem('stardust-character') || 'null');
+  const character = getActiveCharacter();
   const progress = getProgress();
   const skill = (skillProgression[character?.job] || []).find((entry) => getSkillKey(character.job, entry) === selectedSkillKey);
   if (!modal || !content || !character || !skill || progress.level < skill.level) {
@@ -2990,7 +3014,7 @@ function renderStrongholdObjective(currentMap = getActiveMap(getProgress())) {
 
 function updateBattleUI() {
   syncLegacyBattleStateFromMain();
-  const character = JSON.parse(localStorage.getItem('stardust-character'));
+  const character = getActiveCharacter();
   const progress = getProgress();
   const maxHp = getMaxHp(progress.level, progress);
   const maxMana = getMaxCombatResource(character.job, progress.level);
@@ -3109,7 +3133,7 @@ function usePotion(manual = false) {
 
 function useManaPotion(manual = false) {
   const progress = getProgress();
-  const character = JSON.parse(localStorage.getItem('stardust-character'));
+  const character = getActiveCharacter();
   if (!character) return false;
   if (WarriorResourcePolicy.isWarrior(character.job)) {
     if (manual) showToast('戰士使用怒氣，無法使用魔法藥水。');
@@ -3230,7 +3254,7 @@ function rewardVictory(index) {
     progress.level += 1;
     showToast(`升級！已到達 Lv. ${progress.level}`);
     logBattle(`✦ 冒險者升至 Lv. ${progress.level}`, 'progress');
-    const character = JSON.parse(localStorage.getItem('stardust-character'));
+    const character = getActiveCharacter();
     const learned = (skillProgression[character.job] || []).find((skill) => skill.level === progress.level);
     if (learned) {
       showToast(`學會${learned.type === 'active' ? '主動' : '被動'}技能：${learned.name}`);
@@ -3422,7 +3446,7 @@ function applyDamageToMonster(index, baseDamage, profile, options = {}) {
   const enemy = getEnemyDefinition(index);
   const attacker = options.attacker || null;
   const progress = attacker?.progress || getProgress();
-  const character = attacker?.character || JSON.parse(localStorage.getItem('stardust-character') || 'null');
+  const character = attacker?.character || getActiveCharacter();
   const attackerStats = attacker?.stats || getCharacterStats(progress.level, progress, character);
   const magicDamageBonus = profile.damageType === 'magic' ? attackerStats.magicDamageBonus : 0;
   const rankMultiplier = enemy.isBoss ? 1 + (attackerStats.bossDamagePercent || 0) : enemy.isElite ? 1 + (attackerStats.eliteDamagePercent || 0) : 1;
@@ -3825,7 +3849,7 @@ function processPlayerBleed(now = Date.now()) {
 function legacyEnemyAttackTick() {
   if (!fighting || battleScreen.classList.contains('hidden') || battle.dungeonComplete) return;
   const progress = getProgress();
-  const character = JSON.parse(localStorage.getItem('stardust-character'));
+  const character = getActiveCharacter();
   if (!character) return;
   const now = Date.now();
   const stats = getCharacterStats(progress.level, progress, character);
@@ -4609,7 +4633,7 @@ function enemyAttackTick() {
 }
 
 function openBattle() {
-  const character = JSON.parse(localStorage.getItem('stardust-character'));
+  const character = getActiveCharacter();
   if (!character) { openCreation(); return; }
   const battlePlayerArt = document.querySelector('#battle-player-art');
   const characterArt = battleCharacterArt[`${character.race}:${character.job}`];
@@ -4715,7 +4739,7 @@ loginForm.addEventListener('submit', (event) => {
 });
 
 document.querySelector('#profile-button').addEventListener('click', () => { nameInput.value = displayName.textContent; menuScreen.classList.add('hidden'); loginScreen.classList.remove('hidden'); nameInput.focus(); });
-document.querySelector('#reset-button').addEventListener('click', () => { localStorage.removeItem('stardust-player-name'); localStorage.removeItem('stardust-character'); localStorage.removeItem('stardust-progress'); localStorage.removeItem('stardust-character-slots'); localStorage.removeItem('stardust-active-character-slot'); nameInput.value = ''; enterMenu(''); menuScreen.classList.add('hidden'); loginScreen.classList.remove('hidden'); nameInput.focus(); });
+document.querySelector('#reset-button').addEventListener('click', () => { localStorage.removeItem('stardust-player-name'); localStorage.removeItem('stardust-character'); localStorage.removeItem('stardust-progress'); localStorage.removeItem('stardust-character-slots'); localStorage.removeItem('stardust-active-character-slot'); sessionStorage.removeItem(TAB_ACTIVE_CHARACTER_SLOT_KEY); nameInput.value = ''; enterMenu(''); menuScreen.classList.add('hidden'); loginScreen.classList.remove('hidden'); nameInput.focus(); });
 document.querySelector('#adventure-button').addEventListener('click', openBattle);
 document.querySelector('#village-menu-button').addEventListener('click', openVillage);
 document.querySelectorAll('[data-faction]').forEach((card) => card.addEventListener('click', () => { selection.faction = card.dataset.faction; selection.race = factions[selection.faction][0].id; document.querySelectorAll('[data-faction]').forEach((item) => item.classList.toggle('selected', item === card)); renderCreation(); }));
@@ -4728,7 +4752,7 @@ document.querySelector('#create-character').addEventListener('click', (event) =>
   event.stopImmediatePropagation();
   showToast(selection.race === 'elf' ? '夜精靈沒有牧師職業。' : '半獸人無法創立牧師職業。');
 }, true);
-document.querySelector('#create-character').addEventListener('click', () => { const name = characterName.value.trim(); if (!name) { showToast('請先為角色取名。'); characterName.focus(); return; } const lockedFaction = getLockedFactionForCreation(); if (lockedFaction && selection.faction !== lockedFaction) { selection.faction = lockedFaction; selection.race = factions[lockedFaction][0].id; renderCreation(); showToast('帳號角色必須選擇相同陣營。'); return; } const race = factions[selection.faction].find((item) => item.id === selection.race); const job = classes.find((item) => item.id === selection.job); const character = { ...selection, id: `character-slot-${creationSlotIndex + 1}`, name }; const progress = { level: 1, xp: 0, gold: 0, potions: 5, manaPotions: 0, selectedMapId: 'beginner-plains', inventory: [], equipment: selection.job === 'hunter' ? createStarterEquipment('hunter') : emptyEquipment(), lastActiveAt: Date.now(), ...(selection.job === 'assassin' ? { energy: 100, maxEnergy: 100, energyUpdatedAt: Date.now() } : {}) }; const slots = getCharacterSlots(); slots[creationSlotIndex] = { character, progress }; progress.party = PartyPolicy.normalizeParty(null, { slots, mainSlotIndex: creationSlotIndex, mainCharacter: character, mainProgress: progress }); localStorage.setItem('stardust-character-slots', JSON.stringify(slots)); localStorage.setItem('stardust-active-character-slot', String(creationSlotIndex)); localStorage.setItem('stardust-character', JSON.stringify(character)); localStorage.setItem('stardust-progress', JSON.stringify(progress)); characterScreen.classList.add('hidden'); menuScreen.classList.remove('hidden'); document.querySelector('#character-title').textContent = '建立你的角色'; showToast(`${race.name}${job.name}「${name}」已儲存至角色欄位 ${creationSlotIndex + 1}！`); });
+document.querySelector('#create-character').addEventListener('click', () => { const name = characterName.value.trim(); if (!name) { showToast('請先為角色取名。'); characterName.focus(); return; } const lockedFaction = getLockedFactionForCreation(); if (lockedFaction && selection.faction !== lockedFaction) { selection.faction = lockedFaction; selection.race = factions[lockedFaction][0].id; renderCreation(); showToast('帳號角色必須選擇相同陣營。'); return; } const race = factions[selection.faction].find((item) => item.id === selection.race); const job = classes.find((item) => item.id === selection.job)?.name || selection.job; const character = { ...selection, id: `character-slot-${creationSlotIndex + 1}`, name }; const progress = { level: 1, xp: 0, gold: 0, potions: 5, manaPotions: 0, selectedMapId: 'beginner-plains', inventory: [], equipment: selection.job === 'hunter' ? createStarterEquipment('hunter') : emptyEquipment(), lastActiveAt: Date.now(), ...(selection.job === 'assassin' ? { energy: 100, maxEnergy: 100, energyUpdatedAt: Date.now() } : {}) }; const slots = getCharacterSlots(); slots[creationSlotIndex] = { character, progress }; progress.party = PartyPolicy.normalizeParty(null, { slots, mainSlotIndex: creationSlotIndex, mainCharacter: character, mainProgress: progress }); localStorage.setItem('stardust-character-slots', JSON.stringify(slots)); setActiveCharacterSlotIndex(creationSlotIndex); localStorage.setItem('stardust-character', JSON.stringify(character)); localStorage.setItem('stardust-progress', JSON.stringify(progress)); characterScreen.classList.add('hidden'); menuScreen.classList.remove('hidden'); document.querySelector('#character-title').textContent = '建立你的角色'; showToast(`${race.name}${job}「${name}」已儲存至角色欄位 ${creationSlotIndex + 1}！`); });
 document.querySelector('#character-roster-button').addEventListener('click', renderCharacterRoster);
 document.querySelector('#character-roster-close').addEventListener('click', () => document.querySelector('#character-roster-modal').classList.add('hidden'));
 document.querySelector('#character-roster-modal').addEventListener('click', (event) => {
@@ -4747,7 +4771,7 @@ document.querySelector('#leave-battle').addEventListener('click', () => {
     showToast('調整版面中：返回箭頭只會移動，不會離開戰鬥。');
     return;
   }
-  const leavingCharacter = JSON.parse(localStorage.getItem('stardust-character') || 'null');
+  const leavingCharacter = getActiveCharacter();
   if (AssassinEnergyPolicy.isAssassin(leavingCharacter?.job)) {
     const energyNow = Date.now();
     battle.playerMana = AssassinEnergyPolicy.getRegeneratedEnergy(
@@ -4773,7 +4797,7 @@ document.querySelector('#leave-battle').addEventListener('click', () => {
 });
 document.querySelector('#battle-toggle').addEventListener('click', () => {
   if (battle.dungeonComplete) return;
-  const character = JSON.parse(localStorage.getItem('stardust-character') || 'null');
+  const character = getActiveCharacter();
   const now = Date.now();
   if (AssassinEnergyPolicy.isAssassin(character?.job)) {
     battle.playerMana = AssassinEnergyPolicy.getRegeneratedEnergy(
@@ -4806,7 +4830,7 @@ document.querySelector('#skill-detail-modal').addEventListener('click', (event) 
   const button = event.target.closest('#skill-detail-upgrade');
   if (!button || button.disabled) return;
   button.disabled = true;
-  const character = JSON.parse(localStorage.getItem('stardust-character') || 'null');
+  const character = getActiveCharacter();
   const progress = getProgress();
   const skill = (skillProgression[character?.job] || []).find((entry) => getSkillKey(character.job, entry) === selectedSkillKey);
   if (!skill || progress.level < skill.level) return;
@@ -4850,7 +4874,7 @@ document.querySelector('#layout-skills-stack').addEventListener('click', () => {
   const saved = JSON.parse(localStorage.getItem('stardust-battle-layout') || '{}');
   Object.keys(saved).filter((key) => key.startsWith('skill-')).forEach((key) => delete saved[key]);
   localStorage.setItem('stardust-battle-layout', JSON.stringify(saved));
-  const character = JSON.parse(localStorage.getItem('stardust-character'));
+  const character = getActiveCharacter();
   if (character) renderSkills(character, getProgress().level);
   showToast('所有技能已統一為由上往下排列。');
 });
