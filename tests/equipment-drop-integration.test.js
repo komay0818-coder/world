@@ -4,6 +4,8 @@ const path = require('path');
 
 const script = fs.readFileSync(path.join(__dirname, '..', 'script.js'), 'utf8');
 const index = fs.readFileSync(path.join(__dirname, '..', 'index.html'), 'utf8');
+assert.match(script, /'logging-hatchet': 'assets\/logging-hatchet\.png'/, 'logging hatchet artwork migrates into existing items');
+assert.match(script, /'warrior-hatchet': 'assets\/warrior-hatchet\.png'/, 'warrior hatchet artwork migrates into existing items');
 assert.match(index, /world\/7142a00c3bdb55859c86719f43c08af67f6439e1\/script\.js/, 'the live page pins the current game UI to an immutable commit');
 assert.match(script, /'forest-guard-longsword': 'assets\/forest-guard-longsword\.png'/, 'forest guard sword artwork migrates into existing items');
 assert.match(script, /'mercenary-broadsword': 'assets\/mercenary-broadsword\.png'/, 'mercenary broadsword artwork migrates into existing items');

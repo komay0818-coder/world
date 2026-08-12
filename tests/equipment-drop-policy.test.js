@@ -1,6 +1,8 @@
 const assert = require('assert');
 const dropPolicy = require('../equipment-drop-policy.js');
 const equipmentPolicy = require('../equipment-policy.js');
+assert.equal(equipmentPolicy.WEAPON_CATALOG.loggingHatchet.image, 'assets/logging-hatchet.png');
+assert.equal(equipmentPolicy.WEAPON_CATALOG.warriorHatchet.image, 'assets/warrior-hatchet.png');
 
 function sequence(values) {
   let index = 0;

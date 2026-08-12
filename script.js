@@ -726,6 +726,8 @@ function createStarterEquipment(job = 'warrior') {
 }
 
 const equipmentVisualByTemplateId = {
+  'logging-hatchet': 'assets/logging-hatchet.png',
+  'warrior-hatchet': 'assets/warrior-hatchet.png',
   'forest-guard-longsword': 'assets/forest-guard-longsword.png',
   'mercenary-broadsword': 'assets/mercenary-broadsword.png',
   'woodcutter-greatsword': 'assets/woodcutter-greatsword.png',
@@ -746,6 +748,8 @@ function applyEquipmentVisual(item) {
   if (!item || item.kind !== 'equipment') return item;
   const templateId = item.templateId || item.baseItemId;
   const image = equipmentVisualByTemplateId[templateId]
+    || (item.name === '伐木手斧' ? equipmentVisualByTemplateId['logging-hatchet'] : '')
+    || (item.name === '戰士手斧' ? equipmentVisualByTemplateId['warrior-hatchet'] : '')
     || (item.name === '林衛長劍' ? equipmentVisualByTemplateId['forest-guard-longsword'] : '')
     || (item.name === '傭兵闊劍' ? equipmentVisualByTemplateId['mercenary-broadsword'] : '')
     || (item.name === '斬木巨劍' ? equipmentVisualByTemplateId['woodcutter-greatsword'] : '')
@@ -807,10 +811,10 @@ function getProgress() {
       localStorage.setItem('stardust-progress', JSON.stringify(saved));
     }
   }
-  if (saved.equipmentVisualMigrationVersion !== 'chapter-two-wand-images-v10') {
+  if (saved.equipmentVisualMigrationVersion !== 'chapter-one-hatchet-images-v11') {
     saved.inventory = (Array.isArray(saved.inventory) ? saved.inventory : []).map(applyEquipmentVisual);
     saved.equipment = Object.fromEntries(Object.entries(saved.equipment || {}).map(([slot, item]) => [slot, applyEquipmentVisual(item)]));
-    saved.equipmentVisualMigrationVersion = 'chapter-two-wand-images-v10';
+    saved.equipmentVisualMigrationVersion = 'chapter-one-hatchet-images-v11';
     localStorage.setItem('stardust-progress', JSON.stringify(saved));
   }
   if (saved.bowVisualMigrationVersion !== 'hunter-bow-image-v1') {
