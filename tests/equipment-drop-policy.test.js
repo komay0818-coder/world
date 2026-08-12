@@ -13,6 +13,8 @@ assert.equal(equipmentPolicy.WEAPON_CATALOG.shortIronSword.image, 'assets/short-
 assert.equal(equipmentPolicy.WEAPON_CATALOG.knightLongsword.image, 'assets/knight-longsword.png');
 assert.equal(equipmentPolicy.WEAPON_CATALOG.hunterShortbow.image, 'assets/hunter-shortbow.png');
 assert.equal(equipmentPolicy.WEAPON_CATALOG.longHuntingBow.image, 'assets/long-hunting-bow.png');
+assert.equal(equipmentPolicy.WEAPON_CATALOG.mercenaryGreatsword.image, 'assets/mercenary-greatsword.png');
+assert.equal(equipmentPolicy.WEAPON_CATALOG.giantIronSword.image, 'assets/giant-iron-sword.png');
 
 function sequence(values) {
   let index = 0;
