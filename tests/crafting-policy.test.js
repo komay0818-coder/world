@@ -7,7 +7,7 @@ function seeded(seed = 1) {
   return () => ((state = (state * 1664525 + 1013904223) >>> 0) / 0x100000000);
 }
 function stackedItem(item, quantity = 999) { return { ...item, quantity }; }
-function progressWith(recipeIds, quantity = 999, gold = 99999) {
+function progressWith(recipeIds, quantity = 999, gold = 999999) {
   const recipeItems = recipeIds.map((recipeId) => stackedItem(Object.values(require('../chapter-one-recipe-drop-policy.js').RECIPES).find((entry) => entry.recipeId === recipeId), quantity));
   return { gold, inventory: [...Object.values(CraftingPolicy.MATERIALS).map((item) => stackedItem(item, quantity)), ...recipeItems], equipment: {} };
 }
@@ -46,7 +46,7 @@ assert.deepEqual(JSON.parse(JSON.stringify(green[0])), green[0], 'save/load stor
 
 const recipeId = 'chapter1-green-wrist';
 const recipe = CraftingPolicy.RECIPES[recipeId];
-const success = progressWith([recipeId], 10, 1000);
+const success = progressWith([recipeId], 10, 10000);
 const beforeGold = success.gold;
 const beforeRecipe = CraftingPolicy.getRecipeQuantity(success, recipeId);
 const beforeStone = CraftingPolicy.getItemQuantity(success.inventory, 'equipment-stone-uncommon');
@@ -58,9 +58,9 @@ assert.equal(success.gold, beforeGold - recipe.goldCost, 'craft consumes configu
 assert.ok(success.inventory.includes(crafted.item), 'crafted equipment enters the existing inventory');
 
 for (const setup of [
-  { name: 'missing recipe', progress: progressWith([], 10, 1000), code: 'missing-recipe' },
-  { name: 'missing quality stone', progress: progressWith([recipeId], 10, 1000), code: 'missing-quality-stone', mutate: (progress) => { progress.inventory.find((item) => item.id === 'equipment-stone-uncommon').quantity = 0; } },
-  { name: 'missing map material', progress: progressWith([recipeId], 10, 1000), code: 'missing-material', mutate: (progress) => { progress.inventory.find((item) => item.id === 'iron-ore').quantity = 0; } },
+  { name: 'missing recipe', progress: progressWith([], 10, 10000), code: 'missing-recipe' },
+  { name: 'missing quality stone', progress: progressWith([recipeId], 10, 10000), code: 'missing-quality-stone', mutate: (progress) => { progress.inventory.find((item) => item.id === 'equipment-stone-uncommon').quantity = 0; } },
+  { name: 'missing map material', progress: progressWith([recipeId], 10, 10000), code: 'missing-material', mutate: (progress) => { progress.inventory.find((item) => item.id === 'iron-ore').quantity = 0; } },
   { name: 'missing gold', progress: progressWith([recipeId], 10, 0), code: 'missing-gold' }
 ]) {
   setup.mutate?.(setup.progress);
@@ -70,13 +70,13 @@ for (const setup of [
   assert.equal(JSON.stringify(setup.progress), snapshot, `${setup.name} deducts nothing`);
 }
 
-const full = progressWith([recipeId], 10, 1000);
+const full = progressWith([recipeId], 10, 10000);
 while (full.inventory.length < CraftingPolicy.INVENTORY_CAPACITY) full.inventory.push({ id: `filler-${full.inventory.length}`, kind: 'material', quantity: 2 });
 const fullSnapshot = JSON.stringify(full);
 assert.equal(CraftingPolicy.craftEquipment(full, recipeId).code, 'inventory-full');
 assert.equal(JSON.stringify(full), fullSnapshot, 'full inventory deducts nothing');
 
-const duplicate = progressWith([recipeId], 10, 1000);
+const duplicate = progressWith([recipeId], 10, 10000);
 duplicate.inventory.push({ id: 'duplicate', instanceId: 'duplicate', kind: 'equipment' });
 const duplicateSnapshot = JSON.stringify(duplicate);
 assert.equal(CraftingPolicy.craftEquipment(duplicate, recipeId, { instanceId: 'duplicate' }).code, 'duplicate-instance');

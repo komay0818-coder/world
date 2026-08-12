@@ -26,6 +26,14 @@ Object.values(policy.RECIPES).forEach((recipe) => {
   assert.deepEqual(recipe.materialRequirements, recipe.materials);
   assert.ok(recipe.goldCost > 0);
 });
+assert.deepEqual(Object.fromEntries(Object.values(policy.RECIPES).map((recipe) => [recipe.id, recipe.goldCost])), {
+  'recipe-green-wrist': 2400,
+  'recipe-green-cloak': 2400,
+  'recipe-green-shoulders': 3200,
+  'recipe-goblin-rare-cloak': 9000,
+  'recipe-high-chief-rare-wrist': 9000,
+  'recipe-black-knight-rare-shoulders': 11000
+}, 'all chapter-one wearable recipe gold costs are increased twentyfold');
 
 const greenBoss = { id: 'blackstoneLeader', isBoss: true };
 assert.equal(policy.rollRecipeDrops(greenBoss, 'plains-depths', sequence([0]))[0].id, 'recipe-green-wrist');
