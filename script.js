@@ -895,7 +895,7 @@ function getProgress() {
     saved.collectibleMigrationVersion = 'unique-monster-collectibles-v1';
     localStorage.setItem('stardust-progress', JSON.stringify(saved));
   }
-  const inventory = SalvagePolicy.normalizeInventory(removeLegacySkillUpgradeMaterials(VillageUpgradePolicy.normalizeWolfFangInventory(saved.inventory)));
+  const inventory = SalvagePolicy.normalizeInventory(removeLegacySkillUpgradeMaterials(VillageUpgradePolicy.normalizeMaterialInventory(saved.inventory)));
   saved.crafting = CraftingPolicy.normalizeCraftingState(saved.crafting);
   const existingHealingPotion = inventory.find((item) => item.id === 'healing-potion');
   if (existingHealingPotion) existingHealingPotion.description = '恢復最大生命 30%。';

@@ -6,37 +6,24 @@
   'use strict';
 
   const MATERIALS = Object.freeze({
-    buildingWolfFur: Object.freeze({ id: 'building-wolf-fur', kind: 'material', materialType: 'building-upgrade', chapter: 1, icon: '🐺', name: '狼毛', description: '第一章建築升級材料；由狼穴取得。' }),
+    buildingWolfFur: Object.freeze({ id: 'wolf-fur', kind: 'material', materialType: 'monster-crafting', chapter: 1, icon: '🐺', name: '狼毛', description: '由狼穴取得，可用於製作與升級建築。' }),
     buildingWolfFang: Object.freeze({ id: 'wolf-fang', kind: 'material', materialType: 'monster-crafting', rarity: 'rare', chapter: 1, icon: '🦷', name: '狼牙', description: '從狼穴怪物身上取得的稀有製作材料，也可用於升級建築。' }),
-    buildingHardHide: Object.freeze({ id: 'building-hard-hide', kind: 'material', materialType: 'building-upgrade', chapter: 1, icon: '▰', name: '硬皮', description: '第一章建築升級材料；由野豬林取得。' }),
-    buildingBoarTusk: Object.freeze({ id: 'building-boar-tusk', kind: 'material', materialType: 'building-upgrade', chapter: 1, icon: '🦷', name: '獠牙', description: '第一章建築升級材料；由野豬林取得。' }),
-    buildingIronOre: Object.freeze({ id: 'building-iron-ore', kind: 'material', materialType: 'building-upgrade', chapter: 1, icon: '⛏', name: '鐵礦石', description: '第一章建築升級材料；由哥布林營地取得。' }),
-    buildingBlackOre: Object.freeze({ id: 'building-black-ore', kind: 'material', materialType: 'building-upgrade', chapter: 1, icon: '⬟', name: '黑礦石', description: '第一章最高階建築升級材料；由平原深處取得。' })
+    buildingHardHide: Object.freeze({ id: 'hard-hide', kind: 'material', materialType: 'monster-crafting', chapter: 1, icon: '▰', name: '硬皮', description: '由野豬林取得，可用於製作與升級建築。' }),
+    buildingBoarTusk: Object.freeze({ id: 'boar-tusk', kind: 'material', materialType: 'monster-crafting', chapter: 1, icon: '🦷', name: '獠牙', description: '由野豬林取得，可用於製作與升級建築。' }),
+    buildingIronOre: Object.freeze({ id: 'iron-ore', kind: 'material', materialType: 'monster-crafting', chapter: 1, icon: '⛏', name: '鐵礦石', description: '由哥布林營地取得，可用於製作與升級建築。' }),
+    buildingBlackOre: Object.freeze({ id: 'black-ore', kind: 'material', materialType: 'special-crafting', chapter: 1, icon: '⬟', name: '黑礦石', description: '由平原深處取得，可用於製作與升級建築。' })
   });
 
-  const MAP_DROP_CONFIGS = Object.freeze({
-    'wolf-den': Object.freeze([
-      Object.freeze({ materialId: MATERIALS.buildingWolfFur.id, dropRate: .25, amount: 1 })
-    ]),
-    'boar-woods': Object.freeze([
-      Object.freeze({ materialId: MATERIALS.buildingHardHide.id, dropRate: .25, amount: 1 }),
-      Object.freeze({ materialId: MATERIALS.buildingBoarTusk.id, dropRate: .05, amount: 1 })
-    ]),
-    'goblin-camp': Object.freeze([
-      Object.freeze({ materialId: MATERIALS.buildingIronOre.id, dropRate: .25, amount: 1 })
-    ]),
-    'plains-depths': Object.freeze([
-      Object.freeze({ materialId: MATERIALS.buildingBlackOre.id, dropRate: .25, amount: 1 })
-    ])
-  });
+  // 材料掉落由章節材料政策統一處理；建築不再額外擲出第二份同名材料。
+  const MAP_DROP_CONFIGS = Object.freeze({});
 
   const CHAPTER_LEVEL_CAPS = Object.freeze({ 1: 2, 2: 3 });
   const LEVEL_TWO_COSTS = Object.freeze({
-    workshop: Object.freeze({ chapter: 1, targetLevel: 2, gold: 15000, materials: Object.freeze({ 'building-wolf-fur': 150, 'building-hard-hide': 150 }) }),
-    blacksmith: Object.freeze({ chapter: 1, targetLevel: 2, gold: 15000, materials: Object.freeze({ 'building-iron-ore': 200, 'building-black-ore': 100 }) }),
-    furnace: Object.freeze({ chapter: 1, targetLevel: 2, gold: 15000, materials: Object.freeze({ 'building-iron-ore': 150, 'building-black-ore': 150 }) }),
-    alchemy: Object.freeze({ chapter: 1, targetLevel: 2, gold: 15000, materials: Object.freeze({ 'wolf-fang': 50, 'building-boar-tusk': 50, 'building-black-ore': 50 }) }),
-    rune: Object.freeze({ chapter: 1, targetLevel: 2, gold: 15000, materials: Object.freeze({ 'building-black-ore': 250, 'wolf-fang': 25, 'building-boar-tusk': 25 }) })
+    workshop: Object.freeze({ chapter: 1, targetLevel: 2, gold: 15000, materials: Object.freeze({ 'wolf-fur': 150, 'hard-hide': 150 }) }),
+    blacksmith: Object.freeze({ chapter: 1, targetLevel: 2, gold: 15000, materials: Object.freeze({ 'iron-ore': 200, 'black-ore': 100 }) }),
+    furnace: Object.freeze({ chapter: 1, targetLevel: 2, gold: 15000, materials: Object.freeze({ 'iron-ore': 150, 'black-ore': 150 }) }),
+    alchemy: Object.freeze({ chapter: 1, targetLevel: 2, gold: 15000, materials: Object.freeze({ 'wolf-fang': 50, 'boar-tusk': 50, 'black-ore': 50 }) }),
+    rune: Object.freeze({ chapter: 1, targetLevel: 2, gold: 15000, materials: Object.freeze({ 'black-ore': 250, 'wolf-fang': 25, 'boar-tusk': 25 }) })
   });
 
   const MATERIAL_BY_ID = new Map(Object.values(MATERIALS).map((material) => [material.id, material]));
@@ -51,15 +38,31 @@
       .reduce((total, item) => total + Math.max(0, Number(item.quantity) || 0), 0);
   }
 
-  function normalizeWolfFangInventory(inventory) {
+  const LEGACY_MATERIAL_IDS = Object.freeze({
+    'building-wolf-fur': 'wolf-fur',
+    'building-wolf-fang': 'wolf-fang',
+    'building-hard-hide': 'hard-hide',
+    'building-boar-tusk': 'boar-tusk',
+    'building-iron-ore': 'iron-ore',
+    'building-black-ore': 'black-ore'
+  });
+
+  function normalizeMaterialInventory(inventory) {
     const items = Array.isArray(inventory) ? inventory : [];
-    const fangItems = items.filter((item) => ['wolf-fang', 'building-wolf-fang'].includes(item?.id));
-    if (!fangItems.some((item) => item.id === 'building-wolf-fang')) return items;
-    const quantity = fangItems.reduce((sum, item) => sum + Math.max(0, Number(item.quantity) || 0), 0);
-    const normalized = items.filter((item) => !['wolf-fang', 'building-wolf-fang'].includes(item?.id));
-    if (quantity > 0) normalized.push({ ...MATERIALS.buildingWolfFang, quantity });
+    const normalized = [];
+    items.forEach((item) => {
+      const canonicalId = LEGACY_MATERIAL_IDS[item?.id] || item?.id;
+      const material = MATERIAL_BY_ID.get(canonicalId);
+      if (!material) { normalized.push(item); return; }
+      const quantity = Math.max(0, Number(item.quantity) || 0);
+      const existing = normalized.find((entry) => entry?.id === canonicalId && entry?.kind === 'material');
+      if (existing) existing.quantity = Math.max(0, Number(existing.quantity) || 0) + quantity;
+      else if (quantity > 0) normalized.push({ ...material, quantity });
+    });
     return normalized;
   }
+
+  const normalizeWolfFangInventory = normalizeMaterialInventory;
 
   function addMaterial(inventory, materialId, amount) {
     const material = MATERIAL_BY_ID.get(materialId);
@@ -122,5 +125,5 @@
     return { ok: true, requirement, level: requirement.targetLevel };
   }
 
-  return Object.freeze({ MATERIALS, MAP_DROP_CONFIGS, CHAPTER_LEVEL_CAPS, LEVEL_TWO_COSTS, getMaterial, getQuantity, normalizeWolfFangInventory, grantMapDrops, getRequirement, canUpgrade, upgrade });
+  return Object.freeze({ MATERIALS, MAP_DROP_CONFIGS, CHAPTER_LEVEL_CAPS, LEVEL_TWO_COSTS, LEGACY_MATERIAL_IDS, getMaterial, getQuantity, normalizeMaterialInventory, normalizeWolfFangInventory, grantMapDrops, getRequirement, canUpgrade, upgrade });
 });
