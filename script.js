@@ -728,6 +728,8 @@ function createStarterEquipment(job = 'warrior') {
 const equipmentVisualByTemplateId = {
   'logging-hatchet': 'assets/logging-hatchet.png',
   'warrior-hatchet': 'assets/warrior-hatchet.png',
+  'rusty-dagger': 'assets/rusty-dagger.png',
+  'assassin-shortblade': 'assets/assassin-shortblade.png',
   'forest-guard-longsword': 'assets/forest-guard-longsword.png',
   'mercenary-broadsword': 'assets/mercenary-broadsword.png',
   'woodcutter-greatsword': 'assets/woodcutter-greatsword.png',
@@ -750,6 +752,8 @@ function applyEquipmentVisual(item) {
   const image = equipmentVisualByTemplateId[templateId]
     || (item.name === '伐木手斧' ? equipmentVisualByTemplateId['logging-hatchet'] : '')
     || (item.name === '戰士手斧' ? equipmentVisualByTemplateId['warrior-hatchet'] : '')
+    || (item.name === '生鏽匕首' ? equipmentVisualByTemplateId['rusty-dagger'] : '')
+    || (item.name === '刺客短刃' ? equipmentVisualByTemplateId['assassin-shortblade'] : '')
     || (item.name === '林衛長劍' ? equipmentVisualByTemplateId['forest-guard-longsword'] : '')
     || (item.name === '傭兵闊劍' ? equipmentVisualByTemplateId['mercenary-broadsword'] : '')
     || (item.name === '斬木巨劍' ? equipmentVisualByTemplateId['woodcutter-greatsword'] : '')
@@ -811,10 +815,10 @@ function getProgress() {
       localStorage.setItem('stardust-progress', JSON.stringify(saved));
     }
   }
-  if (saved.equipmentVisualMigrationVersion !== 'chapter-one-hatchet-images-v11') {
+  if (saved.equipmentVisualMigrationVersion !== 'chapter-one-dagger-images-v12') {
     saved.inventory = (Array.isArray(saved.inventory) ? saved.inventory : []).map(applyEquipmentVisual);
     saved.equipment = Object.fromEntries(Object.entries(saved.equipment || {}).map(([slot, item]) => [slot, applyEquipmentVisual(item)]));
-    saved.equipmentVisualMigrationVersion = 'chapter-one-hatchet-images-v11';
+    saved.equipmentVisualMigrationVersion = 'chapter-one-dagger-images-v12';
     localStorage.setItem('stardust-progress', JSON.stringify(saved));
   }
   if (saved.bowVisualMigrationVersion !== 'hunter-bow-image-v1') {
