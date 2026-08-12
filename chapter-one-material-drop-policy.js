@@ -9,7 +9,7 @@
     hardHide: Object.freeze({ id: 'hard-hide', kind: 'material', materialType: 'monster-crafting', rarity: 'common', icon: '▰', name: '硬皮', description: '從野豬林怪物身上取得的普通製作材料。' }),
     boarTusk: Object.freeze({ id: 'boar-tusk', kind: 'material', materialType: 'monster-crafting', rarity: 'rare', icon: '🦷', name: '獠牙', description: '從野豬林怪物身上取得的稀有製作材料。' }),
     ironOre: Object.freeze({ id: 'iron-ore', kind: 'material', materialType: 'monster-crafting', rarity: 'common', icon: '⛏', name: '鐵礦', description: '從哥布林營地怪物身上取得的普通製作材料。' }),
-    blackOre: Object.freeze({ id: 'black-ore', kind: 'material', materialType: 'special-crafting', rarity: 'rare', icon: '⬟', name: '黑礦石', description: '從平原深處的黑石山賊身上取得，用於製作第一章藍色裝備。' })
+    blackOre: Object.freeze({ id: 'black-ore', kind: 'material', materialType: 'special-crafting', rarity: 'rare', icon: '⬟', name: '黑礦石', description: '只由平原深處的黑石系列怪物掉落，用於製作與升級建築。' })
   });
 
   const MAP_DROP_CONFIGS = Object.freeze({

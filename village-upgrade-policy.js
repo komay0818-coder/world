@@ -11,7 +11,7 @@
     buildingHardHide: Object.freeze({ id: 'hard-hide', kind: 'material', materialType: 'monster-crafting', chapter: 1, icon: '▰', name: '硬皮', description: '由野豬林取得，可用於製作與升級建築。' }),
     buildingBoarTusk: Object.freeze({ id: 'boar-tusk', kind: 'material', materialType: 'monster-crafting', chapter: 1, icon: '🦷', name: '獠牙', description: '由野豬林取得，可用於製作與升級建築。' }),
     buildingIronOre: Object.freeze({ id: 'iron-ore', kind: 'material', materialType: 'monster-crafting', chapter: 1, icon: '⛏', name: '鐵礦石', description: '由哥布林營地取得，可用於製作與升級建築。' }),
-    buildingBlackOre: Object.freeze({ id: 'black-ore', kind: 'material', materialType: 'special-crafting', chapter: 1, icon: '⬟', name: '黑礦石', description: '由平原深處取得，可用於製作與升級建築。' })
+    buildingBlackOre: Object.freeze({ id: 'black-ore', kind: 'material', materialType: 'special-crafting', chapter: 1, icon: '⬟', name: '黑礦石', description: '只由平原深處的黑石系列怪物掉落，可用於製作與升級建築。' })
   });
 
   // 材料掉落由章節材料政策統一處理；建築不再額外擲出第二份同名材料。
