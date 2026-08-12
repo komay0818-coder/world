@@ -5,6 +5,8 @@ assert.equal(equipmentPolicy.WEAPON_CATALOG.loggingHatchet.image, 'assets/loggin
 assert.equal(equipmentPolicy.WEAPON_CATALOG.warriorHatchet.image, 'assets/warrior-hatchet.png');
 assert.equal(equipmentPolicy.WEAPON_CATALOG.rustyDagger.image, 'assets/rusty-dagger.png');
 assert.equal(equipmentPolicy.WEAPON_CATALOG.assassinShortblade.image, 'assets/assassin-shortblade.png');
+assert.equal(equipmentPolicy.WEAPON_CATALOG.apprenticeStaff.image, 'assets/apprentice-staff.png');
+assert.equal(equipmentPolicy.WEAPON_CATALOG.arcaneStaff.image, 'assets/arcane-staff.png');
 
 function sequence(values) {
   let index = 0;
