@@ -2238,13 +2238,14 @@ function isDropLookupMapUnlocked(map, progress = getProgress()) {
 }
 
 function renderDropLookup() {
+  const activeMap = getActiveMap(getProgress());
   const items = getDropLookupItems();
-  const filtered = DropLookupPolicy.filterItems(items, dropLookupQuery, dropLookupCategory);
+  const filtered = DropLookupPolicy.filterItems(items, dropLookupQuery, dropLookupCategory, activeMap.id);
   const categories = [['all', '全部'], ['equipment', '裝備'], ['material', '材料'], ['recipe', '配方'], ['skill', '技能材料']];
   const resultCards = filtered.map((item) => {
     return `<article class="drop-result-card"><span>${item.icon || (item.category === 'equipment' ? '⚔' : '◆')}</span><div><b>${item.name}</b><small>${item.typeLabel}</small></div></article>`;
   }).join('');
-  document.querySelector('#drop-lookup-content').innerHTML = `<div class="drop-lookup-toolbar"><label><span>搜尋物品名稱</span><input type="search" data-drop-search value="${dropLookupQuery.replace(/&/g, '&amp;').replace(/"/g, '&quot;')}" placeholder="例如：狼牙、技能殘頁、配方"></label><nav>${categories.map(([id, label]) => `<button type="button" data-drop-category="${id}" class="${dropLookupCategory === id ? 'selected' : ''}">${label}</button>`).join('')}</nav></div><main class="drop-lookup-simple"><p class="drop-result-count">共 ${filtered.length} 種掉落物</p><div class="drop-result-list">${resultCards || '<p class="drop-empty-result">沒有符合條件的掉落物。</p>'}</div></main>`;
+  document.querySelector('#drop-lookup-content').innerHTML = `<div class="drop-lookup-toolbar"><label><span>搜尋物品名稱</span><input type="search" data-drop-search value="${dropLookupQuery.replace(/&/g, '&amp;').replace(/"/g, '&quot;')}" placeholder="例如：狼牙、技能殘頁、配方"></label><nav>${categories.map(([id, label]) => `<button type="button" data-drop-category="${id}" class="${dropLookupCategory === id ? 'selected' : ''}">${label}</button>`).join('')}</nav></div><main class="drop-lookup-simple"><p class="drop-result-count"><strong>目前地圖：${activeMap.name}</strong>・共 ${filtered.length} 種掉落物</p><div class="drop-result-list">${resultCards || '<p class="drop-empty-result">此地圖沒有符合條件的掉落物。</p>'}</div></main>`;
   document.querySelector('#drop-lookup-modal').classList.remove('hidden');
 }
 
@@ -2339,6 +2340,7 @@ function selectAdventureMap(mapId) {
   progress.selectedMapId = map.id;
   progress.unlockedChapter = Math.max(getUnlockedChapter(progress), Number(map.chapter) || 1);
   saveProgress(progress);
+  if (!document.querySelector('#drop-lookup-modal')?.classList.contains('hidden')) renderDropLookup();
   document.querySelector('#inventory-modal').classList.add('hidden');
   showToast(map.dungeon ? map.ticketItemId ? `持有地圖，進入：${map.name}` : `已消耗 1 把鑰匙，進入：${map.name}` : `已前往：${map.name}`);
   openBattle();
