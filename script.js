@@ -736,6 +736,8 @@ const equipmentVisualByTemplateId = {
   'rockbreaker-greataxe': 'assets/rockbreaker-greataxe.png',
   'short-iron-sword': 'assets/short-iron-sword.png',
   'knight-longsword': 'assets/knight-longsword.png',
+  'hunter-shortbow': 'assets/hunter-shortbow.png',
+  'long-hunting-bow': 'assets/long-hunting-bow.png',
   'forest-guard-longsword': 'assets/forest-guard-longsword.png',
   'mercenary-broadsword': 'assets/mercenary-broadsword.png',
   'woodcutter-greatsword': 'assets/woodcutter-greatsword.png',
@@ -766,6 +768,8 @@ function applyEquipmentVisual(item) {
     || (item.name === '碎岩巨斧' ? equipmentVisualByTemplateId['rockbreaker-greataxe'] : '')
     || (item.name === '短鐵劍' ? equipmentVisualByTemplateId['short-iron-sword'] : '')
     || (item.name === '騎士長劍' ? equipmentVisualByTemplateId['knight-longsword'] : '')
+    || (item.name === '獵人短弓' ? equipmentVisualByTemplateId['hunter-shortbow'] : '')
+    || (item.name === '長獵弓' ? equipmentVisualByTemplateId['long-hunting-bow'] : '')
     || (item.name === '林衛長劍' ? equipmentVisualByTemplateId['forest-guard-longsword'] : '')
     || (item.name === '傭兵闊劍' ? equipmentVisualByTemplateId['mercenary-broadsword'] : '')
     || (item.name === '斬木巨劍' ? equipmentVisualByTemplateId['woodcutter-greatsword'] : '')
@@ -827,10 +831,10 @@ function getProgress() {
       localStorage.setItem('stardust-progress', JSON.stringify(saved));
     }
   }
-  if (saved.equipmentVisualMigrationVersion !== 'chapter-one-sword-images-v15') {
+  if (saved.equipmentVisualMigrationVersion !== 'chapter-one-bow-images-v16') {
     saved.inventory = (Array.isArray(saved.inventory) ? saved.inventory : []).map(applyEquipmentVisual);
     saved.equipment = Object.fromEntries(Object.entries(saved.equipment || {}).map(([slot, item]) => [slot, applyEquipmentVisual(item)]));
-    saved.equipmentVisualMigrationVersion = 'chapter-one-sword-images-v15';
+    saved.equipmentVisualMigrationVersion = 'chapter-one-bow-images-v16';
     localStorage.setItem('stardust-progress', JSON.stringify(saved));
   }
   if (saved.bowVisualMigrationVersion !== 'hunter-bow-image-v1') {
