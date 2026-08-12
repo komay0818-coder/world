@@ -9,6 +9,8 @@ assert.equal(equipmentPolicy.WEAPON_CATALOG.apprenticeStaff.image, 'assets/appre
 assert.equal(equipmentPolicy.WEAPON_CATALOG.arcaneStaff.image, 'assets/arcane-staff.png');
 assert.equal(equipmentPolicy.WEAPON_CATALOG.battleGreataxe.image, 'assets/battle-greataxe.png');
 assert.equal(equipmentPolicy.WEAPON_CATALOG.rockbreakerGreataxe.image, 'assets/rockbreaker-greataxe.png');
+assert.equal(equipmentPolicy.WEAPON_CATALOG.shortIronSword.image, 'assets/short-iron-sword.png');
+assert.equal(equipmentPolicy.WEAPON_CATALOG.knightLongsword.image, 'assets/knight-longsword.png');
 
 function sequence(values) {
   let index = 0;
