@@ -13,7 +13,7 @@ assert.match(html, /id="battle-player-art" class="battle-player-art hidden"/, 'm
 assert.doesNotMatch(html, /portrait-prototype|combat-unit-frame|combat-unit-art/, 'battlefield markup no longer contains frame prototype elements');
 assert.match(html, /id="player-stage-info"/, 'main player information floats near the battlefield art');
 assert.match(html, /id="battle-companion-icons" class="battle-companion-icons hidden"/, 'battlefield provides a generic companion icon tray');
-assert.match(html, /d90c3590e7fc7269c2c59d521aab28a8e8523751\/styles\/monster-slots\.css/, 'battlefield loads the immutable unframed style build');
+assert.match(html, /74427e6da8b8cb7925f1cf00a847e2a06d72f183\/styles\/monster-slots\.css/, 'battlefield loads the immutable normalized frameless style build');
 assert.match(html, /41954f68a4928b590409c441ae3bdf18ad5babf4\/script\.js/, 'battlefield loads the restored unframed player build');
 assert.doesNotMatch(html, /id="hunter-companion"/, 'legacy full-body hunter companion is removed from the battlefield');
 assert.match(css, /grid-template-columns: repeat\(4, minmax\(0, 1fr\)\)/, 'desktop enemies share a four-unit battlefield row');
