@@ -2616,6 +2616,13 @@ function playPartyMemberCombatAnimation(member, targetIndexes = [], options = {}
     const fieldRect = field.getBoundingClientRect();
     const artRect = art.getBoundingClientRect();
     const targetRect = target?.getBoundingClientRect();
+    if (kind === 'basic' && targetRect) {
+      const deltaX = targetRect.left + targetRect.width / 2 - (artRect.left + artRect.width / 2);
+      const deltaY = targetRect.top + targetRect.height / 2 - (artRect.top + artRect.height / 2);
+      const distance = Math.hypot(deltaX, deltaY) || 1;
+      art.style.setProperty('--basic-lunge-x', `${deltaX / distance * 24}px`);
+      art.style.setProperty('--basic-lunge-y', `${deltaY / distance * 24}px`);
+    }
     const effect = document.createElement('span');
     const startX = artRect.right - fieldRect.left - Math.min(38, artRect.width * .16);
     const startY = artRect.top - fieldRect.top + artRect.height * (job === 'mage' || job === 'priest' ? .37 : .48);
@@ -2632,6 +2639,8 @@ function playPartyMemberCombatAnimation(member, targetIndexes = [], options = {}
     setTimeout(() => {
       fighter?.classList.remove('attack', actionClass);
       art.classList.remove('attack', actionClass);
+      art.style.removeProperty('--basic-lunge-x');
+      art.style.removeProperty('--basic-lunge-y');
     }, 680);
   });
 }

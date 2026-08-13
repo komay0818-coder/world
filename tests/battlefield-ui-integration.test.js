@@ -15,6 +15,9 @@ assert.match(html, /id="player-stage-info"/, 'main player information floats nea
 assert.match(html, /id="battle-companion-icons" class="battle-companion-icons hidden"/, 'battlefield provides a generic companion icon tray');
 assert.match(html, /050a8b3efe623fe48a9bcd990d21e72fd5c7123b\/styles\/monster-slots\.css/, 'battlefield loads the immutable equal-scale aura build');
 assert.match(html, /7d0852d004a2ccbb5a99faaaeaf0b79eba7bd67e\/script\.js/, 'battlefield loads the shared caster weapon build');
+assert.match(script, /--basic-lunge-x[\s\S]*deltaX \/ distance \* 24/, 'basic attacks calculate a short lunge toward the current target');
+assert.match(script, /--basic-lunge-y[\s\S]*deltaY \/ distance \* 24/, 'basic attack lunge follows the target direction');
+assert.match(css, /@keyframes partyBasicStrike[\s\S]*translate\(var\(--basic-lunge-x, 24px\),var\(--basic-lunge-y, -8px\)\)/, 'player artwork lunges and returns without moving the surrounding HUD');
 assert.doesNotMatch(html, /id="hunter-companion"/, 'legacy full-body hunter companion is removed from the battlefield');
 assert.match(css, /grid-template-columns: repeat\(4, minmax\(0, 1fr\)\)/, 'desktop enemies share a four-unit battlefield row');
 assert.match(css, /#enemy-squad \.monster-battle-slot[\s\S]*?border: 0 !important;[\s\S]*?background: none !important;/, 'individual monster cards have no frame or background');
