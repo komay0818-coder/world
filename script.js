@@ -3031,7 +3031,7 @@ function renderBattlePartyStatus() {
       const resourcePercent = Math.max(0, Math.min(100, member.resourceCurrent / resourceMax * 100));
       const art = battleCharacterArt[`${member.character.race}:${member.character.job}`] || '';
       const jobName = classes.find((job) => job.id === member.character.job)?.name || member.character.job;
-      return `<article class="player-stage-unit ${member.alive ? '' : 'is-dead'}" data-visual-size="humanoid" data-member-id="${member.id}" data-job="${member.character.job}"><div class="player-stage-floating"><b>${member.name}</b><small>${jobName}・Lv.${member.level}</small><span class="player-stage-hp"><i style="width:${hpPercent}%"></i></span><span class="player-stage-resource"><i style="width:${resourcePercent}%"></i></span></div><div class="player-stage-art" style="background-image:url('${art}')" aria-label="${member.name}"></div></article>`;
+      return `<article class="player-stage-unit combat-unit-frame player-unit-frame ${member.alive ? '' : 'is-dead'}" data-visual-size="humanoid" data-member-id="${member.id}" data-job="${member.character.job}" aria-label="${member.name}"><div class="player-stage-floating"><b>${member.name}</b><small>${jobName}・Lv.${member.level}</small><span class="player-stage-hp"><i style="width:${hpPercent}%"></i></span><span class="player-stage-resource"><i style="width:${resourcePercent}%"></i></span></div><div class="player-stage-art combat-unit-art" style="background-image:url('${art}')" aria-hidden="true"></div></article>`;
     }).join('');
   }
 }
@@ -4690,6 +4690,7 @@ function openBattle() {
   const battlePlayerArt = document.querySelector('#battle-player-art');
   const characterArt = battleCharacterArt[`${character.race}:${character.job}`];
   if (battlePlayerArt) {
+    const battlePlayerImage = battlePlayerArt.querySelector('.combat-unit-art');
     battlePlayerArt.classList.toggle('hidden', !characterArt);
     battlePlayerArt.classList.toggle('undead-art', character.race === 'undead' && Boolean(characterArt));
     battlePlayerArt.dataset.job = character.job;
@@ -4698,7 +4699,7 @@ function openBattle() {
     const characterLayout = battleCharacterLayout[`${character.race}:${character.job}`];
     battlePlayerArt.style.setProperty('--character-scale', CHARACTER_SCALE * (characterLayout?.visibleScale || 1));
     battlePlayerArt.style.setProperty('--character-aspect', characterLayout?.aspect || '2048 / 1200');
-    battlePlayerArt.style.backgroundImage = characterArt ? `url('${characterArt}')` : '';
+    if (battlePlayerImage) battlePlayerImage.style.backgroundImage = characterArt ? `url('${characterArt}')` : '';
     const raceName = Object.values(factions).flat().find((race) => race.id === character.race)?.name || character.race;
     battlePlayerArt.setAttribute('aria-label', `${raceName}${classes.find((job) => job.id === character.job)?.name || ''}`);
   }

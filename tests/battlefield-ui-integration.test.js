@@ -13,6 +13,7 @@ const layoutKeys = new Set([...layoutBlock.matchAll(/'([^']+:[^']+)'\s*:/g)].map
 
 assert.match(html, /class="battlefield-zone-label enemy-zone-label"/, 'enemy battlefield has a shared label');
 assert.match(html, /id="player-battle-stage"/, 'player party has a shared battlefield display layer');
+assert.match(html, /id="battle-player-art" class="battle-player-art combat-unit-frame player-unit-frame hidden"[\s\S]*?class="combat-unit-art"/, 'main player uses the reusable framed-unit component');
 assert.match(html, /id="player-stage-info"/, 'main player information floats near the battlefield art');
 assert.match(html, /id="battle-companion-icons" class="battle-companion-icons hidden"/, 'battlefield provides a generic companion icon tray');
 assert.match(html, /c254cb92bff3199d2b7774b1a7e0f96fb4d8853c\/styles\/monster-slots\.css/, 'battlefield loads the immutable character proportion fix');
@@ -38,6 +39,7 @@ assert.match(css, /\.battle-companion-icon\.portrait \{[\s\S]*?background-positi
 assert.doesNotMatch(script, /companionName\.textContent/, 'companion tray does not add level, health, stats, or text panels');
 assert.match(css, /\.player-battle-stage[\s\S]*?justify-content: center;/, 'party units auto-center on their shared ground');
 assert.match(script, /battleCharacterArt\[`\$\{member\.character\.race\}:\$\{member\.character\.job\}`\]/, 'party display reuses existing character art');
+assert.match(script, /player-stage-unit combat-unit-frame player-unit-frame[\s\S]*?player-stage-art combat-unit-art/, 'party members use the same framed-unit component as the main player');
 assert.equal(artKeys.length, 20, 'all four races and five jobs have battlefield artwork');
 assert.deepEqual(artKeys.filter((key) => !layoutKeys.has(key)), [], 'every race and job artwork has an explicit aspect-ratio layout');
 assert.match(layoutBlock, /'elf:warrior': \{ aspect: '1346 \/ 1169', visibleScale: 1\.178 \}/, 'elf warrior transparent padding is calibrated to the shared visible height');
@@ -58,6 +60,12 @@ assert.match(script, /playPartyMemberCombatAnimation\(member,[\s\S]*?kind: 'skil
 assert.match(script, /playPartyMemberCombatAnimation\(member, \[targetIndex\], \{ kind: 'basic' \}\)/, 'basic attacks animate every party member');
 assert.match(css, /\.character-attack-effect\.attack-kind-skill::after/, 'skill attacks show an in-field skill label');
 assert.match(css, /prefers-reduced-motion: reduce/, 'combat animation respects reduced-motion preferences');
+assert.match(css, /--combat-frame-width:[\s\S]*?--combat-frame-height:/, 'combat units share reusable frame dimensions');
+assert.match(css, /\.combat-unit-art,[\s\S]*?#enemy-squad \.monster-slot-image[\s\S]*?object-fit: cover !important;[\s\S]*?object-position: center 28% !important;/, 'all artwork is automatically cropped around its recognizable center');
+assert.match(css, /monster-battle-slot\.elite \.monster-image-frame[\s\S]*?border-color: #b89bea !important;/, 'elite rank uses a silver-violet frame instead of enlarged artwork');
+assert.match(css, /monster-battle-slot\.boss \{[\s\S]*?scale: 1\.34 !important;/, 'boss frame is larger than the standard frame');
+assert.match(css, /monster-battle-slot\.boss \.monster-image-frame::before,[\s\S]*?clip-path: polygon/, 'boss frame includes reusable gold dragon-wing ornaments');
+assert.match(css, /monster-battle-slot\.boss \.monster-slot-header::before[\s\S]*?content: "龍";/, 'boss nameplate includes a gold dragon crest');
 assert.match(css, /#battle-player-art\[aria-label\][\s\S]*?width: auto !important;[\s\S]*?height: 24\.5% !important;/, 'main player preserves the source artwork aspect ratio in its desktop unit box');
 assert.match(css, /@media \(max-width: 700px\)[\s\S]*?#battle-player-art\[aria-label\][\s\S]*?width: auto !important;[\s\S]*?height: 22% !important;/, 'main player preserves the source artwork aspect ratio in its mobile unit box');
 assert.doesNotMatch(css, /\.battle-field #battle-player-art\[aria-label\] \{[^}]*width: clamp\(/, 'main player artwork is never squeezed into a fixed-width frame');

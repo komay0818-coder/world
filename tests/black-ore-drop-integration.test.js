@@ -12,6 +12,6 @@ assert.match(script, /VillageUpgradePolicy\.grantMapDrops\(progress, currentMap\
 assert.doesNotMatch(crafting, /blackOre: Object\.freeze/, 'black ore has one canonical material definition in the drop policy');
 assert.match(index, /chapter-one-material-drop-policy\.js\?v=20260813-blackstone-only-v3/, 'the blackstone-only material policy cache key changes');
 assert.match(index, /world\/6f4cf2aa093d7da62f43c7b217ba8ca7fd7cbf4a\/script\.js/, 'the integration script uses the immutable shared visible-height calibration');
-assert.match(index, /VER\. 0\.6\.8/, 'the game version includes the battle character proportion fix');
+assert.match(index, /VER\. 0\.6\.9/, 'the game version includes reusable combat unit frames');
 
 console.log('black-ore-drop-integration: assertions passed');

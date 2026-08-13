@@ -421,6 +421,184 @@
   .battle-field:has(#player-battle-stage[data-count="3"]) #battle-player-art[aria-label] { left: 20% !important; }
 }
 
+/* 0.6.9: reusable framed combat units. Artwork is cropped inside a stable portrait,
+   so source canvas size, transparent padding, weapon height and creature width no
+   longer control the battlefield footprint. */
+.battle-field {
+  --combat-frame-width: clamp(104px, 9vw, 142px);
+  --combat-frame-height: clamp(132px, 15vh, 178px);
+  --combat-frame-radius: 44% 44% 18% 18% / 30% 30% 14% 14%;
+}
+
+.combat-unit-frame,
+#enemy-squad .monster-image-frame {
+  box-sizing: border-box;
+  overflow: hidden !important;
+  border: 3px solid #71808c !important;
+  border-radius: var(--combat-frame-radius) !important;
+  background:
+    radial-gradient(circle at 50% 24%, rgba(173, 211, 228, .18), transparent 44%),
+    linear-gradient(160deg, rgba(36, 51, 61, .95), rgba(7, 15, 21, .98)) !important;
+  box-shadow:
+    inset 0 0 0 2px rgba(226, 240, 247, .13),
+    inset 0 -24px 34px rgba(0, 0, 0, .44),
+    0 9px 17px rgba(0, 0, 0, .46) !important;
+}
+
+.combat-unit-art,
+#enemy-squad .monster-slot-image {
+  position: absolute !important;
+  inset: 5px !important;
+  display: block !important;
+  width: calc(100% - 10px) !important;
+  height: calc(100% - 10px) !important;
+  max-width: none !important;
+  max-height: none !important;
+  border-radius: calc(var(--combat-frame-radius) - 5px);
+  background-position: center 28% !important;
+  background-size: cover !important;
+  background-repeat: no-repeat !important;
+  object-fit: cover !important;
+  object-position: center 28% !important;
+  filter: drop-shadow(0 5px 4px rgba(0, 0, 0, .48)) !important;
+  scale: 1 !important;
+  transform: none !important;
+}
+
+/* Main player and party members use exactly the same reusable portrait. */
+.battle-field #battle-player-art[aria-label],
+.battle-field .player-stage-unit {
+  width: var(--combat-frame-width) !important;
+  height: var(--combat-frame-height) !important;
+  aspect-ratio: auto !important;
+  padding: 0 !important;
+  translate: -50% 0 !important;
+  scale: 1 !important;
+  transform: none !important;
+}
+
+.battle-field #battle-player-art[aria-label] {
+  background-image: none !important;
+}
+
+.battle-field .player-stage-art {
+  inset: 5px !important;
+  scale: 1 !important;
+}
+
+.battle-field .player-grounding,
+.player-stage-unit::after { display: none !important; }
+
+/* Every normal and elite monster owns the same portrait footprint. */
+#enemy-squad .monster-battle-slot {
+  grid-template-rows: auto var(--combat-frame-height) auto auto !important;
+  height: auto !important;
+  min-height: 0 !important;
+  align-self: end !important;
+  scale: 1 !important;
+}
+
+#enemy-squad .monster-image-frame {
+  position: relative !important;
+  justify-self: center;
+  width: var(--combat-frame-width) !important;
+  height: var(--combat-frame-height) !important;
+  min-height: 0 !important;
+}
+
+#enemy-squad .monster-battle-slot[class*="visual-size-"] .monster-slot-image,
+#enemy-squad .monster-battle-slot.elite .monster-slot-image,
+#enemy-squad .monster-battle-slot.boss .monster-slot-image {
+  scale: 1 !important;
+}
+
+/* Elite rank is expressed by the silver-violet frame, not oversized artwork. */
+#enemy-squad .monster-battle-slot.elite .monster-image-frame {
+  border-color: #b89bea !important;
+  background:
+    radial-gradient(circle at 50% 18%, rgba(204, 174, 255, .28), transparent 42%),
+    linear-gradient(155deg, rgba(67, 48, 92, .98), rgba(16, 12, 28, .98)) !important;
+  box-shadow:
+    inset 0 0 0 2px rgba(240, 224, 255, .2),
+    inset 0 -25px 36px rgba(12, 6, 22, .5),
+    0 0 18px rgba(148, 96, 223, .48),
+    0 9px 17px rgba(0, 0, 0, .5) !important;
+}
+
+/* Bosses use one larger gold dragon frame; the art remains normalized inside it. */
+#enemy-squad .monster-battle-slot.boss {
+  z-index: 12 !important;
+  scale: 1.34 !important;
+  transform-origin: center bottom !important;
+}
+
+#enemy-squad .monster-battle-slot.boss .monster-image-frame {
+  overflow: visible !important;
+  border: 4px solid #e2ad43 !important;
+  background:
+    radial-gradient(circle at 50% 18%, rgba(255, 225, 134, .26), transparent 38%),
+    linear-gradient(160deg, rgba(91, 54, 18, .98), rgba(25, 12, 7, .99)) !important;
+  box-shadow:
+    inset 0 0 0 2px rgba(255, 239, 177, .3),
+    inset 0 -28px 38px rgba(20, 5, 2, .58),
+    0 0 22px rgba(236, 165, 53, .58),
+    0 11px 20px rgba(0, 0, 0, .55) !important;
+}
+
+#enemy-squad .monster-battle-slot.boss .monster-image-frame::before,
+#enemy-squad .monster-battle-slot.boss .monster-image-frame::after {
+  content: "";
+  position: absolute;
+  z-index: 4;
+  top: 14%;
+  width: 42%;
+  height: 56%;
+  background: linear-gradient(145deg, #f6d47d, #a86718 64%, #5c3109);
+  clip-path: polygon(100% 8%, 54% 0, 67% 24%, 15% 12%, 48% 43%, 0 52%, 47% 63%, 17% 92%, 69% 76%, 62% 100%, 100% 83%);
+  filter: drop-shadow(0 3px 3px rgba(0, 0, 0, .55));
+  pointer-events: none;
+}
+
+#enemy-squad .monster-battle-slot.boss .monster-image-frame::before { right: 96%; }
+#enemy-squad .monster-battle-slot.boss .monster-image-frame::after { left: 96%; transform: scaleX(-1); }
+
+#enemy-squad .monster-battle-slot.boss .monster-slot-header {
+  border: 1px solid rgba(242, 190, 83, .72);
+  background: linear-gradient(90deg, rgba(71, 34, 9, .94), rgba(19, 10, 6, .9)) !important;
+  box-shadow: 0 0 12px rgba(222, 145, 34, .34);
+}
+
+#enemy-squad .monster-battle-slot.boss .monster-slot-header::before {
+  content: "龍";
+  display: grid;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  flex: 0 0 20px;
+  border: 1px solid #f1c566;
+  border-radius: 50%;
+  background: #6d370d;
+  color: #ffe59b;
+  font-size: 11px;
+  font-weight: 900;
+}
+
+#enemy-squad .monster-battle-slot.boss .monster-slot-hp {
+  border-color: #e2ad43 !important;
+  background: #2b0908 !important;
+}
+
+@media (max-width: 700px) {
+  .battle-field {
+    --combat-frame-width: clamp(64px, 18vw, 82px);
+    --combat-frame-height: clamp(82px, 16vh, 108px);
+  }
+
+  #enemy-squad .monster-battle-slot.boss { scale: 1.24 !important; }
+  #enemy-squad .monster-battle-slot.boss .monster-image-frame::before,
+  #enemy-squad .monster-battle-slot.boss .monster-image-frame::after { display: none; }
+}
+
 .stronghold-objective {
   position: absolute;
   z-index: 26;
@@ -806,4 +984,32 @@ body:has(.battle-screen:not(.hidden)) .toast.show {
   .battle-field .player-stage-unit {
     width: clamp(66px, 20vw, 88px) !important;
   }
+}
+
+/* Final framed-unit precedence over the historical 0.4.x free-sprite rules. */
+.battle-field #battle-player-art[aria-label],
+.battle-field .player-stage-unit {
+  width: var(--combat-frame-width) !important;
+  height: var(--combat-frame-height) !important;
+  aspect-ratio: auto !important;
+  scale: 1 !important;
+}
+.battle-field #battle-player-art[aria-label] .combat-unit-art,
+.battle-field .player-stage-art {
+  inset: 5px !important;
+  width: calc(100% - 10px) !important;
+  height: calc(100% - 10px) !important;
+  background-size: cover !important;
+  background-position: center 28% !important;
+  scale: 1 !important;
+}
+#enemy-squad .monster-battle-slot { grid-template-rows: auto var(--combat-frame-height) auto auto !important; height: auto !important; }
+#enemy-squad .monster-image-frame { width: var(--combat-frame-width) !important; height: var(--combat-frame-height) !important; }
+#enemy-squad .monster-battle-slot[class*="visual-size-"] .monster-slot-image,
+#enemy-squad .monster-battle-slot.elite .monster-slot-image,
+#enemy-squad .monster-battle-slot.boss .monster-slot-image { scale: 1 !important; }
+#enemy-squad .monster-battle-slot.boss { scale: 1.34 !important; }
+@media (max-width: 700px) {
+  .battle-field #battle-player-art[aria-label], .battle-field .player-stage-unit { width: var(--combat-frame-width) !important; height: var(--combat-frame-height) !important; }
+  #enemy-squad .monster-battle-slot.boss { scale: 1.24 !important; }
 }
