@@ -39,6 +39,11 @@ assert.doesNotMatch(script, /portraitPrototypeAssigned|normal-portrait-prototype
 assert.doesNotMatch(css, /portrait-prototype|combat-frame-width|player-frame-width|gold dragon frame/, 'combat frame styling is fully removed');
 assert.match(script, /battlePlayerArt\.style\.backgroundImage = characterArt \? `url\('\$\{characterArt\}'\)` : '';/, 'unframed main player receives its character artwork directly');
 assert.doesNotMatch(script, /battlePlayerArt\.querySelector\('\.combat-unit-art'\)/, 'main player no longer depends on the removed frame artwork node');
+assert.match(css, /0\.6\.16: invisible unit zones[\s\S]*?--unit-scale-small: \.9;[\s\S]*?--unit-scale-humanoid: 1;[\s\S]*?--unit-scale-beast: 1\.12;[\s\S]*?--unit-scale-large: 1\.22;/, 'four invisible unit-zone size tiers normalize monster bodies');
+assert.match(css, /#enemy-squad \.monster-battle-slot \{[\s\S]*?border: 0 !important;[\s\S]*?background: none !important;[\s\S]*?box-shadow: none !important;/, 'monster unit zones remain visually frameless');
+assert.match(css, /#enemy-squad \.monster-slot-header \{[\s\S]*?justify-self: center !important;[\s\S]*?width: auto !important;[\s\S]*?border-radius: 999px !important;/, 'monster names use compact attached labels instead of wide cards');
+assert.match(css, /#enemy-squad \.monster-slot-hp \{[\s\S]*?top: -4px !important;[\s\S]*?width: 72% !important;/, 'monster health bars sit directly beneath their artwork');
+assert.match(css, /height: 37% !important;[\s\S]*?bottom: 8% !important;/, 'desktop main player is enlarged and raised within the ally field');
 assert.match(script, /function getMonsterVisualSize\(enemy = \{\}\)/, 'monster visual sizing uses a reusable category resolver');
 assert.doesNotMatch(script, /if \(enemy\.isBoss\) return 'boss';/, 'boss rank does not replace the creature body-size category');
 assert.match(script, /class="enemy-unit monster-battle-slot visual-size-\$\{visualSize\}/, 'enemy slots expose their visual-size category to CSS');

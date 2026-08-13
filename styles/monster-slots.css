@@ -806,3 +806,112 @@ body:has(.battle-screen:not(.hidden)) .toast.show {
     width: clamp(66px, 20vw, 88px) !important;
   }
 }
+
+/* 0.6.16: invisible unit zones keep full-body art aligned without visible cards. */
+.battle-field {
+  --unit-scale-small: .9;
+  --unit-scale-humanoid: 1;
+  --unit-scale-beast: 1.12;
+  --unit-scale-large: 1.22;
+}
+
+#enemy-squad .monster-battle-slot {
+  grid-template-rows: 27px minmax(0, 1fr) 0 8px !important;
+  padding: 0 4px 3px !important;
+  overflow: visible !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: none !important;
+  box-shadow: none !important;
+}
+
+#enemy-squad .monster-battle-slot::after { display: none !important; }
+#enemy-squad .monster-battle-slot::before {
+  top: auto !important;
+  right: 15% !important;
+  bottom: 8px !important;
+  left: 15% !important;
+  width: auto !important;
+  height: 11px !important;
+  border: 0 !important;
+  border-radius: 50% !important;
+  background: rgba(0, 0, 0, .3) !important;
+  filter: blur(4px) !important;
+  transform: none !important;
+}
+
+#enemy-squad .monster-image-frame {
+  overflow: visible !important;
+  border: 0 !important;
+  background: none !important;
+  box-shadow: none !important;
+}
+
+#enemy-squad .monster-slot-header {
+  z-index: 8 !important;
+  display: inline-flex !important;
+  justify-self: center !important;
+  width: auto !important;
+  max-width: calc(100% - 8px) !important;
+  min-height: 23px !important;
+  margin: 0 auto -5px !important;
+  padding: 3px 6px !important;
+  align-items: center !important;
+  border: 1px solid rgba(156, 172, 179, .36) !important;
+  border-radius: 999px !important;
+  background: rgba(5, 16, 23, .78) !important;
+  box-shadow: 0 2px 7px rgba(0, 0, 0, .34) !important;
+}
+
+#enemy-squad .monster-slot-title {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+#enemy-squad .monster-slot-title b { font-size: 10px !important; }
+#enemy-squad .monster-slot-title small { margin: 0 !important; font-size: 7px !important; white-space: nowrap; }
+#enemy-squad .monster-status-row { display: none !important; }
+#enemy-squad .monster-slot-hp {
+  z-index: 8 !important;
+  top: -4px !important;
+  width: 72% !important;
+  height: 7px !important;
+  margin: 0 auto !important;
+  border: 1px solid rgba(192, 205, 210, .72) !important;
+  border-radius: 999px !important;
+  background: rgba(5, 10, 13, .82) !important;
+}
+
+#enemy-squad .monster-battle-slot.elite .monster-image-frame,
+#enemy-squad .monster-battle-slot.elite .monster-slot-image {
+  filter: drop-shadow(0 0 9px rgba(174, 123, 255, .7)) drop-shadow(0 8px 5px rgba(0, 0, 0, .55)) !important;
+}
+
+#enemy-squad .monster-battle-slot.boss .monster-image-frame,
+#enemy-squad .monster-battle-slot.boss .monster-slot-image {
+  filter: drop-shadow(0 0 12px rgba(241, 183, 70, .75)) drop-shadow(0 9px 6px rgba(0, 0, 0, .58)) !important;
+}
+
+@media (min-width: 701px) {
+  .battle-field #battle-player-art[aria-label] {
+    width: clamp(132px, 15.5vw, 198px) !important;
+    height: 37% !important;
+    bottom: 8% !important;
+  }
+}
+
+@media (max-width: 700px) {
+  .battle-field {
+    --unit-scale-small: .92;
+    --unit-scale-humanoid: 1;
+    --unit-scale-beast: 1.1;
+    --unit-scale-large: 1.18;
+  }
+  #enemy-squad .monster-battle-slot { grid-template-rows: 21px minmax(0, 1fr) 0 6px !important; }
+  #enemy-squad .monster-slot-header { min-height: 19px !important; padding: 2px 4px !important; }
+  #enemy-squad .monster-slot-title b { font-size: 8px !important; }
+  #enemy-squad .monster-slot-title small { font-size: 6px !important; }
+  #enemy-squad .monster-slot-hp { width: 76% !important; height: 6px !important; }
+  .battle-field #battle-player-art[aria-label] { width: clamp(74px, 22vw, 98px) !important; height: 28% !important; bottom: 7% !important; }
+}
