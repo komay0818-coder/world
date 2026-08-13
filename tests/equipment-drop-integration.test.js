@@ -18,7 +18,7 @@ assert.match(script, /'hunter-shortbow': 'assets\/hunter-shortbow\.png'/, 'hunte
 assert.match(script, /'long-hunting-bow': 'assets\/long-hunting-bow\.png'/, 'long hunting bow artwork migrates into existing items');
 assert.match(script, /'mercenary-greatsword': 'assets\/mercenary-greatsword\.png'/, 'mercenary greatsword artwork migrates into existing items');
 assert.match(script, /'giant-iron-sword': 'assets\/giant-iron-sword\.png'/, 'giant iron sword artwork migrates into existing items');
-assert.match(index, /world\/54f64cc6ae6e3cab5eaf4f9659ffb44dc9bf3f2a\/script\.js/, 'the live page pins the current game UI to an immutable commit');
+assert.match(index, /world\/c584d03c2bd4b97cf5f89608d849b35397b32dd0\/script\.js/, 'the live page pins the current game UI to an immutable commit');
 assert.match(script, /'forest-guard-longsword': 'assets\/forest-guard-longsword\.png'/, 'forest guard sword artwork migrates into existing items');
 assert.match(script, /'mercenary-broadsword': 'assets\/mercenary-broadsword\.png'/, 'mercenary broadsword artwork migrates into existing items');
 assert.match(script, /'woodcutter-greatsword': 'assets\/woodcutter-greatsword\.png'/, 'woodcutter greatsword artwork migrates into existing items');
