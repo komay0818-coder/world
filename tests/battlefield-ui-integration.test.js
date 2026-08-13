@@ -11,6 +11,7 @@ assert.match(html, /class="battlefield-zone-label enemy-zone-label"/, 'enemy bat
 assert.match(html, /id="player-battle-stage"/, 'player party has a shared battlefield display layer');
 assert.match(html, /id="player-stage-info"/, 'main player information floats near the battlefield art');
 assert.match(html, /id="battle-companion-icons" class="battle-companion-icons hidden"/, 'battlefield provides a generic companion icon tray');
+assert.match(html, /c254cb92bff3199d2b7774b1a7e0f96fb4d8853c\/styles\/monster-slots\.css/, 'battlefield loads the immutable character proportion fix');
 assert.doesNotMatch(html, /id="hunter-companion"/, 'legacy full-body hunter companion is removed from the battlefield');
 assert.match(css, /grid-template-columns: repeat\(4, minmax\(0, 1fr\)\)/, 'desktop enemies share a four-unit battlefield row');
 assert.match(css, /#enemy-squad \.monster-battle-slot[\s\S]*?border: 0 !important;[\s\S]*?background: none !important;/, 'individual monster cards have no frame or background');
