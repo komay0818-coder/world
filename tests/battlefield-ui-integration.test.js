@@ -75,6 +75,9 @@ assert.match(css, /normal-portrait-prototype \.monster-image-frame::before[\s\S]
 assert.match(css, /normal-portrait-prototype \.monster-slot-image[\s\S]*?inset: -8px -10px 0 !important;[\s\S]*?object-fit: contain !important;/, 'normal prototype artwork stays complete and can break beyond the frame');
 assert.match(css, /player-portrait-prototype \.combat-unit-art[\s\S]*?background-size: contain !important;/, 'player prototype preserves the complete character artwork');
 assert.match(css, /monster-battle-slot:not\(\.portrait-prototype\) \.monster-image-frame[\s\S]*?border: 0 !important;/, 'non-prototype monsters do not retain the rejected box frame');
+assert.match(css, /0\.6\.12: Hearthstone-style portrait prototype[\s\S]*?monster-image-frame::before[\s\S]*?z-index: 3;/, 'prototype frame ring renders independently above the portrait well');
+assert.match(css, /normal-portrait-prototype \.monster-slot-image[\s\S]*?inset: 12px 13px 9px !important;[\s\S]*?object-fit: contain !important;/, 'monster artwork fits inside the oval safe area without being cropped or covered');
+assert.match(css, /player-portrait-prototype \.combat-unit-art[\s\S]*?inset: 18px 16px 10px !important;[\s\S]*?background-size: contain !important;/, 'player artwork fits inside the oval safe area without being cropped or covered');
 assert.match(css, /#battle-player-art\[aria-label\][\s\S]*?width: auto !important;[\s\S]*?height: 24\.5% !important;/, 'main player preserves the source artwork aspect ratio in its desktop unit box');
 assert.match(css, /@media \(max-width: 700px\)[\s\S]*?#battle-player-art\[aria-label\][\s\S]*?width: auto !important;[\s\S]*?height: 22% !important;/, 'main player preserves the source artwork aspect ratio in its mobile unit box');
 assert.doesNotMatch(css, /\.battle-field #battle-player-art\[aria-label\] \{[^}]*width: clamp\(/, 'main player artwork is never squeezed into a fixed-width frame');
