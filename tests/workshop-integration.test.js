@@ -10,6 +10,8 @@ const css = fs.readFileSync(path.join(root, 'styles', 'village.css'), 'utf8');
 
 assert.match(html, /chapter-one-material-drop-policy\.js[\s\S]*chapter-one-recipe-drop-policy\.js[\s\S]*crafting-policy\.js[\s\S]*script\.js/, 'formal material and recipe data load before crafting integration');
 assert.match(script, /function renderWorkshop\(/, 'village workshop has a dedicated renderer');
+assert.doesNotMatch(script, /recipe\.chapter === 1/, 'workshop no longer hides chapter-two recipes');
+assert.match(script, /第一、二章裝備製作/, 'workshop identifies both supported crafting chapters');
 assert.match(script, /data-workshop-quality="uncommon"[\s\S]*data-workshop-quality="rare"/, 'workshop exposes green and blue quality filters');
 assert.match(script, /data-workshop-slot="wrist"[\s\S]*data-workshop-slot="cloak"[\s\S]*data-workshop-slot="shoulders"/, 'workshop exposes all three chapter-one equipment slots');
 assert.match(script, /workshop-insufficient/, 'missing resources receive a dedicated UI state');

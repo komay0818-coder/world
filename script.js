@@ -1340,8 +1340,7 @@ function renderWorkshop(building = getVillageBuildingData('workshop'), craftedIt
   const inventory = Array.isArray(progress.inventory) ? progress.inventory : [];
   const materialName = (id) => Object.values(CraftingPolicy.MATERIALS).find((entry) => entry.id === id)?.name || id;
   const quantity = (id) => CraftingPolicy.getItemQuantity(inventory, id);
-  const visibleRecipes = Object.values(CraftingPolicy.RECIPES).filter((recipe) => recipe.chapter === 1
-    && recipe.quality === workshopQuality
+  const visibleRecipes = Object.values(CraftingPolicy.RECIPES).filter((recipe) => recipe.quality === workshopQuality
     && (workshopSlot === 'all' || recipe.equipmentSlot === workshopSlot));
   const cards = visibleRecipes.map((recipe) => {
     const rarity = CraftingPolicy.RARITIES[recipe.quality];
@@ -1363,7 +1362,7 @@ function renderWorkshop(building = getVillageBuildingData('workshop'), craftedIt
     </article>`;
   }).join('');
   const result = craftedItem ? `<section class="workshop-result"><h4>製作完成：${craftedItem.name}</h4>${craftedItem.affixes.map((entry) => `<p><b>${entry.source === 'fixed' ? '固定詞綴' : '隨機詞綴'}</b>　${EquipmentAffixPolicy.formatAffix(entry)}</p>`).join('')}</section>` : '';
-  document.querySelector('#village-building-content').innerHTML = `<div class="workshop-title"><div class="village-building-icon" aria-hidden="true">${building.icon}</div><div><h3>${building.name}</h3><small>第一章裝備製作・背包 ${inventory.length} / ${CraftingPolicy.INVENTORY_CAPACITY}</small></div></div><p>製作前只顯示可能能力；實際能力與數值會在製作成功時生成並永久保存。</p>
+  document.querySelector('#village-building-content').innerHTML = `<div class="workshop-title"><div class="village-building-icon" aria-hidden="true">${building.icon}</div><div><h3>${building.name}</h3><small>第一、二章裝備製作・背包 ${inventory.length} / ${CraftingPolicy.INVENTORY_CAPACITY}</small></div></div><p>製作前只顯示可能能力；實際能力與數值會在製作成功時生成並永久保存。</p>
     <div class="workshop-filters"><div><b>品質</b><button type="button" data-workshop-quality="uncommon" class="${workshopQuality === 'uncommon' ? 'selected' : ''}">綠色</button><button type="button" data-workshop-quality="rare" class="${workshopQuality === 'rare' ? 'selected' : ''}">藍色</button></div><div><b>部位</b><button type="button" data-workshop-slot="all" class="${workshopSlot === 'all' ? 'selected' : ''}">全部</button><button type="button" data-workshop-slot="wrist" class="${workshopSlot === 'wrist' ? 'selected' : ''}">護腕</button><button type="button" data-workshop-slot="cloak" class="${workshopSlot === 'cloak' ? 'selected' : ''}">斗篷</button><button type="button" data-workshop-slot="shoulders" class="${workshopSlot === 'shoulders' ? 'selected' : ''}">肩甲</button></div></div>
     ${result}<section class="workshop-recipes">${cards || '<p class="village-placeholder">此分類目前沒有可製作配方。</p>'}</section>`;
 }

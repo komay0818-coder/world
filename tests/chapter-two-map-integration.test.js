@@ -15,14 +15,14 @@ assert.match(index, /black-forest-entrance-policy\.js[\s\S]*chapter-two-map-poli
 assert.match(index, /black-forest-trail-policy\.js[\s\S]*chapter-two-map-policy\.js/);
 assert.match(index, /spider-nest-policy\.js[\s\S]*chapter-two-map-policy\.js/);
 assert.match(index, /forest-altar-policy\.js[\s\S]*chapter-two-map-policy\.js/);
-assert.match(index, /VER\. 0\.6\.14/);
+assert.match(index, /VER\. 0\.6\.15/);
 assert.match(index, /black-forest-depths-policy\.js\?v=20260810-depths-boss-v13/);
 assert.match(index, /blackstone-stronghold-policy\.js\?v=20260810-outpost-objective-v17/);
 assert.match(index, /black-forest-trail-policy\.js\?v=20260809-trail-balance-v10/);
 assert.match(index, /spider-nest-policy\.js\?v=20260809-spider-combat-v9/);
 assert.match(index, /forest-altar-policy\.js\?v=20260810-altar-skills-v12/);
 assert.match(index, /chapter-two-map-policy\.js\?v=20260810-depths-boss-v20/);
-assert.match(index, /world\/c584d03c2bd4b97cf5f89608d849b35397b32dd0\/script\.js/);
+assert.match(index, /world\/d90c3590e7fc7269c2c59d521aab28a8e8523751\/script\.js/);
 assert.match(index, /VER\. \d+\.\d+\.\d+/, 'the game exposes a semantic version');
 assert.match(script, /\.\.\.ChapterTwoMapPolicy\.MAPS/, 'chapter-two maps join the shared progression data');
 assert.match(script, /blackForestEntrance: BlackForestEntrancePolicy\.getCombatPool\(\)/);

@@ -8,7 +8,7 @@ function seeded(seed = 1) {
 }
 function stackedItem(item, quantity = 999) { return { ...item, quantity }; }
 function progressWith(recipeIds, quantity = 999, gold = 999999) {
-  const recipeItems = recipeIds.map((recipeId) => stackedItem(Object.values(require('../chapter-one-recipe-drop-policy.js').RECIPES).find((entry) => entry.recipeId === recipeId), quantity));
+  const recipeItems = recipeIds.map((recipeId) => stackedItem(CraftingPolicy.RECIPES[recipeId], quantity));
   return { gold, inventory: [...Object.values(CraftingPolicy.MATERIALS).map((item) => stackedItem(item, quantity)), ...recipeItems], equipment: {} };
 }
 function assertValidBatch(recipeId, expectedFixed, expectedRandom, seed) {
@@ -80,6 +80,20 @@ const duplicate = progressWith([recipeId], 10, 10000);
 duplicate.inventory.push({ id: 'duplicate', instanceId: 'duplicate', kind: 'equipment' });
 const duplicateSnapshot = JSON.stringify(duplicate);
 assert.equal(CraftingPolicy.craftEquipment(duplicate, recipeId, { instanceId: 'duplicate' }).code, 'duplicate-instance');
+
+const chapterTwoRecipeId = 'chapter2-corrupted-centurion-cloak';
+const chapterTwoRecipe = CraftingPolicy.RECIPES[chapterTwoRecipeId];
+assert.equal(Object.values(CraftingPolicy.RECIPES).filter((entry) => entry.chapter === 2).length, 6, 'all six chapter-two recipes are craftable');
+assert.equal(CraftingPolicy.MATERIALS.blackWood.name, '黑木', 'chapter-two materials are available to crafting');
+assert.equal(CraftingPolicy.MATERIALS.uncommonStone.name, '綠色裝備強化石');
+assert.equal(CraftingPolicy.MATERIALS.rareStone.name, '藍色裝備強化石');
+const chapterTwoProgress = progressWith([chapterTwoRecipeId], 20, 50000);
+const chapterTwoBefore = Object.fromEntries(Object.keys(chapterTwoRecipe.materials).map((id) => [id, CraftingPolicy.getItemQuantity(chapterTwoProgress.inventory, id)]));
+const chapterTwoCraft = CraftingPolicy.craftEquipment(chapterTwoProgress, chapterTwoRecipeId, { instanceId: 'chapter-two-craft', craftedAt: 456 });
+assert.equal(chapterTwoCraft.ok, true);
+assert.equal(chapterTwoCraft.item.name, '腐化百夫長披風');
+Object.entries(chapterTwoRecipe.materials).forEach(([id, amount]) => assert.equal(CraftingPolicy.getItemQuantity(chapterTwoProgress.inventory, id), chapterTwoBefore[id] - amount));
+assert.equal(chapterTwoProgress.gold, 32000, 'chapter-two rare craft consumes 18,000 gold');
 assert.equal(JSON.stringify(duplicate), duplicateSnapshot, 'duplicate instance id deducts nothing');
 
 assert.deepEqual(Object.values(CraftingPolicy.RARITIES).map((entry) => entry.affixCount), [3, 5, 6], 'V3 total affix counts remain configurable rarity data');

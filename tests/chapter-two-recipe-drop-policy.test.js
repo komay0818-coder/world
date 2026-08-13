@@ -5,7 +5,15 @@ assert.equal(policy.RECIPE_DROP_RATE, .01, '沿用現有稀有配方 1% 機制')
 assert.equal(Object.keys(policy.RECIPES).length, 6);
 assert.deepEqual(Object.values(policy.RECIPES).map(({ equipmentSlot }) => equipmentSlot), ['cloak', 'wrist', 'shoulders', 'shoulders', 'wrist', 'cloak']);
 assert.deepEqual(Object.values(policy.RECIPES).map(({ quality }) => quality), ['uncommon', 'uncommon', 'uncommon', 'rare', 'rare', 'rare']);
-assert.ok(Object.values(policy.RECIPES).every((recipe) => recipe.chapter === 2 && recipe.materials === null && recipe.goldCost === null));
+assert.ok(Object.values(policy.RECIPES).every((recipe) => recipe.chapter === 2 && recipe.craftingStatus === 'ready'));
+assert.deepEqual(policy.RECIPES.greenCloak.materials, { 'equipment-stone-uncommon': 1, 'black-wood': 8, 'spider-silk': 6 });
+assert.deepEqual(policy.RECIPES.greenWrist.materials, { 'equipment-stone-uncommon': 1, 'black-iron-ore': 8, 'hard-hide': 6 });
+assert.deepEqual(policy.RECIPES.greenShoulders.materials, { 'equipment-stone-uncommon': 1, 'black-iron-ore': 6, 'hard-hide': 6, 'spider-silk': 6 });
+assert.deepEqual(policy.RECIPES.blackstoneBullhornShoulders.materials, { 'equipment-stone-rare': 1, 'black-iron-ore': 12, 'hard-hide': 10, 'corruption-crystal': 3 });
+assert.deepEqual(policy.RECIPES.sturdyGuardianWrist.materials, { 'equipment-stone-rare': 1, 'black-iron-ore': 10, 'black-wood': 8, 'corruption-crystal': 5 });
+assert.deepEqual(policy.RECIPES.corruptedCenturionCloak.materials, { 'equipment-stone-rare': 1, 'spider-silk': 10, 'black-wood': 8, 'corruption-crystal': 6, 'venom-sac': 3 });
+assert.deepEqual(Object.values(policy.RECIPES).map(({ goldCost }) => goldCost), [4800, 4800, 4800, 18000, 18000, 18000]);
+Object.values(policy.RECIPES).forEach((recipe) => assert.deepEqual(recipe.materialRequirements, recipe.materials));
 assert.deepEqual(Object.keys(policy.RARE_DROP_SOURCES), [
   'forestGuardianV2', 'blackstoneCenturion', 'giantSpider',
   'blackstoneStrongholdBullhornWarrior', 'altarGuard', 'corruptedBlackstoneCenturion'
