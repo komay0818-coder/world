@@ -2,26 +2,33 @@ const assert = require('node:assert/strict');
 const policy = require('../black-forest-corruption-policy.js');
 
 assert.equal(policy.MAX_LAYERS, 6);
-assert.equal(Object.keys(policy.MAP_MATERIALS).length, 6);
-assert.equal(new Set(Object.values(policy.MAP_MATERIALS).map((item) => item.id)).size, 6);
-assert.ok(Object.values(policy.MAP_MATERIALS).every((item) => item.dropRate === null));
-const progress = { inventory: [] };
-assert.deepEqual(policy.enterChapter(progress), { level: 6, attackPenalty: .48, defensePenalty: .48, accuracyPenalty: .48, maxHpLossPerSecond: .06, fullyPurified: false });
-assert.deepEqual(policy.applyCombatStats({ attack: 100, defense: 50, accuracy: 1.05 }, progress.blackForestCorruption), { attack: 52, defense: 26, accuracy: .5700000000000001 });
-assert.equal(policy.getHpLoss(1000, 1, progress.blackForestCorruption), 60);
-for (const [index, material] of Object.values(policy.MAP_MATERIALS).entries()) {
-  progress.inventory.push({ id: material.id, quantity: 1 });
-  const result = policy.purify(progress, material.mapId);
-  assert.equal(result.ok, true);
-  assert.equal(result.effect.level, 5 - index);
-  assert.equal(result.effect.attackPenalty, (5 - index) * .08);
-  assert.equal(result.effect.maxHpLossPerSecond, (5 - index) * .01);
-}
-assert.equal(policy.getEffect(progress.blackForestCorruption).fullyPurified, true);
-assert.equal(policy.purify(progress, 'black-forest-entrance').reason, 'already-purified');
-const missing = { inventory: [], blackForestCorruption: { initialized: true, purifiedMapIds: [] } };
-assert.equal(policy.purify(missing, 'forest-altar').reason, 'material');
-assert.equal(policy.createMapDrop('forest-altar', null, () => 0), null);
-assert.equal(policy.createMapDrop('forest-altar', .25, () => .249).id, 'forest-altar-purifier');
-assert.equal(policy.createMapDrop('forest-altar', .25, () => .25), null);
+assert.deepEqual(policy.DROP_RATES, { normal: .10, elite: .25, boss: 1 });
+assert.equal(policy.MATERIAL_COST, 20);
+assert.equal(policy.GOLD_COST, 1000);
+assert.equal(policy.SUCCESS_RATE, .10);
+assert.deepEqual(Object.values(policy.MAP_MATERIALS).map((item) => item.name), ['森林淨化葉', '黑石破咒石', '蛛毒淨化囊', '督軍徽記碎片', '祭壇淨化結晶', '黑森林之心碎片']);
+
+const material = policy.MAP_MATERIALS['spider-nest'];
+const failed = { gold: 2000, inventory: [{ ...material, quantity: 40 }], blackForestCorruption: { initialized: true, removedLayers: 0 } };
+const failure = policy.purify(failed, 'spider-nest', { random: () => .10 });
+assert.equal(failure.success, false);
+assert.equal(failed.gold, 1000);
+assert.equal(failed.inventory[0].quantity, 20);
+assert.equal(policy.getEffect(failed.blackForestCorruption).level, 6);
+
+const success = policy.purify(failed, 'spider-nest', { random: () => .099 });
+assert.equal(success.success, true);
+assert.equal(failed.gold, 0);
+assert.equal(failed.inventory.length, 0);
+assert.equal(success.effect.level, 5);
+
+assert.equal(policy.createMapDrop('forest-altar', {}, () => .099).quantity, 1);
+assert.equal(policy.createMapDrop('forest-altar', {}, () => .10), null);
+assert.equal(policy.createMapDrop('forest-altar', { isElite: true }, () => .249).quantity, 1);
+assert.equal(policy.createMapDrop('forest-altar', { isElite: true }, () => .25), null);
+assert.equal(policy.createMapDrop('forest-altar', { isBoss: true }, () => .999).quantity, 1);
+
+const legacy = policy.normalizeState({ initialized: true, purifiedMapIds: ['black-forest-entrance', 'spider-nest'] });
+assert.equal(policy.getEffect(legacy).level, 4, 'legacy permanent progress is retained');
+
 console.log('black-forest-corruption-policy: assertions passed');

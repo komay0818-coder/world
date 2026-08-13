@@ -26,6 +26,11 @@
     maps.forEach((map) => uniqueMonsterIds(mapPools[map.id]).forEach((monsterId) => {
       const monster = monsters[monsterId]; if (!monster) return;
       const sourceBase = { chapter: map.chapter, mapId: map.id, mapName: map.name, monsterId, monsterName: monster.name };
+      const purificationItem = options.purificationPolicy?.MAP_MATERIALS?.[map.id];
+      if (purificationItem) {
+        const rank = monster.isBoss ? 'boss' : monster.isElite ? 'elite' : 'normal';
+        addSource(index, { ...purificationItem, category: 'material', typeLabel: 'Debuff 解除道具' }, { ...sourceBase, rate: options.purificationPolicy.DROP_RATES?.[rank], amount: 1 });
+      }
       (options.materialPolicy?.MAP_DROP_CONFIGS?.[map.id] || []).forEach((drop) => { const item = materialById.get(drop.materialId); addSource(index, item && { ...item, category: 'material', typeLabel: '製作材料' }, { ...sourceBase, rate: drop.dropRate }); });
       (options.materialPolicy?.MONSTER_DROP_CONFIGS?.[monsterId] || []).forEach((drop) => { const item = materialById.get(drop.materialId); addSource(index, item && { ...item, category: 'material', typeLabel: '製作材料' }, { ...sourceBase, rate: drop.dropRate, amount: drop.amount || 1 }); });
       (options.skillPolicy?.DROP_CONFIG?.[map.chapter]?.materials || []).filter((drop) => !drop.bossOnly || monster.isBoss).forEach((drop) => { const item = skillById.get(drop.materialId); addSource(index, item && { ...item, category: 'skill', typeLabel: '技能材料' }, { ...sourceBase, rate: drop.chance, amount: drop.amount || 1 }); });

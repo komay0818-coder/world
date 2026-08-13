@@ -154,3 +154,4 @@
   .enemy-unit.focus-target .enemy-track{width:68px!important;height:5px!important}
   .enemy-unit.support-target .enemy-track{width:46px!important;height:2px!important}
 }
+.drop-purification-panel{display:flex;align-items:center;justify-content:space-between;gap:16px;margin:0 0 14px;padding:14px 16px;border:1px solid #8f6cff;border-radius:12px;background:linear-gradient(135deg,rgba(81,45,132,.42),rgba(13,34,48,.9))}.drop-purification-panel div{display:grid;gap:4px}.drop-purification-panel b{color:#efe5ff}.drop-purification-panel small,.drop-purification-panel em{color:#c6bfd3;font-style:normal}.drop-purification-panel button{flex:0 0 auto;padding:10px 14px;border:1px solid #b999ff;border-radius:9px;background:#563c91;color:#fff;font-weight:800;cursor:pointer}.drop-purification-panel button:disabled{opacity:.45;cursor:not-allowed}

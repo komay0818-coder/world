@@ -60,7 +60,7 @@ assert.doesNotMatch(script, /button\.dataset\.menuAction === '材料'/, 'the rem
 assert.match(css, /grid-template-columns: repeat\(7, minmax\(0, 1fr\)\) !important;/, 'the seven remaining battle actions share the full row');
 assert.match(css, /body:has\(\.battle-screen:not\(\.hidden\)\) \.toast[\s\S]*?bottom: calc\(92px/, 'battle loot notifications sit above the action bar');
 assert.match(script, /<main class="drop-lookup-simple">/, 'drop lookup uses a simple item-list layout');
-assert.match(script, /const activeMap = getActiveMap\(getProgress\(\)\);[\s\S]*?filterItems\(items, dropLookupQuery, dropLookupCategory, activeMap\.id\)/, 'drop lookup only shows items obtainable in the active map');
+assert.match(script, /const activeMap = getActiveMap\(progress\);[\s\S]*?filterItems\(items, dropLookupQuery, dropLookupCategory, activeMap\.id\)/, 'drop lookup only shows items obtainable in the active map');
 assert.match(script, /目前地圖：\$\{activeMap\.name\}/, 'drop lookup identifies the map currently being queried');
 assert.match(script, /progress\.selectedMapId = map\.id;[\s\S]*?renderDropLookup\(\)/, 'an open drop lookup synchronizes when the player changes maps');
 assert.doesNotMatch(script, /data-drop-map=|data-drop-travel=|drop-source-list/, 'drop lookup does not render map sources or travel actions');

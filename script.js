@@ -2249,7 +2249,8 @@ function getDropLookupItems() {
     materialPolicy: ChapterOneMaterialDropPolicy,
     recipePolicy: ChapterOneRecipeDropPolicy,
     skillPolicy: SkillUpgradePolicy,
-    bossPolicy: ChapterBossDropPolicy
+    bossPolicy: ChapterBossDropPolicy,
+    purificationPolicy: BlackForestCorruptionPolicy
   });
 }
 
@@ -2262,14 +2263,19 @@ function isDropLookupMapUnlocked(map, progress = getProgress()) {
 }
 
 function renderDropLookup() {
-  const activeMap = getActiveMap(getProgress());
+  const progress = getProgress();
+  const activeMap = getActiveMap(progress);
   const items = getDropLookupItems();
   const filtered = DropLookupPolicy.filterItems(items, dropLookupQuery, dropLookupCategory, activeMap.id);
   const categories = [['all', '全部'], ['equipment', '裝備'], ['material', '材料'], ['recipe', '配方'], ['skill', '技能材料']];
   const resultCards = filtered.map((item) => {
     return `<article class="drop-result-card"><span>${item.icon || (item.category === 'equipment' ? '⚔' : '◆')}</span><div><b>${item.name}</b><small>${item.typeLabel}</small></div></article>`;
   }).join('');
-  document.querySelector('#drop-lookup-content').innerHTML = `<div class="drop-lookup-toolbar"><label><span>搜尋物品名稱</span><input type="search" data-drop-search value="${dropLookupQuery.replace(/&/g, '&amp;').replace(/"/g, '&quot;')}" placeholder="例如：狼牙、技能殘頁、配方"></label><nav>${categories.map(([id, label]) => `<button type="button" data-drop-category="${id}" class="${dropLookupCategory === id ? 'selected' : ''}">${label}</button>`).join('')}</nav></div><main class="drop-lookup-simple"><p class="drop-result-count"><strong>目前地圖：${activeMap.name}</strong>・共 ${filtered.length} 種掉落物</p><div class="drop-result-list">${resultCards || '<p class="drop-empty-result">此地圖沒有符合條件的掉落物。</p>'}</div></main>`;
+  const purificationMaterial = BlackForestCorruptionPolicy.MAP_MATERIALS[activeMap.id];
+  const corruption = BlackForestCorruptionPolicy.getEffect(progress.blackForestCorruption);
+  const owned = purificationMaterial ? BlackForestCorruptionPolicy.getQuantity(progress.inventory, purificationMaterial.id) : 0;
+  const purificationPanel = purificationMaterial ? `<section class="drop-purification-panel"><div><b>黑森林 Debuff：${corruption.level} 層</b><small>${purificationMaterial.name} ${owned} / ${BlackForestCorruptionPolicy.MATERIAL_COST}・金幣 ${progress.gold} / ${BlackForestCorruptionPolicy.GOLD_COST}</small><em>每次成功率 10%；無論成功或失敗皆消耗材料與金幣。</em></div><button type="button" data-attempt-purification="${activeMap.id}" ${corruption.level <= 0 || owned < BlackForestCorruptionPolicy.MATERIAL_COST || progress.gold < BlackForestCorruptionPolicy.GOLD_COST ? 'disabled' : ''}>嘗試解除 1 層</button></section>` : '';
+  document.querySelector('#drop-lookup-content').innerHTML = `${purificationPanel}<div class="drop-lookup-toolbar"><label><span>搜尋物品名稱</span><input type="search" data-drop-search value="${dropLookupQuery.replace(/&/g, '&amp;').replace(/"/g, '&quot;')}" placeholder="例如：狼牙、技能殘頁、配方"></label><nav>${categories.map(([id, label]) => `<button type="button" data-drop-category="${id}" class="${dropLookupCategory === id ? 'selected' : ''}">${label}</button>`).join('')}</nav></div><main class="drop-lookup-simple"><p class="drop-result-count"><strong>目前地圖：${activeMap.name}</strong>・共 ${filtered.length} 種掉落物</p><div class="drop-result-list">${resultCards || '<p class="drop-empty-result">此地圖沒有符合條件的掉落物。</p>'}</div></main>`;
   document.querySelector('#drop-lookup-modal').classList.remove('hidden');
 }
 
@@ -3203,6 +3209,7 @@ function rewardVictory(index) {
   const collectible = addCollectibleLoot(progress, enemy);
   const materialDrops = ChapterOneMaterialDropPolicy.grantMaterialDrops(progress, currentMap.id, enemy);
   materialDrops.push(...VillageUpgradePolicy.grantMapDrops(progress, currentMap.id));
+  const purificationDrop = BlackForestCorruptionPolicy.grantMapDrop(progress, currentMap.id, enemy);
   const skillMaterialDrops = SkillUpgradePolicy.grantChapterDrops(progress, currentMap.chapter, enemy);
   const recipeDrops = ChapterOneRecipeDropPolicy.grantRecipeDrops(progress, enemy, currentMap.id);
   let equipmentDrop = null;
@@ -3268,6 +3275,10 @@ function rewardVictory(index) {
     showToast(`獲得材料：${material.name}`);
     logBattle(`◆ 材料掉落【${material.name} ×${material.quantity}】`, 'loot');
   });
+  if (purificationDrop) {
+    showToast(`獲得淨化道具：${purificationDrop.name}`);
+    logBattle(`◇ 淨化道具掉落【${purificationDrop.name} ×1】`, 'loot');
+  }
   skillMaterialDrops.forEach((material) => {
     showToast(`獲得技能材料：${material.name}`);
     logBattle(`📜 技能材料掉落【${material.name} ×${material.quantity}】`, 'loot');
@@ -4937,6 +4948,15 @@ document.querySelector('#drop-lookup-modal').addEventListener('click', (event) =
   if (event.target === event.currentTarget) { event.currentTarget.classList.add('hidden'); return; }
   const category = event.target.closest('[data-drop-category]');
   if (category) { dropLookupCategory = category.dataset.dropCategory; renderDropLookup(); }
+  const purificationButton = event.target.closest('[data-attempt-purification]');
+  if (purificationButton) {
+    const progress = getProgress();
+    const result = BlackForestCorruptionPolicy.purify(progress, purificationButton.dataset.attemptPurification);
+    if (!result.ok) { showToast('解除條件不足，請確認材料、金幣與 Debuff 層數。'); return; }
+    saveProgress(progress);
+    showToast(result.success ? `淨化成功！Debuff 降至 ${result.effect.level} 層。` : '淨化失敗，材料與金幣已消耗。');
+    renderDropLookup();
+  }
 });
 document.querySelector('#drop-lookup-modal').addEventListener('input', (event) => {
   if (!event.target.matches('[data-drop-search]')) return;
