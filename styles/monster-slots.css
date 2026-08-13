@@ -915,3 +915,8 @@ body:has(.battle-screen:not(.hidden)) .toast.show {
   #enemy-squad .monster-slot-hp { width: 76% !important; height: 6px !important; }
   .battle-field #battle-player-art[aria-label] { width: clamp(74px, 22vw, 98px) !important; height: 28% !important; bottom: 7% !important; }
 }
+
+/* 0.6.17: widen only the main character silhouette without changing its height. */
+.battle-field #battle-player-art[aria-label] {
+  scale: calc(var(--character-scale, 1) * 1.1) var(--character-scale, 1) !important;
+}

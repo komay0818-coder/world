@@ -44,6 +44,7 @@ assert.match(css, /#enemy-squad \.monster-battle-slot \{[\s\S]*?border: 0 !impor
 assert.match(css, /#enemy-squad \.monster-slot-header \{[\s\S]*?justify-self: center !important;[\s\S]*?width: auto !important;[\s\S]*?border-radius: 999px !important;/, 'monster names use compact attached labels instead of wide cards');
 assert.match(css, /#enemy-squad \.monster-slot-hp \{[\s\S]*?top: -4px !important;[\s\S]*?width: 72% !important;/, 'monster health bars sit directly beneath their artwork');
 assert.match(css, /height: 37% !important;[\s\S]*?bottom: 8% !important;/, 'desktop main player is enlarged and raised within the ally field');
+assert.match(css, /0\.6\.17: widen only the main character silhouette[\s\S]*?scale: calc\(var\(--character-scale, 1\) \* 1\.1\) var\(--character-scale, 1\) !important;/, 'main character widens ten percent without increasing its height');
 assert.match(script, /function getMonsterVisualSize\(enemy = \{\}\)/, 'monster visual sizing uses a reusable category resolver');
 assert.doesNotMatch(script, /if \(enemy\.isBoss\) return 'boss';/, 'boss rank does not replace the creature body-size category');
 assert.match(script, /class="enemy-unit monster-battle-slot visual-size-\$\{visualSize\}/, 'enemy slots expose their visual-size category to CSS');
