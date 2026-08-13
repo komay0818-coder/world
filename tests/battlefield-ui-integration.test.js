@@ -13,7 +13,7 @@ const layoutKeys = new Set([...layoutBlock.matchAll(/'([^']+:[^']+)'\s*:/g)].map
 
 assert.match(html, /class="battlefield-zone-label enemy-zone-label"/, 'enemy battlefield has a shared label');
 assert.match(html, /id="player-battle-stage"/, 'player party has a shared battlefield display layer');
-assert.match(html, /id="battle-player-art" class="battle-player-art combat-unit-frame player-unit-frame hidden"[\s\S]*?class="combat-unit-art"/, 'main player uses the reusable framed-unit component');
+assert.match(html, /id="battle-player-art" class="battle-player-art portrait-prototype player-portrait-prototype hidden"[\s\S]*?class="combat-unit-art"/, 'main player uses the portrait-frame prototype');
 assert.match(html, /id="player-stage-info"/, 'main player information floats near the battlefield art');
 assert.match(html, /id="battle-companion-icons" class="battle-companion-icons hidden"/, 'battlefield provides a generic companion icon tray');
 assert.match(html, /c260d9bded4390bba74858ea194f8036ccfe65e9\/styles\/monster-slots\.css/, 'battlefield loads the immutable near-square framed-unit build');
@@ -39,7 +39,8 @@ assert.match(css, /\.battle-companion-icon\.portrait \{[\s\S]*?background-positi
 assert.doesNotMatch(script, /companionName\.textContent/, 'companion tray does not add level, health, stats, or text panels');
 assert.match(css, /\.player-battle-stage[\s\S]*?justify-content: center;/, 'party units auto-center on their shared ground');
 assert.match(script, /battleCharacterArt\[`\$\{member\.character\.race\}:\$\{member\.character\.job\}`\]/, 'party display reuses existing character art');
-assert.match(script, /player-stage-unit combat-unit-frame player-unit-frame[\s\S]*?player-stage-art combat-unit-art/, 'party members use the same framed-unit component as the main player');
+assert.match(script, /let portraitPrototypeAssigned = false;[\s\S]*?!enemy\.isElite && !enemy\.isBoss[\s\S]*?normal-portrait-prototype/, 'only the first visible normal monster receives the portrait prototype');
+assert.doesNotMatch(script, /player-stage-unit combat-unit-frame player-unit-frame/, 'party members do not receive the unapproved prototype');
 assert.equal(artKeys.length, 20, 'all four races and five jobs have battlefield artwork');
 assert.deepEqual(artKeys.filter((key) => !layoutKeys.has(key)), [], 'every race and job artwork has an explicit aspect-ratio layout');
 assert.match(layoutBlock, /'elf:warrior': \{ aspect: '1346 \/ 1169', visibleScale: 1\.178 \}/, 'elf warrior transparent padding is calibrated to the shared visible height');
@@ -70,6 +71,10 @@ assert.match(css, /#enemy-squad \.monster-slot-hp[\s\S]*?margin: -1px auto 0 !im
 assert.match(css, /monster-battle-slot\.boss \{[\s\S]*?scale: 1\.34 !important;/, 'boss frame is larger than the standard frame');
 assert.match(css, /monster-battle-slot\.boss \.monster-image-frame::before,[\s\S]*?clip-path: polygon/, 'boss frame includes reusable gold dragon-wing ornaments');
 assert.match(css, /monster-battle-slot\.boss \.monster-slot-header::before[\s\S]*?content: "龍";/, 'boss nameplate includes a gold dragon crest');
+assert.match(css, /normal-portrait-prototype \.monster-image-frame::before[\s\S]*?border-radius: 50% 50% 42% 42%/, 'normal prototype uses an oval shield frame');
+assert.match(css, /normal-portrait-prototype \.monster-slot-image[\s\S]*?inset: -8px -10px 0 !important;[\s\S]*?object-fit: contain !important;/, 'normal prototype artwork stays complete and can break beyond the frame');
+assert.match(css, /player-portrait-prototype \.combat-unit-art[\s\S]*?background-size: contain !important;/, 'player prototype preserves the complete character artwork');
+assert.match(css, /monster-battle-slot:not\(\.portrait-prototype\) \.monster-image-frame[\s\S]*?border: 0 !important;/, 'non-prototype monsters do not retain the rejected box frame');
 assert.match(css, /#battle-player-art\[aria-label\][\s\S]*?width: auto !important;[\s\S]*?height: 24\.5% !important;/, 'main player preserves the source artwork aspect ratio in its desktop unit box');
 assert.match(css, /@media \(max-width: 700px\)[\s\S]*?#battle-player-art\[aria-label\][\s\S]*?width: auto !important;[\s\S]*?height: 22% !important;/, 'main player preserves the source artwork aspect ratio in its mobile unit box');
 assert.doesNotMatch(css, /\.battle-field #battle-player-art\[aria-label\] \{[^}]*width: clamp\(/, 'main player artwork is never squeezed into a fixed-width frame');
