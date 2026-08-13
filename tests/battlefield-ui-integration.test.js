@@ -45,6 +45,10 @@ assert.match(css, /#enemy-squad \.monster-slot-header \{[\s\S]*?justify-self: ce
 assert.match(css, /#enemy-squad \.monster-slot-hp \{[\s\S]*?top: -4px !important;[\s\S]*?width: 72% !important;/, 'monster health bars sit directly beneath their artwork');
 assert.match(css, /height: 37% !important;[\s\S]*?bottom: 8% !important;/, 'desktop main player is enlarged and raised within the ally field');
 assert.match(css, /0\.6\.17: widen only the main character silhouette[\s\S]*?scale: calc\(var\(--character-scale, 1\) \* 1\.1\) var\(--character-scale, 1\) !important;/, 'main character widens ten percent without increasing its height');
+assert.match(css, /0\.6\.18: every monster uses one visual scale[\s\S]*?--unit-scale-small: 1;[\s\S]*?--unit-scale-humanoid: 1;[\s\S]*?--unit-scale-beast: 1;[\s\S]*?--unit-scale-large: 1;/, 'all monster body categories use one visual scale');
+assert.match(css, /monster-battle-slot\.elite,[\s\S]*?monster-battle-slot\.boss \{[\s\S]*?--unit-rank-scale: 1;/, 'elite and boss ranks no longer enlarge monster artwork');
+assert.match(css, /monster-battle-slot\.rare \.monster-image-frame::after,[\s\S]*?monster-battle-slot\.elite \.monster-image-frame::after,[\s\S]*?monster-battle-slot\.boss \.monster-image-frame::after[\s\S]*?border-radius: 50%;/, 'rare, elite and boss monsters receive rank auras');
+assert.match(css, /monster-battle-slot\.rare \{[\s\S]*?93, 190, 255[\s\S]*?monster-battle-slot\.elite \{[\s\S]*?174, 116, 255[\s\S]*?monster-battle-slot\.boss \{[\s\S]*?255, 194, 73/, 'special ranks use distinct blue, purple and gold aura colors');
 assert.match(script, /function getMonsterVisualSize\(enemy = \{\}\)/, 'monster visual sizing uses a reusable category resolver');
 assert.doesNotMatch(script, /if \(enemy\.isBoss\) return 'boss';/, 'boss rank does not replace the creature body-size category');
 assert.match(script, /class="enemy-unit monster-battle-slot visual-size-\$\{visualSize\}/, 'enemy slots expose their visual-size category to CSS');

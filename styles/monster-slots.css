@@ -920,3 +920,57 @@ body:has(.battle-screen:not(.hidden)) .toast.show {
 .battle-field #battle-player-art[aria-label] {
   scale: calc(var(--character-scale, 1) * 1.1) var(--character-scale, 1) !important;
 }
+
+/* 0.6.18: every monster uses one visual scale; rank is shown only by an aura. */
+.battle-field {
+  --unit-scale-small: 1;
+  --unit-scale-humanoid: 1;
+  --unit-scale-beast: 1;
+  --unit-scale-large: 1;
+}
+
+#enemy-squad .monster-battle-slot,
+#enemy-squad .monster-battle-slot.elite,
+#enemy-squad .monster-battle-slot.boss {
+  --unit-rank-scale: 1;
+}
+
+#enemy-squad .monster-battle-slot[class*="visual-size-"] .monster-slot-image {
+  scale: 1 !important;
+}
+
+#enemy-squad .monster-image-frame { position: relative !important; }
+#enemy-squad .monster-slot-image { position: relative; z-index: 2; }
+
+#enemy-squad .monster-battle-slot.rare .monster-image-frame::after,
+#enemy-squad .monster-battle-slot.elite .monster-image-frame::after,
+#enemy-squad .monster-battle-slot.boss .monster-image-frame::after {
+  content: "";
+  position: absolute;
+  z-index: 1;
+  right: 14%;
+  bottom: 7%;
+  left: 14%;
+  height: 44%;
+  border: 3px solid var(--monster-aura-color);
+  border-radius: 50%;
+  background: radial-gradient(ellipse, var(--monster-aura-fill), transparent 67%);
+  box-shadow: 0 0 12px var(--monster-aura-color), inset 0 0 12px var(--monster-aura-color);
+  filter: blur(.2px);
+  pointer-events: none;
+}
+
+#enemy-squad .monster-battle-slot.rare {
+  --monster-aura-color: rgba(93, 190, 255, .78);
+  --monster-aura-fill: rgba(65, 149, 219, .23);
+}
+
+#enemy-squad .monster-battle-slot.elite {
+  --monster-aura-color: rgba(174, 116, 255, .82);
+  --monster-aura-fill: rgba(128, 71, 206, .25);
+}
+
+#enemy-squad .monster-battle-slot.boss {
+  --monster-aura-color: rgba(255, 194, 73, .88);
+  --monster-aura-fill: rgba(218, 139, 36, .28);
+}
