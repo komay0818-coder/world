@@ -2275,10 +2275,11 @@ function getDropLookupItems() {
     mapPools: dropLookupMapPools,
     monsters: monsterTypes,
     materialPolicies: [ChapterOneMaterialDropPolicy, ChapterTwoMaterialDropPolicy],
-    recipePolicy: ChapterOneRecipeDropPolicy,
+    recipePolicies: [ChapterOneRecipeDropPolicy, ChapterTwoRecipeDropPolicy],
     skillPolicy: SkillUpgradePolicy,
     bossPolicy: ChapterBossDropPolicy,
-    purificationPolicy: BlackForestCorruptionPolicy
+    purificationPolicy: BlackForestCorruptionPolicy,
+    specialEquipmentPolicy: ChapterTwoSpecialEquipmentPolicy
   });
 }
 
@@ -3241,6 +3242,7 @@ function rewardVictory(index) {
   const purificationDrop = BlackForestCorruptionPolicy.grantMapDrop(progress, currentMap.id, enemy);
   const skillMaterialDrops = SkillUpgradePolicy.grantChapterDrops(progress, currentMap.chapter, enemy);
   const recipeDrops = ChapterOneRecipeDropPolicy.grantRecipeDrops(progress, enemy, currentMap.id);
+  recipeDrops.push(...ChapterTwoRecipeDropPolicy.grantRecipeDrops(progress, enemy, currentMap.id));
   let equipmentDrop = null;
   try {
     equipmentDrop = EquipmentDropPolicy.grantEquipmentDrop(progress, enemy);

@@ -3,6 +3,8 @@ const DropLookupPolicy = require('../drop-lookup-policy.js');
 const MaterialPolicy = require('../chapter-one-material-drop-policy.js');
 const ChapterTwoMaterialPolicy = require('../chapter-two-material-drop-policy.js');
 const RecipePolicy = require('../chapter-one-recipe-drop-policy.js');
+const ChapterTwoRecipePolicy = require('../chapter-two-recipe-drop-policy.js');
+const SpecialEquipmentPolicy = require('../chapter-two-special-equipment-policy.js');
 const SkillPolicy = require('../skill-upgrade-policy.js');
 const BossPolicy = require('../chapter-boss-drop-policy.js');
 
@@ -11,7 +13,8 @@ const bossLoot = { equipmentDropRate: 1, rarityWeights: { common: 20, uncommon: 
 const maps = [
   { id: 'wolf-den', name: '狼穴', chapter: 1, regionOf: 'beginner-plains', implemented: true },
   { id: 'plains-depths', name: '平原深處', chapter: 1, regionOf: 'beginner-plains', implemented: true },
-  { id: 'black-forest-trail', name: '黑森林小徑', chapter: 2, regionOf: 'black-forest', implemented: true }
+  { id: 'black-forest-trail', name: '黑森林小徑', chapter: 2, regionOf: 'black-forest', implemented: true },
+  { id: 'forest-altar', name: '森林祭壇', chapter: 2, regionOf: 'black-forest', implemented: true }
 ];
 const monsters = {
   denForestWolf: { id: 'denForestWolf', name: '森林狼', lootConfig: normalLoot },
@@ -19,14 +22,17 @@ const monsters = {
   blackstoneLeader: { id: 'blackstoneLeader', name: '黑石首領', isBoss: true, lootConfig: bossLoot },
   wanderingBlackKnight: { id: 'wanderingBlackKnight', name: '流浪黑騎士', lootConfig: normalLoot },
   trailWolf: { id: 'trailWolf', name: '黑森林狼', lootConfig: { equipmentDropRate: .25, rarityWeights: { uncommon: 25, rare: 75 } } },
-  blackstoneTrailScout: { id: 'blackstoneTrailScout', name: '黑石斥候', lootConfig: { equipmentDropRate: .25, rarityWeights: { uncommon: 25, rare: 75 } } }
+  blackstoneTrailScout: { id: 'blackstoneTrailScout', name: '黑石斥候', lootConfig: { equipmentDropRate: .25, rarityWeights: { uncommon: 25, rare: 75 } } },
+  blackstoneCenturion: { id: 'blackstoneCenturion', name: '黑石百夫長', isBoss: true, lootConfig: bossLoot },
+  fallenDruid: { id: 'fallenDruid', name: '墮落德魯伊', isElite: true, lootConfig: normalLoot }
 };
 const mapPools = {
   'wolf-den': { normal: ['denForestWolf'], boss: ['greatfangWolf'] },
   'plains-depths': { normal: ['wanderingBlackKnight'], boss: ['blackstoneLeader'] },
-  'black-forest-trail': { normal: ['trailWolf', 'blackstoneTrailScout'] }
+  'black-forest-trail': { normal: ['trailWolf', 'blackstoneTrailScout'], boss: ['blackstoneCenturion'] },
+  'forest-altar': { elite: ['fallenDruid'] }
 };
-const items = DropLookupPolicy.buildIndex({ maps, mapPools, monsters, materialPolicies: [MaterialPolicy, ChapterTwoMaterialPolicy], recipePolicy: RecipePolicy, skillPolicy: SkillPolicy, bossPolicy: BossPolicy });
+const items = DropLookupPolicy.buildIndex({ maps, mapPools, monsters, materialPolicies: [MaterialPolicy, ChapterTwoMaterialPolicy], recipePolicies: [RecipePolicy, ChapterTwoRecipePolicy], skillPolicy: SkillPolicy, bossPolicy: BossPolicy, specialEquipmentPolicy: SpecialEquipmentPolicy });
 
 const wolfFang = items.find((item) => item.id === 'wolf-fang');
 assert(wolfFang, '狼牙應由現有材料掉落設定建立索引');
@@ -51,6 +57,13 @@ const blackIron = items.find((item) => item.id === 'black-iron-ore');
 assert(blackIron.sources.some((source) => source.mapId === 'black-forest-trail' && source.monsterId === 'blackstoneTrailScout' && source.rate === .10));
 assert.strictEqual(DropLookupPolicy.filterItems(items, '黑鐵礦石', 'material', 'wolf-den').length, 0, '其他地圖不顯示第二章材料');
 assert.strictEqual(DropLookupPolicy.filterItems(items, '黑鐵礦石', 'material', 'black-forest-trail').length, 1);
+const greenWristRecipe = items.find((item) => item.id === 'recipe-chapter2-green-wrist');
+assert(greenWristRecipe.sources.some((source) => source.mapId === 'black-forest-trail' && source.monsterId === 'blackstoneCenturion' && source.rate === .01));
+const fallenThornWand = items.find((item) => item.id === 'fallen-thorn-wand');
+assert(fallenThornWand.sources.some((source) => source.mapId === 'forest-altar' && source.monsterId === 'fallenDruid' && source.rate === null));
+assert.match(fallenThornWand.typeLabel, /機率與能力待定/);
+assert.strictEqual(DropLookupPolicy.filterItems(items, '墮落荊棘魔杖', 'equipment', 'black-forest-trail').length, 0);
+assert.strictEqual(DropLookupPolicy.filterItems(items, '墮落荊棘魔杖', 'equipment', 'forest-altar').length, 1);
 assert.strictEqual(DropLookupPolicy.percent(.333333), '33.33%');
 
 console.log('drop lookup policy tests passed');

@@ -10,7 +10,7 @@ assert.match(script, /BlackForestCorruptionPolicy\.purify\(progress, purificatio
 assert.match(script, /saveProgress\(progress\)/);
 assert.match(lookup, /purificationPolicy\?\.MAP_MATERIALS\?\.\[map\.id\]/);
 assert.match(lookup, /monster\.isBoss \? 'boss' : monster\.isElite \? 'elite' : 'normal'/);
-assert.match(index, /VER\. 0\.6\.6/);
+assert.match(index, /VER\. 0\.6\.7/);
 assert.match(index, /world\/32d9183\/drop-lookup-policy\.js/, 'the live lookup policy includes purification and regular chapter-two materials');
 
 console.log('chapter-two-purification-integration: assertions passed');
