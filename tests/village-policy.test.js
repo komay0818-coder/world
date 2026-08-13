@@ -36,6 +36,9 @@ const furnace = VillagePolicy.getVillageBuildingData(repaired, 'furnace');
 assert.equal(furnace.name, '熔爐');
 assert.equal(furnace.level, 10);
 assert.equal(furnace.feature, 'salvage');
+const magicTower = VillagePolicy.getVillageBuildingData(repaired, 'rune');
+assert.equal(magicTower.name, '魔法塔');
+assert.equal(magicTower.feature, 'magic-synthesis');
 assert.equal(VillagePolicy.getVillageBuildingData(repaired, 'missing'), null);
 
 console.log('village-policy: assertions passed');

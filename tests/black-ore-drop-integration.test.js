@@ -12,6 +12,6 @@ assert.match(script, /VillageUpgradePolicy\.grantMapDrops\(progress, currentMap\
 assert.doesNotMatch(crafting, /blackOre: Object\.freeze/, 'black ore has one canonical material definition in the drop policy');
 assert.match(index, /chapter-one-material-drop-policy\.js\?v=20260813-blackstone-only-v3/, 'the blackstone-only material policy cache key changes');
 assert.match(index, /world\/88042116bfbcc936d5b561889e63745c21c27881\/script\.js/, 'the integration script uses an immutable deployment path');
-assert.match(index, /VER\. 0\.6\.4/, 'the game version includes chapter-two purification drops');
+assert.match(index, /VER\. 0\.6\.5/, 'the game version includes magic tower synthesis');
 
 console.log('black-ore-drop-integration: assertions passed');

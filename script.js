@@ -938,6 +938,7 @@ function getProgress() {
     potions: 5,
     manaPotions: 0,
     magicCrystals: 0,
+    magicFragments: 0,
     skillBooks: {},
     skillLevels: {},
     blackForestCorruption: BlackForestCorruptionPolicy.normalizeState(null),
@@ -1150,8 +1151,28 @@ function openVillageBuilding(buildingId) {
   if (buildingId === 'furnace') renderFurnace(building);
   else if (buildingId === 'workshop') renderWorkshop(building);
   else if (buildingId === 'alchemy') renderAlchemy(building);
+  else if (buildingId === 'rune') renderMagicTower(building);
   else document.querySelector('#village-building-content').innerHTML = `<div class="village-building-icon" aria-hidden="true">${building.icon}</div><h3>${building.name}</h3><small>建築等級 Lv${building.level} / ${building.maxLevel}</small><p>${building.description}</p><p class="village-placeholder">${building.name}功能尚未完成，將於後續版本加入。</p>`;
   document.querySelector('#village-building-modal').classList.remove('hidden');
+}
+
+function renderMagicTower(building = getVillageBuildingData('rune'), message = '') {
+  const progress = getProgress();
+  const state = MagicTowerPolicy.getState(progress);
+  const validation = MagicTowerPolicy.canSynthesize(progress);
+  document.querySelector('#village-building-content').innerHTML = `<div class="workshop-title"><div class="village-building-icon" aria-hidden="true">${building.icon}</div><div><h3>${building.name}</h3><small>建築 Lv${building.level}・成功率 40%</small></div></div>
+    <p>每次消耗 10 個魔法碎片，成功時獲得 1 個魔法結晶。合成失敗仍會消耗魔法碎片。</p>
+    <p class="furnace-material-summary">魔法碎片：${state.magicFragments}　魔法結晶：${state.magicCrystals}</p>
+    ${message ? `<p class="alchemy-message">${message}</p>` : ''}
+    <button class="primary-button" type="button" data-synthesize-magic ${validation.ok ? '' : 'disabled'}><span>${validation.ok ? '合成魔法結晶' : `還缺 ${validation.missing} 個魔法碎片`}</span><b>◇</b></button>`;
+}
+
+function synthesizeMagicCrystal() {
+  const progress = getProgress();
+  const result = MagicTowerPolicy.synthesize(progress);
+  if (!result.ok) { renderMagicTower(undefined, '魔法碎片不足，無法合成。'); return; }
+  saveProgress(progress);
+  renderMagicTower(undefined, result.success ? '合成成功！獲得魔法結晶 ×1。' : '合成失敗，魔法碎片已消耗。');
 }
 
 function resetFurnaceState() { furnaceSelectedItemId = null; furnaceResult = null; furnaceBusy = false; }
@@ -4933,6 +4954,7 @@ document.querySelector('#village-building-modal').addEventListener('click', (eve
   if (candidate) { selectedAlchemyCandidate = candidate.dataset.selectAlchemyCandidate; renderAlchemy(); return; }
   if (event.target.closest('[data-start-alchemy]')) { startAlchemy(); return; }
   if (event.target.closest('[data-confirm-alchemy]')) { confirmAlchemy(); return; }
+  if (event.target.closest('[data-synthesize-magic]')) { synthesizeMagicCrystal(); return; }
   if (event.target.closest('[data-return-alchemy]')) closeVillageBuilding();
 });
 document.querySelector('#party-close').addEventListener('click', () => document.querySelector('#party-modal').classList.add('hidden'));

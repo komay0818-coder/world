@@ -1,7 +1,7 @@
 # 星辰 DEV－重新對話接續指南
 
 最後更新：2026-08-13  
-目前顯示版本：`0.6.4`  
+目前顯示版本：`0.6.5`
 GitHub：`https://github.com/komay0818-coder/world`  
 開發分支：`dev`
 
@@ -27,7 +27,13 @@ GitHub：`https://github.com/komay0818-coder/world`
 - 每次完成修改都要更新 `DEVELOPMENT_PROGRESS.md`、提升顯示版本、補測試、執行全部測試與 `git diff --check`。
 - 不得覆蓋或刪除使用者已有變更；開始前先查看 `git status --short`。
 
-## 最新完成：第二章黑森林 Debuff 解除道具
+## 最新完成：魔法塔與魔法碎片合成
+
+- 村莊「符文塔」已更名為「魔法塔」，沿用既有 `rune` 建築 ID 與升級資料。
+- 每次合成消耗魔法碎片 10 個，成功率 40%；成功獲得魔法結晶 1 個，失敗仍消耗碎片。
+- 魔法塔會顯示碎片、結晶持有量與不足數量；舊存檔缺少魔法碎片時視為 0。
+
+## 先前完成：第二章黑森林 Debuff 解除道具
 
 黑森林共有 6 層全章共用 Debuff，首次進入第二章後啟用。永久進度保存在角色進度的 `blackForestCorruption.removedLayers`；舊版 `purifiedMapIds` 會自動轉換為已解除層數。
 
