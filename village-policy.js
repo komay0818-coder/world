@@ -9,7 +9,7 @@
     alchemy: { id: 'alchemy', name: '煉金房', icon: '⚗', maxLevel: 10, description: '合成裝備並重新產生詞綴', unlocked: true, feature: 'alchemy' },
     workshop: { id: 'workshop', name: '工坊', icon: '⚙', maxLevel: 10, description: '使用配方與材料製作裝備', unlocked: true, feature: 'crafting' },
     blacksmith: { id: 'blacksmith', name: '鐵匠', icon: '⚒', maxLevel: 10, description: '替裝備開啟符文插槽', unlocked: true, feature: 'socketing' },
-    rune: { id: 'rune', name: '魔法塔', icon: '◇', maxLevel: 10, description: '將魔法碎片合成為魔法結晶', unlocked: true, feature: 'magic-synthesis' },
+    rune: { id: 'rune', name: '魔法塔', icon: '◇', maxLevel: 10, description: '將技能殘頁合成為同階技能書', unlocked: true, feature: 'magic-synthesis' },
     storage: { id: 'storage', name: '倉庫', icon: '▣', maxLevel: 10, description: '存放裝備與各類材料', unlocked: true, feature: 'storage' },
     shop: { id: 'shop', name: '商店', icon: '⚖', maxLevel: 10, description: '購買與販售一般物品', unlocked: true, feature: 'shop' }
   });

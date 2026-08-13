@@ -938,7 +938,6 @@ function getProgress() {
     potions: 5,
     manaPotions: 0,
     magicCrystals: 0,
-    magicFragments: 0,
     skillBooks: {},
     skillLevels: {},
     blackForestCorruption: BlackForestCorruptionPolicy.normalizeState(null),
@@ -1158,21 +1157,27 @@ function openVillageBuilding(buildingId) {
 
 function renderMagicTower(building = getVillageBuildingData('rune'), message = '') {
   const progress = getProgress();
-  const state = MagicTowerPolicy.getState(progress);
-  const validation = MagicTowerPolicy.canSynthesize(progress);
+  const recipes = MagicTowerPolicy.getAvailableRecipes(building.level);
+  const recipeCards = recipes.map((recipe) => {
+    const page = SkillUpgradePolicy.MATERIALS[recipe.pageMaterialId];
+    const book = SkillUpgradePolicy.MATERIALS[recipe.bookMaterialId];
+    const validation = MagicTowerPolicy.canSynthesize(progress, recipe.id, building.level);
+    return `<article class="furnace-slot filled"><span class="item-icon">${page.icon}</span><h4>${page.name}</h4><p>持有：${validation.owned} / 需要：10</p><p>成功取得：${book.icon} ${book.name} ×1</p><strong>實際成功率：40%</strong><button type="button" data-synthesize-magic="${recipe.id}" ${validation.ok ? '' : 'disabled'}>${validation.ok ? `合成${book.name}` : `還缺 ${validation.missing} 個${page.name}`}</button></article>`;
+  }).join('');
   document.querySelector('#village-building-content').innerHTML = `<div class="workshop-title"><div class="village-building-icon" aria-hidden="true">${building.icon}</div><div><h3>${building.name}</h3><small>建築 Lv${building.level}・成功率 40%</small></div></div>
-    <p>每次消耗 10 個魔法碎片，成功時獲得 1 個魔法結晶。合成失敗仍會消耗魔法碎片。</p>
-    <p class="furnace-material-summary">魔法碎片：${state.magicFragments}　魔法結晶：${state.magicCrystals}</p>
+    <p>每次消耗 10 個技能殘頁，成功時獲得 1 本同階技能書。合成失敗仍會消耗技能殘頁；魔法塔 Lv2 解鎖中級合成。</p>
     ${message ? `<p class="alchemy-message">${message}</p>` : ''}
-    <button class="primary-button" type="button" data-synthesize-magic ${validation.ok ? '' : 'disabled'}><span>${validation.ok ? '合成魔法結晶' : `還缺 ${validation.missing} 個魔法碎片`}</span><b>◇</b></button>`;
+    <section class="furnace-layout">${recipeCards}</section>`;
 }
 
-function synthesizeMagicCrystal() {
+function synthesizeSkillBook(recipeId) {
   const progress = getProgress();
-  const result = MagicTowerPolicy.synthesize(progress);
-  if (!result.ok) { renderMagicTower(undefined, '魔法碎片不足，無法合成。'); return; }
+  const building = getVillageBuildingData('rune');
+  const result = MagicTowerPolicy.synthesize(progress, recipeId, building.level, { materialDefinitions: SkillUpgradePolicy.MATERIALS });
+  if (!result.ok) { renderMagicTower(building, result.reason === 'tower-level' ? '魔法塔等級不足。' : '技能殘頁不足，無法合成。'); return; }
   saveProgress(progress);
-  renderMagicTower(undefined, result.success ? '合成成功！獲得魔法結晶 ×1。' : '合成失敗，魔法碎片已消耗。');
+  const book = SkillUpgradePolicy.MATERIALS[result.recipe.bookMaterialId];
+  renderMagicTower(building, result.success ? `合成成功！獲得${book.name} ×1。` : '合成失敗，技能殘頁已消耗。');
 }
 
 function resetFurnaceState() { furnaceSelectedItemId = null; furnaceResult = null; furnaceBusy = false; }
@@ -4954,7 +4959,8 @@ document.querySelector('#village-building-modal').addEventListener('click', (eve
   if (candidate) { selectedAlchemyCandidate = candidate.dataset.selectAlchemyCandidate; renderAlchemy(); return; }
   if (event.target.closest('[data-start-alchemy]')) { startAlchemy(); return; }
   if (event.target.closest('[data-confirm-alchemy]')) { confirmAlchemy(); return; }
-  if (event.target.closest('[data-synthesize-magic]')) { synthesizeMagicCrystal(); return; }
+  const magicSynthesis = event.target.closest('[data-synthesize-magic]');
+  if (magicSynthesis) { synthesizeSkillBook(magicSynthesis.dataset.synthesizeMagic); return; }
   if (event.target.closest('[data-return-alchemy]')) closeVillageBuilding();
 });
 document.querySelector('#party-close').addEventListener('click', () => document.querySelector('#party-modal').classList.add('hidden'));

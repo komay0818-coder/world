@@ -1,21 +1,22 @@
 const assert = require('node:assert/strict');
 const policy = require('../magic-tower-policy.js');
+const skillPolicy = require('../skill-upgrade-policy.js');
 
-assert.deepEqual(policy.CONFIG, { fragmentCost: 10, successChance: .4, rewardAmount: 1 });
-assert.deepEqual(policy.getState({}), { magicFragments: 0, magicCrystals: 0 });
-assert.equal(policy.canSynthesize({ magicFragments: 9 }).ok, false);
-assert.equal(policy.canSynthesize({ magicFragments: 10 }).ok, true);
+assert.deepEqual(policy.CONFIG, { pageCost: 10, successChance: .4, rewardAmount: 1 });
+assert.deepEqual(policy.getAvailableRecipes(1).map((recipe) => recipe.id), ['beginner']);
+assert.deepEqual(policy.getAvailableRecipes(2).map((recipe) => recipe.id), ['beginner', 'intermediate']);
+assert.equal(policy.canSynthesize({ inventory: [{ id: 'beginner_skill_page', quantity: 9 }] }, 'beginner', 1).ok, false);
+assert.equal(policy.canSynthesize({ inventory: [{ id: 'beginner_skill_page', quantity: 10 }] }, 'beginner', 1).ok, true);
+assert.equal(policy.canSynthesize({ inventory: [{ id: 'intermediate_skill_page', quantity: 10 }] }, 'intermediate', 1).reason, 'tower-level');
 
-const success = { magicFragments: 15, magicCrystals: 2 };
-assert.equal(policy.synthesize(success, () => .3999).success, true);
-assert.deepEqual(success, { magicFragments: 5, magicCrystals: 3 });
+const success = { inventory: [{ ...skillPolicy.MATERIALS.beginner_skill_page, quantity: 15 }] };
+assert.equal(policy.synthesize(success, 'beginner', 1, { random: () => .3999, materialDefinitions: skillPolicy.MATERIALS }).success, true);
+assert.equal(policy.getQuantity(success.inventory, 'beginner_skill_page'), 5);
+assert.equal(policy.getQuantity(success.inventory, 'beginner_skill_book'), 1);
 
-const failure = { magicFragments: 10, magicCrystals: 2 };
-assert.equal(policy.synthesize(failure, () => .4).success, false);
-assert.deepEqual(failure, { magicFragments: 0, magicCrystals: 2 });
-
-const insufficient = { magicFragments: 9, magicCrystals: 1 };
-assert.equal(policy.synthesize(insufficient, () => 0).ok, false);
-assert.deepEqual(insufficient, { magicFragments: 9, magicCrystals: 1 });
+const failure = { inventory: [{ ...skillPolicy.MATERIALS.intermediate_skill_page, quantity: 10 }] };
+assert.equal(policy.synthesize(failure, 'intermediate', 2, { random: () => .4, materialDefinitions: skillPolicy.MATERIALS }).success, false);
+assert.equal(policy.getQuantity(failure.inventory, 'intermediate_skill_page'), 0);
+assert.equal(policy.getQuantity(failure.inventory, 'intermediate_skill_book'), 0);
 
 console.log('magic-tower-policy: assertions passed');

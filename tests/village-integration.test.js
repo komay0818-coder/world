@@ -22,7 +22,7 @@ assert.match(script, /升級至 Lv2/, 'the village shows the chapter-one upgrade
 assert.match(script, /village: VillagePolicy\.normalizeVillageData\(saved\.village\)/, 'legacy progress is normalized on load');
 assert.match(script, /progress\.village = VillagePolicy\.normalizeVillageData\(progress\.village\)/, 'village state is normalized on save');
 assert.match(script, /else if \(buildingId === 'rune'\) renderMagicTower\(building\)/, 'magic tower opens its synthesis interface');
-assert.match(script, /MagicTowerPolicy\.synthesize\(progress\)/, 'magic tower synthesis uses the centralized policy');
+assert.match(script, /MagicTowerPolicy\.synthesize\(progress, recipeId, building\.level/, 'magic tower synthesis uses the centralized policy and building level');
 assert.match(script, /villageReturnScreen = !battleScreen\.classList\.contains\('hidden'\) \? 'battle' : 'menu'/);
 assert.match(script, /if \(villageReturnScreen === 'battle'[\s\S]*battleScreen\.classList\.remove\('hidden'\)/, 'closing village reveals the existing battle screen');
 assert.doesNotMatch(script.match(/function closeVillage\(\) \{[\s\S]*?\n\}/)?.[0] || '', /openBattle|clearInterval/, 'village close neither regenerates battle nor changes its timers');
