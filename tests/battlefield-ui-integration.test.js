@@ -6,6 +6,10 @@ const root = path.join(__dirname, '..');
 const html = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
 const script = fs.readFileSync(path.join(root, 'script.js'), 'utf8');
 const css = fs.readFileSync(path.join(root, 'styles', 'monster-slots.css'), 'utf8');
+const artBlock = script.match(/const battleCharacterArt = \{([\s\S]*?)\n\};/)?.[1] || '';
+const layoutBlock = script.match(/const battleCharacterLayout = \{([\s\S]*?)\n\};/)?.[1] || '';
+const artKeys = [...artBlock.matchAll(/'([^']+:[^']+)'\s*:/g)].map((match) => match[1]);
+const layoutKeys = new Set([...layoutBlock.matchAll(/'([^']+:[^']+)'\s*:/g)].map((match) => match[1]));
 
 assert.match(html, /class="battlefield-zone-label enemy-zone-label"/, 'enemy battlefield has a shared label');
 assert.match(html, /id="player-battle-stage"/, 'player party has a shared battlefield display layer');
@@ -34,6 +38,8 @@ assert.match(css, /\.battle-companion-icon\.portrait \{[\s\S]*?background-positi
 assert.doesNotMatch(script, /companionName\.textContent/, 'companion tray does not add level, health, stats, or text panels');
 assert.match(css, /\.player-battle-stage[\s\S]*?justify-content: center;/, 'party units auto-center on their shared ground');
 assert.match(script, /battleCharacterArt\[`\$\{member\.character\.race\}:\$\{member\.character\.job\}`\]/, 'party display reuses existing character art');
+assert.equal(artKeys.length, 20, 'all four races and five jobs have battlefield artwork');
+assert.deepEqual(artKeys.filter((key) => !layoutKeys.has(key)), [], 'every race and job artwork has an explicit aspect-ratio layout');
 assert.match(script, /function getMonsterVisualSize\(enemy = \{\}\)/, 'monster visual sizing uses a reusable category resolver');
 assert.doesNotMatch(script, /if \(enemy\.isBoss\) return 'boss';/, 'boss rank does not replace the creature body-size category');
 assert.match(script, /class="enemy-unit monster-battle-slot visual-size-\$\{visualSize\}/, 'enemy slots expose their visual-size category to CSS');
