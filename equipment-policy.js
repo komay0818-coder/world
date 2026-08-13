@@ -196,7 +196,7 @@
       attackMax: 15,
       attack: 13,
       attackSpeed: 1.00,
-      allowedJobs: ['mage'],
+      allowedJobs: ['mage', 'priest'],
       quality: '普通'
     }),
     arcaneStaff: Object.freeze({
@@ -211,7 +211,7 @@
       attackMax: 18,
       attack: 16,
       attackSpeed: .85,
-      allowedJobs: ['mage'],
+      allowedJobs: ['mage', 'priest'],
       quality: '普通'
     })
   });

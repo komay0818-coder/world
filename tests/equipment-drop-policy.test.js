@@ -7,6 +7,8 @@ assert.equal(equipmentPolicy.WEAPON_CATALOG.rustyDagger.image, 'assets/rusty-dag
 assert.equal(equipmentPolicy.WEAPON_CATALOG.assassinShortblade.image, 'assets/assassin-shortblade.png');
 assert.equal(equipmentPolicy.WEAPON_CATALOG.apprenticeStaff.image, 'assets/apprentice-staff.png');
 assert.equal(equipmentPolicy.WEAPON_CATALOG.arcaneStaff.image, 'assets/arcane-staff.png');
+assert.deepEqual(equipmentPolicy.WEAPON_CATALOG.apprenticeStaff.allowedJobs, ['mage', 'priest']);
+assert.deepEqual(equipmentPolicy.WEAPON_CATALOG.arcaneStaff.allowedJobs, ['mage', 'priest']);
 assert.equal(equipmentPolicy.WEAPON_CATALOG.battleGreataxe.image, 'assets/battle-greataxe.png');
 assert.equal(equipmentPolicy.WEAPON_CATALOG.rockbreakerGreataxe.image, 'assets/rockbreaker-greataxe.png');
 assert.equal(equipmentPolicy.WEAPON_CATALOG.shortIronSword.image, 'assets/short-iron-sword.png');

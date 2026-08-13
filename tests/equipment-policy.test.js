@@ -76,7 +76,7 @@ assert.deepEqual([weapons.arcaneStaff.attackMin, weapons.arcaneStaff.attackMax, 
 assert.deepEqual(policy.getEquipSlots(weapons.hunterShortbow, 'hunter'), ['weapon'], 'hunters equip bows in the main-hand slot');
 assert.deepEqual(policy.getEquipSlots(weapons.rustyDagger, 'assassin'), ['weapon', 'offhand'], 'assassins can equip daggers in either hand');
 assert.deepEqual(policy.getEquipSlots(weapons.apprenticeStaff, 'mage'), ['weapon'], 'mages equip staves in the main-hand slot');
-assert.deepEqual(policy.getEquipSlots(weapons.apprenticeStaff, 'priest'), [], 'priests cannot equip mage staves');
+assert.deepEqual(policy.getEquipSlots(weapons.apprenticeStaff, 'priest'), ['weapon'], 'priests can equip shared caster staves');
 
 const plateArmor = { id: 'plate-test', kind: 'equipment', slot: 'armor', armorType: 'heavy' };
 const leatherArmor = { id: 'leather-test', kind: 'equipment', slot: 'armor', armorType: 'leather' };

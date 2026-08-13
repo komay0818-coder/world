@@ -33,6 +33,9 @@ assert.match(script, /'venomfang-dagger': 'assets\/venomfang-dagger\.png'/, 'ven
 assert.match(script, /'darkwood-shortblade': 'assets\/darkwood-shortblade\.png'/, 'darkwood shortblade artwork migrates into existing items');
 assert.match(script, /'ancient-wood-wand': 'assets\/ancient-wood-wand\.png'/, 'ancient wood wand artwork migrates into existing items');
 assert.match(script, /'spore-wand': 'assets\/spore-wand\.png'/, 'spore wand artwork migrates into existing items');
+assert.match(script, /function normalizeCasterWeaponJobs\(item\)[\s\S]*\['staff', 'one-handed-wand'\][\s\S]*allowedJobs: \['mage', 'priest'\]/, 'staffs and wands share mage and priest compatibility');
+assert.match(script, /const allowedJobs = item\.slot === 'weapon' && \['staff', 'one-handed-wand'\]\.includes\(item\.weaponType\)[\s\S]*\? \['mage', 'priest'\]/, 'mage and priest starter weapons are mutually equippable');
+assert.match(script, /sharedCasterWeaponMigrationVersion !== 'mage-priest-weapons-v1'/, 'existing caster weapons receive shared compatibility on save load');
 const html = fs.readFileSync(path.join(__dirname, '..', 'index.html'), 'utf8');
 
 assert.match(html, /equipment-drop-policy\.js/, 'drop policy loads before the main game script');

@@ -730,9 +730,18 @@ function createStarterEquipment(job = 'warrior') {
   };
   const equipment = emptyEquipment();
   (starterSets[job] || starterSets.warrior).forEach((item, index) => {
-    equipment[item.slot] = { ...item, id: `starter-${job}-${item.slot}-${index}`, kind: 'equipment', quality: '新兵', allowedJobs: [job] };
+    const allowedJobs = item.slot === 'weapon' && ['staff', 'one-handed-wand'].includes(item.weaponType)
+      ? ['mage', 'priest']
+      : [job];
+    equipment[item.slot] = { ...item, id: `starter-${job}-${item.slot}-${index}`, kind: 'equipment', quality: '新兵', allowedJobs };
   });
   return equipment;
+}
+
+function normalizeCasterWeaponJobs(item) {
+  if (!item || item.kind !== 'equipment' || item.slot !== 'weapon') return item;
+  if (!['staff', 'one-handed-wand'].includes(item.weaponType)) return item;
+  return { ...item, allowedJobs: ['mage', 'priest'] };
 }
 
 const equipmentVisualByTemplateId = {
@@ -907,6 +916,13 @@ function getProgress() {
   if (saved.equipmentDropMigrationVersion !== 'equipment-drop-v1') {
     saved.inventory = Array.isArray(saved.inventory) ? saved.inventory : [];
     saved.equipmentDropMigrationVersion = 'equipment-drop-v1';
+    localStorage.setItem('stardust-progress', JSON.stringify(saved));
+  }
+  if (saved.sharedCasterWeaponMigrationVersion !== 'mage-priest-weapons-v1') {
+    saved.inventory = (Array.isArray(saved.inventory) ? saved.inventory : []).map(normalizeCasterWeaponJobs);
+    saved.equipment = Object.fromEntries(Object.entries(saved.equipment || {})
+      .map(([slot, item]) => [slot, normalizeCasterWeaponJobs(item)]));
+    saved.sharedCasterWeaponMigrationVersion = 'mage-priest-weapons-v1';
     localStorage.setItem('stardust-progress', JSON.stringify(saved));
   }
   if (saved.jobRestrictionMigrationVersion !== 'job-restriction-v1') {

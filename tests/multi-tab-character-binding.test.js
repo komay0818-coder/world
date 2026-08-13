@@ -12,6 +12,6 @@ assert.match(script, /sessionStorage\.setItem\(TAB_ACTIVE_CHARACTER_SLOT_KEY, St
 assert.match(script, /const slotProgress = Array\.isArray\(slots\) \? slots\[getActiveCharacterSlotIndex\(\)\]\?\.progress : null/, 'progress is loaded from the tab-bound character slot');
 assert.match(script, /function activateCharacterSlot\(index\)[\s\S]*setActiveCharacterSlotIndex\(index\)/, 'roster switching uses the tab-scoped binding');
 assert.match(script, /function syncActiveCharacterSlot[\s\S]*const activeIndex = getActiveCharacterSlotIndex\(\)/, 'saving targets the current tab character slot');
-assert.match(index, /VER\. 0\.6\.18/, 'the current game version retains tab-scoped character binding');
+assert.match(index, /VER\. 0\.6\.19/, 'the current game version retains tab-scoped character binding');
 
 console.log('multi-tab-character-binding: assertions passed');
