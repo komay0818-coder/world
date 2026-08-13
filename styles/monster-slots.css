@@ -622,6 +622,10 @@
 }
 
 /* Final portrait-safe-area precedence. */
+.battle-field {
+  --portrait-prototype-width: 156px;
+  --portrait-prototype-height: 172px;
+}
 #enemy-squad .normal-portrait-prototype .monster-image-frame::before,
 .battle-field #battle-player-art.player-portrait-prototype::before {
   z-index: 3;
@@ -638,10 +642,20 @@
   background: radial-gradient(circle at 50% 30%, rgba(135, 174, 178, .28), transparent 48%), linear-gradient(165deg, rgba(38, 57, 64, .9), rgba(7, 15, 19, .96));
   box-shadow: inset 0 -20px 28px rgba(0, 0, 0, .34);
 }
-#enemy-squad .normal-portrait-prototype .monster-image-frame::after { inset: 14px 15px 10px; }
+#enemy-squad .normal-portrait-prototype .monster-image-frame::after { inset: 23px 20px 12px; }
 .battle-field #battle-player-art.player-portrait-prototype::after { inset: 23px 20px 12px; }
-#enemy-squad .normal-portrait-prototype .monster-slot-image { inset: 12px 13px 9px !important; width: calc(100% - 26px) !important; height: calc(100% - 21px) !important; object-fit: contain !important; object-position: center center !important; scale: 1 !important; }
-.battle-field #battle-player-art.player-portrait-prototype .combat-unit-art { inset: 18px 16px 10px !important; width: calc(100% - 32px) !important; height: calc(100% - 28px) !important; background-size: contain !important; background-position: center center !important; scale: 1 !important; }
+#enemy-squad .normal-portrait-prototype { grid-template-rows: 24px var(--portrait-prototype-height) 0 9px !important; }
+#enemy-squad .normal-portrait-prototype .monster-image-frame,
+.battle-field #battle-player-art.player-portrait-prototype[aria-label] { width: var(--portrait-prototype-width) !important; height: var(--portrait-prototype-height) !important; }
+#enemy-squad .normal-portrait-prototype .monster-slot-image { inset: 26px 24px 30px !important; width: calc(100% - 48px) !important; height: calc(100% - 56px) !important; object-fit: contain !important; object-position: center center !important; scale: 1 !important; }
+.battle-field #battle-player-art.player-portrait-prototype .combat-unit-art { inset: 26px 24px 30px !important; width: calc(100% - 48px) !important; height: calc(100% - 56px) !important; background-size: contain !important; background-position: center center !important; scale: 1 !important; }
+
+@media (max-width: 700px) {
+  .battle-field { --portrait-prototype-width: 98px; --portrait-prototype-height: 112px; }
+  #enemy-squad .normal-portrait-prototype { grid-template-rows: 20px var(--portrait-prototype-height) 0 7px !important; }
+  #enemy-squad .normal-portrait-prototype .monster-slot-image,
+  .battle-field #battle-player-art.player-portrait-prototype .combat-unit-art { inset: 18px 17px 20px !important; width: calc(100% - 34px) !important; height: calc(100% - 38px) !important; }
+}
 
 /* 0.6.10: reusable near-square combat units. Artwork is cropped inside a stable frame,
    so source canvas size, transparent padding, weapon height and creature width no
