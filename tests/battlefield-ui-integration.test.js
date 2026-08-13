@@ -16,7 +16,7 @@ assert.match(html, /id="player-battle-stage"/, 'player party has a shared battle
 assert.match(html, /id="battle-player-art" class="battle-player-art portrait-prototype player-portrait-prototype hidden"[\s\S]*?class="combat-unit-art"/, 'main player uses the portrait-frame prototype');
 assert.match(html, /id="player-stage-info"/, 'main player information floats near the battlefield art');
 assert.match(html, /id="battle-companion-icons" class="battle-companion-icons hidden"/, 'battlefield provides a generic companion icon tray');
-assert.match(html, /c584d03c2bd4b97cf5f89608d849b35397b32dd0\/styles\/monster-slots\.css/, 'battlefield loads the immutable portrait prototype build');
+assert.match(html, /9bbd6e5e87d5166f09ceb0196aa4032345866c24\/styles\/monster-slots\.css/, 'battlefield loads the immutable portrait safe-area build');
 assert.doesNotMatch(html, /id="hunter-companion"/, 'legacy full-body hunter companion is removed from the battlefield');
 assert.match(css, /grid-template-columns: repeat\(4, minmax\(0, 1fr\)\)/, 'desktop enemies share a four-unit battlefield row');
 assert.match(css, /#enemy-squad \.monster-battle-slot[\s\S]*?border: 0 !important;[\s\S]*?background: none !important;/, 'individual monster cards have no frame or background');
