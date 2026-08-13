@@ -40,6 +40,9 @@ assert.match(css, /\.player-battle-stage[\s\S]*?justify-content: center;/, 'part
 assert.match(script, /battleCharacterArt\[`\$\{member\.character\.race\}:\$\{member\.character\.job\}`\]/, 'party display reuses existing character art');
 assert.equal(artKeys.length, 20, 'all four races and five jobs have battlefield artwork');
 assert.deepEqual(artKeys.filter((key) => !layoutKeys.has(key)), [], 'every race and job artwork has an explicit aspect-ratio layout');
+assert.match(layoutBlock, /'elf:warrior': \{ aspect: '1346 \/ 1169', visibleScale: 1\.178 \}/, 'elf warrior transparent padding is calibrated to the shared visible height');
+assert.match(layoutBlock, /'elf:hunter': \{ aspect: '1370 \/ 1148', visibleScale: 1\.024 \}/, 'elf hunter transparent padding is calibrated to the shared visible height');
+assert.match(layoutBlock, /'elf:mage': \{ aspect: '1122 \/ 1402', visibleScale: 1\.106 \}/, 'elf mage transparent padding is calibrated to the shared visible height');
 assert.match(script, /function getMonsterVisualSize\(enemy = \{\}\)/, 'monster visual sizing uses a reusable category resolver');
 assert.doesNotMatch(script, /if \(enemy\.isBoss\) return 'boss';/, 'boss rank does not replace the creature body-size category');
 assert.match(script, /class="enemy-unit monster-battle-slot visual-size-\$\{visualSize\}/, 'enemy slots expose their visual-size category to CSS');
