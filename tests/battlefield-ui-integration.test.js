@@ -61,8 +61,12 @@ assert.match(script, /playPartyMemberCombatAnimation\(member, \[targetIndex\], \
 assert.match(css, /\.character-attack-effect\.attack-kind-skill::after/, 'skill attacks show an in-field skill label');
 assert.match(css, /prefers-reduced-motion: reduce/, 'combat animation respects reduced-motion preferences');
 assert.match(css, /--combat-frame-width:[\s\S]*?--combat-frame-height:/, 'combat units share reusable frame dimensions');
-assert.match(css, /\.combat-unit-art,[\s\S]*?#enemy-squad \.monster-slot-image[\s\S]*?object-fit: cover !important;[\s\S]*?object-position: center 28% !important;/, 'all artwork is automatically cropped around its recognizable center');
+assert.match(css, /--combat-frame-width: clamp\(120px, 8vw, 130px\);[\s\S]*?--combat-frame-height: clamp\(110px, 12vh, 120px\);/, 'desktop combat frames stay within the requested near-square dimensions');
+assert.match(css, /--player-frame-width: calc\(var\(--combat-frame-width\) \* 1\.07\);[\s\S]*?--player-frame-height: calc\(var\(--combat-frame-height\) \* 1\.07\);/, 'player frames are seven percent larger than standard monster frames');
+assert.match(css, /\.combat-unit-art,[\s\S]*?#enemy-squad \.monster-slot-image[\s\S]*?object-fit: cover !important;[\s\S]*?object-position: center 30% !important;[\s\S]*?scale: 1\.12 !important;/, 'all artwork fills most of the near-square frame around its recognizable center');
 assert.match(css, /monster-battle-slot\.elite \.monster-image-frame[\s\S]*?border-color: #b89bea !important;/, 'elite rank uses a silver-violet frame instead of enlarged artwork');
+assert.match(css, /#enemy-squad \.monster-slot-header[\s\S]*?margin: 0 auto -4px !important;/, 'monster name and level are visually attached to the unit frame');
+assert.match(css, /#enemy-squad \.monster-slot-hp[\s\S]*?margin: -1px auto 0 !important;/, 'monster health is visually attached to the unit frame');
 assert.match(css, /monster-battle-slot\.boss \{[\s\S]*?scale: 1\.34 !important;/, 'boss frame is larger than the standard frame');
 assert.match(css, /monster-battle-slot\.boss \.monster-image-frame::before,[\s\S]*?clip-path: polygon/, 'boss frame includes reusable gold dragon-wing ornaments');
 assert.match(css, /monster-battle-slot\.boss \.monster-slot-header::before[\s\S]*?content: "龍";/, 'boss nameplate includes a gold dragon crest');
