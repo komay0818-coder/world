@@ -11,6 +11,6 @@ assert.match(script, /saveProgress\(progress\)/);
 assert.match(lookup, /purificationPolicy\?\.MAP_MATERIALS\?\.\[map\.id\]/);
 assert.match(lookup, /monster\.isBoss \? 'boss' : monster\.isElite \? 'elite' : 'normal'/);
 assert.match(index, /VER\. 0\.6\.7/);
-assert.match(index, /world\/32d9183\/drop-lookup-policy\.js/, 'the live lookup policy includes purification and regular chapter-two materials');
+assert.match(index, /world\/2728da1\/drop-lookup-policy\.js/, 'the live lookup policy includes purification, materials, recipes and special equipment sources');
 
 console.log('chapter-two-purification-integration: assertions passed');
