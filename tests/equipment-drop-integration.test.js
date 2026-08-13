@@ -43,6 +43,8 @@ assert.match(script, /greatfangWolf:.*lootConfig: EquipmentDropPolicy\.TEST_LOOT
 assert.match(script, /function rewardVictory\(index\)[\s\S]*EquipmentDropPolicy\.grantEquipmentDrop\(progress, enemy\)/, 'rewardVictory enters the equipment drop flow');
 assert.match(script, /const currentMap = getActiveMap\(progress\);\s*renderStrongholdObjective\(currentMap\);/, 'rewardVictory resolves the active map before rendering map objectives');
 assert.match(script, /ChapterOneMaterialDropPolicy\.grantMaterialDrops\(progress, currentMap\.id, enemy\)/, 'rewardVictory grants map and monster-specific materials through the shared inventory');
+assert.match(script, /ChapterTwoMaterialDropPolicy\.grantMaterialDrops\(progress, currentMap\.id, enemy\)/, 'rewardVictory grants second chapter monster-specific materials separately');
+assert.match(html, /chapter-two-material-drop-policy\.js[\s\S]*script\.js/, 'second chapter material policy loads before the main game script');
 assert.match(script, /VillageUpgradePolicy\.normalizeMaterialInventory\(saved\.inventory\)/, 'legacy building material ids merge into canonical item stacks when a save loads');
 assert.match(script, /materialDrops\.push\(\.\.\.VillageUpgradePolicy\.grantMapDrops\(progress, currentMap\.id\)\)/, 'the compatibility hook remains while unified building material drops return no duplicates');
 assert.match(script, /materialDrops\.forEach[\s\S]*材料掉落/, 'material drops are shown in the battle loot log');

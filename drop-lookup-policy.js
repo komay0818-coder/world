@@ -19,8 +19,9 @@
     const index = new Map();
     const maps = (options.maps || []).filter((map) => map?.regionOf);
     const mapPools = options.mapPools || {}, monsters = options.monsters || {};
-    const materials = options.materialPolicy?.MATERIALS || {}, recipes = options.recipePolicy?.RECIPES || {}, skillMaterials = options.skillPolicy?.MATERIALS || {};
-    const materialById = new Map(Object.values(materials).map((item) => [item.id, item]));
+    const materialPolicies = options.materialPolicies || [options.materialPolicy].filter(Boolean);
+    const materials = materialPolicies.flatMap((policy) => Object.values(policy?.MATERIALS || {})), recipes = options.recipePolicy?.RECIPES || {}, skillMaterials = options.skillPolicy?.MATERIALS || {};
+    const materialById = new Map(materials.map((item) => [item.id, item]));
     const recipeById = new Map(Object.values(recipes).map((item) => [item.id, item]));
     const skillById = new Map(Object.values(skillMaterials).map((item) => [item.id, item]));
     maps.forEach((map) => uniqueMonsterIds(mapPools[map.id]).forEach((monsterId) => {
@@ -31,8 +32,10 @@
         const rank = monster.isBoss ? 'boss' : monster.isElite ? 'elite' : 'normal';
         addSource(index, { ...purificationItem, category: 'material', typeLabel: 'Debuff 解除道具' }, { ...sourceBase, rate: options.purificationPolicy.DROP_RATES?.[rank], amount: 1 });
       }
-      (options.materialPolicy?.MAP_DROP_CONFIGS?.[map.id] || []).forEach((drop) => { const item = materialById.get(drop.materialId); addSource(index, item && { ...item, category: 'material', typeLabel: '製作材料' }, { ...sourceBase, rate: drop.dropRate }); });
-      (options.materialPolicy?.MONSTER_DROP_CONFIGS?.[monsterId] || []).forEach((drop) => { const item = materialById.get(drop.materialId); addSource(index, item && { ...item, category: 'material', typeLabel: '製作材料' }, { ...sourceBase, rate: drop.dropRate, amount: drop.amount || 1 }); });
+      materialPolicies.forEach((policy) => {
+        (policy?.MAP_DROP_CONFIGS?.[map.id] || []).forEach((drop) => { const item = materialById.get(drop.materialId); addSource(index, item && { ...item, category: 'material', typeLabel: '製作材料' }, { ...sourceBase, rate: drop.dropRate }); });
+        (policy?.MONSTER_DROP_CONFIGS?.[monsterId] || []).forEach((drop) => { const item = materialById.get(drop.materialId); addSource(index, item && { ...item, category: 'material', typeLabel: '製作材料' }, { ...sourceBase, rate: drop.dropRate, amount: drop.amount || 1 }); });
+      });
       (options.skillPolicy?.DROP_CONFIG?.[map.chapter]?.materials || []).filter((drop) => !drop.bossOnly || monster.isBoss).forEach((drop) => { const item = skillById.get(drop.materialId); addSource(index, item && { ...item, category: 'skill', typeLabel: '技能材料' }, { ...sourceBase, rate: drop.chance, amount: drop.amount || 1 }); });
       const loot = monster.lootConfig;
       if (loot?.equipmentDropRate && loot.rarityWeights) {

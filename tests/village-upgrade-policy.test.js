@@ -38,7 +38,24 @@ assert.deepEqual(policy.upgrade(workshopProgress, workshopVillage, 'workshop'), 
 assert.equal(workshopProgress.gold, 0);
 assert.equal(workshopProgress.inventory.length, 0);
 assert.equal(workshopVillage.buildings.workshop.level, 2);
-assert.equal(policy.canUpgrade(workshopProgress, workshopVillage, 'workshop').reason, 'chapter-cap');
+assert.equal(policy.canUpgrade(workshopProgress, workshopVillage, 'workshop').reason, 'chapter-locked');
+
+assert.deepEqual(policy.LEVEL_THREE_COSTS.workshop.materials, { 'black-wood': 400, 'hard-hide': 400, 'spider-silk': 300 });
+assert.deepEqual(policy.LEVEL_THREE_COSTS.blacksmith.materials, { 'black-iron-ore': 500, 'black-wood': 300 });
+assert.deepEqual(policy.LEVEL_THREE_COSTS.furnace.materials, { 'black-iron-ore': 400, 'corruption-crystal': 200 });
+assert.deepEqual(policy.LEVEL_THREE_COSTS.alchemy.materials, { 'venom-sac': 150, 'corruption-crystal': 150, 'spider-silk': 200 });
+assert.deepEqual(policy.LEVEL_THREE_COSTS.rune.materials, { 'corruption-crystal': 300, 'black-iron-ore': 300, 'venom-sac': 100 });
+Object.values(policy.LEVEL_THREE_COSTS).forEach((rule) => assert.equal(rule.gold, 30000));
+assert.equal(Object.values(policy.LEVEL_THREE_COSTS).reduce((total, rule) => total + rule.gold, 0), 150000);
+
+const levelThreeProgress = progressWith({ 'black-wood': 400, 'hard-hide': 400, 'spider-silk': 300 }, 30000);
+levelThreeProgress.unlockedChapter = 2;
+const levelThreeVillage = villageWith('workshop', 2);
+assert.equal(policy.canUpgrade(levelThreeProgress, levelThreeVillage, 'workshop').ok, true);
+assert.equal(policy.upgrade(levelThreeProgress, levelThreeVillage, 'workshop').level, 3);
+assert.equal(levelThreeProgress.gold, 0);
+assert.equal(levelThreeProgress.inventory.length, 0);
+assert.equal(policy.canUpgrade(levelThreeProgress, levelThreeVillage, 'workshop').reason, 'chapter-cap');
 
 const insufficient = progressWith({ 'wolf-fur': 149, 'hard-hide': 150 });
 const before = JSON.stringify(insufficient);
@@ -49,7 +66,7 @@ assert.equal(policy.canUpgrade(progressWith(), villageWith('storage'), 'storage'
 
 const buildingIds = Object.values(policy.MATERIALS).map(({ id }) => id);
 assert.equal(new Set(buildingIds).size, buildingIds.length);
-assert.deepEqual(buildingIds.sort(), ['black-ore', 'boar-tusk', 'hard-hide', 'iron-ore', 'wolf-fang', 'wolf-fur']);
+assert.deepEqual(buildingIds.sort(), ['black-iron-ore', 'black-ore', 'black-wood', 'boar-tusk', 'corruption-crystal', 'hard-hide', 'iron-ore', 'spider-silk', 'venom-sac', 'wolf-fang', 'wolf-fur']);
 const materialNames = Object.values(policy.MATERIALS).map(({ name }) => name);
 assert.equal(new Set(materialNames).size, materialNames.length, 'one policy cannot define the same item name under different ids');
 assert.equal(policy.getMaterial('wolf-fang').name, '狼牙');

@@ -1105,7 +1105,9 @@ function renderVillage() {
     const building = getVillageBuildingData(definition.id);
     const requirement = VillageUpgradePolicy.getRequirement(building.id, building.level);
     const validation = VillageUpgradePolicy.canUpgrade(progress, villageData, building.id);
-    const supportsChapterOneUpgrade = Object.prototype.hasOwnProperty.call(VillageUpgradePolicy.LEVEL_TWO_COSTS, building.id);
+    const supportsUpgrade = Object.prototype.hasOwnProperty.call(VillageUpgradePolicy.LEVEL_TWO_COSTS, building.id);
+    const unlockedChapter = getUnlockedChapter(progress);
+    const displayedCap = VillageUpgradePolicy.CHAPTER_LEVEL_CAPS[Math.min(2, unlockedChapter)] || 2;
     const costs = requirement ? Object.entries(requirement.materials).map(([materialId, amount]) => {
       const material = VillageUpgradePolicy.getMaterial(materialId);
       const owned = VillageUpgradePolicy.getQuantity(progress.inventory, materialId);
@@ -1113,11 +1115,11 @@ function renderVillage() {
     }).join('') : '';
     const upgradePanel = requirement
       ? `<ul class="village-upgrade-cost">${costs}<li class="${(Number(progress.gold) || 0) < requirement.gold ? 'village-upgrade-insufficient' : ''}"><span>金幣</span><b>${Number(progress.gold) || 0} / ${requirement.gold}</b></li></ul>`
-      : supportsChapterOneUpgrade ? '<p class="village-upgrade-status">已達第一章上限；Lv3 將於第二章開放。</p>' : '<p class="village-upgrade-status">建築功能尚未開放。</p>';
-    const upgradeLabel = requirement ? '升級至 Lv2' : supportsChapterOneUpgrade ? '第一章上限 Lv2' : '尚未開放';
+      : supportsUpgrade ? (building.level >= 3 ? '<p class="village-upgrade-status">已達第二章上限 Lv3。</p>' : '<p class="village-upgrade-status">已達第一章上限；Lv3 將於第二章開放。</p>') : '<p class="village-upgrade-status">建築功能尚未開放。</p>';
+    const upgradeLabel = requirement ? `升級至 Lv${requirement.targetLevel}` : supportsUpgrade ? `章節上限 Lv${displayedCap}` : '尚未開放';
     return `<article class="village-building-card" data-village-building="${building.id}">
       <div class="village-building-icon" aria-hidden="true">${building.icon}</div>
-      <div class="village-building-copy"><h3>${building.name}</h3><small>Lv${building.level} / 第一章上限 Lv2</small><p>${building.description}</p></div>
+      <div class="village-building-copy"><h3>${building.name}</h3><small>Lv${building.level} / 目前上限 Lv${displayedCap}</small><p>${building.description}</p></div>
       ${upgradePanel}
       <div class="village-building-actions"><button class="village-enter" type="button" data-open-village-building="${building.id}">進入</button><button class="village-upgrade" type="button" data-upgrade-village-building="${building.id}" ${validation.ok ? '' : 'disabled'}>${upgradeLabel}</button></div>
     </article>`;
@@ -2272,7 +2274,7 @@ function getDropLookupItems() {
     maps: mapProgression,
     mapPools: dropLookupMapPools,
     monsters: monsterTypes,
-    materialPolicy: ChapterOneMaterialDropPolicy,
+    materialPolicies: [ChapterOneMaterialDropPolicy, ChapterTwoMaterialDropPolicy],
     recipePolicy: ChapterOneRecipeDropPolicy,
     skillPolicy: SkillUpgradePolicy,
     bossPolicy: ChapterBossDropPolicy,
@@ -3234,6 +3236,7 @@ function rewardVictory(index) {
   const loot = addLoot(progress, enemy);
   const collectible = addCollectibleLoot(progress, enemy);
   const materialDrops = ChapterOneMaterialDropPolicy.grantMaterialDrops(progress, currentMap.id, enemy);
+  materialDrops.push(...ChapterTwoMaterialDropPolicy.grantMaterialDrops(progress, currentMap.id, enemy));
   materialDrops.push(...VillageUpgradePolicy.grantMapDrops(progress, currentMap.id));
   const purificationDrop = BlackForestCorruptionPolicy.grantMapDrop(progress, currentMap.id, enemy);
   const skillMaterialDrops = SkillUpgradePolicy.grantChapterDrops(progress, currentMap.chapter, enemy);
