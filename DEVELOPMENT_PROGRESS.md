@@ -1536,3 +1536,8 @@ Boss：
 - 功能提交：`d5edf27e2a92445a308678ac85d35d3248e51a48`；入口頁已鎖定該提交的 `script.js` 與 `styles/monster-slots.css`。
 - 驗證狀態：52 項 JavaScript 測試、JavaScript 語法檢查與 `git diff --check` 通過；線上實測 7 個按鈕皆等寬顯示，「獲得材料」提示未遮擋功能列，點擊「掉落」可正常開啟並顯示 21 種掉落物，瀏覽器主控台無錯誤。
 - DEV 不可變測試網址：<https://raw.githack.com/komay0818-coder/world/133fcb7/index.html>。
+## 2026-08-14 戰鬥角色圖片比例修正（0.6.8）
+- 修正戰鬥角色圖被固定寬度樣式壓縮的問題，角色現在依各素材的原始寬高比顯示。
+- 保留既有角色高度、隊伍站位與腳底基準線，不修改戰鬥、掉落或角色資料。
+- 功能提交：`c254cb9`；入口頁已鎖定該提交的 `styles/monster-slots.css`，避免開發預覽沿用舊快取。
+- 戰鬥畫面整合測試與完整 JavaScript 測試均通過，`git diff --check` 通過。
