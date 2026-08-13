@@ -13,6 +13,8 @@ assert.match(html, /id="battle-player-art" class="battle-player-art hidden"/, 'm
 assert.doesNotMatch(html, /portrait-prototype|combat-unit-frame|combat-unit-art/, 'battlefield markup no longer contains frame prototype elements');
 assert.match(html, /id="player-stage-info"/, 'main player information floats near the battlefield art');
 assert.match(html, /id="battle-companion-icons" class="battle-companion-icons hidden"/, 'battlefield provides a generic companion icon tray');
+assert.match(html, /d90c3590e7fc7269c2c59d521aab28a8e8523751\/styles\/monster-slots\.css/, 'battlefield loads the immutable unframed style build');
+assert.match(html, /d90c3590e7fc7269c2c59d521aab28a8e8523751\/script\.js/, 'battlefield loads the immutable unframed rendering build');
 assert.doesNotMatch(html, /id="hunter-companion"/, 'legacy full-body hunter companion is removed from the battlefield');
 assert.match(css, /grid-template-columns: repeat\(4, minmax\(0, 1fr\)\)/, 'desktop enemies share a four-unit battlefield row');
 assert.match(css, /#enemy-squad \.monster-battle-slot[\s\S]*?border: 0 !important;[\s\S]*?background: none !important;/, 'individual monster cards have no frame or background');
