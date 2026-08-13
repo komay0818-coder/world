@@ -4689,7 +4689,6 @@ function openBattle() {
   const battlePlayerArt = document.querySelector('#battle-player-art');
   const characterArt = battleCharacterArt[`${character.race}:${character.job}`];
   if (battlePlayerArt) {
-    const battlePlayerImage = battlePlayerArt.querySelector('.combat-unit-art');
     battlePlayerArt.classList.toggle('hidden', !characterArt);
     battlePlayerArt.classList.toggle('undead-art', character.race === 'undead' && Boolean(characterArt));
     battlePlayerArt.dataset.job = character.job;
@@ -4698,7 +4697,7 @@ function openBattle() {
     const characterLayout = battleCharacterLayout[`${character.race}:${character.job}`];
     battlePlayerArt.style.setProperty('--character-scale', CHARACTER_SCALE * (characterLayout?.visibleScale || 1));
     battlePlayerArt.style.setProperty('--character-aspect', characterLayout?.aspect || '2048 / 1200');
-    if (battlePlayerImage) battlePlayerImage.style.backgroundImage = characterArt ? `url('${characterArt}')` : '';
+    battlePlayerArt.style.backgroundImage = characterArt ? `url('${characterArt}')` : '';
     const raceName = Object.values(factions).flat().find((race) => race.id === character.race)?.name || character.race;
     battlePlayerArt.setAttribute('aria-label', `${raceName}${classes.find((job) => job.id === character.job)?.name || ''}`);
   }

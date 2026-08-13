@@ -37,6 +37,8 @@ assert.match(css, /\.player-battle-stage[\s\S]*?justify-content: center;/, 'part
 assert.match(script, /battleCharacterArt\[`\$\{member\.character\.race\}:\$\{member\.character\.job\}`\]/, 'party display reuses existing character art');
 assert.doesNotMatch(script, /portraitPrototypeAssigned|normal-portrait-prototype|player-unit-frame/, 'battlefield rendering no longer assigns frame classes');
 assert.doesNotMatch(css, /portrait-prototype|combat-frame-width|player-frame-width|gold dragon frame/, 'combat frame styling is fully removed');
+assert.match(script, /battlePlayerArt\.style\.backgroundImage = characterArt \? `url\('\$\{characterArt\}'\)` : '';/, 'unframed main player receives its character artwork directly');
+assert.doesNotMatch(script, /battlePlayerArt\.querySelector\('\.combat-unit-art'\)/, 'main player no longer depends on the removed frame artwork node');
 assert.match(script, /function getMonsterVisualSize\(enemy = \{\}\)/, 'monster visual sizing uses a reusable category resolver');
 assert.doesNotMatch(script, /if \(enemy\.isBoss\) return 'boss';/, 'boss rank does not replace the creature body-size category');
 assert.match(script, /class="enemy-unit monster-battle-slot visual-size-\$\{visualSize\}/, 'enemy slots expose their visual-size category to CSS');
