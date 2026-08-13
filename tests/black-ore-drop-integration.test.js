@@ -11,7 +11,7 @@ assert.match(script, /grantMaterialDrops\(progress, currentMap\.id, enemy\)/, 'r
 assert.match(script, /VillageUpgradePolicy\.grantMapDrops\(progress, currentMap\.id\)/, 'reward settlement also grants map-based building black ore');
 assert.doesNotMatch(crafting, /blackOre: Object\.freeze/, 'black ore has one canonical material definition in the drop policy');
 assert.match(index, /chapter-one-material-drop-policy\.js\?v=20260813-blackstone-only-v3/, 'the blackstone-only material policy cache key changes');
-assert.match(index, /world\/41954f68a4928b590409c441ae3bdf18ad5babf4\/script\.js/, 'the integration script uses the current immutable build');
+assert.match(index, /world\/7d0852d004a2ccbb5a99faaaeaf0b79eba7bd67e\/script\.js/, 'the integration script uses the current immutable build');
 assert.match(index, /VER\. 0\.6\.19/, 'the game version includes shared mage and priest weapons');
 
 console.log('black-ore-drop-integration: assertions passed');
