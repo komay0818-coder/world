@@ -619,7 +619,7 @@ body:has(.battle-screen:not(.hidden)) .toast {
 
 /* 0.4.83: the main player uses the same unit box as every party member. */
 .battle-field #battle-player-art[aria-label] {
-  width: clamp(80px, 10vw, 133px) !important;
+  width: auto !important;
   height: 24.5% !important;
 }
 
@@ -633,7 +633,7 @@ body:has(.battle-screen:not(.hidden)) .toast {
 
 @media (max-width: 700px) {
   .battle-field #battle-player-art[aria-label] {
-    width: clamp(58px, 18vw, 78px) !important;
+    width: auto !important;
     height: 22% !important;
   }
 
@@ -768,7 +768,7 @@ body:has(.battle-screen:not(.hidden)) .toast.show {
 /* 0.4.89: enlarge the shared player unit box; four party anchors still fit without overlap. */
 @media (min-width: 701px) {
   .battle-field #battle-player-art[aria-label] {
-    width: clamp(120px, 14vw, 180px) !important;
+    width: auto !important;
     height: 33% !important;
   }
 
@@ -795,7 +795,7 @@ body:has(.battle-screen:not(.hidden)) .toast.show {
 
 @media (max-width: 700px) {
   .battle-field #battle-player-art[aria-label] {
-    width: clamp(66px, 20vw, 88px) !important;
+    width: auto !important;
     height: 25% !important;
   }
 

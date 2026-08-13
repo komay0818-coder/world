@@ -48,8 +48,9 @@ assert.match(script, /playPartyMemberCombatAnimation\(member,[\s\S]*?kind: 'skil
 assert.match(script, /playPartyMemberCombatAnimation\(member, \[targetIndex\], \{ kind: 'basic' \}\)/, 'basic attacks animate every party member');
 assert.match(css, /\.character-attack-effect\.attack-kind-skill::after/, 'skill attacks show an in-field skill label');
 assert.match(css, /prefers-reduced-motion: reduce/, 'combat animation respects reduced-motion preferences');
-assert.match(css, /#battle-player-art\[aria-label\][\s\S]*?width: clamp\(80px, 10vw, 133px\) !important;[\s\S]*?height: 24\.5% !important;/, 'main player uses the same desktop unit box as party members');
-assert.match(css, /@media \(max-width: 700px\)[\s\S]*?#battle-player-art\[aria-label\][\s\S]*?width: clamp\(58px, 18vw, 78px\) !important;[\s\S]*?height: 22% !important;/, 'main player uses the same mobile unit box as party members');
+assert.match(css, /#battle-player-art\[aria-label\][\s\S]*?width: auto !important;[\s\S]*?height: 24\.5% !important;/, 'main player preserves the source artwork aspect ratio in its desktop unit box');
+assert.match(css, /@media \(max-width: 700px\)[\s\S]*?#battle-player-art\[aria-label\][\s\S]*?width: auto !important;[\s\S]*?height: 22% !important;/, 'main player preserves the source artwork aspect ratio in its mobile unit box');
+assert.doesNotMatch(css, /\.battle-field #battle-player-art\[aria-label\] \{[^}]*width: clamp\(/, 'main player artwork is never squeezed into a fixed-width frame');
 assert.match(css, /\.player-battle-stage[\s\S]*?height: 24\.5%;/, 'party member stage is reduced to about seventy percent of its previous height');
 assert.match(css, /\.battle-field \{ --player-unit-ground-line: 7%; \}[\s\S]*?\.player-battle-stage,[\s\S]*?#battle-player-art\[aria-label\],[\s\S]*?\.player-grounding \{[\s\S]*?bottom: var\(--player-unit-ground-line\) !important;/, 'all desktop player units share an inset ground line inside the ally field');
 assert.match(css, /@media \(max-width: 700px\) \{[\s\S]*?--player-unit-ground-line: 6%;/, 'mobile player units also retain space above the ally field edge');
