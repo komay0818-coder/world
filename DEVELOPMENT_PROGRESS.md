@@ -1559,3 +1559,10 @@ Boss：
 - Boss 金龍框與菁英紫銀框沿用同一方形基準；Boss 仍維持較大階級尺寸。
 - 功能提交：`c260d9b`；入口頁已鎖定該提交的 `styles/monster-slots.css`。
 - 本機瀏覽器已驗證人類刺客、兔子、史萊姆與高耳哥布林；58 項 JavaScript 測試及 `git diff --check` 通過。
+## 2026-08-14 戰鬥肖像框 Prototype（0.6.11）
+- 停止擴充方形卡片框；本次只讓主玩家與戰場上第一隻普通怪使用 prototype，其他普通怪、菁英、Boss 與隊伍角色不套用。
+- prototype 改用橢圓盾牌式裝飾框，角色圖片以 `contain` 完整呈現，並允許頭部、耳朵、武器與四肢自然突破框緣。
+- 普通怪名稱與 Lv 整合為框頂小型膠囊銘牌，HP 血條貼合框底；移除 prototype 的大型黑色名稱卡與方形圖片盒感。
+- 主玩家使用相同視覺語言的較大橢圓框，保留完整角色姿態，不修改隊伍角色或其他單位。
+- 功能提交：`c584d03`；入口頁已鎖定該提交的 `script.js` 與 `styles/monster-slots.css`。
+- 本機瀏覽器已確認兔子 prototype、玩家 prototype，以及未套用的哥布林與狼能同場正常顯示；58 項 JavaScript 測試及 `git diff --check` 通過。
