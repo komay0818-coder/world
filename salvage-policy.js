@@ -5,12 +5,18 @@
 }(typeof globalThis !== 'undefined' ? globalThis : this, function createSalvagePolicy() {
   const MATERIALS = Object.freeze({
     green_essence_stone: Object.freeze({ id: 'green_essence_stone', kind: 'material', materialType: 'crafting', quality: 'uncommon', stackable: true, icon: '🟢', name: '綠色精華石', description: '由綠色裝備分解後取得，可用於工坊製作裝備。' }),
-    blue_essence_stone: Object.freeze({ id: 'blue_essence_stone', kind: 'material', materialType: 'crafting', quality: 'rare', stackable: true, icon: '🔵', name: '藍色精華石', description: '由藍色裝備分解後取得，可用於工坊製作高品質裝備。' })
+    blue_essence_stone: Object.freeze({ id: 'blue_essence_stone', kind: 'material', materialType: 'crafting', quality: 'rare', stackable: true, icon: '🔵', name: '藍色精華石', description: '由藍色裝備分解後取得，可用於工坊製作高品質裝備。' }),
+    purple_essence_stone: Object.freeze({ id: 'purple_essence_stone', kind: 'material', materialType: 'crafting', quality: 'epic', stackable: true, icon: '🟣', name: '紫色精華石', description: '保留給未來紫色裝備分解與製作。' })
   });
   const FURNACE_CONFIG = Object.freeze({
     green: Object.freeze({ quality: 'uncommon', materialId: 'green_essence_stone', baseChance: .40, chanceCap: .80, amount: 1 }),
     blue: Object.freeze({ quality: 'rare', materialId: 'blue_essence_stone', baseChance: .25, chanceCap: .65, amount: 1 }),
     chanceBonusPerLevel: .05
+  });
+  const LEGACY_ESSENCE_IDS = Object.freeze({
+    'equipment-stone-uncommon': 'green_essence_stone',
+    'equipment-stone-rare': 'blue_essence_stone',
+    'equipment-stone-epic': 'purple_essence_stone'
   });
 
   function getItemId(item) { return String(item?.instanceId || item?.id || ''); }
@@ -60,10 +66,17 @@
     return next;
   }
   function normalizeInventory(inventory) {
-    return (Array.isArray(inventory) ? inventory : []).map((item) => {
-      const material = getMaterial(item?.id);
-      return material ? { ...item, ...material, quantity: Math.max(0, Number(item.quantity) || 0) } : item;
+    const normalized = [];
+    (Array.isArray(inventory) ? inventory : []).forEach((item) => {
+      const canonicalId = LEGACY_ESSENCE_IDS[item?.id] || item?.id;
+      const material = getMaterial(canonicalId);
+      if (!material) { normalized.push(item); return; }
+      const quantity = Math.max(0, Number(item.quantity) || 0);
+      const existing = normalized.find((entry) => entry?.id === canonicalId && entry?.kind === 'material');
+      if (existing) existing.quantity += quantity;
+      else normalized.push({ ...item, ...material, id: canonicalId, quantity });
     });
+    return normalized;
   }
   function getMaterialQuantity(inventory, materialId) {
     return (Array.isArray(inventory) ? inventory : []).filter((item) => item?.id === materialId && item.kind !== 'equipment').reduce((sum, item) => sum + Math.max(0, Number(item.quantity) || 0), 0);
@@ -81,5 +94,5 @@
     return { ok: true, item: validation.item, consumedId: validation.itemId, success, chance, roll, material: getMaterial(validation.rule.materialId), amount: success ? validation.rule.amount : 0 };
   }
 
-  return Object.freeze({ MATERIALS, FURNACE_CONFIG, getItemId, normalizeQuality, getRule, getMaterial, isProtected, isEquipped, getChance, validate, getEligibleEquipment, addMaterialStack, normalizeInventory, getMaterialQuantity, salvage });
+  return Object.freeze({ MATERIALS, FURNACE_CONFIG, LEGACY_ESSENCE_IDS, getItemId, normalizeQuality, getRule, getMaterial, isProtected, isEquipped, getChance, validate, getEligibleEquipment, addMaterialStack, normalizeInventory, getMaterialQuantity, salvage });
 }));

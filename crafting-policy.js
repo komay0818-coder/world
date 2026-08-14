@@ -20,9 +20,9 @@
 }(typeof globalThis !== 'undefined' ? globalThis : this, function createCraftingPolicy(RecipePolicy, MaterialPolicy, ChapterTwoRecipePolicy, ChapterTwoMaterialPolicy, EquipmentAffixPolicy) {
   const INVENTORY_CAPACITY = 1000;
   const RARITIES = Object.freeze({
-    uncommon: Object.freeze({ id: 'uncommon', label: '綠色', fixedAffixCount: 1, randomAffixCount: 2, affixCount: 3, workshopLevel: 1, stoneId: 'equipment-stone-uncommon' }),
-    rare: Object.freeze({ id: 'rare', label: '藍色', fixedAffixCount: 2, randomAffixCount: 3, affixCount: 5, workshopLevel: 1, stoneId: 'equipment-stone-rare' }),
-    epic: Object.freeze({ id: 'epic', label: '紫色', fixedAffixCount: 2, randomAffixCount: 4, affixCount: 6, workshopLevel: 3, stoneId: 'equipment-stone-epic' })
+    uncommon: Object.freeze({ id: 'uncommon', label: '綠色', fixedAffixCount: 1, randomAffixCount: 2, affixCount: 3, workshopLevel: 1, essenceId: 'green_essence_stone' }),
+    rare: Object.freeze({ id: 'rare', label: '藍色', fixedAffixCount: 2, randomAffixCount: 3, affixCount: 5, workshopLevel: 1, essenceId: 'blue_essence_stone' }),
+    epic: Object.freeze({ id: 'epic', label: '紫色', fixedAffixCount: 2, randomAffixCount: 4, affixCount: 6, workshopLevel: 3, essenceId: 'purple_essence_stone' })
   });
 
   const STAT_DEFINITIONS = Object.freeze({
@@ -56,12 +56,12 @@
     cloak: Object.freeze(['maxHp', 'dodgeChance', 'cooldownRecovery', 'hpRegeneration', 'manaRegeneration', 'itemFind', 'goldFind', 'damageReduction'])
   });
 
-  const EXTRA_MATERIALS = Object.freeze({
-    uncommonStone: Object.freeze({ id: 'equipment-stone-uncommon', kind: 'material', materialType: 'quality-stone', icon: '🟢', name: '綠色裝備強化石', description: '製作綠色裝備所需的強化石。' }),
-    rareStone: Object.freeze({ id: 'equipment-stone-rare', kind: 'material', materialType: 'quality-stone', icon: '🔵', name: '藍色裝備強化石', description: '製作藍色裝備所需的強化石。' }),
-    epicStone: Object.freeze({ id: 'equipment-stone-epic', kind: 'material', materialType: 'quality-stone', icon: '🟣', name: '紫色品質寶石', description: '保留給未來紫色裝備製作。' })
+  const ESSENCE_MATERIALS = Object.freeze({
+    greenEssence: Object.freeze({ id: 'green_essence_stone', kind: 'material', materialType: 'crafting', quality: 'uncommon', stackable: true, icon: '🟢', name: '綠色精華石', description: '由綠色裝備分解後取得，可用於工坊製作裝備。' }),
+    blueEssence: Object.freeze({ id: 'blue_essence_stone', kind: 'material', materialType: 'crafting', quality: 'rare', stackable: true, icon: '🔵', name: '藍色精華石', description: '由藍色裝備分解後取得，可用於工坊製作高品質裝備。' }),
+    purpleEssence: Object.freeze({ id: 'purple_essence_stone', kind: 'material', materialType: 'crafting', quality: 'epic', stackable: true, icon: '🟣', name: '紫色精華石', description: '保留給未來紫色裝備分解與製作。' })
   });
-  const MATERIALS = Object.freeze({ ...(MaterialPolicy?.MATERIALS || {}), ...(ChapterTwoMaterialPolicy?.MATERIALS || {}), ...EXTRA_MATERIALS });
+  const MATERIALS = Object.freeze({ ...(MaterialPolicy?.MATERIALS || {}), ...(ChapterTwoMaterialPolicy?.MATERIALS || {}), ...ESSENCE_MATERIALS });
   const MATERIAL_BY_ID = new Map(Object.values(MATERIALS).map((entry) => [entry.id, entry]));
   const RECIPES = Object.freeze(Object.fromEntries([...Object.values(RecipePolicy?.RECIPES || {}), ...Object.values(ChapterTwoRecipePolicy?.RECIPES || {})].map((recipe) => [recipe.recipeId, recipe])));
 
@@ -105,9 +105,9 @@
     const rarity = RARITIES[recipe.quality];
     if (!rarity) return { ok: false, code: 'invalid-quality', reason: '配方品質設定錯誤。' };
     if ((Number(workshopLevel) || 1) < rarity.workshopLevel) return { ok: false, code: 'workshop-level', reason: `需要工坊 Lv${rarity.workshopLevel}。` };
-    const stoneAmount = Number(recipe.materials?.[rarity.stoneId]) || 0;
-    if (getItemQuantity(progress?.inventory, rarity.stoneId) < stoneAmount) return { ok: false, code: 'missing-quality-stone', itemId: rarity.stoneId, reason: `缺少${MATERIAL_BY_ID.get(rarity.stoneId)?.name || '品質寶石'}。` };
-    const missingMaterial = Object.entries(recipe.materials || {}).find(([id, amount]) => id !== rarity.stoneId && getItemQuantity(progress?.inventory, id) < amount);
+    const essenceAmount = Number(recipe.materials?.[rarity.essenceId]) || 0;
+    if (getItemQuantity(progress?.inventory, rarity.essenceId) < essenceAmount) return { ok: false, code: 'missing-quality-essence', itemId: rarity.essenceId, reason: `缺少${MATERIAL_BY_ID.get(rarity.essenceId)?.name || '品質精華石'}。` };
+    const missingMaterial = Object.entries(recipe.materials || {}).find(([id, amount]) => id !== rarity.essenceId && getItemQuantity(progress?.inventory, id) < amount);
     if (missingMaterial) return { ok: false, code: 'missing-material', itemId: missingMaterial[0], reason: `缺少${MATERIAL_BY_ID.get(missingMaterial[0])?.name || missingMaterial[0]}。` };
     if ((Number(progress?.gold) || 0) < recipe.goldCost) return { ok: false, code: 'missing-gold', reason: '金幣不足。' };
     if (getProjectedInventorySlots(progress, recipe) > INVENTORY_CAPACITY) return { ok: false, code: 'inventory-full', reason: '背包空間不足。' };

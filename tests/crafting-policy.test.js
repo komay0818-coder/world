@@ -51,17 +51,17 @@ assert.match(CraftingPolicy.generateCraftedEquipment('chapter1-goblin-rare-cloak
 const success = progressWith([recipeId], 10, 10000);
 const beforeGold = success.gold;
 const beforeRecipe = CraftingPolicy.getRecipeQuantity(success, recipeId);
-const beforeStone = CraftingPolicy.getItemQuantity(success.inventory, 'equipment-stone-uncommon');
+const beforeEssence = CraftingPolicy.getItemQuantity(success.inventory, 'green_essence_stone');
 const crafted = CraftingPolicy.craftEquipment(success, recipeId, { instanceId: 'atomic-success' });
 assert.equal(crafted.ok, true);
 assert.equal(CraftingPolicy.getRecipeQuantity(success, recipeId), beforeRecipe - 1, 'craft consumes exactly one recipe');
-assert.equal(CraftingPolicy.getItemQuantity(success.inventory, 'equipment-stone-uncommon'), beforeStone - 1, 'craft consumes quality stone');
+assert.equal(CraftingPolicy.getItemQuantity(success.inventory, 'green_essence_stone'), beforeEssence - 1, 'craft consumes matching essence');
 assert.equal(success.gold, beforeGold - recipe.goldCost, 'craft consumes configured gold');
 assert.ok(success.inventory.includes(crafted.item), 'crafted equipment enters the existing inventory');
 
 for (const setup of [
   { name: 'missing recipe', progress: progressWith([], 10, 10000), code: 'missing-recipe' },
-  { name: 'missing quality stone', progress: progressWith([recipeId], 10, 10000), code: 'missing-quality-stone', mutate: (progress) => { progress.inventory.find((item) => item.id === 'equipment-stone-uncommon').quantity = 0; } },
+  { name: 'missing quality essence', progress: progressWith([recipeId], 10, 10000), code: 'missing-quality-essence', mutate: (progress) => { progress.inventory.find((item) => item.id === 'green_essence_stone').quantity = 0; } },
   { name: 'missing map material', progress: progressWith([recipeId], 10, 10000), code: 'missing-material', mutate: (progress) => { progress.inventory.find((item) => item.id === 'iron-ore').quantity = 0; } },
   { name: 'missing gold', progress: progressWith([recipeId], 10, 0), code: 'missing-gold' }
 ]) {
@@ -87,8 +87,9 @@ const chapterTwoRecipeId = 'chapter2-corrupted-centurion-cloak';
 const chapterTwoRecipe = CraftingPolicy.RECIPES[chapterTwoRecipeId];
 assert.equal(Object.values(CraftingPolicy.RECIPES).filter((entry) => entry.chapter === 2).length, 6, 'all six chapter-two recipes are craftable');
 assert.equal(CraftingPolicy.MATERIALS.blackWood.name, '黑木', 'chapter-two materials are available to crafting');
-assert.equal(CraftingPolicy.MATERIALS.uncommonStone.name, '綠色裝備強化石');
-assert.equal(CraftingPolicy.MATERIALS.rareStone.name, '藍色裝備強化石');
+assert.equal(CraftingPolicy.MATERIALS.greenEssence.name, '綠色精華石');
+assert.equal(Object.values(CraftingPolicy.MATERIALS).some((item) => item.id.startsWith('equipment-stone-')), false, '強化石已從製作材料移除');
+assert.equal(CraftingPolicy.MATERIALS.blueEssence.name, '藍色精華石');
 const chapterTwoProgress = progressWith([chapterTwoRecipeId], 20, 50000);
 const chapterTwoBefore = Object.fromEntries(Object.keys(chapterTwoRecipe.materials).map((id) => [id, CraftingPolicy.getItemQuantity(chapterTwoProgress.inventory, id)]));
 const chapterTwoCraft = CraftingPolicy.craftEquipment(chapterTwoProgress, chapterTwoRecipeId, { instanceId: 'chapter-two-craft', craftedAt: 456 });

@@ -21,6 +21,7 @@ assert.equal(policy.getChance(blue, 99), .65);
 
 assert.equal(policy.MATERIALS.green_essence_stone.stackable, true);
 assert.equal(policy.MATERIALS.blue_essence_stone.stackable, true);
+assert.equal(policy.MATERIALS.purple_essence_stone.stackable, true);
 assert.equal(policy.getRule(equipment('white', 'common')), null);
 assert.equal(policy.getRule(equipment('purple', 'epic')), null);
 
@@ -57,5 +58,16 @@ const normalized = policy.normalizeInventory([{ id: 'green_essence_stone', kind:
 assert.equal(normalized[0].quantity, 0);
 assert.equal(normalized[0].name, '綠色精華石');
 assert.equal(policy.getMaterialQuantity([], 'blue_essence_stone'), 0, 'old saves without stones read as zero');
+const migrated = policy.normalizeInventory([
+  { id: 'equipment-stone-uncommon', kind: 'material', quantity: 2 },
+  { ...policy.MATERIALS.green_essence_stone, quantity: 3 },
+  { id: 'equipment-stone-rare', kind: 'material', quantity: 4 },
+  { id: 'equipment-stone-epic', kind: 'material', quantity: 1 }
+]);
+assert.deepEqual(migrated.map(({ id, quantity }) => ({ id, quantity })), [
+  { id: 'green_essence_stone', quantity: 5 },
+  { id: 'blue_essence_stone', quantity: 4 },
+  { id: 'purple_essence_stone', quantity: 1 }
+], '舊存檔強化石等量併入對應精華石');
 
 console.log('salvage-policy tests passed');

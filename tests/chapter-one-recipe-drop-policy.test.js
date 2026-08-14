@@ -30,6 +30,9 @@ Object.values(policy.RECIPES).forEach((recipe) => {
   assert.deepEqual(recipe.materialRequirements, recipe.materials);
   assert.ok(recipe.goldCost > 0);
 });
+assert.ok([policy.RECIPES.greenWrist, policy.RECIPES.greenCloak, policy.RECIPES.greenShoulders].every((recipe) => recipe.materials.green_essence_stone === 1));
+assert.ok([policy.RECIPES.goblinRareCloak, policy.RECIPES.highChiefRareWrist, policy.RECIPES.blackKnightRareShoulders].every((recipe) => recipe.materials.blue_essence_stone === 1));
+assert.ok(Object.values(policy.RECIPES).every((recipe) => Object.keys(recipe.materials).every((id) => !id.startsWith('equipment-stone-'))));
 assert.deepEqual(Object.fromEntries(Object.values(policy.RECIPES).map((recipe) => [recipe.id, recipe.goldCost])), {
   'recipe-green-wrist': 2400,
   'recipe-green-cloak': 2400,
