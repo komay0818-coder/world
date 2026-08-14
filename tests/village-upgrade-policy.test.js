@@ -80,6 +80,11 @@ assert.deepEqual(policy.normalizeMaterialInventory([
   { id: 'iron-ore', quantity: 7 }, { id: 'black-ore', quantity: 17 }
 ]);
 assert.equal(policy.getMaterial('black-ore').name, '黑礦石');
+['wolf-fur', 'wolf-fang', 'hard-hide', 'boar-tusk', 'iron-ore', 'black-ore'].forEach((materialId) => {
+  const material = policy.getMaterial(materialId);
+  assert.equal(material.imageStatus, 'ready');
+  assert.equal(material.image, `assets/${materialId}.png?v=20260815-user-image-v1`);
+});
 assert.equal(policy.getMaterial('unknown'), null);
 assert.deepEqual(policy.CHAPTER_LEVEL_CAPS, { 1: 2, 2: 3 });
 

@@ -11,6 +11,8 @@ assert.deepEqual(Object.values(policy.MATERIALS).map((item) => item.id), [
 ]);
 Object.values(policy.MATERIALS).forEach((material) => {
   assert.equal(material.kind, 'material');
+  assert.equal(material.imageStatus, 'ready');
+  assert.equal(material.image, `assets/${material.id}.png?v=20260815-user-image-v1`);
 });
 assert.equal(policy.MATERIALS.blackOre.materialType, 'special-crafting');
 Object.values(policy.MATERIALS).filter((material) => material.id !== 'black-ore')

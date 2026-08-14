@@ -4,12 +4,12 @@
   else root.ChapterOneMaterialDropPolicy = api;
 }(typeof globalThis !== 'undefined' ? globalThis : this, function createChapterOneMaterialDropPolicy() {
   const MATERIALS = Object.freeze({
-    wolfFur: Object.freeze({ id: 'wolf-fur', kind: 'material', materialType: 'monster-crafting', rarity: 'common', icon: '🐺', name: '狼毛', description: '從狼穴怪物身上取得的普通製作材料。' }),
-    wolfFang: Object.freeze({ id: 'wolf-fang', kind: 'material', materialType: 'monster-crafting', rarity: 'rare', icon: '🦷', name: '狼牙', description: '從狼穴怪物身上取得的稀有製作材料。' }),
-    hardHide: Object.freeze({ id: 'hard-hide', kind: 'material', materialType: 'monster-crafting', rarity: 'common', icon: '▰', name: '硬皮', description: '從野豬林怪物身上取得的普通製作材料。' }),
-    boarTusk: Object.freeze({ id: 'boar-tusk', kind: 'material', materialType: 'monster-crafting', rarity: 'rare', icon: '🦷', name: '獠牙', description: '從野豬林怪物身上取得的稀有製作材料。' }),
-    ironOre: Object.freeze({ id: 'iron-ore', kind: 'material', materialType: 'monster-crafting', rarity: 'common', icon: '⛏', name: '鐵礦', description: '從哥布林營地怪物身上取得的普通製作材料。' }),
-    blackOre: Object.freeze({ id: 'black-ore', kind: 'material', materialType: 'special-crafting', rarity: 'rare', icon: '⬟', name: '黑礦石', description: '只由平原深處的黑石系列怪物掉落，用於製作與升級建築。' })
+    wolfFur: Object.freeze({ id: 'wolf-fur', kind: 'material', materialType: 'monster-crafting', rarity: 'common', icon: '🐺', image: 'assets/wolf-fur.png?v=20260815-user-image-v1', imageStatus: 'ready', name: '狼毛', description: '從狼穴怪物身上取得的普通製作材料。' }),
+    wolfFang: Object.freeze({ id: 'wolf-fang', kind: 'material', materialType: 'monster-crafting', rarity: 'rare', icon: '🦷', image: 'assets/wolf-fang.png?v=20260815-user-image-v1', imageStatus: 'ready', name: '狼牙', description: '從狼穴怪物身上取得的稀有製作材料。' }),
+    hardHide: Object.freeze({ id: 'hard-hide', kind: 'material', materialType: 'monster-crafting', rarity: 'common', icon: '▰', image: 'assets/hard-hide.png?v=20260815-user-image-v1', imageStatus: 'ready', name: '硬皮', description: '從野豬林怪物身上取得的普通製作材料。' }),
+    boarTusk: Object.freeze({ id: 'boar-tusk', kind: 'material', materialType: 'monster-crafting', rarity: 'rare', icon: '🦷', image: 'assets/boar-tusk.png?v=20260815-user-image-v1', imageStatus: 'ready', name: '獠牙', description: '從野豬林怪物身上取得的稀有製作材料。' }),
+    ironOre: Object.freeze({ id: 'iron-ore', kind: 'material', materialType: 'monster-crafting', rarity: 'common', icon: '⛏', image: 'assets/iron-ore.png?v=20260815-user-image-v1', imageStatus: 'ready', name: '鐵礦', description: '從哥布林營地怪物身上取得的普通製作材料。' }),
+    blackOre: Object.freeze({ id: 'black-ore', kind: 'material', materialType: 'special-crafting', rarity: 'rare', icon: '⬟', image: 'assets/black-ore.png?v=20260815-user-image-v1', imageStatus: 'ready', name: '黑礦石', description: '只由平原深處的黑石系列怪物掉落，用於製作與升級建築。' })
   });
 
   const MAP_DROP_CONFIGS = Object.freeze({

@@ -6,12 +6,12 @@
   'use strict';
 
   const MATERIALS = Object.freeze({
-    buildingWolfFur: Object.freeze({ id: 'wolf-fur', kind: 'material', materialType: 'monster-crafting', chapter: 1, icon: '🐺', name: '狼毛', description: '由狼穴取得，可用於製作與升級建築。' }),
-    buildingWolfFang: Object.freeze({ id: 'wolf-fang', kind: 'material', materialType: 'monster-crafting', rarity: 'rare', chapter: 1, icon: '🦷', name: '狼牙', description: '從狼穴怪物身上取得的稀有製作材料，也可用於升級建築。' }),
-    buildingHardHide: Object.freeze({ id: 'hard-hide', kind: 'material', materialType: 'monster-crafting', chapter: 1, icon: '▰', name: '硬皮', description: '由野豬林取得，可用於製作與升級建築。' }),
-    buildingBoarTusk: Object.freeze({ id: 'boar-tusk', kind: 'material', materialType: 'monster-crafting', chapter: 1, icon: '🦷', name: '獠牙', description: '由野豬林取得，可用於製作與升級建築。' }),
-    buildingIronOre: Object.freeze({ id: 'iron-ore', kind: 'material', materialType: 'monster-crafting', chapter: 1, icon: '⛏', name: '鐵礦石', description: '由哥布林營地取得，可用於製作與升級建築。' }),
-    buildingBlackOre: Object.freeze({ id: 'black-ore', kind: 'material', materialType: 'special-crafting', chapter: 1, icon: '⬟', name: '黑礦石', description: '只由平原深處的黑石系列怪物掉落，可用於製作與升級建築。' }),
+    buildingWolfFur: Object.freeze({ id: 'wolf-fur', kind: 'material', materialType: 'monster-crafting', chapter: 1, icon: '🐺', image: 'assets/wolf-fur.png?v=20260815-user-image-v1', imageStatus: 'ready', name: '狼毛', description: '由狼穴取得，可用於製作與升級建築。' }),
+    buildingWolfFang: Object.freeze({ id: 'wolf-fang', kind: 'material', materialType: 'monster-crafting', rarity: 'rare', chapter: 1, icon: '🦷', image: 'assets/wolf-fang.png?v=20260815-user-image-v1', imageStatus: 'ready', name: '狼牙', description: '從狼穴怪物身上取得的稀有製作材料，也可用於升級建築。' }),
+    buildingHardHide: Object.freeze({ id: 'hard-hide', kind: 'material', materialType: 'monster-crafting', chapter: 1, icon: '▰', image: 'assets/hard-hide.png?v=20260815-user-image-v1', imageStatus: 'ready', name: '硬皮', description: '由野豬林取得，可用於製作與升級建築。' }),
+    buildingBoarTusk: Object.freeze({ id: 'boar-tusk', kind: 'material', materialType: 'monster-crafting', chapter: 1, icon: '🦷', image: 'assets/boar-tusk.png?v=20260815-user-image-v1', imageStatus: 'ready', name: '獠牙', description: '由野豬林取得，可用於製作與升級建築。' }),
+    buildingIronOre: Object.freeze({ id: 'iron-ore', kind: 'material', materialType: 'monster-crafting', chapter: 1, icon: '⛏', image: 'assets/iron-ore.png?v=20260815-user-image-v1', imageStatus: 'ready', name: '鐵礦石', description: '由哥布林營地取得，可用於製作與升級建築。' }),
+    buildingBlackOre: Object.freeze({ id: 'black-ore', kind: 'material', materialType: 'special-crafting', chapter: 1, icon: '⬟', image: 'assets/black-ore.png?v=20260815-user-image-v1', imageStatus: 'ready', name: '黑礦石', description: '只由平原深處的黑石系列怪物掉落，可用於製作與升級建築。' }),
     buildingBlackWood: Object.freeze({ id: 'black-wood', kind: 'material', materialType: 'monster-crafting', chapter: 2, icon: '🪵', name: '黑木', description: '從黑森林的樹木與植物系怪物取得。' }),
     buildingSpiderSilk: Object.freeze({ id: 'spider-silk', kind: 'material', materialType: 'monster-crafting', chapter: 2, icon: '🕸', name: '蜘蛛絲', description: '從第二章蜘蛛系怪物取得。' }),
     buildingVenomSac: Object.freeze({ id: 'venom-sac', kind: 'material', materialType: 'monster-crafting', rarity: 'rare', chapter: 2, icon: '🧪', name: '毒囊', description: '從蜘蛛巢穴的毒系怪物取得。' }),
