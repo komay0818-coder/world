@@ -6,7 +6,7 @@ const root = path.join(__dirname, '..');
 const script = fs.readFileSync(path.join(root, 'script.js'), 'utf8');
 const html = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
 assert.match(html, /world\/c7dbee1fbc6b016c20fd3f9cf901eade5b970302\/crafting-policy\.js/, 'the chapter-two crafting policy is loaded from its immutable commit');
-assert.match(html, /world\/c7dbee1fbc6b016c20fd3f9cf901eade5b970302\/chapter-two-recipe-drop-policy\.js/, 'chapter-two recipe costs are loaded from their immutable commit');
+assert.match(html, /world\/828ff04d4eaab832cbbdbdfc365d47b8c3901f83\/chapter-two-recipe-drop-policy\.js/, 'chapter-two recipe names are loaded from their immutable commit');
 const css = fs.readFileSync(path.join(root, 'styles', 'village.css'), 'utf8');
 
 assert.match(html, /chapter-one-material-drop-policy\.js[\s\S]*chapter-one-recipe-drop-policy\.js[\s\S]*crafting-policy\.js[\s\S]*script\.js/, 'formal material and recipe data load before crafting integration');
