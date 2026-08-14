@@ -16,6 +16,7 @@ assert.match(html, /data-menu-action="村莊"/);
 assert.equal((html.match(/id="village-building-modal"/g) || []).length, 1, 'all buildings share one modal');
 assert.match(script, /Object\.values\(VillagePolicy\.BUILDING_DEFINITIONS\)/, 'building cards render from centralized data');
 assert.match(html, /village-upgrade-policy\.js[\s\S]*script\.js/, 'building upgrade policy loads before the main game script');
+assert.match(html, /world\/6bd12564a8f40c65e2637a87045a4bfe863f9475\/village-upgrade-policy\.js/, 'building materials load the immutable artwork definition');
 assert.match(script, /VillageUpgradePolicy\.grantMapDrops\(progress, currentMap\.id\)/, 'battle rewards include map-based building materials');
 assert.match(script, /VillageUpgradePolicy\.upgrade\(progress, villageData, buildingId\)/, 'the village action uses the centralized upgrade policy');
 assert.match(script, /升級至 Lv2/, 'the village shows the chapter-one upgrade action');

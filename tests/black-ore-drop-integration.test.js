@@ -10,8 +10,8 @@ const crafting = fs.readFileSync(path.join(root, 'crafting-policy.js'), 'utf8');
 assert.match(script, /grantMaterialDrops\(progress, currentMap\.id, enemy\)/, 'reward settlement passes the defeated monster to the material policy');
 assert.match(script, /VillageUpgradePolicy\.grantMapDrops\(progress, currentMap\.id\)/, 'reward settlement also grants map-based building black ore');
 assert.doesNotMatch(crafting, /blackOre: Object\.freeze/, 'black ore has one canonical material definition in the drop policy');
-assert.match(index, /chapter-one-material-drop-policy\.js\?v=20260813-blackstone-only-v3/, 'the blackstone-only material policy cache key changes');
+assert.match(index, /chapter-one-material-drop-policy\.js\?v=20260815-material-artwork-v1/, 'the material policy cache key includes the current artwork');
 assert.match(index, /world\/08a2cb4210c36d39774cd83ed622c94c25b7f1ce\/script\.js/, 'the integration script uses the current immutable build');
-assert.match(index, /VER\. 0\.6\.26/, 'the current game version includes rare wearable artwork');
+assert.match(index, /VER\. 0\.6\.27/, 'the current game version includes chapter-one material artwork');
 
 console.log('black-ore-drop-integration: assertions passed');
