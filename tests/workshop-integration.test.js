@@ -5,7 +5,7 @@ const path = require('node:path');
 const root = path.join(__dirname, '..');
 const script = fs.readFileSync(path.join(root, 'script.js'), 'utf8');
 const html = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
-assert.match(html, /world\/67f5ab92db6af0eccead2ff7d5e6db5289fc1adf\/crafting-policy\.js/, 'essence crafting is loaded from its immutable commit');
+assert.match(html, /world\/b8d1acec6e8403a61172e23b613e2e7ddf9c74a1\/crafting-policy\.js/, 'essence artwork is loaded from its immutable commit');
 assert.match(html, /world\/67f5ab92db6af0eccead2ff7d5e6db5289fc1adf\/chapter-two-recipe-drop-policy\.js/, 'chapter-two essence recipes are loaded from their immutable commit');
 const css = fs.readFileSync(path.join(root, 'styles', 'village.css'), 'utf8');
 
