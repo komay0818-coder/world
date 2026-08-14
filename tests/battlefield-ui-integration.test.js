@@ -17,6 +17,7 @@ assert.match(html, /91e08ae1dc2e3a9906e05987484d36cae41f20cb\/styles\/monster-sl
 assert.match(html, /08a2cb4210c36d39774cd83ed622c94c25b7f1ce\/script\.js/, 'battlefield loads the current game controller');
 assert.match(script, /--basic-lunge-x[\s\S]*deltaX \/ distance \* 24/, 'basic attacks calculate a short lunge toward the current target');
 assert.match(script, /--basic-lunge-y[\s\S]*deltaY \/ distance \* 24/, 'basic attack lunge follows the target direction');
+assert.match(script, /goblinTreasureChest:[\s\S]*artClass: 'goblin-treasure-chest-art'/, 'goblin treasure chest no longer uses goblin placeholder metadata');
 assert.match(css, /@keyframes partyBasicStrike[\s\S]*translate\(var\(--basic-lunge-x, 24px\),var\(--basic-lunge-y, -8px\)\)/, 'player artwork lunges and returns without moving the surrounding HUD');
 assert.doesNotMatch(html, /id="hunter-companion"/, 'legacy full-body hunter companion is removed from the battlefield');
 assert.match(css, /grid-template-columns: repeat\(4, minmax\(0, 1fr\)\)/, 'desktop enemies share a four-unit battlefield row');

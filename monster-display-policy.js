@@ -23,7 +23,7 @@
     goblinShaman: 'assets/goblin-camp-shaman-transparent.png?v=20260802-transparent-v1',
     goblinGuard: 'assets/goblin-camp-guard-transparent.png?v=20260802-transparent-v1',
     goblinCaptain: 'assets/goblin-camp-captain-transparent.png?v=20260802-transparent-v1',
-    goblinTreasureChest: 'assets/goblin-transparent.png',
+    goblinTreasureChest: 'assets/goblin-treasure-chest.png?v=20260815-user-image-v1',
     goblinHighChief: 'assets/goblin-camp-high-chief-transparent.png?v=20260802-transparent-v1',
     wolf: 'assets/forest-wolf.png',
     boar: 'assets/wild-boar.png',
