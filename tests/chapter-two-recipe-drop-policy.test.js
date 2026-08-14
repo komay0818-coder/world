@@ -3,6 +3,7 @@ const policy = require('../chapter-two-recipe-drop-policy.js');
 
 assert.equal(policy.RECIPE_DROP_RATE, .01, '沿用現有稀有配方 1% 機制');
 assert.equal(Object.keys(policy.RECIPES).length, 6);
+assert.deepEqual([policy.RECIPES.greenWrist.resultName, policy.RECIPES.greenCloak.resultName, policy.RECIPES.greenShoulders.resultName], ['黑森林護腕', '黑森林斗篷', '黑森林肩甲']);
 assert.deepEqual(Object.values(policy.RECIPES).map(({ equipmentSlot }) => equipmentSlot), ['cloak', 'wrist', 'shoulders', 'shoulders', 'wrist', 'cloak']);
 assert.deepEqual(Object.values(policy.RECIPES).map(({ quality }) => quality), ['uncommon', 'uncommon', 'uncommon', 'rare', 'rare', 'rare']);
 assert.ok(Object.values(policy.RECIPES).every((recipe) => recipe.chapter === 2 && recipe.craftingStatus === 'ready'));
@@ -20,7 +21,7 @@ assert.deepEqual(Object.keys(policy.RARE_DROP_SOURCES), [
 ]);
 assert.ok(Object.values(policy.RARE_DROP_SOURCES).every((source) => source.dropRate === .01));
 
-assert.equal(policy.rollRecipeDrops({ id: 'forestGuardianV2', isBoss: true }, 'black-forest-entrance', () => .0099)[0].name, '綠色披風製作書');
+assert.equal(policy.rollRecipeDrops({ id: 'forestGuardianV2', isBoss: true }, 'black-forest-entrance', () => .0099)[0].name, '黑森林斗篷製作書');
 assert.deepEqual(policy.rollRecipeDrops({ id: 'forestGuardianV2', isBoss: true }, 'black-forest-entrance', () => .01), [], '邊界值不掉落');
 assert.deepEqual(policy.rollRecipeDrops({ id: 'forestGuardianV2', isBoss: true }, 'black-forest-trail', () => 0), [], '配方不會在錯誤地圖掉落');
 

@@ -811,6 +811,28 @@ function applyEquipmentVisual(item) {
   return item;
 }
 
+const wearableSeriesNames = Object.freeze({
+  'recipe-green-wrist': '平原護腕配方',
+  'recipe-green-cloak': '平原斗篷配方',
+  'recipe-green-shoulders': '平原肩甲配方',
+  'crafted-green-wrist': '平原護腕',
+  'crafted-green-cloak': '平原斗篷',
+  'crafted-green-shoulders': '平原肩甲',
+  'recipe-chapter2-green-wrist': '黑森林護腕製作書',
+  'recipe-chapter2-green-cloak': '黑森林斗篷製作書',
+  'recipe-chapter2-green-shoulders': '黑森林肩甲製作書',
+  'crafted-chapter2-green-wrist': '黑森林護腕',
+  'crafted-chapter2-green-cloak': '黑森林斗篷',
+  'crafted-chapter2-green-shoulders': '黑森林肩甲'
+});
+
+function normalizeWearableSeriesName(item) {
+  if (!item || typeof item !== 'object') return item;
+  const catalogId = item.equipmentId || item.templateId || item.id;
+  const name = wearableSeriesNames[catalogId];
+  return name ? { ...item, name } : item;
+}
+
 const TAB_ACTIVE_CHARACTER_SLOT_KEY = 'stardust-tab-active-character-slot';
 
 function getActiveCharacterSlotIndex() {
@@ -945,7 +967,10 @@ function getProgress() {
     saved.collectibleMigrationVersion = 'unique-monster-collectibles-v1';
     localStorage.setItem('stardust-progress', JSON.stringify(saved));
   }
-  const inventory = SalvagePolicy.normalizeInventory(removeLegacySkillUpgradeMaterials(VillageUpgradePolicy.normalizeMaterialInventory(saved.inventory)));
+  const inventory = SalvagePolicy.normalizeInventory(removeLegacySkillUpgradeMaterials(VillageUpgradePolicy.normalizeMaterialInventory(saved.inventory)))
+    .map(normalizeWearableSeriesName);
+  saved.equipment = Object.fromEntries(Object.entries(saved.equipment || {})
+    .map(([slot, item]) => [slot, normalizeWearableSeriesName(item)]));
   saved.crafting = CraftingPolicy.normalizeCraftingState(saved.crafting);
   const existingHealingPotion = inventory.find((item) => item.id === 'healing-potion');
   if (existingHealingPotion) existingHealingPotion.description = '恢復最大生命 30%。';
