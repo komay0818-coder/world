@@ -588,7 +588,7 @@
       series: '盾牌',
       name: '木製圓盾',
       slot: 'offhand',
-      image: 'assets/equipment-armor.png',
+      image: 'assets/wooden-round-shield.png?v=20260815-user-image-v1',
       allowedJobs: Object.freeze(['warrior']),
       quality: '普通'
     }),
@@ -610,7 +610,7 @@
       series: '魔導書',
       name: '初學者魔導書',
       slot: 'offhand',
-      image: 'assets/equipment-weapon.png',
+      image: 'assets/beginner-spellbook.png?v=20260815-user-image-v1',
       allowedJobs: Object.freeze(['mage', 'priest']),
       quality: '普通'
     })

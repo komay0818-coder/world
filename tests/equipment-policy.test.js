@@ -25,6 +25,8 @@ assert.equal(policy.isPreservedEquipment(inventory[4]), true, 'planned armor is 
 assert.equal(policy.isPreservedEquipment(inventory[5]), false, 'legacy monster equipment is removed');
 
 const offhands = policy.OFFHAND_CATALOG;
+assert.match(offhands.woodenRoundShield.image, /assets\/wooden-round-shield\.png/, 'wooden round shield uses its dedicated artwork');
+assert.match(offhands.beginnerSpellbook.image, /assets\/beginner-spellbook\.png/, 'beginner spellbook uses its dedicated artwork');
 assert.deepEqual(policy.getEquipSlots(offhands.woodenRoundShield, 'warrior'), ['offhand'], 'warriors can equip wooden round shields');
 assert.deepEqual(policy.getEquipSlots(offhands.woodenRoundShield, 'hunter'), [], 'hunters cannot equip wooden round shields');
 assert.deepEqual(policy.getEquipSlots(offhands.roughQuiver, 'hunter'), ['offhand'], 'hunters can equip rough quivers');
