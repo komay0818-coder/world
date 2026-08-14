@@ -21,6 +21,10 @@ assert.equal(policy.getChance(blue, 99), .65);
 
 assert.equal(policy.MATERIALS.green_essence_stone.stackable, true);
 assert.equal(policy.MATERIALS.blue_essence_stone.stackable, true);
+assert.equal(policy.MATERIALS.green_essence_stone.image, 'assets/green-essence-stone.png?v=20260815-user-image-v1');
+assert.equal(policy.MATERIALS.blue_essence_stone.image, 'assets/blue-essence-stone.png?v=20260815-user-image-v1');
+assert.equal(policy.MATERIALS.green_essence_stone.imageStatus, 'ready');
+assert.equal(policy.MATERIALS.blue_essence_stone.imageStatus, 'ready');
 assert.equal(policy.MATERIALS.purple_essence_stone.stackable, true);
 assert.equal(policy.getRule(equipment('white', 'common')), null);
 assert.equal(policy.getRule(equipment('purple', 'epic')), null);

@@ -57,8 +57,8 @@
   });
 
   const ESSENCE_MATERIALS = Object.freeze({
-    greenEssence: Object.freeze({ id: 'green_essence_stone', kind: 'material', materialType: 'crafting', quality: 'uncommon', stackable: true, icon: '🟢', name: '綠色精華石', description: '由綠色裝備分解後取得，可用於工坊製作裝備。' }),
-    blueEssence: Object.freeze({ id: 'blue_essence_stone', kind: 'material', materialType: 'crafting', quality: 'rare', stackable: true, icon: '🔵', name: '藍色精華石', description: '由藍色裝備分解後取得，可用於工坊製作高品質裝備。' }),
+    greenEssence: Object.freeze({ id: 'green_essence_stone', kind: 'material', materialType: 'crafting', quality: 'uncommon', stackable: true, icon: '🟢', image: 'assets/green-essence-stone.png?v=20260815-user-image-v1', imageStatus: 'ready', name: '綠色精華石', description: '由綠色裝備分解後取得，可用於工坊製作裝備。' }),
+    blueEssence: Object.freeze({ id: 'blue_essence_stone', kind: 'material', materialType: 'crafting', quality: 'rare', stackable: true, icon: '🔵', image: 'assets/blue-essence-stone.png?v=20260815-user-image-v1', imageStatus: 'ready', name: '藍色精華石', description: '由藍色裝備分解後取得，可用於工坊製作高品質裝備。' }),
     purpleEssence: Object.freeze({ id: 'purple_essence_stone', kind: 'material', materialType: 'crafting', quality: 'epic', stackable: true, icon: '🟣', name: '紫色精華石', description: '保留給未來紫色裝備分解與製作。' })
   });
   const MATERIALS = Object.freeze({ ...(MaterialPolicy?.MATERIALS || {}), ...(ChapterTwoMaterialPolicy?.MATERIALS || {}), ...ESSENCE_MATERIALS });

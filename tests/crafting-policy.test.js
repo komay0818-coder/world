@@ -88,6 +88,8 @@ const chapterTwoRecipe = CraftingPolicy.RECIPES[chapterTwoRecipeId];
 assert.equal(Object.values(CraftingPolicy.RECIPES).filter((entry) => entry.chapter === 2).length, 6, 'all six chapter-two recipes are craftable');
 assert.equal(CraftingPolicy.MATERIALS.blackWood.name, '黑木', 'chapter-two materials are available to crafting');
 assert.equal(CraftingPolicy.MATERIALS.greenEssence.name, '綠色精華石');
+assert.equal(CraftingPolicy.MATERIALS.greenEssence.image, 'assets/green-essence-stone.png?v=20260815-user-image-v1');
+assert.equal(CraftingPolicy.MATERIALS.blueEssence.image, 'assets/blue-essence-stone.png?v=20260815-user-image-v1');
 assert.equal(Object.values(CraftingPolicy.MATERIALS).some((item) => item.id.startsWith('equipment-stone-')), false, '強化石已從製作材料移除');
 assert.equal(CraftingPolicy.MATERIALS.blueEssence.name, '藍色精華石');
 const chapterTwoProgress = progressWith([chapterTwoRecipeId], 20, 50000);
