@@ -2,6 +2,13 @@
 
 > 重新開啟 Codex 對話時，請先完整讀取 [`CONTINUE_DEVELOPMENT.md`](CONTINUE_DEVELOPMENT.md)，其中保存目前分支、版本、核心規則、最新系統與接續方式；本文件保留完整歷史紀錄。
 
+## 2026-08-15 初級副手專屬圖片（0.6.23）
+
+- 新增使用者提供的木製圓盾與初學者魔導書透明 PNG 圖片。
+- 兩件副手裝備不再使用 `equipment-armor.png`與 `equipment-weapon.png` 通用圖片。
+- 功能提交：`acd8f13`；入口頁已鎖定該提交的 `equipment-policy.js`。
+- 58 個 JavaScript 測試與 `git diff --check` 均通過。
+
 ## 2026-08-15 皮革靴專屬圖片（0.6.22）
 
 - 新增使用者提供的皮革短靴與旅行長靴透明 PNG 圖片。

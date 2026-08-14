@@ -12,6 +12,6 @@ assert.match(script, /VillageUpgradePolicy\.grantMapDrops\(progress, currentMap\
 assert.doesNotMatch(crafting, /blackOre: Object\.freeze/, 'black ore has one canonical material definition in the drop policy');
 assert.match(index, /chapter-one-material-drop-policy\.js\?v=20260813-blackstone-only-v3/, 'the blackstone-only material policy cache key changes');
 assert.match(index, /world\/5ccbd057a7cb594cad65e16e08f66dd4190e055e\/script\.js/, 'the integration script uses the current immutable build');
-assert.match(index, /VER\. 0\.6\.22/, 'the current game version includes dedicated leather boot artwork');
+assert.match(index, /VER\. 0\.6\.23/, 'the current game version includes dedicated starter offhand artwork');
 
 console.log('black-ore-drop-integration: assertions passed');
