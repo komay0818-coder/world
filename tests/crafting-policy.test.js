@@ -47,6 +47,7 @@ assert.deepEqual(JSON.parse(JSON.stringify(green[0])), green[0], 'save/load stor
 const recipeId = 'chapter1-green-wrist';
 const recipe = CraftingPolicy.RECIPES[recipeId];
 assert.match(CraftingPolicy.generateCraftedEquipment('chapter1-green-wrist', { random: () => 0 }).image, /assets\/plains-wrist\.png/, 'crafted plains equipment keeps its dedicated artwork');
+assert.match(CraftingPolicy.generateCraftedEquipment('chapter1-goblin-rare-cloak', { random: () => 0 }).image, /assets\/goblin-rare-cloak\.png/, 'crafted rare equipment keeps its dedicated artwork');
 const success = progressWith([recipeId], 10, 10000);
 const beforeGold = success.gold;
 const beforeRecipe = CraftingPolicy.getRecipeQuantity(success, recipeId);

@@ -831,7 +831,13 @@ const wearableSeriesVisuals = Object.freeze({
   'recipe-green-shoulders': 'assets/plains-shoulders.png?v=20260815-user-image-v1',
   'crafted-green-wrist': 'assets/plains-wrist.png?v=20260815-user-image-v1',
   'crafted-green-cloak': 'assets/plains-cloak.png?v=20260815-user-image-v1',
-  'crafted-green-shoulders': 'assets/plains-shoulders.png?v=20260815-user-image-v1'
+  'crafted-green-shoulders': 'assets/plains-shoulders.png?v=20260815-user-image-v1',
+  'recipe-goblin-rare-cloak': 'assets/goblin-rare-cloak.png?v=20260815-user-image-v1',
+  'recipe-high-chief-rare-wrist': 'assets/high-chief-rare-wrist.png?v=20260815-user-image-v1',
+  'recipe-black-knight-rare-shoulders': 'assets/black-knight-rare-shoulders.png?v=20260815-user-image-v1',
+  'crafted-goblin-rare-cloak': 'assets/goblin-rare-cloak.png?v=20260815-user-image-v1',
+  'crafted-high-chief-rare-wrist': 'assets/high-chief-rare-wrist.png?v=20260815-user-image-v1',
+  'crafted-black-knight-rare-shoulders': 'assets/black-knight-rare-shoulders.png?v=20260815-user-image-v1'
 });
 
 function normalizeWearableSeriesName(item) {
