@@ -538,7 +538,7 @@
       name: '皮革短靴',
       slot: 'boots',
       armorType: 'leather',
-      image: 'assets/boarhide-boots.png',
+      image: 'assets/leather-short-boots.png?v=20260815-user-image-v1',
       defense: 8,
       dodge: .03,
       quality: '普通'
@@ -550,7 +550,7 @@
       name: '旅行長靴',
       slot: 'boots',
       armorType: 'leather',
-      image: 'assets/boarhide-boots.png',
+      image: 'assets/travel-long-boots.png?v=20260815-user-image-v1',
       defense: 6,
       movementSpeedBonus: .08,
       quality: '普通'

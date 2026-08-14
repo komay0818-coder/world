@@ -184,6 +184,9 @@ assert.equal(armor.recruitIronBoots.image.split('?')[0], 'assets/recruit-iron-bo
 assert.equal(armor.guardWarBoots.image.split('?')[0], 'assets/guard-war-boots.png', 'guard war boots use their dedicated image');
 assert.deepEqual([armor.leatherShortBoots.defense, armor.leatherShortBoots.dodge], [8, .03], 'leather short boots stats match the design');
 assert.deepEqual([armor.travelLongBoots.defense, armor.travelLongBoots.movementSpeedBonus], [6, .08], 'travel long boots stats match the design');
+assert.match(armor.leatherShortBoots.image, /assets\/leather-short-boots\.png/, 'leather short boots use their dedicated artwork');
+assert.match(armor.travelLongBoots.image, /assets\/travel-long-boots\.png/, 'travel long boots use their dedicated artwork');
+assert.notEqual(armor.leatherShortBoots.image, armor.travelLongBoots.image, 'the two leather boots no longer share artwork');
 assert.deepEqual([armor.apprenticeClothShoes.defense, armor.apprenticeClothShoes.mana], [4, 40], 'apprentice cloth shoes stats match the design');
 assert.deepEqual([armor.arcaneLongBoots.defense, armor.arcaneLongBoots.manaRegenFlat], [3, 2], 'arcane long boots stats match the design');
 assert.equal(armor.apprenticeClothShoes.name, '新兵布鞋', 'chapter one recruit cloth shoes use the recruit-series name');
