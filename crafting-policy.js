@@ -122,6 +122,7 @@
     const template = {
       id: recipe.resultItemId, kind: 'equipment', name: recipe.resultName, slot: recipe.equipmentSlot,
       equipmentSlot: recipe.equipmentSlot, allowedJobs: [], baseStats: { ...(recipe.baseStats || {}) },
+      image: recipe.image || null, imageStatus: recipe.image ? 'ready' : 'pending',
       ...(Array.isArray(recipe.fixedAffixIds) ? { fixedAffixIds: [...recipe.fixedAffixIds] } : {})
     };
     const generated = EquipmentAffixPolicy.createEquipmentInstance(template, { quality: recipe.quality, uniqueId: instanceId, random, chapter: options.chapter || recipe.chapter || 1, jobId: options.jobId });

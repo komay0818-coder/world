@@ -10,6 +10,7 @@ assert.equal(policy.RARE_RECIPE_DROP_RATE, .01);
 assert.equal(Object.keys(policy.RECIPES).length, 6);
 assert.deepEqual([policy.RECIPES.greenWrist.resultName, policy.RECIPES.greenCloak.resultName, policy.RECIPES.greenShoulders.resultName], ['平原護腕', '平原斗篷', '平原肩甲']);
 assert.deepEqual([policy.RECIPES.greenWrist.name, policy.RECIPES.greenCloak.name, policy.RECIPES.greenShoulders.name], ['平原護腕配方', '平原斗篷配方', '平原肩甲配方']);
+assert.deepEqual([policy.RECIPES.greenWrist.image, policy.RECIPES.greenCloak.image, policy.RECIPES.greenShoulders.image].map((image) => image.split('?')[0]), ['assets/plains-wrist.png', 'assets/plains-cloak.png', 'assets/plains-shoulders.png']);
 Object.values(policy.RECIPES).forEach((recipe) => {
   assert.equal(recipe.kind, 'recipe');
   assert.equal(recipe.itemType, 'recipe');

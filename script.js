@@ -825,12 +825,21 @@ const wearableSeriesNames = Object.freeze({
   'crafted-chapter2-green-cloak': '黑森林斗篷',
   'crafted-chapter2-green-shoulders': '黑森林肩甲'
 });
+const wearableSeriesVisuals = Object.freeze({
+  'recipe-green-wrist': 'assets/plains-wrist.png?v=20260815-user-image-v1',
+  'recipe-green-cloak': 'assets/plains-cloak.png?v=20260815-user-image-v1',
+  'recipe-green-shoulders': 'assets/plains-shoulders.png?v=20260815-user-image-v1',
+  'crafted-green-wrist': 'assets/plains-wrist.png?v=20260815-user-image-v1',
+  'crafted-green-cloak': 'assets/plains-cloak.png?v=20260815-user-image-v1',
+  'crafted-green-shoulders': 'assets/plains-shoulders.png?v=20260815-user-image-v1'
+});
 
 function normalizeWearableSeriesName(item) {
   if (!item || typeof item !== 'object') return item;
   const catalogId = item.equipmentId || item.templateId || item.id;
   const name = wearableSeriesNames[catalogId];
-  return name ? { ...item, name } : item;
+  const image = wearableSeriesVisuals[catalogId];
+  return name || image ? { ...item, ...(name ? { name } : {}), ...(image ? { image, imageStatus: 'ready' } : {}) } : item;
 }
 
 const TAB_ACTIVE_CHARACTER_SLOT_KEY = 'stardust-tab-active-character-slot';
