@@ -5,8 +5,8 @@ const path = require('node:path');
 const root = path.join(__dirname, '..');
 const script = fs.readFileSync(path.join(root, 'script.js'), 'utf8');
 const html = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
-assert.match(html, /world\/4113903699082232ef10589820a7a22be85b992e\/crafting-policy\.js/, 'crafted plains equipment artwork is loaded from its immutable commit');
-assert.match(html, /world\/828ff04d4eaab832cbbdbdfc365d47b8c3901f83\/chapter-two-recipe-drop-policy\.js/, 'chapter-two recipe names are loaded from their immutable commit');
+assert.match(html, /world\/67f5ab92db6af0eccead2ff7d5e6db5289fc1adf\/crafting-policy\.js/, 'essence crafting is loaded from its immutable commit');
+assert.match(html, /world\/67f5ab92db6af0eccead2ff7d5e6db5289fc1adf\/chapter-two-recipe-drop-policy\.js/, 'chapter-two essence recipes are loaded from their immutable commit');
 const css = fs.readFileSync(path.join(root, 'styles', 'village.css'), 'utf8');
 
 assert.match(html, /chapter-one-material-drop-policy\.js[\s\S]*chapter-one-recipe-drop-policy\.js[\s\S]*crafting-policy\.js[\s\S]*script\.js/, 'formal material and recipe data load before crafting integration');

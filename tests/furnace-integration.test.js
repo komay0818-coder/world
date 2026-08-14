@@ -4,7 +4,7 @@ const path = require('node:path');
 
 const script = fs.readFileSync(path.join(__dirname, '..', 'script.js'), 'utf8');
 const html = fs.readFileSync(path.join(__dirname, '..', 'index.html'), 'utf8');
-assert.match(html, /salvage-policy\.js\?v=20260805-furnace-v1/);
+assert.match(html, /salvage-policy\.js\?v=20260815-essence-migration-v1/);
 assert.match(script, /SalvagePolicy\.normalizeInventory/, 'old material stacks are normalized through the shared inventory');
 assert.match(script, /SalvagePolicy\.getEligibleEquipment/, 'furnace list uses centralized eligibility rules');
 assert.match(script, /data-select-furnace-item/, 'one equipment item can be selected into the slot');
