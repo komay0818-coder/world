@@ -14,7 +14,7 @@ assert.doesNotMatch(html, /portrait-prototype|combat-unit-frame|combat-unit-art/
 assert.match(html, /id="player-stage-info"/, 'main player information floats near the battlefield art');
 assert.match(html, /id="battle-companion-icons" class="battle-companion-icons hidden"/, 'battlefield provides a generic companion icon tray');
 assert.match(html, /91e08ae1dc2e3a9906e05987484d36cae41f20cb\/styles\/monster-slots\.css/, 'battlefield loads the directional player attack animation');
-assert.match(html, /1f622951cc3bd39c0fe49331e6f66da6257fb036\/script\.js/, 'battlefield loads the current combat controller');
+assert.match(html, /5ccbd057a7cb594cad65e16e08f66dd4190e055e\/script\.js/, 'battlefield loads the current combat controller');
 assert.match(script, /--basic-lunge-x[\s\S]*deltaX \/ distance \* 24/, 'basic attacks calculate a short lunge toward the current target');
 assert.match(script, /--basic-lunge-y[\s\S]*deltaY \/ distance \* 24/, 'basic attack lunge follows the target direction');
 assert.match(css, /@keyframes partyBasicStrike[\s\S]*translate\(var\(--basic-lunge-x, 24px\),var\(--basic-lunge-y, -8px\)\)/, 'player artwork lunges and returns without moving the surrounding HUD');
