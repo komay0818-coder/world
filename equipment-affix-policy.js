@@ -46,7 +46,7 @@
     dodge_percent: affix('dodge_percent', '閃避', 'dodgePercent', 5, '%', 8, ['armor']),
     attack_speed_percent: affix('attack_speed_percent', '攻擊速度', 'attackSpeedPercent', 5, '%', 6, ['weapon'], { exclusionGroups: ['speed'] }),
     critical_chance: affix('critical_chance', '暴擊率', 'criticalChance', 3, '%', 5, ['weapon', 'accessory'], { exclusionGroups: ['critical'] }),
-    critical_damage_percent: affix('critical_damage_percent', '暴擊傷害', 'criticalDamagePercent', 10, '%', 5, ['weapon'], { enabled: false, exclusionGroups: ['critical'], disabledReason: '目前暴擊倍率固定為 150%' }),
+    critical_damage_percent: affix('critical_damage_percent', '暴擊傷害', 'criticalDamagePercent', 10, '%', 5, ['weapon'], { unlockChapter: 2, exclusionGroups: ['critical'] }),
     cooldown_speed_percent: affix('cooldown_speed_percent', '冷卻速度', 'cooldownSpeedPercent', 5, '%', 5, ['armor', 'accessory'], { exclusionGroups: ['speed'] }),
     mana_regeneration_percent: affix('mana_regeneration_percent', '魔力恢復', 'manaRegenerationPercent', 10, '%', 6, ['armor', 'accessory']),
     experience_gain_percent: affix('experience_gain_percent', '經驗值獲得', 'experienceGainPercent', 5, '%', 3, ['accessory'], { enabled: false, disabledReason: '尚未接入獎勵結算' }),

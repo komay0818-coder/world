@@ -58,6 +58,8 @@ assert.match(policy.formatAffix(green.affixes[0]), /\+/);
 
 const chapterTwoAvailable = policy.getAvailableAffixes(weapon, [], { chapter: 2, quality: 'rare' }).map((entry) => entry.id);
 ['elite_damage_percent', 'boss_damage_percent', 'skill_damage_percent', 'basic_attack_damage_percent', 'kill_resource_recovery_percent'].forEach((id) => assert.ok(chapterTwoAvailable.includes(id), `chapter two unlocks ${id}`));
+assert.ok(chapterTwoAvailable.includes('critical_damage_percent'), 'chapter two unlocks critical damage');
+assert.equal(policy.getAvailableAffixes(weapon, [], { chapter: 1, quality: 'rare' }).some((entry) => entry.id === 'critical_damage_percent'), false, 'critical damage stays locked in chapter one');
 assert.equal(policy.getAvailableAffixes(weapon, [], { chapter: 1, quality: 'rare' }).some((entry) => entry.unlockChapter > 1), false, 'chapter one cannot roll chapter-two affixes');
 const chapterOneTier = policy.createEquipmentInstance({ ...weapon, fixedAffixIds: ['attack_flat'] }, { quality: 'uncommon', chapter: 1, random: () => 0 });
 const chapterTwoTier = policy.createEquipmentInstance({ ...weapon, fixedAffixIds: ['attack_flat'] }, { quality: 'uncommon', chapter: 2, random: () => 0 });

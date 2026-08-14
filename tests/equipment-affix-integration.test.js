@@ -17,6 +17,12 @@ assert.match(source, /equipment\.maxHpPercent/, 'maximum-health affixes feed the
 assert.match(source, /equipment\.defensePercent/, 'defense affixes feed the character calculation');
 assert.match(source, /equipment\.criticalChance/, 'critical chance affixes feed the character calculation');
 assert.match(source, /equipment\.attackSpeedPercent/, 'attack-speed affixes feed the character calculation');
+['skillDamagePercent', 'eliteDamagePercent', 'bossDamagePercent', 'basicAttackDamagePercent', 'killHealthRecoveryPercent', 'killResourceRecoveryPercent', 'poisonResistancePercent'].forEach((stat) => {
+  assert.match(source, new RegExp(`${stat}: Math`), `chapter-two combat stat ${stat} feeds the character calculation`);
+});
+assert.match(source, /criticalDamageMultiplier: 1\.5 \+ Math\.max\(0, equipment\.criticalDamagePercent\)/, 'critical damage increases the player critical multiplier');
+assert.match(source, /updatePartyMemberHealthRegeneration\(member, now\)/, 'battle ticks apply equipped health regeneration');
+assert.match(source, /hasEquippedSpecialAbility\(member\.equipment, 'mage_fireball_burn'\)/, 'fireball burn requires its equipped special ability');
 assert.match(source, /EquipmentAffixPolicy\.formatAffix\(entry\)/, 'inventory, comparison and worn views share the affix text renderer');
 assert.match(source, /function equipmentDetailsHtml\(item\)/, 'equipment inventory rows use a dedicated details renderer');
 assert.match(source, /equipment-affix-title">裝備詞綴/, 'the affix section has a clear title');

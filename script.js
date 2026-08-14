@@ -134,7 +134,7 @@ const skillProgression = {
     { level: 20, type: 'passive', name: '招架', detail: '10% 招架反擊' }
   ],
   mage: [
-    { level: 1, type: 'active', id: 'fireball', name: '火球術', detail: '170% 傷害 · 燃燒', power: 1.7, cooldown: 4 },
+    { level: 1, type: 'active', id: 'fireball', name: '火球術', detail: '170% 傷害', power: 1.7, cooldown: 4 },
     { level: 3, type: 'passive', name: '魔力增幅', detail: '魔法傷害 +15%' },
     { level: 5, type: 'active', id: 'blizzard', name: '暴風雪', detail: '全體 80% 傷害', power: .8, targets: 5, cooldown: 7 },
     { level: 8, type: 'passive', name: '閃現', detail: '受擊時機率無敵' },
@@ -1889,6 +1889,7 @@ function getEquipmentStats(progress = getProgress()) {
     dodgePercent: (affixes.dodgePercent || 0) / 100,
     attackSpeedPercent: (affixes.attackSpeedPercent || 0) / 100,
     criticalChance: (affixes.criticalChance || 0) / 100,
+    criticalDamagePercent: (affixes.criticalDamagePercent || 0) / 100,
     cooldownSpeedPercent: (affixes.cooldownSpeedPercent || 0) / 100,
     manaRegenerationPercent: (affixes.manaRegenerationPercent || 0) / 100
   };
@@ -1941,6 +1942,15 @@ function getCharacterStats(level, progress = getProgress(), character = getActiv
     parry: Math.min(.50, Math.max(0, equipment.parry)),
     damageReduction: Math.min(.50, Math.max(0, equipment.damageReduction)),
     movementSpeedBonus: Math.max(0, equipment.movementSpeedBonus),
+    hpRegeneration: Math.max(0, equipment.hpRegeneration),
+    skillDamagePercent: Math.max(0, equipment.skillDamagePercent),
+    eliteDamagePercent: Math.max(0, equipment.eliteDamagePercent),
+    bossDamagePercent: Math.max(0, equipment.bossDamagePercent),
+    basicAttackDamagePercent: Math.max(0, equipment.basicAttackDamagePercent),
+    killHealthRecoveryPercent: Math.max(0, equipment.killHealthRecoveryPercent),
+    killResourceRecoveryPercent: Math.max(0, equipment.killResourceRecoveryPercent),
+    poisonResistancePercent: Math.min(1, Math.max(0, equipment.poisonResistancePercent)),
+    criticalDamageMultiplier: 1.5 + Math.max(0, equipment.criticalDamagePercent),
     dotMultiplier: character?.race === 'undead' ? 1.20 : 1
   };
   const activeMap = getActiveMap(progress);
@@ -2777,6 +2787,7 @@ function createBattlePartyMember(slot, slotIndex, mainId, now = Date.now()) {
     undeadRevived: false,
     hunterAttackCount: 0,
     lastManaRegenAt: now,
+    lastHpRegenerationAt: now,
     lastResourceUpdatedAt: now,
     lastArrowRecoveryAt: now
   };
@@ -3628,11 +3639,13 @@ function useAutoSkillForMember(member, now = Date.now()) {
     if (!targets.length) continue;
     const critical = Math.random() < stats.crit;
     const companionMultiplier = skill.id === 'companion' && member.level >= 8 ? 1.15 + (getPassiveSkillUpgradeLevel(progress, 'hunter', '野性夥伴') - 1) * .10 : 1;
-    const damage = Math.max(1, Math.ceil(stats.attack * skill.power * getSkillPowerMultiplier(progress, member.job, skill) * companionMultiplier * (critical ? 1.5 : 1)));
+    const damage = Math.max(1, Math.ceil(stats.attack * skill.power * getSkillPowerMultiplier(progress, member.job, skill) * companionMultiplier * (critical ? stats.criticalDamageMultiplier : 1)));
     const profile = getPlayerAttackProfile(character, skill);
     const resolvedTargets = targets.map((index) => ({ index, result: applyDamageToMonster(index, damage, profile, { attacker: member, attackKind: 'skill' }) }));
     const hits = resolvedTargets.filter((target) => !target.result.evaded);
-    if (skill.id === 'fireball') hits.forEach((target) => applyDot(target.index, 'burn', Math.max(1, Math.ceil(target.result.finalDamage * .18 * stats.dotMultiplier)), 4));
+    if (skill.id === 'fireball' && hasEquippedSpecialAbility(member.equipment, 'mage_fireball_burn')) {
+      hits.forEach((target) => applyDot(target.index, 'burn', Math.max(1, Math.ceil(target.result.finalDamage * .18 * stats.dotMultiplier)), 4));
+    }
     if (skill.id === 'poison-blade') hits.forEach((target) => applyDot(target.index, 'poison', Math.max(1, Math.ceil(target.result.finalDamage * .15 * stats.dotMultiplier)), 5));
     member.resourceCurrent = member.resourceType === 'arrows'
       ? HunterArrowPolicy.spendArrows(member.resourceCurrent, skill.id, progress.equipment)
@@ -3718,6 +3731,18 @@ function updatePartyMemberResource(member, now) {
   }
 }
 
+function hasEquippedSpecialAbility(equipment, abilityId) {
+  return Object.values(equipment || {}).some((item) => item?.specialAbility?.id === abilityId || item?.legendaryAbility?.id === abilityId);
+}
+
+function updatePartyMemberHealthRegeneration(member, now) {
+  if (!member.alive) return;
+  const elapsedSeconds = Math.max(0, now - member.lastHpRegenerationAt) / 1000;
+  member.lastHpRegenerationAt = now;
+  if (elapsedSeconds <= 0 || member.currentHp >= member.maxHp) return;
+  member.currentHp = Math.min(member.maxHp, member.currentHp + member.stats.hpRegeneration * elapsedSeconds);
+}
+
 function processPartyMemberAttacks(now = Date.now()) {
   for (const member of battle.partyMembers || []) {
     if (!PartyPolicy.canMemberAttack(member, now)) continue;
@@ -3730,7 +3755,7 @@ function processPartyMemberAttacks(now = Date.now()) {
     const attackWithWeaponRoll = member.stats.attack + (rolledWeaponAttack === null ? 0 : rolledWeaponAttack - displayedWeaponAttack);
     const orcRage = member.race === 'orc' && Math.random() < .10;
     const critical = Math.random() < member.stats.crit;
-    const baseHit = Math.max(1, Math.ceil(attackWithWeaponRoll * (orcRage ? 1.10 : 1) * (critical ? 1.5 : 1)));
+    const baseHit = Math.max(1, Math.ceil(attackWithWeaponRoll * (orcRage ? 1.10 : 1) * (critical ? member.stats.criticalDamageMultiplier : 1)));
     member.hunterAttackCount += 1;
     const hunterInstinct = member.job === 'hunter' && member.level >= 20 ? getHunterInstinctEffect(member.progress) : null;
     const instinctTriggered = Boolean(hunterInstinct && member.hunterAttackCount % hunterInstinct.interval === 0);
@@ -3828,7 +3853,10 @@ function battleTick() {
   processBlackForestCorruption(now);
   processStrongholdOutpost(now);
   reviveDefeatedTeammates(now);
-  (battle.partyMembers || []).forEach((member) => updatePartyMemberResource(member, now));
+  (battle.partyMembers || []).forEach((member) => {
+    updatePartyMemberResource(member, now);
+    updatePartyMemberHealthRegeneration(member, now);
+  });
   processPartyMemberAttacks(now);
   queueDefeatedEnemies();
   syncLegacyBattleStateFromMain();
