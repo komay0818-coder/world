@@ -14,7 +14,7 @@ assert.doesNotMatch(html, /portrait-prototype|combat-unit-frame|combat-unit-art/
 assert.match(html, /id="player-stage-info"/, 'main player information floats near the battlefield art');
 assert.match(html, /id="battle-companion-icons" class="battle-companion-icons hidden"/, 'battlefield provides a generic companion icon tray');
 assert.match(html, /91e08ae1dc2e3a9906e05987484d36cae41f20cb\/styles\/monster-slots\.css/, 'battlefield loads the directional player attack animation');
-assert.match(html, /08a2cb4210c36d39774cd83ed622c94c25b7f1ce\/script\.js/, 'battlefield loads the current game controller');
+assert.match(html, /265560afb8462f15dc7bab2d5f4b36e940e12a85\/script\.js/, 'battlefield loads the goblin chest build');
 assert.match(script, /--basic-lunge-x[\s\S]*deltaX \/ distance \* 24/, 'basic attacks calculate a short lunge toward the current target');
 assert.match(script, /--basic-lunge-y[\s\S]*deltaY \/ distance \* 24/, 'basic attack lunge follows the target direction');
 assert.match(script, /goblinTreasureChest:[\s\S]*artClass: 'goblin-treasure-chest-art'/, 'goblin treasure chest no longer uses goblin placeholder metadata');
