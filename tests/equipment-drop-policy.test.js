@@ -191,8 +191,6 @@ assert.deepEqual(equipmentPolicy.getEquipSlots(chapterTwoWeapons.find((item) => 
 assert.deepEqual(equipmentPolicy.getEquipSlots(chapterTwoWeapons.find((item) => item.name === '黑鐵重劍'), 'assassin'), []);
 assert.deepEqual(equipmentPolicy.getEquipSlots(chapterTwoWeapons.find((item) => item.name === '穿林長弓'), 'hunter'), ['weapon']);
 assert.deepEqual(equipmentPolicy.getEquipSlots(chapterTwoWeapons.find((item) => item.name === '孢子魔杖'), 'priest'), ['weapon']);
-assert.deepEqual(chapterTwoWeapons.find((item) => item.name === '古木魔杖').specialAbilityIds, ['mage_fireball_burn'], 'chapter-two wands can roll the fireball burn ability');
-assert.deepEqual(chapterTwoWeapons.find((item) => item.name === '孢子魔杖').specialAbilityIds, ['mage_fireball_burn'], 'both chapter-two wands expose the fireball burn ability');
 
 const duplicateWarnings = [];
 const duplicateProgress = { inventory: [{ id: 'duplicate', instanceId: 'duplicate' }] };

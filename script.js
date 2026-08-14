@@ -134,7 +134,7 @@ const skillProgression = {
     { level: 20, type: 'passive', name: '招架', detail: '10% 招架反擊' }
   ],
   mage: [
-    { level: 1, type: 'active', id: 'fireball', name: '火球術', detail: '170% 傷害', power: 1.7, cooldown: 4 },
+    { level: 1, type: 'active', id: 'fireball', name: '火球術', detail: '170% 傷害 · 燃燒', power: 1.7, cooldown: 4 },
     { level: 3, type: 'passive', name: '魔力增幅', detail: '魔法傷害 +15%' },
     { level: 5, type: 'active', id: 'blizzard', name: '暴風雪', detail: '全體 80% 傷害', power: .8, targets: 5, cooldown: 7 },
     { level: 8, type: 'passive', name: '閃現', detail: '受擊時機率無敵' },
@@ -3643,9 +3643,7 @@ function useAutoSkillForMember(member, now = Date.now()) {
     const profile = getPlayerAttackProfile(character, skill);
     const resolvedTargets = targets.map((index) => ({ index, result: applyDamageToMonster(index, damage, profile, { attacker: member, attackKind: 'skill' }) }));
     const hits = resolvedTargets.filter((target) => !target.result.evaded);
-    if (skill.id === 'fireball' && hasEquippedSpecialAbility(member.equipment, 'mage_fireball_burn')) {
-      hits.forEach((target) => applyDot(target.index, 'burn', Math.max(1, Math.ceil(target.result.finalDamage * .18 * stats.dotMultiplier)), 4));
-    }
+    if (skill.id === 'fireball') hits.forEach((target) => applyDot(target.index, 'burn', Math.max(1, Math.ceil(target.result.finalDamage * .18 * stats.dotMultiplier)), 4));
     if (skill.id === 'poison-blade') hits.forEach((target) => applyDot(target.index, 'poison', Math.max(1, Math.ceil(target.result.finalDamage * .15 * stats.dotMultiplier)), 5));
     member.resourceCurrent = member.resourceType === 'arrows'
       ? HunterArrowPolicy.spendArrows(member.resourceCurrent, skill.id, progress.equipment)
@@ -3729,10 +3727,6 @@ function updatePartyMemberResource(member, now) {
     member.resourceCurrent = recovery.arrows;
     member.lastArrowRecoveryAt = now - recovery.remainder;
   }
-}
-
-function hasEquippedSpecialAbility(equipment, abilityId) {
-  return Object.values(equipment || {}).some((item) => item?.specialAbility?.id === abilityId || item?.legendaryAbility?.id === abilityId);
 }
 
 function updatePartyMemberHealthRegeneration(member, now) {

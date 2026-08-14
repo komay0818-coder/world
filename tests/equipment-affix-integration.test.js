@@ -22,7 +22,8 @@ assert.match(source, /equipment\.attackSpeedPercent/, 'attack-speed affixes feed
 });
 assert.match(source, /criticalDamageMultiplier: 1\.5 \+ Math\.max\(0, equipment\.criticalDamagePercent\)/, 'critical damage increases the player critical multiplier');
 assert.match(source, /updatePartyMemberHealthRegeneration\(member, now\)/, 'battle ticks apply equipped health regeneration');
-assert.match(source, /hasEquippedSpecialAbility\(member\.equipment, 'mage_fireball_burn'\)/, 'fireball burn requires its equipped special ability');
+assert.match(source, /skill\.id === 'fireball'\) hits\.forEach[\s\S]*applyDot\(target\.index, 'burn'/, 'fireball inherently applies burn on hit');
+assert.doesNotMatch(source, /hasEquippedSpecialAbility\(member\.equipment, 'mage_fireball_burn'\)/, 'fireball burn does not depend on equipment');
 assert.match(source, /EquipmentAffixPolicy\.formatAffix\(entry\)/, 'inventory, comparison and worn views share the affix text renderer');
 assert.match(source, /function equipmentDetailsHtml\(item\)/, 'equipment inventory rows use a dedicated details renderer');
 assert.match(source, /equipment-affix-title">裝備詞綴/, 'the affix section has a clear title');
