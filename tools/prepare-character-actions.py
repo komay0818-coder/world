@@ -1,13 +1,20 @@
 from pathlib import Path
 
 from PIL import Image
+from rembg import new_session, remove
 
 
 ROOT = Path(__file__).resolve().parents[1]
 SOURCE = ROOT / "assets" / "character-action-sources"
 OUTPUT = ROOT / "assets" / "character-actions"
-CANVAS = 1280
-PADDING = 48
+MAX_HEIGHT = 1280
+EDGE_PADDING = 16
+
+
+def extract_subject(image: Image.Image, session) -> Image.Image:
+    if image.mode == "RGBA" and image.getchannel("A").getextrema() != (255, 255):
+        return image
+    return remove(image.convert("RGB"), session=session, alpha_matting=False)
 
 
 def normalize(image: Image.Image) -> Image.Image:
@@ -16,16 +23,17 @@ def normalize(image: Image.Image) -> Image.Image:
     if not bounds:
         raise ValueError("image contains no visible subject")
     subject = image.crop(bounds)
-    maximum = CANVAS - PADDING * 2
-    ratio = min(maximum / subject.width, maximum / subject.height)
-    subject = subject.resize(
-        (max(1, round(subject.width * ratio)), max(1, round(subject.height * ratio))),
-        Image.Resampling.LANCZOS,
+    if subject.height > MAX_HEIGHT:
+        ratio = MAX_HEIGHT / subject.height
+        subject = subject.resize(
+            (max(1, round(subject.width * ratio)), MAX_HEIGHT), Image.Resampling.LANCZOS
+        )
+    canvas = Image.new(
+        "RGBA",
+        (subject.width + EDGE_PADDING * 2, subject.height + EDGE_PADDING * 2),
+        (0, 0, 0, 0),
     )
-    canvas = Image.new("RGBA", (CANVAS, CANVAS), (0, 0, 0, 0))
-    x = (CANVAS - subject.width) // 2
-    y = CANVAS - PADDING - subject.height
-    canvas.alpha_composite(subject, (x, y))
+    canvas.alpha_composite(subject, (EDGE_PADDING, EDGE_PADDING))
     return canvas
 
 
@@ -33,12 +41,14 @@ def main() -> None:
     files = sorted(SOURCE.rglob("*.png"))
     if len(files) != 54:
         raise SystemExit(f"expected 54 source images, found {len(files)}")
+    session = new_session("u2net")
     for source in files:
         relative = source.relative_to(SOURCE)
         destination = OUTPUT / relative
         destination.parent.mkdir(parents=True, exist_ok=True)
         with Image.open(source) as raw:
-            normalize(raw.convert("RGBA")).save(destination, optimize=True)
+            subject = extract_subject(raw.convert("RGBA"), session)
+            normalize(subject).save(destination, optimize=True)
         print(relative.as_posix())
 
 
