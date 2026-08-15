@@ -993,21 +993,41 @@ body:has(.battle-screen:not(.hidden)) .toast.show {
 .battle-field::after { display: none !important; }
 
 .battle-field::before {
-  inset: 2% 2.5% 64% !important;
+  top: calc(2% + 24px) !important;
+  right: 2.5% !important;
+  bottom: calc(64% - 24px) !important;
+  left: 2.5% !important;
   border-radius: 18px 18px 34px 34px !important;
 }
 
-.battle-field .enemy-zone-label { top: 2.5% !important; }
+.battle-field .enemy-zone-label { top: calc(2.5% + 24px) !important; }
 
 .battle-field #enemy-squad.monster-slot-grid {
-  top: 3% !important;
+  top: calc(3% + 24px) !important;
   height: 31% !important;
 }
 
+.battle-field #battle-player-art[aria-label] {
+  bottom: calc(var(--player-unit-ground-line) + 64px) !important;
+}
+
+.battle-field .player-grounding {
+  bottom: calc(var(--player-unit-ground-line) + 64px) !important;
+}
+
 @media (max-width: 700px) {
-  .battle-field::before { inset: 2% 2% 60% !important; }
+  .battle-field::before {
+    top: calc(2% + 14px) !important;
+    right: 2% !important;
+    bottom: calc(60% - 14px) !important;
+    left: 2% !important;
+  }
   .battle-field #enemy-squad.monster-slot-grid {
-    top: 4% !important;
+    top: calc(4% + 14px) !important;
     height: 35% !important;
+  }
+  .battle-field #battle-player-art[aria-label],
+  .battle-field .player-grounding {
+    bottom: calc(var(--player-unit-ground-line) + 36px) !important;
   }
 }

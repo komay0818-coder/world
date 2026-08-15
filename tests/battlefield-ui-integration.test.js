@@ -31,7 +31,8 @@ assert.match(css, /\.battle-field \.player-stage-art \{[\s\S]*?scale: 1\.28;/, '
 assert.match(css, /body:has\(\.battle-screen:not\(\.hidden\)\) \.toast \{[\s\S]*?right: calc\(var\(--battle-right-column, 15%\) \+ 18px\) !important;[\s\S]*?left: auto !important;/, 'battle loot notifications align to the right of the battlefield');
 assert.match(css, /\.battle-screen #layout-toggle,[\s\S]*?\.battle-bottom \.skill-panel > \.potion-button \{[\s\S]*?display: none !important;/, 'battlefield utility controls are removed from the upper-right skill area');
 assert.match(css, /\.battle-field::after \{[\s\S]*?display: none !important;/, 'the translucent ally battlefield plate is removed');
-assert.match(css, /\.battle-field #enemy-squad\.monster-slot-grid \{[\s\S]*?top: 3% !important;[\s\S]*?height: 31% !important;/, 'the enemy battlefield is moved upward and compacted');
+assert.match(css, /\.battle-field #enemy-squad\.monster-slot-grid \{[\s\S]*?top: calc\(3% \+ 24px\) !important;[\s\S]*?height: 31% !important;/, 'the compact enemy battlefield is inset slightly below the top edge');
+assert.match(css, /#battle-player-art\[aria-label\] \{[\s\S]*?bottom: calc\(var\(--player-unit-ground-line\) \+ 64px\) !important;/, 'the main character moves upward into the central engagement area');
 assert.match(css, /\.battle-field \.battle-companion-icons \{[\s\S]*?right: 18px;[\s\S]*?bottom: 112px;[\s\S]*?flex-wrap: wrap-reverse;/, 'companion icons occupy an extensible tray above the right-side notification area');
 assert.match(css, /\.battle-field \.battle-companion-icon \{[\s\S]*?width: 54px;[\s\S]*?height: 54px;/, 'companions render as compact icons');
 assert.match(script, /const activeBattleCompanions = character\.job === 'hunter'[\s\S]*?companionIcons\.innerHTML = activeBattleCompanions\.map/, 'generic companion collection renders the currently active hunter companion');
