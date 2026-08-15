@@ -26,7 +26,7 @@ assert.match(script, /function useSharedHealingPotionForMember\(member\)[\s\S]*p
 assert.match(script, /function useSharedManaPotionForMember\(member\)[\s\S]*usesManaResource\(member\.job\)[\s\S]*progress\.manaPotions -= 1[\s\S]*removeManaPotionItem\(progress\)[\s\S]*member\.resourceMax \* \.20/, 'mana teammates consume the main inventory blue potion for twenty percent mana');
 assert.match(script, /else useSharedManaPotionForMember\(member\)/, 'a non-main mana user drinks a blue potion when entering exhaustion');
 assert.match(script, /target\.currentHp \/ target\.maxHp < PARTY_AUTO_POTION_HEALTH_RATIO[\s\S]*useSharedHealingPotionForMember\(target\)/, 'a damaged teammate drinks a healing potion below thirty-five percent health');
-assert.match(script, /PartyPolicy\.scheduleNextAttack\(member, now, member\.attackSpeed, exhaustedMultiplier \* trailSlowMultiplier\)/, 'attack timing uses each member attack speed and active trail slow effects');
+assert.match(script, /PartyPolicy\.scheduleNextAttack\(member, now, member\.attackSpeed \* skillHasteMultiplier \* blessingSpeedMultiplier, exhaustedMultiplier \* trailSlowMultiplier\)/, 'attack timing uses member speed, skill buffs, blessings and active trail slow effects');
 assert.match(script, /chooseRandomAliveMember\(battle\.partyMembers/, 'monsters choose among living party members');
 assert.match(script, /PartyPolicy\.isPartyDefeated\(battle\.partyMembers\)/, 'failure requires the whole party to be defeated');
 assert.match(script, /rewardedEnemyIndexes/, 'enemy rewards are guarded against duplicate processing');

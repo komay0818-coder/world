@@ -1,7 +1,7 @@
 # 星辰 DEV－重新對話接續指南
 
 最後更新：2026-08-16
-目前顯示版本：`0.6.33`
+目前顯示版本：`0.6.34`
 GitHub：`https://github.com/komay0818-coder/world`  
 開發分支：`dev`
 
