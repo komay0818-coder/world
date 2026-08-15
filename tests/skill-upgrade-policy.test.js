@@ -12,6 +12,17 @@ const normalizedBook = policy.normalizeMaterialInventory([{ id: 'beginner_skill_
 assert.equal(normalizedBook.image, 'assets/skill-book-beginner.png?v=20260815-user-image-v1');
 assert.equal(normalizedBook.quantity, 2);
 
+assert.deepEqual(Object.values(policy.SKILL_PAGE_RANKS).map(({ rank }) => rank), ['初階', '中階', '高階', '專精', '大師', '宗師', '傳承']);
+assert.deepEqual(Object.values(policy.SKILL_PAGE_RANKS).map(({ implemented }) => implemented), [true, true, true, false, false, false, false]);
+Object.values(policy.SKILL_PAGE_RANKS).forEach((page) => {
+  assert.equal(page.imageStatus, 'ready');
+  assert.match(page.image, /^assets\/skill-page-[a-z-]+\.png\?v=20260815-user-image-v1$/);
+});
+['beginner_skill_page', 'intermediate_skill_page', 'advanced_skill_page'].forEach((id) => assert.equal(policy.MATERIALS[id].imageStatus, 'ready'));
+const normalizedPage = policy.normalizeMaterialInventory([{ id: 'beginner_skill_page', kind: 'material', quantity: 3 }])[0];
+assert.equal(normalizedPage.image, 'assets/skill-page-beginner.png?v=20260815-user-image-v1');
+assert.equal(normalizedPage.quantity, 3);
+
 const chapterOne = policy.getUpgradeRequirement(1);
 assert.equal(chapterOne.chapter, 1);
 assert.equal(chapterOne.targetLevel, 2);

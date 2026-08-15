@@ -15,12 +15,22 @@
     legacy: Object.freeze({ id: 'legacy_skill_book', rank: '傳承', image: 'assets/skill-book-legacy.png?v=20260815-user-image-v1', imageStatus: 'ready', implemented: false })
   });
 
+  const SKILL_PAGE_RANKS = Object.freeze({
+    beginner: Object.freeze({ id: 'beginner_skill_page', rank: '初階', image: 'assets/skill-page-beginner.png?v=20260815-user-image-v1', imageStatus: 'ready', implemented: true }),
+    intermediate: Object.freeze({ id: 'intermediate_skill_page', rank: '中階', image: 'assets/skill-page-intermediate.png?v=20260815-user-image-v1', imageStatus: 'ready', implemented: true }),
+    advanced: Object.freeze({ id: 'advanced_skill_page', rank: '高階', image: 'assets/skill-page-advanced.png?v=20260815-user-image-v1', imageStatus: 'ready', implemented: true }),
+    specialization: Object.freeze({ id: 'specialization_skill_page', rank: '專精', image: 'assets/skill-page-specialization.png?v=20260815-user-image-v1', imageStatus: 'ready', implemented: false }),
+    master: Object.freeze({ id: 'master_skill_page', rank: '大師', image: 'assets/skill-page-master.png?v=20260815-user-image-v1', imageStatus: 'ready', implemented: false }),
+    grandmaster: Object.freeze({ id: 'grandmaster_skill_page', rank: '宗師', image: 'assets/skill-page-grandmaster.png?v=20260815-user-image-v1', imageStatus: 'ready', implemented: false }),
+    legacy: Object.freeze({ id: 'legacy_skill_page', rank: '傳承', image: 'assets/skill-page-legacy.png?v=20260815-user-image-v1', imageStatus: 'ready', implemented: false })
+  });
+
   const MATERIALS = Object.freeze({
-    beginner_skill_page: Object.freeze({ id: 'beginner_skill_page', kind: 'material', icon: '📜', name: '初級技能殘頁', chapter: 1, materialType: 'page', stackable: true }),
+    beginner_skill_page: Object.freeze({ ...SKILL_PAGE_RANKS.beginner, kind: 'material', icon: '📜', name: '初級技能殘頁', chapter: 1, materialType: 'page', stackable: true }),
     beginner_skill_book: Object.freeze({ ...SKILL_BOOK_RANKS.beginner, kind: 'material', icon: '📕', name: '初級技能書', chapter: 1, materialType: 'book', stackable: true }),
-    intermediate_skill_page: Object.freeze({ id: 'intermediate_skill_page', kind: 'material', icon: '📜', name: '中級技能殘頁', chapter: 2, materialType: 'page', stackable: true }),
+    intermediate_skill_page: Object.freeze({ ...SKILL_PAGE_RANKS.intermediate, kind: 'material', icon: '📜', name: '中級技能殘頁', chapter: 2, materialType: 'page', stackable: true }),
     intermediate_skill_book: Object.freeze({ ...SKILL_BOOK_RANKS.intermediate, kind: 'material', icon: '📘', name: '中級技能書', chapter: 2, materialType: 'book', stackable: true }),
-    advanced_skill_page: Object.freeze({ id: 'advanced_skill_page', kind: 'material', icon: '📜', name: '高級技能殘頁', chapter: 3, materialType: 'page', stackable: true }),
+    advanced_skill_page: Object.freeze({ ...SKILL_PAGE_RANKS.advanced, kind: 'material', icon: '📜', name: '高級技能殘頁', chapter: 3, materialType: 'page', stackable: true }),
     advanced_skill_book: Object.freeze({ ...SKILL_BOOK_RANKS.advanced, kind: 'material', icon: '📙', name: '高級技能書', chapter: 3, materialType: 'book', stackable: true })
   });
 
@@ -151,5 +161,5 @@
       .map((drop) => addMaterial(progress.inventory, drop.materialId, drop.amount));
   }
 
-  return Object.freeze({ SKILL_BOOK_RANKS, MATERIALS, CHAPTERS, TARGET_LEVEL_COSTS, DROP_CONFIG, MAX_SKILL_LEVEL, normalizeMaterialInventory, getChapterForUpgrade, getUpgradeRequirement, getQuantity, canUpgrade, attemptUpgrade, grantChapterDrops });
+  return Object.freeze({ SKILL_BOOK_RANKS, SKILL_PAGE_RANKS, MATERIALS, CHAPTERS, TARGET_LEVEL_COSTS, DROP_CONFIG, MAX_SKILL_LEVEL, normalizeMaterialInventory, getChapterForUpgrade, getUpgradeRequirement, getQuantity, canUpgrade, attemptUpgrade, grantChapterDrops });
 });
