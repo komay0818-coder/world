@@ -260,7 +260,8 @@
     const config = enemy?.lootConfig;
     if (!config || typeof config !== 'object') return null;
     const random = typeof options.random === 'function' ? options.random : Math.random;
-    const dropRate = Math.min(1, Math.max(0, Number(config.equipmentDropRate) || 0));
+    const dropRateMultiplier = Math.max(1, Number(options.dropRateMultiplier) || 1);
+    const dropRate = Math.min(1, Math.max(0, Number(config.equipmentDropRate) || 0) * dropRateMultiplier);
     if (random() >= dropRate) return null;
     const chapter = Math.max(1, Number(options.chapter || enemy.chapter || config.chapter) || 1);
     const rarity = rollChapterRarity(chapter, config.rarityWeights, random(), Boolean(enemy?.isBoss || config.specialDungeon), warningHandler);

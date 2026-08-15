@@ -12,6 +12,6 @@ assert.match(script, /VillageUpgradePolicy\.grantMapDrops\(progress, currentMap\
 assert.doesNotMatch(crafting, /blackOre: Object\.freeze/, 'black ore has one canonical material definition in the drop policy');
 assert.match(index, /chapter-one-material-drop-policy\.js\?v=20260815-material-artwork-v1/, 'the material policy cache key includes the current artwork');
 assert.match(index, /world\/e6455c75a9b6207ad9630e7ce66a7197b4b4fa57\/script\.js/, 'the integration script uses the current immutable build');
-assert.match(index, /VER\. 0\.6\.35/, 'the current game version includes compound skill triggers');
+assert.match(index, /VER\. 0\.6\.36/, 'the current game version includes elite affixes and compound skill triggers');
 
 console.log('black-ore-drop-integration: assertions passed');

@@ -45,10 +45,10 @@ assert.match(script, /const monsterTypes = EquipmentDropPolicy\.applyDefaultLoot
 assert.match(script, /plainsRabbit:.*lootConfig: EquipmentDropPolicy\.TEST_LOOT_CONFIGS\.normal/, 'a normal monster has phase-one loot data');
 assert.match(script, /ragingWolf:.*lootConfig: EquipmentDropPolicy\.TEST_LOOT_CONFIGS\.elite/, 'an elite monster has phase-one loot data');
 assert.match(script, /greatfangWolf:.*lootConfig: EquipmentDropPolicy\.TEST_LOOT_CONFIGS\.boss/, 'a boss has phase-one loot data');
-assert.match(script, /function rewardVictory\(index\)[\s\S]*EquipmentDropPolicy\.grantEquipmentDrop\(progress, enemy\)/, 'rewardVictory enters the equipment drop flow');
+assert.match(script, /function rewardVictory\(index\)[\s\S]*EquipmentDropPolicy\.grantEquipmentDrop\(progress, enemy, \{ chapter: currentMap\.chapter/, 'rewardVictory enters the equipment drop flow with scoped options');
 assert.match(script, /const currentMap = getActiveMap\(progress\);\s*renderStrongholdObjective\(currentMap\);/, 'rewardVictory resolves the active map before rendering map objectives');
 assert.match(script, /ChapterOneMaterialDropPolicy\.grantMaterialDrops\(progress, currentMap\.id, enemy\)/, 'rewardVictory grants map and monster-specific materials through the shared inventory');
-assert.match(script, /ChapterTwoMaterialDropPolicy\.grantMaterialDrops\(progress, currentMap\.id, enemy\)/, 'rewardVictory grants second chapter monster-specific materials separately');
+assert.match(script, /ChapterTwoMaterialDropPolicy\.grantMaterialDrops\(progress, currentMap\.id, enemy, \{ dropRateMultiplier:/, 'rewardVictory grants second chapter monster-specific materials with a scoped Bonus hook');
 assert.match(html, /chapter-two-material-drop-policy\.js[\s\S]*script\.js/, 'second chapter material policy loads before the main game script');
 assert.match(html, /chapter-two-recipe-drop-policy\.js[\s\S]*chapter-two-special-equipment-policy\.js[\s\S]*script\.js/, 'second chapter recipe and special equipment policies load before the main game script');
 assert.match(script, /ChapterTwoRecipeDropPolicy\.grantRecipeDrops\(progress, enemy, currentMap\.id\)/, 'rewardVictory grants second chapter recipes through their independent policy');

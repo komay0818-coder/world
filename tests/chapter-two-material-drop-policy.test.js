@@ -26,6 +26,7 @@ assert.deepEqual(spiderProgress.inventory.map(({ id, quantity }) => ({ id, quant
 ]);
 assert.deepEqual(policy.rollDrops('spider-nest', { id: 'blackstoneVenomHunter' }, sequence([.05, .10])), [], '掉落邊界不成功');
 assert.deepEqual(policy.rollDrops('plains-depths', { id: 'blackstoneTrailScout' }, () => 0), [], '第二章材料不會在第一章掉落');
+assert.equal(policy.rollDrops('black-forest-trail', { id: 'blackstoneBeastmaster' }, () => .31, 1.1).length, 1, '詞綴材料 Bonus 將 30% 提高至 33%');
 assert.deepEqual(policy.rollDrops('blackstone-stronghold', { id: 'blackstoneStrongholdWarlord', isBoss: true }, () => 0).map(({ id, quantity }) => ({ id, quantity })), [{ id: 'black-iron-ore', quantity: 1 }]);
 assert.deepEqual(policy.rollDrops('forest-altar', { id: 'corruptedAltarGuardian', isBoss: true }, () => 0).map(({ id, quantity }) => ({ id, quantity })), [{ id: 'corruption-crystal', quantity: 1 }]);
 

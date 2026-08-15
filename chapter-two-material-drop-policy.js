@@ -60,10 +60,11 @@
   const MAP_DROP_CONFIGS = Object.freeze({});
   const MATERIAL_BY_ID = new Map(Object.values(MATERIALS).map((material) => [material.id, material]));
   function clampRoll(value) { return Math.max(0, Math.min(.999999, Number(value) || 0)); }
-  function rollDrops(mapId, enemy = {}, random = Math.random) {
+  function rollDrops(mapId, enemy = {}, random = Math.random, dropRateMultiplier = 1) {
     if (Number(enemy?.chapter) !== 2 && !String(mapId || '').startsWith('black-forest') && !['spider-nest', 'blackstone-stronghold', 'forest-altar'].includes(mapId)) return [];
+    const bonus = Math.max(1, Number(dropRateMultiplier) || 1);
     return (MONSTER_DROP_CONFIGS[String(enemy?.id || '')] || [])
-      .filter((entry) => clampRoll(random()) < entry.dropRate)
+      .filter((entry) => clampRoll(random()) < Math.min(1, entry.dropRate * bonus))
       .map((entry) => ({ ...MATERIAL_BY_ID.get(entry.materialId), sourceMapId: mapId, sourceMonsterId: enemy.id, quantity: entry.amount || 1 }));
   }
   function addStackedMaterial(progress, material, amount = 1) {
@@ -78,7 +79,7 @@
   function grantMaterialDrops(progress, mapId, enemy = {}, options = {}) {
     if (!progress || typeof progress !== 'object') return [];
     const random = typeof options.random === 'function' ? options.random : Math.random;
-    const results = rollDrops(mapId, enemy, random);
+    const results = rollDrops(mapId, enemy, random, options.dropRateMultiplier);
     results.forEach((drop) => addStackedMaterial(progress, drop, drop.quantity));
     return results;
   }
