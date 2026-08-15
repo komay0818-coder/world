@@ -53,7 +53,7 @@ const battleCharacterArt = {
 };
 const battleCharacterActionArt = (character, state = 'idle') => {
   if (!character?.race || !character?.job || !canCreateRaceJob(character.race, character.job)) return '';
-  const action = ['idle', 'attack', 'hit'].includes(state) ? state : 'idle';
+  const action = state === 'attack' ? 'attack' : 'idle';
   const characterId = `${character.race}-${character.job}`;
   return `assets/character-actions/${characterId}/${characterId}-back-${action}.png`;
 };

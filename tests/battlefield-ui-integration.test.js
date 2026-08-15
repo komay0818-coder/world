@@ -70,11 +70,12 @@ assert.match(script, /data-member-id="\$\{member\.id\}"/, 'party battlefield uni
 assert.match(script, /playPartyMemberCombatAnimation\(member,[\s\S]*?kind: 'skill', skillName: skill\.name/, 'skills animate every party member and expose the skill name');
 assert.match(script, /playPartyMemberCombatAnimation\(member, \[targetIndex\], \{ kind: 'basic' \}\)/, 'basic attacks animate every party member');
 assert.match(script, /function battleCharacterActionArt|const battleCharacterActionArt/, 'battlefield resolves dedicated character action artwork');
-assert.match(script, /back-\$\{action\}\.png/, 'idle, attack, and hit states share a predictable asset convention');
+assert.match(script, /const action = state === 'attack' \? 'attack' : 'idle';/, 'taking damage keeps idle artwork instead of displaying a hit image');
+assert.match(script, /back-\$\{action\}\.png/, 'idle and attack states share a predictable asset convention');
 assert.match(script, /assets\/character-actions/, 'battlefield uses normalized transparent action assets');
 assert.match(script, /setBattleCharacterAction\(art, member\.character, 'attack'\)/, 'party attacks swap to their attack artwork');
-assert.match(script, /playPartyMemberHitAnimation\(target\)/, 'enemy damage swaps the targeted party member to hit artwork');
-assert.match(css, /@keyframes characterActionHit/, 'hit artwork receives a short impact animation');
+assert.match(script, /playPartyMemberHitAnimation\(target\)/, 'enemy damage still animates the targeted party member');
+assert.match(css, /@keyframes characterActionHit/, 'the idle artwork receives a short impact animation when hit');
 assert.match(css, /\.character-attack-effect\.attack-kind-skill::after/, 'skill attacks show an in-field skill label');
 assert.match(css, /prefers-reduced-motion: reduce/, 'combat animation respects reduced-motion preferences');
 assert.match(css, /#battle-player-art\[aria-label\][\s\S]*?width: clamp\(80px, 10vw, 133px\) !important;[\s\S]*?height: 24\.5% !important;/, 'main player uses the same desktop unit box as party members');
