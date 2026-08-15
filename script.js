@@ -2736,7 +2736,7 @@ function showEnemyDamage(indexes, damage, type = 'normal') {
   });
 }
 
-function applyDot(index, type, damage, duration, maxStacks = 1) {
+function applyDot(index, type, damage, duration, maxStacks = 1, options = {}) {
   if (battle.enemyHps[index] <= 0) return;
   const dots = battle.enemyDots[index] || [];
   const sameType = dots.filter((dot) => dot.type === type);
@@ -2744,9 +2744,10 @@ function applyDot(index, type, damage, duration, maxStacks = 1) {
   if (existing) {
     existing.damage = Math.max(existing.damage, damage);
     existing.remaining = Math.max(existing.remaining, duration);
+    existing.defenseReduction = Math.max(existing.defenseReduction || 0, options.defenseReduction || 0);
     return;
   }
-  dots.push({ type, damage, remaining: duration });
+  dots.push({ type, damage, remaining: duration, source: options.source || null, defenseReduction: options.defenseReduction || 0 });
   battle.enemyDots[index] = dots;
 }
 
@@ -2760,7 +2761,12 @@ function processEnemyDots() {
     });
     battle.enemyDots[index] = dots.filter((dot) => dot.remaining > 0);
     if (damage <= 0) return;
-    applyDamageToMonster(index, damage, { damageType: 'periodic', attackRange: 'none' }, {
+    const source = dots.find((dot) => dot.source)?.source || null;
+    const sourceMastery = source?.job === 'mage' && source.level >= 15
+      ? ClassSkillPolicy.getEffect('mage', 'elemental-mastery', Number(source.progress.skillLevels?.['mage:elemental-mastery']) || 1)
+      : null;
+    applyDamageToMonster(index, damage * (sourceMastery?.resonance && dots.some((dot) => dot.type === 'burn') ? 1.2 : 1), { damageType: 'periodic', attackRange: 'none' }, {
+      attacker: source,
       canEvade: false,
       canParry: false,
       logDefense: false,
@@ -3617,6 +3623,7 @@ function applyEnemySkillState(index, effect, now = Date.now()) {
   if (effect.mark) { state.markedUntil = now + (effect.duration || 6) * 1000; state.markBonus = effect.mark; }
   if (effect.magicVulnerability) { state.magicVulnerabilityUntil = now + effect.vulnerabilityDuration * 1000; state.magicVulnerability = effect.magicVulnerability; }
   if (effect.attackDown) { state.attackDownUntil = now + effect.duration * 1000; state.attackDown = effect.attackDown; }
+  if (effect.enhancedParalysis) state.paralyzedUntil = now + 4000;
 }
 
 function applyDamageToMonster(index, baseDamage, profile, options = {}) {
@@ -3627,6 +3634,9 @@ function applyDamageToMonster(index, baseDamage, profile, options = {}) {
   const attackerStats = attacker?.stats || getCharacterStats(progress.level, progress, character);
   const skillState = getEnemySkillState(index);
   const now = Date.now();
+  const elementalMastery = attacker?.job === 'mage' && attacker.level >= 15
+    ? ClassSkillPolicy.getEffect('mage', 'elemental-mastery', Number(progress.skillLevels?.['mage:elemental-mastery']) || 1)
+    : null;
   const magicDamageBonus = profile.damageType === 'magic' ? attackerStats.magicDamageBonus : 0;
   const rankMultiplier = enemy.isBoss ? 1 + (attackerStats.bossDamagePercent || 0) : enemy.isElite ? 1 + (attackerStats.eliteDamagePercent || 0) : 1;
   const attackKindMultiplier = options.attackKind === 'skill' ? 1 + (attackerStats.skillDamagePercent || 0) : options.attackKind === 'basic' ? 1 + (attackerStats.basicAttackDamagePercent || 0) : 1;
@@ -3634,7 +3644,10 @@ function applyDamageToMonster(index, baseDamage, profile, options = {}) {
   const markMultiplier = now < skillState.markedUntil && attacker?.job === 'hunter' ? 1 + skillState.markBonus : 1;
   const vulnerabilityMultiplier = profile.damageType === 'magic' && now < skillState.magicVulnerabilityUntil ? 1 + skillState.magicVulnerability : 1;
   const controlledMultiplier = options.controlledBonus && (now < skillState.stunnedUntil || now < skillState.frozenUntil) ? 1 + options.controlledBonus : 1;
-  const adjustedBaseDamage = magicAdjustedDamage * rankMultiplier * attackKindMultiplier * markMultiplier * vulnerabilityMultiplier * controlledMultiplier;
+  const statusElementMultiplier = elementalMastery && (battle.enemyDots[index] || []).length ? 1 + elementalMastery.elementDamage : 1;
+  const frostResonanceMultiplier = elementalMastery?.resonance && (now < skillState.slowedUntil || now < skillState.frozenUntil) && Math.random() < .1 ? attackerStats.criticalDamageMultiplier : 1;
+  const lightningResonanceMultiplier = elementalMastery?.resonance && now < (skillState.paralyzedUntil || 0) && options.attackKind !== 'resonance' && Math.random() < .1 ? 1.3 : 1;
+  const adjustedBaseDamage = magicAdjustedDamage * rankMultiplier * attackKindMultiplier * markMultiplier * vulnerabilityMultiplier * controlledMultiplier * statusElementMultiplier * frostResonanceMultiplier * lightningResonanceMultiplier;
   if (enemy.mapId) {
     const hitChance = ChapterOneLevelPolicy.getPlayerHitChance(progress.level, enemy.level, attackerStats.accuracy, 0);
     if (Math.random() >= hitChance) {
@@ -3651,7 +3664,7 @@ function applyDamageToMonster(index, baseDamage, profile, options = {}) {
   const assassinDashActive = enemy.id === 'blackstoneVenombladeAssassin' && Date.now() < (battle.enemyAssassinDashUntil?.[index] || 0);
   const defendedEnemy = {
     ...enemy,
-    defense: Math.max(0, Math.round(enemy.defense * (1 - (options.armorIgnore || 0)) * trailMultipliers.defense * spiderNestMultipliers.defense * strongholdMultipliers.defense * forestAltarMultipliers.defense * depthsMultipliers.defense)),
+    defense: Math.max(0, Math.round(enemy.defense * (1 - (options.armorIgnore || 0)) * (1 - Math.min(.9, (battle.enemyDots[index] || []).filter((dot) => dot.type === 'poison').reduce((total, dot) => total + (dot.defenseReduction || 0), 0))) * trailMultipliers.defense * spiderNestMultipliers.defense * strongholdMultipliers.defense * forestAltarMultipliers.defense * depthsMultipliers.defense)),
     evasion: (enemy.evasion || 0) + (trailMultipliers.evasion || 0) + (spiderNestMultipliers.evasion || 0) + (strongholdMultipliers.evasion || 0) + (forestAltarMultipliers.evasion || 0) + (depthsMultipliers.evasion || 0) + (assassinDashActive ? SpiderNestPolicy.ASSASSIN.dashEvasionBonus : 0),
     parry: (enemy.parry || 0) + (captainShieldActive ? BlackForestTrailPolicy.CAPTAIN.shieldParryBonus : 0)
   };
@@ -3698,6 +3711,10 @@ function applyDamageToMonster(index, baseDamage, profile, options = {}) {
     const resourceRecovery = Math.ceil((attacker.resourceMax || 0) * (attackerStats.killResourceRecoveryPercent || 0));
     if (hpRecovery > 0) attacker.currentHp = Math.min(attacker.maxHp, attacker.currentHp + hpRecovery);
     if (resourceRecovery > 0) attacker.resourceCurrent = Math.min(attacker.resourceMax, attacker.resourceCurrent + resourceRecovery);
+    if (attacker.job === 'assassin' && attacker.level >= 20 && attacker.currentHp / attacker.maxHp <= .3) {
+      const desperate = ClassSkillPolicy.getEffect('assassin', 'desperate-counter', Number(progress.skillLevels?.['assassin:desperate-counter']) || 1);
+      if (desperate.killHeal) attacker.currentHp = Math.min(attacker.maxHp, attacker.currentHp + attacker.maxHp * desperate.killHeal);
+    }
   }
   if (options.showDamage !== false) showEnemyDamage([index], result.finalDamage, options.effectType || 'normal');
   return result;
@@ -3751,8 +3768,13 @@ function useAutoSkillForMember(member, now = Date.now()) {
     });
     const hits = resolvedTargets.filter((target) => !target.result.evaded);
     hits.forEach((target) => applyEnemySkillState(target.index, skillEffect, now));
-    if (skill.id === 'fireball') hits.forEach((target) => applyDot(target.index, 'burn', Math.max(1, Math.ceil(target.result.finalDamage * .18 * (1 + (skillEffect.burnBonus || 0)) * stats.dotMultiplier)), 4 + (skillEffect.burnDuration || 0)));
-    if (skill.id === 'poison-blade') hits.forEach((target) => applyDot(target.index, 'poison', Math.max(1, Math.ceil(target.result.finalDamage * .15 * (1 + (skillEffect.poisonBonus || 0)) * stats.dotMultiplier)), 5 + (skillEffect.poisonDuration || 0), skillEffect.poisonStacks || 1));
+    if (skill.id === 'fireball') hits.forEach((target) => applyDot(target.index, 'burn', Math.max(1, Math.ceil(target.result.finalDamage * .18 * (1 + (skillEffect.burnBonus || 0)) * stats.dotMultiplier)), 4 + (skillEffect.burnDuration || 0), 1, { source: member }));
+    if (skill.id === 'backstab') hits.forEach((target) => {
+      const bleeding = (battle.enemyDots[target.index] || []).find((dot) => dot.type === 'bleed');
+      if (bleeding && skillEffect.bleedTrigger) applyDamageToMonster(target.index, bleeding.damage * skillEffect.bleedTrigger, { damageType: 'periodic', attackRange: 'none' }, { attacker: member, attackKind: 'bleed-trigger', canEvade: false, canParry: false });
+      applyDot(target.index, 'bleed', Math.max(1, Math.ceil(target.result.finalDamage * .12 * (1 + (skillEffect.bleedBonus || 0)))), 5, 1, { source: member });
+    });
+    if (skill.id === 'poison-blade') hits.forEach((target) => applyDot(target.index, 'poison', Math.max(1, Math.ceil(target.result.finalDamage * .15 * (1 + (skillEffect.poisonBonus || 0)) * stats.dotMultiplier)), 5 + (skillEffect.poisonDuration || 0), skillEffect.poisonStacks || 1, { source: member, defenseReduction: skillEffect.defensePerStack || 0 }));
     if (skill.id === 'fireball' && skillEffect.explosionPower && hits.length) {
       aliveEnemyIndexesByAge().filter((index) => index !== hits[0].index).slice(0, skillEffect.explosionTargets).forEach((index) => applyDamageToMonster(index, stats.attack * skillEffect.explosionPower, profile, { attacker: member, attackKind: 'skill', effectType: 'magic' }));
     }
@@ -3766,6 +3788,11 @@ function useAutoSkillForMember(member, now = Date.now()) {
       member.shadowDanceOffhandChance = (skillEffect.offhandChance || 0) + Math.min(.25, hits.length * (skillEffect.offhandPerTarget || 0));
     }
     if (skill.id === 'multi-shot' && skillEffect.nextBasicPerTarget) member.nextBasicDamageBonus = Math.min(skillEffect.maxNextBasic, hits.length * skillEffect.nextBasicPerTarget);
+    if (skill.id === 'multi-shot' && skillEffect.killCooldownReduction) {
+      const killed = resolvedTargets.filter(({ index, result }) => !result.evaded && battle.enemyHps[index] <= 0).length;
+      const reduction = Math.min(skillEffect.maxCooldownReduction, killed * skillEffect.killCooldownReduction) * 1000;
+      member.pendingSkillCooldownReduction = reduction;
+    }
     if (skill.id === 'holy-nova' && hits.length) {
       member.currentHp = Math.min(member.maxHp, member.currentHp + member.maxHp * (skillEffect.selfHealPerTarget || 0) * hits.length);
       if (skillEffect.shield && hits.length >= skillEffect.shieldAtTargets) member.shield += member.maxHp * skillEffect.shield;
@@ -3780,6 +3807,10 @@ function useAutoSkillForMember(member, now = Date.now()) {
     const blinkCooldownMultiplier = member.blinkCooldownReduction ? 1 - member.blinkCooldownReduction : 1;
     const blessingCooldownSpeed = now < (member.lightGraceUntil || 0) ? 1 + (member.lightGraceCooldownSpeed || 0) : 1;
     member.skillCooldowns[skill.id] = now + (skillEffect.cooldown || skill.cooldown) * blinkCooldownMultiplier * skillCooldownMultiplier * 1000 / (stats.cooldownSpeed * blessingCooldownSpeed);
+    if (member.pendingSkillCooldownReduction) {
+      member.skillCooldowns[skill.id] = Math.max(now, member.skillCooldowns[skill.id] - member.pendingSkillCooldownReduction);
+      member.pendingSkillCooldownReduction = 0;
+    }
     member.blinkCooldownReduction = 0;
     member.globalSkillReadyAt = now + 1000;
     const totalDamage = hits.reduce((total, target) => total + target.result.finalDamage, 0);
@@ -3901,13 +3932,17 @@ function processPartyMemberAttacks(now = Date.now()) {
     const displayedWeaponAttack = rolledWeaponAttack === null ? 0 : effectiveEquipmentStat(equippedWeapon, 'attack');
     const attackWithWeaponRoll = member.stats.attack + (rolledWeaponAttack === null ? 0 : rolledWeaponAttack - displayedWeaponAttack);
     const orcRage = member.race === 'orc' && Math.random() < .10;
+    const desperate = member.job === 'assassin' && member.level >= 20 && member.currentHp / member.maxHp <= .3
+      ? ClassSkillPolicy.getEffect('assassin', 'desperate-counter', Number(member.progress.skillLevels?.['assassin:desperate-counter']) || 1)
+      : null;
     const hunterInstinct = member.job === 'hunter' && member.level >= 20 ? getHunterInstinctEffect(member.progress) : null;
     member.hunterAttackCount += 1;
     const instinctTriggered = Boolean(hunterInstinct && member.hunterAttackCount % hunterInstinct.interval === 0);
-    const critical = instinctTriggered && hunterInstinct.guaranteedCrit ? true : Math.random() < member.stats.crit;
-    const temporaryBasicBonus = (now < (member.skillHasteUntil || 0) ? member.skillBasicDamageBonus || 0 : 0) + (member.nextBasicDamageBonus || 0);
+    const critical = instinctTriggered && hunterInstinct.guaranteedCrit ? true : Math.random() < Math.min(.95, member.stats.crit + (desperate?.crit || 0));
+    const temporaryBasicBonus = (now < (member.skillHasteUntil || 0) ? member.skillBasicDamageBonus || 0 : 0) + (member.nextBasicDamageBonus || 0) + (member.nextHunterAttackBonus || 0) + (desperate?.attack || 0);
     const baseHit = Math.max(1, Math.ceil(attackWithWeaponRoll * (1 + temporaryBasicBonus) * (orcRage ? 1.10 : 1) * (critical ? member.stats.criticalDamageMultiplier : 1)));
     member.nextBasicDamageBonus = 0;
+    member.nextHunterAttackBonus = 0;
     const hit = Math.max(1, Math.ceil(baseHit * (instinctTriggered ? hunterInstinct.power : 1)));
     const enemy = getEnemyDefinition(targetIndex);
     const profile = getPlayerAttackProfile(member.character);
@@ -3920,6 +3955,12 @@ function processPartyMemberAttacks(now = Date.now()) {
         const bond = ClassSkillPolicy.getEffect('hunter', 'wild-bond', Number(member.progress.skillLevels?.['hunter:wild-bond']) || 1);
         const pet = applyDamageToMonster(targetIndex, member.stats.attack * bond.companionAttack, { damageType: 'physical', attackRange: 'melee' }, { attacker: member, attackKind: 'companion', canParry: false });
         if (!pet.evaded) playCompanionAttackAnimation([targetIndex]);
+        member.petAttackCount = (member.petAttackCount || 0) + 1;
+        if (bond.beastSlam && member.petAttackCount % 6 === 0 && battle.enemyHps[targetIndex] > 0) {
+          applyDamageToMonster(targetIndex, member.stats.attack * bond.companionAttack * bond.beastSlam, { damageType: 'physical', attackRange: 'melee' }, { attacker: member, attackKind: 'beast-slam', canParry: false });
+          member.nextHunterAttackBonus = bond.nextHunterAttack || 0;
+          logBattle(`🐾 ${member.name}的寵物發動【野獸猛擊】！`, 'damage-dealt');
+        }
       }
       if (member.job === 'hunter' && member.level >= 15) {
         const reload = ClassSkillPolicy.getEffect('hunter', 'quick-reload', Number(member.progress.skillLevels?.['hunter:quick-reload']) || 1);
@@ -3947,7 +3988,7 @@ function processPartyMemberAttacks(now = Date.now()) {
       : 1;
     const skillHasteMultiplier = now < (member.skillHasteUntil || 0) ? 1 + (member.skillHasteBonus || 0) : 1;
     const blessingSpeedMultiplier = now < (member.lightGraceUntil || 0) ? 1 + (member.lightGraceAttackSpeed || 0) : 1;
-    PartyPolicy.scheduleNextAttack(member, now, member.attackSpeed * skillHasteMultiplier * blessingSpeedMultiplier, exhaustedMultiplier * trailSlowMultiplier);
+    PartyPolicy.scheduleNextAttack(member, now, member.attackSpeed * skillHasteMultiplier * blessingSpeedMultiplier * (1 + (desperate?.speed || 0)), exhaustedMultiplier * trailSlowMultiplier);
   }
 }
 
@@ -4641,9 +4682,21 @@ function enemyAttackTick() {
       targetName: target.name
     });
     const stats = getCharacterStats(target.level, target.progress, target.character);
+    const lowHealthAssassin = target.job === 'assassin' && target.level >= 20 && target.currentHp / target.maxHp <= .3;
+    if (!lowHealthAssassin) target.desperateLowActive = false;
+    if (lowHealthAssassin && !target.desperateLowActive) {
+      target.desperateLowActive = true;
+      const desperate = ClassSkillPolicy.getEffect('assassin', 'desperate-counter', Number(target.progress.skillLevels?.['assassin:desperate-counter']) || 1);
+      if (!target.desperateEntryTriggered && desperate.entryDodge) {
+        target.desperateEntryTriggered = true;
+        target.desperateDodgeUntil = now + (desperate.entryDuration || 3) * 1000;
+        target.desperateEntryDodge = desperate.entryDodge;
+      }
+    }
+    const transientDodge = now < (target.desperateDodgeUntil || 0) ? target.desperateEntryDodge || 0 : 0;
     const monsterHitChance = enemy.mapId
-      ? ChapterOneLevelPolicy.getMonsterHitChance(enemy.level, target.level, stats.dodge)
-      : 1 - stats.dodge;
+      ? ChapterOneLevelPolicy.getMonsterHitChance(enemy.level, target.level, Math.min(.9, stats.dodge + transientDodge))
+      : 1 - Math.min(.9, stats.dodge + transientDodge);
     let dodged = Math.random() >= monsterHitChance;
     if (!dodged && target.job === 'mage' && target.level >= 8) {
       const blink = ClassSkillPolicy.getEffect('mage', 'blink', Number(target.progress.skillLevels?.['mage:blink']) || 1);
