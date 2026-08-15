@@ -720,7 +720,7 @@ body:has(.battle-screen:not(.hidden)) .toast {
 
 /* 0.4.85: compensate for party art padding so teammates match the main player visually. */
 .battle-field .player-stage-art {
-  scale: 1.28;
+  scale: var(--character-render-scale, 1.28);
   transform-origin: center bottom;
 }
 
@@ -735,7 +735,7 @@ body:has(.battle-screen:not(.hidden)) .toast.show {
 }
 
 @media (max-width: 700px) {
-  .battle-field .player-stage-art { scale: 1.28; }
+  .battle-field .player-stage-art { scale: var(--character-render-scale, 1.28); }
   body:has(.battle-screen:not(.hidden)) .toast {
     right: 10px !important;
     max-width: calc(100% - 20px);
@@ -926,7 +926,7 @@ body:has(.battle-screen:not(.hidden)) .toast.show {
 
 /* 0.6.17: widen only the main character silhouette without changing its height. */
 .battle-field #battle-player-art[aria-label] {
-  scale: calc(var(--character-scale, 1) * 1.1) var(--character-scale, 1) !important;
+  scale: var(--character-render-scale-x, 1.1) var(--character-render-scale, 1) !important;
 }
 
 /* 0.6.18: every monster uses one visual scale; rank is shown only by an aura. */

@@ -27,7 +27,7 @@ assert.match(css, /top: 16% !important;/, 'desktop enemy formation moves closer 
 assert.match(css, /\.battle-field \.player-stage-info \{ left: 50%; translate: -50% 0; \}/, 'main player information follows the player art horizontally');
 assert.match(css, /\.battle-field \.player-grounding \{[\s\S]*?background: rgba\(0, 0, 0, \.28\) !important;/, 'main player has a subtle grounding shadow');
 assert.match(css, /\.battle-field \.player-stage-info,[\s\S]*?\.battle-field \.player-stage-floating \{[\s\S]*?display: none !important;/, 'main and party vitals are hidden over battlefield units');
-assert.match(css, /\.battle-field \.player-stage-art \{[\s\S]*?scale: 1\.28;/, 'party art is optically enlarged to match the main player');
+assert.match(css, /\.battle-field \.player-stage-art \{[\s\S]*?scale: var\(--character-render-scale, 1\.28\);/, 'party art uses the calibrated per-character action scale');
 assert.match(css, /body:has\(\.battle-screen:not\(\.hidden\)\) \.toast \{[\s\S]*?right: calc\(var\(--battle-right-column, 15%\) \+ 18px\) !important;[\s\S]*?left: auto !important;/, 'battle loot notifications align to the right of the battlefield');
 assert.match(css, /\.battle-screen #layout-toggle,[\s\S]*?\.battle-bottom \.skill-panel > \.potion-button \{[\s\S]*?display: none !important;/, 'battlefield utility controls are removed from the upper-right skill area');
 assert.match(css, /\.battle-field::after \{[\s\S]*?display: none !important;/, 'the translucent ally battlefield plate is removed');
@@ -45,14 +45,14 @@ assert.match(css, /\.player-battle-stage[\s\S]*?justify-content: center;/, 'part
 assert.match(script, /battleCharacterArt\[`\$\{member\.character\.race\}:\$\{member\.character\.job\}`\]/, 'party display reuses existing character art');
 assert.doesNotMatch(script, /portraitPrototypeAssigned|normal-portrait-prototype|player-unit-frame/, 'battlefield rendering no longer assigns frame classes');
 assert.doesNotMatch(css, /portrait-prototype|combat-frame-width|player-frame-width|gold dragon frame/, 'combat frame styling is fully removed');
-assert.match(script, /battlePlayerArt\.style\.backgroundImage = characterArt \? `url\('\$\{characterArt\}'\)` : '';/, 'unframed main player receives its character artwork directly');
+assert.match(script, /setBattleCharacterAction\(battlePlayerArt, character, 'idle'\);/, 'unframed main player receives its calibrated idle artwork directly');
 assert.doesNotMatch(script, /battlePlayerArt\.querySelector\('\.combat-unit-art'\)/, 'main player no longer depends on the removed frame artwork node');
 assert.match(css, /0\.6\.16: invisible unit zones[\s\S]*?--unit-scale-small: \.9;[\s\S]*?--unit-scale-humanoid: 1;[\s\S]*?--unit-scale-beast: 1\.12;[\s\S]*?--unit-scale-large: 1\.22;/, 'four invisible unit-zone size tiers normalize monster bodies');
 assert.match(css, /#enemy-squad \.monster-battle-slot \{[\s\S]*?border: 0 !important;[\s\S]*?background: none !important;[\s\S]*?box-shadow: none !important;/, 'monster unit zones remain visually frameless');
 assert.match(css, /#enemy-squad \.monster-slot-header \{[\s\S]*?justify-self: center !important;[\s\S]*?width: auto !important;[\s\S]*?border-radius: 999px !important;/, 'monster names use compact attached labels instead of wide cards');
 assert.match(css, /#enemy-squad \.monster-slot-hp \{[\s\S]*?top: -4px !important;[\s\S]*?width: 72% !important;/, 'monster health bars sit directly beneath their artwork');
 assert.match(css, /height: 37% !important;[\s\S]*?bottom: 8% !important;/, 'desktop main player is enlarged and raised within the ally field');
-assert.match(css, /0\.6\.17: widen only the main character silhouette[\s\S]*?scale: calc\(var\(--character-scale, 1\) \* 1\.1\) var\(--character-scale, 1\) !important;/, 'main character widens ten percent without increasing its height');
+assert.match(css, /0\.6\.17: widen only the main character silhouette[\s\S]*?scale: var\(--character-render-scale-x, 1\.1\) var\(--character-render-scale, 1\) !important;/, 'main character uses the calibrated per-character and per-action scale');
 assert.match(css, /0\.6\.18: every monster uses one visual scale[\s\S]*?--unit-scale-small: 1;[\s\S]*?--unit-scale-humanoid: 1;[\s\S]*?--unit-scale-beast: 1;[\s\S]*?--unit-scale-large: 1;/, 'all monster body categories use one visual scale');
 assert.match(css, /monster-battle-slot\.elite,[\s\S]*?monster-battle-slot\.boss \{[\s\S]*?--unit-rank-scale: 1;/, 'elite and boss ranks no longer enlarge monster artwork');
 assert.match(css, /monster-battle-slot\.rare \.monster-image-frame::after,[\s\S]*?monster-battle-slot\.elite \.monster-image-frame::after,[\s\S]*?monster-battle-slot\.boss \.monster-image-frame::after[\s\S]*?border-radius: 50%;/, 'rare, elite and boss monsters receive rank auras');
@@ -75,6 +75,9 @@ assert.match(script, /const action = state === 'attack' \? 'attack' : 'idle';/, 
 assert.match(script, /back-\$\{action\}\.png/, 'idle and attack states share a predictable asset convention');
 assert.match(script, /assets\/character-actions/, 'battlefield uses normalized transparent action assets');
 assert.match(script, /setBattleCharacterAction\(art, member\.character, 'attack'\)/, 'party attacks swap to their attack artwork');
+assert.match(script, /'human:assassin': \{ aspect: '2048 \/ 1200', visibleScale: 1\.2 \}[\s\S]*?'human:priest': \{ aspect: '2048 \/ 1200', visibleScale: 1\.2 \}/, 'undersized human classes receive a larger shared battlefield scale');
+assert.match(script, /const battleCharacterActionScale = \{[\s\S]*?'elf:assassin': \{ attack: 1\.2 \}[\s\S]*?'undead:mage': \{ attack: 1\.1 \}/, 'characters with mismatched attack artwork receive per-action scale corrections');
+assert.match(script, /--character-render-scale', renderScale/, 'action changes update the rendered character scale');
 assert.match(script, /playPartyMemberHitAnimation\(target\)/, 'enemy damage still animates the targeted party member');
 assert.match(css, /@keyframes characterActionHit/, 'the idle artwork receives a short impact animation when hit');
 assert.match(css, /\.character-attack-effect\.attack-kind-skill::after/, 'skill attacks show an in-field skill label');

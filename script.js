@@ -62,17 +62,24 @@ function setBattleCharacterAction(art, character, state = 'idle') {
   if (!art || !character) return;
   const actionArt = battleCharacterActionArt(character, state);
   if (!actionArt) return;
+  const characterKey = `${character.race}:${character.job}`;
+  const visibleScale = battleCharacterLayout[characterKey]?.visibleScale || 1;
+  const actionScale = battleCharacterActionScale[characterKey]?.[state] || 1;
+  const stageScale = art.id === 'battle-player-art' ? CHARACTER_SCALE : 1.28;
+  const renderScale = stageScale * visibleScale * actionScale;
   art.dataset.action = state;
+  art.style.setProperty('--character-render-scale', renderScale);
+  art.style.setProperty('--character-render-scale-x', renderScale * 1.1);
   art.style.backgroundImage = `url('${actionArt}')`;
 }
 // Preserve each source image's proportions and compensate for transparent top/bottom
 // padding so every visible character matches the human hunter's battlefield height.
 const battleCharacterLayout = {
   'human:warrior': { aspect: '1197 / 1315', visibleScale: 1.089 },
-  'human:assassin': { aspect: '2048 / 1200', visibleScale: 1 },
-  'human:hunter': { aspect: '2048 / 1200', visibleScale: 1 },
-  'human:mage': { aspect: '2048 / 1200', visibleScale: 1 },
-  'human:priest': { aspect: '2048 / 1200', visibleScale: 1 },
+  'human:assassin': { aspect: '2048 / 1200', visibleScale: 1.2 },
+  'human:hunter': { aspect: '2048 / 1200', visibleScale: 1.2 },
+  'human:mage': { aspect: '2048 / 1200', visibleScale: 1.2 },
+  'human:priest': { aspect: '2048 / 1200', visibleScale: 1.2 },
   'elf:warrior': { aspect: '1346 / 1169', visibleScale: 1.178 },
   'elf:assassin': { aspect: '1254 / 1254', visibleScale: 1 },
   'elf:hunter': { aspect: '1370 / 1148', visibleScale: 1.024 },
@@ -88,6 +95,14 @@ const battleCharacterLayout = {
   'undead:hunter': { aspect: '1360 / 1156', visibleScale: 1.117 },
   'undead:mage': { aspect: '1122 / 1402', visibleScale: 1.166 },
   'undead:priest': { aspect: '1122 / 1402', visibleScale: 1.044 }
+};
+const battleCharacterActionScale = {
+  'elf:assassin': { attack: 1.2 },
+  'orc:warrior': { attack: 1.2 },
+  'orc:assassin': { attack: 1.1 },
+  'orc:mage': { attack: 1.12 },
+  'undead:assassin': { attack: 1.12 },
+  'undead:mage': { attack: 1.1 }
 };
 const racialCompanions = {
   human: { image: 'assets/companion-human-hunter.png', icon: 'assets/hunter-companion-human-icon.png', portrait: true, name: '王國獵犬' },
@@ -5087,10 +5102,8 @@ function openBattle() {
     battlePlayerArt.dataset.race = character.race;
     battlePlayerArt.dataset.visualSize = 'humanoid';
     const characterLayout = battleCharacterLayout[`${character.race}:${character.job}`];
-    battlePlayerArt.style.setProperty('--character-scale', CHARACTER_SCALE * (characterLayout?.visibleScale || 1));
     battlePlayerArt.style.setProperty('--character-aspect', characterLayout?.aspect || '2048 / 1200');
-    battlePlayerArt.style.backgroundImage = characterArt ? `url('${characterArt}')` : '';
-    battlePlayerArt.dataset.action = 'idle';
+    setBattleCharacterAction(battlePlayerArt, character, 'idle');
     const raceName = Object.values(factions).flat().find((race) => race.id === character.race)?.name || character.race;
     battlePlayerArt.setAttribute('aria-label', `${raceName}${classes.find((job) => job.id === character.job)?.name || ''}`);
   }
