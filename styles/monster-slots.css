@@ -982,3 +982,32 @@ body:has(.battle-screen:not(.hidden)) .toast.show {
   --monster-aura-color: rgba(255, 194, 73, .88);
   --monster-aura-fill: rgba(218, 139, 36, .28);
 }
+
+/* 0.6.37: compact battlefield composition requested for the combat screen. */
+.battle-screen #layout-toggle,
+.battle-screen .battle-status,
+.battle-bottom .skill-panel > .potion-button {
+  display: none !important;
+}
+
+.battle-field::after { display: none !important; }
+
+.battle-field::before {
+  inset: 2% 2.5% 64% !important;
+  border-radius: 18px 18px 34px 34px !important;
+}
+
+.battle-field .enemy-zone-label { top: 2.5% !important; }
+
+.battle-field #enemy-squad.monster-slot-grid {
+  top: 3% !important;
+  height: 31% !important;
+}
+
+@media (max-width: 700px) {
+  .battle-field::before { inset: 2% 2% 60% !important; }
+  .battle-field #enemy-squad.monster-slot-grid {
+    top: 4% !important;
+    height: 35% !important;
+  }
+}
