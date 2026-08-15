@@ -982,7 +982,7 @@ function getProgress() {
     saved.collectibleMigrationVersion = 'unique-monster-collectibles-v1';
     localStorage.setItem('stardust-progress', JSON.stringify(saved));
   }
-  const inventory = SalvagePolicy.normalizeInventory(removeLegacySkillUpgradeMaterials(VillageUpgradePolicy.normalizeMaterialInventory(saved.inventory)))
+  const inventory = SkillUpgradePolicy.normalizeMaterialInventory(SalvagePolicy.normalizeInventory(removeLegacySkillUpgradeMaterials(VillageUpgradePolicy.normalizeMaterialInventory(saved.inventory))))
     .map(normalizeWearableSeriesName);
   saved.equipment = Object.fromEntries(Object.entries(saved.equipment || {})
     .map(([slot, item]) => [slot, normalizeWearableSeriesName(item)]));

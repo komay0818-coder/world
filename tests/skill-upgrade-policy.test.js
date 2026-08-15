@@ -1,6 +1,17 @@
 const assert = require('node:assert/strict');
 const policy = require('../skill-upgrade-policy.js');
 
+assert.deepEqual(Object.values(policy.SKILL_BOOK_RANKS).map(({ rank }) => rank), ['初階', '中階', '高階', '專精', '大師', '宗師', '傳承']);
+assert.deepEqual(Object.values(policy.SKILL_BOOK_RANKS).map(({ implemented }) => implemented), [true, true, true, false, false, false, false]);
+Object.values(policy.SKILL_BOOK_RANKS).forEach((book) => {
+  assert.equal(book.imageStatus, 'ready');
+  assert.match(book.image, /^assets\/skill-book-[a-z-]+\.png\?v=20260815-user-image-v1$/);
+});
+['beginner_skill_book', 'intermediate_skill_book', 'advanced_skill_book'].forEach((id) => assert.equal(policy.MATERIALS[id].imageStatus, 'ready'));
+const normalizedBook = policy.normalizeMaterialInventory([{ id: 'beginner_skill_book', kind: 'material', quantity: 2 }])[0];
+assert.equal(normalizedBook.image, 'assets/skill-book-beginner.png?v=20260815-user-image-v1');
+assert.equal(normalizedBook.quantity, 2);
+
 const chapterOne = policy.getUpgradeRequirement(1);
 assert.equal(chapterOne.chapter, 1);
 assert.equal(chapterOne.targetLevel, 2);
