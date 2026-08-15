@@ -19,7 +19,7 @@ assert.match(script, /'long-hunting-bow': 'assets\/long-hunting-bow\.png'/, 'lon
 assert.match(script, /'mercenary-greatsword': 'assets\/mercenary-greatsword\.png'/, 'mercenary greatsword artwork migrates into existing items');
 assert.match(script, /'giant-iron-sword': 'assets\/giant-iron-sword\.png'/, 'giant iron sword artwork migrates into existing items');
 assert.match(index, /world\/fd9d07d51f1168ed20c358bdd5db0e67d15bf4b3\/script\.js/, 'the live page pins the current game UI to an immutable commit');
-assert.match(index, /skill-upgrade-policy\.js\?v=20260815-skill-book-artwork-v1/, 'ranked skill-book artwork uses the current cache key');
+assert.match(index, /skill-upgrade-policy\.js\?v=20260815-skill-page-artwork-v1/, 'ranked skill material artwork uses the current cache key');
 assert.match(index, /world\/acd8f1313a90f6a64ce6a75259d5892e5aa410a7\/equipment-policy\.js/, 'the live page pins the current equipment catalog to an immutable commit');
 assert.match(script, /'forest-guard-longsword': 'assets\/forest-guard-longsword\.png'/, 'forest guard sword artwork migrates into existing items');
 assert.match(script, /'mercenary-broadsword': 'assets\/mercenary-broadsword\.png'/, 'mercenary broadsword artwork migrates into existing items');
