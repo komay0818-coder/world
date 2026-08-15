@@ -13,7 +13,7 @@ assert.match(html, /id="battle-player-art" class="battle-player-art hidden"/, 'm
 assert.doesNotMatch(html, /portrait-prototype|combat-unit-frame|combat-unit-art/, 'battlefield markup no longer contains frame prototype elements');
 assert.match(html, /id="player-stage-info"/, 'main player information floats near the battlefield art');
 assert.match(html, /id="battle-companion-icons" class="battle-companion-icons hidden"/, 'battlefield provides a generic companion icon tray');
-assert.match(html, /f02d3fc\/styles\/monster-slots\.css/, 'battlefield loads the current compact battlefield styles');
+assert.match(html, /2b9f556\/styles\/monster-slots\.css/, 'battlefield loads the current compact battlefield styles');
 assert.match(html, /87d4f72\/script\.js/, 'battlefield loads the current character action logic');
 assert.match(script, /--basic-lunge-x[\s\S]*deltaX \/ distance \* 24/, 'basic attacks calculate a short lunge toward the current target');
 assert.match(script, /--basic-lunge-y[\s\S]*deltaY \/ distance \* 24/, 'basic attack lunge follows the target direction');
