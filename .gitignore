@@ -1,0 +1,3 @@
+# Original high-resolution character action inputs are retained locally.
+# The normalized deployable copies live in assets/character-actions/.
+assets/character-action-sources/

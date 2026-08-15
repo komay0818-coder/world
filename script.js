@@ -51,6 +51,20 @@ const battleCharacterArt = {
   'undead:mage': 'assets/character-sprites/undead-mage-v2.png?v=20260730-user-image-v1',
   'undead:priest': 'assets/character-sprites/undead-priest-v2.png?v=20260730-user-image-v1'
 };
+const battleCharacterActionArt = (character, state = 'idle') => {
+  if (!character?.race || !character?.job || !canCreateRaceJob(character.race, character.job)) return '';
+  const action = ['idle', 'attack', 'hit'].includes(state) ? state : 'idle';
+  const characterId = `${character.race}-${character.job}`;
+  return `assets/character-actions/${characterId}/${characterId}-back-${action}.png`;
+};
+
+function setBattleCharacterAction(art, character, state = 'idle') {
+  if (!art || !character) return;
+  const actionArt = battleCharacterActionArt(character, state);
+  if (!actionArt) return;
+  art.dataset.action = state;
+  art.style.backgroundImage = `url('${actionArt}')`;
+}
 // Preserve each source image's proportions and compensate for transparent top/bottom
 // padding so every visible character matches the human hunter's battlefield height.
 const battleCharacterLayout = {
@@ -2651,22 +2665,45 @@ function renderEnemySquad() {
   squad.innerHTML = visibleEnemies + reserveLabel;
 }
 
-function playMonsterAttackAnimation(enemyIndex, playerWasHit) {
+function playMonsterAttackAnimation(enemyIndex, playerWasHit, targetMember = null) {
   const enemy = document.querySelector(`#enemy-${enemyIndex}`);
   if (enemy) {
     enemy.classList.remove('attacking');
     requestAnimationFrame(() => enemy.classList.add('attacking'));
     setTimeout(() => enemy.classList.remove('attacking'), 780);
   }
-  if (!playerWasHit) return;
+  if (!playerWasHit || (targetMember && !targetMember.isMain)) return;
   const player = document.querySelector('#player-fighter');
+  const playerArt = document.querySelector('#battle-player-art');
   const field = document.querySelector('.battle-field');
   player?.classList.remove('hit');
   field?.classList.remove('impact');
   requestAnimationFrame(() => {
     player?.classList.add('hit');
     field?.classList.add('impact');
+    setBattleCharacterAction(playerArt, getActiveCharacter(), 'hit');
   });
+  setTimeout(() => setBattleCharacterAction(playerArt, getActiveCharacter(), 'idle'), 520);
+}
+
+function playPartyMemberHitAnimation(member) {
+  if (!member) return;
+  const fighter = member.isMain
+    ? document.querySelector('#player-fighter')
+    : document.querySelector(`[data-member-id="${member.id}"]`);
+  const art = member.isMain
+    ? document.querySelector('#battle-player-art')
+    : fighter?.querySelector('.player-stage-art');
+  if (!art) return;
+  fighter?.classList.remove('is-hit');
+  requestAnimationFrame(() => {
+    fighter?.classList.add('is-hit');
+    setBattleCharacterAction(art, member.character, 'hit');
+  });
+  setTimeout(() => {
+    fighter?.classList.remove('is-hit');
+    setBattleCharacterAction(art, member.character, 'idle');
+  }, 520);
 }
 
 function playPartyMemberCombatAnimation(member, targetIndexes = [], options = {}) {
@@ -2688,6 +2725,7 @@ function playPartyMemberCombatAnimation(member, targetIndexes = [], options = {}
     fighter?.classList.add(actionClass);
     art.classList.add(actionClass);
     art.dataset.job = member.job || member.character?.job || 'warrior';
+    setBattleCharacterAction(art, member.character, 'attack');
 
     const job = art.dataset.job;
     const fieldRect = field.getBoundingClientRect();
@@ -2718,6 +2756,7 @@ function playPartyMemberCombatAnimation(member, targetIndexes = [], options = {}
       art.classList.remove('attack', actionClass);
       art.style.removeProperty('--basic-lunge-x');
       art.style.removeProperty('--basic-lunge-y');
+      setBattleCharacterAction(art, member.character, 'idle');
     }, 680);
   });
 }
@@ -3148,7 +3187,7 @@ function renderBattlePartyStatus() {
       const hpPercent = Math.max(0, Math.min(100, member.currentHp / member.maxHp * 100));
       const resourceMax = Math.max(1, getMaxCombatResourceForMember(member.character, member.progress));
       const resourcePercent = Math.max(0, Math.min(100, member.resourceCurrent / resourceMax * 100));
-      const art = battleCharacterArt[`${member.character.race}:${member.character.job}`] || '';
+      const art = battleCharacterActionArt(member.character, 'idle') || battleCharacterArt[`${member.character.race}:${member.character.job}`] || '';
       const jobName = classes.find((job) => job.id === member.character.job)?.name || member.character.job;
       return `<article class="player-stage-unit ${member.alive ? '' : 'is-dead'}" data-visual-size="humanoid" data-member-id="${member.id}" data-job="${member.character.job}"><div class="player-stage-floating"><b>${member.name}</b><small>${jobName}・Lv.${member.level}</small><span class="player-stage-hp"><i style="width:${hpPercent}%"></i></span><span class="player-stage-resource"><i style="width:${resourcePercent}%"></i></span></div><div class="player-stage-art" style="background-image:url('${art}')" aria-label="${member.name}"></div></article>`;
     }).join('');
@@ -5015,7 +5054,8 @@ function enemyAttackTick() {
         summary: `${enemy.name} 攻擊 ${target.name}${critical ? '（暴擊）' : ''}`
       });
     }
-    playMonsterAttackAnimation(enemyIndex, !dodged && damage > 0);
+    playMonsterAttackAnimation(enemyIndex, !dodged && damage > 0, target);
+    if (!dodged && damage > 0) playPartyMemberHitAnimation(target);
 
     if (target.currentHp > 0 && target.currentHp / target.maxHp < PARTY_AUTO_POTION_HEALTH_RATIO) {
       if (target.isMain) {
@@ -5039,7 +5079,7 @@ function openBattle() {
   const character = getActiveCharacter();
   if (!character) { openCreation(); return; }
   const battlePlayerArt = document.querySelector('#battle-player-art');
-  const characterArt = battleCharacterArt[`${character.race}:${character.job}`];
+  const characterArt = battleCharacterActionArt(character, 'idle') || battleCharacterArt[`${character.race}:${character.job}`];
   if (battlePlayerArt) {
     battlePlayerArt.classList.toggle('hidden', !characterArt);
     battlePlayerArt.classList.toggle('undead-art', character.race === 'undead' && Boolean(characterArt));
@@ -5050,6 +5090,7 @@ function openBattle() {
     battlePlayerArt.style.setProperty('--character-scale', CHARACTER_SCALE * (characterLayout?.visibleScale || 1));
     battlePlayerArt.style.setProperty('--character-aspect', characterLayout?.aspect || '2048 / 1200');
     battlePlayerArt.style.backgroundImage = characterArt ? `url('${characterArt}')` : '';
+    battlePlayerArt.dataset.action = 'idle';
     const raceName = Object.values(factions).flat().find((race) => race.id === character.race)?.name || character.race;
     battlePlayerArt.setAttribute('aria-label', `${raceName}${classes.find((job) => job.id === character.job)?.name || ''}`);
   }
