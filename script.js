@@ -123,7 +123,7 @@ const beginnerPlainsRegions = [
 ];
 const blackForestRegions = ChapterTwoMapPolicy.MAPS;
 const skillCooldownMultiplier = 1.0;
-const skillProgression = {
+const legacySkillProgression = {
   warrior: [
     { level: 1, type: 'active', id: 'heavy-strike', name: '重擊', detail: '160% 傷害 · 暈眩', power: 1.6, cooldown: 4 },
     { level: 3, type: 'passive', name: '鋼鐵意志', detail: '敵多時減傷' },
@@ -170,6 +170,15 @@ const skillProgression = {
     { level: 20, type: 'passive', name: '聖光恩典', detail: '治療後提升攻速' }
   ]
 };
+const skillProgression = Object.fromEntries(Object.keys(ClassSkillPolicy.SKILLS).map((job) => [
+  job,
+  ClassSkillPolicy.getSkills(job).map((entry) => ({
+    ...entry,
+    detail: entry.levels[0]?.breakthrough || entry.name,
+    power: entry.levels[0]?.power,
+    targets: entry.levels[0]?.targets || entry.targets
+  }))
+]));
 const skillIcons = {
   'heavy-strike': '⚔', whirlwind: '🌀', charge: '➤', fireball: '🔥', blizzard: '❄', 'chain-lightning': '⚡',
   backstab: '🗡', 'shadow-dance': '✦', 'poison-blade': '☠', 'power-shot': '➶', companion: '🐺', 'multi-shot': '≋',
@@ -184,13 +193,13 @@ function getPassiveSkillUpgradeLevel(progress, job, name) {
   return skill ? getSkillUpgradeLevel(progress, job, skill) : 1;
 }
 
+function getSkillEffect(progress, job, skill) {
+  return ClassSkillPolicy.getEffect(job, skill.id, getSkillUpgradeLevel(progress, job, skill)) || {};
+}
+
 function getHunterInstinctEffect(progress = getProgress()) {
-  const tier = getPassiveSkillUpgradeLevel(progress, 'hunter', '獵人本能');
-  return {
-    interval: tier >= 6 ? 3 : tier >= 4 ? 4 : tier >= 2 ? 5 : 6,
-    multiplier: tier >= 5 ? 2 : tier >= 3 ? 1.75 : 1.5,
-    extraAttack: tier >= 6
-  };
+  const definition = ClassSkillPolicy.getSkill('hunter', 'hunting-instinct');
+  return ClassSkillPolicy.getEffect('hunter', 'hunting-instinct', getSkillUpgradeLevel(progress, 'hunter', definition));
 }
 
 function getPassiveSkillDetail(job, skill, progress = getProgress()) {
@@ -214,7 +223,9 @@ function getSkillUpgradeLevel(progress, job, skill) {
 }
 
 function getSkillPowerMultiplier(progress, job, skill) {
-  return 1 + (getSkillUpgradeLevel(progress, job, skill) - 1) * .12;
+  const base = Number(skill.power) || 1;
+  const power = Number(getSkillEffect(progress, job, skill).power);
+  return power > 0 ? power / base : 1;
 }
 
 function getUnlockedChapter(progress) {
@@ -1017,6 +1028,7 @@ function getProgress() {
     equipment: { ...emptyEquipment(), ...(saved.equipment || {}) },
     collection: saved.collection && typeof saved.collection === 'object' ? saved.collection : {},
     skillBooks: saved.skillBooks && typeof saved.skillBooks === 'object' ? saved.skillBooks : {},
+    skillLevels: ClassSkillPolicy.normalizeSkillLevels(saved.skillLevels),
     blackForestCorruption: BlackForestCorruptionPolicy.normalizeState(saved.blackForestCorruption),
     crafting: CraftingPolicy.normalizeCraftingState(saved.crafting),
     village: VillagePolicy.normalizeVillageData(saved.village)
@@ -1954,32 +1966,39 @@ function getActiveMap(progress = getProgress()) {
   return mapProgression.find((map) => map.id === 'plains-entrance') || mapProgression[0];
 }
 
+function getUnlockedPassiveEffects(level, progress, character) {
+  return ClassSkillPolicy.getSkills(character?.job)
+    .filter((skill) => skill.type === 'passive' && level >= skill.level)
+    .map((skill) => ClassSkillPolicy.getEffect(character.job, skill.id, getSkillUpgradeLevel(progress, character.job, skill)) || {});
+}
+
 function getCharacterStats(level, progress = getProgress(), character = getActiveCharacter()) {
   const base = classBaseStats[character?.job] || classBaseStats.warrior;
   const race = raceAdjustments[character?.race] || raceAdjustments.human;
   const equipment = getEquipmentStats(progress);
   const collection = getCollectionStats(progress);
   const humanMultiplier = character?.race === 'human' ? 1.05 : 1;
-  const hunterPrecisionUnlocked = character?.job === 'hunter' && level >= 3;
-  const hunterMasteryUnlocked = character?.job === 'hunter' && level >= 15;
-  const hunterPrecisionTier = hunterPrecisionUnlocked ? getPassiveSkillUpgradeLevel(progress, 'hunter', '精準射擊') : 0;
-  const hunterMasteryTier = hunterMasteryUnlocked ? getPassiveSkillUpgradeLevel(progress, 'hunter', '弓術專精') : 0;
-  const hunterWeaponMultiplier = hunterMasteryUnlocked ? 1 + (10 + (hunterMasteryTier - 1) * 2) / 100 : 1;
   const equippedWeapon = progress.equipment?.weapon;
+  const passives = getUnlockedPassiveEffects(level, progress, character);
+  const passiveTotal = (key) => passives.reduce((total, effect) => total + (Number(effect[key]) || 0), 0);
+  const lowHealth = Number(progress.currentHpRatio) <= .3;
+  const lowHealthAttack = lowHealth ? passiveTotal('attack') : 0;
+  const lowHealthSpeed = lowHealth ? passiveTotal('speed') : 0;
+  const lowHealthCrit = lowHealth ? passiveTotal('crit') : 0;
   const stats = {
-    hp: Math.round((base.hp + race.hp + (level - 1) * 12 + equipment.hp + equipment.maxHp + collection.hp) * (1 + equipment.maxHpPercent) * humanMultiplier),
+    hp: Math.round((base.hp + race.hp + (level - 1) * 12 + equipment.hp + equipment.maxHp + collection.hp) * (1 + equipment.maxHpPercent + passiveTotal('maxHp')) * humanMultiplier),
     mana: ['warrior', 'assassin'].includes(character?.job) ? 0 : Math.round((base.mana + race.mana + (level - 1) * 6 + equipment.mana + collection.mana) * humanMultiplier),
-    attack: Math.round((base.attack + race.attack + (level - 1) + equipment.attack + equipment.attackFlat + equipment.strength + equipment.intelligence + collection.attack) * humanMultiplier * hunterWeaponMultiplier),
+    attack: Math.round((base.attack + race.attack + (level - 1) + equipment.attack + equipment.attackFlat + equipment.strength + equipment.intelligence + collection.attack) * humanMultiplier * (1 + passiveTotal('weaponDamage') + lowHealthAttack)),
     defense: Math.round((base.defense + race.defense + Math.floor((level - 1) / 5) + equipment.defense + collection.defense) * (1 + equipment.defensePercent) * humanMultiplier),
-    crit: Math.min(.60, base.crit + race.crit + collection.crit + equipment.criticalChance + (hunterPrecisionUnlocked ? (5 + (hunterPrecisionTier - 1)) / 100 : 0)),
-    dodge: Math.min(.45, Math.max(0, base.dodge + race.dodge + collection.dodge + equipment.dodge + equipment.dodgePercent)),
-    accuracy: Math.min(1.30, 1.05 + equipment.accuracy + equipment.accuracyPercent + (character?.job === 'hunter' ? .05 : 0) + (hunterPrecisionUnlocked ? (10 + (hunterPrecisionTier - 1) * 2) / 100 : 0)),
-    attackSpeed: EquipmentPolicy.getAttacksPerSecond(equippedWeapon, base.attackSpeed * 1.15) * (1 + equipment.attackSpeedBonus + equipment.attackSpeedPercent),
+    crit: Math.min(.60, base.crit + race.crit + collection.crit + equipment.criticalChance + passiveTotal('crit') + lowHealthCrit),
+    dodge: Math.min(.45, Math.max(0, base.dodge + race.dodge + collection.dodge + equipment.dodge + equipment.dodgePercent + passiveTotal('dodge'))),
+    accuracy: Math.min(1.30, 1.05 + equipment.accuracy + equipment.accuracyPercent + (character?.job === 'hunter' ? .05 : 0)),
+    attackSpeed: EquipmentPolicy.getAttacksPerSecond(equippedWeapon, base.attackSpeed * 1.15) * (1 + equipment.attackSpeedBonus + equipment.attackSpeedPercent + passiveTotal('attackSpeed') + lowHealthSpeed),
     cooldownSpeed: (character?.race === 'elf' ? 1.03 : 1) * (1 + equipment.cooldownSpeedBonus + equipment.cooldownSpeedPercent),
     manaRegen: 1 + equipment.manaRegenBonus + equipment.manaRegenerationPercent,
     manaRegenFlat: equipment.manaRegenFlat,
-    magicDamageBonus: Math.max(0, equipment.magicDamageBonus),
-    parry: Math.min(.50, Math.max(0, equipment.parry)),
+    magicDamageBonus: Math.max(0, equipment.magicDamageBonus + passiveTotal('magicDamage') + passiveTotal('elementDamage')),
+    parry: Math.min(.50, Math.max(0, equipment.parry + passiveTotal('parry'))),
     damageReduction: Math.min(.50, Math.max(0, equipment.damageReduction)),
     movementSpeedBonus: Math.max(0, equipment.movementSpeedBonus),
     hpRegeneration: Math.max(0, equipment.hpRegeneration),
@@ -1990,7 +2009,7 @@ function getCharacterStats(level, progress = getProgress(), character = getActiv
     killHealthRecoveryPercent: Math.max(0, equipment.killHealthRecoveryPercent),
     killResourceRecoveryPercent: Math.max(0, equipment.killResourceRecoveryPercent),
     poisonResistancePercent: Math.min(1, Math.max(0, equipment.poisonResistancePercent)),
-    criticalDamageMultiplier: 1.5 + Math.max(0, equipment.criticalDamagePercent),
+    criticalDamageMultiplier: 1.5 + Math.max(0, equipment.criticalDamagePercent + passiveTotal('criticalDamage') + passiveTotal('skillCriticalDamage')),
     dotMultiplier: character?.race === 'undead' ? 1.20 : 1
   };
   const activeMap = getActiveMap(progress);
@@ -2717,10 +2736,11 @@ function showEnemyDamage(indexes, damage, type = 'normal') {
   });
 }
 
-function applyDot(index, type, damage, duration) {
+function applyDot(index, type, damage, duration, maxStacks = 1) {
   if (battle.enemyHps[index] <= 0) return;
   const dots = battle.enemyDots[index] || [];
-  const existing = dots.find((dot) => dot.type === type);
+  const sameType = dots.filter((dot) => dot.type === type);
+  const existing = sameType.length >= maxStacks ? sameType.sort((a, b) => a.remaining - b.remaining)[0] : null;
   if (existing) {
     existing.damage = Math.max(existing.damage, damage);
     existing.remaining = Math.max(existing.remaining, duration);
@@ -2779,7 +2799,8 @@ function createBattlePartyMember(slot, slotIndex, mainId, now = Date.now()) {
     collection: {},
     skillLevels: {},
     ...slot.progress,
-    equipment: { ...emptyEquipment(), ...(slot.progress?.equipment || {}) }
+    equipment: { ...emptyEquipment(), ...(slot.progress?.equipment || {}) },
+    skillLevels: ClassSkillPolicy.normalizeSkillLevels(slot.progress?.skillLevels)
   };
   const stats = getCharacterStats(progress.level, progress, character);
   const maxResource = getMaxCombatResourceForMember(character, progress);
@@ -3020,18 +3041,24 @@ function refreshSkills(character, level) {
 }
 
 function getSkillEffectPercent(skill, upgradeLevel = 1) {
-  const multiplier = 1 + (Math.max(1, Number(upgradeLevel) || 1) - 1) * .12;
-  if (skill.power) return Math.round(skill.power * multiplier * 100);
-  if (skill.id === 'heal') return Math.round(40 * multiplier);
+  const effect = ClassSkillPolicy.getEffect(getActiveCharacter()?.job, skill.id, upgradeLevel) || {};
+  if (effect.power) return Math.round(effect.power * 100);
+  if (effect.healPower) return Math.round(effect.healPower * 100);
   return 0;
 }
 
 function getSkillDescription(job, skill) {
-  const effectPercent = getSkillEffectPercent(skill);
-  if (skill.id === 'heal') return `恢復相當於魔法攻擊 ${effectPercent}% 的生命值。`;
-  if (skill.type === 'active' && effectPercent) return `對敵人造成 ${effectPercent}% 技能傷害。`;
-  if (skill.type === 'passive') return getPassiveSkillDetail(job, skill);
-  return skill.detail;
+  const level = getSkillUpgradeLevel(getProgress(), job, skill);
+  const effect = ClassSkillPolicy.getEffect(job, skill.id, level) || {};
+  const parts = [];
+  if (effect.power) parts.push(`造成 ${Math.round(effect.power * 100)}% 傷害`);
+  if (effect.healPower) parts.push(`治療量為魔法攻擊 ${Math.round(effect.healPower * 100)}%`);
+  if (effect.targets) parts.push(`最多 ${effect.targets} 個目標`);
+  if (effect.stun) parts.push(`曈眩 ${effect.stun} 秒`);
+  if (effect.slow) parts.push(`緩速 ${Math.round(effect.slow * 100)}%`);
+  if (effect.attackDown) parts.push(`降低攻擊 ${Math.round(effect.attackDown * 100)}%`);
+  if (effect.breakthrough) parts.push(`Lv6 突破：${effect.breakthrough}`);
+  return parts.join('；') || getPassiveSkillDetail(job, skill) || skill.detail;
 }
 
 function closeSkillDetailModal() {
@@ -3054,12 +3081,15 @@ function renderSkillDetailModal() {
   const requirement = SkillUpgradePolicy.getUpgradeRequirement(upgradeLevel);
   const upgradeProgress = { ...progress, unlockedChapter: getUnlockedChapter(progress) };
   const validation = SkillUpgradePolicy.canUpgrade(upgradeProgress, upgradeLevel);
+  const specialization = upgradeLevel === 5 ? ClassSkillPolicy.canSpecialize(progress.skillLevels, character.job, skill.id) : { ok: true };
   const cooldown = skill.type === 'active' ? Math.round(skill.cooldown * skillCooldownMultiplier) : 0;
   const manaCost = skill.type === 'active' ? getSkillResourceCost(character.job, skill) : 0;
   const currentEffect = getSkillEffectPercent(skill, upgradeLevel);
   const materialStatus = requirement ? requirement.materials.map((material) => `${material.icon} ${material.name} ${SkillUpgradePolicy.getQuantity(progress.inventory, material.id)}/${material.amount}`).join('、') : '';
   const upgradeStatus = !requirement
     ? '<p>目前已達技能最高等級。</p>'
+    : !specialization.ok
+      ? `<p>已選擇其他${skill.type === 'active' ? '主動' : '被動'}技能突破：${specialization.occupied.name}。</p>`
     : getUnlockedChapter(progress) < requirement.chapter
       ? `<p>需要解鎖第 ${requirement.chapter} 章才能繼續升級。</p>`
       : `<p>${materialStatus}</p><p>金幣 ${progress.gold}/${requirement.gold}・成功率 ${Math.round(requirement.successRate * 100)}%</p>`;
@@ -3072,7 +3102,7 @@ function renderSkillDetailModal() {
       <div><dt>消耗</dt><dd>${skill.type === 'active' && manaCost > 0 ? `${manaCost} ${getCombatResourceUnit(character.job)}` : '無'}</dd></div>
     </dl>
     <section class="skill-detail-copy"><h3>技能說明</h3><p>${getSkillDescription(character.job, skill)}</p></section>
-    <section class="skill-upgrade-summary"><h3>技能 Lv${upgradeLevel}</h3>${upgradeStatus}<button id="skill-detail-upgrade" type="button" ${validation.ok ? '' : 'disabled'}>${requirement ? `升級至 Lv${requirement.targetLevel}` : '已達上限'}</button></section>`;
+    <section class="skill-upgrade-summary"><h3>技能 Lv${upgradeLevel}</h3>${upgradeStatus}<button id="skill-detail-upgrade" type="button" ${validation.ok && specialization.ok ? '' : 'disabled'}>${requirement ? `升級至 Lv${requirement.targetLevel}` : '已達上限'}</button></section>`;
   modal.classList.remove('hidden');
 }
 
@@ -3172,7 +3202,7 @@ function updateBattleUI() {
   }
   const companionIcons = document.querySelector('#battle-companion-icons');
   const racialCompanion = racialCompanions[character.race] || racialCompanions.human;
-  const activeBattleCompanions = character.job === 'hunter' && progress.level >= 5
+  const activeBattleCompanions = character.job === 'hunter' && progress.level >= 8
     ? [{ id: 'hunter-companion', image: racialCompanion.icon || racialCompanion.image, portrait: racialCompanion.portrait, name: racialCompanion.name }]
     : [];
   if (companionIcons) {
@@ -3672,23 +3702,29 @@ function useAutoSkillForMember(member, now = Date.now()) {
   const unlocked = getKnownSkills(member.job, member.level).filter((skill) => skill.type === 'active' && skill.level <= member.level);
   const attackSkills = unlocked.filter((skill) => skill.id !== 'heal' && (member.skillCooldowns[skill.id] || 0) <= now);
   for (const skill of attackSkills) {
+    const skillEffect = getSkillEffect(progress, member.job, skill);
     const cost = getSkillResourceCost(member.job, skill);
     if (member.resourceType === 'arrows' && !HunterArrowPolicy.canUseSkill(member.resourceCurrent, skill.id, progress.equipment)) continue;
     if (member.resourceType !== 'arrows' && member.resourceCurrent < cost) continue;
-    const targets = aliveEnemyIndexesByAge().slice(0, skill.targets || 1);
+    const targets = aliveEnemyIndexesByAge().slice(0, skillEffect.targets || skill.targets || 1);
     if (!targets.length) continue;
     const critical = Math.random() < stats.crit;
-    const companionMultiplier = skill.id === 'companion' && member.level >= 8 ? 1.15 + (getPassiveSkillUpgradeLevel(progress, 'hunter', '野性夥伴') - 1) * .10 : 1;
-    const damage = Math.max(1, Math.ceil(stats.attack * skill.power * getSkillPowerMultiplier(progress, member.job, skill) * companionMultiplier * (critical ? stats.criticalDamageMultiplier : 1)));
+    let damagePower = Number(skillEffect.power) || Number(skill.power) || 1;
+    if (skill.id === 'piercing-shot' && aliveEnemyIndexesByAge().length === 1) damagePower *= skillEffect.singleTargetBonus ? 1 + skillEffect.singleTargetBonus : 1;
+    if (skill.id === 'whirlwind') damagePower *= 1 + Math.min(skillEffect.maxTargetBonus || 0, Math.max(0, targets.length - 1) * (skillEffect.perExtraTargetBonus || 0));
+    const damage = Math.max(1, Math.ceil(stats.attack * damagePower * (critical ? stats.criticalDamageMultiplier : 1)));
     const profile = getPlayerAttackProfile(character, skill);
     const resolvedTargets = targets.map((index) => ({ index, result: applyDamageToMonster(index, damage, profile, { attacker: member, attackKind: 'skill' }) }));
     const hits = resolvedTargets.filter((target) => !target.result.evaded);
-    if (skill.id === 'fireball') hits.forEach((target) => applyDot(target.index, 'burn', Math.max(1, Math.ceil(target.result.finalDamage * .18 * stats.dotMultiplier)), 4));
-    if (skill.id === 'poison-blade') hits.forEach((target) => applyDot(target.index, 'poison', Math.max(1, Math.ceil(target.result.finalDamage * .15 * stats.dotMultiplier)), 5));
+    if (skill.id === 'fireball') hits.forEach((target) => applyDot(target.index, 'burn', Math.max(1, Math.ceil(target.result.finalDamage * .18 * (1 + (skillEffect.burnBonus || 0)) * stats.dotMultiplier)), 4 + (skillEffect.burnDuration || 0)));
+    if (skill.id === 'poison-blade') hits.forEach((target) => applyDot(target.index, 'poison', Math.max(1, Math.ceil(target.result.finalDamage * .15 * (1 + (skillEffect.poisonBonus || 0)) * stats.dotMultiplier)), 5 + (skillEffect.poisonDuration || 0), skillEffect.poisonStacks || 1));
+    if (skill.id === 'fireball' && skillEffect.explosionPower && hits.length) {
+      aliveEnemyIndexesByAge().filter((index) => index !== hits[0].index).slice(0, skillEffect.explosionTargets).forEach((index) => applyDamageToMonster(index, stats.attack * skillEffect.explosionPower, profile, { attacker: member, attackKind: 'skill', effectType: 'magic' }));
+    }
     member.resourceCurrent = member.resourceType === 'arrows'
       ? HunterArrowPolicy.spendArrows(member.resourceCurrent, skill.id, progress.equipment)
       : Math.max(0, member.resourceCurrent - cost);
-    member.skillCooldowns[skill.id] = now + skill.cooldown * skillCooldownMultiplier * 1000 / stats.cooldownSpeed;
+    member.skillCooldowns[skill.id] = now + (skillEffect.cooldown || skill.cooldown) * skillCooldownMultiplier * 1000 / stats.cooldownSpeed;
     member.globalSkillReadyAt = now + 1000;
     const totalDamage = hits.reduce((total, target) => total + target.result.finalDamage, 0);
     if (skill.id !== 'companion') playPartyMemberCombatAnimation(member, (hits.length ? hits : resolvedTargets).map((target) => target.index), { kind: 'skill', skillName: skill.name });
@@ -3708,22 +3744,30 @@ function useAutoSkillForMember(member, now = Date.now()) {
     return true;
   }
   const healSkill = unlocked.find((skill) => skill.id === 'heal' && (member.skillCooldowns[skill.id] || 0) <= now);
-  if (!healSkill || member.resourceCurrent < getSkillManaCost(healSkill) || member.currentHp / member.maxHp > .7) return false;
+  const healTarget = (battle.partyMembers || []).filter((candidate) => candidate.alive).sort((a, b) => a.currentHp / a.maxHp - b.currentHp / b.maxHp)[0] || member;
+  if (!healSkill || member.resourceCurrent < getSkillManaCost(healSkill) || healTarget.currentHp / healTarget.maxHp > .7) return false;
   const cost = getSkillManaCost(healSkill);
-  const heal = Math.ceil(member.maxHp * .4 * getSkillPowerMultiplier(progress, member.job, healSkill));
-  const missing = member.maxHp - member.currentHp;
-  member.currentHp = Math.min(member.maxHp, member.currentHp + heal);
-  member.shield += Math.max(0, heal - missing);
+  const healEffect = getSkillEffect(progress, member.job, healSkill);
+  const heal = Math.ceil(stats.attack * (healEffect.healPower || 1.5));
+  const missing = healTarget.maxHp - healTarget.currentHp;
+  const actualHeal = Math.min(missing, heal);
+  healTarget.currentHp = Math.min(healTarget.maxHp, healTarget.currentHp + heal);
+  healTarget.shield += Math.max(0, heal - missing) * (healEffect.overhealShield || 0);
   member.resourceCurrent -= cost;
   member.globalSkillReadyAt = now + 1000;
-  member.skillCooldowns[healSkill.id] = now + healSkill.cooldown * skillCooldownMultiplier * 1000 / stats.cooldownSpeed;
-  logBattle(`✦ ${member.name}施放【${healSkill.name}】，恢復 ${heal} 生命。`);
+  member.skillCooldowns[healSkill.id] = now + (healEffect.cooldown || healSkill.cooldown) * skillCooldownMultiplier * 1000 / stats.cooldownSpeed;
+  if (healEffect.afterglow && actualHeal > 0) setTimeout(() => {
+    if (!healTarget.alive) return;
+    healTarget.currentHp = Math.min(healTarget.maxHp, healTarget.currentHp + Math.ceil(actualHeal * healEffect.afterglow));
+    if (fighting) updateBattleUI();
+  }, 3000);
+  logBattle(`✦ ${member.name}施放【${healSkill.name}】，為 ${healTarget.name}恢復 ${actualHeal} 生命。`);
   logPartyDebug('技能施放', {
     attackerId: member.id,
     attackerName: member.name,
-    targetId: member.id,
-    targetName: member.name,
-    damage: -heal,
+    targetId: healTarget.id,
+    targetName: healTarget.name,
+    damage: -actualHeal,
     skill: healSkill.name,
     resource: `${member.resourceType}:${Math.floor(member.resourceCurrent)}/${member.resourceMax}`,
     cooldownUntil: Math.round(member.skillCooldowns[healSkill.id])
@@ -3788,12 +3832,12 @@ function processPartyMemberAttacks(now = Date.now()) {
     const displayedWeaponAttack = rolledWeaponAttack === null ? 0 : effectiveEquipmentStat(equippedWeapon, 'attack');
     const attackWithWeaponRoll = member.stats.attack + (rolledWeaponAttack === null ? 0 : rolledWeaponAttack - displayedWeaponAttack);
     const orcRage = member.race === 'orc' && Math.random() < .10;
-    const critical = Math.random() < member.stats.crit;
-    const baseHit = Math.max(1, Math.ceil(attackWithWeaponRoll * (orcRage ? 1.10 : 1) * (critical ? member.stats.criticalDamageMultiplier : 1)));
-    member.hunterAttackCount += 1;
     const hunterInstinct = member.job === 'hunter' && member.level >= 20 ? getHunterInstinctEffect(member.progress) : null;
+    member.hunterAttackCount += 1;
     const instinctTriggered = Boolean(hunterInstinct && member.hunterAttackCount % hunterInstinct.interval === 0);
-    const hit = Math.max(1, Math.ceil(baseHit * (instinctTriggered ? hunterInstinct.multiplier : 1)));
+    const critical = instinctTriggered && hunterInstinct.guaranteedCrit ? true : Math.random() < member.stats.crit;
+    const baseHit = Math.max(1, Math.ceil(attackWithWeaponRoll * (orcRage ? 1.10 : 1) * (critical ? member.stats.criticalDamageMultiplier : 1)));
+    const hit = Math.max(1, Math.ceil(baseHit * (instinctTriggered ? hunterInstinct.power : 1)));
     const enemy = getEnemyDefinition(targetIndex);
     const profile = getPlayerAttackProfile(member.character);
     const result = applyDamageToMonster(targetIndex, hit, profile, { attacker: member, attackKind: 'basic' });
@@ -3801,9 +3845,14 @@ function processPartyMemberAttacks(now = Date.now()) {
     if (!result.evaded) {
       if (member.resourceType === 'rage') member.resourceCurrent = WarriorResourcePolicy.gainFromAttack(member.resourceCurrent);
       logBattle(`⚔ ${member.name}對【${enemy.name}】造成 ${result.finalDamage} 傷害${critical ? '（暴擊）' : ''}${orcRage ? '（狂怒）' : ''}${instinctTriggered ? '（獵人本能）' : ''}`, 'damage-dealt', { aggregateKey: `member-${member.id}-${battle.enemyTypes[targetIndex]}`, damage: result.finalDamage, summary: `⚔ ${member.name}攻擊【${enemy.name}】` });
-      if (instinctTriggered && hunterInstinct.extraAttack && battle.enemyHps[targetIndex] > 0) {
-        const extra = applyDamageToMonster(targetIndex, baseHit, profile, { attacker: member, attackKind: 'basic' });
-        if (!extra.evaded) logBattle(`➶ ${member.name}的【獵人本能】額外造成 ${extra.finalDamage} 傷害。`, 'damage-dealt');
+      if (member.job === 'hunter' && member.level >= 8 && battle.enemyHps[targetIndex] > 0) {
+        const bond = ClassSkillPolicy.getEffect('hunter', 'wild-bond', Number(member.progress.skillLevels?.['hunter:wild-bond']) || 1);
+        const pet = applyDamageToMonster(targetIndex, member.stats.attack * bond.companionAttack, { damageType: 'physical', attackRange: 'melee' }, { attacker: member, attackKind: 'companion', canParry: false });
+        if (!pet.evaded) playCompanionAttackAnimation([targetIndex]);
+      }
+      if (member.job === 'hunter' && member.level >= 15) {
+        const reload = ClassSkillPolicy.getEffect('hunter', 'quick-reload', Number(member.progress.skillLevels?.['hunter:quick-reload']) || 1);
+        if (reload.basicArrowRecoveryChance && Math.random() < reload.basicArrowRecoveryChance) member.resourceCurrent = Math.min(member.resourceMax, member.resourceCurrent + 1);
       }
     }
     logPartyDebug('普通攻擊', {
@@ -4974,6 +5023,12 @@ document.querySelector('#skill-detail-modal').addEventListener('click', (event) 
   if (!skill || progress.level < skill.level) return;
   progress.unlockedChapter = getUnlockedChapter(progress);
   const currentLevel = getSkillUpgradeLevel(progress, character.job, skill);
+  const specialization = currentLevel === 5 ? ClassSkillPolicy.canSpecialize(progress.skillLevels, character.job, skill.id) : { ok: true };
+  if (!specialization.ok) {
+    showToast(`已選擇其他${skill.type === 'active' ? '主動' : '被動'}技能突破。`);
+    renderSkillDetailModal();
+    return;
+  }
   const result = SkillUpgradePolicy.attemptUpgrade(progress, currentLevel);
   if (!result.ok) {
     renderSkillDetailModal();

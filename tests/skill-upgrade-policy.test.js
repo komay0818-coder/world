@@ -1,8 +1,8 @@
 const assert = require('node:assert/strict');
 const policy = require('../skill-upgrade-policy.js');
 
-assert.deepEqual(Object.values(policy.SKILL_BOOK_RANKS).map(({ rank }) => rank), ['初階', '中階', '高階', '專精', '大師', '宗師', '傳承']);
-assert.deepEqual(Object.values(policy.SKILL_BOOK_RANKS).map(({ implemented }) => implemented), [true, true, true, false, false, false, false]);
+assert.deepEqual(Object.values(policy.SKILL_BOOK_RANKS).map(({ rank }) => rank), ['初階', '中階', '高階', '神聖一階', '專精', '大師', '宗師', '傳承']);
+assert.deepEqual(Object.values(policy.SKILL_BOOK_RANKS).map(({ implemented }) => implemented), [true, true, false, true, false, false, false, false]);
 Object.values(policy.SKILL_BOOK_RANKS).forEach((book) => {
   assert.equal(book.imageStatus, 'ready');
   assert.match(book.image, /^assets\/skill-book-[a-z-]+\.png\?v=20260815-user-image-v1$/);
@@ -27,9 +27,10 @@ const chapterOne = policy.getUpgradeRequirement(1);
 assert.equal(chapterOne.chapter, 1);
 assert.equal(chapterOne.targetLevel, 2);
 assert.deepEqual(chapterOne.materials.map((item) => item.id), ['beginner_skill_page', 'beginner_skill_book']);
-assert.equal(policy.getUpgradeRequirement(3).chapter, 1, 'Lv3 to Lv4 remains a chapter-one upgrade');
-assert.equal(policy.getUpgradeRequirement(4).chapter, 2, 'Lv4 to Lv5 requires chapter two');
+assert.equal(policy.getUpgradeRequirement(3).chapter, 2, 'Lv3 to Lv4 requires chapter two');
+assert.equal(policy.getUpgradeRequirement(4).chapter, 2, 'Lv4 to Lv5 remains in chapter two');
 assert.equal(policy.getUpgradeRequirement(5).chapter, 3, 'Lv5 to Lv6 requires chapter three');
+assert.deepEqual(policy.getUpgradeRequirement(5).materials.map((item) => item.id), ['divine_tome_tier_1'], 'Lv6 uses one complete divine tome and no pages');
 assert.equal(policy.getUpgradeRequirement(6), null, 'Lv6 is the configured maximum');
 
 const wrongChapterMaterials = {

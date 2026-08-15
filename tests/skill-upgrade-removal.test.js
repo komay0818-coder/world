@@ -10,8 +10,8 @@ assert.match(index, /skill-upgrade-policy\.js[\s\S]*script\.js/, 'chapter policy
 assert.match(script, /SkillUpgradePolicy\.getUpgradeRequirement/, 'skill details use the data-driven upgrade requirement');
 assert.match(script, /SkillUpgradePolicy\.attemptUpgrade/, 'upgrade actions use the shared policy');
 assert.match(script, /SkillUpgradePolicy\.grantChapterDrops\(progress, currentMap\.chapter, enemy\)/, 'drops are selected by the active map chapter');
-assert.match(script, /getSkillPowerMultiplier\(progress, member\.job, skill\)/, 'active skill damage applies the saved skill level');
-assert.match(script, /getSkillPowerMultiplier\(progress, member\.job, healSkill\)/, 'healing applies the saved skill level');
+assert.match(script, /const skillEffect = getSkillEffect\(progress, member\.job, skill\)/, 'active skill damage applies the saved skill level');
+assert.match(script, /const healEffect = getSkillEffect\(progress, member\.job, healSkill\)/, 'healing applies the saved skill level');
 assert.match(script, /function removeLegacySkillUpgradeMaterials\(/, 'obsolete global materials remain filtered for save compatibility');
 
 console.log('Chapter skill upgrade integration checks passed.');

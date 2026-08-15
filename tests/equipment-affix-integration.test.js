@@ -20,7 +20,7 @@ assert.match(source, /equipment\.attackSpeedPercent/, 'attack-speed affixes feed
 ['skillDamagePercent', 'eliteDamagePercent', 'bossDamagePercent', 'basicAttackDamagePercent', 'killHealthRecoveryPercent', 'killResourceRecoveryPercent', 'poisonResistancePercent'].forEach((stat) => {
   assert.match(source, new RegExp(`${stat}: Math`), `chapter-two combat stat ${stat} feeds the character calculation`);
 });
-assert.match(source, /criticalDamageMultiplier: 1\.5 \+ Math\.max\(0, equipment\.criticalDamagePercent\)/, 'critical damage increases the player critical multiplier');
+assert.match(source, /criticalDamageMultiplier: 1\.5 \+ Math\.max\(0, equipment\.criticalDamagePercent \+ passiveTotal/, 'equipment and passive critical damage increase the player critical multiplier');
 assert.match(source, /updatePartyMemberHealthRegeneration\(member, now\)/, 'battle ticks apply equipped health regeneration');
 assert.match(source, /skill\.id === 'fireball'\) hits\.forEach[\s\S]*applyDot\(target\.index, 'burn'/, 'fireball inherently applies burn on hit');
 assert.doesNotMatch(source, /hasEquippedSpecialAbility\(member\.equipment, 'mage_fireball_burn'\)/, 'fireball burn does not depend on equipment');

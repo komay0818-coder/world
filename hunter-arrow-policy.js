@@ -16,9 +16,9 @@
     allowedJobs: Object.freeze(['hunter'])
   });
   const SKILL_COSTS = Object.freeze({
-    'power-shot': 2,
-    companion: 0,
-    'multi-shot': 3
+    'power-shot': 1,
+    'multi-shot': 3,
+    'piercing-shot': 2
   });
 
   function isHunter(job) {

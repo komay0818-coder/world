@@ -18,15 +18,15 @@ assert.equal(oldEquipment.offhand.name, '新手箭筒', 'old saves receive a sta
 assert.equal(policy.getMaxArrows(oldEquipment), 8, 'equipped quiver provides arrow capacity');
 assert.equal(policy.getRecoveryInterval(oldEquipment), 1000, 'equipped quiver provides recovery speed');
 
-assert.equal(policy.getSkillCost('power-shot'), 2, 'power shot costs two arrows');
+assert.equal(policy.getSkillCost('power-shot'), 1, 'power shot costs one arrow');
 assert.equal(policy.getSkillCost('multi-shot'), 3, 'multi-shot costs three arrows');
-assert.equal(policy.getSkillCost('companion'), 0, 'companion costs no arrows');
+assert.equal(policy.getSkillCost('piercing-shot'), 2, 'piercing shot costs two arrows');
+assert.equal(policy.getSkillCost('companion'), null, 'removed companion active skill has no arrow cost');
 assert.equal(policy.getSkillCost('unknown-skill'), null, 'unknown skills do not invent an arrow cost');
 assert.equal(policy.canUseSkill(2, 'power-shot', oldEquipment), true, 'a skill can fire with enough arrows');
-assert.equal(policy.canUseSkill(1, 'power-shot', oldEquipment), false, 'an unaffordable skill is skipped');
-assert.equal(policy.spendArrows(2, 'power-shot', oldEquipment), 0, 'an affordable skill spends its arrows');
-assert.equal(policy.spendArrows(1, 'power-shot', oldEquipment), null, 'an unaffordable skill spends nothing');
-assert.equal(policy.spendArrows(0, 'companion', oldEquipment), 0, 'companion remains available at zero arrows');
+assert.equal(policy.canUseSkill(0, 'power-shot', oldEquipment), false, 'an unaffordable skill is skipped');
+assert.equal(policy.spendArrows(2, 'power-shot', oldEquipment), 1, 'an affordable skill spends its arrow');
+assert.equal(policy.spendArrows(0, 'power-shot', oldEquipment), null, 'an unaffordable skill spends nothing');
 
 assert.deepEqual(
   policy.recoverArrows(2, 2500, oldEquipment),

@@ -52,7 +52,7 @@ verify(6, 'independent skill cooldowns', () => {
   const records = makeSlots().slice(0, 2).map(party.createMemberRecord);
   records[0].skillCooldowns.fireball = 5000;
   assert.equal(records[1].skillCooldowns.fireball, undefined);
-  assert.match(script, /member\.skillCooldowns\[skill\.id\] = now \+ skill\.cooldown/);
+  assert.match(script, /member\.skillCooldowns\[skill\.id\] = now \+ \(skillEffect\.cooldown \|\| skill\.cooldown\)/);
 });
 
 verify(7, 'independent class resources', () => {
