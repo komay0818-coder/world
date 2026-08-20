@@ -23,6 +23,11 @@ assert.match(script, /'elf:warrior': 'assets\/character-portraits\/elf-warrior\.
 assert.match(script, /'elf:hunter': 'assets\/character-portraits\/elf-hunter\.png'/, 'night elf hunter uses the supplied portrait');
 assert.match(script, /'elf:assassin': 'assets\/character-portraits\/elf-assassin\.png'/, 'night elf rogue uses the supplied portrait');
 assert.match(script, /'elf:mage': 'assets\/character-portraits\/elf-mage\.png'/, 'night elf mage uses the supplied portrait');
+assert.match(script, /'human:warrior': 'assets\/character-portraits\/human-warrior\.png'/, 'human warrior uses the supplied portrait');
+assert.match(script, /'human:hunter': 'assets\/character-portraits\/human-hunter\.png'/, 'human hunter uses the supplied portrait');
+assert.match(script, /'human:assassin': 'assets\/character-portraits\/human-assassin\.png'/, 'human rogue uses the supplied portrait');
+assert.match(script, /'human:mage': 'assets\/character-portraits\/human-mage\.png'/, 'human mage uses the supplied portrait');
+assert.match(script, /'human:priest': 'assets\/character-portraits\/human-priest\.png'/, 'human priest uses the supplied portrait');
 assert.doesNotMatch(script, /assets\/character-actions/, 'legacy idle and attack action sheets are removed');
 assert.doesNotMatch(script, /character-attack-effect|--attack-travel-x|--basic-lunge-x/, 'shared attack effects are removed');
 

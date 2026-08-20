@@ -29,11 +29,11 @@ const raceTotems = { human: '☀', elf: '❈', orc: '⛧', undead: '☾' };
 const jobMarks = { warrior: '⛨', assassin: '◈', hunter: '➶', mage: '✦', priest: '✥' };
 const PARTY_DEBUG = false;
 const battleCharacterArt = {
-  'human:warrior': 'assets/character-sprites/human-warrior-v3.png?v=20260730-user-image-v1',
-  'human:assassin': 'assets/character-sprites/human-assassin-v4.png',
-  'human:hunter': 'assets/character-sprites/human-hunter.png',
-  'human:mage': 'assets/character-sprites/human-mage-v2.png',
-  'human:priest': 'assets/character-sprites/human-priest-v2.png',
+  'human:warrior': 'assets/character-portraits/human-warrior.png',
+  'human:assassin': 'assets/character-portraits/human-assassin.png',
+  'human:hunter': 'assets/character-portraits/human-hunter.png',
+  'human:mage': 'assets/character-portraits/human-mage.png',
+  'human:priest': 'assets/character-portraits/human-priest.png',
   'elf:warrior': 'assets/character-portraits/elf-warrior.png',
   'elf:assassin': 'assets/character-portraits/elf-assassin.png',
   'elf:hunter': 'assets/character-portraits/elf-hunter.png',
