@@ -44,11 +44,11 @@ const battleCharacterArt = {
   'orc:hunter': 'assets/character-portraits/orc-hunter.png',
   'orc:mage': 'assets/character-portraits/orc-mage.png',
   'orc:priest': 'assets/character-sprites/orc-priest.png',
-  'undead:warrior': 'assets/character-sprites/undead-warrior-v2.png?v=20260730-user-image-v1',
-  'undead:assassin': 'assets/character-sprites/undead-assassin-v2.png?v=20260730-user-image-v1',
-  'undead:hunter': 'assets/character-sprites/undead-hunter-v2.png?v=20260730-user-image-v1',
-  'undead:mage': 'assets/character-sprites/undead-mage-v2.png?v=20260730-user-image-v1',
-  'undead:priest': 'assets/character-sprites/undead-priest-v2.png?v=20260730-user-image-v1'
+  'undead:warrior': 'assets/character-portraits/undead-warrior.png',
+  'undead:assassin': 'assets/character-portraits/undead-assassin.png',
+  'undead:hunter': 'assets/character-portraits/undead-hunter.png',
+  'undead:mage': 'assets/character-portraits/undead-mage.png',
+  'undead:priest': 'assets/character-portraits/undead-priest.png'
 };
 const battleCharacterActionArt = (character) => {
   if (!character?.race || !character?.job || !canCreateRaceJob(character.race, character.job)) return '';
