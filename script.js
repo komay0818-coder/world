@@ -2692,9 +2692,9 @@ function playPartyMemberCombatAnimation(member, targetIndexes = [], options = {}
     const target = document.querySelector(`#enemy-${targetIndexes[0]}`);
     if (!field || !art) return;
     const actionClass = kind === 'basic' ? 'is-attacking' : area ? 'is-area-skill' : 'is-target-skill';
-    fighter?.classList.remove('attack', 'is-attacking', 'is-target-skill', 'is-area-skill');
-    art.classList.remove('attack', 'is-attacking', 'is-target-skill', 'is-area-skill');
-    if (member.isMain) fighter?.classList.add('attack');
+    fighter?.classList.remove('is-attacking', 'is-target-skill', 'is-area-skill');
+    art.classList.remove('is-attacking', 'is-target-skill', 'is-area-skill');
+    void art.offsetWidth;
     fighter?.classList.add(actionClass);
     art.classList.add(actionClass);
     art.dataset.job = member.job || member.character?.job || 'warrior';
@@ -2713,8 +2713,8 @@ function playPartyMemberCombatAnimation(member, targetIndexes = [], options = {}
       art.style.setProperty('--skill-move-y', `${destinationY - (artRect.top + artRect.height / 2)}px`);
     }
     setTimeout(() => {
-      fighter?.classList.remove('attack', actionClass);
-      art.classList.remove('attack', actionClass);
+      fighter?.classList.remove(actionClass);
+      art.classList.remove(actionClass);
       art.style.removeProperty('--skill-move-x');
       art.style.removeProperty('--skill-move-y');
       setBattleCharacterAction(art, member.character, 'idle');

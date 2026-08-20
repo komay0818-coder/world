@@ -38,6 +38,9 @@ assert.doesNotMatch(layoutCss, /character-attack-effect|characterAttackProjectil
 assert.match(css, /--player-portrait-size: clamp\(64px, 7\.2vw, 92px\)/, 'desktop portraits use one compact size');
 assert.match(css, /overflow: hidden !important;[\s\S]*?border: 3px solid #d9a93f !important;[\s\S]*?border-radius: 50% !important;/, 'player artwork is clipped inside a gold circle');
 assert.match(css, /@keyframes playerBasicShake/, 'basic attacks shake the portrait');
+assert.match(script, /art\.classList\.remove\('is-attacking', 'is-target-skill', 'is-area-skill'\);[\s\S]*?void art\.offsetWidth;[\s\S]*?art\.classList\.add\(actionClass\);/, 'every attack reliably restarts its portrait animation');
+assert.doesNotMatch(script, /classList\.(?:add|remove)\('attack'/, 'combat no longer activates the legacy attack class');
+assert.doesNotMatch(layoutCss, /characterAttackWarrior|characterAttackAssassin|characterAttackHunter|characterAttackMage|characterAttackPriest/, 'legacy per-job attack motion is removed');
 assert.match(script, /const actionClass = kind === 'basic' \? 'is-attacking' : area \? 'is-area-skill' : 'is-target-skill'/, 'attack movement types are separate');
 assert.match(script, /const target = document\.querySelector\(`#enemy-\$\{targetIndexes\[0\]\}`\)/, 'single-target movement follows the actual target');
 assert.match(script, /targetRect \? targetRect\.left \+ targetRect\.width \* \.5/, 'single-target destination uses target position');

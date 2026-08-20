@@ -1446,18 +1446,6 @@
   animation: none !important;
 }
 
-.battle-field #battle-player-art[aria-label].attack {
-  animation-duration: 620ms !important;
-  animation-timing-function: cubic-bezier(.2, .72, .25, 1) !important;
-  animation-iteration-count: 1 !important;
-}
-
-.battle-field #battle-player-art[aria-label].attack[data-job="warrior"] { animation-name: characterAttackWarrior !important; }
-.battle-field #battle-player-art[aria-label].attack[data-job="assassin"] { animation-name: characterAttackAssassin !important; }
-.battle-field #battle-player-art[aria-label].attack[data-job="hunter"] { animation-name: characterAttackHunter !important; }
-.battle-field #battle-player-art[aria-label].attack[data-job="mage"] { animation-name: characterAttackMage !important; }
-.battle-field #battle-player-art[aria-label].attack[data-job="priest"] { animation-name: characterAttackPriest !important; }
-
 /* Keep party status bars in their own fixed-height rows. The bars are spans,
    so leaving them inline makes their percentage-height children expand to the
    card height in desktop layouts. */
