@@ -10,6 +10,10 @@ const css = fs.readFileSync(path.join(root, 'styles', 'monster-slots.css'), 'utf
 assert.match(html, /id="player-battle-stage"/, 'party players render on the battlefield');
 assert.match(html, /id="battle-player-art" class="battle-player-art hidden"/, 'main player has a dedicated portrait node');
 assert.match(script, /return battleCharacterArt\[`\$\{character\.race\}:\$\{character\.job\}`\] \|\| '';/, 'battle uses stable front character artwork');
+assert.match(script, /'orc:warrior': 'assets\/character-portraits\/orc-warrior\.png'/, 'orc warrior uses the supplied portrait');
+assert.match(script, /'orc:hunter': 'assets\/character-portraits\/orc-hunter\.png'/, 'orc hunter uses the supplied portrait');
+assert.match(script, /'orc:assassin': 'assets\/character-portraits\/orc-assassin\.png'/, 'orc rogue uses the supplied portrait');
+assert.match(script, /'orc:mage': 'assets\/character-portraits\/orc-mage\.png'/, 'orc mage uses the supplied portrait');
 assert.doesNotMatch(script, /assets\/character-actions/, 'legacy idle and attack action sheets are removed');
 assert.doesNotMatch(script, /character-attack-effect|--attack-travel-x|--basic-lunge-x/, 'shared attack effects are removed');
 
