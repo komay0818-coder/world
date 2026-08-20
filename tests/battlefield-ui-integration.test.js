@@ -48,6 +48,10 @@ assert.match(script, /style\.setProperty\('--skill-move-y'[\s\S]*?fighter\?\.cla
 assert.doesNotMatch(script.match(/function playPartyMemberCombatAnimation[\s\S]*?function playCompanionAttackAnimation/)?.[0] || '', /oldestAliveEnemyIndex\(\)/, 'single-target animation never substitutes the oldest or first enemy');
 assert.match(script, /fieldRect\.left \+ fieldRect\.width \* \.5/, 'area skills use the battlefield center');
 assert.match(script, /area: Number\(skillEffect\.targets \|\| skill\.targets \|\| 1\) > 1/, 'target count selects area movement');
+assert.match(script, /kind === 'skill' && area[\s\S]*?document\.querySelector\('#enemy-squad'\)/, 'area skills resolve the enemy formation instead of one monster');
+assert.match(script, /enemyFormationRect\.left \+ enemyFormationRect\.width \* \.5/, 'area skills use the enemy formation horizontal center');
+assert.match(script, /enemyFormationRect\.bottom \+ artRect\.height \* \.2/, 'area skills stop just in front of the enemy formation');
+assert.match(script, /const target = kind === 'skill' && !area/, 'area skills never bind their travel to an individual target');
 assert.match(css, /@keyframes playerSkillTravel[\s\S]*?--skill-move-x[\s\S]*?--skill-move-y/, 'skills travel out and return');
 
 assert.match(script, /class="enemy-unit monster-battle-slot visual-size-\$\{visualSize\}/, 'monsters keep full-body image slots');

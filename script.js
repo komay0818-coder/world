@@ -2692,6 +2692,9 @@ function playPartyMemberCombatAnimation(member, targetIndexes = [], options = {}
     const target = kind === 'skill' && !area
       ? document.querySelector(`#enemy-${targetIndexes[0]}`)
       : null;
+    const enemyFormation = kind === 'skill' && area
+      ? document.querySelector('#enemy-squad')
+      : null;
     if (!field || !art) return;
     const actionClass = kind === 'basic' ? 'is-attacking' : area ? 'is-area-skill' : 'is-target-skill';
     fighter?.classList.remove('is-attacking', 'is-target-skill', 'is-area-skill');
@@ -2702,12 +2705,13 @@ function playPartyMemberCombatAnimation(member, targetIndexes = [], options = {}
     const fieldRect = field.getBoundingClientRect();
     const artRect = art.getBoundingClientRect();
     const targetRect = target?.getBoundingClientRect();
+    const enemyFormationRect = enemyFormation?.getBoundingClientRect();
     if (kind === 'skill') {
       const destinationX = area
-        ? fieldRect.left + fieldRect.width * .5
+        ? enemyFormationRect ? enemyFormationRect.left + enemyFormationRect.width * .5 : fieldRect.left + fieldRect.width * .5
         : targetRect ? targetRect.left + targetRect.width * .5 : artRect.left + artRect.width * .5;
       const destinationY = area
-        ? fieldRect.top + fieldRect.height * .48
+        ? enemyFormationRect ? enemyFormationRect.bottom + artRect.height * .2 : fieldRect.top + fieldRect.height * .48
         : targetRect ? targetRect.bottom + artRect.height * .08 : artRect.top + artRect.height * .5;
       art.style.setProperty('--skill-move-x', `${destinationX - (artRect.left + artRect.width / 2)}px`);
       art.style.setProperty('--skill-move-y', `${destinationY - (artRect.top + artRect.height / 2)}px`);
