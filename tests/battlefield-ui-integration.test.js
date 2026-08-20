@@ -36,6 +36,10 @@ assert.doesNotMatch(script, /character-attack-effect|--attack-travel-x|--basic-l
 assert.doesNotMatch(layoutCss, /character-attack-effect|characterAttackProjectile|attack-effect-/, 'legacy shared attack effect styles are removed');
 
 assert.match(css, /--player-portrait-size: clamp\(64px, 7\.2vw, 92px\)/, 'desktop portraits use one compact size');
+assert.match(css, /Final 0\.7\.1 battlefield composition[\s\S]*?--enemy-formation-top: calc\(3% \+ 24px\);[\s\S]*?--enemy-formation-height: 31%;/, 'desktop enemy formation leaves most of the battlefield background visible');
+assert.match(css, /Final 0\.7\.1 battlefield composition[\s\S]*?@media \(min-width: 701px\)[\s\S]*?data-count="3"[\s\S]*?left: 14%[\s\S]*?left: 38%[\s\S]*?left: 62%[\s\S]*?left: 86%/, 'four desktop player portraits use evenly separated anchors');
+assert.match(css, /Final 0\.7\.1 battlefield composition[\s\S]*?@media \(max-width: 700px\)[\s\S]*?--enemy-formation-height: 35%;[\s\S]*?--player-portrait-size: clamp\(48px, 14vw, 64px\)/, 'mobile keeps both formations compact');
+assert.match(css, /Final 0\.7\.1 battlefield composition[\s\S]*?data-count="3"[\s\S]*?left: 20%[\s\S]*?left: 41%[\s\S]*?left: 61%[\s\S]*?left: 81%/, 'four mobile portraits retain non-overlapping anchors');
 assert.match(css, /overflow: hidden !important;[\s\S]*?border: 3px solid #d9a93f !important;[\s\S]*?border-radius: 50% !important;/, 'player artwork is clipped inside a gold circle');
 assert.match(css, /@keyframes playerBasicShake/, 'basic attacks shake the portrait');
 assert.match(script, /art\.classList\.remove\('is-attacking', 'is-target-skill', 'is-area-skill'\);[\s\S]*?void art\.offsetWidth;[\s\S]*?art\.classList\.add\(actionClass\);/, 'every attack reliably restarts its portrait animation');
