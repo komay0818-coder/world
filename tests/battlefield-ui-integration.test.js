@@ -42,8 +42,10 @@ assert.match(script, /art\.classList\.remove\('is-attacking', 'is-target-skill',
 assert.doesNotMatch(script, /classList\.(?:add|remove)\('attack'/, 'combat no longer activates the legacy attack class');
 assert.doesNotMatch(layoutCss, /characterAttackWarrior|characterAttackAssassin|characterAttackHunter|characterAttackMage|characterAttackPriest/, 'legacy per-job attack motion is removed');
 assert.match(script, /const actionClass = kind === 'basic' \? 'is-attacking' : area \? 'is-area-skill' : 'is-target-skill'/, 'attack movement types are separate');
-assert.match(script, /const target = document\.querySelector\(`#enemy-\$\{targetIndexes\[0\]\}`\)/, 'single-target movement follows the actual target');
+assert.match(script, /kind === 'skill' && !area[\s\S]*?document\.querySelector\(`#enemy-\$\{targetIndexes\[0\]\}`\)/, 'only single-target skills resolve their actual target element');
 assert.match(script, /targetRect \? targetRect\.left \+ targetRect\.width \* \.5/, 'single-target destination uses target position');
+assert.match(script, /style\.setProperty\('--skill-move-y'[\s\S]*?fighter\?\.classList\.add\(actionClass\);[\s\S]*?art\.classList\.add\(actionClass\);/, 'target coordinates are ready before the skill animation starts');
+assert.doesNotMatch(script.match(/function playPartyMemberCombatAnimation[\s\S]*?function playCompanionAttackAnimation/)?.[0] || '', /oldestAliveEnemyIndex\(\)/, 'single-target animation never substitutes the oldest or first enemy');
 assert.match(script, /fieldRect\.left \+ fieldRect\.width \* \.5/, 'area skills use the battlefield center');
 assert.match(script, /area: Number\(skillEffect\.targets \|\| skill\.targets \|\| 1\) > 1/, 'target count selects area movement');
 assert.match(css, /@keyframes playerSkillTravel[\s\S]*?--skill-move-x[\s\S]*?--skill-move-y/, 'skills travel out and return');
