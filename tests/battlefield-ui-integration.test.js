@@ -19,6 +19,10 @@ assert.match(script, /'undead:hunter': 'assets\/character-portraits\/undead-hunt
 assert.match(script, /'undead:assassin': 'assets\/character-portraits\/undead-assassin\.png'/, 'undead rogue uses the supplied portrait');
 assert.match(script, /'undead:mage': 'assets\/character-portraits\/undead-mage\.png'/, 'undead mage uses the supplied portrait');
 assert.match(script, /'undead:priest': 'assets\/character-portraits\/undead-priest\.png'/, 'undead priest uses the supplied portrait');
+assert.match(script, /'elf:warrior': 'assets\/character-portraits\/elf-warrior\.png'/, 'night elf warrior uses the supplied portrait');
+assert.match(script, /'elf:hunter': 'assets\/character-portraits\/elf-hunter\.png'/, 'night elf hunter uses the supplied portrait');
+assert.match(script, /'elf:assassin': 'assets\/character-portraits\/elf-assassin\.png'/, 'night elf rogue uses the supplied portrait');
+assert.match(script, /'elf:mage': 'assets\/character-portraits\/elf-mage\.png'/, 'night elf mage uses the supplied portrait');
 assert.doesNotMatch(script, /assets\/character-actions/, 'legacy idle and attack action sheets are removed');
 assert.doesNotMatch(script, /character-attack-effect|--attack-travel-x|--basic-lunge-x/, 'shared attack effects are removed');
 
