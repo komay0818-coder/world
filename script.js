@@ -27,7 +27,6 @@ const canCreateRaceJob = (raceId, jobId) => !isJobHiddenForRace(raceId, jobId) &
 const classIcons = Object.fromEntries(classes.map((job) => [job.id, job.icon]));
 const raceTotems = { human: '☀', elf: '❈', orc: '⛧', undead: '☾' };
 const jobMarks = { warrior: '⛨', assassin: '◈', hunter: '➶', mage: '✦', priest: '✥' };
-const CHARACTER_SCALE = 0.90;
 const PARTY_DEBUG = false;
 const battleCharacterArt = {
   'human:warrior': 'assets/character-sprites/human-warrior-v3.png?v=20260730-user-image-v1',
@@ -51,59 +50,18 @@ const battleCharacterArt = {
   'undead:mage': 'assets/character-sprites/undead-mage-v2.png?v=20260730-user-image-v1',
   'undead:priest': 'assets/character-sprites/undead-priest-v2.png?v=20260730-user-image-v1'
 };
-const battleCharacterActionArt = (character, state = 'idle') => {
+const battleCharacterActionArt = (character) => {
   if (!character?.race || !character?.job || !canCreateRaceJob(character.race, character.job)) return '';
-  const action = state === 'attack' ? 'attack' : 'idle';
-  const characterId = `${character.race}-${character.job}`;
-  return `assets/character-actions/${characterId}/${characterId}-back-${action}.png`;
+  return battleCharacterArt[`${character.race}:${character.job}`] || '';
 };
 
 function setBattleCharacterAction(art, character, state = 'idle') {
   if (!art || !character) return;
   const actionArt = battleCharacterActionArt(character, state);
   if (!actionArt) return;
-  const characterKey = `${character.race}:${character.job}`;
-  const visibleScale = battleCharacterLayout[characterKey]?.visibleScale || 1;
-  const actionScale = battleCharacterActionScale[characterKey]?.[state] || 1;
-  const stageScale = art.id === 'battle-player-art' ? CHARACTER_SCALE : 1.28;
-  const renderScale = stageScale * visibleScale * actionScale;
   art.dataset.action = state;
-  art.style.setProperty('--character-render-scale', renderScale);
-  art.style.setProperty('--character-render-scale-x', renderScale * 1.1);
   art.style.backgroundImage = `url('${actionArt}')`;
 }
-// Preserve each source image's proportions and compensate for transparent top/bottom
-// padding so every visible character matches the human hunter's battlefield height.
-const battleCharacterLayout = {
-  'human:warrior': { aspect: '1197 / 1315', visibleScale: 1.089 },
-  'human:assassin': { aspect: '2048 / 1200', visibleScale: 1.2 },
-  'human:hunter': { aspect: '2048 / 1200', visibleScale: 1.2 },
-  'human:mage': { aspect: '2048 / 1200', visibleScale: 1.2 },
-  'human:priest': { aspect: '2048 / 1200', visibleScale: 1.2 },
-  'elf:warrior': { aspect: '1346 / 1169', visibleScale: 1.178 },
-  'elf:assassin': { aspect: '1254 / 1254', visibleScale: 1 },
-  'elf:hunter': { aspect: '1370 / 1148', visibleScale: 1.024 },
-  'elf:mage': { aspect: '1122 / 1402', visibleScale: 1.106 },
-  'elf:priest': { aspect: '2048 / 1200', visibleScale: 1 },
-  'orc:warrior': { aspect: '1179 / 1334', visibleScale: 1.058 },
-  'orc:assassin': { aspect: '1163 / 1352', visibleScale: 1.028 },
-  'orc:hunter': { aspect: '1123 / 1401', visibleScale: 1.227 },
-  'orc:mage': { aspect: '1370 / 1148', visibleScale: 1.041 },
-  'orc:priest': { aspect: '2048 / 1200', visibleScale: 1 },
-  'undead:warrior': { aspect: '1124 / 1399', visibleScale: 1.049 },
-  'undead:assassin': { aspect: '1254 / 1254', visibleScale: 1.121 },
-  'undead:hunter': { aspect: '1360 / 1156', visibleScale: 1.117 },
-  'undead:mage': { aspect: '1122 / 1402', visibleScale: 1.166 },
-  'undead:priest': { aspect: '1122 / 1402', visibleScale: 1.044 }
-};
-const battleCharacterActionScale = {
-  'elf:assassin': { attack: 1.2 },
-  'orc:warrior': { attack: 1.2 },
-  'orc:assassin': { attack: 1.1 },
-  'orc:mage': { attack: 1.12 },
-  'undead:assassin': { attack: 1.12 },
-  'undead:mage': { attack: 1.1 }
-};
 const racialCompanions = {
   human: { image: 'assets/companion-human-hunter.png', icon: 'assets/hunter-companion-human-icon.png', portrait: true, name: '王國獵犬' },
   elf: { image: 'assets/companion-elf.png', icon: 'assets/hunter-companion-elf-icon.png', portrait: true, name: '月光山貓' },
@@ -2722,7 +2680,7 @@ function playPartyMemberHitAnimation(member) {
 }
 
 function playPartyMemberCombatAnimation(member, targetIndexes = [], options = {}) {
-  const { kind = 'basic', skillName = '' } = options;
+  const { kind = 'basic', area = false } = options;
   requestAnimationFrame(() => {
     const field = document.querySelector('.battle-field');
     const fighter = member.isMain
@@ -2731,48 +2689,36 @@ function playPartyMemberCombatAnimation(member, targetIndexes = [], options = {}
     const art = member.isMain
       ? document.querySelector('#battle-player-art')
       : fighter?.querySelector('.player-stage-art');
-    const target = document.querySelector(`#enemy-${targetIndexes[0] ?? oldestAliveEnemyIndex()}`);
+    const target = document.querySelector(`#enemy-${targetIndexes[0]}`);
     if (!field || !art) return;
-    const actionClass = kind === 'skill' ? 'is-casting' : 'is-attacking';
-    fighter?.classList.remove('attack', 'is-attacking', 'is-casting');
-    art.classList.remove('attack', 'is-attacking', 'is-casting');
+    const actionClass = kind === 'basic' ? 'is-attacking' : area ? 'is-area-skill' : 'is-target-skill';
+    fighter?.classList.remove('attack', 'is-attacking', 'is-target-skill', 'is-area-skill');
+    art.classList.remove('attack', 'is-attacking', 'is-target-skill', 'is-area-skill');
     if (member.isMain) fighter?.classList.add('attack');
     fighter?.classList.add(actionClass);
     art.classList.add(actionClass);
     art.dataset.job = member.job || member.character?.job || 'warrior';
-    setBattleCharacterAction(art, member.character, 'attack');
-
-    const job = art.dataset.job;
+    setBattleCharacterAction(art, member.character, 'active');
     const fieldRect = field.getBoundingClientRect();
     const artRect = art.getBoundingClientRect();
     const targetRect = target?.getBoundingClientRect();
-    if (kind === 'basic' && targetRect) {
-      const deltaX = targetRect.left + targetRect.width / 2 - (artRect.left + artRect.width / 2);
-      const deltaY = targetRect.top + targetRect.height / 2 - (artRect.top + artRect.height / 2);
-      const distance = Math.hypot(deltaX, deltaY) || 1;
-      art.style.setProperty('--basic-lunge-x', `${deltaX / distance * 24}px`);
-      art.style.setProperty('--basic-lunge-y', `${deltaY / distance * 24}px`);
+    if (kind === 'skill') {
+      const destinationX = area
+        ? fieldRect.left + fieldRect.width * .5
+        : targetRect ? targetRect.left + targetRect.width * .5 : artRect.left + artRect.width * .5;
+      const destinationY = area
+        ? fieldRect.top + fieldRect.height * .48
+        : targetRect ? targetRect.bottom + artRect.height * .08 : artRect.top + artRect.height * .5;
+      art.style.setProperty('--skill-move-x', `${destinationX - (artRect.left + artRect.width / 2)}px`);
+      art.style.setProperty('--skill-move-y', `${destinationY - (artRect.top + artRect.height / 2)}px`);
     }
-    const effect = document.createElement('span');
-    const startX = artRect.right - fieldRect.left - Math.min(38, artRect.width * .16);
-    const startY = artRect.top - fieldRect.top + artRect.height * (job === 'mage' || job === 'priest' ? .37 : .48);
-    const targetX = targetRect ? targetRect.left - fieldRect.left + targetRect.width * .42 : fieldRect.width * .62;
-    const targetY = targetRect ? targetRect.top - fieldRect.top + targetRect.height * .5 : fieldRect.height * .45;
-    effect.className = `character-attack-effect attack-effect-${job} attack-kind-${kind}`;
-    effect.style.setProperty('--attack-start-x', `${startX}px`);
-    effect.style.setProperty('--attack-start-y', `${startY}px`);
-    effect.style.setProperty('--attack-travel-x', `${targetX - startX}px`);
-    effect.style.setProperty('--attack-travel-y', `${targetY - startY}px`);
-    if (skillName) effect.dataset.skillName = skillName;
-    field.appendChild(effect);
-    setTimeout(() => effect.remove(), 820);
     setTimeout(() => {
       fighter?.classList.remove('attack', actionClass);
       art.classList.remove('attack', actionClass);
-      art.style.removeProperty('--basic-lunge-x');
-      art.style.removeProperty('--basic-lunge-y');
+      art.style.removeProperty('--skill-move-x');
+      art.style.removeProperty('--skill-move-y');
       setBattleCharacterAction(art, member.character, 'idle');
-    }, 680);
+    }, kind === 'basic' ? 420 : 720);
   });
 }
 
@@ -3881,7 +3827,10 @@ function useAutoSkillForMember(member, now = Date.now()) {
     member.blinkCooldownReduction = 0;
     member.globalSkillReadyAt = now + 1000;
     const totalDamage = hits.reduce((total, target) => total + target.result.finalDamage, 0);
-    if (skill.id !== 'companion') playPartyMemberCombatAnimation(member, (hits.length ? hits : resolvedTargets).map((target) => target.index), { kind: 'skill', skillName: skill.name });
+    if (skill.id !== 'companion') playPartyMemberCombatAnimation(member, (hits.length ? hits : resolvedTargets).map((target) => target.index), {
+      kind: 'skill',
+      area: Number(skillEffect.targets || skill.targets || 1) > 1
+    });
     if (member.isMain && skill.id === 'companion') playCompanionAttackAnimation((hits.length ? hits : resolvedTargets).map((target) => target.index));
     if (hits.length) logBattle(`✦ ${member.name}施放【${skill.name}】，造成 ${totalDamage}${critical ? ' 暴擊' : ''}傷害。`, 'damage-dealt');
     logPartyDebug('技能施放', {
@@ -5101,8 +5050,6 @@ function openBattle() {
     battlePlayerArt.dataset.job = character.job;
     battlePlayerArt.dataset.race = character.race;
     battlePlayerArt.dataset.visualSize = 'humanoid';
-    const characterLayout = battleCharacterLayout[`${character.race}:${character.job}`];
-    battlePlayerArt.style.setProperty('--character-aspect', characterLayout?.aspect || '2048 / 1200');
     setBattleCharacterAction(battlePlayerArt, character, 'idle');
     const raceName = Object.values(factions).flat().find((race) => race.id === character.race)?.name || character.race;
     battlePlayerArt.setAttribute('aria-label', `${raceName}${classes.find((job) => job.id === character.job)?.name || ''}`);

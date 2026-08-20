@@ -16,6 +16,7 @@
   transform: none !important;
   pointer-events: none;
 }
+
 #enemy-squad .monster-battle-slot {
   position: relative !important;
   inset: auto !important;
@@ -379,23 +380,11 @@
 .player-stage-art { position:absolute; z-index:1; inset:20px 0 0; background-position:center bottom; background-size:contain; background-repeat:no-repeat; filter:drop-shadow(0 9px 5px rgba(0,0,0,.58)) drop-shadow(0 0 3px rgba(203,226,238,.18)); }
 .player-stage-floating { position:absolute; z-index:3; top:0; right:2%; left:2%; padding:5px 7px; border-radius:8px; background:linear-gradient(90deg,rgba(3,12,20,.7),rgba(3,12,20,.25)); text-shadow:0 1px 4px #000; }
 .player-stage-floating b,.player-stage-floating small { display:block; }.player-stage-floating b{font-size:11px}.player-stage-floating small{color:#d1deea;font-size:8px}.player-stage-unit.is-dead{opacity:.42;filter:grayscale(1)}
-.player-stage-unit.is-attacking .player-stage-art,.battle-player-art.is-attacking { animation: partyBasicStrike .5s cubic-bezier(.2,.82,.24,1) !important; }
 .player-stage-unit.is-hit .player-stage-art,.battle-player-art[data-action="hit"] { animation: characterActionHit .52s ease-out !important; filter: brightness(1.35) saturate(.72) drop-shadow(0 0 12px rgba(255,90,90,.82)) drop-shadow(0 9px 5px rgba(0,0,0,.58)) !important; }
 .battle-player-art[data-action],.player-stage-art { mix-blend-mode: normal; background-position: center bottom !important; background-size: auto 96% !important; background-repeat: no-repeat !important; }
 @keyframes characterActionHit { 0%,100% { translate: 0 0; } 28% { translate: -7px 2px; } 55% { translate: 5px -1px; } }
-.player-stage-unit.is-casting .player-stage-art,.battle-player-art.is-casting { animation: partySkillCast .68s ease-out !important; filter: brightness(1.28) drop-shadow(0 0 18px rgba(142,213,255,.88)) drop-shadow(0 9px 5px rgba(0,0,0,.58)) !important; }
-.character-attack-effect.attack-kind-skill::after { content: attr(data-skill-name); position:absolute; left:0; bottom:14px; min-width:max-content; padding:3px 7px; border:1px solid rgba(174,222,255,.72); border-radius:999px; background:rgba(9,28,48,.88); color:#e8f8ff; font:700 10px "Noto Sans TC",sans-serif; text-shadow:0 1px 3px #000; box-shadow:0 0 14px rgba(78,178,255,.48); }
-@keyframes partyBasicStrike {
-  0%,100% { transform: translate(0,0) scale(1); }
-  18% { transform: translate(-4px,2px) scale(.985); }
-  52% { transform: translate(var(--basic-lunge-x, 24px),var(--basic-lunge-y, -8px)) scale(1.045); filter: brightness(1.25) drop-shadow(0 0 12px rgba(255,224,151,.72)); }
-  76% { transform: translate(5px,-2px) scale(1.015); }
-}
-@keyframes partySkillCast { 0%,100% { transform: translateY(0) scale(1); } 42% { transform: translateY(-11px) scale(1.08); } }
-
 @media (prefers-reduced-motion: reduce) {
-  .player-stage-unit.is-attacking .player-stage-art,.player-stage-unit.is-casting .player-stage-art,.battle-player-art.is-attacking,.battle-player-art.is-casting { animation-duration:.01ms !important; }
-  .character-attack-effect { animation-duration:.01ms !important; }
+  .player-stage-unit.is-attacking .player-stage-art,.battle-player-art.is-attacking { animation-duration:.01ms !important; }
 }
 .battle-field #battle-player-art[aria-label] { left: 50% !important; bottom: 1.5% !important; height: 32.6667% !important; z-index: 8 !important; filter: drop-shadow(0 10px 6px rgba(0,0,0,.62)) drop-shadow(0 0 3px rgba(203,226,238,.18)) !important; }
 .battle-field:has(#player-battle-stage[data-count="1"]) #battle-player-art[aria-label] { left: 40% !important; }
@@ -426,6 +415,60 @@
   .battle-field:has(#player-battle-stage[data-count="1"]) #battle-player-art[aria-label] { left: 38% !important; }
   .battle-field:has(#player-battle-stage[data-count="2"]) #battle-player-art[aria-label] { left: 30% !important; }
   .battle-field:has(#player-battle-stage[data-count="3"]) #battle-player-art[aria-label] { left: 20% !important; }
+}
+
+/* 0.7.0: compact circular player portraits and movement-only combat actions. */
+.battle-field { --player-portrait-size: clamp(64px, 7.2vw, 92px); --player-unit-ground-line: 9%; }
+.battle-field #battle-player-art[aria-label],
+.battle-field .player-stage-art {
+  width: var(--player-portrait-size) !important;
+  height: var(--player-portrait-size) !important;
+  aspect-ratio: 1 !important;
+  inset: auto !important;
+  overflow: hidden !important;
+  border: 3px solid #d9a93f !important;
+  border-radius: 50% !important;
+  background-color: rgba(8, 17, 25, .92) !important;
+  background-position: center 22% !important;
+  background-size: cover !important;
+  background-repeat: no-repeat !important;
+  box-shadow: 0 0 0 2px rgba(255, 231, 151, .54), 0 7px 16px rgba(0, 0, 0, .48), inset 0 0 9px rgba(255, 215, 103, .32) !important;
+  filter: none !important;
+  scale: 1 !important;
+  transform-origin: center !important;
+}
+.battle-field #battle-player-art[aria-label] { bottom: var(--player-unit-ground-line) !important; translate: -50% 0; }
+.battle-field .player-battle-stage { bottom: var(--player-unit-ground-line) !important; height: var(--player-portrait-size) !important; }
+.battle-field .player-stage-unit { width: var(--player-portrait-size) !important; height: var(--player-portrait-size) !important; }
+.battle-field .player-stage-unit::after,
+.battle-field .player-grounding { display: none !important; }
+.player-stage-unit.is-attacking .player-stage-art,
+.battle-player-art.is-attacking { animation: playerBasicShake .42s cubic-bezier(.2,.8,.25,1) !important; }
+.player-stage-unit.is-target-skill .player-stage-art,
+.battle-player-art.is-target-skill,
+.player-stage-unit.is-area-skill .player-stage-art,
+.battle-player-art.is-area-skill { z-index: 30 !important; animation: playerSkillTravel .72s cubic-bezier(.22,.75,.24,1) !important; }
+@keyframes playerBasicShake {
+  0%,100% { transform: translate(0,0); }
+  20% { transform: translate(-4px,1px) rotate(-2deg); }
+  46% { transform: translate(8px,-3px) rotate(2deg); }
+  68% { transform: translate(-3px,1px); }
+}
+@keyframes playerSkillTravel {
+  0%,100% { transform: translate(0,0); }
+  18%,72% { transform: translate(var(--skill-move-x, 0),var(--skill-move-y, 0)); }
+  45% { transform: translate(var(--skill-move-x, 0),var(--skill-move-y, 0)) scale(1.06); }
+}
+@media (max-width: 700px) {
+  .battle-field { --player-portrait-size: clamp(48px, 14vw, 64px); --player-unit-ground-line: 8%; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .player-stage-unit.is-attacking .player-stage-art,
+  .battle-player-art.is-attacking,
+  .player-stage-unit.is-target-skill .player-stage-art,
+  .battle-player-art.is-target-skill,
+  .player-stage-unit.is-area-skill .player-stage-art,
+  .battle-player-art.is-area-skill { animation-duration: .01ms !important; }
 }
 
 .stronghold-objective {
@@ -1030,4 +1073,26 @@ body:has(.battle-screen:not(.hidden)) .toast.show {
   .battle-field .player-grounding {
     bottom: calc(var(--player-unit-ground-line) + 36px) !important;
   }
+}
+
+/* Final portrait cascade: keep legacy battlefield sizing from overriding 0.7.0. */
+.battle-field { --player-portrait-size: clamp(64px, 7.2vw, 92px); --player-unit-ground-line: 9%; }
+.battle-field #battle-player-art[aria-label],
+.battle-field .player-stage-art {
+  width: var(--player-portrait-size) !important;
+  height: var(--player-portrait-size) !important;
+  inset: auto !important;
+  overflow: hidden !important;
+  border: 3px solid #d9a93f !important;
+  border-radius: 50% !important;
+  background-position: center 22% !important;
+  background-size: cover !important;
+  filter: none !important;
+  scale: 1 !important;
+}
+.battle-field #battle-player-art[aria-label] { bottom: var(--player-unit-ground-line) !important; }
+.battle-field .player-battle-stage { bottom: var(--player-unit-ground-line) !important; height: var(--player-portrait-size) !important; }
+.battle-field .player-stage-unit { width: var(--player-portrait-size) !important; height: var(--player-portrait-size) !important; }
+@media (max-width: 700px) {
+  .battle-field { --player-portrait-size: clamp(48px, 14vw, 64px); --player-unit-ground-line: 8%; }
 }
