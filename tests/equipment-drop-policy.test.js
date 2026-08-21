@@ -26,6 +26,13 @@ function sequence(values) {
 const normalEnemy = { id: 'plainsRabbit', lootConfig: dropPolicy.TEST_LOOT_CONFIGS.normal };
 const eliteEnemy = { id: 'ragingWolf', isElite: true, lootConfig: dropPolicy.TEST_LOOT_CONFIGS.elite };
 const bossEnemy = { id: 'greatfangWolf', isBoss: true, lootConfig: dropPolicy.TEST_LOOT_CONFIGS.boss };
+const chapterOnePants = [
+  'starter-recruit-iron-legguards', 'guard-legguards', 'leather-pants',
+  'hunting-legguards', 'apprentice-cloth-pants', 'novice-priest-pants'
+];
+
+assert.ok(chapterOnePants.every((id) => dropPolicy.EQUIPMENT_POOLS.plains_common_armor.includes(id)), 'all chapter-one pants can drop from the plains armor pool');
+assert.ok(chapterOnePants.every((id) => dropPolicy.getTemplatesFromPools(['plains_common_armor']).some((template) => template.id === id && template.slot === 'pants')), 'all chapter-one pants resolve to wearable drop templates');
 
 assert.equal(normalEnemy.lootConfig.equipmentDropRate, .25);
 assert.deepEqual(normalEnemy.lootConfig.rarityWeights, { common: 60, uncommon: 40 });

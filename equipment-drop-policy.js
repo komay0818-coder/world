@@ -36,6 +36,8 @@
     ]),
     plains_common_armor: Object.freeze([
       'starter-recruit-plate-armor', 'leather-vest', 'apprentice-robe',
+      'starter-recruit-iron-legguards', 'guard-legguards', 'leather-pants',
+      'hunting-legguards', 'apprentice-cloth-pants', 'novice-priest-pants',
       'starter-recruit-iron-helmet', 'leather-hood', 'apprentice-mage-hat',
       'starter-recruit-iron-gauntlets', 'rough-leather-gloves', 'apprentice-gloves',
       'starter-recruit-iron-boots', 'leather-short-boots', 'apprentice-cloth-shoes'
