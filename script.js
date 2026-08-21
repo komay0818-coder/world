@@ -4475,7 +4475,7 @@ function useAutoSkillForMember(member, now = Date.now()) {
     member.blinkCooldownReduction = 0;
     member.globalSkillReadyAt = now + 1000;
     const totalDamage = hits.reduce((total, target) => total + target.result.finalDamage, 0);
-    if (!['companion', 'poison-blade'].includes(skill.id)) playPartyMemberCombatAnimation(member, (skill.id === 'shadow-dance' ? resolvedTargets : (hits.length ? hits : resolvedTargets)).map((target) => target.index), {
+    if (skill.id !== 'companion') playPartyMemberCombatAnimation(member, (skill.id === 'shadow-dance' ? resolvedTargets : (hits.length ? hits : resolvedTargets)).map((target) => target.index), {
       kind: 'skill',
       area: Number(skillEffect.targets || skill.targets || 1) > 1,
       skillId: skill.id,

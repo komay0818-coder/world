@@ -11,7 +11,7 @@ const layoutCss = fs.readFileSync(path.join(root, 'styles', 'mmorpg-layout.css')
 assert.match(html, /id="player-battle-stage"/, 'party players render on the battlefield');
 assert.match(html, /id="battle-player-art" class="battle-player-art hidden"/, 'main player has a dedicated portrait node');
 assert.match(html, /styles\/monster-slots\.css\?v=20260822-single-target-travel-v6/, 'battlefield loads the current local portrait styles');
-assert.match(html, /script\.js\?v=20260822-combat-animation-lock-v3/, 'battlefield loads the current local combat logic');
+assert.match(html, /script\.js\?v=20260822-all-class-skill-motion-v4/, 'battlefield loads the current local combat logic');
 assert.match(script, /return battleCharacterArt\[`\$\{character\.race\}:\$\{character\.job\}`\] \|\| '';/, 'battle uses stable front character artwork');
 assert.match(script, /'orc:warrior': 'assets\/character-portraits\/orc-warrior\.png'/, 'orc warrior uses the supplied portrait');
 assert.match(script, /'orc:hunter': 'assets\/character-portraits\/orc-hunter\.png'/, 'orc hunter uses the supplied portrait');
@@ -125,7 +125,8 @@ assert.match(css, /shadow-dance-hit\.is-finisher strong::before[\s\S]*?strong::a
 assert.doesNotMatch(css.match(/\.battle-effect-shadow-dance[\s\S]*?@keyframes shadowDanceTargetHit/)?.[0] || '', /explosion|crack|debris|shockwave|whirlwind/, 'shadow dance avoids warrior impact and spinning effects');
 assert.match(script, /function getPoisonBladeVisualState[\s\S]*?dot\.type === 'poison'[\s\S]*?dot\.source === member/, 'poison blade aura follows poison stacks actually applied by that rogue');
 assert.match(script, /member\.poisonBladeVisualUntil = now \+ 800/, 'poison blade has a short activation phase before settling into its live state');
-assert.match(script, /!\['companion', 'poison-blade'\]\.includes\(skill\.id\)/, 'poison blade does not reuse attack travel animation');
+assert.match(script, /skill\.id !== 'companion'\) playPartyMemberCombatAnimation/, 'every damaging class skill, including poison blade, receives a combat movement');
+assert.doesNotMatch(script, /\['companion', 'poison-blade'\]\.includes\(skill\.id\)/, 'poison blade is not excluded from single-target travel');
 assert.match(script, /renderMainPoisonBladeVisual\(getMainBattleMember\(\)\)/, 'main rogue poison visuals refresh with battle state');
 assert.match(css, /poison-blade-aura[\s\S]*?poison-blade-indicator[\s\S]*?poisonBladeDaggerCast/, 'poison blade renders a restrained green ring and overhead dagger');
 assert.doesNotMatch(css.match(/\.poison-blade-aura[\s\S]*?@keyframes poisonBladeDaggerCast/)?.[0] || '', /explosion|crack|debris|shockwave|fire/, 'poison blade avoids attack and warrior impact visuals');
