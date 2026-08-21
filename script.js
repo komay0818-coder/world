@@ -2930,7 +2930,8 @@ const battleSkillEffectPresets = Object.freeze({
   blizzard: { duration: 1100, impactAt: 350, className: 'battle-effect-blizzard' },
   'chain-lightning': { duration: 880, impactAt: 230, className: 'battle-effect-chain-lightning' },
   'holy-light': { duration: 680, impactAt: 300, className: 'battle-effect-holy-light' },
-  'holy-nova': { duration: 980, impactAt: 300, className: 'battle-effect-holy-nova' }
+  'holy-nova': { duration: 980, impactAt: 300, className: 'battle-effect-holy-nova' },
+  heal: { duration: 900, impactAt: 300, className: 'battle-effect-heal' }
 });
 
 function captureBattleTargetAnchor(index) {
@@ -2949,6 +2950,16 @@ function captureBattleAttackerAnchor(member) {
   const fieldRect = field.getBoundingClientRect();
   const artRect = art.getBoundingClientRect();
   return { x: artRect.left - fieldRect.left + artRect.width / 2, y: artRect.top - fieldRect.top + artRect.height / 2 };
+}
+
+function captureBattleAllyAnchor(member) {
+  const field = document.querySelector('.battle-field');
+  const selector = member?.isMain ? '#battle-player-art' : `[data-member-id="${member?.id}"] .player-stage-art`;
+  const art = document.querySelector(selector);
+  if (!field || !art) return null;
+  const fieldRect = field.getBoundingClientRect();
+  const artRect = art.getBoundingClientRect();
+  return { index: member.id, selector, x: artRect.left - fieldRect.left + artRect.width / 2, y: artRect.top - fieldRect.top + artRect.height / 2, width: artRect.width };
 }
 
 function animatePiercingProjectile(effect, origin, targets) {
@@ -3024,13 +3035,15 @@ function playBattleSkillEffect(skillId, targetAnchor, options = {}) {
       ? `<span class="holy-light-mark">✦</span><span class="holy-light-beam"></span><span class="holy-light-flash"></span><span class="holy-light-ring"></span><span class="holy-light-particles"><i></i><i></i><i></i><i></i></span>${options.damage > 0 ? `<b class="holy-light-damage">-${options.damage}</b>` : ''}`
     : skillId === 'holy-nova'
       ? `<span class="holy-nova-gather"><i></i><i></i><i></i></span><span class="holy-nova-ring"></span>${(options.targets || []).map((target) => `<span class="holy-nova-hit" data-effect-target="${target.index}" style="--hit-delay:${target.delay}ms;--hit-size:${target.anchor.width}px;--hit-x:${target.anchor.x - targetAnchor.x}px;--hit-y:${target.anchor.y - targetAnchor.y}px"><i></i><em></em>${target.damage > 0 ? `<b>-${target.damage}</b>` : ''}</span>`).join('')}`
+    : skillId === 'heal'
+      ? `<span class="heal-aura"></span><span class="heal-soft-glow"></span><span class="heal-particles"><i>+</i><i>✦</i><i></i><i>+</i></span>${options.heal > 0 ? `<b class="heal-number">+${options.heal} HP</b>` : ''}`
     : `<span class="smash-trail"></span><span class="impact-shockwave"></span><span class="impact-crack"></span><span class="impact-sparks"></span><span class="impact-debris">${Array.from({ length: 6 }, (_, index) => `<i style="--debris-index:${index}"></i>`).join('')}</span>${options.damage > 0 ? `<b class="skill-impact-damage">-${options.damage}</b>` : ''}`;
   layer.append(effect);
   if (skillId === 'piercing-shot') animatePiercingProjectile(effect, targetAnchor, options.targets || []);
   const startedAt = performance.now();
   const followTarget = () => {
     if (!effect.isConnected || performance.now() - startedAt >= preset.duration) return;
-    const currentTarget = document.querySelector(`#enemy-${targetAnchor.index}`);
+    const currentTarget = document.querySelector(targetAnchor.selector || `#enemy-${targetAnchor.index}`);
     let currentEffectX = targetAnchor.x;
     let currentEffectY = targetAnchor.y;
     if (currentTarget) {
@@ -4449,8 +4462,10 @@ function useAutoSkillForMember(member, now = Date.now()) {
   const heal = Math.ceil(stats.attack * (healEffect.healPower || 1.5) * (graceTriggered ? 1 + grace.bonus : 1));
   const missing = healTarget.maxHp - healTarget.currentHp;
   const actualHeal = Math.min(missing, heal);
+  const healTargetAnchor = captureBattleAllyAnchor(healTarget);
   healTarget.currentHp = Math.min(healTarget.maxHp, healTarget.currentHp + heal);
   healTarget.shield += Math.max(0, heal - missing) * (healEffect.overhealShield || 0);
+  if (healTargetAnchor && actualHeal > 0) playBattleSkillEffect('heal', healTargetAnchor, { heal: actualHeal });
   if (graceTriggered && grace.spread && actualHeal > 0) {
     (battle.partyMembers || []).filter((ally) => ally.alive && ally.id !== healTarget.id).slice(0, grace.maxAllies).forEach((ally) => {
       ally.currentHp = Math.min(ally.maxHp, ally.currentHp + actualHeal * grace.spread);

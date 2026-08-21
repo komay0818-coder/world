@@ -10,8 +10,8 @@ const layoutCss = fs.readFileSync(path.join(root, 'styles', 'mmorpg-layout.css')
 
 assert.match(html, /id="player-battle-stage"/, 'party players render on the battlefield');
 assert.match(html, /id="battle-player-art" class="battle-player-art hidden"/, 'main player has a dedicated portrait node');
-assert.match(html, /styles\/monster-slots\.css\?v=20260821-holy-nova-v1/, 'battlefield loads the current local portrait styles');
-assert.match(html, /script\.js\?v=20260821-holy-nova-v1/, 'battlefield loads the current local combat logic');
+assert.match(html, /styles\/monster-slots\.css\?v=20260821-heal-v1/, 'battlefield loads the current local portrait styles');
+assert.match(html, /script\.js\?v=20260821-heal-v1/, 'battlefield loads the current local combat logic');
 assert.match(script, /return battleCharacterArt\[`\$\{character\.race\}:\$\{character\.job\}`\] \|\| '';/, 'battle uses stable front character artwork');
 assert.match(script, /'orc:warrior': 'assets\/character-portraits\/orc-warrior\.png'/, 'orc warrior uses the supplied portrait');
 assert.match(script, /'orc:hunter': 'assets\/character-portraits\/orc-hunter\.png'/, 'orc hunter uses the supplied portrait');
@@ -151,6 +151,13 @@ assert.match(script, /Math\.hypot\(target\.anchor\.x - centerAnchor\.x, target\.
 assert.match(script, /setTimeout\([\s\S]*?holy-nova-hit[\s\S]*?visualTarget\.delay/, 'each enemy shakes only when the expanding ring reaches it');
 assert.match(css, /holy-nova-ring[\s\S]*?var\(--effect-radius\)\*2/, 'the single holy nova ring expands far enough to sweep all selected targets');
 assert.doesNotMatch(css.match(/\.battle-effect-holy-nova[\s\S]*?@keyframes holyNovaTargetHit/)?.[0] || '', /explosion|pillar|magic-array|smoke|debris/, 'holy nova avoids explosions, pillars, complex arrays, smoke, and debris');
+assert.match(script, /heal: \{ duration: 900, impactAt: 300, className: 'battle-effect-heal' \}/, 'heal uses a compact target-bound preset');
+assert.match(script, /function captureBattleAllyAnchor[\s\S]*?member\?\.isMain \? '#battle-player-art'[\s\S]*?data-member-id/, 'heal resolves the actual main or party portrait');
+assert.match(script, /targetAnchor\.selector \|\| `#enemy-\$\{targetAnchor\.index\}`/, 'shared effects can follow either ally or enemy targets');
+assert.match(script, /captureBattleAllyAnchor\(healTarget\)[\s\S]*?playBattleSkillEffect\('heal', healTargetAnchor, \{ heal: actualHeal \}\)/, 'real healing triggers the target-bound visual with the actual recovered HP');
+assert.match(css, /battle-effect-heal \.heal-aura[\s\S]*?var\(--target-width\)\*1\.08/, 'heal aura stays close to 108 percent of the portrait');
+assert.match(css, /battle-effect-heal \.heal-number[\s\S]*?#9cff7b[\s\S]*?healNumber \.7s/, 'heal displays a distinct green HP number');
+assert.doesNotMatch(css.match(/\.battle-effect-heal[\s\S]*?@keyframes healNumber/)?.[0] || '', /shake|explosion|pillar|projectile/, 'healing remains soft and avoids attack-style motion');
 
 assert.match(script, /class="enemy-unit monster-battle-slot visual-size-\$\{visualSize\}/, 'monsters keep full-body image slots');
 assert.match(css, /monster-battle-slot\.elite,[\s\S]*?monster-battle-slot\.boss \{[\s\S]*?--unit-rank-scale: 1;/, 'elite and boss monsters are not enlarged');
