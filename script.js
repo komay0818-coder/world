@@ -2628,7 +2628,8 @@ function renderEnemySquad() {
     const slowed = Date.now() < enemySkillState.slowedUntil && Date.now() >= (enemySkillState.visualSlowAt || 0);
     const marked = Date.now() < enemySkillState.markedUntil && Date.now() >= (enemySkillState.visualMarkAt || 0);
     const bleeding = (battle.enemyDots[index] || []).some((dot) => dot.type === 'bleed') && Date.now() >= (enemySkillState.visualBleedAt || 0);
-    const hunterStatusIndicators = `${slowed ? '<span class="enemy-slow-indicator" role="img" aria-label="緩速中">❄</span><span class="enemy-slow-airflow"></span>' : ''}${marked ? '<span class="enemy-hunter-mark" role="img" aria-label="獵殺標記">◎</span>' : ''}${bleeding ? '<span class="enemy-bleed-indicator" role="img" aria-label="流血中">🩸</span><span class="enemy-bleed-wound"></span>' : ''}`;
+    const burning = (battle.enemyDots[index] || []).some((dot) => dot.type === 'burn') && Date.now() >= (enemySkillState.visualBurnAt || 0);
+    const hunterStatusIndicators = `${slowed ? '<span class="enemy-slow-indicator" role="img" aria-label="緩速中">❄</span><span class="enemy-slow-airflow"></span>' : ''}${marked ? '<span class="enemy-hunter-mark" role="img" aria-label="獵殺標記">◎</span>' : ''}${bleeding ? '<span class="enemy-bleed-indicator" role="img" aria-label="流血中">🩸</span><span class="enemy-bleed-wound"></span>' : ''}${burning ? '<span class="enemy-burn-flames" role="img" aria-label="燃燒中"><i></i><i></i><i></i></span>' : ''}`;
     const statusIcons = statusDisplays.length
       ? statusDisplays.map((status) => `<span class="monster-status-icon" title="${status.label}" aria-label="${status.label}">${status.icon}</span>`).join('')
       : '<span class="monster-status-empty">無異常狀態</span>';
@@ -2741,9 +2742,9 @@ function playPartyMemberCombatAnimation(member, targetIndexes = [], options = {}
       ? document.querySelector('#enemy-squad')
       : null;
     if (!field || !art) return;
-    const actionClass = skillId === 'heavy-strike' ? 'is-heavy-strike' : skillId === 'whirlwind' ? 'is-whirlwind' : skillId === 'charge' ? 'is-charge' : skillId === 'power-shot' ? 'is-power-shot' : skillId === 'multi-shot' ? 'is-multi-shot' : skillId === 'piercing-shot' ? 'is-piercing-shot' : skillId === 'backstab' ? 'is-backstab' : skillId === 'shadow-dance' ? 'is-shadow-dance' : kind === 'basic' ? 'is-attacking' : area ? 'is-area-skill' : 'is-target-skill';
-    fighter?.classList.remove('is-attacking', 'is-target-skill', 'is-area-skill', 'is-heavy-strike', 'is-whirlwind', 'is-charge', 'is-power-shot', 'is-multi-shot', 'is-piercing-shot', 'is-backstab', 'is-shadow-dance');
-    art.classList.remove('is-attacking', 'is-target-skill', 'is-area-skill', 'is-heavy-strike', 'is-whirlwind', 'is-charge', 'is-power-shot', 'is-multi-shot', 'is-piercing-shot', 'is-backstab', 'is-shadow-dance');
+    const actionClass = skillId === 'heavy-strike' ? 'is-heavy-strike' : skillId === 'whirlwind' ? 'is-whirlwind' : skillId === 'charge' ? 'is-charge' : skillId === 'power-shot' ? 'is-power-shot' : skillId === 'multi-shot' ? 'is-multi-shot' : skillId === 'piercing-shot' ? 'is-piercing-shot' : skillId === 'backstab' ? 'is-backstab' : skillId === 'shadow-dance' ? 'is-shadow-dance' : skillId === 'fireball' ? 'is-fireball' : kind === 'basic' ? 'is-attacking' : area ? 'is-area-skill' : 'is-target-skill';
+    fighter?.classList.remove('is-attacking', 'is-target-skill', 'is-area-skill', 'is-heavy-strike', 'is-whirlwind', 'is-charge', 'is-power-shot', 'is-multi-shot', 'is-piercing-shot', 'is-backstab', 'is-shadow-dance', 'is-fireball');
+    art.classList.remove('is-attacking', 'is-target-skill', 'is-area-skill', 'is-heavy-strike', 'is-whirlwind', 'is-charge', 'is-power-shot', 'is-multi-shot', 'is-piercing-shot', 'is-backstab', 'is-shadow-dance', 'is-fireball');
     void art.offsetWidth;
     art.dataset.job = member.job || member.character?.job || 'warrior';
     setBattleCharacterAction(art, member.character, 'active');
@@ -2870,7 +2871,8 @@ const battleSkillEffectPresets = Object.freeze({
   'multi-shot': { duration: 880, impactAt: 450, className: 'battle-effect-multi-shot' },
   'piercing-shot': { duration: 960, impactAt: 400, className: 'battle-effect-piercing-shot' },
   backstab: { duration: 680, impactAt: 350, className: 'battle-effect-backstab' },
-  'shadow-dance': { duration: 980, impactAt: 180, className: 'battle-effect-shadow-dance' }
+  'shadow-dance': { duration: 980, impactAt: 180, className: 'battle-effect-shadow-dance' },
+  fireball: { duration: 680, impactAt: 320, className: 'battle-effect-fireball' }
 });
 
 function captureBattleTargetAnchor(index) {
@@ -2948,6 +2950,8 @@ function playBattleSkillEffect(skillId, targetAnchor, options = {}) {
         const trailY = target.anchor.y - previous.y;
         return `<span class="shadow-dance-hit${order === targets.length - 1 ? ' is-finisher' : ''}${targets.length === 1 ? ' is-solo' : ''}" data-effect-target="${target.index}" style="--hit-order:${order};--hit-count:${targets.length};--slash-angle:${order % 2 ? 38 : -38}deg;--trail-length:${Math.min(150, Math.max(28, Math.hypot(trailX, trailY)))}px;--trail-angle:${Math.atan2(trailY, trailX)}rad;--hit-x:${target.anchor.x - targetAnchor.x}px;--hit-y:${target.anchor.y - targetAnchor.y}px"><i></i><em></em><strong></strong>${target.damage > 0 ? `<b>-${target.damage}</b>` : ''}</span>`;
       }).join('')}`
+    : skillId === 'fireball'
+      ? `<span class="fireball-core"></span><span class="fireball-burst"></span><span class="fireball-sparks"><i></i><i></i><i></i><i></i></span>${options.damage > 0 ? `<b class="fireball-damage">-${options.damage}</b>` : ''}`
     : `<span class="smash-trail"></span><span class="impact-shockwave"></span><span class="impact-crack"></span><span class="impact-sparks"></span><span class="impact-debris">${Array.from({ length: 6 }, (_, index) => `<i style="--debris-index:${index}"></i>`).join('')}</span>${options.damage > 0 ? `<b class="skill-impact-damage">-${options.damage}</b>` : ''}`;
   layer.append(effect);
   if (skillId === 'piercing-shot') animatePiercingProjectile(effect, targetAnchor, options.targets || []);
@@ -2992,6 +2996,11 @@ function playBattleSkillEffect(skillId, targetAnchor, options = {}) {
     const target = document.querySelector(`#enemy-${targetAnchor.index}`);
     target?.classList.add('power-shot-hit');
     setTimeout(() => target?.classList.remove('power-shot-hit'), 170);
+  }, preset.impactAt);
+  if (skillId === 'fireball') setTimeout(() => {
+    const target = document.querySelector(`#enemy-${targetAnchor.index}`);
+    target?.classList.add('fireball-hit');
+    setTimeout(() => target?.classList.remove('fireball-hit'), 170);
   }, preset.impactAt);
   if (skillId === 'shadow-dance') (options.targets || []).forEach((visualTarget, order, visualTargets) => {
     const delay = preset.impactAt + order * (visualTargets.length > 1 ? 85 : 0);
@@ -4111,7 +4120,7 @@ function useAutoSkillForMember(member, now = Date.now()) {
     if (skill.id === 'whirlwind') damagePower *= 1 + Math.min(skillEffect.maxTargetBonus || 0, Math.max(0, targets.length - 1) * (skillEffect.perExtraTargetBonus || 0));
     const damage = Math.max(1, Math.ceil(stats.attack * damagePower * (critical ? stats.criticalDamageMultiplier : 1)));
     const profile = getPlayerAttackProfile(character, skill);
-    const targetAnchors = ['heavy-strike', 'whirlwind', 'charge', 'power-shot', 'multi-shot', 'piercing-shot', 'backstab', 'shadow-dance'].includes(skill.id)
+    const targetAnchors = ['heavy-strike', 'whirlwind', 'charge', 'power-shot', 'multi-shot', 'piercing-shot', 'backstab', 'shadow-dance', 'fireball'].includes(skill.id)
       ? new Map(targets.map((index) => [index, captureBattleTargetAnchor(index)]))
       : null;
     const attackerAnchor = ['power-shot', 'multi-shot', 'piercing-shot'].includes(skill.id) ? captureBattleAttackerAnchor(member) : null;
@@ -4123,7 +4132,7 @@ function useAutoSkillForMember(member, now = Date.now()) {
         attackKind: 'skill',
         armorIgnore: skillEffect.armorIgnore,
         controlledBonus: skillEffect.controlledBonus,
-        showDamage: !['heavy-strike', 'whirlwind', 'charge', 'power-shot', 'multi-shot', 'piercing-shot', 'backstab', 'shadow-dance', 'poison-blade'].includes(skill.id)
+        showDamage: !['heavy-strike', 'whirlwind', 'charge', 'power-shot', 'multi-shot', 'piercing-shot', 'backstab', 'shadow-dance', 'poison-blade', 'fireball'].includes(skill.id)
       }) };
     });
     const hits = resolvedTargets.filter((target) => !target.result.evaded);
@@ -4134,7 +4143,10 @@ function useAutoSkillForMember(member, now = Date.now()) {
       if (skillEffect.slow) state.visualSlowAt = now + 550;
       if (skillEffect.mark) state.visualMarkAt = now + 550;
     });
-    if (skill.id === 'fireball') hits.forEach((target) => applyDot(target.index, 'burn', Math.max(1, Math.ceil(target.result.finalDamage * .18 * (1 + (skillEffect.burnBonus || 0)) * stats.dotMultiplier)), 4 + (skillEffect.burnDuration || 0), 1, { source: member }));
+    if (skill.id === 'fireball') hits.forEach((target) => {
+      applyDot(target.index, 'burn', Math.max(1, Math.ceil(target.result.finalDamage * .18 * (1 + (skillEffect.burnBonus || 0)) * stats.dotMultiplier)), 4 + (skillEffect.burnDuration || 0), 1, { source: member });
+      getEnemySkillState(target.index).visualBurnAt = now + 500;
+    });
     if (skill.id === 'backstab') hits.forEach((target) => {
       const bleeding = (battle.enemyDots[target.index] || []).find((dot) => dot.type === 'bleed');
       if (bleeding && skillEffect.bleedTrigger) applyDamageToMonster(target.index, bleeding.damage * skillEffect.bleedTrigger, { damageType: 'periodic', attackRange: 'none' }, { attacker: member, attackKind: 'bleed-trigger', canEvade: false, canParry: false });
@@ -4201,6 +4213,11 @@ function useAutoSkillForMember(member, now = Date.now()) {
       playBattleSkillEffect(skill.id, targetAnchors.get(displayedTarget.index), { damage: struckTarget?.result.finalDamage || 0, origin: attackerAnchor });
     }
     if (skill.id === 'backstab') {
+      const struckTarget = hits[0];
+      const displayedTarget = struckTarget || resolvedTargets[0];
+      playBattleSkillEffect(skill.id, targetAnchors.get(displayedTarget.index), { damage: struckTarget?.result.finalDamage || 0 });
+    }
+    if (skill.id === 'fireball') {
       const struckTarget = hits[0];
       const displayedTarget = struckTarget || resolvedTargets[0];
       playBattleSkillEffect(skill.id, targetAnchors.get(displayedTarget.index), { damage: struckTarget?.result.finalDamage || 0 });
