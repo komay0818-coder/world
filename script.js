@@ -1020,6 +1020,7 @@ function getProgress() {
     crafting: CraftingPolicy.normalizeCraftingState(saved.crafting),
     village: VillagePolicy.normalizeVillageData(saved.village)
   };
+  ChapterOneProgressionPolicy.normalize(normalizedProgress);
   const activeCharacter = getActiveCharacter();
   const activeSlotIndex = getActiveCharacterSlotIndex();
   let partySlots = JSON.parse(localStorage.getItem('stardust-character-slots') || '[]');
@@ -1585,6 +1586,7 @@ function claimOfflineRewards() {
       progress.level = 30;
       progress.xp = Math.min(progress.xp, requiredXp(30));
     }
+    ChapterOneProgressionPolicy.recordNormalKill(progress, activeMap.id);
   }
   const gainedGold = defeated * 2;
   progress.gold += gainedGold;
@@ -1955,7 +1957,8 @@ function getCurrentMap(level) {
 
 function getActiveMap(progress = getProgress()) {
   const selected = mapProgression.find((map) => map.id === progress.selectedMapId && map.implemented
-    && (ChapterOneLevelPolicy.canEnterMap(map.id) || progress.level >= map.min));
+    && (map.chapter !== 1 || ChapterOneProgressionPolicy.isUnlocked(progress, map.id))
+    && (map.chapter !== 2 || (ChapterOneProgressionPolicy.isUnlocked(progress, 'black-forest') && progress.level >= map.min)));
   if (selected?.id === 'beginner-plains') return mapProgression.find((map) => map.id === 'plains-entrance');
   if (selected) return selected;
   return mapProgression.find((map) => map.id === 'plains-entrance') || mapProgression[0];
@@ -2374,7 +2377,8 @@ function getDropLookupItems() {
 
 function isDropLookupMapUnlocked(map, progress = getProgress()) {
   if (!map?.implemented) return false;
-  if (!ChapterOneLevelPolicy.canEnterMap(map.id) && progress.level < map.min) return false;
+  if (map.chapter === 1 && !ChapterOneProgressionPolicy.isUnlocked(progress, map.id)) return false;
+  if (map.chapter === 2 && (!ChapterOneProgressionPolicy.isUnlocked(progress, 'black-forest') || progress.level < map.min)) return false;
   if (map.ticketItemId && getInventoryItemQuantity(progress, map.ticketItemId) < 1) return false;
   if (map.dungeon && !map.ticketItemId && (getAccountResources().dungeonKeys?.blackForestAltar || 0) < 1) return false;
   return true;
@@ -2407,7 +2411,9 @@ function renderMapSelector() {
   const modal = document.querySelector('#inventory-modal');
   document.querySelector('#inventory-title').textContent = '選擇冒險地圖';
   document.querySelector('#inventory-content').innerHTML = `<section class="map-selection-grid">${maps.map((map) => {
-    const unlocked = ChapterOneLevelPolicy.canEnterMap(map.id) || progress.level >= map.min;
+    const unlocked = map.id === 'beginner-plains'
+      || (map.chapter === 1 && ChapterOneProgressionPolicy.isUnlocked(progress, map.id))
+      || (map.chapter === 2 && ChapterOneProgressionPolicy.isUnlocked(progress, 'black-forest') && progress.level >= map.min);
     const isRegionHub = map.id === 'beginner-plains' || map.regionHub;
     const regionCount = map.id === 'black-forest' ? blackForestRegions.length : beginnerPlainsRegions.length;
     const recommended = map.recommended || { attack: 0, defense: 0, hp: 0 };
@@ -2446,18 +2452,21 @@ function renderBeginnerPlainsRegions() {
     <section class="map-region-grid">${beginnerPlainsRegions.map((region, index) => {
       const available = ['plains-entrance', 'wolf-den', 'boar-woods', 'goblin-camp', 'plains-depths'].includes(region.id);
       const regionMap = mapProgression.find((map) => map.id === region.id);
-      const unlocked = available;
+      const unlocked = available && ChapterOneProgressionPolicy.isUnlocked(progress, region.id);
+      const unlockStatus = ChapterOneProgressionPolicy.getUnlockStatus(progress, region.id);
+      const condition = unlockStatus.completion;
       const isGoblinCamp = region.id === 'goblin-camp';
       const goblinMaps = getInventoryItemQuantity(progress, GOBLIN_CAMP_TICKET_ID);
       const regionDetail = isGoblinCamp
         ? `號角將決定是否繼續深入・哥布林營地地圖 ${goblinMaps} 張`
         : region.id === 'plains-depths' ? '怪物 7 種・已完成圖片 7 種' : available ? '怪物 5 種・稀有怪物機率 10%' : '怪物與掉落物：尚未設定';
+      const lockedDetail = condition ? `<div class="map-unlock-progress"><b>${region.name}－尚未解鎖</b><small>角色等級：Lv${condition.level} / Lv${condition.requirement.level}</small><small>區域壓制：${Math.min(condition.normalKills, condition.requirement.normalKills)} / ${condition.requirement.normalKills}</small><small>Boss（${condition.requirement.bossName}）：${condition.bossCleared ? '已擊敗' : '尚未擊敗'}</small></div>` : '';
       return `
       <article class="map-region-card ${available ? 'available' : 'pending'} ${unlocked ? '' : 'locked'} ${activeMap.id === region.id ? 'selected' : ''}">
         <span>${String(index + 1).padStart(2, '0')}</span>
-        <div><b>${region.name}</b><small>${regionDetail}</small></div>
+        <div><b>${region.name}</b><small>${regionDetail}</small>${unlocked ? '' : lockedDetail}</div>
         ${available
-          ? !unlocked ? `<em>Lv. ${regionMap?.min || 1} 解鎖</em>` : activeMap.id === region.id ? '<em class="current-region">目前區域</em>' : `<button type="button" data-select-map="${region.id}" ${isGoblinCamp && goblinMaps < 1 ? 'disabled' : ''}>${isGoblinCamp ? goblinMaps > 0 ? '使用地圖進入副本' : '需要哥布林營地地圖' : '進入區域'}</button>`
+          ? !unlocked ? '<em>完成前一區域三項條件後解鎖</em>' : activeMap.id === region.id ? '<em class="current-region">目前區域</em>' : `<button type="button" data-select-map="${region.id}" ${isGoblinCamp && goblinMaps < 1 ? 'disabled' : ''}>${isGoblinCamp ? goblinMaps > 0 ? '使用地圖進入副本' : '需要哥布林營地地圖' : '進入區域'}</button>`
           : '<em>準備中</em>'}
       </article>`;
     }).join('')}
@@ -2469,7 +2478,13 @@ function renderBeginnerPlainsRegions() {
 function selectAdventureMap(mapId) {
   const progress = getProgress();
   const map = mapProgression.find((item) => item.id === mapId && item.implemented);
-  if (!map || (!ChapterOneLevelPolicy.canEnterMap(map.id) && progress.level < map.min)) return;
+  if (!map) return;
+  if (map.chapter === 1 && !ChapterOneProgressionPolicy.isUnlocked(progress, map.id)) {
+    const status = ChapterOneProgressionPolicy.getUnlockStatus(progress, map.id).completion;
+    if (status) showToast(`${map.name}尚未解鎖：Lv${status.level}/${status.requirement.level}・壓制 ${status.normalKills}/${status.requirement.normalKills}・Boss ${status.bossCleared ? '完成' : '未完成'}`);
+    return;
+  }
+  if (map.chapter === 2 && (!ChapterOneProgressionPolicy.isUnlocked(progress, 'black-forest') || progress.level < map.min)) return;
   if (map.chapter === 2) BlackForestCorruptionPolicy.enterChapter(progress);
   if (map.dungeon) {
     if (map.ticketItemId) {
@@ -3881,6 +3896,15 @@ function rewardVictory(index) {
       logBattle(`★ 自動學會${learned.type === 'active' ? '主動' : '被動'}技能【${learned.name}】`, 'progress');
     }
   }
+  const newlyUnlockedMaps = enemy.isBoss || enemy.id === ChapterOneProgressionPolicy.REQUIREMENTS[currentMap.id]?.bossId
+    ? ChapterOneProgressionPolicy.recordBossKill(progress, currentMap.id, enemy)
+    : enemy.isElite ? [] : ChapterOneProgressionPolicy.recordNormalKill(progress, currentMap.id);
+  newlyUnlockedMaps.forEach((mapId) => {
+    const unlockedMap = mapProgression.find((map) => map.id === mapId);
+    const name = unlockedMap?.name || (mapId === 'black-forest' ? '第二章' : mapId);
+    showToast(`${name}已解鎖`);
+    logBattle(`◆ 區域推進完成：${name}已解鎖`, 'progress');
+  });
   saveProgress(progress);
   logBattle(`✦ 擊敗${enemy.name}！獲得 ${earnedXp} EXP、${earnedGold} 金幣`, 'reward');
   if (loot) logBattle(`🎁 掉落【${loot.name}】${loot.quantity ? ` ×${loot.quantity}` : ''}`);
