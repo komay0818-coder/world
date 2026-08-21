@@ -5,13 +5,13 @@ const player = { maxHp: 100, currentHp: 100, attack: 25, defense: 0, damageReduc
 const monster = { maxHp: 50, attack: 10, defense: 0, damageReduction: 0, attackSpeed: 1 };
 
 const survived = policy.simulate({ durationMs: 5000, player, monsters: [monster] });
-assert.deepEqual(survived, { died: false, defeated: 2, effectiveMs: 5000, deathAtMs: null, remainingHp: 50 }, 'simulation settles complete encounters and partial incoming damage');
+assert.deepEqual(survived, { died: false, deaths: 0, defeated: 2, effectiveMs: 5000, deathAtMs: null, remainingHp: 50 }, 'simulation settles complete encounters and partial incoming damage');
 
 const defeated = policy.simulate({ durationMs: 20000, player, monsters: [monster] });
-assert.equal(defeated.died, true);
-assert.equal(defeated.defeated, 4, 'the lethal unfinished encounter grants no kill');
-assert.equal(defeated.deathAtMs, 10000, 'death time truncates the offline duration');
-assert.equal(defeated.effectiveMs, 10000);
+assert.equal(defeated.died, false);
+assert.equal(defeated.deaths, 2, 'offline combat automatically revives after defeat');
+assert.equal(defeated.defeated, 8, 'combat continues for the full offline duration');
+assert.equal(defeated.effectiveMs, 20000);
 
 const fastPlayer = policy.simulate({ durationMs: 10000, player: { ...player, attack: 100, attackSpeed: 2 }, monsters: [monster] });
 assert.equal(fastPlayer.defeated, 20, 'simulation advances by encounters rather than one-second ticks');

@@ -38,6 +38,7 @@
     let hp = Math.max(0, Math.min(Number(player.maxHp) || 0, Number(player.currentHp ?? player.maxHp) || 0));
     let elapsedSeconds = 0;
     let defeated = 0;
+    let deaths = 0;
     if (!durationSeconds || !roster.length || hp <= 0) {
       return { died: hp <= 0, defeated: 0, effectiveMs: 0, deathAtMs: hp <= 0 ? 0 : null, remainingHp: hp };
     }
@@ -59,13 +60,9 @@
       if (deathSeconds <= encounterSeconds) {
         elapsedSeconds += deathSeconds;
         hp = 0;
-        return {
-          died: true,
-          defeated,
-          effectiveMs: Math.min(durationMs, Math.round(elapsedSeconds * 1000)),
-          deathAtMs: Math.round(elapsedSeconds * 1000),
-          remainingHp: 0
-        };
+        deaths += 1;
+        hp = Math.max(1, Number(player.maxHp) || 1);
+        continue;
       }
 
       hp = Math.max(0, hp - attacksBeforeEnd * monsterDamage);
@@ -74,7 +71,7 @@
       else break;
     }
 
-    return { died: false, defeated, effectiveMs: Math.round(durationSeconds * 1000), deathAtMs: null, remainingHp: hp };
+    return { died: false, deaths, defeated, effectiveMs: Math.round(durationSeconds * 1000), deathAtMs: null, remainingHp: hp };
   }
 
   return Object.freeze({ attacksPerSecond, getPlayerDamage, getMonsterDamage, simulate });

@@ -8,5 +8,6 @@ assert.match(index, /monster-defense\.js[\s\S]*offline-combat-policy\.js[\s\S]*s
 assert.match(script, /OfflineCombatPolicy\.simulate\(\{[\s\S]*durationMs: offlineMs[\s\S]*getOfflineCombatMonsters\(activeMap, progress\.level\)/, 'offline rewards use map monsters and current player stats');
 assert.doesNotMatch(script.match(/function claimOfflineRewards\(\)[\s\S]*?\n}/)?.[0] || '', /killsPerMinute/, 'fixed offline kill speed is no longer the settlement source');
 assert.match(script, /const defeated = simulation\.defeated[\s\S]*for \(let kill = 0; kill < defeated;/, 'only kills completed before death grant rewards and map progress');
-assert.match(script, /simulation\.died[\s\S]*requiresMapSelectionAfterDefeat = true[\s\S]*openVillage\('menu'\)/, 'offline death restores the character, returns to village, and requires a new map choice');
-assert.match(script, /formatOfflineDuration\(simulation\.effectiveMs\)/, 'the report displays effective time truncated at death');
+const offlineClaim = script.match(/function claimOfflineRewards\(\)[\s\S]*?\n}/)?.[0] || '';
+assert.doesNotMatch(offlineClaim, /openVillage\('menu'\)|requiresMapSelectionAfterDefeat = true/, 'offline settlement keeps the player on the active map');
+assert.match(offlineClaim, /deaths: simulation\.deaths \|\| 0/, 'offline auto-revives are retained in the settlement report');
