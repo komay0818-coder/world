@@ -2864,6 +2864,12 @@ function playPartyMemberCombatAnimation(member, targetIndexes = [], options = {}
       ? document.querySelector('#enemy-squad')
       : null;
     if (!field || !art) return;
+    if (kind === 'basic' && Number(art.combatAnimationLockUntil || 0) > Date.now()) return;
+    if (art.combatAnimationTimer) clearTimeout(art.combatAnimationTimer);
+    art.combatAnimationSequence = Number(art.combatAnimationSequence || 0) + 1;
+    const animationSequence = art.combatAnimationSequence;
+    const animationDuration = kind === 'basic' ? 420 : skillId === 'shadow-dance' ? 1000 : skillId === 'blizzard' ? 1120 : skillId === 'chain-lightning' ? 900 : skillId === 'holy-nova' ? 1000 : 720;
+    if (kind === 'skill') art.combatAnimationLockUntil = Date.now() + animationDuration;
     const actionClass = skillId === 'heavy-strike' ? 'is-heavy-strike' : skillId === 'whirlwind' ? 'is-whirlwind' : skillId === 'charge' ? 'is-charge' : skillId === 'power-shot' ? 'is-power-shot' : skillId === 'multi-shot' ? 'is-multi-shot' : skillId === 'piercing-shot' ? 'is-piercing-shot' : skillId === 'backstab' ? 'is-backstab' : skillId === 'shadow-dance' ? 'is-shadow-dance' : skillId === 'fireball' ? 'is-fireball' : skillId === 'blizzard' ? 'is-blizzard' : skillId === 'chain-lightning' ? 'is-chain-lightning' : skillId === 'holy-light' ? 'is-holy-light' : skillId === 'holy-nova' ? 'is-holy-nova' : kind === 'basic' ? 'is-attacking' : area ? 'is-area-skill' : 'is-target-skill';
     fighter?.classList.remove('is-attacking', 'is-target-skill', 'is-single-target-skill', 'is-area-skill', 'is-heavy-strike', 'is-whirlwind', 'is-charge', 'is-power-shot', 'is-multi-shot', 'is-piercing-shot', 'is-backstab', 'is-shadow-dance', 'is-fireball', 'is-blizzard', 'is-chain-lightning', 'is-holy-light', 'is-holy-nova');
     art.classList.remove('is-attacking', 'is-target-skill', 'is-single-target-skill', 'is-area-skill', 'is-heavy-strike', 'is-whirlwind', 'is-charge', 'is-power-shot', 'is-multi-shot', 'is-piercing-shot', 'is-backstab', 'is-shadow-dance', 'is-fireball', 'is-blizzard', 'is-chain-lightning', 'is-holy-light', 'is-holy-nova');
@@ -2874,18 +2880,19 @@ function playPartyMemberCombatAnimation(member, targetIndexes = [], options = {}
     const fieldRect = field.getBoundingClientRect();
     const artRect = art.getBoundingClientRect();
     const targetRect = target?.getBoundingClientRect();
+    const targetAnchor = targetPositions?.get(targetIndexes[0]);
     const enemyFormationRect = enemyFormation?.getBoundingClientRect();
     if (kind === 'skill') {
       const destinationX = skillId === 'chain-lightning'
-        ? targetRect ? targetRect.left + targetRect.width * .5 : fieldRect.left + fieldRect.width * .5
+        ? targetRect ? targetRect.left + targetRect.width * .5 : targetAnchor ? fieldRect.left + targetAnchor.x : fieldRect.left + fieldRect.width * .5
         : area
         ? enemyFormationRect ? enemyFormationRect.left + enemyFormationRect.width * .5 : fieldRect.left + fieldRect.width * .5
-        : targetRect ? targetRect.left + targetRect.width * .5 : artRect.left + artRect.width * .5;
+        : targetRect ? targetRect.left + targetRect.width * .5 : targetAnchor ? fieldRect.left + targetAnchor.x : artRect.left + artRect.width * .5;
       const destinationY = skillId === 'chain-lightning'
-        ? targetRect ? targetRect.top + targetRect.height * .62 : fieldRect.top + fieldRect.height * .42
+        ? targetRect ? targetRect.top + targetRect.height * .62 : targetAnchor ? fieldRect.top + targetAnchor.y : fieldRect.top + fieldRect.height * .42
         : area
         ? enemyFormationRect ? enemyFormationRect.bottom + artRect.height * .2 : fieldRect.top + fieldRect.height * .48
-        : targetRect ? targetRect.top + targetRect.height * .55 : artRect.top + artRect.height * .5;
+        : targetRect ? targetRect.top + targetRect.height * .55 : targetAnchor ? fieldRect.top + targetAnchor.y : artRect.top + artRect.height * .5;
       art.style.setProperty('--skill-move-x', `${destinationX - (artRect.left + artRect.width / 2)}px`);
       art.style.setProperty('--skill-move-y', `${destinationY - (artRect.top + artRect.height / 2)}px`);
       if (skillId === 'heavy-strike') {
@@ -2983,11 +2990,12 @@ function playPartyMemberCombatAnimation(member, targetIndexes = [], options = {}
     }
     fighter?.classList.add(actionClass);
     art.classList.add(actionClass);
-    if (kind === 'skill' && !area && targetRect && skillId !== 'shadow-dance') {
+    if (kind === 'skill' && !area && (targetRect || targetAnchor) && skillId !== 'shadow-dance') {
       fighter?.classList.add('is-single-target-skill');
       art.classList.add('is-single-target-skill');
     }
-    setTimeout(() => {
+    art.combatAnimationTimer = setTimeout(() => {
+      if (art.combatAnimationSequence !== animationSequence) return;
       fighter?.classList.remove(actionClass);
       art.classList.remove(actionClass);
       fighter?.classList.remove('is-single-target-skill');
@@ -3022,8 +3030,10 @@ function playPartyMemberCombatAnimation(member, targetIndexes = [], options = {}
         art.shadowTeleportAnimation?.cancel();
         art.shadowTeleportAnimation = null;
       }
+      art.combatAnimationLockUntil = 0;
+      art.combatAnimationTimer = null;
       setBattleCharacterAction(art, member.character, 'idle');
-    }, kind === 'basic' ? 420 : skillId === 'shadow-dance' ? 1000 : skillId === 'blizzard' ? 1120 : skillId === 'chain-lightning' ? 900 : skillId === 'holy-nova' ? 1000 : 720);
+    }, animationDuration);
   });
 }
 
@@ -4469,7 +4479,7 @@ function useAutoSkillForMember(member, now = Date.now()) {
       kind: 'skill',
       area: Number(skillEffect.targets || skill.targets || 1) > 1,
       skillId: skill.id,
-      targetPositions: skill.id === 'shadow-dance' ? targetAnchors : null
+      targetPositions: targetAnchors
     });
     if (skill.id === 'heavy-strike') {
       const struckTarget = hits[0];
