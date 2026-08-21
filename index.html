@@ -20,6 +20,7 @@
   <link rel="stylesheet" href="styles/mmorpg-layout.css?v=20260822-combat-motion-v43" />
   <link rel="stylesheet" href="styles/monster-slots.css?v=20260821-combat-motion-v5" />
   <link rel="stylesheet" href="styles/village.css?v=20260803-workshop-crafting-v2" />
+  <link rel="stylesheet" href="styles/adventure-info.css?v=20260822-battle-density-v1" />
 </head>
 <body>
   <div class="sky" aria-hidden="true"></div>
@@ -139,6 +140,7 @@
         <button id="layout-export" class="layout-reset layout-export" type="button">匯出版面設定</button>
         <button id="layout-reset" class="layout-reset" type="button">回復預設位置</button>
       </section>
+      <main class="battle-center">
       <div class="battle-field">
         <div class="world-depth" aria-hidden="true">
           <div class="world-veil"></div>
@@ -158,6 +160,22 @@
         <div id="enemy-squad" class="enemy-squad monster-slot-grid" role="grid" aria-label="敵方戰場"></div>
         <div class="battle-status"><span><b>⚔</b> 自動戰鬥中 · <strong id="enemy-count">5</strong> 隻敵人</span><span><b>✦</b> <strong id="gold-count">0</strong> 金幣</span></div>
       </div>
+      <section class="battle-adventure-info" aria-label="冒險資訊">
+        <article class="adventure-info-card region-progress-card">
+          <header><span>🚩</span><h3>區域進度</h3></header>
+          <div class="region-progress-body">
+            <div><strong id="region-progress-name">目前區域</strong><small id="region-progress-chapter">冒險進行中</small></div>
+            <div class="region-kill-summary"><span>擊殺進度</span><b id="region-progress-count">0 / 0</b></div>
+            <div class="region-progress-track" role="progressbar" aria-label="區域擊殺進度" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><i id="region-progress-bar"></i></div>
+            <div class="region-progress-next"><span>下一區域</span><strong id="region-progress-next">—</strong></div>
+          </div>
+        </article>
+        <article class="adventure-info-card round-loot-card">
+          <header><span>🎁</span><h3>本輪戰利品</h3></header>
+          <div id="round-loot-list" class="round-loot-list"><p>尚未獲得戰利品</p></div>
+        </article>
+      </section>
+      </main>
       <div class="battle-bottom">
         <div class="combat-log"><p>戰鬥紀錄</p><div id="combat-log-lines" aria-live="polite"></div></div>
         <section class="skill-panel" aria-labelledby="skill-panel-title"><div class="skill-panel-head"><strong id="skill-panel-title">技能</strong><small id="skill-resource-status">自動施放</small></div><button id="potion-button" class="potion-button" type="button"><span>🧪</span><span>治癒藥水</span><b id="potion-count">5</b></button><button id="mana-potion-button" class="potion-button" type="button"><span>🔷</span><span>魔法藥水</span><b id="mana-potion-count">0</b></button><div id="skill-list" class="skill-list"></div></section>

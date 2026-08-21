@@ -8,7 +8,7 @@ const css = fs.readFileSync(path.join(root, 'styles', 'monster-slots.css'), 'utf
 
 assert.match(
   html,
-  /<div class="battle-field">[\s\S]*?id="battle-player-art"[\s\S]*?<\/div>\s*<div class="battle-bottom">/,
+  /<main class="battle-center">[\s\S]*?<div class="battle-field">[\s\S]*?id="battle-player-art"[\s\S]*?<section class="battle-adventure-info"[\s\S]*?<\/main>\s*<div class="battle-bottom">/,
   'the player portrait is a child of the battlefield rather than the lower controls'
 );
 assert.match(css, /\.battle-screen \.battle-field\s*{[\s\S]*?position:\s*relative\s*!important;[\s\S]*?overflow:\s*hidden\s*!important;/);

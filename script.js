@@ -243,6 +243,56 @@ let battleLogEntries = [];
 let dropLookupCategory = 'all';
 let dropLookupQuery = '';
 let battle = { enemyTypes: ['goblin', 'wolf', 'boar', 'goblin', 'wolf'], enemyHps: [45, 68, 82, 45, 68], playerHp: 100, playerMana: 100, playerShield: 0, manaExhausted: false, playerAttackCharge: 0, globalSkillReadyAt: 0, undeadRevived: false, skillCooldowns: {}, enemyRespawns: [null, null, null, null, null], enemySpawnedAt: [0, 1, 2, 3, 4], enemyNextAttackAt: [0, 0, 0, 0, 0], enemyDots: [[], [], [], [], []], monsterMoveSpeed: 200, targetIndexes: [], enemyDamages: [[], [], [], [], []], damageTimers: [] };
+
+function addRoundLoot(id, name, quantity = 1, icon = '◆', valuePrefix = '×') {
+  if (!battle.roundLoot) battle.roundLoot = {};
+  const key = String(id || name || 'loot');
+  const current = battle.roundLoot[key] || { id: key, name: String(name || '未知物品'), quantity: 0, icon, valuePrefix, updatedAt: 0 };
+  current.quantity += Math.max(0, Number(quantity) || 0);
+  current.icon = icon || current.icon;
+  current.valuePrefix = valuePrefix;
+  current.updatedAt = Date.now();
+  battle.roundLoot[key] = current;
+}
+
+function getNextAdventureMap(currentMap) {
+  const nextId = ChapterOneProgressionPolicy.NEXT_MAP[currentMap.id];
+  if (nextId) return mapProgression.find((map) => map.id === nextId) || (nextId === 'black-forest' ? mapProgression.find((map) => map.id === ChapterTwoMapPolicy.CHAPTER.id) : null);
+  if (currentMap.chapter === 2) {
+    const regions = mapProgression.filter((map) => map.chapter === 2 && map.regionOf && !map.dungeon);
+    return regions[regions.findIndex((map) => map.id === currentMap.id) + 1] || null;
+  }
+  return null;
+}
+
+function renderBattleAdventureInfo(progress = getProgress()) {
+  const currentMap = getActiveMap(progress);
+  const requirement = ChapterOneProgressionPolicy.REQUIREMENTS[currentMap.id];
+  const kills = Math.max(0, Number(progress.mapKillProgress?.[currentMap.id]) || 0);
+  const target = Math.max(0, Number(requirement?.normalKills) || 0);
+  const percent = target > 0 ? Math.min(100, Math.round(kills / target * 100)) : 0;
+  const nextMap = getNextAdventureMap(currentMap);
+  const name = document.querySelector('#region-progress-name');
+  const chapter = document.querySelector('#region-progress-chapter');
+  const count = document.querySelector('#region-progress-count');
+  const bar = document.querySelector('#region-progress-bar');
+  const track = document.querySelector('.region-progress-track');
+  const next = document.querySelector('#region-progress-next');
+  if (name) name.textContent = currentMap.name;
+  if (chapter) chapter.textContent = `第 ${currentMap.chapter || 1} 章${requirement?.bossName ? `・區域首領 ${requirement.bossName}` : '・持續探索中'}`;
+  if (count) count.textContent = target > 0 ? `${Math.min(kills, target)} / ${target}` : `${kills} 次擊殺`;
+  if (bar) bar.style.width = target > 0 ? `${percent}%` : '0%';
+  if (track) {
+    track.setAttribute('aria-valuenow', String(percent));
+    track.classList.toggle('is-open-ended', target <= 0);
+  }
+  if (next) next.textContent = nextMap?.name || '本章最終區域';
+
+  const lootList = document.querySelector('#round-loot-list');
+  if (!lootList) return;
+  const entries = Object.values(battle.roundLoot || {}).sort((a, b) => (a.id === 'gold' ? -1 : b.id === 'gold' ? 1 : b.updatedAt - a.updatedAt)).slice(0, 8);
+  lootList.innerHTML = entries.length ? entries.map((entry) => `<div class="round-loot-item"><span>${escapeBattleLogText(entry.icon)}</span><b>${escapeBattleLogText(entry.name)}</b><em>${entry.valuePrefix}${Math.floor(entry.quantity).toLocaleString('zh-TW')}</em></div>`).join('') : '<p>尚未獲得戰利品</p>';
+}
 let layoutEditMode = false;
 let activeLayoutDrag = null;
 let selectedLayoutTarget = 'hud';
@@ -3933,11 +3983,12 @@ function rewardVictory(index) {
       const amount = enemy.isBoss ? 2 : 1;
       resources.starIron += amount;
       accountDrops.push(`星鐵碎片 ×${amount}`);
+      addRoundLoot('star-iron', '星鐵碎片', amount, '✦');
     }
     saveAccountResources(resources);
   } else if (enemy.isBoss) {
     const resources = getAccountResources();
-    if (Math.random() < .12) { resources.starIron += 1; accountDrops.push('星鐵碎片 ×1'); }
+    if (Math.random() < .12) { resources.starIron += 1; accountDrops.push('星鐵碎片 ×1'); addRoundLoot('star-iron', '星鐵碎片', 1, '✦'); }
     saveAccountResources(resources);
   }
   while (progress.xp >= requiredXp(progress.level)) {
@@ -3961,7 +4012,19 @@ function rewardVictory(index) {
     showToast(`${name}已解鎖`);
     logBattle(`◆ 區域推進完成：${name}已解鎖`, 'progress');
   });
+  addRoundLoot('gold', '金幣', earnedGold, '🪙', '+');
+  if (loot) addRoundLoot(`loot:${loot.name}`, loot.name, loot.quantity || 1, loot.kind === 'consumable' ? '🧪' : '◆');
+  materialDrops.forEach((material) => addRoundLoot(`material:${material.id || material.name}`, material.name, material.quantity || 1, material.icon || '◆'));
+  if (purificationDrop) addRoundLoot(`purification:${purificationDrop.id || purificationDrop.name}`, purificationDrop.name, purificationDrop.quantity || 1, purificationDrop.icon || '◇');
+  skillMaterialDrops.forEach((material) => addRoundLoot(`skill:${material.id || material.name}`, material.name, material.quantity || 1, material.icon || '📜'));
+  recipeDrops.forEach((recipe) => addRoundLoot(`recipe:${recipe.id || recipe.name}`, recipe.name, recipe.quantity || 1, recipe.icon || '📜'));
+  if (equipmentDrop) addRoundLoot(`equipment:${equipmentDrop.name}`, equipmentDrop.name, 1, '⚔');
+  if (blueBossDrop) addRoundLoot(`equipment:${blueBossDrop.name}`, blueBossDrop.name, 1, '🔷');
+  if (offhandDrop) addRoundLoot(`equipment:${offhandDrop.name}`, offhandDrop.name, 1, '🛡');
+  if (goblinCampMapDropped) addRoundLoot('goblin-camp-map', '哥布林營地地圖', 1, '🗺️');
+  if (collectible) addRoundLoot(`collectible:${collectible.id || collectible.name}`, collectible.name, 1, '♛');
   saveProgress(progress);
+  renderBattleAdventureInfo(progress);
   logBattle(`✦ 擊敗${enemy.name}！獲得 ${earnedXp} EXP、${earnedGold} 金幣`, 'reward');
   if (loot) logBattle(`🎁 掉落【${loot.name}】${loot.quantity ? ` ×${loot.quantity}` : ''}`);
   materialDrops.forEach((material) => {
@@ -5756,7 +5819,7 @@ function openBattle() {
   const sessionId = ++battleSessionSequence;
   const partyMembers = buildBattlePartyMembers(battleStart);
   const mainMember = partyMembers.find((member) => member.isMain) || partyMembers[0];
-  battle = { enemyTypes, enemyLevels, enemyHps, partyMembers, playerHp: mainMember?.currentHp || getMaxHp(progress.level, progress), playerMana: mainMember?.resourceCurrent || 0, playerArrows: mainMember?.resourceType === 'arrows' ? mainMember.resourceCurrent : 0, playerShield: 0, playerStunnedUntil: 0, playerBleed: null, manaExhausted: false, playerAttackCharge: 0, hunterAttackCount: 0, lastManaRegenAt: battleStart, lastResourceUpdatedAt: battleStart, lastArrowRecoveryAt: battleStart, lastCorruptionTickAt: battleStart, lastStrongholdRegenAt: battleStart, enemyNextAttackAt: createEnemyAttackSchedule(enemyTypes, battleStart, currentMap.id, enemyLevels), enemyBoarEnraged: enemyTypes.map(() => false), enemyTrailSummoned: enemyTypes.map(() => false), enemySummonProfiles: enemyTypes.map(() => null), enemyCaptainShieldUntil: enemyTypes.map(() => 0), enemyAssassinDashUntil: enemyTypes.map(() => 0), enemySpiderNestPhase: enemyTypes.map(() => 1), blackstoneRoarUntil: 0, blackstoneCommandUntil: 0, blackstoneSpiderCommandUntil: 0, spiderNestCommandUntil: 0, strongholdCommandUntil: 0, blackstoneStrongholdState: BlackstoneStrongholdPolicy.createState(), globalSkillReadyAt: 0, undeadRevived: false, skillCooldowns: {}, enemyRespawns: enemyTypes.map(() => null), enemySpawnedAt: enemyTypes.map((_, index) => battleStart + index), enemyDots: enemyTypes.map(() => []), enemySkillStates: enemyTypes.map(() => null), monsterMoveSpeed: 200, targetIndexes: [], enemyDamages: enemyTypes.map(() => []), damageTimers: [], rewardedEnemyIndexes: new Set(), isDungeon, dungeonId: isDungeon ? currentMap.id : null, dungeonWave: isDungeon ? 1 : 0, dungeonComplete: false, waveTransitioning: false, goblinScoutSummons: 0 };
+  battle = { enemyTypes, enemyLevels, enemyHps, partyMembers, playerHp: mainMember?.currentHp || getMaxHp(progress.level, progress), playerMana: mainMember?.resourceCurrent || 0, playerArrows: mainMember?.resourceType === 'arrows' ? mainMember.resourceCurrent : 0, playerShield: 0, playerStunnedUntil: 0, playerBleed: null, manaExhausted: false, playerAttackCharge: 0, hunterAttackCount: 0, lastManaRegenAt: battleStart, lastResourceUpdatedAt: battleStart, lastArrowRecoveryAt: battleStart, lastCorruptionTickAt: battleStart, lastStrongholdRegenAt: battleStart, enemyNextAttackAt: createEnemyAttackSchedule(enemyTypes, battleStart, currentMap.id, enemyLevels), enemyBoarEnraged: enemyTypes.map(() => false), enemyTrailSummoned: enemyTypes.map(() => false), enemySummonProfiles: enemyTypes.map(() => null), enemyCaptainShieldUntil: enemyTypes.map(() => 0), enemyAssassinDashUntil: enemyTypes.map(() => 0), enemySpiderNestPhase: enemyTypes.map(() => 1), blackstoneRoarUntil: 0, blackstoneCommandUntil: 0, blackstoneSpiderCommandUntil: 0, spiderNestCommandUntil: 0, strongholdCommandUntil: 0, blackstoneStrongholdState: BlackstoneStrongholdPolicy.createState(), globalSkillReadyAt: 0, undeadRevived: false, skillCooldowns: {}, enemyRespawns: enemyTypes.map(() => null), enemySpawnedAt: enemyTypes.map((_, index) => battleStart + index), enemyDots: enemyTypes.map(() => []), enemySkillStates: enemyTypes.map(() => null), monsterMoveSpeed: 200, targetIndexes: [], enemyDamages: enemyTypes.map(() => []), damageTimers: [], rewardedEnemyIndexes: new Set(), roundLoot: {}, isDungeon, dungeonId: isDungeon ? currentMap.id : null, dungeonWave: isDungeon ? 1 : 0, dungeonComplete: false, waveTransitioning: false, goblinScoutSummons: 0 };
   battle.enemyAffixes = enemyAffixes;
   battle.sessionId = sessionId;
   clearBattleLog();
@@ -5778,6 +5841,7 @@ function openBattle() {
   fighting = true;
   document.querySelector('#battle-toggle').textContent = 'Ⅱ 暫停攻擊';
   updateBattleUI();
+  renderBattleAdventureInfo(progress);
   clearInterval(battleTimer);
   clearInterval(skillTimer);
   clearInterval(enemyAttackTimer);
