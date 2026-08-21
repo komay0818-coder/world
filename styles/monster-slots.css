@@ -1283,13 +1283,13 @@ body:has(.battle-screen:not(.hidden)) .toast.show {
 
 #battle-screen .battle-field:has(#player-battle-stage) #battle-player-art[aria-label] {
   position: absolute !important;
-  inset: auto auto clamp(14px, 3%, 24px) clamp(14px, 3%, 28px) !important;
-  translate: none;
+  inset: auto auto clamp(18px, 6%, 48px) 50% !important;
+  translate: -50% 0;
   transform: none;
 }
 
 @media (max-width: 700px) {
   #battle-screen .battle-field:has(#player-battle-stage) #battle-player-art[aria-label] {
-    inset: auto auto 12px 12px !important;
+    inset: auto auto 16px 50% !important;
   }
 }
