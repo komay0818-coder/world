@@ -1599,6 +1599,7 @@ function formatOfflineDuration(milliseconds) {
 function markPlayerActive() {
   const character = localStorage.getItem('stardust-character');
   if (!character) return;
+  if (fighting && battle.partyMembers?.length) persistPartyRuntimeState();
   const progress = getProgress();
   progress.lastActiveAt = Date.now();
   saveProgress(progress);
@@ -1642,6 +1643,8 @@ function claimOfflineRewards() {
       defense: stats.defense,
       damageReduction: stats.damageReduction,
       attackSpeed: stats.attackSpeed,
+      hpRegeneration: stats.hpRegeneration,
+      healingPotions: progress.potions,
       ...attackProfile
     },
     monsters: getOfflineCombatMonsters(activeMap, progress.level)
@@ -1666,15 +1669,28 @@ function claimOfflineRewards() {
   }
   const gainedGold = defeated * 2;
   progress.gold += gainedGold;
+  const potionsUsed = Math.min(progress.potions, simulation.potionsUsed || 0);
+  progress.potions -= potionsUsed;
+  for (let potion = 0; potion < potionsUsed; potion += 1) removePotionItem(progress);
   const finalStats = getCharacterStats(progress.level, progress, character);
   progress.partyMemberState = {
     ...(progress.partyMemberState || {}),
     currentHp: simulation.died ? finalStats.hp : Math.max(1, Math.min(finalStats.hp, simulation.remainingHp)),
     maxHp: finalStats.hp
   };
+  if (simulation.died) {
+    if (activeMap.dungeon) {
+      progress.selectedMapId = progress.dungeonReturnMapId || (activeMap.id === 'black-forest-altar' ? 'black-forest' : 'plains-entrance');
+      progress.dungeonAdmission = false;
+    }
+    progress.requiresMapSelectionAfterDefeat = true;
+  }
   saveProgress(progress);
-  pendingOfflineReport = { duration: formatOfflineDuration(simulation.effectiveMs), offlineDuration: formatOfflineDuration(offlineMs), defeated, gainedXp, gainedGold, levelsGained, equipmentFound: 0, capped: now - lastActiveAt > offlineLimitMs, deaths: simulation.deaths || 0, died: false };
-  showToast(`離線掛機 ${pendingOfflineReport.duration}：獲得 ${gainedXp} EXP、${gainedGold} 金幣`);
+  pendingOfflineReport = { duration: formatOfflineDuration(simulation.effectiveMs), offlineDuration: formatOfflineDuration(offlineMs), defeated, gainedXp, gainedGold, levelsGained, equipmentFound: 0, capped: now - lastActiveAt > offlineLimitMs, potionsUsed, died: simulation.died };
+  if (simulation.died) {
+    openVillage('menu');
+    showToast(`角色在離線戰鬥中戰敗，本次掛機已結束。有效掛機時間：${pendingOfflineReport.duration}`);
+  } else showToast(`離線掛機 ${pendingOfflineReport.duration}：獲得 ${gainedXp} EXP、${gainedGold} 金幣`);
   return pendingOfflineReport;
 }
 

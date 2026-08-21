@@ -9,5 +9,6 @@ assert.match(script, /OfflineCombatPolicy\.simulate\(\{[\s\S]*durationMs: offlin
 assert.doesNotMatch(script.match(/function claimOfflineRewards\(\)[\s\S]*?\n}/)?.[0] || '', /killsPerMinute/, 'fixed offline kill speed is no longer the settlement source');
 assert.match(script, /const defeated = simulation\.defeated[\s\S]*for \(let kill = 0; kill < defeated;/, 'only kills completed before death grant rewards and map progress');
 const offlineClaim = script.match(/function claimOfflineRewards\(\)[\s\S]*?\n}/)?.[0] || '';
-assert.doesNotMatch(offlineClaim, /openVillage\('menu'\)|requiresMapSelectionAfterDefeat = true/, 'offline settlement keeps the player on the active map');
-assert.match(offlineClaim, /deaths: simulation\.deaths \|\| 0/, 'offline auto-revives are retained in the settlement report');
+assert.match(offlineClaim, /healingPotions: progress\.potions[\s\S]*hpRegeneration: stats\.hpRegeneration|hpRegeneration: stats\.hpRegeneration[\s\S]*healingPotions: progress\.potions/, 'offline survival includes automatic potions and passive regeneration');
+assert.match(offlineClaim, /simulation\.died[\s\S]*requiresMapSelectionAfterDefeat = true[\s\S]*openVillage\('menu'\)/, 'a genuine offline defeat still returns to the village');
+assert.match(script, /fighting && battle\.partyMembers\?\.length\) persistPartyRuntimeState\(\)/, 'hiding the page persists the live battle health before offline settlement');
