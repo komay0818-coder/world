@@ -5,8 +5,9 @@
 }(typeof globalThis !== 'undefined' ? globalThis : this, function createGoblinCampPolicy() {
   const STRENGTH_MULTIPLIER = 1.5;
   const SLINGER_STUN_CHANCE = .2;
-  const SHAMAN_HEAL_CHANCE = .35;
+  const SHAMAN_HEAL_CHANCE = .20;
   const SHAMAN_HEAL_RATIO = .15;
+  const SHAMAN_HEAL_COOLDOWN_MS = 5000;
   const HIGH_CHIEF_TOTEM_CHANCE = .25;
   const HIGH_CHIEF_SUMMON_CHANCE = .15;
 
@@ -24,9 +25,9 @@
     return type === 'goblinSlinger' && Number(randomValue) < SLINGER_STUN_CHANCE;
   }
 
-  function resolveAction({ type, randomValue, hasWoundedAlly = false, canSummon = false }) {
+  function resolveAction({ type, randomValue, hasWoundedAlly = false, canHeal = true, canSummon = false }) {
     const roll = Math.min(1, Math.max(0, Number(randomValue) || 0));
-    if (type === 'goblinShaman' && hasWoundedAlly && roll < SHAMAN_HEAL_CHANCE) return 'heal';
+    if (type === 'goblinShaman' && hasWoundedAlly && canHeal && roll < SHAMAN_HEAL_CHANCE) return 'heal';
     if (type !== 'goblinHighChief') return 'attack';
     if (hasWoundedAlly && roll < HIGH_CHIEF_TOTEM_CHANCE) return 'healing-totem';
     const summonThreshold = (hasWoundedAlly ? HIGH_CHIEF_TOTEM_CHANCE : 0) + HIGH_CHIEF_SUMMON_CHANCE;
@@ -39,6 +40,7 @@
     SLINGER_STUN_CHANCE,
     SHAMAN_HEAL_CHANCE,
     SHAMAN_HEAL_RATIO,
+    SHAMAN_HEAL_COOLDOWN_MS,
     HIGH_CHIEF_TOTEM_CHANCE,
     HIGH_CHIEF_SUMMON_CHANCE,
     scaleMonster,

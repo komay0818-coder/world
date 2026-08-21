@@ -4678,7 +4678,7 @@ function getWoundedEnemyIndexes() {
   return aliveEnemyIndexesByAge().filter((index) => battle.enemyHps[index] < getEnemyDefinition(index).maxHp);
 }
 
-function healGoblinAlly(healerIndex) {
+function healGoblinAlly(healerIndex, now = Date.now()) {
   const wounded = getWoundedEnemyIndexes();
   if (!wounded.length) return false;
   const targetIndex = wounded.sort((first, second) => (
@@ -4689,6 +4689,7 @@ function healGoblinAlly(healerIndex) {
   const heal = Math.max(1, Math.ceil(target.maxHp * GoblinCampPolicy.SHAMAN_HEAL_RATIO));
   const restored = Math.min(heal, target.maxHp - battle.enemyHps[targetIndex]);
   battle.enemyHps[targetIndex] += restored;
+  getEnemySkillState(healerIndex).shamanHealReadyAt = now + GoblinCampPolicy.SHAMAN_HEAL_COOLDOWN_MS;
   playMonsterAttackAnimation(healerIndex, false);
   logBattle(`✨【哥布林薩滿】施放治療術，替【${target.name}】恢復 ${restored} 生命。`, 'enemy-healing');
   return true;
@@ -4797,9 +4798,10 @@ function legacyEnemyAttackTick() {
         type: battle.enemyTypes[attackingEnemyIndex],
         randomValue: Math.random(),
         hasWoundedAlly: getWoundedEnemyIndexes().length > 0,
+        canHeal: now >= (getEnemySkillState(attackingEnemyIndex).shamanHealReadyAt || 0),
         canSummon: aliveEnemyIndexesByAge().length < 4 && (battle.goblinScoutSummons || 0) < 2
       });
-      if (action === 'heal' && healGoblinAlly(attackingEnemyIndex)) continue;
+      if (action === 'heal' && healGoblinAlly(attackingEnemyIndex, now)) continue;
       if (action === 'healing-totem' && useGoblinHealingTotem(attackingEnemyIndex)) continue;
       if (action === 'summon-scout' && summonGoblinScout(attackingEnemyIndex, now)) continue;
     }
@@ -5286,9 +5288,10 @@ function enemyAttackTick() {
         type: battle.enemyTypes[enemyIndex],
         randomValue: Math.random(),
         hasWoundedAlly: getWoundedEnemyIndexes().length > 0,
+        canHeal: now >= (getEnemySkillState(enemyIndex).shamanHealReadyAt || 0),
         canSummon: aliveEnemyIndexesByAge().length < 4 && (battle.goblinScoutSummons || 0) < 2
       });
-      if (action === 'heal' && healGoblinAlly(enemyIndex)) continue;
+      if (action === 'heal' && healGoblinAlly(enemyIndex, now)) continue;
       if (action === 'healing-totem' && useGoblinHealingTotem(enemyIndex)) continue;
       if (action === 'summon-scout' && summonGoblinScout(enemyIndex, now)) continue;
     }
