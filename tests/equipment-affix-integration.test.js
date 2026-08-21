@@ -9,7 +9,7 @@ const appCss = fs.readFileSync(path.join(__dirname, '..', 'style.css'), 'utf8');
 
 assert.match(html, /equipment-affix-policy\.js/, 'affix policy loads before the main game script');
 assert.match(html, /world\/f068f8b5f2cdc3d7268f008e3c815db9e1267318\/style\.css/, 'the affix UI stylesheet is pinned to its immutable commit');
-assert.match(html, /script\.js\?v=20260821-holy-light-v1/, 'the affix UI renderer uses the current local build');
+assert.match(html, /script\.js\?v=20260821-holy-nova-v1/, 'the affix UI renderer uses the current local build');
 assert.match(source, /equipmentAffixMigrationVersion !== 'green-affix-v1'/, 'legacy saves receive the affix compatibility migration');
 assert.match(source, /EquipmentAffixPolicy\.normalizeEquipment\(item\)/, 'inventory and equipped items are normalized on load');
 assert.match(source, /EquipmentAffixPolicy\.getEquippedAffixStats\(progress\.equipment\)/, 'stats read only the equipped item collection');

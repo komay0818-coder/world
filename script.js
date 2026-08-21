@@ -2745,9 +2745,9 @@ function playPartyMemberCombatAnimation(member, targetIndexes = [], options = {}
       ? document.querySelector('#enemy-squad')
       : null;
     if (!field || !art) return;
-    const actionClass = skillId === 'heavy-strike' ? 'is-heavy-strike' : skillId === 'whirlwind' ? 'is-whirlwind' : skillId === 'charge' ? 'is-charge' : skillId === 'power-shot' ? 'is-power-shot' : skillId === 'multi-shot' ? 'is-multi-shot' : skillId === 'piercing-shot' ? 'is-piercing-shot' : skillId === 'backstab' ? 'is-backstab' : skillId === 'shadow-dance' ? 'is-shadow-dance' : skillId === 'fireball' ? 'is-fireball' : skillId === 'blizzard' ? 'is-blizzard' : skillId === 'chain-lightning' ? 'is-chain-lightning' : skillId === 'holy-light' ? 'is-holy-light' : kind === 'basic' ? 'is-attacking' : area ? 'is-area-skill' : 'is-target-skill';
-    fighter?.classList.remove('is-attacking', 'is-target-skill', 'is-area-skill', 'is-heavy-strike', 'is-whirlwind', 'is-charge', 'is-power-shot', 'is-multi-shot', 'is-piercing-shot', 'is-backstab', 'is-shadow-dance', 'is-fireball', 'is-blizzard', 'is-chain-lightning', 'is-holy-light');
-    art.classList.remove('is-attacking', 'is-target-skill', 'is-area-skill', 'is-heavy-strike', 'is-whirlwind', 'is-charge', 'is-power-shot', 'is-multi-shot', 'is-piercing-shot', 'is-backstab', 'is-shadow-dance', 'is-fireball', 'is-blizzard', 'is-chain-lightning', 'is-holy-light');
+    const actionClass = skillId === 'heavy-strike' ? 'is-heavy-strike' : skillId === 'whirlwind' ? 'is-whirlwind' : skillId === 'charge' ? 'is-charge' : skillId === 'power-shot' ? 'is-power-shot' : skillId === 'multi-shot' ? 'is-multi-shot' : skillId === 'piercing-shot' ? 'is-piercing-shot' : skillId === 'backstab' ? 'is-backstab' : skillId === 'shadow-dance' ? 'is-shadow-dance' : skillId === 'fireball' ? 'is-fireball' : skillId === 'blizzard' ? 'is-blizzard' : skillId === 'chain-lightning' ? 'is-chain-lightning' : skillId === 'holy-light' ? 'is-holy-light' : skillId === 'holy-nova' ? 'is-holy-nova' : kind === 'basic' ? 'is-attacking' : area ? 'is-area-skill' : 'is-target-skill';
+    fighter?.classList.remove('is-attacking', 'is-target-skill', 'is-area-skill', 'is-heavy-strike', 'is-whirlwind', 'is-charge', 'is-power-shot', 'is-multi-shot', 'is-piercing-shot', 'is-backstab', 'is-shadow-dance', 'is-fireball', 'is-blizzard', 'is-chain-lightning', 'is-holy-light', 'is-holy-nova');
+    art.classList.remove('is-attacking', 'is-target-skill', 'is-area-skill', 'is-heavy-strike', 'is-whirlwind', 'is-charge', 'is-power-shot', 'is-multi-shot', 'is-piercing-shot', 'is-backstab', 'is-shadow-dance', 'is-fireball', 'is-blizzard', 'is-chain-lightning', 'is-holy-light', 'is-holy-nova');
     void art.offsetWidth;
     art.dataset.job = member.job || member.character?.job || 'warrior';
     setBattleCharacterAction(art, member.character, 'active');
@@ -2857,6 +2857,10 @@ function playPartyMemberCombatAnimation(member, targetIndexes = [], options = {}
         art.style.setProperty('--holy-light-x', `${deltaX - deltaX / distance * stopShort}px`);
         art.style.setProperty('--holy-light-y', `${deltaY - deltaY / distance * stopShort}px`);
       }
+      if (skillId === 'holy-nova') {
+        art.style.setProperty('--holy-nova-x', `${fieldRect.left + fieldRect.width * .5 - (artRect.left + artRect.width / 2)}px`);
+        art.style.setProperty('--holy-nova-y', `${fieldRect.top + fieldRect.height * .54 - (artRect.top + artRect.height / 2)}px`);
+      }
     }
     fighter?.classList.add(actionClass);
     art.classList.add(actionClass);
@@ -2887,12 +2891,14 @@ function playPartyMemberCombatAnimation(member, targetIndexes = [], options = {}
       art.style.removeProperty('--chain-move-y');
       art.style.removeProperty('--holy-light-x');
       art.style.removeProperty('--holy-light-y');
+      art.style.removeProperty('--holy-nova-x');
+      art.style.removeProperty('--holy-nova-y');
       if (skillId === 'shadow-dance') {
         art.shadowTeleportAnimation?.cancel();
         art.shadowTeleportAnimation = null;
       }
       setBattleCharacterAction(art, member.character, 'idle');
-    }, kind === 'basic' ? 420 : skillId === 'shadow-dance' ? 1000 : skillId === 'blizzard' ? 1120 : skillId === 'chain-lightning' ? 900 : 720);
+    }, kind === 'basic' ? 420 : skillId === 'shadow-dance' ? 1000 : skillId === 'blizzard' ? 1120 : skillId === 'chain-lightning' ? 900 : skillId === 'holy-nova' ? 1000 : 720);
   });
 }
 
@@ -2908,7 +2914,8 @@ const battleSkillEffectPresets = Object.freeze({
   fireball: { duration: 680, impactAt: 320, className: 'battle-effect-fireball' },
   blizzard: { duration: 1100, impactAt: 350, className: 'battle-effect-blizzard' },
   'chain-lightning': { duration: 880, impactAt: 230, className: 'battle-effect-chain-lightning' },
-  'holy-light': { duration: 680, impactAt: 300, className: 'battle-effect-holy-light' }
+  'holy-light': { duration: 680, impactAt: 300, className: 'battle-effect-holy-light' },
+  'holy-nova': { duration: 980, impactAt: 300, className: 'battle-effect-holy-nova' }
 });
 
 function captureBattleTargetAnchor(index) {
@@ -2967,6 +2974,7 @@ function playBattleSkillEffect(skillId, targetAnchor, options = {}) {
   effect.style.setProperty('--effect-x', `${targetAnchor.x}px`);
   effect.style.setProperty('--effect-y', `${targetAnchor.y}px`);
   effect.style.setProperty('--target-width', `${targetAnchor.width}px`);
+  if (options.radius) effect.style.setProperty('--effect-radius', `${options.radius}px`);
   effect.innerHTML = skillId === 'whirlwind'
     ? `<span class="whirlwind-speed-trails"><i></i><i></i></span><span class="whirlwind-ring"></span><span class="whirlwind-afterimages"><i></i><i></i><i></i></span><span class="whirlwind-finisher"></span>${(options.targets || []).map((target, order) => `<span class="whirlwind-target-hit" data-effect-target="${target.index}" style="--hit-order:${order};--hit-x:${(target.anchor?.x || targetAnchor.x) - targetAnchor.x}px;--hit-y:${(target.anchor?.y || targetAnchor.y) - targetAnchor.y}px"><i></i><b>-${target.damage}</b></span>`).join('')}`
     : skillId === 'charge'
@@ -2999,6 +3007,8 @@ function playBattleSkillEffect(skillId, targetAnchor, options = {}) {
       }).join('')
     : skillId === 'holy-light'
       ? `<span class="holy-light-mark">✦</span><span class="holy-light-beam"></span><span class="holy-light-flash"></span><span class="holy-light-ring"></span><span class="holy-light-particles"><i></i><i></i><i></i><i></i></span>${options.damage > 0 ? `<b class="holy-light-damage">-${options.damage}</b>` : ''}`
+    : skillId === 'holy-nova'
+      ? `<span class="holy-nova-gather"><i></i><i></i><i></i></span><span class="holy-nova-ring"></span>${(options.targets || []).map((target) => `<span class="holy-nova-hit" data-effect-target="${target.index}" style="--hit-delay:${target.delay}ms;--hit-size:${target.anchor.width}px;--hit-x:${target.anchor.x - targetAnchor.x}px;--hit-y:${target.anchor.y - targetAnchor.y}px"><i></i><em></em>${target.damage > 0 ? `<b>-${target.damage}</b>` : ''}</span>`).join('')}`
     : `<span class="smash-trail"></span><span class="impact-shockwave"></span><span class="impact-crack"></span><span class="impact-sparks"></span><span class="impact-debris">${Array.from({ length: 6 }, (_, index) => `<i style="--debris-index:${index}"></i>`).join('')}</span>${options.damage > 0 ? `<b class="skill-impact-damage">-${options.damage}</b>` : ''}`;
   layer.append(effect);
   if (skillId === 'piercing-shot') animatePiercingProjectile(effect, targetAnchor, options.targets || []);
@@ -3084,6 +3094,13 @@ function playBattleSkillEffect(skillId, targetAnchor, options = {}) {
     target?.classList.add('holy-light-hit');
     setTimeout(() => target?.classList.remove('holy-light-hit'), 170);
   }, preset.impactAt);
+  if (skillId === 'holy-nova') (options.targets || []).forEach((visualTarget) => {
+    setTimeout(() => {
+      const target = document.querySelector(`#enemy-${visualTarget.index}`);
+      target?.classList.add('holy-nova-hit');
+      setTimeout(() => target?.classList.remove('holy-nova-hit'), 160);
+    }, visualTarget.delay);
+  });
   if (skillId === 'shadow-dance') (options.targets || []).forEach((visualTarget, order, visualTargets) => {
     const delay = preset.impactAt + order * (visualTargets.length > 1 ? 85 : 0);
     setTimeout(() => {
@@ -4204,7 +4221,7 @@ function useAutoSkillForMember(member, now = Date.now()) {
     if (skill.id === 'whirlwind') damagePower *= 1 + Math.min(skillEffect.maxTargetBonus || 0, Math.max(0, targets.length - 1) * (skillEffect.perExtraTargetBonus || 0));
     const damage = Math.max(1, Math.ceil(stats.attack * damagePower * (critical ? stats.criticalDamageMultiplier : 1)));
     const profile = getPlayerAttackProfile(character, skill);
-    const targetAnchors = ['heavy-strike', 'whirlwind', 'charge', 'power-shot', 'multi-shot', 'piercing-shot', 'backstab', 'shadow-dance', 'fireball', 'blizzard', 'chain-lightning', 'holy-light'].includes(skill.id)
+    const targetAnchors = ['heavy-strike', 'whirlwind', 'charge', 'power-shot', 'multi-shot', 'piercing-shot', 'backstab', 'shadow-dance', 'fireball', 'blizzard', 'chain-lightning', 'holy-light', 'holy-nova'].includes(skill.id)
       ? new Map(targets.map((index) => [index, captureBattleTargetAnchor(index)]))
       : null;
     const attackerAnchor = ['power-shot', 'multi-shot', 'piercing-shot', 'chain-lightning'].includes(skill.id) ? captureBattleAttackerAnchor(member) : null;
@@ -4216,7 +4233,7 @@ function useAutoSkillForMember(member, now = Date.now()) {
         attackKind: 'skill',
         armorIgnore: skillEffect.armorIgnore,
         controlledBonus: skillEffect.controlledBonus,
-        showDamage: !['heavy-strike', 'whirlwind', 'charge', 'power-shot', 'multi-shot', 'piercing-shot', 'backstab', 'shadow-dance', 'poison-blade', 'fireball', 'blizzard', 'chain-lightning', 'holy-light'].includes(skill.id)
+        showDamage: !['heavy-strike', 'whirlwind', 'charge', 'power-shot', 'multi-shot', 'piercing-shot', 'backstab', 'shadow-dance', 'poison-blade', 'fireball', 'blizzard', 'chain-lightning', 'holy-light', 'holy-nova'].includes(skill.id)
       }) };
     });
     const hits = resolvedTargets.filter((target) => !target.result.evaded);
@@ -4329,6 +4346,15 @@ function useAutoSkillForMember(member, now = Date.now()) {
       const struckTarget = hits[0];
       const displayedTarget = struckTarget || resolvedTargets[0];
       playBattleSkillEffect(skill.id, targetAnchors.get(displayedTarget.index), { damage: struckTarget?.result.finalDamage || 0 });
+    }
+    if (skill.id === 'holy-nova') {
+      const field = document.querySelector('.battle-field');
+      const fieldRect = field?.getBoundingClientRect();
+      const centerAnchor = fieldRect ? { index: -1, x: fieldRect.width * .5, y: fieldRect.height * .54, width: 1 } : targetAnchors.get((hits[0] || resolvedTargets[0]).index);
+      const hitTargets = hits.map((target) => ({ index: target.index, damage: target.result.finalDamage, anchor: targetAnchors.get(target.index) })).filter((target) => target.anchor);
+      const radius = Math.max(90, ...hitTargets.map((target) => Math.hypot(target.anchor.x - centerAnchor.x, target.anchor.y - centerAnchor.y) + target.anchor.width * .36));
+      const visualTargets = hitTargets.map((target) => ({ ...target, delay: Math.round(300 + Math.hypot(target.anchor.x - centerAnchor.x, target.anchor.y - centerAnchor.y) / radius * 400) }));
+      playBattleSkillEffect(skill.id, centerAnchor, { targets: visualTargets, radius });
     }
     if (skill.id === 'shadow-dance') {
       const visualTargets = resolvedTargets.slice(0, 5).map((target) => ({
