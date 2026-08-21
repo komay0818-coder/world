@@ -473,6 +473,20 @@
   18%,72% { transform: translate(var(--skill-move-x, 0),var(--skill-move-y, 0)); }
   45% { transform: translate(var(--skill-move-x, 0),var(--skill-move-y, 0)) scale(1.06); }
 }
+
+/* Single-target skills travel onto the live target anchor, then return home. */
+.battle-field #battle-player-art.is-single-target-skill,
+.battle-field .player-stage-unit.is-single-target-skill .player-stage-art {
+  z-index: 49 !important;
+  animation: playerSingleTargetTravel .72s cubic-bezier(.22,.76,.24,1) !important;
+}
+
+@keyframes playerSingleTargetTravel {
+  0%,100% { transform: translate(0,0) scale(1); }
+  16% { transform: translate(calc(var(--skill-move-x,0) * .72),calc(var(--skill-move-y,0) * .72)) scale(1.03); }
+  28%,68% { transform: translate(var(--skill-move-x,0),var(--skill-move-y,0)) scale(1.08); }
+  82% { transform: translate(calc(var(--skill-move-x,0) * .68),calc(var(--skill-move-y,0) * .68)) scale(1.03); }
+}
 @keyframes playerHeavyStrikeLunge {
   0%,100% { transform: translate(0,0) scale(1); }
   10% { transform: translate(calc(var(--heavy-lunge-x, 0) * -.12),calc(var(--heavy-lunge-y, 0) * -.12)) scale(1.03); }

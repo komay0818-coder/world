@@ -2859,8 +2859,8 @@ function playPartyMemberCombatAnimation(member, targetIndexes = [], options = {}
       : null;
     if (!field || !art) return;
     const actionClass = skillId === 'heavy-strike' ? 'is-heavy-strike' : skillId === 'whirlwind' ? 'is-whirlwind' : skillId === 'charge' ? 'is-charge' : skillId === 'power-shot' ? 'is-power-shot' : skillId === 'multi-shot' ? 'is-multi-shot' : skillId === 'piercing-shot' ? 'is-piercing-shot' : skillId === 'backstab' ? 'is-backstab' : skillId === 'shadow-dance' ? 'is-shadow-dance' : skillId === 'fireball' ? 'is-fireball' : skillId === 'blizzard' ? 'is-blizzard' : skillId === 'chain-lightning' ? 'is-chain-lightning' : skillId === 'holy-light' ? 'is-holy-light' : skillId === 'holy-nova' ? 'is-holy-nova' : kind === 'basic' ? 'is-attacking' : area ? 'is-area-skill' : 'is-target-skill';
-    fighter?.classList.remove('is-attacking', 'is-target-skill', 'is-area-skill', 'is-heavy-strike', 'is-whirlwind', 'is-charge', 'is-power-shot', 'is-multi-shot', 'is-piercing-shot', 'is-backstab', 'is-shadow-dance', 'is-fireball', 'is-blizzard', 'is-chain-lightning', 'is-holy-light', 'is-holy-nova');
-    art.classList.remove('is-attacking', 'is-target-skill', 'is-area-skill', 'is-heavy-strike', 'is-whirlwind', 'is-charge', 'is-power-shot', 'is-multi-shot', 'is-piercing-shot', 'is-backstab', 'is-shadow-dance', 'is-fireball', 'is-blizzard', 'is-chain-lightning', 'is-holy-light', 'is-holy-nova');
+    fighter?.classList.remove('is-attacking', 'is-target-skill', 'is-single-target-skill', 'is-area-skill', 'is-heavy-strike', 'is-whirlwind', 'is-charge', 'is-power-shot', 'is-multi-shot', 'is-piercing-shot', 'is-backstab', 'is-shadow-dance', 'is-fireball', 'is-blizzard', 'is-chain-lightning', 'is-holy-light', 'is-holy-nova');
+    art.classList.remove('is-attacking', 'is-target-skill', 'is-single-target-skill', 'is-area-skill', 'is-heavy-strike', 'is-whirlwind', 'is-charge', 'is-power-shot', 'is-multi-shot', 'is-piercing-shot', 'is-backstab', 'is-shadow-dance', 'is-fireball', 'is-blizzard', 'is-chain-lightning', 'is-holy-light', 'is-holy-nova');
     void art.offsetWidth;
     art.dataset.job = member.job || member.character?.job || 'warrior';
     setBattleCharacterAction(art, member.character, 'active');
@@ -2879,7 +2879,7 @@ function playPartyMemberCombatAnimation(member, targetIndexes = [], options = {}
         ? targetRect ? targetRect.top + targetRect.height * .62 : fieldRect.top + fieldRect.height * .42
         : area
         ? enemyFormationRect ? enemyFormationRect.bottom + artRect.height * .2 : fieldRect.top + fieldRect.height * .48
-        : targetRect ? targetRect.bottom + artRect.height * .08 : artRect.top + artRect.height * .5;
+        : targetRect ? targetRect.top + targetRect.height * .55 : artRect.top + artRect.height * .5;
       art.style.setProperty('--skill-move-x', `${destinationX - (artRect.left + artRect.width / 2)}px`);
       art.style.setProperty('--skill-move-y', `${destinationY - (artRect.top + artRect.height / 2)}px`);
       if (skillId === 'heavy-strike') {
@@ -2977,9 +2977,15 @@ function playPartyMemberCombatAnimation(member, targetIndexes = [], options = {}
     }
     fighter?.classList.add(actionClass);
     art.classList.add(actionClass);
+    if (kind === 'skill' && !area && targetRect && skillId !== 'shadow-dance') {
+      fighter?.classList.add('is-single-target-skill');
+      art.classList.add('is-single-target-skill');
+    }
     setTimeout(() => {
       fighter?.classList.remove(actionClass);
       art.classList.remove(actionClass);
+      fighter?.classList.remove('is-single-target-skill');
+      art.classList.remove('is-single-target-skill');
       art.style.removeProperty('--skill-move-x');
       art.style.removeProperty('--skill-move-y');
       art.style.removeProperty('--heavy-lunge-x');

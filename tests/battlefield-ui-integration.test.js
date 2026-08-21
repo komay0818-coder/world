@@ -10,8 +10,8 @@ const layoutCss = fs.readFileSync(path.join(root, 'styles', 'mmorpg-layout.css')
 
 assert.match(html, /id="player-battle-stage"/, 'party players render on the battlefield');
 assert.match(html, /id="battle-player-art" class="battle-player-art hidden"/, 'main player has a dedicated portrait node');
-assert.match(html, /styles\/monster-slots\.css\?v=20260821-combat-motion-v5/, 'battlefield loads the current local portrait styles');
-assert.match(html, /script\.js\?v=20260821-heal-v1/, 'battlefield loads the current local combat logic');
+assert.match(html, /styles\/monster-slots\.css\?v=20260822-single-target-travel-v6/, 'battlefield loads the current local portrait styles');
+assert.match(html, /script\.js\?v=20260822-single-target-travel-v2/, 'battlefield loads the current local combat logic');
 assert.match(script, /return battleCharacterArt\[`\$\{character\.race\}:\$\{character\.job\}`\] \|\| '';/, 'battle uses stable front character artwork');
 assert.match(script, /'orc:warrior': 'assets\/character-portraits\/orc-warrior\.png'/, 'orc warrior uses the supplied portrait');
 assert.match(script, /'orc:hunter': 'assets\/character-portraits\/orc-hunter\.png'/, 'orc hunter uses the supplied portrait');
@@ -46,7 +46,7 @@ assert.doesNotMatch(css.match(/#battle-screen \.battle-field:has\(#player-battle
 const legacyPortraitContract = layoutCss.match(/\.battle-field #battle-player-art\[aria-label\]\s*{[\s\S]*?\n}/)?.[0] || '';
 assert.doesNotMatch(legacyPortraitContract, /(?:transform|animation):\s*none\s*!important/, 'legacy portrait layout cannot suppress combat motion');
 assert.doesNotMatch(css, /prefers-reduced-motion[\s\S]{0,1200}\.battle-player-art\.is-(?:attacking|target-skill|area-skill|heavy-strike|whirlwind|charge|power-shot|multi-shot|piercing-shot|backstab|fireball|blizzard|chain-lightning|holy-light|holy-nova)[\s\S]{0,200}animation-duration:\s*\.01ms/, 'combat feedback remains visible when reduced-motion is enabled');
-assert.match(script, /art\.classList\.remove\('is-attacking', 'is-target-skill', 'is-area-skill', 'is-heavy-strike', 'is-whirlwind', 'is-charge', 'is-power-shot', 'is-multi-shot', 'is-piercing-shot', 'is-backstab', 'is-shadow-dance', 'is-fireball', 'is-blizzard', 'is-chain-lightning', 'is-holy-light', 'is-holy-nova'\);[\s\S]*?void art\.offsetWidth;[\s\S]*?art\.classList\.add\(actionClass\);/, 'every attack reliably restarts its portrait animation');
+assert.match(script, /art\.classList\.remove\('is-attacking', 'is-target-skill', 'is-single-target-skill',[\s\S]*?void art\.offsetWidth;[\s\S]*?art\.classList\.add\(actionClass\);/, 'every attack reliably restarts its portrait animation');
 assert.doesNotMatch(script, /classList\.(?:add|remove)\('attack'/, 'combat no longer activates the legacy attack class');
 assert.doesNotMatch(layoutCss, /characterAttackWarrior|characterAttackAssassin|characterAttackHunter|characterAttackMage|characterAttackPriest/, 'legacy per-job attack motion is removed');
 assert.match(script, /skillId === 'charge' \? 'is-charge' : skillId === 'power-shot' \? 'is-power-shot'/, 'named skill presets select distinct movement types');
@@ -61,6 +61,9 @@ assert.match(script, /enemyFormationRect\.left \+ enemyFormationRect\.width \* \
 assert.match(script, /enemyFormationRect\.bottom \+ artRect\.height \* \.2/, 'area skills stop just in front of the enemy formation');
 assert.match(script, /const target = kind === 'skill' && \(!area \|\| skillId === 'chain-lightning'\)/, 'area skills use formation travel except chain lightning, which approaches its first target');
 assert.match(css, /@keyframes playerSkillTravel[\s\S]*?--skill-move-x[\s\S]*?--skill-move-y/, 'skills travel out and return');
+assert.match(script, /kind === 'skill' && !area && targetRect[\s\S]*?classList\.add\('is-single-target-skill'\)/, 'single-target skills activate target-overlap travel');
+assert.match(script, /targetRect\.top \+ targetRect\.height \* \.55/, 'single-target travel resolves the live monster center');
+assert.match(css, /@keyframes playerSingleTargetTravel[\s\S]*?--skill-move-x[\s\S]*?--skill-move-y/, 'single-target portraits travel onto the target and return');
 assert.match(script, /battleSkillEffectPresets[\s\S]*?'heavy-strike'[\s\S]*?duration: 680[\s\S]*?impactAt: 350/, 'heavy strike is a reusable short battle-effect preset');
 assert.match(script, /captureBattleTargetAnchor\(index\)[\s\S]*?getBoundingClientRect/, 'heavy strike captures its actual target position before damage resolves');
 assert.match(script, /followTarget[\s\S]*?`#enemy-\$\{targetAnchor\.index\}`[\s\S]*?requestAnimationFrame\(followTarget\)/, 'active heavy strike effects follow the selected target');
