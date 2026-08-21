@@ -2688,8 +2688,44 @@ function playPartyMemberHitAnimation(member) {
   }, 520);
 }
 
+function playShadowTeleportSequence(art, points = [], duration = 980) {
+  if (!art || !points.length) return null;
+  art.shadowTeleportAnimation?.cancel();
+  const visits = points.length === 1 ? [points[0], points[0]] : points;
+  const keyframes = [
+    { transform: 'translate(0,0)', opacity: 1, filter: 'none', offset: 0 },
+    { transform: 'translate(-6px,0)', opacity: .18, filter: 'brightness(.35) sepia(.45) hue-rotate(225deg)', offset: .1 },
+    { transform: 'translate(-6px,0)', opacity: 0, filter: 'brightness(.3)', offset: .14 }
+  ];
+  const start = .16;
+  const finish = .7;
+  const step = (finish - start) / Math.max(1, visits.length);
+  visits.forEach((point, index) => {
+    const arrival = start + index * step;
+    const departure = Math.min(.74, arrival + step * .72);
+    const transform = `translate(${point.x}px,${point.y}px)`;
+    keyframes.push({ transform, opacity: 0, filter: 'brightness(.35)', offset: Math.max(.141, arrival - .018) });
+    keyframes.push({ transform, opacity: 1, filter: 'none', offset: arrival });
+    keyframes.push({ transform, opacity: 1, filter: 'none', offset: Math.max(arrival, departure - .025) });
+    keyframes.push({ transform, opacity: 0, filter: 'brightness(.35)', offset: departure });
+  });
+  keyframes.push(
+    { transform: 'translate(0,0)', opacity: 0, filter: 'brightness(.35)', offset: .82 },
+    { transform: 'translate(0,0)', opacity: 1, filter: 'none', offset: 1 }
+  );
+  const animation = art.animate(keyframes, { duration, easing: 'linear', fill: 'both' });
+  art.shadowTeleportAnimation = animation;
+  animation.finished.catch(() => {}).finally(() => {
+    if (art.shadowTeleportAnimation === animation) {
+      animation.cancel();
+      art.shadowTeleportAnimation = null;
+    }
+  });
+  return animation;
+}
+
 function playPartyMemberCombatAnimation(member, targetIndexes = [], options = {}) {
-  const { kind = 'basic', area = false, skillId = '' } = options;
+  const { kind = 'basic', area = false, skillId = '', targetPositions = null } = options;
   requestAnimationFrame(() => {
     const field = document.querySelector('.battle-field');
     const fighter = member.isMain
@@ -2705,9 +2741,9 @@ function playPartyMemberCombatAnimation(member, targetIndexes = [], options = {}
       ? document.querySelector('#enemy-squad')
       : null;
     if (!field || !art) return;
-    const actionClass = skillId === 'heavy-strike' ? 'is-heavy-strike' : skillId === 'whirlwind' ? 'is-whirlwind' : skillId === 'charge' ? 'is-charge' : skillId === 'power-shot' ? 'is-power-shot' : skillId === 'multi-shot' ? 'is-multi-shot' : skillId === 'piercing-shot' ? 'is-piercing-shot' : skillId === 'backstab' ? 'is-backstab' : kind === 'basic' ? 'is-attacking' : area ? 'is-area-skill' : 'is-target-skill';
-    fighter?.classList.remove('is-attacking', 'is-target-skill', 'is-area-skill', 'is-heavy-strike', 'is-whirlwind', 'is-charge', 'is-power-shot', 'is-multi-shot', 'is-piercing-shot', 'is-backstab');
-    art.classList.remove('is-attacking', 'is-target-skill', 'is-area-skill', 'is-heavy-strike', 'is-whirlwind', 'is-charge', 'is-power-shot', 'is-multi-shot', 'is-piercing-shot', 'is-backstab');
+    const actionClass = skillId === 'heavy-strike' ? 'is-heavy-strike' : skillId === 'whirlwind' ? 'is-whirlwind' : skillId === 'charge' ? 'is-charge' : skillId === 'power-shot' ? 'is-power-shot' : skillId === 'multi-shot' ? 'is-multi-shot' : skillId === 'piercing-shot' ? 'is-piercing-shot' : skillId === 'backstab' ? 'is-backstab' : skillId === 'shadow-dance' ? 'is-shadow-dance' : kind === 'basic' ? 'is-attacking' : area ? 'is-area-skill' : 'is-target-skill';
+    fighter?.classList.remove('is-attacking', 'is-target-skill', 'is-area-skill', 'is-heavy-strike', 'is-whirlwind', 'is-charge', 'is-power-shot', 'is-multi-shot', 'is-piercing-shot', 'is-backstab', 'is-shadow-dance');
+    art.classList.remove('is-attacking', 'is-target-skill', 'is-area-skill', 'is-heavy-strike', 'is-whirlwind', 'is-charge', 'is-power-shot', 'is-multi-shot', 'is-piercing-shot', 'is-backstab', 'is-shadow-dance');
     void art.offsetWidth;
     art.dataset.job = member.job || member.character?.job || 'warrior';
     setBattleCharacterAction(art, member.character, 'active');
@@ -2778,6 +2814,21 @@ function playPartyMemberCombatAnimation(member, targetIndexes = [], options = {}
         art.style.setProperty('--backstab-x', `${deltaX + side * Math.min(48, (targetRect?.width || 80) * .42)}px`);
         art.style.setProperty('--backstab-y', `${deltaY - artRect.height * .12}px`);
       }
+      if (skillId === 'shadow-dance') {
+        const points = targetIndexes.slice(0, 5).map((index) => {
+          const anchor = targetPositions?.get(index);
+          const rect = document.querySelector(`#enemy-${index}`)?.getBoundingClientRect();
+          if (!anchor && !rect) return null;
+          const targetX = anchor ? fieldRect.left + anchor.x : rect.left + rect.width / 2;
+          const targetY = anchor ? fieldRect.top + anchor.y : rect.top + rect.height * .56;
+          const targetWidth = anchor?.width || rect?.width || 80;
+          const deltaX = targetX - (artRect.left + artRect.width / 2);
+          const deltaY = targetY - (artRect.top + artRect.height / 2);
+          const side = deltaX >= 0 ? 1 : -1;
+          return { x: deltaX + side * Math.min(42, targetWidth * .38), y: deltaY - artRect.height * .1 };
+        });
+        playShadowTeleportSequence(art, points.filter(Boolean));
+      }
     }
     fighter?.classList.add(actionClass);
     art.classList.add(actionClass);
@@ -2802,8 +2853,12 @@ function playPartyMemberCombatAnimation(member, targetIndexes = [], options = {}
       art.style.removeProperty('--piercing-pull-y');
       art.style.removeProperty('--backstab-x');
       art.style.removeProperty('--backstab-y');
+      if (skillId === 'shadow-dance') {
+        art.shadowTeleportAnimation?.cancel();
+        art.shadowTeleportAnimation = null;
+      }
       setBattleCharacterAction(art, member.character, 'idle');
-    }, kind === 'basic' ? 420 : 720);
+    }, kind === 'basic' ? 420 : skillId === 'shadow-dance' ? 1000 : 720);
   });
 }
 
@@ -2814,7 +2869,8 @@ const battleSkillEffectPresets = Object.freeze({
   'power-shot': { duration: 760, impactAt: 400, className: 'battle-effect-power-shot' },
   'multi-shot': { duration: 880, impactAt: 450, className: 'battle-effect-multi-shot' },
   'piercing-shot': { duration: 960, impactAt: 400, className: 'battle-effect-piercing-shot' },
-  backstab: { duration: 680, impactAt: 350, className: 'battle-effect-backstab' }
+  backstab: { duration: 680, impactAt: 350, className: 'battle-effect-backstab' },
+  'shadow-dance': { duration: 980, impactAt: 180, className: 'battle-effect-shadow-dance' }
 });
 
 function captureBattleTargetAnchor(index) {
@@ -2885,6 +2941,13 @@ function playBattleSkillEffect(skillId, targetAnchor, options = {}) {
       ? `<span class="piercing-shot-charge"><i></i><i></i><i></i></span><span class="piercing-shot-arrow"><i></i></span>${(options.targets || []).map((target, order) => `<span class="piercing-shot-hit" data-effect-target="${target.index}" style="--hit-order:${order};--hit-x:${target.anchor.x - targetAnchor.x}px;--hit-y:${target.anchor.y - targetAnchor.y}px"><i></i><em>◫</em>${target.damage > 0 ? `<b>-${target.damage}</b>` : ''}</span>`).join('')}`
     : skillId === 'backstab'
       ? `<span class="backstab-shadow"></span><span class="backstab-slash"></span><span class="backstab-sparks"></span>${options.damage > 0 ? `<b class="backstab-damage">-${options.damage}</b>` : ''}`
+    : skillId === 'shadow-dance'
+      ? `<span class="shadow-dance-origin"></span>${(options.targets || []).map((target, order, targets) => {
+        const previous = order ? targets[order - 1].anchor : targetAnchor;
+        const trailX = target.anchor.x - previous.x;
+        const trailY = target.anchor.y - previous.y;
+        return `<span class="shadow-dance-hit${order === targets.length - 1 ? ' is-finisher' : ''}${targets.length === 1 ? ' is-solo' : ''}" data-effect-target="${target.index}" style="--hit-order:${order};--hit-count:${targets.length};--slash-angle:${order % 2 ? 38 : -38}deg;--trail-length:${Math.min(150, Math.max(28, Math.hypot(trailX, trailY)))}px;--trail-angle:${Math.atan2(trailY, trailX)}rad;--hit-x:${target.anchor.x - targetAnchor.x}px;--hit-y:${target.anchor.y - targetAnchor.y}px"><i></i><em></em><strong></strong>${target.damage > 0 ? `<b>-${target.damage}</b>` : ''}</span>`;
+      }).join('')}`
     : `<span class="smash-trail"></span><span class="impact-shockwave"></span><span class="impact-crack"></span><span class="impact-sparks"></span><span class="impact-debris">${Array.from({ length: 6 }, (_, index) => `<i style="--debris-index:${index}"></i>`).join('')}</span>${options.damage > 0 ? `<b class="skill-impact-damage">-${options.damage}</b>` : ''}`;
   layer.append(effect);
   if (skillId === 'piercing-shot') animatePiercingProjectile(effect, targetAnchor, options.targets || []);
@@ -2892,11 +2955,15 @@ function playBattleSkillEffect(skillId, targetAnchor, options = {}) {
   const followTarget = () => {
     if (!effect.isConnected || performance.now() - startedAt >= preset.duration) return;
     const currentTarget = document.querySelector(`#enemy-${targetAnchor.index}`);
+    let currentEffectX = targetAnchor.x;
+    let currentEffectY = targetAnchor.y;
     if (currentTarget) {
       const targetRect = currentTarget.getBoundingClientRect();
       const fieldRect = field.getBoundingClientRect();
-      effect.style.setProperty('--effect-x', `${targetRect.left - fieldRect.left + targetRect.width / 2}px`);
-      effect.style.setProperty('--effect-y', `${targetRect.top - fieldRect.top + targetRect.height * .62}px`);
+      currentEffectX = targetRect.left - fieldRect.left + targetRect.width / 2;
+      currentEffectY = targetRect.top - fieldRect.top + targetRect.height * .62;
+      effect.style.setProperty('--effect-x', `${currentEffectX}px`);
+      effect.style.setProperty('--effect-y', `${currentEffectY}px`);
       effect.style.setProperty('--target-width', `${targetRect.width}px`);
     }
     effect.querySelectorAll('[data-effect-target]').forEach((hit) => {
@@ -2904,8 +2971,8 @@ function playBattleSkillEffect(skillId, targetAnchor, options = {}) {
       if (!hitTarget) return;
       const hitRect = hitTarget.getBoundingClientRect();
       const fieldRect = field.getBoundingClientRect();
-      hit.style.setProperty('--hit-x', `${hitRect.left - fieldRect.left + hitRect.width / 2 - targetAnchor.x}px`);
-      hit.style.setProperty('--hit-y', `${hitRect.top - fieldRect.top + hitRect.height * .55 - targetAnchor.y}px`);
+      hit.style.setProperty('--hit-x', `${hitRect.left - fieldRect.left + hitRect.width / 2 - currentEffectX}px`);
+      hit.style.setProperty('--hit-y', `${hitRect.top - fieldRect.top + hitRect.height * .55 - currentEffectY}px`);
     });
     requestAnimationFrame(followTarget);
   };
@@ -2926,6 +2993,14 @@ function playBattleSkillEffect(skillId, targetAnchor, options = {}) {
     target?.classList.add('power-shot-hit');
     setTimeout(() => target?.classList.remove('power-shot-hit'), 170);
   }, preset.impactAt);
+  if (skillId === 'shadow-dance') (options.targets || []).forEach((visualTarget, order, visualTargets) => {
+    const delay = preset.impactAt + order * (visualTargets.length > 1 ? 85 : 0);
+    setTimeout(() => {
+      const target = document.querySelector(`#enemy-${visualTarget.index}`);
+      target?.classList.add('shadow-dance-hit');
+      setTimeout(() => target?.classList.remove('shadow-dance-hit'), 130);
+    }, delay);
+  });
   setTimeout(() => {
     effect.remove();
     if (!layer.childElementCount) layer.remove();
@@ -3983,7 +4058,7 @@ function useAutoSkillForMember(member, now = Date.now()) {
     if (skill.id === 'whirlwind') damagePower *= 1 + Math.min(skillEffect.maxTargetBonus || 0, Math.max(0, targets.length - 1) * (skillEffect.perExtraTargetBonus || 0));
     const damage = Math.max(1, Math.ceil(stats.attack * damagePower * (critical ? stats.criticalDamageMultiplier : 1)));
     const profile = getPlayerAttackProfile(character, skill);
-    const targetAnchors = ['heavy-strike', 'whirlwind', 'charge', 'power-shot', 'multi-shot', 'piercing-shot', 'backstab'].includes(skill.id)
+    const targetAnchors = ['heavy-strike', 'whirlwind', 'charge', 'power-shot', 'multi-shot', 'piercing-shot', 'backstab', 'shadow-dance'].includes(skill.id)
       ? new Map(targets.map((index) => [index, captureBattleTargetAnchor(index)]))
       : null;
     const attackerAnchor = ['power-shot', 'multi-shot', 'piercing-shot'].includes(skill.id) ? captureBattleAttackerAnchor(member) : null;
@@ -3995,7 +4070,7 @@ function useAutoSkillForMember(member, now = Date.now()) {
         attackKind: 'skill',
         armorIgnore: skillEffect.armorIgnore,
         controlledBonus: skillEffect.controlledBonus,
-        showDamage: !['heavy-strike', 'whirlwind', 'charge', 'power-shot', 'multi-shot', 'piercing-shot', 'backstab'].includes(skill.id)
+        showDamage: !['heavy-strike', 'whirlwind', 'charge', 'power-shot', 'multi-shot', 'piercing-shot', 'backstab', 'shadow-dance'].includes(skill.id)
       }) };
     });
     const hits = resolvedTargets.filter((target) => !target.result.evaded);
@@ -4053,10 +4128,11 @@ function useAutoSkillForMember(member, now = Date.now()) {
     member.blinkCooldownReduction = 0;
     member.globalSkillReadyAt = now + 1000;
     const totalDamage = hits.reduce((total, target) => total + target.result.finalDamage, 0);
-    if (skill.id !== 'companion') playPartyMemberCombatAnimation(member, (hits.length ? hits : resolvedTargets).map((target) => target.index), {
+    if (skill.id !== 'companion') playPartyMemberCombatAnimation(member, (skill.id === 'shadow-dance' ? resolvedTargets : (hits.length ? hits : resolvedTargets)).map((target) => target.index), {
       kind: 'skill',
       area: Number(skillEffect.targets || skill.targets || 1) > 1,
-      skillId: skill.id
+      skillId: skill.id,
+      targetPositions: skill.id === 'shadow-dance' ? targetAnchors : null
     });
     if (skill.id === 'heavy-strike') {
       const struckTarget = hits[0];
@@ -4072,6 +4148,14 @@ function useAutoSkillForMember(member, now = Date.now()) {
       const struckTarget = hits[0];
       const displayedTarget = struckTarget || resolvedTargets[0];
       playBattleSkillEffect(skill.id, targetAnchors.get(displayedTarget.index), { damage: struckTarget?.result.finalDamage || 0 });
+    }
+    if (skill.id === 'shadow-dance') {
+      const visualTargets = resolvedTargets.slice(0, 5).map((target) => ({
+        index: target.index,
+        damage: target.result.evaded ? 0 : target.result.finalDamage,
+        anchor: targetAnchors.get(target.index)
+      })).filter((target) => target.anchor);
+      if (visualTargets.length) playBattleSkillEffect(skill.id, visualTargets[0].anchor, { targets: visualTargets });
     }
     if (skill.id === 'multi-shot') {
       const visualTargets = resolvedTargets.map((target) => ({
