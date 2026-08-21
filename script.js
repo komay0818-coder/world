@@ -2701,12 +2701,13 @@ function playPartyMemberCombatAnimation(member, targetIndexes = [], options = {}
       ? document.querySelector('#enemy-squad')
       : null;
     if (!field || !art) return;
-    const actionClass = skillId === 'heavy-strike' ? 'is-heavy-strike' : kind === 'basic' ? 'is-attacking' : area ? 'is-area-skill' : 'is-target-skill';
-    fighter?.classList.remove('is-attacking', 'is-target-skill', 'is-area-skill', 'is-heavy-strike');
-    art.classList.remove('is-attacking', 'is-target-skill', 'is-area-skill', 'is-heavy-strike');
+    const actionClass = skillId === 'heavy-strike' ? 'is-heavy-strike' : skillId === 'whirlwind' ? 'is-whirlwind' : kind === 'basic' ? 'is-attacking' : area ? 'is-area-skill' : 'is-target-skill';
+    fighter?.classList.remove('is-attacking', 'is-target-skill', 'is-area-skill', 'is-heavy-strike', 'is-whirlwind');
+    art.classList.remove('is-attacking', 'is-target-skill', 'is-area-skill', 'is-heavy-strike', 'is-whirlwind');
     void art.offsetWidth;
     art.dataset.job = member.job || member.character?.job || 'warrior';
     setBattleCharacterAction(art, member.character, 'active');
+    if (skillId === 'whirlwind') fighter?.style.setProperty('--whirlwind-portrait', art.style.backgroundImage);
     const fieldRect = field.getBoundingClientRect();
     const artRect = art.getBoundingClientRect();
     const targetRect = target?.getBoundingClientRect();
@@ -2728,6 +2729,12 @@ function playPartyMemberCombatAnimation(member, targetIndexes = [], options = {}
         art.style.setProperty('--heavy-lunge-x', `${deltaX / distance * lungeDistance}px`);
         art.style.setProperty('--heavy-lunge-y', `${deltaY / distance * lungeDistance}px`);
       }
+      if (skillId === 'whirlwind') {
+        const moveX = destinationX - (artRect.left + artRect.width / 2);
+        const moveY = destinationY - (artRect.top + artRect.height / 2);
+        art.style.setProperty('--whirlwind-move-x', `${moveX * .62}px`);
+        art.style.setProperty('--whirlwind-move-y', `${moveY * .62}px`);
+      }
     }
     fighter?.classList.add(actionClass);
     art.classList.add(actionClass);
@@ -2738,13 +2745,16 @@ function playPartyMemberCombatAnimation(member, targetIndexes = [], options = {}
       art.style.removeProperty('--skill-move-y');
       art.style.removeProperty('--heavy-lunge-x');
       art.style.removeProperty('--heavy-lunge-y');
+      art.style.removeProperty('--whirlwind-move-x');
+      art.style.removeProperty('--whirlwind-move-y');
       setBattleCharacterAction(art, member.character, 'idle');
     }, kind === 'basic' ? 420 : 720);
   });
 }
 
 const battleSkillEffectPresets = Object.freeze({
-  'heavy-strike': { duration: 680, impactAt: 350, className: 'battle-effect-heavy-strike' }
+  'heavy-strike': { duration: 680, impactAt: 350, className: 'battle-effect-heavy-strike' },
+  whirlwind: { duration: 1000, impactAt: 350, className: 'battle-effect-whirlwind' }
 });
 
 function captureBattleTargetAnchor(index) {
@@ -2773,7 +2783,9 @@ function playBattleSkillEffect(skillId, targetAnchor, options = {}) {
   effect.style.setProperty('--effect-x', `${targetAnchor.x}px`);
   effect.style.setProperty('--effect-y', `${targetAnchor.y}px`);
   effect.style.setProperty('--target-width', `${targetAnchor.width}px`);
-  effect.innerHTML = `<span class="smash-trail"></span><span class="impact-shockwave"></span><span class="impact-crack"></span><span class="impact-sparks"></span><span class="impact-debris">${Array.from({ length: 6 }, (_, index) => `<i style="--debris-index:${index}"></i>`).join('')}</span>${options.damage > 0 ? `<b class="skill-impact-damage">-${options.damage}</b>` : ''}`;
+  effect.innerHTML = skillId === 'whirlwind'
+    ? `<span class="whirlwind-speed-trails"><i></i><i></i></span><span class="whirlwind-ring"></span><span class="whirlwind-afterimages"><i></i><i></i><i></i></span><span class="whirlwind-finisher"></span>${(options.targets || []).map((target, order) => `<span class="whirlwind-target-hit" data-effect-target="${target.index}" style="--hit-order:${order};--hit-x:${(target.anchor?.x || targetAnchor.x) - targetAnchor.x}px;--hit-y:${(target.anchor?.y || targetAnchor.y) - targetAnchor.y}px"><i></i><b>-${target.damage}</b></span>`).join('')}`
+    : `<span class="smash-trail"></span><span class="impact-shockwave"></span><span class="impact-crack"></span><span class="impact-sparks"></span><span class="impact-debris">${Array.from({ length: 6 }, (_, index) => `<i style="--debris-index:${index}"></i>`).join('')}</span>${options.damage > 0 ? `<b class="skill-impact-damage">-${options.damage}</b>` : ''}`;
   layer.append(effect);
   const startedAt = performance.now();
   const followTarget = () => {
@@ -2786,10 +2798,18 @@ function playBattleSkillEffect(skillId, targetAnchor, options = {}) {
       effect.style.setProperty('--effect-y', `${targetRect.top - fieldRect.top + targetRect.height * .62}px`);
       effect.style.setProperty('--target-width', `${targetRect.width}px`);
     }
+    effect.querySelectorAll('[data-effect-target]').forEach((hit) => {
+      const hitTarget = document.querySelector(`#enemy-${hit.dataset.effectTarget}`);
+      if (!hitTarget) return;
+      const hitRect = hitTarget.getBoundingClientRect();
+      const fieldRect = field.getBoundingClientRect();
+      hit.style.setProperty('--hit-x', `${hitRect.left - fieldRect.left + hitRect.width / 2 - targetAnchor.x}px`);
+      hit.style.setProperty('--hit-y', `${hitRect.top - fieldRect.top + hitRect.height * .55 - targetAnchor.y}px`);
+    });
     requestAnimationFrame(followTarget);
   };
   requestAnimationFrame(followTarget);
-  setTimeout(() => {
+  if (skillId === 'heavy-strike') setTimeout(() => {
     const target = document.querySelector(`#enemy-${targetAnchor.index}`);
     target?.classList.add('heavy-strike-hit');
     setTimeout(() => target?.classList.remove('heavy-strike-hit'), 220);
@@ -3847,7 +3867,7 @@ function useAutoSkillForMember(member, now = Date.now()) {
     if (skill.id === 'whirlwind') damagePower *= 1 + Math.min(skillEffect.maxTargetBonus || 0, Math.max(0, targets.length - 1) * (skillEffect.perExtraTargetBonus || 0));
     const damage = Math.max(1, Math.ceil(stats.attack * damagePower * (critical ? stats.criticalDamageMultiplier : 1)));
     const profile = getPlayerAttackProfile(character, skill);
-    const targetAnchors = skill.id === 'heavy-strike'
+    const targetAnchors = ['heavy-strike', 'whirlwind'].includes(skill.id)
       ? new Map(targets.map((index) => [index, captureBattleTargetAnchor(index)]))
       : null;
     const resolvedTargets = targets.map((index, targetOrder) => {
@@ -3858,7 +3878,7 @@ function useAutoSkillForMember(member, now = Date.now()) {
         attackKind: 'skill',
         armorIgnore: skillEffect.armorIgnore,
         controlledBonus: skillEffect.controlledBonus,
-        showDamage: skill.id !== 'heavy-strike'
+        showDamage: !['heavy-strike', 'whirlwind'].includes(skill.id)
       }) };
     });
     const hits = resolvedTargets.filter((target) => !target.result.evaded);
@@ -3919,6 +3939,20 @@ function useAutoSkillForMember(member, now = Date.now()) {
       const struckTarget = hits[0];
       const displayedTarget = struckTarget || resolvedTargets[0];
       playBattleSkillEffect(skill.id, targetAnchors.get(displayedTarget.index), { damage: struckTarget?.result.finalDamage || 0 });
+    }
+    if (skill.id === 'whirlwind') {
+      const field = document.querySelector('.battle-field');
+      const fieldRect = field?.getBoundingClientRect();
+      const formationRect = document.querySelector('#enemy-squad')?.getBoundingClientRect();
+      const centerAnchor = fieldRect && formationRect ? {
+        index: -1,
+        x: formationRect.left - fieldRect.left + formationRect.width / 2,
+        y: formationRect.top - fieldRect.top + formationRect.height * .58,
+        width: Math.min(formationRect.width, fieldRect.width * .56)
+      } : targetAnchors.get((hits[0] || resolvedTargets[0]).index);
+      playBattleSkillEffect(skill.id, centerAnchor, {
+        targets: hits.map((target) => ({ index: target.index, damage: target.result.finalDamage, anchor: targetAnchors.get(target.index) }))
+      });
     }
     if (member.isMain && skill.id === 'companion') playCompanionAttackAnimation((hits.length ? hits : resolvedTargets).map((target) => target.index));
     if (hits.length) logBattle(`✦ ${member.name}施放【${skill.name}】，造成 ${totalDamage}${critical ? ' 暴擊' : ''}傷害。`, 'damage-dealt');

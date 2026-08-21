@@ -450,6 +450,9 @@
 .battle-player-art.is-area-skill { z-index: 30 !important; animation: playerSkillTravel .72s cubic-bezier(.22,.75,.24,1) !important; }
 .player-stage-unit.is-heavy-strike .player-stage-art,
 .battle-player-art.is-heavy-strike { z-index: 30 !important; animation: playerHeavyStrikeLunge .68s cubic-bezier(.2,.78,.25,1) !important; }
+.player-stage-unit.is-whirlwind .player-stage-art,
+.battle-player-art.is-whirlwind { z-index: 46 !important; animation: playerWhirlwindRush 1s cubic-bezier(.2,.76,.24,1) !important; }
+.player-stage-unit.is-whirlwind::before { content:""; position:absolute; z-index:44; inset:4%; border-radius:50%; background-image:var(--whirlwind-portrait); background-position:center; background-size:cover; opacity:0; animation:whirlwindPortraitGhost 1s ease-out; pointer-events:none; }
 @keyframes playerBasicShake {
   0%,100% { transform: translate(0,0); }
   20% { transform: translate(-4px,1px) rotate(-2deg); }
@@ -467,6 +470,14 @@
   22%,70% { transform: translate(var(--heavy-lunge-x, 0),var(--heavy-lunge-y, 0)) scale(1.08); }
   82% { transform: translate(calc(var(--heavy-lunge-x, 0) * .72),calc(var(--heavy-lunge-y, 0) * .72)) scale(1.04); }
 }
+@keyframes playerWhirlwindRush {
+  0%,100% { transform:translate(0,0) rotate(0) scale(1); }
+  15% { transform:translate(var(--whirlwind-move-x,0),var(--whirlwind-move-y,0)) rotate(0) scale(1.05); }
+  35% { transform:translate(var(--whirlwind-move-x,0),var(--whirlwind-move-y,0)) rotate(320deg) scale(1.06); }
+  70% { transform:translate(var(--whirlwind-move-x,0),var(--whirlwind-move-y,0)) rotate(1040deg) scale(1.06); }
+  82% { transform:translate(var(--whirlwind-move-x,0),var(--whirlwind-move-y,0)) rotate(1080deg) scale(1.03); }
+}
+@keyframes whirlwindPortraitGhost { 0%,14%,76%,100%{opacity:0} 22%{opacity:.24;transform:translate(calc(var(--whirlwind-move-x,0) * .55),calc(var(--whirlwind-move-y,0) * .55))} 42%{opacity:.12;transform:translate(calc(var(--whirlwind-move-x,0) * .82 - 22px),calc(var(--whirlwind-move-y,0) * .82))} 62%{opacity:.2;transform:translate(calc(var(--whirlwind-move-x,0) * .82 + 26px),calc(var(--whirlwind-move-y,0) * .82))} }
 @media (max-width: 700px) {
   .battle-field { --player-portrait-size: clamp(48px, 14vw, 64px); --player-unit-ground-line: 8%; }
 }
@@ -479,7 +490,9 @@
   .player-stage-unit.is-area-skill .player-stage-art,
   .battle-player-art.is-area-skill,
   .player-stage-unit.is-heavy-strike .player-stage-art,
-  .battle-player-art.is-heavy-strike { animation-duration: .01ms !important; }
+  .battle-player-art.is-heavy-strike,
+  .player-stage-unit.is-whirlwind .player-stage-art,
+  .battle-player-art.is-whirlwind { animation-duration: .01ms !important; }
 }
 
 /* Reusable skill-effect layer; heavy strike is the first preset. */
@@ -503,6 +516,19 @@
 @keyframes heavyDamageFloat { 0%{opacity:0;transform:translate(-50%,10px) scale(.8)} 22%{opacity:1} 100%{opacity:0;transform:translate(-50%,-24px) scale(1.1)} }
 @keyframes heavyTargetHit { 0%,100%{translate:0 0} 18%{translate:-4px 2px} 42%{translate:7px -1px} 68%{translate:-3px 1px} }
 @keyframes stunStarOrbit { from{transform:rotate(0deg) translateX(20px) rotate(0deg)} to{transform:rotate(360deg) translateX(20px) rotate(-360deg)} }
+
+.battle-effect-whirlwind { width:min(var(--target-width),56%); height:1px; }
+.battle-effect-whirlwind .whirlwind-speed-trails i { position:absolute; left:50%; top:-18px; width:42%; height:4px; border-radius:50%; background:linear-gradient(90deg,transparent,#e99128,transparent); opacity:0; animation:whirlwindSpeedTrail .3s ease-out; }.battle-effect-whirlwind .whirlwind-speed-trails i:nth-child(2){top:13px;animation-delay:.05s}
+.battle-effect-whirlwind .whirlwind-ring { position:absolute; left:50%; top:0; width:44%; aspect-ratio:2.5; border:4px solid #ef9c28; border-top-color:#fff1b5; border-radius:50%; opacity:0; transform:translate(-50%,-50%) rotate(-8deg) scale(.3); animation:whirlwindRing 1s .15s ease-out; }
+.battle-effect-whirlwind .whirlwind-afterimages { position:absolute; left:50%; top:0; width:54px; height:54px; transform:translate(-50%,-50%); }.battle-effect-whirlwind .whirlwind-afterimages i { position:absolute; inset:0; border:3px solid rgba(255,188,67,.48); border-radius:50%; background:radial-gradient(circle at 42% 35%,rgba(255,229,153,.34),rgba(225,126,29,.13) 52%,transparent 70%); opacity:0; animation:whirlwindAfterimage .55s .31s ease-out; }.battle-effect-whirlwind .whirlwind-afterimages i:nth-child(2){animation-delay:.39s}.battle-effect-whirlwind .whirlwind-afterimages i:nth-child(3){animation-delay:.47s}
+.battle-effect-whirlwind .whirlwind-target-hit { position:absolute; left:calc(50% + var(--hit-x,0px)); top:var(--hit-y,0px); width:56px; height:52px; transform:translate(-50%,-50%); }.battle-effect-whirlwind .whirlwind-target-hit i { position:absolute; inset:5px -8px; opacity:0; border-top:6px solid #ffad32; border-right:2px solid #fff2bd; border-radius:50%; transform:rotate(-32deg) scale(.35); animation:whirlwindTargetSlash .2s calc(.35s + var(--hit-order) * .05s) ease-out forwards; }.battle-effect-whirlwind .whirlwind-target-hit b { position:absolute; left:50%; top:-24px; color:#fff2ae; font-size:18px; font-weight:900; text-shadow:0 2px 2px #5b1720,0 0 6px #e77b20; opacity:0; animation:whirlwindHitDamage .32s calc(.36s + var(--hit-order) * .05s) ease-out forwards; }
+.battle-effect-whirlwind .whirlwind-finisher { position:absolute; left:50%; top:0; width:72%; aspect-ratio:3.2; border-top:8px solid #ffad32; border-right:3px solid #fff4c3; border-radius:50%; opacity:0; transform:translate(-50%,-50%) rotate(-10deg) scale(.35); animation:whirlwindFinisher .22s .7s ease-out forwards; }
+@keyframes whirlwindSpeedTrail { 0%{opacity:0;transform:translateX(-85%)} 35%{opacity:.7} 100%{opacity:0;transform:translateX(15%)} }
+@keyframes whirlwindRing { 0%,100%{opacity:0} 8%{opacity:.9;transform:translate(-50%,-50%) rotate(-8deg) scale(.55)} 28%,68%{opacity:.75;transform:translate(-50%,-50%) rotate(520deg) scale(1)} 84%{opacity:.25;transform:translate(-50%,-50%) rotate(850deg) scale(1.12)} }
+@keyframes whirlwindAfterimage { 0%{opacity:0;transform:translateX(-38px) scale(.72)} 28%{opacity:.35} 100%{opacity:0;transform:translateX(42px) rotate(150deg) scale(1.08)} }
+@keyframes whirlwindTargetSlash { 0%{opacity:0;transform:rotate(-32deg) scale(.35)} 30%{opacity:1} 100%{opacity:0;transform:rotate(-32deg) scale(1.14)} }
+@keyframes whirlwindHitDamage { 0%{opacity:0;transform:translate(-50%,8px) scale(.82)} 25%{opacity:1} 100%{opacity:0;transform:translate(-50%,-22px) scale(1.08)} }
+@keyframes whirlwindFinisher { 0%{opacity:0;transform:translate(-50%,-50%) rotate(-10deg) scale(.35)} 30%{opacity:1} 100%{opacity:0;transform:translate(-50%,-50%) rotate(20deg) scale(1.1)} }
 
 .stronghold-objective {
   position: absolute;
