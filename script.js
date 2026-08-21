@@ -2620,6 +2620,11 @@ function renderEnemySquad() {
     const damageEvents = (battle.enemyDamages[index] || []).map((event, eventIndex) => `<b class="enemy-damage ${event.type || 'normal'}" style="--damage-offset:${eventIndex * 18}px">-${event.damage}</b>`).join('');
     const rank = MonsterDisplayPolicy.getRankDisplay(enemy);
     const statusDisplays = MonsterDisplayPolicy.getStatusDisplays(battle.enemyDots[index]);
+    const enemySkillState = getEnemySkillState(index);
+    const stunned = Date.now() < enemySkillState.stunnedUntil && Date.now() >= (enemySkillState.visualStunAt || 0);
+    const stunIndicator = stunned
+      ? `<span class="enemy-stun-indicator" role="img" aria-label="暈眩中" style="--stun-remaining:${Math.max(0, enemySkillState.stunnedUntil - Date.now())}ms"><i>★</i><i>★</i><i>★</i></span>`
+      : '';
     const statusIcons = statusDisplays.length
       ? statusDisplays.map((status) => `<span class="monster-status-icon" title="${status.label}" aria-label="${status.label}">${status.icon}</span>`).join('')
       : '<span class="monster-status-empty">無異常狀態</span>';
@@ -2630,7 +2635,7 @@ function renderEnemySquad() {
     const visualSize = getMonsterVisualSize(enemy);
     const visualScaleCorrection = enemy.visualScaleCorrection || monsterVisualScaleCorrections[enemy.id] || 1;
     const hpPercent = Math.max(0, hp / enemy.maxHp * 100);
-    return `<article id="enemy-${index}" class="enemy-unit monster-battle-slot visual-size-${visualSize} ${focusClass} ${rank.className} ${battle.targetIndexes.includes(index) ? 'targeted hit' : ''}" data-visual-size="${visualSize}" style="--unit-art-correction:${visualScaleCorrection}" data-display-slot="${displaySlot}" data-enemy-index="${index}" role="gridcell" aria-label="${enemy.name}，等級 ${monsterLevel}"><header class="monster-slot-header"><div class="monster-slot-title"><b>${enemy.name}</b><small>Lv. ${monsterLevel}</small></div>${rankBadge}${affixBadges}</header><div class="monster-image-frame"><img class="monster-slot-image" src="${imagePath}" alt="${enemy.name}" draggable="false">${damageEvents}</div><div class="monster-status-row" aria-label="異常狀態">${statusIcons}</div><div class="hp-track enemy-track monster-slot-hp" role="progressbar" aria-label="${enemy.name}生命" aria-valuemin="0" aria-valuemax="${enemy.maxHp}" aria-valuenow="${Math.max(0, hp)}"><i style="width:${hpPercent}%"></i></div></article>`;
+    return `<article id="enemy-${index}" class="enemy-unit monster-battle-slot visual-size-${visualSize} ${focusClass} ${rank.className} ${battle.targetIndexes.includes(index) ? 'targeted hit' : ''}" data-visual-size="${visualSize}" style="--unit-art-correction:${visualScaleCorrection}" data-display-slot="${displaySlot}" data-enemy-index="${index}" role="gridcell" aria-label="${enemy.name}，等級 ${monsterLevel}">${stunIndicator}<header class="monster-slot-header"><div class="monster-slot-title"><b>${enemy.name}</b><small>Lv. ${monsterLevel}</small></div>${rankBadge}${affixBadges}</header><div class="monster-image-frame"><img class="monster-slot-image" src="${imagePath}" alt="${enemy.name}" draggable="false">${damageEvents}</div><div class="monster-status-row" aria-label="異常狀態">${statusIcons}</div><div class="hp-track enemy-track monster-slot-hp" role="progressbar" aria-label="${enemy.name}生命" aria-valuemin="0" aria-valuemax="${enemy.maxHp}" aria-valuenow="${Math.max(0, hp)}"><i style="width:${hpPercent}%"></i></div></article>`;
   }).join('');
   const reserveLabel = reserveCount > 0
     ? `<div class="reserve-indicator"><b>其餘 ${reserveCount}</b><span>等待顯示</span></div>`
@@ -2680,7 +2685,7 @@ function playPartyMemberHitAnimation(member) {
 }
 
 function playPartyMemberCombatAnimation(member, targetIndexes = [], options = {}) {
-  const { kind = 'basic', area = false } = options;
+  const { kind = 'basic', area = false, skillId = '' } = options;
   requestAnimationFrame(() => {
     const field = document.querySelector('.battle-field');
     const fighter = member.isMain
@@ -2696,9 +2701,9 @@ function playPartyMemberCombatAnimation(member, targetIndexes = [], options = {}
       ? document.querySelector('#enemy-squad')
       : null;
     if (!field || !art) return;
-    const actionClass = kind === 'basic' ? 'is-attacking' : area ? 'is-area-skill' : 'is-target-skill';
-    fighter?.classList.remove('is-attacking', 'is-target-skill', 'is-area-skill');
-    art.classList.remove('is-attacking', 'is-target-skill', 'is-area-skill');
+    const actionClass = skillId === 'heavy-strike' ? 'is-heavy-strike' : kind === 'basic' ? 'is-attacking' : area ? 'is-area-skill' : 'is-target-skill';
+    fighter?.classList.remove('is-attacking', 'is-target-skill', 'is-area-skill', 'is-heavy-strike');
+    art.classList.remove('is-attacking', 'is-target-skill', 'is-area-skill', 'is-heavy-strike');
     void art.offsetWidth;
     art.dataset.job = member.job || member.character?.job || 'warrior';
     setBattleCharacterAction(art, member.character, 'active');
@@ -2715,6 +2720,14 @@ function playPartyMemberCombatAnimation(member, targetIndexes = [], options = {}
         : targetRect ? targetRect.bottom + artRect.height * .08 : artRect.top + artRect.height * .5;
       art.style.setProperty('--skill-move-x', `${destinationX - (artRect.left + artRect.width / 2)}px`);
       art.style.setProperty('--skill-move-y', `${destinationY - (artRect.top + artRect.height / 2)}px`);
+      if (skillId === 'heavy-strike') {
+        const deltaX = destinationX - (artRect.left + artRect.width / 2);
+        const deltaY = destinationY - (artRect.top + artRect.height / 2);
+        const distance = Math.max(1, Math.hypot(deltaX, deltaY));
+        const lungeDistance = Math.min(48, Math.max(26, fieldRect.width * .045));
+        art.style.setProperty('--heavy-lunge-x', `${deltaX / distance * lungeDistance}px`);
+        art.style.setProperty('--heavy-lunge-y', `${deltaY / distance * lungeDistance}px`);
+      }
     }
     fighter?.classList.add(actionClass);
     art.classList.add(actionClass);
@@ -2723,9 +2736,68 @@ function playPartyMemberCombatAnimation(member, targetIndexes = [], options = {}
       art.classList.remove(actionClass);
       art.style.removeProperty('--skill-move-x');
       art.style.removeProperty('--skill-move-y');
+      art.style.removeProperty('--heavy-lunge-x');
+      art.style.removeProperty('--heavy-lunge-y');
       setBattleCharacterAction(art, member.character, 'idle');
     }, kind === 'basic' ? 420 : 720);
   });
+}
+
+const battleSkillEffectPresets = Object.freeze({
+  'heavy-strike': { duration: 680, impactAt: 350, className: 'battle-effect-heavy-strike' }
+});
+
+function captureBattleTargetAnchor(index) {
+  const target = document.querySelector(`#enemy-${index}`);
+  const field = document.querySelector('.battle-field');
+  if (!target || !field) return null;
+  const targetRect = target.getBoundingClientRect();
+  const fieldRect = field.getBoundingClientRect();
+  return { index, x: targetRect.left - fieldRect.left + targetRect.width / 2, y: targetRect.top - fieldRect.top + targetRect.height * .62, width: targetRect.width };
+}
+
+function playBattleSkillEffect(skillId, targetAnchor, options = {}) {
+  const preset = battleSkillEffectPresets[skillId];
+  const field = document.querySelector('.battle-field');
+  if (!preset || !field || !targetAnchor) return;
+  let layer = field.querySelector('.battle-skill-effect-layer');
+  if (!layer) {
+    layer = document.createElement('div');
+    layer.className = 'battle-skill-effect-layer';
+    layer.setAttribute('aria-hidden', 'true');
+    field.append(layer);
+  }
+  const effect = document.createElement('div');
+  effect.className = `battle-skill-effect ${preset.className}`;
+  effect.dataset.targetIndex = String(targetAnchor.index);
+  effect.style.setProperty('--effect-x', `${targetAnchor.x}px`);
+  effect.style.setProperty('--effect-y', `${targetAnchor.y}px`);
+  effect.style.setProperty('--target-width', `${targetAnchor.width}px`);
+  effect.innerHTML = `<span class="smash-trail"></span><span class="impact-shockwave"></span><span class="impact-crack"></span><span class="impact-sparks"></span><span class="impact-debris">${Array.from({ length: 6 }, (_, index) => `<i style="--debris-index:${index}"></i>`).join('')}</span>${options.damage > 0 ? `<b class="skill-impact-damage">-${options.damage}</b>` : ''}`;
+  layer.append(effect);
+  const startedAt = performance.now();
+  const followTarget = () => {
+    if (!effect.isConnected || performance.now() - startedAt >= preset.duration) return;
+    const currentTarget = document.querySelector(`#enemy-${targetAnchor.index}`);
+    if (currentTarget) {
+      const targetRect = currentTarget.getBoundingClientRect();
+      const fieldRect = field.getBoundingClientRect();
+      effect.style.setProperty('--effect-x', `${targetRect.left - fieldRect.left + targetRect.width / 2}px`);
+      effect.style.setProperty('--effect-y', `${targetRect.top - fieldRect.top + targetRect.height * .62}px`);
+      effect.style.setProperty('--target-width', `${targetRect.width}px`);
+    }
+    requestAnimationFrame(followTarget);
+  };
+  requestAnimationFrame(followTarget);
+  setTimeout(() => {
+    const target = document.querySelector(`#enemy-${targetAnchor.index}`);
+    target?.classList.add('heavy-strike-hit');
+    setTimeout(() => target?.classList.remove('heavy-strike-hit'), 220);
+  }, preset.impactAt);
+  setTimeout(() => {
+    effect.remove();
+    if (!layer.childElementCount) layer.remove();
+  }, preset.duration);
 }
 
 function playCompanionAttackAnimation(targetIndexes = []) {
@@ -3775,6 +3847,9 @@ function useAutoSkillForMember(member, now = Date.now()) {
     if (skill.id === 'whirlwind') damagePower *= 1 + Math.min(skillEffect.maxTargetBonus || 0, Math.max(0, targets.length - 1) * (skillEffect.perExtraTargetBonus || 0));
     const damage = Math.max(1, Math.ceil(stats.attack * damagePower * (critical ? stats.criticalDamageMultiplier : 1)));
     const profile = getPlayerAttackProfile(character, skill);
+    const targetAnchors = skill.id === 'heavy-strike'
+      ? new Map(targets.map((index) => [index, captureBattleTargetAnchor(index)]))
+      : null;
     const resolvedTargets = targets.map((index, targetOrder) => {
       const chainMultiplier = skill.id === 'chain-lightning' ? 1 + targetOrder * (skillEffect.bounceBonus || 0) : 1;
       const piercingMultiplier = skill.id === 'piercing-shot' ? Math.max(.1, 1 - targetOrder * .1) : 1;
@@ -3782,11 +3857,13 @@ function useAutoSkillForMember(member, now = Date.now()) {
         attacker: member,
         attackKind: 'skill',
         armorIgnore: skillEffect.armorIgnore,
-        controlledBonus: skillEffect.controlledBonus
+        controlledBonus: skillEffect.controlledBonus,
+        showDamage: skill.id !== 'heavy-strike'
       }) };
     });
     const hits = resolvedTargets.filter((target) => !target.result.evaded);
     hits.forEach((target) => applyEnemySkillState(target.index, skillEffect, now));
+    if (skill.id === 'heavy-strike') hits.forEach((target) => { getEnemySkillState(target.index).visualStunAt = now + 550; });
     if (skill.id === 'fireball') hits.forEach((target) => applyDot(target.index, 'burn', Math.max(1, Math.ceil(target.result.finalDamage * .18 * (1 + (skillEffect.burnBonus || 0)) * stats.dotMultiplier)), 4 + (skillEffect.burnDuration || 0), 1, { source: member }));
     if (skill.id === 'backstab') hits.forEach((target) => {
       const bleeding = (battle.enemyDots[target.index] || []).find((dot) => dot.type === 'bleed');
@@ -3835,8 +3912,14 @@ function useAutoSkillForMember(member, now = Date.now()) {
     const totalDamage = hits.reduce((total, target) => total + target.result.finalDamage, 0);
     if (skill.id !== 'companion') playPartyMemberCombatAnimation(member, (hits.length ? hits : resolvedTargets).map((target) => target.index), {
       kind: 'skill',
-      area: Number(skillEffect.targets || skill.targets || 1) > 1
+      area: Number(skillEffect.targets || skill.targets || 1) > 1,
+      skillId: skill.id
     });
+    if (skill.id === 'heavy-strike') {
+      const struckTarget = hits[0];
+      const displayedTarget = struckTarget || resolvedTargets[0];
+      playBattleSkillEffect(skill.id, targetAnchors.get(displayedTarget.index), { damage: struckTarget?.result.finalDamage || 0 });
+    }
     if (member.isMain && skill.id === 'companion') playCompanionAttackAnimation((hits.length ? hits : resolvedTargets).map((target) => target.index));
     if (hits.length) logBattle(`✦ ${member.name}施放【${skill.name}】，造成 ${totalDamage}${critical ? ' 暴擊' : ''}傷害。`, 'damage-dealt');
     logPartyDebug('技能施放', {

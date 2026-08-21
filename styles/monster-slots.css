@@ -448,6 +448,8 @@
 .battle-player-art.is-target-skill,
 .player-stage-unit.is-area-skill .player-stage-art,
 .battle-player-art.is-area-skill { z-index: 30 !important; animation: playerSkillTravel .72s cubic-bezier(.22,.75,.24,1) !important; }
+.player-stage-unit.is-heavy-strike .player-stage-art,
+.battle-player-art.is-heavy-strike { z-index: 30 !important; animation: playerHeavyStrikeLunge .68s cubic-bezier(.2,.78,.25,1) !important; }
 @keyframes playerBasicShake {
   0%,100% { transform: translate(0,0); }
   20% { transform: translate(-4px,1px) rotate(-2deg); }
@@ -459,6 +461,12 @@
   18%,72% { transform: translate(var(--skill-move-x, 0),var(--skill-move-y, 0)); }
   45% { transform: translate(var(--skill-move-x, 0),var(--skill-move-y, 0)) scale(1.06); }
 }
+@keyframes playerHeavyStrikeLunge {
+  0%,100% { transform: translate(0,0) scale(1); }
+  10% { transform: translate(calc(var(--heavy-lunge-x, 0) * -.12),calc(var(--heavy-lunge-y, 0) * -.12)) scale(1.03); }
+  22%,70% { transform: translate(var(--heavy-lunge-x, 0),var(--heavy-lunge-y, 0)) scale(1.08); }
+  82% { transform: translate(calc(var(--heavy-lunge-x, 0) * .72),calc(var(--heavy-lunge-y, 0) * .72)) scale(1.04); }
+}
 @media (max-width: 700px) {
   .battle-field { --player-portrait-size: clamp(48px, 14vw, 64px); --player-unit-ground-line: 8%; }
 }
@@ -469,8 +477,32 @@
   .player-stage-unit.is-target-skill .player-stage-art,
   .battle-player-art.is-target-skill,
   .player-stage-unit.is-area-skill .player-stage-art,
-  .battle-player-art.is-area-skill { animation-duration: .01ms !important; }
+  .battle-player-art.is-area-skill,
+  .player-stage-unit.is-heavy-strike .player-stage-art,
+  .battle-player-art.is-heavy-strike { animation-duration: .01ms !important; }
 }
+
+/* Reusable skill-effect layer; heavy strike is the first preset. */
+.battle-skill-effect-layer { position:absolute; z-index:45; inset:0; overflow:visible; pointer-events:none; }
+.battle-skill-effect { position:absolute; left:var(--effect-x); top:var(--effect-y); width:var(--target-width); height:1px; transform:translate(-50%,-50%); }
+.battle-effect-heavy-strike .smash-trail { position:absolute; left:50%; bottom:-8px; width:clamp(12px,calc(var(--target-width) * .16),22px); height:calc(var(--target-width) * 1.05); border-radius:60% 60% 28% 28%; background:linear-gradient(90deg,#8d4a12 0,#f08a22 22%,#fff4ba 48%,#ffc243 66%,#a95312 100%); box-shadow:0 0 7px rgba(255,166,45,.56); transform-origin:bottom; animation:heavySmashTrail .35s cubic-bezier(.42,0,.86,.34) forwards; }
+.battle-effect-heavy-strike .smash-trail::before,.battle-effect-heavy-strike .smash-trail::after { content:""; position:absolute; top:22%; width:3px; height:48%; border-radius:4px; background:#f5a333; opacity:.65; }
+.battle-effect-heavy-strike .smash-trail::before { left:-10px; transform:skewY(-12deg); }.battle-effect-heavy-strike .smash-trail::after { right:-9px; transform:skewY(11deg); }
+.battle-effect-heavy-strike .impact-shockwave { position:absolute; left:50%; top:4px; width:calc(var(--target-width) * 1.42); height:calc(var(--target-width) * .38); border:4px solid #efa22e; border-radius:50%; opacity:0; transform:translate(-50%,-50%) scale(.18); animation:heavyShockwave .26s .34s ease-out forwards; }
+.battle-effect-heavy-strike .impact-crack { position:absolute; left:50%; top:2px; width:calc(var(--target-width) * .72); height:18px; opacity:0; transform:translateX(-50%); background:linear-gradient(145deg,transparent 43%,#5c351d 45% 50%,transparent 52%),linear-gradient(35deg,transparent 45%,#8c5225 47% 51%,transparent 53%); clip-path:polygon(0 42%,35% 50%,46% 10%,53% 50%,80% 22%,65% 56%,100% 68%,57% 66%,50% 100%,43% 67%,8% 82%,38% 58%); animation:heavyImpactAppear .24s .34s ease-out forwards; }
+.battle-effect-heavy-strike .impact-sparks { position:absolute; left:50%; top:0; width:calc(var(--target-width) * .82); height:28px; opacity:0; transform:translateX(-50%); background:conic-gradient(from 10deg,transparent 0 9%,#fff2b1 10% 12%,transparent 13% 31%,#f49a24 32% 35%,transparent 36% 57%,#ffd15a 58% 61%,transparent 62% 79%,#fff2bd 80% 82%,transparent 83%); animation:heavyImpactAppear .2s .34s ease-out forwards; }
+.battle-effect-heavy-strike .impact-debris { position:absolute; inset:0; }.battle-effect-heavy-strike .impact-debris i { position:absolute; left:50%; top:0; width:7px; height:6px; border-radius:45% 55% 40% 50%; background:#79502b; opacity:0; --debris-angle:calc(var(--debris-index) * 60deg - 150deg); animation:heavyDebris .3s .34s ease-out forwards; transform:rotate(var(--debris-angle)) translateX(calc(var(--target-width) * .1)); }
+.battle-effect-heavy-strike .skill-impact-damage { position:absolute; z-index:3; left:50%; top:calc(var(--target-width) * -.45); color:#fff3ae; font-size:22px; font-weight:900; text-shadow:0 2px 2px #5b1720,0 0 7px #ef8a2c; opacity:0; animation:heavyDamageFloat .34s .35s ease-out forwards; }
+#enemy-squad .monster-battle-slot.heavy-strike-hit .monster-slot-image { animation:heavyTargetHit .22s ease-out !important; }
+.enemy-stun-indicator { position:absolute; z-index:20; left:50%; top:-9px; width:62px; height:24px; transform:translateX(-50%); pointer-events:none; }
+.enemy-stun-indicator i { position:absolute; left:26px; top:7px; color:#ffd34f; font-size:13px; font-style:normal; text-shadow:0 1px 1px #783d13,0 0 3px #fff1a3; animation:stunStarOrbit 1s linear infinite; }.enemy-stun-indicator i:nth-child(2){animation-delay:-.33s}.enemy-stun-indicator i:nth-child(3){animation-delay:-.66s}
+@keyframes heavySmashTrail { 0%{opacity:0;transform:translateX(-50%) translateY(-100%) scaleY(.25)} 28%{opacity:1} 72%{opacity:1;transform:translateX(-50%) translateY(-8%) scaleY(1)} 100%{opacity:0;transform:translateX(-50%) translateY(8%) scaleY(.82)} }
+@keyframes heavyShockwave { 0%{opacity:.9;transform:translate(-50%,-50%) scale(.18)} 100%{opacity:0;transform:translate(-50%,-50%) scale(1)} }
+@keyframes heavyImpactAppear { 0%{opacity:0;transform:translateX(-50%) scale(.45)} 35%{opacity:1} 100%{opacity:0;transform:translateX(-50%) scale(1.05)} }
+@keyframes heavyDebris { 0%{opacity:0} 20%{opacity:1} 100%{opacity:0;transform:rotate(var(--debris-angle)) translateX(calc(var(--target-width) * .62)) rotate(120deg)} }
+@keyframes heavyDamageFloat { 0%{opacity:0;transform:translate(-50%,10px) scale(.8)} 22%{opacity:1} 100%{opacity:0;transform:translate(-50%,-24px) scale(1.1)} }
+@keyframes heavyTargetHit { 0%,100%{translate:0 0} 18%{translate:-4px 2px} 42%{translate:7px -1px} 68%{translate:-3px 1px} }
+@keyframes stunStarOrbit { from{transform:rotate(0deg) translateX(20px) rotate(0deg)} to{transform:rotate(360deg) translateX(20px) rotate(-360deg)} }
 
 .stronghold-objective {
   position: absolute;
