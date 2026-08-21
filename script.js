@@ -2704,9 +2704,9 @@ function playPartyMemberCombatAnimation(member, targetIndexes = [], options = {}
       ? document.querySelector('#enemy-squad')
       : null;
     if (!field || !art) return;
-    const actionClass = skillId === 'heavy-strike' ? 'is-heavy-strike' : skillId === 'whirlwind' ? 'is-whirlwind' : skillId === 'charge' ? 'is-charge' : skillId === 'power-shot' ? 'is-power-shot' : skillId === 'multi-shot' ? 'is-multi-shot' : kind === 'basic' ? 'is-attacking' : area ? 'is-area-skill' : 'is-target-skill';
-    fighter?.classList.remove('is-attacking', 'is-target-skill', 'is-area-skill', 'is-heavy-strike', 'is-whirlwind', 'is-charge', 'is-power-shot', 'is-multi-shot');
-    art.classList.remove('is-attacking', 'is-target-skill', 'is-area-skill', 'is-heavy-strike', 'is-whirlwind', 'is-charge', 'is-power-shot', 'is-multi-shot');
+    const actionClass = skillId === 'heavy-strike' ? 'is-heavy-strike' : skillId === 'whirlwind' ? 'is-whirlwind' : skillId === 'charge' ? 'is-charge' : skillId === 'power-shot' ? 'is-power-shot' : skillId === 'multi-shot' ? 'is-multi-shot' : skillId === 'piercing-shot' ? 'is-piercing-shot' : kind === 'basic' ? 'is-attacking' : area ? 'is-area-skill' : 'is-target-skill';
+    fighter?.classList.remove('is-attacking', 'is-target-skill', 'is-area-skill', 'is-heavy-strike', 'is-whirlwind', 'is-charge', 'is-power-shot', 'is-multi-shot', 'is-piercing-shot');
+    art.classList.remove('is-attacking', 'is-target-skill', 'is-area-skill', 'is-heavy-strike', 'is-whirlwind', 'is-charge', 'is-power-shot', 'is-multi-shot', 'is-piercing-shot');
     void art.offsetWidth;
     art.dataset.job = member.job || member.character?.job || 'warrior';
     setBattleCharacterAction(art, member.character, 'active');
@@ -2763,6 +2763,13 @@ function playPartyMemberCombatAnimation(member, targetIndexes = [], options = {}
         art.style.setProperty('--multi-shot-pull-x', `${-deltaX / distance * 8}px`);
         art.style.setProperty('--multi-shot-pull-y', `${-deltaY / distance * 8}px`);
       }
+      if (skillId === 'piercing-shot') {
+        const deltaX = destinationX - (artRect.left + artRect.width / 2);
+        const deltaY = destinationY - (artRect.top + artRect.height / 2);
+        const distance = Math.max(1, Math.hypot(deltaX, deltaY));
+        art.style.setProperty('--piercing-pull-x', `${-deltaX / distance * 11}px`);
+        art.style.setProperty('--piercing-pull-y', `${-deltaY / distance * 11}px`);
+      }
     }
     fighter?.classList.add(actionClass);
     art.classList.add(actionClass);
@@ -2783,6 +2790,8 @@ function playPartyMemberCombatAnimation(member, targetIndexes = [], options = {}
       art.style.removeProperty('--power-shot-pull-y');
       art.style.removeProperty('--multi-shot-pull-x');
       art.style.removeProperty('--multi-shot-pull-y');
+      art.style.removeProperty('--piercing-pull-x');
+      art.style.removeProperty('--piercing-pull-y');
       setBattleCharacterAction(art, member.character, 'idle');
     }, kind === 'basic' ? 420 : 720);
   });
@@ -2793,7 +2802,8 @@ const battleSkillEffectPresets = Object.freeze({
   whirlwind: { duration: 1000, impactAt: 350, className: 'battle-effect-whirlwind' },
   charge: { duration: 780, impactAt: 400, className: 'battle-effect-charge' },
   'power-shot': { duration: 760, impactAt: 400, className: 'battle-effect-power-shot' },
-  'multi-shot': { duration: 880, impactAt: 450, className: 'battle-effect-multi-shot' }
+  'multi-shot': { duration: 880, impactAt: 450, className: 'battle-effect-multi-shot' },
+  'piercing-shot': { duration: 960, impactAt: 400, className: 'battle-effect-piercing-shot' }
 });
 
 function captureBattleTargetAnchor(index) {
@@ -2812,6 +2822,27 @@ function captureBattleAttackerAnchor(member) {
   const fieldRect = field.getBoundingClientRect();
   const artRect = art.getBoundingClientRect();
   return { x: artRect.left - fieldRect.left + artRect.width / 2, y: artRect.top - fieldRect.top + artRect.height / 2 };
+}
+
+function animatePiercingProjectile(effect, origin, targets) {
+  const arrow = effect.querySelector('.piercing-shot-arrow');
+  if (!arrow || !targets.length) return;
+  const points = [origin, ...targets.map((target) => target.anchor)];
+  const previous = points[points.length - 2] || origin;
+  const last = points[points.length - 1];
+  const dx = last.x - previous.x;
+  const dy = last.y - previous.y;
+  const length = Math.max(1, Math.hypot(dx, dy));
+  points.push({ x: last.x + dx / length * 150, y: last.y + dy / length * 150 });
+  const segments = points.slice(1).map((point, index) => Math.hypot(point.x - points[index].x, point.y - points[index].y));
+  const total = segments.reduce((sum, value) => sum + value, 0) || 1;
+  let traveled = 0;
+  const keyframes = points.map((point, index) => {
+    if (index) traveled += segments[index - 1];
+    const next = points[Math.min(points.length - 1, index + 1)];
+    return { transform: `translate(${point.x - origin.x}px,${point.y - origin.y}px) rotate(${Math.atan2(next.y - point.y, next.x - point.x)}rad)`, opacity: index === points.length - 1 ? 0 : 1, offset: traveled / total };
+  });
+  arrow.animate(keyframes, { duration: 650, delay: 250, easing: 'linear', fill: 'forwards' });
 }
 
 function playBattleSkillEffect(skillId, targetAnchor, options = {}) {
@@ -2839,8 +2870,11 @@ function playBattleSkillEffect(skillId, targetAnchor, options = {}) {
       ? `<span class="power-shot-charge"></span><span class="power-shot-arrow" style="--arrow-start-x:${(options.origin?.x || targetAnchor.x) - targetAnchor.x}px;--arrow-start-y:${(options.origin?.y || targetAnchor.y) - targetAnchor.y}px"><i></i></span><span class="power-shot-burst"></span><span class="power-shot-sparks"></span>${options.damage > 0 ? `<b class="power-shot-damage">-${options.damage}</b>` : ''}`
     : skillId === 'multi-shot'
       ? `<span class="multi-shot-charge"></span>${(options.targets || []).map((target, order) => `<span class="multi-shot-projectile" data-effect-target="${target.index}" style="--hit-order:${order};--hit-x:${target.anchor.x - targetAnchor.x}px;--hit-y:${target.anchor.y - targetAnchor.y}px"><i></i><em></em>${target.damage > 0 ? `<b>-${target.damage}</b>` : ''}</span>`).join('')}`
+    : skillId === 'piercing-shot'
+      ? `<span class="piercing-shot-charge"><i></i><i></i><i></i></span><span class="piercing-shot-arrow"><i></i></span>${(options.targets || []).map((target, order) => `<span class="piercing-shot-hit" data-effect-target="${target.index}" style="--hit-order:${order};--hit-x:${target.anchor.x - targetAnchor.x}px;--hit-y:${target.anchor.y - targetAnchor.y}px"><i></i><em>◫</em>${target.damage > 0 ? `<b>-${target.damage}</b>` : ''}</span>`).join('')}`
     : `<span class="smash-trail"></span><span class="impact-shockwave"></span><span class="impact-crack"></span><span class="impact-sparks"></span><span class="impact-debris">${Array.from({ length: 6 }, (_, index) => `<i style="--debris-index:${index}"></i>`).join('')}</span>${options.damage > 0 ? `<b class="skill-impact-damage">-${options.damage}</b>` : ''}`;
   layer.append(effect);
+  if (skillId === 'piercing-shot') animatePiercingProjectile(effect, targetAnchor, options.targets || []);
   const startedAt = performance.now();
   const followTarget = () => {
     if (!effect.isConnected || performance.now() - startedAt >= preset.duration) return;
@@ -3936,10 +3970,10 @@ function useAutoSkillForMember(member, now = Date.now()) {
     if (skill.id === 'whirlwind') damagePower *= 1 + Math.min(skillEffect.maxTargetBonus || 0, Math.max(0, targets.length - 1) * (skillEffect.perExtraTargetBonus || 0));
     const damage = Math.max(1, Math.ceil(stats.attack * damagePower * (critical ? stats.criticalDamageMultiplier : 1)));
     const profile = getPlayerAttackProfile(character, skill);
-    const targetAnchors = ['heavy-strike', 'whirlwind', 'charge', 'power-shot', 'multi-shot'].includes(skill.id)
+    const targetAnchors = ['heavy-strike', 'whirlwind', 'charge', 'power-shot', 'multi-shot', 'piercing-shot'].includes(skill.id)
       ? new Map(targets.map((index) => [index, captureBattleTargetAnchor(index)]))
       : null;
-    const attackerAnchor = ['power-shot', 'multi-shot'].includes(skill.id) ? captureBattleAttackerAnchor(member) : null;
+    const attackerAnchor = ['power-shot', 'multi-shot', 'piercing-shot'].includes(skill.id) ? captureBattleAttackerAnchor(member) : null;
     const resolvedTargets = targets.map((index, targetOrder) => {
       const chainMultiplier = skill.id === 'chain-lightning' ? 1 + targetOrder * (skillEffect.bounceBonus || 0) : 1;
       const piercingMultiplier = skill.id === 'piercing-shot' ? Math.max(.1, 1 - targetOrder * .1) : 1;
@@ -3948,7 +3982,7 @@ function useAutoSkillForMember(member, now = Date.now()) {
         attackKind: 'skill',
         armorIgnore: skillEffect.armorIgnore,
         controlledBonus: skillEffect.controlledBonus,
-        showDamage: !['heavy-strike', 'whirlwind', 'charge', 'power-shot', 'multi-shot'].includes(skill.id)
+        showDamage: !['heavy-strike', 'whirlwind', 'charge', 'power-shot', 'multi-shot', 'piercing-shot'].includes(skill.id)
       }) };
     });
     const hits = resolvedTargets.filter((target) => !target.result.evaded);
@@ -4022,6 +4056,14 @@ function useAutoSkillForMember(member, now = Date.now()) {
     }
     if (skill.id === 'multi-shot') {
       const visualTargets = resolvedTargets.map((target) => ({
+        index: target.index,
+        damage: target.result.evaded ? 0 : target.result.finalDamage,
+        anchor: targetAnchors.get(target.index)
+      })).filter((target) => target.anchor);
+      if (attackerAnchor && visualTargets.length) playBattleSkillEffect(skill.id, { index: -1, ...attackerAnchor, width: 1 }, { targets: visualTargets });
+    }
+    if (skill.id === 'piercing-shot') {
+      const visualTargets = resolvedTargets.slice(0, 4).map((target) => ({
         index: target.index,
         damage: target.result.evaded ? 0 : target.result.finalDamage,
         anchor: targetAnchors.get(target.index)
