@@ -3458,6 +3458,24 @@ function syncMainBattleMemberFromLegacy() {
   main.alive = main.currentHp > 0;
 }
 
+function syncMainBattleMemberProgression(character, progress) {
+  const main = getMainBattleMember();
+  if (!main || !character || !progress) return;
+  const stats = getCharacterStats(progress.level, progress, character);
+  const maxResource = getMaxCombatResourceForMember(character, progress);
+  main.level = progress.level;
+  main.progress.level = progress.level;
+  main.stats = stats;
+  main.attack = stats.attack;
+  main.defense = stats.defense;
+  main.attackSpeed = stats.attackSpeed;
+  main.maxHp = stats.hp;
+  main.currentHp = Math.min(main.currentHp, main.maxHp);
+  main.resourceMax = maxResource;
+  main.resourceCurrent = Math.min(main.resourceCurrent, main.resourceMax);
+  syncLegacyBattleStateFromMain();
+}
+
 function persistPartyRuntimeState() {
   if (!battle.partyMembers?.length) return;
   const slots = getCharacterSlots();
@@ -4018,6 +4036,7 @@ function rewardVictory(index) {
     if (Math.random() < .12) { resources.starIron += 1; accountDrops.push('星鐵碎片 ×1'); addRoundLoot('star-iron', '星鐵碎片', 1, '✦'); }
     saveAccountResources(resources);
   }
+  const levelBeforeRewards = progress.level;
   while (progress.xp >= requiredXp(progress.level)) {
     progress.xp -= requiredXp(progress.level);
     progress.level += 1;
@@ -4030,6 +4049,7 @@ function rewardVictory(index) {
       logBattle(`★ 自動學會${learned.type === 'active' ? '主動' : '被動'}技能【${learned.name}】`, 'progress');
     }
   }
+  if (progress.level !== levelBeforeRewards) syncMainBattleMemberProgression(getActiveCharacter(), progress);
   const newlyUnlockedMaps = enemy.isBoss || enemy.id === ChapterOneProgressionPolicy.REQUIREMENTS[currentMap.id]?.bossId
     ? ChapterOneProgressionPolicy.recordBossKill(progress, currentMap.id, enemy)
     : enemy.isElite ? [] : ChapterOneProgressionPolicy.recordNormalKill(progress, currentMap.id);
