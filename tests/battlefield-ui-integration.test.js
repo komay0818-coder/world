@@ -10,7 +10,7 @@ const layoutCss = fs.readFileSync(path.join(root, 'styles', 'mmorpg-layout.css')
 
 assert.match(html, /id="player-battle-stage"/, 'party players render on the battlefield');
 assert.match(html, /id="battle-player-art" class="battle-player-art hidden"/, 'main player has a dedicated portrait node');
-assert.match(html, /styles\/monster-slots\.css\?v=20260821-heal-v1/, 'battlefield loads the current local portrait styles');
+assert.match(html, /styles\/monster-slots\.css\?v=20260821-player-anchor-v2/, 'battlefield loads the current local portrait styles');
 assert.match(html, /script\.js\?v=20260821-heal-v1/, 'battlefield loads the current local combat logic');
 assert.match(script, /return battleCharacterArt\[`\$\{character\.race\}:\$\{character\.job\}`\] \|\| '';/, 'battle uses stable front character artwork');
 assert.match(script, /'orc:warrior': 'assets\/character-portraits\/orc-warrior\.png'/, 'orc warrior uses the supplied portrait');
