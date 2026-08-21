@@ -383,9 +383,6 @@
 .player-stage-unit.is-hit .player-stage-art,.battle-player-art[data-action="hit"] { animation: characterActionHit .52s ease-out !important; filter: brightness(1.35) saturate(.72) drop-shadow(0 0 12px rgba(255,90,90,.82)) drop-shadow(0 9px 5px rgba(0,0,0,.58)) !important; }
 .battle-player-art[data-action],.player-stage-art { mix-blend-mode: normal; background-position: center bottom !important; background-size: auto 96% !important; background-repeat: no-repeat !important; }
 @keyframes characterActionHit { 0%,100% { translate: 0 0; } 28% { translate: -7px 2px; } 55% { translate: 5px -1px; } }
-@media (prefers-reduced-motion: reduce) {
-  .player-stage-unit.is-attacking .player-stage-art,.battle-player-art.is-attacking { animation-duration:.01ms !important; }
-}
 .battle-field #battle-player-art[aria-label] { left: 50% !important; bottom: 1.5% !important; height: 32.6667% !important; z-index: 8 !important; filter: drop-shadow(0 10px 6px rgba(0,0,0,.62)) drop-shadow(0 0 3px rgba(203,226,238,.18)) !important; }
 .battle-field:has(#player-battle-stage[data-count="1"]) #battle-player-art[aria-label] { left: 40% !important; }
 .battle-field:has(#player-battle-stage[data-count="2"]) #battle-player-art[aria-label] { left: 34% !important; }
@@ -503,31 +500,6 @@
 @keyframes playerHolyNova { 0%,100%{transform:translate(0,0)} 15%,80%{transform:translate(var(--holy-nova-x,0),var(--holy-nova-y,0))} 84%{transform:translate(var(--holy-nova-x,0),var(--holy-nova-y,0))} }
 @media (max-width: 700px) {
   .battle-field { --player-portrait-size: clamp(48px, 14vw, 64px); --player-unit-ground-line: 8%; }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .player-stage-unit.is-attacking .player-stage-art,
-  .battle-player-art.is-attacking,
-  .player-stage-unit.is-target-skill .player-stage-art,
-  .battle-player-art.is-target-skill,
-  .player-stage-unit.is-area-skill .player-stage-art,
-  .battle-player-art.is-area-skill,
-  .player-stage-unit.is-heavy-strike .player-stage-art,
-  .battle-player-art.is-heavy-strike,
-  .player-stage-unit.is-whirlwind .player-stage-art,
-  .battle-player-art.is-whirlwind { animation-duration: .01ms !important; }
-  .player-stage-unit.is-charge .player-stage-art,
-  .battle-player-art.is-charge { animation-duration:.01ms!important; }
-  .player-stage-unit.is-power-shot .player-stage-art,.battle-player-art.is-power-shot { animation-duration:.01ms!important; }
-  .player-stage-unit.is-multi-shot .player-stage-art,.battle-player-art.is-multi-shot { animation-duration:.01ms!important; }
-  .player-stage-unit.is-piercing-shot .player-stage-art,.battle-player-art.is-piercing-shot { animation-duration:.01ms!important; }
-  .player-stage-unit.is-backstab .player-stage-art,.battle-player-art.is-backstab { animation-duration:.01ms!important; }
-  .player-stage-unit.is-shadow-dance .player-stage-art,.battle-player-art.is-shadow-dance { transition:none!important; }
-  .player-stage-unit.is-fireball .player-stage-art,.battle-player-art.is-fireball { animation-duration:.01ms!important; }
-  .player-stage-unit.is-blizzard .player-stage-art,.battle-player-art.is-blizzard { animation-duration:.01ms!important; }
-  .player-stage-unit.is-chain-lightning .player-stage-art,.battle-player-art.is-chain-lightning { animation-duration:.01ms!important; }
-  .player-stage-unit.is-holy-light .player-stage-art,.battle-player-art.is-holy-light { animation-duration:.01ms!important; }
-  .player-stage-unit.is-holy-nova .player-stage-art,.battle-player-art.is-holy-nova { animation-duration:.01ms!important; }
 }
 
 /* Reusable skill-effect layer; heavy strike is the first preset. */
