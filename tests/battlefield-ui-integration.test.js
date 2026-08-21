@@ -10,8 +10,8 @@ const layoutCss = fs.readFileSync(path.join(root, 'styles', 'mmorpg-layout.css')
 
 assert.match(html, /id="player-battle-stage"/, 'party players render on the battlefield');
 assert.match(html, /id="battle-player-art" class="battle-player-art hidden"/, 'main player has a dedicated portrait node');
-assert.match(html, /styles\/monster-slots\.css\?v=20260821-shadow-dance-v1/, 'battlefield loads the current local portrait styles');
-assert.match(html, /script\.js\?v=20260821-shadow-dance-v1/, 'battlefield loads the current local combat logic');
+assert.match(html, /styles\/monster-slots\.css\?v=20260821-poison-blade-v1/, 'battlefield loads the current local portrait styles');
+assert.match(html, /script\.js\?v=20260821-poison-blade-v1/, 'battlefield loads the current local combat logic');
 assert.match(script, /return battleCharacterArt\[`\$\{character\.race\}:\$\{character\.job\}`\] \|\| '';/, 'battle uses stable front character artwork');
 assert.match(script, /'orc:warrior': 'assets\/character-portraits\/orc-warrior\.png'/, 'orc warrior uses the supplied portrait');
 assert.match(script, /'orc:hunter': 'assets\/character-portraits\/orc-hunter\.png'/, 'orc hunter uses the supplied portrait');
@@ -61,7 +61,7 @@ assert.match(script, /battleSkillEffectPresets[\s\S]*?'heavy-strike'[\s\S]*?dura
 assert.match(script, /captureBattleTargetAnchor\(index\)[\s\S]*?getBoundingClientRect/, 'heavy strike captures its actual target position before damage resolves');
 assert.match(script, /followTarget[\s\S]*?`#enemy-\$\{targetAnchor\.index\}`[\s\S]*?requestAnimationFrame\(followTarget\)/, 'active heavy strike effects follow the selected target');
 assert.match(script, /effect\.remove\(\);[\s\S]*?if \(!layer\.childElementCount\) layer\.remove\(\)/, 'finished skill effects leave no stale effect DOM');
-assert.match(script, /showDamage: !\['heavy-strike', 'whirlwind', 'charge', 'power-shot', 'multi-shot', 'piercing-shot', 'backstab', 'shadow-dance'\]\.includes\(skill\.id\)/, 'skill presets suppress early generic damage numbers when impact timing is custom');
+assert.match(script, /showDamage: !\['heavy-strike', 'whirlwind', 'charge', 'power-shot', 'multi-shot', 'piercing-shot', 'backstab', 'shadow-dance', 'poison-blade'\]\.includes\(skill\.id\)/, 'skill presets suppress early generic damage numbers when impact timing is custom');
 assert.match(script, /visualStunAt = now \+ 550/, 'stun art waits until the impact animation finishes');
 assert.match(script, /Date\.now\(\) < enemySkillState\.stunnedUntil[\s\S]*?enemySkillState\.visualStunAt/, 'stun stars are driven by the actual stun state');
 assert.match(css, /impact-shockwave[\s\S]*?var\(--target-width\) \* 1\.42/, 'single-target shockwave stays proportional to the target');
@@ -69,7 +69,7 @@ assert.match(css, /impact-debris[\s\S]*?heavyDebris/, 'heavy strike has a restra
 assert.match(css, /@keyframes playerHeavyStrikeLunge/, 'heavy strike uses a short portrait lunge and return');
 assert.match(script, /whirlwind: \{ duration: 1000, impactAt: 350, className: 'battle-effect-whirlwind' \}/, 'whirlwind is a reusable one-second battle-effect preset');
 assert.match(script, /targets: hits\.map\(\(target\) => \(\{ index: target\.index, damage: target\.result\.finalDamage, anchor: targetAnchors\.get\(target\.index\) \}\)\)/, 'whirlwind binds each hit visual and number to its resolved target');
-assert.match(script, /showDamage: !\['heavy-strike', 'whirlwind', 'charge', 'power-shot', 'multi-shot', 'piercing-shot', 'backstab', 'shadow-dance'\]\.includes\(skill\.id\)/, 'preset damage numbers wait for their custom hit visuals');
+assert.match(script, /showDamage: !\['heavy-strike', 'whirlwind', 'charge', 'power-shot', 'multi-shot', 'piercing-shot', 'backstab', 'shadow-dance', 'poison-blade'\]\.includes\(skill\.id\)/, 'preset damage numbers wait for their custom hit visuals');
 assert.match(css, /whirlwind-target-hit[\s\S]*?var\(--hit-order\) \* \.05s/, 'whirlwind staggers target slashes by fifty milliseconds');
 assert.match(css, /whirlwind-afterimages[\s\S]*?whirlwindAfterimage/, 'whirlwind uses portrait afterimages as its signature');
 assert.match(css, /whirlwind-finisher[\s\S]*?\.7s/, 'whirlwind ends with a larger arc slash');
@@ -112,6 +112,12 @@ assert.match(script, /targetIndexes\.slice\(0, 5\)[\s\S]*?targetPositions\?\.get
 assert.match(script, /resolvedTargets\.slice\(0, 5\)[\s\S]*?playBattleSkillEffect\(skill\.id, visualTargets\[0\]\.anchor/, 'shadow dance visuals use the resolved target order and anchors');
 assert.match(css, /shadow-dance-hit\.is-finisher strong::before[\s\S]*?strong::after/, 'the final target gets a compact X-shaped double slash');
 assert.doesNotMatch(css.match(/\.battle-effect-shadow-dance[\s\S]*?@keyframes shadowDanceTargetHit/)?.[0] || '', /explosion|crack|debris|shockwave|whirlwind/, 'shadow dance avoids warrior impact and spinning effects');
+assert.match(script, /function getPoisonBladeVisualState[\s\S]*?dot\.type === 'poison'[\s\S]*?dot\.source === member/, 'poison blade aura follows poison stacks actually applied by that rogue');
+assert.match(script, /member\.poisonBladeVisualUntil = now \+ 800/, 'poison blade has a short activation phase before settling into its live state');
+assert.match(script, /!\['companion', 'poison-blade'\]\.includes\(skill\.id\)/, 'poison blade does not reuse attack travel animation');
+assert.match(script, /renderMainPoisonBladeVisual\(getMainBattleMember\(\)\)/, 'main rogue poison visuals refresh with battle state');
+assert.match(css, /poison-blade-aura[\s\S]*?poison-blade-indicator[\s\S]*?poisonBladeDaggerCast/, 'poison blade renders a restrained green ring and overhead dagger');
+assert.doesNotMatch(css.match(/\.poison-blade-aura[\s\S]*?@keyframes poisonBladeDaggerCast/)?.[0] || '', /explosion|crack|debris|shockwave|fire/, 'poison blade avoids attack and warrior impact visuals');
 
 assert.match(script, /class="enemy-unit monster-battle-slot visual-size-\$\{visualSize\}/, 'monsters keep full-body image slots');
 assert.match(css, /monster-battle-slot\.elite,[\s\S]*?monster-battle-slot\.boss \{[\s\S]*?--unit-rank-scale: 1;/, 'elite and boss monsters are not enlarged');

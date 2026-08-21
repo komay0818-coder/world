@@ -3436,9 +3436,61 @@ function renderBattlePartyStatus() {
       const art = battleCharacterActionArt(member.character, 'idle') || battleCharacterArt[`${member.character.race}:${member.character.job}`] || '';
       const jobName = classes.find((job) => job.id === member.character.job)?.name || member.character.job;
       const chargeBuffClass = Date.now() < (member.skillHasteUntil || 0) ? ' has-charge-buff' : '';
-      return `<article class="player-stage-unit ${member.alive ? '' : 'is-dead'}${chargeBuffClass}" data-visual-size="humanoid" data-member-id="${member.id}" data-job="${member.character.job}"><div class="player-stage-floating"><b>${member.name}</b><small>${jobName}・Lv.${member.level}</small><span class="player-stage-hp"><i style="width:${hpPercent}%"></i></span><span class="player-stage-resource"><i style="width:${resourcePercent}%"></i></span></div><div class="player-stage-art" style="background-image:url('${art}')" aria-label="${member.name}"></div></article>`;
+      const poisonBlade = getPoisonBladeVisualState(member);
+      const poisonBladeClass = poisonBlade.active ? ` has-poison-blade${poisonBlade.activating ? ' is-poison-blade-cast' : ''}` : '';
+      const poisonBladeIndicator = poisonBlade.active ? `<span class="poison-blade-aura" aria-hidden="true"><i></i><i></i><i></i></span><span class="poison-blade-indicator" role="img" aria-label="毒刃效果${poisonBlade.stacks > 1 ? `，${poisonBlade.stacks} 層` : ''}"><i>🗡</i>${poisonBlade.stacks > 1 ? `<b>×${poisonBlade.stacks}</b>` : ''}</span>` : '';
+      return `<article class="player-stage-unit ${member.alive ? '' : 'is-dead'}${chargeBuffClass}${poisonBladeClass}" data-visual-size="humanoid" data-member-id="${member.id}" data-job="${member.character.job}"><div class="player-stage-floating"><b>${member.name}</b><small>${jobName}・Lv.${member.level}</small><span class="player-stage-hp"><i style="width:${hpPercent}%"></i></span><span class="player-stage-resource"><i style="width:${resourcePercent}%"></i></span></div><div class="player-stage-art" style="background-image:url('${art}')" aria-label="${member.name}"></div>${poisonBladeIndicator}</article>`;
     }).join('');
   }
+}
+
+function getPoisonBladeVisualState(member, now = Date.now()) {
+  const activating = Boolean(member?.alive && now < (member.poisonBladeVisualUntil || 0));
+  let stacks = 0;
+  (battle.enemyDots || []).forEach((dots, index) => {
+    if ((battle.enemyHps?.[index] || 0) <= 0) return;
+    const targetStacks = (dots || []).filter((dot) => dot.type === 'poison' && (dot.source === member || dot.source?.id === member?.id)).length;
+    stacks = Math.max(stacks, targetStacks);
+  });
+  return { active: Boolean(member?.alive && (activating || stacks > 0)), activating, stacks: Math.max(1, stacks) };
+}
+
+function renderMainPoisonBladeVisual(member) {
+  const art = document.querySelector('#battle-player-art');
+  const field = document.querySelector('.battle-field');
+  if (!art || !field) return;
+  const state = getPoisonBladeVisualState(member);
+  art.classList.toggle('has-poison-blade', state.active);
+  art.classList.toggle('is-poison-blade-cast', state.activating);
+  field.classList.toggle('main-has-poison-blade', state.active);
+  field.classList.toggle('main-is-poison-blade-cast', state.activating);
+  let aura = field.querySelector('.main-poison-blade-aura');
+  let indicator = field.querySelector('.main-poison-blade-indicator');
+  if (!state.active) {
+    aura?.remove();
+    indicator?.remove();
+    return;
+  }
+  if (!aura) {
+    aura = document.createElement('span');
+    aura.className = 'poison-blade-aura main-poison-blade-aura';
+    aura.setAttribute('aria-hidden', 'true');
+    aura.innerHTML = '<i></i><i></i><i></i>';
+    art.append(aura);
+  }
+  if (!indicator) {
+    indicator = document.createElement('span');
+    indicator.className = 'poison-blade-indicator main-poison-blade-indicator';
+    indicator.setAttribute('role', 'img');
+    art.append(indicator);
+  }
+  indicator.setAttribute('aria-label', `毒刃效果${state.stacks > 1 ? `，${state.stacks} 層` : ''}`);
+  indicator.innerHTML = `<i>🗡</i>${state.stacks > 1 ? `<b>×${state.stacks}</b>` : ''}`;
+  const artRect = art.getBoundingClientRect();
+  const fieldRect = field.getBoundingClientRect();
+  field.style.setProperty('--main-poison-x', `${artRect.left - fieldRect.left + artRect.width / 2}px`);
+  field.style.setProperty('--main-poison-y', `${artRect.top - fieldRect.top + artRect.height / 2}px`);
+  field.style.setProperty('--main-poison-size', `${artRect.width}px`);
 }
 
 function renderStrongholdObjective(currentMap = getActiveMap(getProgress())) {
@@ -3541,6 +3593,7 @@ function updateBattleUI() {
   document.querySelector('#exp-text').textContent = `${progress.xp} / ${requiredXp(progress.level)}`;
   document.querySelector('#xp-bar').style.width = `${progress.xp / requiredXp(progress.level) * 100}%`;
   renderBattlePartyStatus();
+  renderMainPoisonBladeVisual(getMainBattleMember());
   refreshSkills(character, progress.level);
 }
 
@@ -4070,7 +4123,7 @@ function useAutoSkillForMember(member, now = Date.now()) {
         attackKind: 'skill',
         armorIgnore: skillEffect.armorIgnore,
         controlledBonus: skillEffect.controlledBonus,
-        showDamage: !['heavy-strike', 'whirlwind', 'charge', 'power-shot', 'multi-shot', 'piercing-shot', 'backstab', 'shadow-dance'].includes(skill.id)
+        showDamage: !['heavy-strike', 'whirlwind', 'charge', 'power-shot', 'multi-shot', 'piercing-shot', 'backstab', 'shadow-dance', 'poison-blade'].includes(skill.id)
       }) };
     });
     const hits = resolvedTargets.filter((target) => !target.result.evaded);
@@ -4088,7 +4141,10 @@ function useAutoSkillForMember(member, now = Date.now()) {
       applyDot(target.index, 'bleed', Math.max(1, Math.ceil(target.result.finalDamage * .12 * (1 + (skillEffect.bleedBonus || 0)))), 5, 1, { source: member });
       getEnemySkillState(target.index).visualBleedAt = now + 500;
     });
-    if (skill.id === 'poison-blade') hits.forEach((target) => applyDot(target.index, 'poison', Math.max(1, Math.ceil(target.result.finalDamage * .15 * (1 + (skillEffect.poisonBonus || 0)) * stats.dotMultiplier)), 5 + (skillEffect.poisonDuration || 0), skillEffect.poisonStacks || 1, { source: member, defenseReduction: skillEffect.defensePerStack || 0 }));
+    if (skill.id === 'poison-blade') {
+      member.poisonBladeVisualUntil = now + 800;
+      hits.forEach((target) => applyDot(target.index, 'poison', Math.max(1, Math.ceil(target.result.finalDamage * .15 * (1 + (skillEffect.poisonBonus || 0)) * stats.dotMultiplier)), 5 + (skillEffect.poisonDuration || 0), skillEffect.poisonStacks || 1, { source: member, defenseReduction: skillEffect.defensePerStack || 0 }));
+    }
     if (skill.id === 'fireball' && skillEffect.explosionPower && hits.length) {
       aliveEnemyIndexesByAge().filter((index) => index !== hits[0].index).slice(0, skillEffect.explosionTargets).forEach((index) => applyDamageToMonster(index, stats.attack * skillEffect.explosionPower, profile, { attacker: member, attackKind: 'skill', effectType: 'magic' }));
     }
@@ -4128,7 +4184,7 @@ function useAutoSkillForMember(member, now = Date.now()) {
     member.blinkCooldownReduction = 0;
     member.globalSkillReadyAt = now + 1000;
     const totalDamage = hits.reduce((total, target) => total + target.result.finalDamage, 0);
-    if (skill.id !== 'companion') playPartyMemberCombatAnimation(member, (skill.id === 'shadow-dance' ? resolvedTargets : (hits.length ? hits : resolvedTargets)).map((target) => target.index), {
+    if (!['companion', 'poison-blade'].includes(skill.id)) playPartyMemberCombatAnimation(member, (skill.id === 'shadow-dance' ? resolvedTargets : (hits.length ? hits : resolvedTargets)).map((target) => target.index), {
       kind: 'skill',
       area: Number(skillEffect.targets || skill.targets || 1) > 1,
       skillId: skill.id,
