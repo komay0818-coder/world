@@ -1554,6 +1554,18 @@ function markPlayerActive() {
   saveProgress(progress);
 }
 
+function getOfflineCombatMonsters(map, playerLevel) {
+  const pool = map.id === 'goblin-camp'
+    ? [...new Set(Object.values(DungeonTicketCycle.GOBLIN_CAMP_WAVES).flat())]
+    : [...new Set(getMonsterPool(playerLevel).normal || [])];
+  const levels = createEnemyLevels(pool, map.id, () => .5);
+  const normalMonsters = pool.map((type, index) => map.chapter === 1
+    ? ChapterOneLevelPolicy.scaleMonster(monsterTypes[type] || monsterTypes.goblin, map.id, levels[index])
+    : getMonsterDefinitionForMap(type, map.id, levels[index]))
+    .filter((monster) => monster && !monster.isElite && !monster.isBoss);
+  return normalMonsters.length ? normalMonsters : [monsterTypes.goblin];
+}
+
 function claimOfflineRewards() {
   const character = getActiveCharacter();
   if (!character) return null;
@@ -1568,12 +1580,26 @@ function claimOfflineRewards() {
   }
 
   const stats = getCharacterStats(progress.level, progress, character);
-  const killsPerMinute = Math.max(2, Math.round(6 * stats.attackSpeed));
-  const defeated = Math.floor(offlineMs / 60000 * killsPerMinute);
+  const activeMap = getActiveMap(progress);
+  const attackProfile = getPlayerAttackProfile(character);
+  const savedHp = Number(progress.partyMemberState?.currentHp);
+  const simulation = OfflineCombatPolicy.simulate({
+    durationMs: offlineMs,
+    player: {
+      maxHp: stats.hp,
+      currentHp: Number.isFinite(savedHp) ? Math.max(0, Math.min(stats.hp, savedHp)) : stats.hp,
+      attack: stats.attack,
+      defense: stats.defense,
+      damageReduction: stats.damageReduction,
+      attackSpeed: stats.attackSpeed,
+      ...attackProfile
+    },
+    monsters: getOfflineCombatMonsters(activeMap, progress.level)
+  });
+  const defeated = simulation.defeated;
   let gainedXp = 0;
   let levelsGained = 0;
   for (let kill = 0; kill < defeated; kill += 1) {
-    const activeMap = getActiveMap(progress);
     const gained = MapExpPolicy.calculate(activeMap.normalXp, progress.level, activeMap).actualExp;
     progress.xp += gained;
     gainedXp += gained;
@@ -1590,9 +1616,25 @@ function claimOfflineRewards() {
   }
   const gainedGold = defeated * 2;
   progress.gold += gainedGold;
+  const finalStats = getCharacterStats(progress.level, progress, character);
+  progress.partyMemberState = {
+    ...(progress.partyMemberState || {}),
+    currentHp: simulation.died ? finalStats.hp : Math.max(1, Math.min(finalStats.hp, simulation.remainingHp)),
+    maxHp: finalStats.hp
+  };
+  if (simulation.died) {
+    if (activeMap.dungeon) {
+      progress.selectedMapId = progress.dungeonReturnMapId || (activeMap.id === 'black-forest-altar' ? 'black-forest' : 'plains-entrance');
+      progress.dungeonAdmission = false;
+    }
+    progress.requiresMapSelectionAfterDefeat = true;
+  }
   saveProgress(progress);
-  pendingOfflineReport = { duration: formatOfflineDuration(offlineMs), defeated, gainedXp, gainedGold, levelsGained, equipmentFound: 0, capped: now - lastActiveAt > offlineLimitMs };
-  showToast(`離線掛機 ${pendingOfflineReport.duration}：獲得 ${gainedXp} EXP、${gainedGold} 金幣`);
+  pendingOfflineReport = { duration: formatOfflineDuration(simulation.effectiveMs), offlineDuration: formatOfflineDuration(offlineMs), defeated, gainedXp, gainedGold, levelsGained, equipmentFound: 0, capped: now - lastActiveAt > offlineLimitMs, died: simulation.died };
+  if (simulation.died) {
+    openVillage('menu');
+    showToast(`角色在離線戰鬥中戰敗，本次掛機已結束。有效掛機時間：${pendingOfflineReport.duration}`);
+  } else showToast(`離線掛機 ${pendingOfflineReport.duration}：獲得 ${gainedXp} EXP、${gainedGold} 金幣`);
   return pendingOfflineReport;
 }
 
