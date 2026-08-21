@@ -24,7 +24,7 @@ assert.match(script, /village: VillagePolicy\.normalizeVillageData\(saved\.villa
 assert.match(script, /progress\.village = VillagePolicy\.normalizeVillageData\(progress\.village\)/, 'village state is normalized on save');
 assert.match(script, /else if \(buildingId === 'rune'\) renderMagicTower\(building\)/, 'magic tower opens its synthesis interface');
 assert.match(script, /MagicTowerPolicy\.synthesize\(progress, recipeId, building\.level/, 'magic tower synthesis uses the centralized policy and building level');
-assert.match(script, /villageReturnScreen = !battleScreen\.classList\.contains\('hidden'\) \? 'battle' : 'menu'/);
+assert.match(script, /villageReturnScreen = typeof forcedReturnScreen === 'string' \? forcedReturnScreen : \(!battleScreen\.classList\.contains\('hidden'\) \? 'battle' : 'menu'\)/, 'village supports an explicit post-defeat return destination');
 assert.match(script, /if \(villageReturnScreen === 'battle'[\s\S]*battleScreen\.classList\.remove\('hidden'\)/, 'closing village reveals the existing battle screen');
 assert.doesNotMatch(script.match(/function closeVillage\(\) \{[\s\S]*?\n\}/)?.[0] || '', /openBattle|clearInterval/, 'village close neither regenerates battle nor changes its timers');
 assert.match(css, /grid-template-columns:repeat\(auto-fit,minmax\(230px,1fr\)\)/, 'building cards use a responsive grid');

@@ -1192,8 +1192,8 @@ function renderVillage() {
   }).join('');
 }
 
-function openVillage() {
-  villageReturnScreen = !battleScreen.classList.contains('hidden') ? 'battle' : 'menu';
+function openVillage(forcedReturnScreen = null) {
+  villageReturnScreen = typeof forcedReturnScreen === 'string' ? forcedReturnScreen : (!battleScreen.classList.contains('hidden') ? 'battle' : 'menu');
   battleScreen.classList.add('hidden');
   menuScreen.classList.add('hidden');
   loadVillageData();
@@ -2466,7 +2466,7 @@ function renderBeginnerPlainsRegions() {
         <span>${String(index + 1).padStart(2, '0')}</span>
         <div><b>${region.name}</b><small>${regionDetail}</small>${unlocked ? '' : lockedDetail}</div>
         ${available
-          ? !unlocked ? '<em>完成前一區域三項條件後解鎖</em>' : activeMap.id === region.id ? '<em class="current-region">目前區域</em>' : `<button type="button" data-select-map="${region.id}" ${isGoblinCamp && goblinMaps < 1 ? 'disabled' : ''}>${isGoblinCamp ? goblinMaps > 0 ? '使用地圖進入副本' : '需要哥布林營地地圖' : '進入區域'}</button>`
+          ? !unlocked ? '<em>完成前一區域三項條件後解鎖</em>' : activeMap.id === region.id && !progress.requiresMapSelectionAfterDefeat ? '<em class="current-region">目前區域</em>' : `<button type="button" data-select-map="${region.id}" ${isGoblinCamp && goblinMaps < 1 ? 'disabled' : ''}>${isGoblinCamp ? goblinMaps > 0 ? '使用地圖進入副本' : '需要哥布林營地地圖' : progress.requiresMapSelectionAfterDefeat ? '重新進入區域' : '進入區域'}</button>`
           : '<em>準備中</em>'}
       </article>`;
     }).join('')}
@@ -2501,6 +2501,7 @@ function selectAdventureMap(mapId) {
     progress.dungeonAdmission = true;
   }
   progress.selectedMapId = map.id;
+  progress.requiresMapSelectionAfterDefeat = false;
   progress.unlockedChapter = Math.max(getUnlockedChapter(progress), Number(map.chapter) || 1);
   saveProgress(progress);
   if (!document.querySelector('#drop-lookup-modal')?.classList.contains('hidden')) renderDropLookup();
@@ -4677,6 +4678,7 @@ function battleTick() {
   processEnemyDots();
   const now = Date.now();
   processBlackForestCorruption(now);
+  if (!fighting) return;
   processStrongholdOutpost(now);
   reviveDefeatedTeammates(now);
   (battle.partyMembers || []).forEach((member) => {
@@ -4867,24 +4869,7 @@ function legacyEnemyAttackTick() {
     if (battle.playerHp > 0 && battle.playerHp / maxHp < 0.35) usePotion();
     if (battle.playerHp > 0) continue;
 
-    if (character.race === 'undead' && !battle.undeadRevived && Math.random() < .35) {
-      battle.undeadRevived = true;
-      battle.playerHp = Math.ceil(maxHp * .35);
-      logBattle('☾ 不死族天賦觸發：從死亡中復活！');
-    } else {
-      battle.playerHp = maxHp;
-      battle.playerMana = WarriorResourcePolicy.isWarrior(character.job)
-        ? 0
-        : AssassinEnergyPolicy.isAssassin(character.job)
-          ? AssassinEnergyPolicy.clampEnergy(battle.playerMana)
-          : getMaxMana(character.job, progress.level);
-      battle.playerShield = 0;
-      battle.undeadRevived = false;
-      logBattle('你暫時撤退並恢復了生命。');
-    }
-    battle.playerBleed = null;
-    resetAliveEnemyAttackSchedule(now);
-    updateBattleUI();
+    endBattleAfterPlayerDefeat(now);
     return;
   }
 
@@ -5133,9 +5118,44 @@ function activateBlackstoneCommand(durationMs, now, sourceName) {
   logBattle(`📣【${sourceName}】施放【隊長號令】，全體黑石怪攻擊提高 15%，持續 6 秒！`, 'system');
 }
 
+function endBattleAfterPlayerDefeat(now = Date.now()) {
+  if (battle.defeatHandled) return false;
+  battle.defeatHandled = true;
+  fighting = false;
+  clearInterval(battleTimer);
+  clearInterval(skillTimer);
+  clearInterval(enemyAttackTimer);
+  battle.sessionId = ++battleSessionSequence;
+  battle.dungeonComplete = true;
+  (battle.partyMembers || []).forEach((member) => {
+    member.currentHp = member.maxHp;
+    member.resourceCurrent = member.resourceType === 'rage' ? 0 : getMaxCombatResourceForMember(member.character, member.progress);
+    member.shield = 0;
+    member.alive = true;
+    member.undeadRevived = false;
+    member.bleed = null;
+    member.stunnedUntil = 0;
+    member.targetIndex = -1;
+    member.reviveAt = null;
+  });
+  syncLegacyBattleStateFromMain();
+  persistPartyRuntimeState();
+  const progress = getProgress();
+  if (battle.isDungeon) {
+    progress.selectedMapId = progress.dungeonReturnMapId || (battle.dungeonId === 'black-forest-altar' ? 'black-forest' : 'plains-entrance');
+    progress.dungeonAdmission = false;
+  }
+  progress.requiresMapSelectionAfterDefeat = true;
+  saveProgress(progress);
+  logPartyDebug('主角色戰敗結束掛機', { at: now });
+  openVillage('menu');
+  showToast('角色已戰敗，本次掛機已結束。');
+  return true;
+}
+
 function defeatPartyMember(member, now = Date.now()) {
   if (member.currentHp > 0 || !member.alive) return false;
-  if (member.character.race === 'undead' && !member.undeadRevived && Math.random() < .35) {
+  if (!member.isMain && member.character.race === 'undead' && !member.undeadRevived && Math.random() < .35) {
     member.undeadRevived = true;
     member.currentHp = Math.ceil(member.maxHp * .35);
     logBattle(`${member.name} 以不死族之力重新站起。`, 'system');
@@ -5155,6 +5175,7 @@ function defeatPartyMember(member, now = Date.now()) {
   member.reviveAt = member.isMain ? null : now + PARTY_REVIVE_DELAY_MS;
   logPartyDebug('死亡事件', { memberId: member.id, memberName: member.name, at: now });
   logBattle(`${member.name} 已倒下。`, 'system');
+  if (member.isMain) endBattleAfterPlayerDefeat(now);
   return true;
 }
 
@@ -5256,6 +5277,7 @@ function enemyAttackTick() {
     }
     defeatPartyMember(member, now);
   });
+  if (!fighting) return;
   if (resetPartyAfterDefeat(now)) {
     updateBattleUI();
     return;
@@ -5639,6 +5661,7 @@ function enemyAttackTick() {
       } else useSharedHealingPotionForMember(target);
     }
     defeatPartyMember(target, now);
+    if (!fighting) return;
     if (resetPartyAfterDefeat(now)) {
       updateBattleUI();
       return;
@@ -5756,7 +5779,10 @@ loginForm.addEventListener('submit', (event) => {
 
 document.querySelector('#profile-button').addEventListener('click', () => { nameInput.value = displayName.textContent; menuScreen.classList.add('hidden'); loginScreen.classList.remove('hidden'); nameInput.focus(); });
 document.querySelector('#reset-button').addEventListener('click', () => { localStorage.removeItem('stardust-player-name'); localStorage.removeItem('stardust-character'); localStorage.removeItem('stardust-progress'); localStorage.removeItem('stardust-character-slots'); localStorage.removeItem('stardust-active-character-slot'); sessionStorage.removeItem(TAB_ACTIVE_CHARACTER_SLOT_KEY); nameInput.value = ''; enterMenu(''); menuScreen.classList.add('hidden'); loginScreen.classList.remove('hidden'); nameInput.focus(); });
-document.querySelector('#adventure-button').addEventListener('click', openBattle);
+document.querySelector('#adventure-button').addEventListener('click', () => {
+  if (getProgress().requiresMapSelectionAfterDefeat) renderMapSelector();
+  else openBattle();
+});
 document.querySelector('#village-menu-button').addEventListener('click', openVillage);
 document.querySelectorAll('[data-faction]').forEach((card) => card.addEventListener('click', () => { selection.faction = card.dataset.faction; selection.race = factions[selection.faction][0].id; document.querySelectorAll('[data-faction]').forEach((item) => item.classList.toggle('selected', item === card)); renderCreation(); }));
 raceChoices.addEventListener('click', (event) => { const choice = event.target.closest('[data-race]'); if (choice) { selection.race = choice.dataset.race; if (!canCreateRaceJob(selection.race, selection.job)) selection.job = 'warrior'; renderCreation(); } });
