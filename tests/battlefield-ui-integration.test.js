@@ -10,8 +10,8 @@ const layoutCss = fs.readFileSync(path.join(root, 'styles', 'mmorpg-layout.css')
 
 assert.match(html, /id="player-battle-stage"/, 'party players render on the battlefield');
 assert.match(html, /id="battle-player-art" class="battle-player-art hidden"/, 'main player has a dedicated portrait node');
-assert.match(html, /styles\/monster-slots\.css\?v=20260821-blizzard-v1/, 'battlefield loads the current local portrait styles');
-assert.match(html, /script\.js\?v=20260821-blizzard-v1/, 'battlefield loads the current local combat logic');
+assert.match(html, /styles\/monster-slots\.css\?v=20260821-chain-lightning-v1/, 'battlefield loads the current local portrait styles');
+assert.match(html, /script\.js\?v=20260821-chain-lightning-v1/, 'battlefield loads the current local combat logic');
 assert.match(script, /return battleCharacterArt\[`\$\{character\.race\}:\$\{character\.job\}`\] \|\| '';/, 'battle uses stable front character artwork');
 assert.match(script, /'orc:warrior': 'assets\/character-portraits\/orc-warrior\.png'/, 'orc warrior uses the supplied portrait');
 assert.match(script, /'orc:hunter': 'assets\/character-portraits\/orc-hunter\.png'/, 'orc hunter uses the supplied portrait');
@@ -42,11 +42,11 @@ assert.match(css, /Final 0\.7\.1 battlefield composition[\s\S]*?@media \(max-wid
 assert.match(css, /Final 0\.7\.1 battlefield composition[\s\S]*?data-count="3"[\s\S]*?left: 20%[\s\S]*?left: 41%[\s\S]*?left: 61%[\s\S]*?left: 81%/, 'four mobile portraits retain non-overlapping anchors');
 assert.match(css, /overflow: hidden !important;[\s\S]*?border: 3px solid #d9a93f !important;[\s\S]*?border-radius: 50% !important;/, 'player artwork is clipped inside a gold circle');
 assert.match(css, /@keyframes playerBasicShake/, 'basic attacks shake the portrait');
-assert.match(script, /art\.classList\.remove\('is-attacking', 'is-target-skill', 'is-area-skill', 'is-heavy-strike', 'is-whirlwind', 'is-charge', 'is-power-shot', 'is-multi-shot', 'is-piercing-shot', 'is-backstab', 'is-shadow-dance', 'is-fireball', 'is-blizzard'\);[\s\S]*?void art\.offsetWidth;[\s\S]*?art\.classList\.add\(actionClass\);/, 'every attack reliably restarts its portrait animation');
+assert.match(script, /art\.classList\.remove\('is-attacking', 'is-target-skill', 'is-area-skill', 'is-heavy-strike', 'is-whirlwind', 'is-charge', 'is-power-shot', 'is-multi-shot', 'is-piercing-shot', 'is-backstab', 'is-shadow-dance', 'is-fireball', 'is-blizzard', 'is-chain-lightning'\);[\s\S]*?void art\.offsetWidth;[\s\S]*?art\.classList\.add\(actionClass\);/, 'every attack reliably restarts its portrait animation');
 assert.doesNotMatch(script, /classList\.(?:add|remove)\('attack'/, 'combat no longer activates the legacy attack class');
 assert.doesNotMatch(layoutCss, /characterAttackWarrior|characterAttackAssassin|characterAttackHunter|characterAttackMage|characterAttackPriest/, 'legacy per-job attack motion is removed');
 assert.match(script, /skillId === 'charge' \? 'is-charge' : skillId === 'power-shot' \? 'is-power-shot'/, 'named skill presets select distinct movement types');
-assert.match(script, /kind === 'skill' && !area[\s\S]*?document\.querySelector\(`#enemy-\$\{targetIndexes\[0\]\}`\)/, 'only single-target skills resolve their actual target element');
+assert.match(script, /kind === 'skill' && \(!area \|\| skillId === 'chain-lightning'\)[\s\S]*?document\.querySelector\(`#enemy-\$\{targetIndexes\[0\]\}`\)/, 'single-target skills and chain lightning resolve their actual first target element');
 assert.match(script, /targetRect \? targetRect\.left \+ targetRect\.width \* \.5/, 'single-target destination uses target position');
 assert.match(script, /style\.setProperty\('--skill-move-y'[\s\S]*?fighter\?\.classList\.add\(actionClass\);[\s\S]*?art\.classList\.add\(actionClass\);/, 'target coordinates are ready before the skill animation starts');
 assert.doesNotMatch(script.match(/function playPartyMemberCombatAnimation[\s\S]*?function playCompanionAttackAnimation/)?.[0] || '', /oldestAliveEnemyIndex\(\)/, 'single-target animation never substitutes the oldest or first enemy');
@@ -55,13 +55,13 @@ assert.match(script, /area: Number\(skillEffect\.targets \|\| skill\.targets \|\
 assert.match(script, /kind === 'skill' && area[\s\S]*?document\.querySelector\('#enemy-squad'\)/, 'area skills resolve the enemy formation instead of one monster');
 assert.match(script, /enemyFormationRect\.left \+ enemyFormationRect\.width \* \.5/, 'area skills use the enemy formation horizontal center');
 assert.match(script, /enemyFormationRect\.bottom \+ artRect\.height \* \.2/, 'area skills stop just in front of the enemy formation');
-assert.match(script, /const target = kind === 'skill' && !area/, 'area skills never bind their travel to an individual target');
+assert.match(script, /const target = kind === 'skill' && \(!area \|\| skillId === 'chain-lightning'\)/, 'area skills use formation travel except chain lightning, which approaches its first target');
 assert.match(css, /@keyframes playerSkillTravel[\s\S]*?--skill-move-x[\s\S]*?--skill-move-y/, 'skills travel out and return');
 assert.match(script, /battleSkillEffectPresets[\s\S]*?'heavy-strike'[\s\S]*?duration: 680[\s\S]*?impactAt: 350/, 'heavy strike is a reusable short battle-effect preset');
 assert.match(script, /captureBattleTargetAnchor\(index\)[\s\S]*?getBoundingClientRect/, 'heavy strike captures its actual target position before damage resolves');
 assert.match(script, /followTarget[\s\S]*?`#enemy-\$\{targetAnchor\.index\}`[\s\S]*?requestAnimationFrame\(followTarget\)/, 'active heavy strike effects follow the selected target');
 assert.match(script, /effect\.remove\(\);[\s\S]*?if \(!layer\.childElementCount\) layer\.remove\(\)/, 'finished skill effects leave no stale effect DOM');
-assert.match(script, /showDamage: !\['heavy-strike', 'whirlwind', 'charge', 'power-shot', 'multi-shot', 'piercing-shot', 'backstab', 'shadow-dance', 'poison-blade', 'fireball', 'blizzard'\]\.includes\(skill\.id\)/, 'skill presets suppress early generic damage numbers when impact timing is custom');
+assert.match(script, /showDamage: !\['heavy-strike', 'whirlwind', 'charge', 'power-shot', 'multi-shot', 'piercing-shot', 'backstab', 'shadow-dance', 'poison-blade', 'fireball', 'blizzard', 'chain-lightning'\]\.includes\(skill\.id\)/, 'skill presets suppress early generic damage numbers when impact timing is custom');
 assert.match(script, /visualStunAt = now \+ 550/, 'stun art waits until the impact animation finishes');
 assert.match(script, /Date\.now\(\) < enemySkillState\.stunnedUntil[\s\S]*?enemySkillState\.visualStunAt/, 'stun stars are driven by the actual stun state');
 assert.match(css, /impact-shockwave[\s\S]*?var\(--target-width\) \* 1\.42/, 'single-target shockwave stays proportional to the target');
@@ -69,7 +69,7 @@ assert.match(css, /impact-debris[\s\S]*?heavyDebris/, 'heavy strike has a restra
 assert.match(css, /@keyframes playerHeavyStrikeLunge/, 'heavy strike uses a short portrait lunge and return');
 assert.match(script, /whirlwind: \{ duration: 1000, impactAt: 350, className: 'battle-effect-whirlwind' \}/, 'whirlwind is a reusable one-second battle-effect preset');
 assert.match(script, /targets: hits\.map\(\(target\) => \(\{ index: target\.index, damage: target\.result\.finalDamage, anchor: targetAnchors\.get\(target\.index\) \}\)\)/, 'whirlwind binds each hit visual and number to its resolved target');
-assert.match(script, /showDamage: !\['heavy-strike', 'whirlwind', 'charge', 'power-shot', 'multi-shot', 'piercing-shot', 'backstab', 'shadow-dance', 'poison-blade', 'fireball', 'blizzard'\]\.includes\(skill\.id\)/, 'preset damage numbers wait for their custom hit visuals');
+assert.match(script, /showDamage: !\['heavy-strike', 'whirlwind', 'charge', 'power-shot', 'multi-shot', 'piercing-shot', 'backstab', 'shadow-dance', 'poison-blade', 'fireball', 'blizzard', 'chain-lightning'\]\.includes\(skill\.id\)/, 'preset damage numbers wait for their custom hit visuals');
 assert.match(css, /whirlwind-target-hit[\s\S]*?var\(--hit-order\) \* \.05s/, 'whirlwind staggers target slashes by fifty milliseconds');
 assert.match(css, /whirlwind-afterimages[\s\S]*?whirlwindAfterimage/, 'whirlwind uses portrait afterimages as its signature');
 assert.match(css, /whirlwind-finisher[\s\S]*?\.7s/, 'whirlwind ends with a larger arc slash');
@@ -130,6 +130,13 @@ assert.match(script, /skillId === 'blizzard'[\s\S]*?blizzard-cast-aura[\s\S]*?bl
 assert.match(script, /hits\.slice\(0, 5\)[\s\S]*?playBattleSkillEffect\(skill\.id, centerAnchor/, 'blizzard visuals bind simultaneously to at most five actual hits');
 assert.match(css, /blizzard-target>i[\s\S]*?\.35s[\s\S]*?blizzardSnow/, 'all target snow effects share the same impact timing');
 assert.doesNotMatch(css.match(/\.battle-effect-blizzard[\s\S]*?@keyframes blizzardTargetHit/)?.[0] || '', /fullscreen|ice-column|explosion|smoke/, 'blizzard avoids full-screen snow, ice columns, explosions, and smoke');
+assert.match(script, /'chain-lightning': \{ duration: 880, impactAt: 230, className: 'battle-effect-chain-lightning' \}/, 'chain lightning uses a short sequential effect preset');
+assert.match(script, /skillId === 'chain-lightning'[\s\S]*?chain-lightning-link[\s\S]*?--link-order/, 'chain lightning creates ordered links between successive targets');
+assert.match(script, /preset\.impactAt \+ order \* 100/, 'chain target hit feedback is staggered by one hundred milliseconds');
+assert.match(script, /data-link-target[\s\S]*?data-link-from[\s\S]*?Math\.atan2\(toY - fromY, toX - fromX\)/, 'active chain links follow actual target positions');
+assert.match(script, /state\.paralyzedUntil > now[\s\S]*?visualParalyzedAt = now \+ 330 \+ order \* 100/, 'persistent arcs appear only for targets with real paralysis state');
+assert.match(css, /enemy-paralysis-indicator[\s\S]*?enemy-paralysis-arcs/, 'paralyzed targets retain a small icon and restrained electric arcs');
+assert.doesNotMatch(css.match(/\.battle-effect-chain-lightning[\s\S]*?@keyframes chainTargetHit/)?.[0] || '', /fullscreen|thunderbolt|explosion|smoke/, 'chain lightning avoids sky strikes, explosions, and screen-wide effects');
 
 assert.match(script, /class="enemy-unit monster-battle-slot visual-size-\$\{visualSize\}/, 'monsters keep full-body image slots');
 assert.match(css, /monster-battle-slot\.elite,[\s\S]*?monster-battle-slot\.boss \{[\s\S]*?--unit-rank-scale: 1;/, 'elite and boss monsters are not enlarged');

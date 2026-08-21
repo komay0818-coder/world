@@ -2629,7 +2629,8 @@ function renderEnemySquad() {
     const marked = Date.now() < enemySkillState.markedUntil && Date.now() >= (enemySkillState.visualMarkAt || 0);
     const bleeding = (battle.enemyDots[index] || []).some((dot) => dot.type === 'bleed') && Date.now() >= (enemySkillState.visualBleedAt || 0);
     const burning = (battle.enemyDots[index] || []).some((dot) => dot.type === 'burn') && Date.now() >= (enemySkillState.visualBurnAt || 0);
-    const hunterStatusIndicators = `${slowed ? '<span class="enemy-slow-indicator" role="img" aria-label="緩速中">❄</span><span class="enemy-slow-airflow"></span>' : ''}${marked ? '<span class="enemy-hunter-mark" role="img" aria-label="獵殺標記">◎</span>' : ''}${bleeding ? '<span class="enemy-bleed-indicator" role="img" aria-label="流血中">🩸</span><span class="enemy-bleed-wound"></span>' : ''}${burning ? '<span class="enemy-burn-flames" role="img" aria-label="燃燒中"><i></i><i></i><i></i></span>' : ''}`;
+    const paralyzed = Date.now() < (enemySkillState.paralyzedUntil || 0) && Date.now() >= (enemySkillState.visualParalyzedAt || 0);
+    const hunterStatusIndicators = `${slowed ? '<span class="enemy-slow-indicator" role="img" aria-label="緩速中">❄</span><span class="enemy-slow-airflow"></span>' : ''}${marked ? '<span class="enemy-hunter-mark" role="img" aria-label="獵殺標記">◎</span>' : ''}${bleeding ? '<span class="enemy-bleed-indicator" role="img" aria-label="流血中">🩸</span><span class="enemy-bleed-wound"></span>' : ''}${burning ? '<span class="enemy-burn-flames" role="img" aria-label="燃燒中"><i></i><i></i><i></i></span>' : ''}${paralyzed ? '<span class="enemy-paralysis-indicator" role="img" aria-label="麻痺中">⚡</span><span class="enemy-paralysis-arcs"><i></i><i></i></span>' : ''}`;
     const statusIcons = statusDisplays.length
       ? statusDisplays.map((status) => `<span class="monster-status-icon" title="${status.label}" aria-label="${status.label}">${status.icon}</span>`).join('')
       : '<span class="monster-status-empty">無異常狀態</span>';
@@ -2735,16 +2736,16 @@ function playPartyMemberCombatAnimation(member, targetIndexes = [], options = {}
     const art = member.isMain
       ? document.querySelector('#battle-player-art')
       : fighter?.querySelector('.player-stage-art');
-    const target = kind === 'skill' && !area
+    const target = kind === 'skill' && (!area || skillId === 'chain-lightning')
       ? document.querySelector(`#enemy-${targetIndexes[0]}`)
       : null;
     const enemyFormation = kind === 'skill' && area
       ? document.querySelector('#enemy-squad')
       : null;
     if (!field || !art) return;
-    const actionClass = skillId === 'heavy-strike' ? 'is-heavy-strike' : skillId === 'whirlwind' ? 'is-whirlwind' : skillId === 'charge' ? 'is-charge' : skillId === 'power-shot' ? 'is-power-shot' : skillId === 'multi-shot' ? 'is-multi-shot' : skillId === 'piercing-shot' ? 'is-piercing-shot' : skillId === 'backstab' ? 'is-backstab' : skillId === 'shadow-dance' ? 'is-shadow-dance' : skillId === 'fireball' ? 'is-fireball' : skillId === 'blizzard' ? 'is-blizzard' : kind === 'basic' ? 'is-attacking' : area ? 'is-area-skill' : 'is-target-skill';
-    fighter?.classList.remove('is-attacking', 'is-target-skill', 'is-area-skill', 'is-heavy-strike', 'is-whirlwind', 'is-charge', 'is-power-shot', 'is-multi-shot', 'is-piercing-shot', 'is-backstab', 'is-shadow-dance', 'is-fireball', 'is-blizzard');
-    art.classList.remove('is-attacking', 'is-target-skill', 'is-area-skill', 'is-heavy-strike', 'is-whirlwind', 'is-charge', 'is-power-shot', 'is-multi-shot', 'is-piercing-shot', 'is-backstab', 'is-shadow-dance', 'is-fireball', 'is-blizzard');
+    const actionClass = skillId === 'heavy-strike' ? 'is-heavy-strike' : skillId === 'whirlwind' ? 'is-whirlwind' : skillId === 'charge' ? 'is-charge' : skillId === 'power-shot' ? 'is-power-shot' : skillId === 'multi-shot' ? 'is-multi-shot' : skillId === 'piercing-shot' ? 'is-piercing-shot' : skillId === 'backstab' ? 'is-backstab' : skillId === 'shadow-dance' ? 'is-shadow-dance' : skillId === 'fireball' ? 'is-fireball' : skillId === 'blizzard' ? 'is-blizzard' : skillId === 'chain-lightning' ? 'is-chain-lightning' : kind === 'basic' ? 'is-attacking' : area ? 'is-area-skill' : 'is-target-skill';
+    fighter?.classList.remove('is-attacking', 'is-target-skill', 'is-area-skill', 'is-heavy-strike', 'is-whirlwind', 'is-charge', 'is-power-shot', 'is-multi-shot', 'is-piercing-shot', 'is-backstab', 'is-shadow-dance', 'is-fireball', 'is-blizzard', 'is-chain-lightning');
+    art.classList.remove('is-attacking', 'is-target-skill', 'is-area-skill', 'is-heavy-strike', 'is-whirlwind', 'is-charge', 'is-power-shot', 'is-multi-shot', 'is-piercing-shot', 'is-backstab', 'is-shadow-dance', 'is-fireball', 'is-blizzard', 'is-chain-lightning');
     void art.offsetWidth;
     art.dataset.job = member.job || member.character?.job || 'warrior';
     setBattleCharacterAction(art, member.character, 'active');
@@ -2754,10 +2755,14 @@ function playPartyMemberCombatAnimation(member, targetIndexes = [], options = {}
     const targetRect = target?.getBoundingClientRect();
     const enemyFormationRect = enemyFormation?.getBoundingClientRect();
     if (kind === 'skill') {
-      const destinationX = area
+      const destinationX = skillId === 'chain-lightning'
+        ? targetRect ? targetRect.left + targetRect.width * .5 : fieldRect.left + fieldRect.width * .5
+        : area
         ? enemyFormationRect ? enemyFormationRect.left + enemyFormationRect.width * .5 : fieldRect.left + fieldRect.width * .5
         : targetRect ? targetRect.left + targetRect.width * .5 : artRect.left + artRect.width * .5;
-      const destinationY = area
+      const destinationY = skillId === 'chain-lightning'
+        ? targetRect ? targetRect.top + targetRect.height * .62 : fieldRect.top + fieldRect.height * .42
+        : area
         ? enemyFormationRect ? enemyFormationRect.bottom + artRect.height * .2 : fieldRect.top + fieldRect.height * .48
         : targetRect ? targetRect.bottom + artRect.height * .08 : artRect.top + artRect.height * .5;
       art.style.setProperty('--skill-move-x', `${destinationX - (artRect.left + artRect.width / 2)}px`);
@@ -2834,6 +2839,14 @@ function playPartyMemberCombatAnimation(member, targetIndexes = [], options = {}
         art.style.setProperty('--blizzard-move-x', `${fieldRect.left + fieldRect.width * .5 - (artRect.left + artRect.width / 2)}px`);
         art.style.setProperty('--blizzard-move-y', `${fieldRect.top + fieldRect.height * .54 - (artRect.top + artRect.height / 2)}px`);
       }
+      if (skillId === 'chain-lightning') {
+        const deltaX = destinationX - (artRect.left + artRect.width / 2);
+        const deltaY = destinationY - (artRect.top + artRect.height / 2);
+        const distance = Math.max(1, Math.hypot(deltaX, deltaY));
+        const stopShort = Math.min(72, (targetRect?.width || 90) * .58);
+        art.style.setProperty('--chain-move-x', `${deltaX - deltaX / distance * stopShort}px`);
+        art.style.setProperty('--chain-move-y', `${deltaY - deltaY / distance * stopShort}px`);
+      }
     }
     fighter?.classList.add(actionClass);
     art.classList.add(actionClass);
@@ -2860,12 +2873,14 @@ function playPartyMemberCombatAnimation(member, targetIndexes = [], options = {}
       art.style.removeProperty('--backstab-y');
       art.style.removeProperty('--blizzard-move-x');
       art.style.removeProperty('--blizzard-move-y');
+      art.style.removeProperty('--chain-move-x');
+      art.style.removeProperty('--chain-move-y');
       if (skillId === 'shadow-dance') {
         art.shadowTeleportAnimation?.cancel();
         art.shadowTeleportAnimation = null;
       }
       setBattleCharacterAction(art, member.character, 'idle');
-    }, kind === 'basic' ? 420 : skillId === 'shadow-dance' ? 1000 : skillId === 'blizzard' ? 1120 : 720);
+    }, kind === 'basic' ? 420 : skillId === 'shadow-dance' ? 1000 : skillId === 'blizzard' ? 1120 : skillId === 'chain-lightning' ? 900 : 720);
   });
 }
 
@@ -2879,7 +2894,8 @@ const battleSkillEffectPresets = Object.freeze({
   backstab: { duration: 680, impactAt: 350, className: 'battle-effect-backstab' },
   'shadow-dance': { duration: 980, impactAt: 180, className: 'battle-effect-shadow-dance' },
   fireball: { duration: 680, impactAt: 320, className: 'battle-effect-fireball' },
-  blizzard: { duration: 1100, impactAt: 350, className: 'battle-effect-blizzard' }
+  blizzard: { duration: 1100, impactAt: 350, className: 'battle-effect-blizzard' },
+  'chain-lightning': { duration: 880, impactAt: 230, className: 'battle-effect-chain-lightning' }
 });
 
 function captureBattleTargetAnchor(index) {
@@ -2961,6 +2977,13 @@ function playBattleSkillEffect(skillId, targetAnchor, options = {}) {
       ? `<span class="fireball-core"></span><span class="fireball-burst"></span><span class="fireball-sparks"><i></i><i></i><i></i><i></i></span>${options.damage > 0 ? `<b class="fireball-damage">-${options.damage}</b>` : ''}`
     : skillId === 'blizzard'
       ? `<span class="blizzard-cast-aura"><i></i><i></i><i></i></span>${(options.targets || []).map((target) => `<span class="blizzard-target" data-effect-target="${target.index}" style="--hit-size:${target.anchor.width}px;--hit-x:${target.anchor.x - targetAnchor.x}px;--hit-y:${target.anchor.y - targetAnchor.y}px"><i></i><i></i><i></i><em></em><strong></strong>${target.damage > 0 ? `<b>-${target.damage}</b>` : ''}</span>`).join('')}`
+    : skillId === 'chain-lightning'
+      ? (options.targets || []).map((target, order, targets) => {
+        const previous = order ? targets[order - 1].anchor : targetAnchor;
+        const dx = target.anchor.x - previous.x;
+        const dy = target.anchor.y - previous.y;
+        return `<span class="chain-lightning-link" data-link-target="${target.index}" data-link-from="${order ? targets[order - 1].index : -1}" style="--link-order:${order};--link-x:${previous.x - targetAnchor.x}px;--link-y:${previous.y - targetAnchor.y}px;--link-length:${Math.hypot(dx, dy)}px;--link-angle:${Math.atan2(dy, dx)}rad"></span><span class="chain-lightning-hit" data-effect-target="${target.index}" style="--hit-order:${order};--hit-size:${target.anchor.width}px;--hit-x:${target.anchor.x - targetAnchor.x}px;--hit-y:${target.anchor.y - targetAnchor.y}px"><i></i><em></em>${target.damage > 0 ? `<b>-${target.damage}</b>` : ''}</span>`;
+      }).join('')
     : `<span class="smash-trail"></span><span class="impact-shockwave"></span><span class="impact-crack"></span><span class="impact-sparks"></span><span class="impact-debris">${Array.from({ length: 6 }, (_, index) => `<i style="--debris-index:${index}"></i>`).join('')}</span>${options.damage > 0 ? `<b class="skill-impact-damage">-${options.damage}</b>` : ''}`;
   layer.append(effect);
   if (skillId === 'piercing-shot') animatePiercingProjectile(effect, targetAnchor, options.targets || []);
@@ -2986,6 +3009,22 @@ function playBattleSkillEffect(skillId, targetAnchor, options = {}) {
       const fieldRect = field.getBoundingClientRect();
       hit.style.setProperty('--hit-x', `${hitRect.left - fieldRect.left + hitRect.width / 2 - currentEffectX}px`);
       hit.style.setProperty('--hit-y', `${hitRect.top - fieldRect.top + hitRect.height * .55 - currentEffectY}px`);
+    });
+    effect.querySelectorAll('[data-link-target]').forEach((link) => {
+      const toTarget = document.querySelector(`#enemy-${link.dataset.linkTarget}`);
+      const fromTarget = Number(link.dataset.linkFrom) >= 0 ? document.querySelector(`#enemy-${link.dataset.linkFrom}`) : null;
+      if (!toTarget) return;
+      const fieldRect = field.getBoundingClientRect();
+      const toRect = toTarget.getBoundingClientRect();
+      const fromRect = fromTarget?.getBoundingClientRect();
+      const fromX = fromRect ? fromRect.left - fieldRect.left + fromRect.width / 2 : targetAnchor.x;
+      const fromY = fromRect ? fromRect.top - fieldRect.top + fromRect.height * .55 : targetAnchor.y;
+      const toX = toRect.left - fieldRect.left + toRect.width / 2;
+      const toY = toRect.top - fieldRect.top + toRect.height * .55;
+      link.style.setProperty('--link-x', `${fromX - targetAnchor.x}px`);
+      link.style.setProperty('--link-y', `${fromY - targetAnchor.y}px`);
+      link.style.setProperty('--link-length', `${Math.hypot(toX - fromX, toY - fromY)}px`);
+      link.style.setProperty('--link-angle', `${Math.atan2(toY - fromY, toX - fromX)}rad`);
     });
     requestAnimationFrame(followTarget);
   };
@@ -3018,6 +3057,13 @@ function playBattleSkillEffect(skillId, targetAnchor, options = {}) {
       setTimeout(() => target?.classList.remove('blizzard-hit'), 180);
     });
   }, preset.impactAt);
+  if (skillId === 'chain-lightning') (options.targets || []).forEach((visualTarget, order) => {
+    setTimeout(() => {
+      const target = document.querySelector(`#enemy-${visualTarget.index}`);
+      target?.classList.add('chain-lightning-hit');
+      setTimeout(() => target?.classList.remove('chain-lightning-hit'), 150);
+    }, preset.impactAt + order * 100);
+  });
   if (skillId === 'shadow-dance') (options.targets || []).forEach((visualTarget, order, visualTargets) => {
     const delay = preset.impactAt + order * (visualTargets.length > 1 ? 85 : 0);
     setTimeout(() => {
@@ -4136,10 +4182,10 @@ function useAutoSkillForMember(member, now = Date.now()) {
     if (skill.id === 'whirlwind') damagePower *= 1 + Math.min(skillEffect.maxTargetBonus || 0, Math.max(0, targets.length - 1) * (skillEffect.perExtraTargetBonus || 0));
     const damage = Math.max(1, Math.ceil(stats.attack * damagePower * (critical ? stats.criticalDamageMultiplier : 1)));
     const profile = getPlayerAttackProfile(character, skill);
-    const targetAnchors = ['heavy-strike', 'whirlwind', 'charge', 'power-shot', 'multi-shot', 'piercing-shot', 'backstab', 'shadow-dance', 'fireball', 'blizzard'].includes(skill.id)
+    const targetAnchors = ['heavy-strike', 'whirlwind', 'charge', 'power-shot', 'multi-shot', 'piercing-shot', 'backstab', 'shadow-dance', 'fireball', 'blizzard', 'chain-lightning'].includes(skill.id)
       ? new Map(targets.map((index) => [index, captureBattleTargetAnchor(index)]))
       : null;
-    const attackerAnchor = ['power-shot', 'multi-shot', 'piercing-shot'].includes(skill.id) ? captureBattleAttackerAnchor(member) : null;
+    const attackerAnchor = ['power-shot', 'multi-shot', 'piercing-shot', 'chain-lightning'].includes(skill.id) ? captureBattleAttackerAnchor(member) : null;
     const resolvedTargets = targets.map((index, targetOrder) => {
       const chainMultiplier = skill.id === 'chain-lightning' ? 1 + targetOrder * (skillEffect.bounceBonus || 0) : 1;
       const piercingMultiplier = skill.id === 'piercing-shot' ? Math.max(.1, 1 - targetOrder * .1) : 1;
@@ -4148,11 +4194,15 @@ function useAutoSkillForMember(member, now = Date.now()) {
         attackKind: 'skill',
         armorIgnore: skillEffect.armorIgnore,
         controlledBonus: skillEffect.controlledBonus,
-        showDamage: !['heavy-strike', 'whirlwind', 'charge', 'power-shot', 'multi-shot', 'piercing-shot', 'backstab', 'shadow-dance', 'poison-blade', 'fireball', 'blizzard'].includes(skill.id)
+        showDamage: !['heavy-strike', 'whirlwind', 'charge', 'power-shot', 'multi-shot', 'piercing-shot', 'backstab', 'shadow-dance', 'poison-blade', 'fireball', 'blizzard', 'chain-lightning'].includes(skill.id)
       }) };
     });
     const hits = resolvedTargets.filter((target) => !target.result.evaded);
     hits.forEach((target) => applyEnemySkillState(target.index, skillEffect, now));
+    if (skill.id === 'chain-lightning') hits.forEach((target, order) => {
+      const state = getEnemySkillState(target.index);
+      if (state.paralyzedUntil > now) state.visualParalyzedAt = now + 330 + order * 100;
+    });
     if (skill.id === 'heavy-strike') hits.forEach((target) => { getEnemySkillState(target.index).visualStunAt = now + 550; });
     if (skill.id === 'power-shot') hits.forEach((target) => {
       const state = getEnemySkillState(target.index);
@@ -4244,6 +4294,10 @@ function useAutoSkillForMember(member, now = Date.now()) {
       const centerAnchor = fieldRect ? { index: -1, x: fieldRect.width * .5, y: fieldRect.height * .54, width: Math.min(fieldRect.width * .22, 150) } : targetAnchors.get((hits[0] || resolvedTargets[0]).index);
       const visualTargets = hits.slice(0, 5).map((target) => ({ index: target.index, damage: target.result.finalDamage, anchor: targetAnchors.get(target.index) })).filter((target) => target.anchor);
       playBattleSkillEffect(skill.id, centerAnchor, { targets: visualTargets });
+    }
+    if (skill.id === 'chain-lightning') {
+      const visualTargets = resolvedTargets.map((target) => ({ index: target.index, damage: target.result.evaded ? 0 : target.result.finalDamage, anchor: targetAnchors.get(target.index) })).filter((target) => target.anchor);
+      if (attackerAnchor && visualTargets.length) playBattleSkillEffect(skill.id, { index: -1, ...attackerAnchor, width: 1 }, { targets: visualTargets });
     }
     if (skill.id === 'shadow-dance') {
       const visualTargets = resolvedTargets.slice(0, 5).map((target) => ({
