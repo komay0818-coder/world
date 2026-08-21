@@ -453,6 +453,8 @@
 .player-stage-unit.is-whirlwind .player-stage-art,
 .battle-player-art.is-whirlwind { z-index: 46 !important; animation: playerWhirlwindRush 1s cubic-bezier(.2,.76,.24,1) !important; }
 .player-stage-unit.is-whirlwind::before { content:""; position:absolute; z-index:44; inset:4%; border-radius:50%; background-image:var(--whirlwind-portrait); background-position:center; background-size:cover; opacity:0; animation:whirlwindPortraitGhost 1s ease-out; pointer-events:none; }
+.player-stage-unit.is-charge .player-stage-art,.battle-player-art.is-charge { z-index:46!important; animation:playerChargeRush .78s cubic-bezier(.18,.76,.22,1)!important; }
+.player-stage-unit.is-charge::before { content:""; position:absolute; z-index:44; inset:4%; border-radius:50%; background-image:var(--charge-portrait); background-position:center; background-size:cover; opacity:0; animation:chargePortraitGhost .5s .12s ease-out; pointer-events:none; }
 @keyframes playerBasicShake {
   0%,100% { transform: translate(0,0); }
   20% { transform: translate(-4px,1px) rotate(-2deg); }
@@ -478,6 +480,8 @@
   82% { transform:translate(var(--whirlwind-move-x,0),var(--whirlwind-move-y,0)) rotate(1080deg) scale(1.03); }
 }
 @keyframes whirlwindPortraitGhost { 0%,14%,76%,100%{opacity:0} 22%{opacity:.24;transform:translate(calc(var(--whirlwind-move-x,0) * .55),calc(var(--whirlwind-move-y,0) * .55))} 42%{opacity:.12;transform:translate(calc(var(--whirlwind-move-x,0) * .82 - 22px),calc(var(--whirlwind-move-y,0) * .82))} 62%{opacity:.2;transform:translate(calc(var(--whirlwind-move-x,0) * .82 + 26px),calc(var(--whirlwind-move-y,0) * .82))} }
+@keyframes playerChargeRush { 0%,100%{transform:translate(0,0) scale(1)} 12%{transform:translate(var(--charge-pull-x,0),var(--charge-pull-y,0)) scale(.95)} 18%{transform:translate(var(--charge-pull-x,0),var(--charge-pull-y,0)) scale(.97)} 40%,66%{transform:translate(var(--charge-move-x,0),var(--charge-move-y,0)) scale(1.05)} 76%{transform:translate(var(--charge-move-x,0),var(--charge-move-y,0)) scale(1.02)} }
+@keyframes chargePortraitGhost { 0%{opacity:0;transform:translate(var(--charge-pull-x,0),var(--charge-pull-y,0)) scale(.92)} 22%{opacity:.25} 100%{opacity:0;transform:translate(calc(var(--charge-move-x,0) * .72),calc(var(--charge-move-y,0) * .72)) scale(1.02)} }
 @media (max-width: 700px) {
   .battle-field { --player-portrait-size: clamp(48px, 14vw, 64px); --player-unit-ground-line: 8%; }
 }
@@ -493,6 +497,8 @@
   .battle-player-art.is-heavy-strike,
   .player-stage-unit.is-whirlwind .player-stage-art,
   .battle-player-art.is-whirlwind { animation-duration: .01ms !important; }
+  .player-stage-unit.is-charge .player-stage-art,
+  .battle-player-art.is-charge { animation-duration:.01ms!important; }
 }
 
 /* Reusable skill-effect layer; heavy strike is the first preset. */
@@ -529,6 +535,22 @@
 @keyframes whirlwindTargetSlash { 0%{opacity:0;transform:rotate(-32deg) scale(.35)} 30%{opacity:1} 100%{opacity:0;transform:rotate(-32deg) scale(1.14)} }
 @keyframes whirlwindHitDamage { 0%{opacity:0;transform:translate(-50%,8px) scale(.82)} 25%{opacity:1} 100%{opacity:0;transform:translate(-50%,-22px) scale(1.08)} }
 @keyframes whirlwindFinisher { 0%{opacity:0;transform:translate(-50%,-50%) rotate(-10deg) scale(.35)} 30%{opacity:1} 100%{opacity:0;transform:translate(-50%,-50%) rotate(20deg) scale(1.1)} }
+
+.battle-effect-charge .charge-airflow i { position:absolute; right:38%; top:calc(var(--flow-index,0) * 13px - 18px); width:calc(var(--target-width) * 1.7); height:5px; border-radius:50%; background:linear-gradient(90deg,transparent,#df7d20,#fff1b3); opacity:0; animation:chargeAirflow .42s ease-out; }.battle-effect-charge .charge-airflow i:nth-child(1){--flow-index:0}.battle-effect-charge .charge-airflow i:nth-child(2){--flow-index:1;animation-delay:.04s}.battle-effect-charge .charge-airflow i:nth-child(3){--flow-index:2;animation-delay:.08s}
+.battle-effect-charge .charge-cone { position:absolute; left:48%; top:0; width:calc(var(--target-width) * 1.35); height:calc(var(--target-width) * .72); opacity:0; transform:translateY(-50%) scaleX(.18); transform-origin:left; background:linear-gradient(90deg,rgba(255,245,193,.92),rgba(244,157,42,.7) 30%,rgba(226,102,20,.08)); clip-path:polygon(0 40%,100% 0,82% 50%,100% 100%,0 60%); animation:chargeCone .2s .4s ease-out forwards; }
+.battle-effect-charge .charge-sparks { position:absolute; left:45%; top:-28px; width:70px; height:58px; opacity:0; background:conic-gradient(transparent 0 10%,#fff2bd 11% 13%,transparent 14% 32%,#f39a27 33% 36%,transparent 37% 59%,#ffd15a 60% 63%,transparent 64%); animation:chargeSparks .18s .4s ease-out; }
+.battle-effect-charge .charge-impact-damage { position:absolute; z-index:4; left:50%; top:calc(var(--target-width) * -.52); color:#fff2ae; font-size:22px; font-weight:900; text-shadow:0 2px 2px #5b1720,0 0 7px #e77b20; opacity:0; animation:chargeDamage .32s .4s ease-out forwards; }
+#enemy-squad .monster-battle-slot.charge-hit .monster-slot-image { animation:chargeTargetHit .17s ease-out!important; }
+.battle-field.charge-impact { animation:chargeFieldImpact .12s linear; }
+.player-stage-unit.has-charge-buff .player-stage-art,.battle-player-art.has-charge-buff { box-shadow:0 0 0 3px rgba(245,159,41,.62),0 0 14px rgba(239,134,32,.48),0 7px 16px rgba(0,0,0,.48)!important; }
+.player-stage-unit.has-charge-buff::after,.player-fighter.has-charge-buff::after { content:""; position:absolute; z-index:31; inset:-7px; border:2px solid rgba(245,159,41,.58); border-radius:50%; opacity:.7; animation:chargeBuffFlow 1.35s ease-in-out infinite; pointer-events:none; }
+@keyframes chargeAirflow { 0%{opacity:0;transform:translateX(-35%)} 32%{opacity:.75} 100%{opacity:0;transform:translateX(35%)} }
+@keyframes chargeCone { 0%{opacity:0;transform:translateY(-50%) scaleX(.18)} 30%{opacity:.95} 100%{opacity:0;transform:translateY(-50%) scaleX(1)} }
+@keyframes chargeSparks { 0%{opacity:0;transform:scale(.3)} 35%{opacity:1} 100%{opacity:0;transform:scale(1.1)} }
+@keyframes chargeDamage { 0%{opacity:0;transform:translate(-50%,8px) scale(.82)} 25%{opacity:1} 100%{opacity:0;transform:translate(-50%,-22px) scale(1.08)} }
+@keyframes chargeTargetHit { 0%,100%{translate:0 0} 35%{translate:8px -1px} 68%{translate:-3px 1px} }
+@keyframes chargeFieldImpact { 0%,100%{transform:translate(0)} 35%{transform:translate(2px,-1px)} 70%{transform:translate(-1px,1px)} }
+@keyframes chargeBuffFlow { 0%,100%{opacity:.35;transform:scale(.97)} 50%{opacity:.75;transform:scale(1.06)} }
 
 .stronghold-objective {
   position: absolute;

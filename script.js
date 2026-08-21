@@ -2701,9 +2701,9 @@ function playPartyMemberCombatAnimation(member, targetIndexes = [], options = {}
       ? document.querySelector('#enemy-squad')
       : null;
     if (!field || !art) return;
-    const actionClass = skillId === 'heavy-strike' ? 'is-heavy-strike' : skillId === 'whirlwind' ? 'is-whirlwind' : kind === 'basic' ? 'is-attacking' : area ? 'is-area-skill' : 'is-target-skill';
-    fighter?.classList.remove('is-attacking', 'is-target-skill', 'is-area-skill', 'is-heavy-strike', 'is-whirlwind');
-    art.classList.remove('is-attacking', 'is-target-skill', 'is-area-skill', 'is-heavy-strike', 'is-whirlwind');
+    const actionClass = skillId === 'heavy-strike' ? 'is-heavy-strike' : skillId === 'whirlwind' ? 'is-whirlwind' : skillId === 'charge' ? 'is-charge' : kind === 'basic' ? 'is-attacking' : area ? 'is-area-skill' : 'is-target-skill';
+    fighter?.classList.remove('is-attacking', 'is-target-skill', 'is-area-skill', 'is-heavy-strike', 'is-whirlwind', 'is-charge');
+    art.classList.remove('is-attacking', 'is-target-skill', 'is-area-skill', 'is-heavy-strike', 'is-whirlwind', 'is-charge');
     void art.offsetWidth;
     art.dataset.job = member.job || member.character?.job || 'warrior';
     setBattleCharacterAction(art, member.character, 'active');
@@ -2735,6 +2735,17 @@ function playPartyMemberCombatAnimation(member, targetIndexes = [], options = {}
         art.style.setProperty('--whirlwind-move-x', `${moveX * .62}px`);
         art.style.setProperty('--whirlwind-move-y', `${moveY * .62}px`);
       }
+      if (skillId === 'charge') {
+        const deltaX = destinationX - (artRect.left + artRect.width / 2);
+        const deltaY = destinationY - (artRect.top + artRect.height / 2);
+        const distance = Math.max(1, Math.hypot(deltaX, deltaY));
+        const stopShort = Math.min(72, targetRect?.width * .55 || 48);
+        art.style.setProperty('--charge-move-x', `${deltaX - deltaX / distance * stopShort}px`);
+        art.style.setProperty('--charge-move-y', `${deltaY - deltaY / distance * stopShort}px`);
+        art.style.setProperty('--charge-pull-x', `${-deltaX / distance * 9}px`);
+        art.style.setProperty('--charge-pull-y', `${-deltaY / distance * 9}px`);
+        fighter?.style.setProperty('--charge-portrait', art.style.backgroundImage);
+      }
     }
     fighter?.classList.add(actionClass);
     art.classList.add(actionClass);
@@ -2747,6 +2758,10 @@ function playPartyMemberCombatAnimation(member, targetIndexes = [], options = {}
       art.style.removeProperty('--heavy-lunge-y');
       art.style.removeProperty('--whirlwind-move-x');
       art.style.removeProperty('--whirlwind-move-y');
+      art.style.removeProperty('--charge-move-x');
+      art.style.removeProperty('--charge-move-y');
+      art.style.removeProperty('--charge-pull-x');
+      art.style.removeProperty('--charge-pull-y');
       setBattleCharacterAction(art, member.character, 'idle');
     }, kind === 'basic' ? 420 : 720);
   });
@@ -2754,7 +2769,8 @@ function playPartyMemberCombatAnimation(member, targetIndexes = [], options = {}
 
 const battleSkillEffectPresets = Object.freeze({
   'heavy-strike': { duration: 680, impactAt: 350, className: 'battle-effect-heavy-strike' },
-  whirlwind: { duration: 1000, impactAt: 350, className: 'battle-effect-whirlwind' }
+  whirlwind: { duration: 1000, impactAt: 350, className: 'battle-effect-whirlwind' },
+  charge: { duration: 780, impactAt: 400, className: 'battle-effect-charge' }
 });
 
 function captureBattleTargetAnchor(index) {
@@ -2785,6 +2801,8 @@ function playBattleSkillEffect(skillId, targetAnchor, options = {}) {
   effect.style.setProperty('--target-width', `${targetAnchor.width}px`);
   effect.innerHTML = skillId === 'whirlwind'
     ? `<span class="whirlwind-speed-trails"><i></i><i></i></span><span class="whirlwind-ring"></span><span class="whirlwind-afterimages"><i></i><i></i><i></i></span><span class="whirlwind-finisher"></span>${(options.targets || []).map((target, order) => `<span class="whirlwind-target-hit" data-effect-target="${target.index}" style="--hit-order:${order};--hit-x:${(target.anchor?.x || targetAnchor.x) - targetAnchor.x}px;--hit-y:${(target.anchor?.y || targetAnchor.y) - targetAnchor.y}px"><i></i><b>-${target.damage}</b></span>`).join('')}`
+    : skillId === 'charge'
+      ? `<span class="charge-airflow"><i></i><i></i><i></i></span><span class="charge-cone"></span><span class="charge-sparks"></span>${options.damage > 0 ? `<b class="charge-impact-damage">-${options.damage}</b>` : ''}`
     : `<span class="smash-trail"></span><span class="impact-shockwave"></span><span class="impact-crack"></span><span class="impact-sparks"></span><span class="impact-debris">${Array.from({ length: 6 }, (_, index) => `<i style="--debris-index:${index}"></i>`).join('')}</span>${options.damage > 0 ? `<b class="skill-impact-damage">-${options.damage}</b>` : ''}`;
   layer.append(effect);
   const startedAt = performance.now();
@@ -2813,6 +2831,12 @@ function playBattleSkillEffect(skillId, targetAnchor, options = {}) {
     const target = document.querySelector(`#enemy-${targetAnchor.index}`);
     target?.classList.add('heavy-strike-hit');
     setTimeout(() => target?.classList.remove('heavy-strike-hit'), 220);
+  }, preset.impactAt);
+  if (skillId === 'charge') setTimeout(() => {
+    const target = document.querySelector(`#enemy-${targetAnchor.index}`);
+    target?.classList.add('charge-hit');
+    field.classList.add('charge-impact');
+    setTimeout(() => { target?.classList.remove('charge-hit'); field.classList.remove('charge-impact'); }, 170);
   }, preset.impactAt);
   setTimeout(() => {
     effect.remove();
@@ -3248,7 +3272,8 @@ function renderBattlePartyStatus() {
       const resourcePercent = Math.max(0, Math.min(100, member.resourceCurrent / resourceMax * 100));
       const art = battleCharacterActionArt(member.character, 'idle') || battleCharacterArt[`${member.character.race}:${member.character.job}`] || '';
       const jobName = classes.find((job) => job.id === member.character.job)?.name || member.character.job;
-      return `<article class="player-stage-unit ${member.alive ? '' : 'is-dead'}" data-visual-size="humanoid" data-member-id="${member.id}" data-job="${member.character.job}"><div class="player-stage-floating"><b>${member.name}</b><small>${jobName}・Lv.${member.level}</small><span class="player-stage-hp"><i style="width:${hpPercent}%"></i></span><span class="player-stage-resource"><i style="width:${resourcePercent}%"></i></span></div><div class="player-stage-art" style="background-image:url('${art}')" aria-label="${member.name}"></div></article>`;
+      const chargeBuffClass = Date.now() < (member.skillHasteUntil || 0) ? ' has-charge-buff' : '';
+      return `<article class="player-stage-unit ${member.alive ? '' : 'is-dead'}${chargeBuffClass}" data-visual-size="humanoid" data-member-id="${member.id}" data-job="${member.character.job}"><div class="player-stage-floating"><b>${member.name}</b><small>${jobName}・Lv.${member.level}</small><span class="player-stage-hp"><i style="width:${hpPercent}%"></i></span><span class="player-stage-resource"><i style="width:${resourcePercent}%"></i></span></div><div class="player-stage-art" style="background-image:url('${art}')" aria-label="${member.name}"></div></article>`;
     }).join('');
   }
 }
@@ -3446,6 +3471,9 @@ function rewardVictory(index) {
   }
   battle.rewardedEnemyIndexes.add(rewardKey);
   const progress = getProgress();
+  const mainChargeBuffActive = Date.now() < (getMainBattleMember()?.skillHasteUntil || 0);
+  document.querySelector('#player-fighter')?.classList.toggle('has-charge-buff', mainChargeBuffActive);
+  document.querySelector('#battle-player-art')?.classList.toggle('has-charge-buff', mainChargeBuffActive);
   const enemy = getEnemyDefinition(index);
   const currentMap = getActiveMap(progress);
   renderStrongholdObjective(currentMap);
@@ -3867,7 +3895,7 @@ function useAutoSkillForMember(member, now = Date.now()) {
     if (skill.id === 'whirlwind') damagePower *= 1 + Math.min(skillEffect.maxTargetBonus || 0, Math.max(0, targets.length - 1) * (skillEffect.perExtraTargetBonus || 0));
     const damage = Math.max(1, Math.ceil(stats.attack * damagePower * (critical ? stats.criticalDamageMultiplier : 1)));
     const profile = getPlayerAttackProfile(character, skill);
-    const targetAnchors = ['heavy-strike', 'whirlwind'].includes(skill.id)
+    const targetAnchors = ['heavy-strike', 'whirlwind', 'charge'].includes(skill.id)
       ? new Map(targets.map((index) => [index, captureBattleTargetAnchor(index)]))
       : null;
     const resolvedTargets = targets.map((index, targetOrder) => {
@@ -3878,7 +3906,7 @@ function useAutoSkillForMember(member, now = Date.now()) {
         attackKind: 'skill',
         armorIgnore: skillEffect.armorIgnore,
         controlledBonus: skillEffect.controlledBonus,
-        showDamage: !['heavy-strike', 'whirlwind'].includes(skill.id)
+        showDamage: !['heavy-strike', 'whirlwind', 'charge'].includes(skill.id)
       }) };
     });
     const hits = resolvedTargets.filter((target) => !target.result.evaded);
@@ -3953,6 +3981,11 @@ function useAutoSkillForMember(member, now = Date.now()) {
       playBattleSkillEffect(skill.id, centerAnchor, {
         targets: hits.map((target) => ({ index: target.index, damage: target.result.finalDamage, anchor: targetAnchors.get(target.index) }))
       });
+    }
+    if (skill.id === 'charge') {
+      const struckTarget = hits[0];
+      const displayedTarget = struckTarget || resolvedTargets[0];
+      playBattleSkillEffect(skill.id, targetAnchors.get(displayedTarget.index), { damage: struckTarget?.result.finalDamage || 0 });
     }
     if (member.isMain && skill.id === 'companion') playCompanionAttackAnimation((hits.length ? hits : resolvedTargets).map((target) => target.index));
     if (hits.length) logBattle(`✦ ${member.name}施放【${skill.name}】，造成 ${totalDamage}${critical ? ' 暴擊' : ''}傷害。`, 'damage-dealt');
