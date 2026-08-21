@@ -1281,7 +1281,7 @@ body:has(.battle-screen:not(.hidden)) .toast.show {
   overflow: hidden !important;
 }
 
-.battle-screen .battle-field #battle-player-art[aria-label] {
+#battle-screen .battle-field:has(#player-battle-stage) #battle-player-art[aria-label] {
   position: absolute !important;
   inset: auto auto clamp(14px, 3%, 24px) clamp(14px, 3%, 28px) !important;
   translate: none !important;
@@ -1289,7 +1289,7 @@ body:has(.battle-screen:not(.hidden)) .toast.show {
 }
 
 @media (max-width: 700px) {
-  .battle-screen .battle-field #battle-player-art[aria-label] {
+  #battle-screen .battle-field:has(#player-battle-stage) #battle-player-art[aria-label] {
     inset: auto auto 12px 12px !important;
   }
 }
