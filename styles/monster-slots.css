@@ -1284,8 +1284,8 @@ body:has(.battle-screen:not(.hidden)) .toast.show {
 #battle-screen .battle-field:has(#player-battle-stage) #battle-player-art[aria-label] {
   position: absolute !important;
   inset: auto auto clamp(14px, 3%, 24px) clamp(14px, 3%, 28px) !important;
-  translate: none !important;
-  transform: none !important;
+  translate: none;
+  transform: none;
 }
 
 @media (max-width: 700px) {

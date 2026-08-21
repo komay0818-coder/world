@@ -10,7 +10,7 @@ const layoutCss = fs.readFileSync(path.join(root, 'styles', 'mmorpg-layout.css')
 
 assert.match(html, /id="player-battle-stage"/, 'party players render on the battlefield');
 assert.match(html, /id="battle-player-art" class="battle-player-art hidden"/, 'main player has a dedicated portrait node');
-assert.match(html, /styles\/monster-slots\.css\?v=20260821-player-anchor-v2/, 'battlefield loads the current local portrait styles');
+assert.match(html, /styles\/monster-slots\.css\?v=20260821-player-animation-v3/, 'battlefield loads the current local portrait styles');
 assert.match(html, /script\.js\?v=20260821-heal-v1/, 'battlefield loads the current local combat logic');
 assert.match(script, /return battleCharacterArt\[`\$\{character\.race\}:\$\{character\.job\}`\] \|\| '';/, 'battle uses stable front character artwork');
 assert.match(script, /'orc:warrior': 'assets\/character-portraits\/orc-warrior\.png'/, 'orc warrior uses the supplied portrait');
@@ -42,6 +42,7 @@ assert.match(css, /Final 0\.7\.1 battlefield composition[\s\S]*?@media \(max-wid
 assert.match(css, /Final 0\.7\.1 battlefield composition[\s\S]*?data-count="3"[\s\S]*?left: 20%[\s\S]*?left: 41%[\s\S]*?left: 61%[\s\S]*?left: 81%/, 'four mobile portraits retain non-overlapping anchors');
 assert.match(css, /overflow: hidden !important;[\s\S]*?border: 3px solid #d9a93f !important;[\s\S]*?border-radius: 50% !important;/, 'player artwork is clipped inside a gold circle');
 assert.match(css, /@keyframes playerBasicShake/, 'basic attacks shake the portrait');
+assert.doesNotMatch(css.match(/#battle-screen \.battle-field:has\(#player-battle-stage\) #battle-player-art\[aria-label\]\s*{[\s\S]*?\n}/)?.[0] || '', /transform:\s*none\s*!important/, 'the portrait anchor does not override combat animation transforms');
 assert.match(script, /art\.classList\.remove\('is-attacking', 'is-target-skill', 'is-area-skill', 'is-heavy-strike', 'is-whirlwind', 'is-charge', 'is-power-shot', 'is-multi-shot', 'is-piercing-shot', 'is-backstab', 'is-shadow-dance', 'is-fireball', 'is-blizzard', 'is-chain-lightning', 'is-holy-light', 'is-holy-nova'\);[\s\S]*?void art\.offsetWidth;[\s\S]*?art\.classList\.add\(actionClass\);/, 'every attack reliably restarts its portrait animation');
 assert.doesNotMatch(script, /classList\.(?:add|remove)\('attack'/, 'combat no longer activates the legacy attack class');
 assert.doesNotMatch(layoutCss, /characterAttackWarrior|characterAttackAssassin|characterAttackHunter|characterAttackMage|characterAttackPriest/, 'legacy per-job attack motion is removed');
