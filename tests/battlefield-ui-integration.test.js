@@ -10,8 +10,8 @@ const layoutCss = fs.readFileSync(path.join(root, 'styles', 'mmorpg-layout.css')
 
 assert.match(html, /id="player-battle-stage"/, 'party players render on the battlefield');
 assert.match(html, /id="battle-player-art" class="battle-player-art hidden"/, 'main player has a dedicated portrait node');
-assert.match(html, /styles\/monster-slots\.css\?v=20260821-charge-v1/, 'battlefield loads the current local portrait styles');
-assert.match(html, /script\.js\?v=20260821-charge-v1/, 'battlefield loads the current local combat logic');
+assert.match(html, /styles\/monster-slots\.css\?v=20260821-power-shot-v1/, 'battlefield loads the current local portrait styles');
+assert.match(html, /script\.js\?v=20260821-power-shot-v1/, 'battlefield loads the current local combat logic');
 assert.match(script, /return battleCharacterArt\[`\$\{character\.race\}:\$\{character\.job\}`\] \|\| '';/, 'battle uses stable front character artwork');
 assert.match(script, /'orc:warrior': 'assets\/character-portraits\/orc-warrior\.png'/, 'orc warrior uses the supplied portrait');
 assert.match(script, /'orc:hunter': 'assets\/character-portraits\/orc-hunter\.png'/, 'orc hunter uses the supplied portrait');
@@ -42,10 +42,10 @@ assert.match(css, /Final 0\.7\.1 battlefield composition[\s\S]*?@media \(max-wid
 assert.match(css, /Final 0\.7\.1 battlefield composition[\s\S]*?data-count="3"[\s\S]*?left: 20%[\s\S]*?left: 41%[\s\S]*?left: 61%[\s\S]*?left: 81%/, 'four mobile portraits retain non-overlapping anchors');
 assert.match(css, /overflow: hidden !important;[\s\S]*?border: 3px solid #d9a93f !important;[\s\S]*?border-radius: 50% !important;/, 'player artwork is clipped inside a gold circle');
 assert.match(css, /@keyframes playerBasicShake/, 'basic attacks shake the portrait');
-assert.match(script, /art\.classList\.remove\('is-attacking', 'is-target-skill', 'is-area-skill', 'is-heavy-strike', 'is-whirlwind', 'is-charge'\);[\s\S]*?void art\.offsetWidth;[\s\S]*?art\.classList\.add\(actionClass\);/, 'every attack reliably restarts its portrait animation');
+assert.match(script, /art\.classList\.remove\('is-attacking', 'is-target-skill', 'is-area-skill', 'is-heavy-strike', 'is-whirlwind', 'is-charge', 'is-power-shot'\);[\s\S]*?void art\.offsetWidth;[\s\S]*?art\.classList\.add\(actionClass\);/, 'every attack reliably restarts its portrait animation');
 assert.doesNotMatch(script, /classList\.(?:add|remove)\('attack'/, 'combat no longer activates the legacy attack class');
 assert.doesNotMatch(layoutCss, /characterAttackWarrior|characterAttackAssassin|characterAttackHunter|characterAttackMage|characterAttackPriest/, 'legacy per-job attack motion is removed');
-assert.match(script, /const actionClass = skillId === 'heavy-strike' \? 'is-heavy-strike' : skillId === 'whirlwind' \? 'is-whirlwind' : skillId === 'charge' \? 'is-charge'/, 'named skill presets select distinct movement types');
+assert.match(script, /skillId === 'charge' \? 'is-charge' : skillId === 'power-shot' \? 'is-power-shot'/, 'named skill presets select distinct movement types');
 assert.match(script, /kind === 'skill' && !area[\s\S]*?document\.querySelector\(`#enemy-\$\{targetIndexes\[0\]\}`\)/, 'only single-target skills resolve their actual target element');
 assert.match(script, /targetRect \? targetRect\.left \+ targetRect\.width \* \.5/, 'single-target destination uses target position');
 assert.match(script, /style\.setProperty\('--skill-move-y'[\s\S]*?fighter\?\.classList\.add\(actionClass\);[\s\S]*?art\.classList\.add\(actionClass\);/, 'target coordinates are ready before the skill animation starts');
@@ -61,7 +61,7 @@ assert.match(script, /battleSkillEffectPresets[\s\S]*?'heavy-strike'[\s\S]*?dura
 assert.match(script, /captureBattleTargetAnchor\(index\)[\s\S]*?getBoundingClientRect/, 'heavy strike captures its actual target position before damage resolves');
 assert.match(script, /followTarget[\s\S]*?`#enemy-\$\{targetAnchor\.index\}`[\s\S]*?requestAnimationFrame\(followTarget\)/, 'active heavy strike effects follow the selected target');
 assert.match(script, /effect\.remove\(\);[\s\S]*?if \(!layer\.childElementCount\) layer\.remove\(\)/, 'finished skill effects leave no stale effect DOM');
-assert.match(script, /showDamage: !\['heavy-strike', 'whirlwind', 'charge'\]\.includes\(skill\.id\)/, 'skill presets suppress early generic damage numbers when impact timing is custom');
+assert.match(script, /showDamage: !\['heavy-strike', 'whirlwind', 'charge', 'power-shot'\]\.includes\(skill\.id\)/, 'skill presets suppress early generic damage numbers when impact timing is custom');
 assert.match(script, /visualStunAt = now \+ 550/, 'stun art waits until the impact animation finishes');
 assert.match(script, /Date\.now\(\) < enemySkillState\.stunnedUntil[\s\S]*?enemySkillState\.visualStunAt/, 'stun stars are driven by the actual stun state');
 assert.match(css, /impact-shockwave[\s\S]*?var\(--target-width\) \* 1\.42/, 'single-target shockwave stays proportional to the target');
@@ -69,7 +69,7 @@ assert.match(css, /impact-debris[\s\S]*?heavyDebris/, 'heavy strike has a restra
 assert.match(css, /@keyframes playerHeavyStrikeLunge/, 'heavy strike uses a short portrait lunge and return');
 assert.match(script, /whirlwind: \{ duration: 1000, impactAt: 350, className: 'battle-effect-whirlwind' \}/, 'whirlwind is a reusable one-second battle-effect preset');
 assert.match(script, /targets: hits\.map\(\(target\) => \(\{ index: target\.index, damage: target\.result\.finalDamage, anchor: targetAnchors\.get\(target\.index\) \}\)\)/, 'whirlwind binds each hit visual and number to its resolved target');
-assert.match(script, /showDamage: !\['heavy-strike', 'whirlwind', 'charge'\]\.includes\(skill\.id\)/, 'preset damage numbers wait for their custom hit visuals');
+assert.match(script, /showDamage: !\['heavy-strike', 'whirlwind', 'charge', 'power-shot'\]\.includes\(skill\.id\)/, 'preset damage numbers wait for their custom hit visuals');
 assert.match(css, /whirlwind-target-hit[\s\S]*?var\(--hit-order\) \* \.05s/, 'whirlwind staggers target slashes by fifty milliseconds');
 assert.match(css, /whirlwind-afterimages[\s\S]*?whirlwindAfterimage/, 'whirlwind uses portrait afterimages as its signature');
 assert.match(css, /whirlwind-finisher[\s\S]*?\.7s/, 'whirlwind ends with a larger arc slash');
@@ -80,6 +80,13 @@ assert.match(script, /skill\.id === 'charge'[\s\S]*?playBattleSkillEffect\(skill
 assert.match(css, /charge-cone[\s\S]*?clip-path:polygon/, 'charge impact uses a forward cone rather than a radial explosion');
 assert.match(script, /mainChargeBuffActive[\s\S]*?skillHasteUntil[\s\S]*?has-charge-buff/, 'charge buff art follows the real buff end time');
 assert.doesNotMatch(css.match(/\.battle-effect-charge[\s\S]*?@keyframes chargeBuffFlow/)?.[0] || '', /debris|crack/, 'charge does not reuse heavy-strike debris or cracks');
+assert.match(script, /'power-shot': \{ duration: 760, impactAt: 400, className: 'battle-effect-power-shot' \}/, 'power shot is a reusable short single-target preset');
+assert.match(script, /captureBattleAttackerAnchor[\s\S]*?--arrow-start-x/, 'power shot draws a projectile from the hunter to the resolved target');
+assert.match(script, /visualSlowAt = now \+ 550[\s\S]*?visualMarkAt = now \+ 550/, 'power-shot statuses appear after the impact burst');
+assert.match(script, /Date\.now\(\) < enemySkillState\.slowedUntil[\s\S]*?Date\.now\(\) < enemySkillState\.markedUntil/, 'slow and hunter mark visuals follow their real status timers');
+assert.match(css, /power-shot-arrow::after[\s\S]*?border-left:14px solid/, 'power shot keeps a visible physical arrowhead');
+assert.match(css, /enemy-slow-airflow/, 'power shot shows restrained slow airflow');
+assert.match(css, /enemy-hunter-mark/, 'advanced power shot shows a distinct hunter mark');
 
 assert.match(script, /class="enemy-unit monster-battle-slot visual-size-\$\{visualSize\}/, 'monsters keep full-body image slots');
 assert.match(css, /monster-battle-slot\.elite,[\s\S]*?monster-battle-slot\.boss \{[\s\S]*?--unit-rank-scale: 1;/, 'elite and boss monsters are not enlarged');
