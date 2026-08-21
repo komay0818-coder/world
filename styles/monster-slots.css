@@ -1274,3 +1274,22 @@ body:has(.battle-screen:not(.hidden)) .toast.show {
   .player-battle-stage[data-count="3"] .player-stage-unit:nth-child(2) { left: 61% !important; }
   .player-battle-stage[data-count="3"] .player-stage-unit:nth-child(3) { left: 81% !important; }
 }
+
+/* Player portrait anchor: position from the battlefield, never the lower UI. */
+.battle-screen .battle-field {
+  position: relative !important;
+  overflow: hidden !important;
+}
+
+.battle-screen .battle-field #battle-player-art[aria-label] {
+  position: absolute !important;
+  inset: auto auto clamp(14px, 3%, 24px) clamp(14px, 3%, 28px) !important;
+  translate: none !important;
+  transform: none !important;
+}
+
+@media (max-width: 700px) {
+  .battle-screen .battle-field #battle-player-art[aria-label] {
+    inset: auto auto 12px 12px !important;
+  }
+}
