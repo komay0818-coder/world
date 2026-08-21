@@ -2359,7 +2359,9 @@ function renderInventory(view = 'inventory') {
     const selectedCount = stackIds.filter((id) => scrapSelection.has(id)).length;
     const junkCandidate = stackItems.some((entry) => InventorySalePolicy.isJunkCandidate(entry, getItemJunkContext(entry, character, progress)));
     const junkBadge = junkCandidate ? '<span class="junk-badge" title="不能裝備的廢品" aria-label="不能裝備的廢品">🗑</span>' : '';
-    const visual = item.kind === 'equipment' ? `<img src="${itemImagePath(item)}" alt="" class="equipment-item-image">` : item.icon || '◈';
+    const visual = item.image
+      ? `<img src="${itemImagePath(item)}" alt="" class="inventory-item-image">`
+      : item.icon || '◈';
     const currentItem = item.kind === 'equipment' ? progress.equipment[item.slot] : null;
     const comparison = item.kind === 'equipment' && !equipped ? `<aside class="equipment-compare-tooltip"><strong>目前穿戴・${equipmentSlots[item.slot]?.label || item.slot}</strong>${currentItem ? `<div><span class="compare-item-icon"><img src="${itemImagePath(currentItem)}" alt=""></span><p><b>${currentItem.name}</b><small>${equipmentDetailsHtml(currentItem)}</small></p></div>` : '<p class="compare-empty">此欄位目前沒有穿戴裝備</p>'}</aside>` : '';
     const equipSlots = item.kind === 'equipment' ? EquipmentPolicy.getEquipSlots(item, character?.job) : [];
@@ -2483,7 +2485,10 @@ function renderDropLookup() {
   const filtered = DropLookupPolicy.filterItems(items, dropLookupQuery, dropLookupCategory, activeMap.id);
   const categories = [['all', '全部'], ['equipment', '裝備'], ['material', '材料'], ['recipe', '配方'], ['skill', '技能材料']];
   const resultCards = filtered.map((item) => {
-    return `<article class="drop-result-card"><span>${item.icon || (item.category === 'equipment' ? '⚔' : '◆')}</span><div><b>${item.name}</b><small>${item.typeLabel}</small></div></article>`;
+    const visual = item.image
+      ? `<img src="${item.image}" alt="" class="drop-result-image">`
+      : item.icon || (item.category === 'equipment' ? '⚔' : '◆');
+    return `<article class="drop-result-card"><span>${visual}</span><div><b>${item.name}</b><small>${item.typeLabel}</small></div></article>`;
   }).join('');
   const purificationMaterial = BlackForestCorruptionPolicy.MAP_MATERIALS[activeMap.id];
   const corruption = BlackForestCorruptionPolicy.getEffect(progress.blackForestCorruption);
