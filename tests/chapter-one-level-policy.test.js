@@ -64,4 +64,10 @@ ok(monsterHitWolf < monsterHitBoar, 'boar woods monsters hit Lv1 more reliably t
 
 policy.CHAPTER_MAP_IDS.forEach((mapId) => check(policy.canEnterMap(mapId), true, `${mapId} has no level gate`));
 
+const entranceAttackTargets = { plainsRabbit: 2, plainsSlime: 3, plainsWolfPup: 4, plainsGoblinYoung: 5, lostGoblin: 8 };
+Object.entries(entranceAttackTargets).forEach(([monsterType, expectedAttack]) => {
+  const profile = policy.getProfile('plains-entrance', monsterType);
+  check(profile.baseAttack, expectedAttack, `${monsterType} uses the beginner-safe entrance attack value`);
+});
+
 console.log(`chapter-one-level-policy: ${assertions} assertions passed`);

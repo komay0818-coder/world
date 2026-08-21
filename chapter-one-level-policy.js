@@ -32,11 +32,11 @@
 
   const MONSTER_PROFILES = Object.freeze({
     'plains-entrance': Object.freeze({
-      plainsRabbit: profile('plains-entrance', 'plainsRabbit', [1, 2], 24, 5, 0, 4),
-      plainsWolfPup: profile('plains-entrance', 'plainsWolfPup', [1, 3], 34, 7, 1, 4),
-      plainsSlime: profile('plains-entrance', 'plainsSlime', [1, 2], 30, 6, 0, 4),
-      plainsGoblinYoung: profile('plains-entrance', 'plainsGoblinYoung', [2, 3], 40, 8, 2, 4),
-      lostGoblin: profile('plains-entrance', 'lostGoblin', 4, 62, 10, 4, 10, 'elite')
+      plainsRabbit: profile('plains-entrance', 'plainsRabbit', [1, 2], 24, 2, 0, 4),
+      plainsWolfPup: profile('plains-entrance', 'plainsWolfPup', [1, 3], 34, 4, 1, 4),
+      plainsSlime: profile('plains-entrance', 'plainsSlime', [1, 2], 30, 3, 0, 4),
+      plainsGoblinYoung: profile('plains-entrance', 'plainsGoblinYoung', [2, 3], 40, 5, 2, 4),
+      lostGoblin: profile('plains-entrance', 'lostGoblin', 4, 62, 8, 4, 10, 'elite')
     }),
     'wolf-den': Object.freeze({
       plainsWolfPup: profile('wolf-den', 'plainsWolfPup', 3, 34, 7, 1, 6),
