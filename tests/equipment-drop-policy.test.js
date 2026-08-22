@@ -157,6 +157,10 @@ assert.equal(chapterTwoBlue.rarity, 'rare', 'blue is the primary chapter-two qua
 const chapterTwoPurple = dropPolicy.grantEquipmentDrop({ inventory: [] }, chapterTwoBoss, { random: sequence([0, .999, 0, 0]), instanceIdFactory: () => 'eq-c2-purple' });
 assert.equal(chapterTwoPurple.rarity, 'epic', 'chapter-two bosses can roll the low-rate purple tier');
 assert.equal(dropPolicy.rollChapterRarity(2, { common: 100 }, 0, false, () => {}), null, 'chapter-two quality guard rejects white even in an invalid override');
+const deepwoodVest = dropPolicy.CHAPTER_TWO_TEMPLATES.find((template) => template.id === 'deepwood-hunter-vest');
+const deepwoodHood = dropPolicy.CHAPTER_TWO_TEMPLATES.find((template) => template.id === 'deepwood-hunter-hood');
+assert.equal(deepwoodVest.dodge, .03, 'deepwood hunter vest grants three percent dodge as a decimal ratio');
+assert.equal(deepwoodHood.dodge, .02, 'deepwood hunter hood grants two percent dodge as a decimal ratio');
 const chapterTwoWeapons = dropPolicy.CHAPTER_TWO_TEMPLATES.filter((template) => template.slot === 'weapon');
 assert.equal(chapterTwoWeapons.length, 14, 'chapter two includes fourteen requested weapons');
 assert.deepEqual(chapterTwoWeapons.map((template) => template.name), ['林衛長劍', '傭兵闊劍', '斬木巨劍', '黑鐵重劍', '伐林戰斧', '裂骨手斧', '巨木戰斧', '破甲重斧', '毒牙匕首', '暗林短刃', '長枝獵弓', '穿林長弓', '古木魔杖', '孢子魔杖']);

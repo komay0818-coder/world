@@ -25,8 +25,8 @@
     chapterTwoTemplate('spore-wand', '孢子魔杖', 'weapon', { attackMin: 26, attackMax: 35, attackSpeed: 1.00, mana: 26 }, { weaponType: 'one-handed-wand', image: 'assets/spore-wand.png', imageStatus: 'ready', allowedJobs: ['mage', 'priest'] }),
     chapterTwoTemplate('blackstone-corrupted-plate', '黑石腐晶戰甲', 'armor', { defense: 30, hp: 58 }, { armorType: 'heavy', allowedJobs: ['warrior'] }),
     chapterTwoTemplate('blackstone-corrupted-helm', '黑石腐晶戰盔', 'head', { defense: 18, hp: 32 }, { armorType: 'heavy', allowedJobs: ['warrior'] }),
-    chapterTwoTemplate('deepwood-hunter-vest', '深林獵裝', 'armor', { defense: 23, hp: 38, dodge: 3 }, { armorType: 'light', allowedJobs: ['hunter', 'assassin'] }),
-    chapterTwoTemplate('deepwood-hunter-hood', '深林兜帽', 'head', { defense: 14, hp: 24, dodge: 2 }, { armorType: 'light', allowedJobs: ['hunter', 'assassin'] }),
+    chapterTwoTemplate('deepwood-hunter-vest', '深林獵裝', 'armor', { defense: 23, hp: 38, dodge: .03 }, { armorType: 'light', allowedJobs: ['hunter', 'assassin'] }),
+    chapterTwoTemplate('deepwood-hunter-hood', '深林兜帽', 'head', { defense: 14, hp: 24, dodge: .02 }, { armorType: 'light', allowedJobs: ['hunter', 'assassin'] }),
     chapterTwoTemplate('spiritweave-robe', '靈森法袍', 'armor', { defense: 17, hp: 30, mana: 38 }, { armorType: 'cloth', allowedJobs: ['mage'] }),
     chapterTwoTemplate('spiritweave-crown', '靈森冠帽', 'head', { defense: 10, hp: 18, mana: 24 }, { armorType: 'cloth', allowedJobs: ['mage'] })
   ]);
