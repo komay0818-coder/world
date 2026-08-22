@@ -820,7 +820,12 @@ const equipmentVisualByTemplateId = {
   'venomfang-dagger': 'assets/venomfang-dagger.png',
   'darkwood-shortblade': 'assets/darkwood-shortblade.png',
   'ancient-wood-wand': 'assets/ancient-wood-wand.png',
-  'spore-wand': 'assets/spore-wand.png'
+  'spore-wand': 'assets/spore-wand.png',
+  'blackstone-corrupted-plate': 'assets/blackstone-corrupted-plate.png',
+  'blackstone-corrupted-helm': 'assets/blackstone-corrupted-helm.png',
+  'blackstone-corrupted-legguards': 'assets/blackstone-corrupted-legguards.png',
+  'blackstone-corrupted-gauntlets': 'assets/blackstone-corrupted-gauntlets.png',
+  'blackstone-corrupted-warboots': 'assets/blackstone-corrupted-warboots.png'
 };
 
 function applyEquipmentVisual(item) {

@@ -163,6 +163,18 @@ const blackstonePlate = dropPolicy.CHAPTER_TWO_TEMPLATES.find((template) => temp
 const blackstoneHelm = dropPolicy.CHAPTER_TWO_TEMPLATES.find((template) => template.id === 'blackstone-corrupted-helm');
 assert.equal(blackstonePlate.parry, .05, 'blackstone corrupted plate grants five percent parry as a decimal ratio');
 assert.equal(blackstoneHelm.parry, .03, 'blackstone corrupted helm grants three percent parry as a decimal ratio');
+const blackstoneArmorImages = {
+  'blackstone-corrupted-plate': 'assets/blackstone-corrupted-plate.png',
+  'blackstone-corrupted-helm': 'assets/blackstone-corrupted-helm.png',
+  'blackstone-corrupted-legguards': 'assets/blackstone-corrupted-legguards.png',
+  'blackstone-corrupted-gauntlets': 'assets/blackstone-corrupted-gauntlets.png',
+  'blackstone-corrupted-warboots': 'assets/blackstone-corrupted-warboots.png'
+};
+Object.entries(blackstoneArmorImages).forEach(([id, image]) => {
+  const template = dropPolicy.CHAPTER_TWO_TEMPLATES.find((item) => item.id === id);
+  assert.equal(template.image, image, `${id} uses its dedicated artwork`);
+  assert.equal(template.imageStatus, 'ready', `${id} artwork is ready`);
+});
 assert.equal(deepwoodVest.dodge, .03, 'deepwood hunter vest grants three percent dodge as a decimal ratio');
 assert.equal(deepwoodHood.dodge, .02, 'deepwood hunter hood grants two percent dodge as a decimal ratio');
 const chapterTwoNewArmor = [
