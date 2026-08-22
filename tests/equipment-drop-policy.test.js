@@ -165,6 +165,30 @@ assert.equal(blackstonePlate.parry, .05, 'blackstone corrupted plate grants five
 assert.equal(blackstoneHelm.parry, .03, 'blackstone corrupted helm grants three percent parry as a decimal ratio');
 assert.equal(deepwoodVest.dodge, .03, 'deepwood hunter vest grants three percent dodge as a decimal ratio');
 assert.equal(deepwoodHood.dodge, .02, 'deepwood hunter hood grants two percent dodge as a decimal ratio');
+const chapterTwoNewArmor = [
+  ['blackstone-corrupted-gauntlets', 'gloves', { defense: 14, hp: 25, accuracy: .03 }],
+  ['deepwood-hunter-gloves', 'gloves', { defense: 10, hp: 18, attackSpeedBonus: .03 }],
+  ['spiritweave-spellgloves', 'gloves', { defense: 7, hp: 14, cooldownSpeedBonus: .03 }],
+  ['blackstone-corrupted-legguards', 'pants', { defense: 22, hp: 42, hpRegeneration: 2 }],
+  ['deepwood-hunter-legguards', 'pants', { defense: 17, hp: 30, accuracy: .03 }],
+  ['spiritweave-pants', 'pants', { defense: 12, hp: 22, manaRegenFlat: 2 }],
+  ['blackstone-corrupted-warboots', 'boots', { defense: 20, hp: 36, damageReduction: .03 }],
+  ['deepwood-hunter-boots', 'boots', { defense: 15, hp: 26, dodge: .03 }],
+  ['spiritweave-boots', 'boots', { defense: 10, hp: 18, manaRegenFlat: 2 }]
+];
+chapterTwoNewArmor.forEach(([id, slot, stats]) => {
+  const template = dropPolicy.CHAPTER_TWO_TEMPLATES.find((item) => item.id === id);
+  assert.ok(template, `${id} has a chapter-two equipment template`);
+  assert.equal(template.slot, slot);
+  Object.entries(stats).forEach(([stat, value]) => assert.equal(template[stat], value, `${id} has the requested ${stat}`));
+  assert.ok(dropPolicy.EQUIPMENT_POOLS.black_forest_armor.includes(id), `${id} is available in the black forest armor pool`);
+});
+assert.ok(chapterTwoNewArmor.filter(([, slot]) => slot === 'pants').every(([id]) => !dropPolicy.CHAPTER_TWO_TEMPLATES.find((item) => item.id === id).parry), 'new chapter-two pants do not add parry');
+const regeneratingLegguards = dropPolicy.createEquipmentDropInstance(
+  dropPolicy.CHAPTER_TWO_TEMPLATES.find((item) => item.id === 'blackstone-corrupted-legguards'),
+  { rarity: 'rare', chapter: 2, instanceId: 'eq-regenerating-legguards', obtainedAt: 1, random: () => 0 }
+);
+assert.equal(regeneratingLegguards.baseStats.hpRegeneration, 2, 'fixed health regeneration survives equipment instance creation');
 const chapterTwoWeapons = dropPolicy.CHAPTER_TWO_TEMPLATES.filter((template) => template.slot === 'weapon');
 assert.equal(chapterTwoWeapons.length, 14, 'chapter two includes fourteen requested weapons');
 assert.deepEqual(chapterTwoWeapons.map((template) => template.name), ['林衛長劍', '傭兵闊劍', '斬木巨劍', '黑鐵重劍', '伐林戰斧', '裂骨手斧', '巨木戰斧', '破甲重斧', '毒牙匕首', '暗林短刃', '長枝獵弓', '穿林長弓', '古木魔杖', '孢子魔杖']);

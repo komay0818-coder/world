@@ -2012,17 +2012,18 @@ function getEquipmentStats(progress = getProgress()) {
     cooldownSpeedBonus: stats.cooldownSpeedBonus + effectiveEquipmentStat(item, 'cooldownSpeedBonus'),
     manaRegenBonus: stats.manaRegenBonus + effectiveEquipmentStat(item, 'manaRegenBonus'),
     manaRegenFlat: stats.manaRegenFlat + effectiveEquipmentStat(item, 'manaRegenFlat'),
+    hpRegeneration: stats.hpRegeneration + effectiveEquipmentStat(item, 'hpRegeneration'),
     magicDamageBonus: stats.magicDamageBonus + effectiveEquipmentStat(item, 'magicDamageBonus'),
     parry: stats.parry + effectiveEquipmentStat(item, 'parry'),
     damageReduction: stats.damageReduction + effectiveEquipmentStat(item, 'damageReduction'),
     movementSpeedBonus: stats.movementSpeedBonus + effectiveEquipmentStat(item, 'movementSpeedBonus')
-  }), { attack: 0, defense: 0, hp: 0, mana: 0, strength: 0, intelligence: 0, accuracy: 0, dodge: 0, attackSpeedBonus: 0, cooldownSpeedBonus: 0, manaRegenBonus: 0, manaRegenFlat: 0, magicDamageBonus: 0, parry: 0, damageReduction: 0, movementSpeedBonus: 0 });
+  }), { attack: 0, defense: 0, hp: 0, mana: 0, strength: 0, intelligence: 0, accuracy: 0, dodge: 0, attackSpeedBonus: 0, cooldownSpeedBonus: 0, manaRegenBonus: 0, manaRegenFlat: 0, hpRegeneration: 0, magicDamageBonus: 0, parry: 0, damageReduction: 0, movementSpeedBonus: 0 });
   const affixes = EquipmentAffixPolicy.getEquippedAffixStats(progress.equipment);
   return {
     ...fixed,
     attackFlat: affixes.attackFlat || 0,
     maxHp: affixes.maxHp || 0,
-    hpRegeneration: affixes.hpRegeneration || 0,
+    hpRegeneration: fixed.hpRegeneration + (affixes.hpRegeneration || 0),
     skillDamagePercent: (affixes.skillDamagePercent || 0) / 100,
     eliteDamagePercent: (affixes.eliteDamagePercent || 0) / 100,
     bossDamagePercent: (affixes.bossDamagePercent || 0) / 100,
@@ -2223,6 +2224,7 @@ function itemStatsText(item) {
   if (item.cooldownSpeedBonus) parts.push(`冷卻速度 +${Math.round(effectiveEquipmentStat(item, 'cooldownSpeedBonus') * 100)}%`);
   if (item.manaRegenBonus) parts.push(`魔力恢復 +${Math.round(effectiveEquipmentStat(item, 'manaRegenBonus') * 100)}%`);
   if (item.manaRegenFlat) parts.push(`每秒回魔 +${effectiveEquipmentStat(item, 'manaRegenFlat')}`);
+  if (item.hpRegeneration) parts.push(`每秒生命恢復 +${effectiveEquipmentStat(item, 'hpRegeneration')}`);
   if (item.magicDamageBonus) parts.push(`魔法傷害 +${Math.round(effectiveEquipmentStat(item, 'magicDamageBonus') * 100)}%`);
   if (item.parry) parts.push(`招架 +${Math.round(effectiveEquipmentStat(item, 'parry') * 100)}%`);
   if (item.damageReduction) parts.push(`傷害減免 +${Math.round(effectiveEquipmentStat(item, 'damageReduction') * 100)}%`);
@@ -2299,6 +2301,7 @@ function equipmentStackKey(item) {
     mana: item.mana || 0,
     accuracy: item.accuracy || 0,
     manaRegenFlat: item.manaRegenFlat || 0,
+    hpRegeneration: item.hpRegeneration || 0,
     magicDamageBonus: item.magicDamageBonus || 0,
     maxArrows: item.maxArrows || 0,
     arrowRecoverySpeedBonus: item.arrowRecoverySpeedBonus || 0,

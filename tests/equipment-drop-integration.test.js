@@ -69,5 +69,8 @@ assert.match(script, /equipmentDropMigrationVersion !== 'equipment-drop-v1'/, 'o
 assert.match(script, /戰鬥獎勵將繼續結算/, 'unexpected drop errors cannot stop reward settlement');
 assert.match(script, /function unequipItem\(slot\)[\s\S]*progress\.inventory\.unshift\(item\)[\s\S]*progress\.equipment\[slot\] = null[\s\S]*saveProgress\(progress\)/, 'dropped equipment can return from an equipped slot to the saved inventory');
 assert.match(script, /data-unequip-slot/, 'the existing equipment screen exposes the unequip action');
+assert.match(script, /hpRegeneration: stats\.hpRegeneration \+ effectiveEquipmentStat\(item, 'hpRegeneration'\)/, 'fixed equipment health regeneration enters aggregated combat stats');
+assert.match(script, /hpRegeneration: fixed\.hpRegeneration \+ \(affixes\.hpRegeneration \|\| 0\)/, 'fixed and affix health regeneration stack together');
+assert.match(script, /每秒生命恢復 \+\$\{effectiveEquipmentStat\(item, 'hpRegeneration'\)\}/, 'fixed equipment health regeneration is visible in item details');
 
 console.log('equipment-drop-integration: assertions passed');
