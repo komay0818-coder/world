@@ -830,7 +830,12 @@ const equipmentVisualByTemplateId = {
   'deepwood-hunter-vest': 'assets/deepwood-hunter-vest.png',
   'deepwood-hunter-legguards': 'assets/deepwood-hunter-legguards.png',
   'deepwood-hunter-gloves': 'assets/deepwood-hunter-gloves.png',
-  'deepwood-hunter-boots': 'assets/deepwood-hunter-boots.png'
+  'deepwood-hunter-boots': 'assets/deepwood-hunter-boots.png',
+  'spiritweave-crown': 'assets/spiritweave-crown.png',
+  'spiritweave-robe': 'assets/spiritweave-robe.png',
+  'spiritweave-spellgloves': 'assets/spiritweave-spellgloves.png',
+  'spiritweave-pants': 'assets/spiritweave-pants.png',
+  'spiritweave-boots': 'assets/spiritweave-boots.png'
 };
 
 function applyEquipmentVisual(item) {

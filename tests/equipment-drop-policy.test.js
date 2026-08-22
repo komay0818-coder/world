@@ -187,6 +187,18 @@ Object.entries(deepwoodArmorImages).forEach(([id, image]) => {
   assert.equal(template.image, image, `${id} uses its dedicated artwork`);
   assert.equal(template.imageStatus, 'ready', `${id} artwork is ready`);
 });
+const spiritweaveArmorImages = {
+  'spiritweave-crown': 'assets/spiritweave-crown.png',
+  'spiritweave-robe': 'assets/spiritweave-robe.png',
+  'spiritweave-spellgloves': 'assets/spiritweave-spellgloves.png',
+  'spiritweave-pants': 'assets/spiritweave-pants.png',
+  'spiritweave-boots': 'assets/spiritweave-boots.png'
+};
+Object.entries(spiritweaveArmorImages).forEach(([id, image]) => {
+  const template = dropPolicy.CHAPTER_TWO_TEMPLATES.find((item) => item.id === id);
+  assert.equal(template.image, image, `${id} uses its dedicated artwork`);
+  assert.equal(template.imageStatus, 'ready', `${id} artwork is ready`);
+});
 assert.equal(deepwoodVest.dodge, .03, 'deepwood hunter vest grants three percent dodge as a decimal ratio');
 assert.equal(deepwoodHood.dodge, .02, 'deepwood hunter hood grants two percent dodge as a decimal ratio');
 const chapterTwoNewArmor = [

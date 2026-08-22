@@ -27,17 +27,17 @@
     chapterTwoTemplate('blackstone-corrupted-helm', '黑石腐晶戰盔', 'head', { defense: 18, hp: 32, parry: .03 }, { armorType: 'heavy', image: 'assets/blackstone-corrupted-helm.png', imageStatus: 'ready', allowedJobs: ['warrior'] }),
     chapterTwoTemplate('deepwood-hunter-vest', '深林獵裝', 'armor', { defense: 23, hp: 38, dodge: .03 }, { armorType: 'light', image: 'assets/deepwood-hunter-vest.png', imageStatus: 'ready', allowedJobs: ['hunter', 'assassin'] }),
     chapterTwoTemplate('deepwood-hunter-hood', '深林兜帽', 'head', { defense: 14, hp: 24, dodge: .02 }, { armorType: 'light', image: 'assets/deepwood-hunter-hood.png', imageStatus: 'ready', allowedJobs: ['hunter', 'assassin'] }),
-    chapterTwoTemplate('spiritweave-robe', '靈森法袍', 'armor', { defense: 17, hp: 30, mana: 38 }, { armorType: 'cloth', allowedJobs: ['mage'] }),
-    chapterTwoTemplate('spiritweave-crown', '靈森冠帽', 'head', { defense: 10, hp: 18, mana: 24 }, { armorType: 'cloth', allowedJobs: ['mage'] }),
+    chapterTwoTemplate('spiritweave-robe', '靈森法袍', 'armor', { defense: 17, hp: 30, mana: 38 }, { armorType: 'cloth', image: 'assets/spiritweave-robe.png', imageStatus: 'ready', allowedJobs: ['mage'] }),
+    chapterTwoTemplate('spiritweave-crown', '靈森冠帽', 'head', { defense: 10, hp: 18, mana: 24 }, { armorType: 'cloth', image: 'assets/spiritweave-crown.png', imageStatus: 'ready', allowedJobs: ['mage'] }),
     chapterTwoTemplate('blackstone-corrupted-gauntlets', '黑石腐晶護手', 'gloves', { defense: 14, hp: 25, accuracy: .03 }, { armorType: 'heavy', image: 'assets/blackstone-corrupted-gauntlets.png', imageStatus: 'ready', allowedJobs: ['warrior'] }),
     chapterTwoTemplate('deepwood-hunter-gloves', '深林獵手套', 'gloves', { defense: 10, hp: 18, attackSpeedBonus: .03 }, { armorType: 'light', image: 'assets/deepwood-hunter-gloves.png', imageStatus: 'ready', allowedJobs: ['hunter', 'assassin'] }),
-    chapterTwoTemplate('spiritweave-spellgloves', '靈森法術手套', 'gloves', { defense: 7, hp: 14, cooldownSpeedBonus: .03 }, { armorType: 'cloth', allowedJobs: ['mage'] }),
+    chapterTwoTemplate('spiritweave-spellgloves', '靈森法術手套', 'gloves', { defense: 7, hp: 14, cooldownSpeedBonus: .03 }, { armorType: 'cloth', image: 'assets/spiritweave-spellgloves.png', imageStatus: 'ready', allowedJobs: ['mage'] }),
     chapterTwoTemplate('blackstone-corrupted-legguards', '黑石腐晶腿鎧', 'pants', { defense: 22, hp: 42, hpRegeneration: 2 }, { armorType: 'heavy', image: 'assets/blackstone-corrupted-legguards.png', imageStatus: 'ready', allowedJobs: ['warrior'] }),
     chapterTwoTemplate('deepwood-hunter-legguards', '深林獵護腿', 'pants', { defense: 17, hp: 30, accuracy: .03 }, { armorType: 'light', image: 'assets/deepwood-hunter-legguards.png', imageStatus: 'ready', allowedJobs: ['hunter', 'assassin'] }),
-    chapterTwoTemplate('spiritweave-pants', '靈森法褲', 'pants', { defense: 12, hp: 22, manaRegenFlat: 2 }, { armorType: 'cloth', allowedJobs: ['mage'] }),
+    chapterTwoTemplate('spiritweave-pants', '靈森法褲', 'pants', { defense: 12, hp: 22, manaRegenFlat: 2 }, { armorType: 'cloth', image: 'assets/spiritweave-pants.png', imageStatus: 'ready', allowedJobs: ['mage'] }),
     chapterTwoTemplate('blackstone-corrupted-warboots', '黑石腐晶戰靴', 'boots', { defense: 20, hp: 36, damageReduction: .03 }, { armorType: 'heavy', image: 'assets/blackstone-corrupted-warboots.png', imageStatus: 'ready', allowedJobs: ['warrior'] }),
     chapterTwoTemplate('deepwood-hunter-boots', '深林獵靴', 'boots', { defense: 15, hp: 26, dodge: .03 }, { armorType: 'light', image: 'assets/deepwood-hunter-boots.png', imageStatus: 'ready', allowedJobs: ['hunter', 'assassin'] }),
-    chapterTwoTemplate('spiritweave-boots', '靈森法靴', 'boots', { defense: 10, hp: 18, manaRegenFlat: 2 }, { armorType: 'cloth', allowedJobs: ['mage'] })
+    chapterTwoTemplate('spiritweave-boots', '靈森法靴', 'boots', { defense: 10, hp: 18, manaRegenFlat: 2 }, { armorType: 'cloth', image: 'assets/spiritweave-boots.png', imageStatus: 'ready', allowedJobs: ['mage'] })
   ]);
   const EQUIPMENT_POOLS = Object.freeze({
     plains_common_weapons: Object.freeze([

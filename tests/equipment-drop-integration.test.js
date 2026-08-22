@@ -39,6 +39,8 @@ assert.match(script, /'blackstone-corrupted-plate': 'assets\/blackstone-corrupte
 assert.match(script, /'blackstone-corrupted-warboots': 'assets\/blackstone-corrupted-warboots\.png'/, 'blackstone boots artwork migrates into existing items');
 assert.match(script, /'deepwood-hunter-hood': 'assets\/deepwood-hunter-hood\.png'/, 'deepwood hood artwork migrates into existing items');
 assert.match(script, /'deepwood-hunter-boots': 'assets\/deepwood-hunter-boots\.png'/, 'deepwood boots artwork migrates into existing items');
+assert.match(script, /'spiritweave-crown': 'assets\/spiritweave-crown\.png'/, 'spiritweave crown artwork migrates into existing items');
+assert.match(script, /'spiritweave-boots': 'assets\/spiritweave-boots\.png'/, 'spiritweave boots artwork migrates into existing items');
 assert.match(script, /function normalizeCasterWeaponJobs\(item\)[\s\S]*\['staff', 'one-handed-wand'\][\s\S]*allowedJobs: \['mage', 'priest'\]/, 'staffs and wands share mage and priest compatibility');
 assert.match(script, /const allowedJobs = item\.slot === 'weapon' && \['staff', 'one-handed-wand'\]\.includes\(item\.weaponType\)[\s\S]*\? \['mage', 'priest'\]/, 'mage and priest starter weapons are mutually equippable');
 assert.match(script, /sharedCasterWeaponMigrationVersion !== 'mage-priest-weapons-v1'/, 'existing caster weapons receive shared compatibility on save load');
