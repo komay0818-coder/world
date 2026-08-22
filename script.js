@@ -825,7 +825,12 @@ const equipmentVisualByTemplateId = {
   'blackstone-corrupted-helm': 'assets/blackstone-corrupted-helm.png',
   'blackstone-corrupted-legguards': 'assets/blackstone-corrupted-legguards.png',
   'blackstone-corrupted-gauntlets': 'assets/blackstone-corrupted-gauntlets.png',
-  'blackstone-corrupted-warboots': 'assets/blackstone-corrupted-warboots.png'
+  'blackstone-corrupted-warboots': 'assets/blackstone-corrupted-warboots.png',
+  'deepwood-hunter-hood': 'assets/deepwood-hunter-hood.png',
+  'deepwood-hunter-vest': 'assets/deepwood-hunter-vest.png',
+  'deepwood-hunter-legguards': 'assets/deepwood-hunter-legguards.png',
+  'deepwood-hunter-gloves': 'assets/deepwood-hunter-gloves.png',
+  'deepwood-hunter-boots': 'assets/deepwood-hunter-boots.png'
 };
 
 function applyEquipmentVisual(item) {

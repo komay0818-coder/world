@@ -175,6 +175,18 @@ Object.entries(blackstoneArmorImages).forEach(([id, image]) => {
   assert.equal(template.image, image, `${id} uses its dedicated artwork`);
   assert.equal(template.imageStatus, 'ready', `${id} artwork is ready`);
 });
+const deepwoodArmorImages = {
+  'deepwood-hunter-hood': 'assets/deepwood-hunter-hood.png',
+  'deepwood-hunter-vest': 'assets/deepwood-hunter-vest.png',
+  'deepwood-hunter-legguards': 'assets/deepwood-hunter-legguards.png',
+  'deepwood-hunter-gloves': 'assets/deepwood-hunter-gloves.png',
+  'deepwood-hunter-boots': 'assets/deepwood-hunter-boots.png'
+};
+Object.entries(deepwoodArmorImages).forEach(([id, image]) => {
+  const template = dropPolicy.CHAPTER_TWO_TEMPLATES.find((item) => item.id === id);
+  assert.equal(template.image, image, `${id} uses its dedicated artwork`);
+  assert.equal(template.imageStatus, 'ready', `${id} artwork is ready`);
+});
 assert.equal(deepwoodVest.dodge, .03, 'deepwood hunter vest grants three percent dodge as a decimal ratio');
 assert.equal(deepwoodHood.dodge, .02, 'deepwood hunter hood grants two percent dodge as a decimal ratio');
 const chapterTwoNewArmor = [
