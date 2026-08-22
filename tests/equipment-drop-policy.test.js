@@ -159,6 +159,10 @@ assert.equal(chapterTwoPurple.rarity, 'epic', 'chapter-two bosses can roll the l
 assert.equal(dropPolicy.rollChapterRarity(2, { common: 100 }, 0, false, () => {}), null, 'chapter-two quality guard rejects white even in an invalid override');
 const deepwoodVest = dropPolicy.CHAPTER_TWO_TEMPLATES.find((template) => template.id === 'deepwood-hunter-vest');
 const deepwoodHood = dropPolicy.CHAPTER_TWO_TEMPLATES.find((template) => template.id === 'deepwood-hunter-hood');
+const blackstonePlate = dropPolicy.CHAPTER_TWO_TEMPLATES.find((template) => template.id === 'blackstone-corrupted-plate');
+const blackstoneHelm = dropPolicy.CHAPTER_TWO_TEMPLATES.find((template) => template.id === 'blackstone-corrupted-helm');
+assert.equal(blackstonePlate.parry, .05, 'blackstone corrupted plate grants five percent parry as a decimal ratio');
+assert.equal(blackstoneHelm.parry, .03, 'blackstone corrupted helm grants three percent parry as a decimal ratio');
 assert.equal(deepwoodVest.dodge, .03, 'deepwood hunter vest grants three percent dodge as a decimal ratio');
 assert.equal(deepwoodHood.dodge, .02, 'deepwood hunter hood grants two percent dodge as a decimal ratio');
 const chapterTwoWeapons = dropPolicy.CHAPTER_TWO_TEMPLATES.filter((template) => template.slot === 'weapon');
