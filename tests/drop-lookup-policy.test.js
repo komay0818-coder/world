@@ -20,7 +20,7 @@ const monsters = {
   denForestWolf: { id: 'denForestWolf', name: '森林狼', lootConfig: normalLoot },
   greatfangWolf: { id: 'greatfangWolf', name: '巨牙狼', isBoss: true, lootConfig: bossLoot },
   blackstoneLeader: { id: 'blackstoneLeader', name: '黑石首領', isBoss: true, lootConfig: bossLoot },
-  wanderingBlackKnight: { id: 'wanderingBlackKnight', name: '流浪黑騎士', lootConfig: normalLoot },
+  wanderingBlackKnight: { id: 'wanderingBlackKnight', name: '流浪黑騎士', isElite: true, lootConfig: normalLoot },
   trailWolf: { id: 'trailWolf', name: '黑森林狼', lootConfig: { equipmentDropRate: .25, rarityWeights: { uncommon: 25, rare: 75 } } },
   blackstoneTrailScout: { id: 'blackstoneTrailScout', name: '黑石斥候', lootConfig: { equipmentDropRate: .25, rarityWeights: { uncommon: 25, rare: 75 } } },
   blackstoneCenturion: { id: 'blackstoneCenturion', name: '黑石百夫長', isBoss: true, lootConfig: bossLoot },
@@ -28,7 +28,7 @@ const monsters = {
 };
 const mapPools = {
   'wolf-den': { normal: ['denForestWolf'], boss: ['greatfangWolf'] },
-  'plains-depths': { normal: ['wanderingBlackKnight'], boss: ['blackstoneLeader'] },
+  'plains-depths': { elite: ['wanderingBlackKnight'], boss: ['blackstoneLeader'] },
   'black-forest-trail': { normal: ['trailWolf', 'blackstoneTrailScout'], boss: ['blackstoneCenturion'] },
   'forest-altar': { elite: ['fallenDruid'] }
 };
@@ -42,7 +42,10 @@ assert(wolfFang.sources.some((source) => source.monsterId === 'greatfangWolf' &&
 const greenRecipe = items.find((item) => item.id === 'recipe-green-wrist');
 assert.strictEqual(greenRecipe.sources[0].rate, 1 / 3, 'Boss 必掉三選一配方應顯示單件 1/3 機率');
 const rareRecipe = items.find((item) => item.id === 'recipe-black-knight-rare-shoulders');
-assert.strictEqual(rareRecipe.sources[0].rate, .01);
+assert.strictEqual(rareRecipe.sources[0].rate, .10);
+const chapterOneBlue = items.find((item) => item.id === 'chapter-1-blue-equipment');
+assert(chapterOneBlue.sources.some((source) => source.monsterId === 'wanderingBlackKnight' && source.rate === .07));
+assert(chapterOneBlue.sources.some((source) => source.monsterId === 'blackstoneLeader' && source.rate === .10));
 
 const beginnerBook = items.find((item) => item.id === 'beginner_skill_book');
 assert(beginnerBook.sources.every((source) => monsters[source.monsterId].isBoss), '技能書只應列出 Boss');

@@ -6,7 +6,7 @@ function sequence(values) {
   return () => values[Math.min(index++, values.length - 1)];
 }
 
-assert.equal(policy.RARE_RECIPE_DROP_RATE, .01);
+assert.equal(policy.RARE_RECIPE_DROP_RATE, .10);
 assert.equal(Object.keys(policy.RECIPES).length, 6);
 assert.deepEqual([policy.RECIPES.greenWrist.resultName, policy.RECIPES.greenCloak.resultName, policy.RECIPES.greenShoulders.resultName], ['平原護腕', '平原斗篷', '平原肩甲']);
 assert.deepEqual([policy.RECIPES.greenWrist.name, policy.RECIPES.greenCloak.name, policy.RECIPES.greenShoulders.name], ['平原護腕配方', '平原斗篷配方', '平原肩甲配方']);
@@ -55,10 +55,10 @@ assert.equal(policy.rollRecipeDrops(greenBoss, 'plains-depths', sequence([.99]))
 assert.deepEqual(policy.rollRecipeDrops({ id: 'blackstoneLeader' }, 'plains-depths', sequence([0])), [], 'green recipes require the plains-depths boss');
 assert.deepEqual(policy.rollRecipeDrops(greenBoss, 'wolf-den', sequence([0])), [], 'green recipes do not drop outside plains depths');
 
-assert.equal(policy.rollRecipeDrops({ id: 'goblinTreasureChest' }, 'goblin-camp', sequence([.009]))[0].id, 'recipe-goblin-rare-cloak');
-assert.equal(policy.rollRecipeDrops({ id: 'goblinHighChief' }, 'goblin-camp', sequence([.009]))[0].id, 'recipe-high-chief-rare-wrist');
-assert.equal(policy.rollRecipeDrops({ id: 'wanderingBlackKnight' }, 'plains-depths', sequence([.009]))[0].id, 'recipe-black-knight-rare-shoulders');
-assert.deepEqual(policy.rollRecipeDrops({ id: 'goblinTreasureChest' }, 'goblin-camp', sequence([.01])), [], 'rare recipe roll at one percent boundary misses');
+assert.equal(policy.rollRecipeDrops({ id: 'goblinTreasureChest' }, 'goblin-camp', sequence([.099]))[0].id, 'recipe-goblin-rare-cloak');
+assert.equal(policy.rollRecipeDrops({ id: 'goblinHighChief' }, 'goblin-camp', sequence([.099]))[0].id, 'recipe-high-chief-rare-wrist');
+assert.equal(policy.rollRecipeDrops({ id: 'wanderingBlackKnight' }, 'plains-depths', sequence([.099]))[0].id, 'recipe-black-knight-rare-shoulders');
+assert.deepEqual(policy.rollRecipeDrops({ id: 'goblinTreasureChest' }, 'goblin-camp', sequence([.10])), [], 'rare recipe roll at ten percent boundary misses');
 assert.deepEqual(policy.rollRecipeDrops({ id: 'goblinHighChief' }, 'plains-depths', sequence([0])), [], 'rare recipe sources are map restricted');
 
 const progress = { inventory: [] };

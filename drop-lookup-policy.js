@@ -48,6 +48,10 @@
         const total = Object.values(loot.rarityWeights).reduce((sum, weight) => sum + Math.max(0, Number(weight) || 0), 0);
         Object.entries(loot.rarityWeights).forEach(([quality, weight]) => { if (!QUALITY_NAMES[quality] || !(Number(weight) > 0) || total <= 0) return; addSource(index, { id: `equipment-${quality}`, name: QUALITY_NAMES[quality], category: 'equipment', typeLabel: '裝備品質' }, { ...sourceBase, rate: Number(loot.equipmentDropRate) * Number(weight) / total, note: '一般裝備池' }); });
       }
+      const chapterOneBlueRate = options.bossPolicy?.getChapterOneBlueDropRate?.(monster, { chapter: map.chapter });
+      if (chapterOneBlueRate > 0) {
+        addSource(index, { id: 'chapter-1-blue-equipment', name: '第一章藍色裝備', category: 'equipment', typeLabel: '額外藍色裝備' }, { ...sourceBase, rate: chapterOneBlueRate, note: '與一般裝備獨立判定' });
+      }
     }));
     recipePolicies.forEach((policy) => Object.entries(policy?.RARE_DROP_SOURCES || {}).forEach(([monsterId, source]) => {
       const map = maps.find((entry) => entry.id === source.mapId), item = recipeById.get(source.recipeItemId);
@@ -55,10 +59,6 @@
     }));
     const greenRecipes = recipePolicies.flatMap((policy) => policy?.GREEN_PLAINS_DEPTHS_RECIPES || []), bossId = 'blackstoneLeader', bossMap = maps.find((entry) => entry.id === 'plains-depths');
     greenRecipes.forEach((recipeId) => { const item = recipeById.get(recipeId); addSource(index, item && { ...item, category: 'recipe', typeLabel: '配方' }, { chapter: 1, mapId: 'plains-depths', mapName: bossMap?.name || '平原深處', monsterId: bossId, monsterName: monsters[bossId]?.name || '黑石首領', rate: 1 / Math.max(1, greenRecipes.length), note: 'Boss 必掉配方三選一' }); });
-    if (options.bossPolicy?.getChapterDropRate) {
-      const map = maps.find((entry) => entry.id === 'plains-depths'), monster = monsters.blackstoneLeader;
-      addSource(index, { id: 'chapter-1-boss-blue', name: 'Boss 藍色裝備', category: 'equipment', typeLabel: 'Boss 裝備' }, { chapter: 1, mapId: 'plains-depths', mapName: map?.name || '平原深處', monsterId: 'blackstoneLeader', monsterName: monster?.name || '黑石首領', rate: options.bossPolicy.getChapterDropRate(1), note: '章節最終 Boss 額外掉落' });
-    }
     return [...index.values()].map((item) => ({ ...item, sources: item.sources.map(({ key, ...source }) => source) }));
   }
   function filterItems(items, query = '', category = 'all', mapId = '') { const term = String(query || '').trim().toLocaleLowerCase('zh-Hant'); return (items || []).filter((item) => (category === 'all' || item.category === category) && (!mapId || item.sources.some((source) => source.mapId === mapId)) && (!term || item.name.toLocaleLowerCase('zh-Hant').includes(term))); }

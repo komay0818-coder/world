@@ -3,7 +3,7 @@
   if (typeof module === 'object' && module.exports) module.exports = api;
   else root.ChapterOneRecipeDropPolicy = api;
 }(typeof globalThis !== 'undefined' ? globalThis : this, function createChapterOneRecipeDropPolicy() {
-  const RARE_RECIPE_DROP_RATE = .01;
+  const RARE_RECIPE_DROP_RATE = .10;
 
   function recipe(definition) {
     return Object.freeze({

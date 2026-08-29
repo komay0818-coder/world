@@ -3983,9 +3983,9 @@ function rewardVictory(index) {
   const finalBossId = currentMap.dungeon
     ? getDungeonDefinition(currentMap.id).finalBossId
     : getMonsterPool(progress.level).boss?.[0] || null;
-  let blueBossDrop = null;
+  let blueEquipmentDrop = null;
   try {
-    blueBossDrop = ChapterBossDropPolicy.grantChapterBossBlueDrop(progress, enemy, {
+    blueEquipmentDrop = ChapterBossDropPolicy.grantChapterOneBlueDrop(progress, enemy, {
       chapter: currentMap.chapter,
       finalBossId
     });
@@ -4049,7 +4049,7 @@ function rewardVictory(index) {
   skillMaterialDrops.forEach((material) => addRoundLoot(`skill:${material.id || material.name}`, material.name, material.quantity || 1, material.icon || '📜'));
   recipeDrops.forEach((recipe) => addRoundLoot(`recipe:${recipe.id || recipe.name}`, recipe.name, recipe.quantity || 1, recipe.icon || '📜'));
   if (equipmentDrop) addRoundLoot(`equipment:${equipmentDrop.name}`, equipmentDrop.name, 1, '⚔');
-  if (blueBossDrop) addRoundLoot(`equipment:${blueBossDrop.name}`, blueBossDrop.name, 1, '🔷');
+  if (blueEquipmentDrop) addRoundLoot(`equipment:${blueEquipmentDrop.name}`, blueEquipmentDrop.name, 1, '🔷');
   if (offhandDrop) addRoundLoot(`equipment:${offhandDrop.name}`, offhandDrop.name, 1, '🛡');
   if (goblinCampMapDropped) addRoundLoot('goblin-camp-map', '哥布林營地地圖', 1, '🗺️');
   saveProgress(progress);
@@ -4077,9 +4077,9 @@ function rewardVictory(index) {
     showToast(`獲得裝備：${equipmentDrop.name}`);
     logBattle(`◆ 獲得裝備：【${rarityLabel}】${equipmentDrop.name}`, 'loot');
   }
-  if (blueBossDrop) {
-    showToast(`BOSS 掉落藍色裝備：${blueBossDrop.name}`);
-    logBattle(`◆ 第一章 BOSS 稀有掉落：【藍色】${blueBossDrop.name}`, 'loot');
+  if (blueEquipmentDrop) {
+    showToast(`額外掉落藍色裝備：${blueEquipmentDrop.name}`);
+    logBattle(`◆ 第一章額外掉落：【藍色】${blueEquipmentDrop.name}`, 'loot');
   }
   if (offhandDrop) {
     showToast(`獲得副手：${offhandDrop.name}【${offhandDrop.affix.name}】`);
@@ -4093,7 +4093,7 @@ function rewardVictory(index) {
     rewardKey,
     xp: earnedXp,
     gold: earnedGold,
-    loot: [loot?.name, ...materialDrops.map((material) => material.name), ...recipeDrops.map((recipe) => recipe.name), equipmentDrop?.name, blueBossDrop?.name, offhandDrop?.name, ...accountDrops].filter(Boolean).join(',') || 'none'
+    loot: [loot?.name, ...materialDrops.map((material) => material.name), ...recipeDrops.map((recipe) => recipe.name), equipmentDrop?.name, blueEquipmentDrop?.name, offhandDrop?.name, ...accountDrops].filter(Boolean).join(',') || 'none'
   });
 }
 

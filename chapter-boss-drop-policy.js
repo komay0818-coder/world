@@ -4,30 +4,46 @@
   if (typeof module === 'object' && module.exports) module.exports = api;
   else root.ChapterBossDropPolicy = api;
 }(typeof globalThis !== 'undefined' ? globalThis : this, function createChapterBossDropPolicy(EquipmentDropPolicy) {
-  const CHAPTER_BLUE_ITEM_DROP_RATES = Object.freeze({ 1: .03, 2: .05, 3: .08 });
+  const CHAPTER_BLUE_ITEM_DROP_RATES = Object.freeze({ 1: .10, 2: .05, 3: .08 });
   const BLUE_ITEM_DROP_RATE = CHAPTER_BLUE_ITEM_DROP_RATES[1];
+  const CHAPTER_ONE_BLUE_DROP_RATES = Object.freeze({
+    normal: 0,
+    elite: .03,
+    goblinTreasureChest: .05,
+    goblinHighChief: .07,
+    wanderingBlackKnight: .07,
+    blackstoneLeader: .10
+  });
+  const CHAPTER_ONE_EQUIPMENT_POOLS = Object.freeze(['plains_common_weapons', 'plains_common_armor']);
 
   function clampRoll(value) { return Math.min(.999999, Math.max(0, Number(value) || 0)); }
 
   function isEligibleFinalBoss(enemy, context = {}) {
     return Boolean(enemy?.isBoss
       && Number(context.chapter) === 1
-      && context.finalBossId
-      && enemy.id === context.finalBossId);
+      && enemy.id === 'blackstoneLeader'
+      && (!context.finalBossId || context.finalBossId === enemy.id));
   }
 
   function getChapterDropRate(chapter, rates = CHAPTER_BLUE_ITEM_DROP_RATES) {
     return Math.min(1, Math.max(0, Number(rates?.[chapter]) || 0));
   }
 
-  function grantChapterBossBlueDrop(progress, enemy, context = {}, options = {}) {
-    if (!progress || typeof progress !== 'object' || !isEligibleFinalBoss(enemy, context)) return null;
+  function getChapterOneBlueDropRate(enemy, context = {}, rates = CHAPTER_ONE_BLUE_DROP_RATES) {
+    if (!enemy || Number(context.chapter) !== 1) return 0;
+    const sourceRate = Object.prototype.hasOwnProperty.call(rates, enemy.id) ? rates[enemy.id] : null;
+    if (sourceRate !== null) return Math.min(1, Math.max(0, Number(sourceRate) || 0));
+    return enemy.isElite ? Math.min(1, Math.max(0, Number(rates.elite) || 0)) : 0;
+  }
+
+  function grantChapterOneBlueDrop(progress, enemy, context = {}, options = {}) {
+    if (!progress || typeof progress !== 'object') return null;
     if (!Array.isArray(progress.inventory)) progress.inventory = [];
     const random = typeof options.random === 'function' ? options.random : Math.random;
-    const dropRate = getChapterDropRate(context.chapter, options.dropRates);
+    const dropRate = getChapterOneBlueDropRate(enemy, context, options.dropRates || CHAPTER_ONE_BLUE_DROP_RATES);
+    if (dropRate <= 0) return null;
     if (random() >= dropRate) return null;
-    const poolIds = Object.keys(EquipmentDropPolicy.EQUIPMENT_POOLS || {});
-    const templates = EquipmentDropPolicy.getTemplatesFromPools(poolIds, options.warningHandler);
+    const templates = EquipmentDropPolicy.getTemplatesFromPools(CHAPTER_ONE_EQUIPMENT_POOLS, options.warningHandler);
     if (!templates.length) return null;
     const template = templates[Math.floor(clampRoll(random()) * templates.length)];
     let instanceId = '';
@@ -45,10 +61,22 @@
       obtainedFrom: enemy.id, obtainedAt: options.obtainedAt || Date.now(), warningHandler: options.warningHandler
     });
     if (!item || item.quality !== 'rare' || item.fixedAffixes.length !== 2 || item.randomAffixes.length !== 3) return null;
-    item.specialDropType = 'chapter-boss-blue';
+    item.specialDropType = isEligibleFinalBoss(enemy, context) ? 'chapter-boss-blue' : 'chapter-one-blue';
     progress.inventory.push(item);
     return item;
   }
 
-  return Object.freeze({ CHAPTER_BLUE_ITEM_DROP_RATES, BLUE_ITEM_DROP_RATE, isEligibleFinalBoss, getChapterDropRate, grantChapterBossBlueDrop });
+  const grantChapterBossBlueDrop = grantChapterOneBlueDrop;
+
+  return Object.freeze({
+    CHAPTER_BLUE_ITEM_DROP_RATES,
+    BLUE_ITEM_DROP_RATE,
+    CHAPTER_ONE_BLUE_DROP_RATES,
+    CHAPTER_ONE_EQUIPMENT_POOLS,
+    isEligibleFinalBoss,
+    getChapterDropRate,
+    getChapterOneBlueDropRate,
+    grantChapterOneBlueDrop,
+    grantChapterBossBlueDrop
+  });
 }));
