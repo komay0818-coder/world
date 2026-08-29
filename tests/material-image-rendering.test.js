@@ -22,4 +22,10 @@ for (const file of ['wolf-fur.png', 'wolf-fang.png', 'hard-hide.png', 'boar-tusk
   assert.ok(fs.existsSync(path.join(root, 'assets', file)), `${file} 應存在`);
 }
 
+for (const file of ['black-wood.png', 'spider-silk.png', 'venom-sac.png', 'black-iron-ore.png', 'corruption-crystal.png']) {
+  assert.ok(fs.existsSync(path.join(root, 'assets', file)), `${file} 應存在`);
+}
+assert.match(html, /chapter-two-material-drop-policy\.js\?v=20260830-chapter-two-material-art-v1/, '第二章材料應載入含圖片的本地政策');
+assert.match(html, /village-upgrade-policy\.js\?v=20260830-chapter-two-material-art-v1/, '建築材料正規化應保留第二章圖片');
+
 console.log('material image rendering tests passed');

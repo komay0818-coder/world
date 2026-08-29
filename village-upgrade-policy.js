@@ -12,11 +12,11 @@
     buildingBoarTusk: Object.freeze({ id: 'boar-tusk', kind: 'material', materialType: 'monster-crafting', chapter: 1, icon: '🦷', image: 'assets/boar-tusk.png?v=20260815-user-image-v1', imageStatus: 'ready', name: '獠牙', description: '由野豬林取得，可用於製作與升級建築。' }),
     buildingIronOre: Object.freeze({ id: 'iron-ore', kind: 'material', materialType: 'monster-crafting', chapter: 1, icon: '⛏', image: 'assets/iron-ore.png?v=20260815-user-image-v1', imageStatus: 'ready', name: '鐵礦石', description: '由哥布林營地取得，可用於製作與升級建築。' }),
     buildingBlackOre: Object.freeze({ id: 'black-ore', kind: 'material', materialType: 'special-crafting', chapter: 1, icon: '⬟', image: 'assets/black-ore.png?v=20260815-user-image-v1', imageStatus: 'ready', name: '黑礦石', description: '只由平原深處的黑石系列怪物掉落，可用於製作與升級建築。' }),
-    buildingBlackWood: Object.freeze({ id: 'black-wood', kind: 'material', materialType: 'monster-crafting', chapter: 2, icon: '🪵', name: '黑木', description: '從黑森林的樹木與植物系怪物取得。' }),
-    buildingSpiderSilk: Object.freeze({ id: 'spider-silk', kind: 'material', materialType: 'monster-crafting', chapter: 2, icon: '🕸', name: '蜘蛛絲', description: '從第二章蜘蛛系怪物取得。' }),
-    buildingVenomSac: Object.freeze({ id: 'venom-sac', kind: 'material', materialType: 'monster-crafting', rarity: 'rare', chapter: 2, icon: '🧪', name: '毒囊', description: '從蜘蛛巢穴的毒系怪物取得。' }),
-    buildingBlackIronOre: Object.freeze({ id: 'black-iron-ore', kind: 'material', materialType: 'special-crafting', rarity: 'rare', chapter: 2, icon: '⬢', name: '黑鐵礦石', description: '只由符合規則的第二章黑石系列怪物掉落。' }),
-    buildingCorruptionCrystal: Object.freeze({ id: 'corruption-crystal', kind: 'material', materialType: 'special-crafting', rarity: 'rare', chapter: 2, icon: '◈', name: '腐化結晶', description: '從第二章中後期的腐化系怪物取得。' })
+    buildingBlackWood: Object.freeze({ id: 'black-wood', kind: 'material', materialType: 'monster-crafting', chapter: 2, icon: '🪵', image: 'assets/black-wood.png?v=20260830-chapter-two-material-art-v1', imageStatus: 'ready', name: '黑木', description: '從黑森林的樹木與植物系怪物取得。' }),
+    buildingSpiderSilk: Object.freeze({ id: 'spider-silk', kind: 'material', materialType: 'monster-crafting', chapter: 2, icon: '🕸', image: 'assets/spider-silk.png?v=20260830-chapter-two-material-art-v1', imageStatus: 'ready', name: '蜘蛛絲', description: '從第二章蜘蛛系怪物取得。' }),
+    buildingVenomSac: Object.freeze({ id: 'venom-sac', kind: 'material', materialType: 'monster-crafting', rarity: 'rare', chapter: 2, icon: '🧪', image: 'assets/venom-sac.png?v=20260830-chapter-two-material-art-v1', imageStatus: 'ready', name: '毒囊', description: '從蜘蛛巢穴的毒系怪物取得。' }),
+    buildingBlackIronOre: Object.freeze({ id: 'black-iron-ore', kind: 'material', materialType: 'special-crafting', rarity: 'rare', chapter: 2, icon: '⬢', image: 'assets/black-iron-ore.png?v=20260830-chapter-two-material-art-v1', imageStatus: 'ready', name: '黑鐵礦石', description: '只由符合規則的第二章黑石系列怪物掉落。' }),
+    buildingCorruptionCrystal: Object.freeze({ id: 'corruption-crystal', kind: 'material', materialType: 'special-crafting', rarity: 'rare', chapter: 2, icon: '◈', image: 'assets/corruption-crystal.png?v=20260830-chapter-two-material-art-v1', imageStatus: 'ready', name: '腐化結晶', description: '從第二章中後期的腐化系怪物取得。' })
   });
 
   // 材料掉落由章節材料政策統一處理；建築不再額外擲出第二份同名材料。

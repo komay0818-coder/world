@@ -85,6 +85,11 @@ assert.equal(policy.getMaterial('black-ore').name, '黑礦石');
   assert.equal(material.imageStatus, 'ready');
   assert.equal(material.image, `assets/${materialId}.png?v=20260815-user-image-v1`);
 });
+['black-wood', 'spider-silk', 'venom-sac', 'black-iron-ore', 'corruption-crystal'].forEach((materialId) => {
+  const material = policy.getMaterial(materialId);
+  assert.equal(material.imageStatus, 'ready');
+  assert.equal(material.image, `assets/${materialId}.png?v=20260830-chapter-two-material-art-v1`);
+});
 assert.equal(policy.getMaterial('unknown'), null);
 assert.deepEqual(policy.CHAPTER_LEVEL_CAPS, { 1: 2, 2: 3 });
 

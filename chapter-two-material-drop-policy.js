@@ -6,12 +6,12 @@
   'use strict';
 
   const MATERIALS = Object.freeze({
-    blackWood: Object.freeze({ id: 'black-wood', kind: 'material', materialType: 'monster-crafting', rarity: 'common', chapter: 2, icon: '🪵', name: '黑木', description: '從黑森林的樹木與植物系怪物取得，可用於製作與升級建築。' }),
+    blackWood: Object.freeze({ id: 'black-wood', kind: 'material', materialType: 'monster-crafting', rarity: 'common', chapter: 2, icon: '🪵', image: 'assets/black-wood.png?v=20260830-chapter-two-material-art-v1', imageStatus: 'ready', name: '黑木', description: '從黑森林的樹木與植物系怪物取得，可用於製作與升級建築。' }),
     hardHide: Object.freeze({ id: 'hard-hide', kind: 'material', materialType: 'monster-crafting', rarity: 'common', chapter: 2, icon: '▰', name: '厚皮', description: '從黑森林的野獸系怪物取得，沿用共用的厚皮材料堆疊。' }),
-    spiderSilk: Object.freeze({ id: 'spider-silk', kind: 'material', materialType: 'monster-crafting', rarity: 'common', chapter: 2, icon: '🕸', name: '蜘蛛絲', description: '從第二章蜘蛛系怪物取得，主要產地為蜘蛛巢穴。' }),
-    venomSac: Object.freeze({ id: 'venom-sac', kind: 'material', materialType: 'monster-crafting', rarity: 'rare', chapter: 2, icon: '🧪', name: '毒囊', description: '從蜘蛛巢穴的毒系怪物取得的稀有材料。' }),
-    blackIronOre: Object.freeze({ id: 'black-iron-ore', kind: 'material', materialType: 'special-crafting', rarity: 'rare', chapter: 2, icon: '⬢', name: '黑鐵礦石', description: '只由符合規則的第二章黑石系列怪物掉落，不是地圖通用掉落。' }),
-    corruptionCrystal: Object.freeze({ id: 'corruption-crystal', kind: 'material', materialType: 'special-crafting', rarity: 'rare', chapter: 2, icon: '◈', name: '腐化結晶', description: '從森林祭壇與黑森林深處的明確腐化系怪物取得。' })
+    spiderSilk: Object.freeze({ id: 'spider-silk', kind: 'material', materialType: 'monster-crafting', rarity: 'common', chapter: 2, icon: '🕸', image: 'assets/spider-silk.png?v=20260830-chapter-two-material-art-v1', imageStatus: 'ready', name: '蜘蛛絲', description: '從第二章蜘蛛系怪物取得，主要產地為蜘蛛巢穴。' }),
+    venomSac: Object.freeze({ id: 'venom-sac', kind: 'material', materialType: 'monster-crafting', rarity: 'rare', chapter: 2, icon: '🧪', image: 'assets/venom-sac.png?v=20260830-chapter-two-material-art-v1', imageStatus: 'ready', name: '毒囊', description: '從蜘蛛巢穴的毒系怪物取得的稀有材料。' }),
+    blackIronOre: Object.freeze({ id: 'black-iron-ore', kind: 'material', materialType: 'special-crafting', rarity: 'rare', chapter: 2, icon: '⬢', image: 'assets/black-iron-ore.png?v=20260830-chapter-two-material-art-v1', imageStatus: 'ready', name: '黑鐵礦石', description: '只由符合規則的第二章黑石系列怪物掉落，不是地圖通用掉落。' }),
+    corruptionCrystal: Object.freeze({ id: 'corruption-crystal', kind: 'material', materialType: 'special-crafting', rarity: 'rare', chapter: 2, icon: '◈', image: 'assets/corruption-crystal.png?v=20260830-chapter-two-material-art-v1', imageStatus: 'ready', name: '腐化結晶', description: '從森林祭壇與黑森林深處的明確腐化系怪物取得。' })
   });
 
   const drops = (...entries) => Object.freeze(entries.map((entry) => Object.freeze(entry)));

@@ -7,6 +7,11 @@ function sequence(values) {
 }
 
 assert.deepEqual(Object.values(policy.MATERIALS).map((item) => item.name), ['黑木', '厚皮', '蜘蛛絲', '毒囊', '黑鐵礦石', '腐化結晶']);
+['black-wood', 'spider-silk', 'venom-sac', 'black-iron-ore', 'corruption-crystal'].forEach((materialId) => {
+  const material = Object.values(policy.MATERIALS).find((item) => item.id === materialId);
+  assert.equal(material.imageStatus, 'ready');
+  assert.equal(material.image, `assets/${materialId}.png?v=20260830-chapter-two-material-art-v1`);
+});
 assert.equal(policy.MATERIALS.hardHide.id, 'hard-hide', '第二章厚皮沿用既有同名材料 ID');
 assert.deepEqual(policy.MAP_DROP_CONFIGS, {}, '不使用整張地圖的通用材料掉落');
 assert.equal(policy.MONSTER_DROP_CONFIGS.witheredTreeWalker[0].dropRate, .25);
