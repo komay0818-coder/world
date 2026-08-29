@@ -724,9 +724,6 @@ const dropLookupMapPools = {
   'black-forest-depths': mapMonsterPools.blackForestDepths
 };
 
-const collectibleTemplates = CollectiblePolicy.COLLECTIBLE_CATALOG;
-const collectibleDropRates = { normal: .01, elite: .08, boss: .30 };
-
 const potionDropRate = .10;
 const manaPotionDropRate = .07;
 const PARTY_REVIVE_DELAY_MS = 10000;
@@ -937,6 +934,8 @@ function getProgress() {
   const slots = JSON.parse(localStorage.getItem('stardust-character-slots') || '[]');
   const slotProgress = Array.isArray(slots) ? slots[getActiveCharacterSlotIndex()]?.progress : null;
   const saved = JSON.parse(JSON.stringify(slotProgress || JSON.parse(localStorage.getItem('stardust-progress') || '{}')));
+  delete saved.collection;
+  delete saved.collectibleMigrationVersion;
   if (['black-forest', 'black-forest-altar'].includes(saved.selectedMapId)) {
     saved.selectedMapId = 'plains-entrance';
     saved.dungeonAdmission = false;
@@ -1040,11 +1039,6 @@ function getProgress() {
     saved.jobRestrictionMigrationVersion = 'job-restriction-v1';
     localStorage.setItem('stardust-progress', JSON.stringify(saved));
   }
-  if (saved.collectibleMigrationVersion !== 'unique-monster-collectibles-v1') {
-    saved.collection = CollectiblePolicy.removeLegacyCollectibles(saved.collection);
-    saved.collectibleMigrationVersion = 'unique-monster-collectibles-v1';
-    localStorage.setItem('stardust-progress', JSON.stringify(saved));
-  }
   const inventory = SkillUpgradePolicy.normalizeMaterialInventory(SalvagePolicy.normalizeInventory(removeLegacySkillUpgradeMaterials(VillageUpgradePolicy.normalizeMaterialInventory(saved.inventory))))
     .map(normalizeWearableSeriesName);
   saved.equipment = Object.fromEntries(Object.entries(saved.equipment || {})
@@ -1074,11 +1068,9 @@ function getProgress() {
     selectedMapId: 'beginner-plains',
     inventory: [],
     equipment: emptyEquipment(),
-    collection: {},
     ...saved,
     inventory,
     equipment: { ...emptyEquipment(), ...(saved.equipment || {}) },
-    collection: saved.collection && typeof saved.collection === 'object' ? saved.collection : {},
     skillBooks: saved.skillBooks && typeof saved.skillBooks === 'object' ? saved.skillBooks : {},
     skillLevels: ClassSkillPolicy.normalizeSkillLevels(saved.skillLevels),
     blackForestCorruption: BlackForestCorruptionPolicy.normalizeState(saved.blackForestCorruption),
@@ -2058,13 +2050,6 @@ function getEquipmentStats(progress = getProgress()) {
   };
 }
 
-function getCollectionStats(progress = getProgress()) {
-  return Object.values(progress.collection || {}).reduce((stats, item) => ({
-    attack: stats.attack + (item.attack || 0), defense: stats.defense + (item.defense || 0), hp: stats.hp + (item.hp || 0), mana: stats.mana + (item.mana || 0),
-    crit: stats.crit + (item.crit || 0), dodge: stats.dodge + (item.dodge || 0)
-  }), { attack: 0, defense: 0, hp: 0, mana: 0, crit: 0, dodge: 0 });
-}
-
 function getCurrentMap(level) {
   return mapProgression.find((map) => map.id === 'beginner-plains' && level >= map.min) || mapProgression[0];
 }
@@ -2088,7 +2073,6 @@ function getCharacterStats(level, progress = getProgress(), character = getActiv
   const base = classBaseStats[character?.job] || classBaseStats.warrior;
   const race = raceAdjustments[character?.race] || raceAdjustments.human;
   const equipment = getEquipmentStats(progress);
-  const collection = getCollectionStats(progress);
   const humanMultiplier = character?.race === 'human' ? 1.05 : 1;
   const equippedWeapon = progress.equipment?.weapon;
   const passives = getUnlockedPassiveEffects(level, progress, character);
@@ -2098,12 +2082,12 @@ function getCharacterStats(level, progress = getProgress(), character = getActiv
   const lowHealthSpeed = lowHealth ? passiveTotal('speed') : 0;
   const lowHealthCrit = lowHealth ? passiveTotal('crit') : 0;
   const stats = {
-    hp: Math.round((base.hp + race.hp + (level - 1) * 12 + equipment.hp + equipment.maxHp + collection.hp) * (1 + equipment.maxHpPercent + passiveTotal('maxHp')) * humanMultiplier),
-    mana: ['warrior', 'assassin'].includes(character?.job) ? 0 : Math.round((base.mana + race.mana + (level - 1) * 6 + equipment.mana + collection.mana) * humanMultiplier),
-    attack: Math.round((base.attack + race.attack + (level - 1) + equipment.attack + equipment.attackFlat + equipment.strength + equipment.intelligence + collection.attack) * humanMultiplier * (1 + passiveTotal('weaponDamage') + lowHealthAttack)),
-    defense: Math.round((base.defense + race.defense + Math.floor((level - 1) / 5) + equipment.defense + collection.defense) * (1 + equipment.defensePercent) * humanMultiplier),
-    crit: Math.min(.60, base.crit + race.crit + collection.crit + equipment.criticalChance + passiveTotal('crit') + lowHealthCrit),
-    dodge: Math.min(.45, Math.max(0, base.dodge + race.dodge + collection.dodge + equipment.dodge + equipment.dodgePercent + passiveTotal('dodge'))),
+    hp: Math.round((base.hp + race.hp + (level - 1) * 12 + equipment.hp + equipment.maxHp) * (1 + equipment.maxHpPercent + passiveTotal('maxHp')) * humanMultiplier),
+    mana: ['warrior', 'assassin'].includes(character?.job) ? 0 : Math.round((base.mana + race.mana + (level - 1) * 6 + equipment.mana) * humanMultiplier),
+    attack: Math.round((base.attack + race.attack + (level - 1) + equipment.attack + equipment.attackFlat + equipment.strength + equipment.intelligence) * humanMultiplier * (1 + passiveTotal('weaponDamage') + lowHealthAttack)),
+    defense: Math.round((base.defense + race.defense + Math.floor((level - 1) / 5) + equipment.defense) * (1 + equipment.defensePercent) * humanMultiplier),
+    crit: Math.min(.60, base.crit + race.crit + equipment.criticalChance + passiveTotal('crit') + lowHealthCrit),
+    dodge: Math.min(.45, Math.max(0, base.dodge + race.dodge + equipment.dodge + equipment.dodgePercent + passiveTotal('dodge'))),
     accuracy: Math.min(1.30, 1.05 + equipment.accuracy + equipment.accuracyPercent + (character?.job === 'hunter' ? .05 : 0)),
     attackSpeed: EquipmentPolicy.getAttacksPerSecond(equippedWeapon, base.attackSpeed * 1.15) * (1 + equipment.attackSpeedBonus + equipment.attackSpeedPercent + passiveTotal('attackSpeed') + lowHealthSpeed),
     cooldownSpeed: (character?.race === 'elf' ? 1.03 : 1) * (1 + equipment.cooldownSpeedBonus + equipment.cooldownSpeedPercent),
@@ -2208,16 +2192,6 @@ function addLoot(progress, enemy) {
     return { kind: 'consumable', name: '魔法藥水', quantity: 1 };
   }
   return null;
-}
-
-function addCollectibleLoot(progress, enemy) {
-  const collectible = collectibleTemplates[enemy.id];
-  if (!collectible || progress.collection?.[collectible.id]) return null;
-  const rate = enemy.isBoss ? collectibleDropRates.boss : enemy.isElite ? collectibleDropRates.elite : collectibleDropRates.normal;
-  if (Math.random() >= rate) return null;
-  if (!progress.collection) progress.collection = {};
-  progress.collection[collectible.id] = { ...collectible, obtainedAt: Date.now() };
-  return collectible;
 }
 
 function itemStatsText(item) {
@@ -2435,7 +2409,6 @@ function renderCharacterAbilities() {
   const progress = getProgress();
   const stats = getCharacterStats(progress.level, progress, character);
   const equipment = getEquipmentStats(progress);
-  const collection = getCollectionStats(progress);
   const race = Object.values(factions).flat().find((item) => item.id === character.race);
   const job = classes.find((item) => item.id === character.job);
   const usesRage = WarriorResourcePolicy.isWarrior(character.job);
@@ -2446,10 +2419,10 @@ function renderCharacterAbilities() {
     <section class="ability-summary">
       <div class="ability-identity"><span class="creation-race-icon race-${character.race}" aria-hidden="true"></span><div><h3>${character.name}</h3><p>${race?.name || character.race}・${job?.name || character.job}・Lv. ${progress.level}</p><small>${race?.trait || ''}</small></div></div>
       <div class="ability-grid">
-        <article><small>最大生命</small><b>${stats.hp}</b><em>裝備 +${equipment.hp}・收藏 +${collection.hp}</em></article>
-        <article><small>${usesRage ? '最大怒氣' : usesEnergy ? '最大能量' : '最大魔力'}</small><b>${usesRage ? WarriorResourcePolicy.MAX_RAGE : usesEnergy ? AssassinEnergyPolicy.MAX_ENERGY : stats.mana}</b><em>${usesRage ? '攻擊與受到攻擊時取得' : usesEnergy ? `固定恢復 ${AssassinEnergyPolicy.ENERGY_REGEN_PER_SECOND}／秒` : `收藏 +${collection.mana}`}</em></article>
-        <article><small>攻擊／法攻</small><b>${stats.attack}</b><em>裝備 +${equipment.attack}・收藏 +${collection.attack}</em></article>
-        <article><small>防禦</small><b>${stats.defense}</b><em>裝備 +${equipment.defense}・收藏 +${collection.defense}</em></article>
+        <article><small>最大生命</small><b>${stats.hp}</b><em>裝備 +${equipment.hp}</em></article>
+        <article><small>${usesRage ? '最大怒氣' : usesEnergy ? '最大能量' : '最大魔力'}</small><b>${usesRage ? WarriorResourcePolicy.MAX_RAGE : usesEnergy ? AssassinEnergyPolicy.MAX_ENERGY : stats.mana}</b><em>${usesRage ? '攻擊與受到攻擊時取得' : usesEnergy ? `固定恢復 ${AssassinEnergyPolicy.ENERGY_REGEN_PER_SECOND}／秒` : `裝備 +${equipment.mana}`}</em></article>
+        <article><small>攻擊／法攻</small><b>${stats.attack}</b><em>裝備 +${equipment.attack}</em></article>
+        <article><small>防禦</small><b>${stats.defense}</b><em>裝備 +${equipment.defense}</em></article>
         <article><small>暴擊率</small><b>${(stats.crit * 100).toFixed(1)}%</b><em>上限 60%</em></article>
         <article><small>閃避率</small><b>${(stats.dodge * 100).toFixed(1)}%</b><em>上限 45%</em></article>
         <article><small>命中能力</small><b>${Math.round(stats.accuracy * 100)}%</b><em>${character.job === 'hunter' && progress.level >= 3 ? '精準射擊加成' : '基礎命中加成'}</em></article>
@@ -2460,22 +2433,6 @@ function renderCharacterAbilities() {
       </div>
     </section>`;
   modal.dataset.view = 'abilities';
-  modal.classList.remove('hidden');
-}
-
-function renderCollection() {
-  const progress = getProgress();
-  const owned = progress.collection || {};
-  const templates = Object.values(collectibleTemplates);
-  const modal = document.querySelector('#inventory-modal');
-  document.querySelector('#inventory-title').textContent = `收藏品 ${Object.keys(owned).length} / ${templates.length}`;
-  document.querySelector('#inventory-content').innerHTML = `<section class="collection-grid">${templates.map((item, index) => {
-    const obtained = Boolean(owned[item.id]);
-    const iconX = index % 4;
-    const iconY = Math.floor(index / 4);
-    return `<article class="collection-card ${obtained ? 'obtained' : 'locked'}"><span class="collection-icon" style="--icon-x:${iconX};--icon-y:${iconY}" aria-label="${obtained ? item.name : '尚未取得'}"></span><div><b>${obtained ? item.name : '尚未發現'}</b><small>來源：${item.source}</small><em>${obtained ? item.description : '擊敗此怪物時有機率獲得'}</em></div></article>`;
-  }).join('')}</section>`;
-  modal.dataset.view = 'collection';
   modal.classList.remove('hidden');
 }
 
@@ -3369,7 +3326,6 @@ function createBattlePartyMember(slot, slotIndex, mainId, now = Date.now()) {
   const progress = {
     level: 1,
     equipment: emptyEquipment(),
-    collection: {},
     skillLevels: {},
     ...slot.progress,
     equipment: { ...emptyEquipment(), ...(slot.progress?.equipment || {}) },
@@ -4000,7 +3956,6 @@ function rewardVictory(index) {
   const earnedGold = Math.max(1, Math.floor(enemy.gold * .55));
   progress.gold += earnedGold;
   const loot = addLoot(progress, enemy);
-  const collectible = addCollectibleLoot(progress, enemy);
   const affixDropBonus = EliteAffixPolicy.getDropBonus(enemy.eliteAffixes, currentMap.chapter);
   const materialDrops = ChapterOneMaterialDropPolicy.grantMaterialDrops(progress, currentMap.id, enemy);
   materialDrops.push(...ChapterTwoMaterialDropPolicy.grantMaterialDrops(progress, currentMap.id, enemy, { dropRateMultiplier: affixDropBonus.materialMultiplier }));
@@ -4087,7 +4042,6 @@ function rewardVictory(index) {
   if (blueBossDrop) addRoundLoot(`equipment:${blueBossDrop.name}`, blueBossDrop.name, 1, '🔷');
   if (offhandDrop) addRoundLoot(`equipment:${offhandDrop.name}`, offhandDrop.name, 1, '🛡');
   if (goblinCampMapDropped) addRoundLoot('goblin-camp-map', '哥布林營地地圖', 1, '🗺️');
-  if (collectible) addRoundLoot(`collectible:${collectible.id || collectible.name}`, collectible.name, 1, '♛');
   saveProgress(progress);
   renderBattleAdventureInfo(progress);
   logBattle(`✦ 擊敗${enemy.name}！獲得 ${earnedXp} EXP、${earnedGold} 金幣`, 'reward');
@@ -4123,17 +4077,13 @@ function rewardVictory(index) {
   }
   if (goblinCampMapDropped) logBattle('🗺 迷路的哥布林掉落【哥布林營地地圖 ×1】', 'loot');
   accountDrops.forEach((drop) => logBattle(`◆ BOSS掉落【${drop}】`, 'loot'));
-  if (collectible) {
-    showToast(`獲得收藏品：${collectible.name}`);
-    logBattle(`♛ 收藏品掉落【${collectible.name}】－${collectible.description}`, 'loot');
-  }
   logPartyDebug('掉落事件', {
     targetId: enemy.id,
     targetName: enemy.name,
     rewardKey,
     xp: earnedXp,
     gold: earnedGold,
-    loot: [loot?.name, ...materialDrops.map((material) => material.name), ...recipeDrops.map((recipe) => recipe.name), equipmentDrop?.name, blueBossDrop?.name, offhandDrop?.name, collectible?.name, ...accountDrops].filter(Boolean).join(',') || 'none'
+    loot: [loot?.name, ...materialDrops.map((material) => material.name), ...recipeDrops.map((recipe) => recipe.name), equipmentDrop?.name, blueBossDrop?.name, offhandDrop?.name, ...accountDrops].filter(Boolean).join(',') || 'none'
   });
 }
 
@@ -6107,7 +6057,6 @@ setupLayoutDrag();
 document.querySelectorAll('[data-menu-action]').forEach((button) => button.addEventListener('click', () => {
   if (layoutEditMode) return;
   if (button.dataset.menuAction === '能力') { renderCharacterAbilities(); return; }
-  if (button.dataset.menuAction === '收藏品') { renderCollection(); return; }
   if (button.dataset.menuAction === '背包') { renderInventory('inventory'); return; }
   if (button.dataset.menuAction === '裝備') { renderInventory('equipment'); return; }
   if (button.dataset.menuAction === '隊伍') { renderParty(); return; }

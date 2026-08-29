@@ -819,11 +819,6 @@ Boss：
 - 魔法傷害 +5%
 - 每秒魔力恢復 +3
 
-## 收藏品系統
-
-- 怪物可提供永久收藏品與角色加成。
-- 收藏品資料、來源、圖示及能力加成集中於 `collectible-policy.js`。
-
 ## 存檔相容
 
 - 新增系統必須處理舊存檔缺少欄位的情況。
@@ -857,7 +852,6 @@ Boss：
 - 怪物防禦與圖片對應
 - 裝備、職業限制、副手與詞綴
 - 戰士怒氣、刺客能量、獵人箭矢、法系 MP
-- 收藏品
 
 ## 規畫檔案索引
 
@@ -875,7 +869,6 @@ Boss：
 - `assassin-energy-policy.js`：刺客能量。
 - `hunter-arrow-policy.js`：獵人箭矢與箭筒。
 - `mana-regen-policy.js`：MP 恢復。
-- `collectible-policy.js`：收藏品。
 
 ## 接續研發方式
 
