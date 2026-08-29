@@ -11,7 +11,7 @@ const layoutCss = fs.readFileSync(path.join(root, 'styles', 'mmorpg-layout.css')
 assert.match(html, /id="player-battle-stage"/, 'party players render on the battlefield');
 assert.match(html, /id="battle-player-art" class="battle-player-art hidden"/, 'main player has a dedicated portrait node');
 assert.match(html, /styles\/monster-slots\.css\?v=20260822-single-target-travel-v6/, 'battlefield loads the current local portrait styles');
-assert.match(html, /script\.js\?v=20260830-purple-special-equipment-v1/, 'battlefield loads the current local combat logic');
+assert.match(html, /script\.js\?v=20260830-dual-dagger-v1/, 'battlefield loads the current local combat logic');
 assert.match(script, /return battleCharacterArt\[`\$\{character\.race\}:\$\{character\.job\}`\] \|\| '';/, 'battle uses stable front character artwork');
 assert.match(script, /'orc:warrior': 'assets\/character-portraits\/orc-warrior\.png'/, 'orc warrior uses the supplied portrait');
 assert.match(script, /'orc:hunter': 'assets\/character-portraits\/orc-hunter\.png'/, 'orc hunter uses the supplied portrait');

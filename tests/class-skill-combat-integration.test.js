@@ -9,6 +9,9 @@ assert.match(source, /armorIgnore: skillEffect\.armorIgnore/, 'piercing shot for
 assert.match(source, /chainMultiplier[\s\S]*piercingMultiplier/, 'chain and piercing target scaling are applied independently');
 assert.match(source, /attackKind: 'counter'/, 'counter attacks have a non-recursive attack source');
 assert.match(source, /attackKind: 'offhand'/, 'offhand attacks have a non-recursive attack source');
+assert.match(source, /AssassinOffhandPolicy\.calculateOffhandStrike\(member\.stats, mastery/, 'offhand damage and critical bonuses use the isolated offhand strike calculation');
+assert.match(source, /AssassinOffhandPolicy\.isDagger\(member\.progress\.equipment\?\.offhand\)/, 'offhand follow-up attacks require an equipped dagger');
+assert.match(source, /rolledOffhandAttack \* AssassinOffhandPolicy\.OFFHAND_ATTACK_CONTRIBUTION/, 'basic attacks roll the equipped offhand dagger at 50% without adding another attack');
 assert.match(source, /target\.job === 'mage'[\s\S]*blinkReadyAt/, 'blink uses an internal cooldown');
 assert.match(source, /target\.manaShieldReadyAt[\s\S]*target\.resourceCurrent -= manaCost/, 'mana shield consumes mana and uses an internal cooldown');
 assert.match(source, /member\.effectiveHealCount[\s\S]*graceTriggered/, 'divine grace uses deterministic effective-heal counting');

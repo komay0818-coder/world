@@ -2006,8 +2006,8 @@ function oldestAliveEnemyIndex() {
 }
 
 function getEquipmentStats(progress = getProgress()) {
-  const fixed = Object.values(progress.equipment || {}).filter(Boolean).reduce((stats, item) => ({
-    attack: stats.attack + effectiveEquipmentStat(item, 'attack'),
+  const fixed = Object.entries(progress.equipment || {}).filter(([, item]) => Boolean(item)).reduce((stats, [slot, item]) => ({
+    attack: stats.attack + AssassinOffhandPolicy.getEquippedAttack({ ...item, attack: effectiveEquipmentStat(item, 'attack') }, slot),
     defense: stats.defense + effectiveEquipmentStat(item, 'defense'),
     hp: stats.hp + effectiveEquipmentStat(item, 'hp'),
     mana: stats.mana + effectiveEquipmentStat(item, 'mana'),
@@ -2220,7 +2220,7 @@ function itemStatsText(item) {
   if (item.hpRegeneration) parts.push(`每秒生命恢復 +${effectiveEquipmentStat(item, 'hpRegeneration')}`);
   if (item.magicDamageBonus) parts.push(`魔法傷害 +${Math.round(effectiveEquipmentStat(item, 'magicDamageBonus') * 100)}%`);
   if (item.damageBonus) parts.push(`傷害 +${Math.round(effectiveEquipmentStat(item, 'damageBonus') * 100)}%`);
-  if (item.parry) parts.push(`招架 +${Math.round(effectiveEquipmentStat(item, 'parry') * 100)}%`);
+  if (item.parry) parts.push(`${item.series === '盾牌' ? '格擋率' : '招架'} +${Math.round(effectiveEquipmentStat(item, 'parry') * 100)}%`);
   if (item.damageReduction) parts.push(`傷害減免 +${Math.round(effectiveEquipmentStat(item, 'damageReduction') * 100)}%`);
   if (item.movementSpeedBonus) parts.push(`移動速度 +${Math.round(effectiveEquipmentStat(item, 'movementSpeedBonus') * 100)}%`);
   if (item.maxArrows) parts.push(`最大箭矢 ${Math.floor(Number(item.maxArrows))}`);
@@ -4703,7 +4703,13 @@ function processPartyMemberAttacks(now = Date.now()) {
     const equippedWeapon = member.progress.equipment?.weapon;
     const rolledWeaponAttack = EquipmentPolicy.rollWeaponAttack(equippedWeapon, Math.random());
     const displayedWeaponAttack = rolledWeaponAttack === null ? 0 : effectiveEquipmentStat(equippedWeapon, 'attack');
-    const attackWithWeaponRoll = member.stats.attack + (rolledWeaponAttack === null ? 0 : rolledWeaponAttack - displayedWeaponAttack);
+    const offhandDagger = AssassinOffhandPolicy.isDagger(member.progress.equipment?.offhand) ? member.progress.equipment.offhand : null;
+    const rolledOffhandAttack = offhandDagger ? EquipmentPolicy.rollWeaponAttack(offhandDagger, Math.random()) : null;
+    const displayedOffhandAttack = AssassinOffhandPolicy.getEquippedAttack(offhandDagger, 'offhand');
+    const offhandAttackWithRoll = rolledOffhandAttack === null ? displayedOffhandAttack : rolledOffhandAttack * AssassinOffhandPolicy.OFFHAND_ATTACK_CONTRIBUTION;
+    const attackWithWeaponRoll = member.stats.attack
+      + (rolledWeaponAttack === null ? 0 : rolledWeaponAttack - displayedWeaponAttack)
+      + (offhandAttackWithRoll - displayedOffhandAttack);
     const orcRage = member.race === 'orc' && Math.random() < .10;
     const desperate = member.job === 'assassin' && member.level >= 20 && member.currentHp / member.maxHp <= .3
       ? ClassSkillPolicy.getEffect('assassin', 'desperate-counter', Number(member.progress.skillLevels?.['assassin:desperate-counter']) || 1)
@@ -4749,7 +4755,10 @@ function processPartyMemberAttacks(now = Date.now()) {
         const mastery = member.level >= 15 ? ClassSkillPolicy.getEffect('assassin', 'dagger-mastery', Number(member.progress.skillLevels?.['assassin:dagger-mastery']) || 1) : {};
         const masteryProc = mastery.offhandChance && Math.random() < mastery.offhandChance;
         const danceProc = now < (member.shadowDanceUntil || 0) && Math.random() < (member.shadowDanceOffhandChance || 0);
-        if (masteryProc || danceProc) applyDamageToMonster(targetIndex, member.stats.attack * .5, profile, { attacker: member, attackKind: 'offhand', canParry: false });
+        if ((masteryProc || danceProc) && AssassinOffhandPolicy.isDagger(member.progress.equipment?.offhand)) {
+          const offhandStrike = AssassinOffhandPolicy.calculateOffhandStrike(member.stats, mastery, Math.random());
+          applyDamageToMonster(targetIndex, offhandStrike.damage, profile, { attacker: member, attackKind: 'offhand', canParry: false });
+        }
       }
     }
     logPartyDebug('普通攻擊', {

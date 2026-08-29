@@ -26,6 +26,9 @@ assert.equal(policy.isPreservedEquipment(inventory[5]), false, 'legacy monster e
 const offhands = policy.OFFHAND_CATALOG;
 assert.match(offhands.woodenRoundShield.image, /assets\/wooden-round-shield\.png/, 'wooden round shield uses its dedicated artwork');
 assert.match(offhands.beginnerSpellbook.image, /assets\/beginner-spellbook\.png/, 'beginner spellbook uses its dedicated artwork');
+assert.deepEqual([offhands.woodenRoundShield.defense, offhands.woodenRoundShield.parry], [5, .03], 'wooden round shield grants 5 defense and 3% block');
+assert.deepEqual([offhands.roughQuiver.maxArrows, offhands.roughQuiver.arrowRecoveryInterval], [10, 1000], 'rough quiver keeps 10 arrows and recovers one arrow per second');
+assert.deepEqual([offhands.beginnerSpellbook.mana, offhands.beginnerSpellbook.manaRegenFlat], [30, 1], 'beginner spellbook grants 30 mana and 1 mana per second');
 assert.deepEqual(policy.getEquipSlots(offhands.woodenRoundShield, 'warrior'), ['offhand'], 'warriors can equip wooden round shields');
 assert.deepEqual(policy.getEquipSlots(offhands.woodenRoundShield, 'hunter'), [], 'hunters cannot equip wooden round shields');
 assert.deepEqual(policy.getEquipSlots(offhands.roughQuiver, 'hunter'), ['offhand'], 'hunters can equip rough quivers');
@@ -42,11 +45,11 @@ const quickQuiver = policy.createRandomOffhandDrop(.4, .9, 'quick-test');
 const magicBook = policy.createRandomOffhandDrop(.8, 0, 'book-test');
 const regenBook = policy.createRandomOffhandDrop(.8, .9, 'regen-test');
 assert.equal(sturdyShield.damageReduction, .03, 'wooden round shield can roll 3% damage reduction');
-assert.equal(parryShield.parry, .03, 'wooden round shield can roll 3% parry');
+assert.equal(parryShield.parry, .06, 'wooden round shield combines its 3% base block with a 3% block affix');
 assert.deepEqual([expandedQuiver.maxArrows, expandedQuiver.arrowRecoveryInterval], [12, 1000], 'expanded rough quiver holds twelve arrows');
 assert.deepEqual([quickQuiver.maxArrows, quickQuiver.arrowRecoverySpeedBonus], [10, .10], 'quick rough quiver starts at ten arrows and gains 10% recovery speed');
 assert.equal(magicBook.magicDamageBonus, .05, 'beginner spellbook can roll 5% magic damage');
-assert.equal(regenBook.manaRegenFlat, 3, 'beginner spellbook can roll 3 mana per second');
+assert.equal(regenBook.manaRegenFlat, 4, 'beginner spellbook combines 1 base mana regen with a 3 mana regen affix');
 assert.equal(policy.applyMagicDamageBonus(100, magicBook.magicDamageBonus), 105, 'the magic damage affix increases magic damage by 5%');
 assert.equal(policy.isPreservedEquipment(sturdyShield), true, 'random offhand variants survive save cleanup');
 

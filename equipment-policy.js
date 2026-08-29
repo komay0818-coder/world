@@ -589,6 +589,8 @@
       name: '木製圓盾',
       slot: 'offhand',
       image: 'assets/wooden-round-shield.png?v=20260815-user-image-v1',
+      defense: 5,
+      parry: .03,
       allowedJobs: Object.freeze(['warrior']),
       quality: '普通'
     }),
@@ -611,6 +613,8 @@
       name: '初學者魔導書',
       slot: 'offhand',
       image: 'assets/beginner-spellbook.png?v=20260815-user-image-v1',
+      mana: 30,
+      manaRegenFlat: 1,
       allowedJobs: Object.freeze(['mage', 'priest']),
       quality: '普通'
     })
@@ -619,7 +623,7 @@
   const OFFHAND_AFFIXES = Object.freeze({
     woodenRoundShield: Object.freeze([
       Object.freeze({ name: '堅固', text: '傷害減免 +3%', stat: 'damageReduction', value: .03 }),
-      Object.freeze({ name: '格擋', text: '招架率 +3%', stat: 'parry', value: .03 })
+      Object.freeze({ name: '格擋', text: '格擋率 +3%', stat: 'parry', value: .03 })
     ]),
     roughQuiver: Object.freeze([
       Object.freeze({ name: '擴充', text: '最大箭矢 +2', stat: 'maxArrows', value: 2 }),
