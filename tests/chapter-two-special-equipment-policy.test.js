@@ -7,7 +7,8 @@ const script = fs.readFileSync(path.join(__dirname, '..', 'script.js'), 'utf8');
 
 assert.equal(Object.keys(policy.TEMPLATES).length, 4);
 assert.deepEqual(Object.values(policy.TEMPLATES).map(({ name }) => name), ['黑石督軍戰盔', '腐化守護者皮靴', '幽森魔珠', '墮落荊棘魔杖']);
-assert.ok(Object.values(policy.TEMPLATES).every((item) => item.quality === 'epic' && item.directDrop && item.image === null && item.implementationStatus === 'ready-values'));
+assert.ok(Object.values(policy.TEMPLATES).every((item) => item.quality === 'epic' && item.directDrop && item.imageStatus === 'ready' && item.implementationStatus === 'ready-values'));
+Object.values(policy.TEMPLATES).forEach((item) => assert.ok(fs.existsSync(path.join(__dirname, '..', item.image)), `${item.name}圖片存在`));
 assert.ok(Object.values(policy.TEMPLATES).every((item) => item.affixRuleOverride.fixedCount === 2 && item.affixRuleOverride.randomCount === 2 && item.affixRuleOverride.specialChance === 1));
 assert.deepEqual(policy.MAGIC_ORB_BASE_TEMPLATE, {}, '魔珠沿用目前沒有額外基礎屬性的法系副手模板');
 assert.deepEqual(policy.WAND_BASE_TEMPLATE, { attackMin: 26, attackMax: 35, attackSpeed: 1 }, '魔杖只保留既有攻擊與攻速模板');
