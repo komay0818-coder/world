@@ -66,6 +66,7 @@ assert.match(html, /chapter-one-recipe-drop-policy\.js[\s\S]*script\.js/, 'recip
 assert.match(script, /ChapterOneRecipeDropPolicy\.grantRecipeDrops\(progress, enemy, currentMap\.id\)/, 'rewardVictory grants recipes for configured monsters and maps');
 assert.match(script, /recipeDrops\.forEach[\s\S]*配方掉落/, 'recipe drops are shown in the battle loot log');
 assert.match(script, /item\.kind === 'recipe'\) return 'consumable'/, 'recipe items appear in the existing backpack item category');
+assert.match(script, /item\?\.kind === 'recipe' \? RecipeImagePolicy\.getImage\(item\.quality \|\| item\.rarity\)/, 'recipe inventory artwork is selected by quality');
 assert.match(html, /chapter-boss-drop-policy\.js[\s\S]*script\.js/, 'chapter boss drop policy loads before reward integration');
 assert.match(script, /ChapterBossDropPolicy\.grantChapterBossBlueDrop\(progress, enemy/, 'boss blue drop is an independent reward roll');
 assert.match(script, /chapter: currentMap\.chapter[\s\S]*finalBossId/, 'chapter and final boss metadata gate the special drop');

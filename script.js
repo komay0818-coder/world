@@ -1467,7 +1467,7 @@ function renderWorkshop(building = getVillageBuildingData('workshop'), craftedIt
     const primaryOptions = CraftingPolicy.PRIMARY_STAT_POOLS[recipe.equipmentSlot].map((stat) => CraftingPolicy.STAT_DEFINITIONS[stat].label).join('、');
     const goldEnough = (Number(progress.gold) || 0) >= recipe.goldCost;
     return `<article class="workshop-recipe quality-${recipe.quality} ${known ? '' : 'workshop-locked'}">
-      <div class="workshop-recipe-head"><div><h4>${recipe.name}</h4><small>製作結果：${recipe.resultName}・${equipmentSlots[recipe.equipmentSlot].label}・${rarity.label}</small></div><span>${known ? `配方 ${recipeQuantity} 張` : '🔒 未持有配方'}</span></div>
+      <div class="workshop-recipe-head"><img src="${RecipeImagePolicy.getImage(recipe.quality)}" alt="" class="workshop-recipe-image"><div><h4>${recipe.name}</h4><small>製作結果：${recipe.resultName}・${equipmentSlots[recipe.equipmentSlot].label}・${rarity.label}</small></div><span>${known ? `配方 ${recipeQuantity} 張` : '🔒 未持有配方'}</span></div>
       <ul><li class="${known ? '' : 'workshop-insufficient'}"><span>${recipe.name}</span><b>${recipeQuantity} / 1</b></li>${materials}</ul>
       <p class="workshop-gold ${goldEnough ? '' : 'workshop-insufficient'}"><span>所需金幣</span><b>${Number(progress.gold) || 0} / ${recipe.goldCost}</b></p>
       <p><b>固定詞綴：</b>${rarity.fixedAffixCount} 條</p><p><b>隨機詞綴：</b>${rarity.randomAffixCount} 條（種類隨機、數值固定）</p>
@@ -2329,7 +2329,9 @@ function stackIdenticalEquipment(items) {
 }
 
 function itemImagePath(item) {
-  return item.image || (['weapon', 'offhand'].includes(item.slot) ? 'assets/equipment-weapon.png' : 'assets/equipment-armor.png');
+  return (item?.kind === 'recipe' ? RecipeImagePolicy.getImage(item.quality || item.rarity) : null)
+    || item.image
+    || (['weapon', 'offhand'].includes(item.slot) ? 'assets/equipment-weapon.png' : 'assets/equipment-armor.png');
 }
 
 function itemQualityClass(item) {
@@ -2360,7 +2362,7 @@ function renderInventory(view = 'inventory') {
     const selectedCount = stackIds.filter((id) => scrapSelection.has(id)).length;
     const junkCandidate = stackItems.some((entry) => InventorySalePolicy.isJunkCandidate(entry, getItemJunkContext(entry, character, progress)));
     const junkBadge = junkCandidate ? '<span class="junk-badge" title="不能裝備的廢品" aria-label="不能裝備的廢品">🗑</span>' : '';
-    const visual = item.image
+    const visual = item.image || item.kind === 'recipe'
       ? `<img src="${itemImagePath(item)}" alt="" class="inventory-item-image">`
       : item.icon || '◈';
     const currentItem = item.kind === 'equipment' ? progress.equipment[item.slot] : null;
@@ -2469,8 +2471,9 @@ function renderDropLookup() {
   const filtered = DropLookupPolicy.filterItems(items, dropLookupQuery, dropLookupCategory, activeMap.id);
   const categories = [['all', '全部'], ['equipment', '裝備'], ['material', '材料'], ['recipe', '配方'], ['skill', '技能材料']];
   const resultCards = filtered.map((item) => {
-    const visual = item.image
-      ? `<img src="${item.image}" alt="" class="drop-result-image">`
+    const image = item.category === 'recipe' ? RecipeImagePolicy.getImage(item.quality || item.rarity) : item.image;
+    const visual = image
+      ? `<img src="${image}" alt="" class="drop-result-image">`
       : item.icon || (item.category === 'equipment' ? '⚔' : '◆');
     return `<article class="drop-result-card"><span>${visual}</span><div><b>${item.name}</b><small>${item.typeLabel}</small></div></article>`;
   }).join('');

@@ -10,6 +10,7 @@ assert.match(html, /world\/67f5ab92db6af0eccead2ff7d5e6db5289fc1adf\/chapter-two
 const css = fs.readFileSync(path.join(root, 'styles', 'village.css'), 'utf8');
 
 assert.match(html, /chapter-one-material-drop-policy\.js[\s\S]*chapter-one-recipe-drop-policy\.js[\s\S]*crafting-policy\.js[\s\S]*script\.js/, 'formal material and recipe data load before crafting integration');
+assert.match(html, /recipe-image-policy\.js[\s\S]*chapter-one-recipe-drop-policy\.js[\s\S]*script\.js/, 'shared quality recipe artwork loads before recipe and workshop rendering');
 assert.match(script, /function renderWorkshop\(/, 'village workshop has a dedicated renderer');
 assert.doesNotMatch(script, /recipe\.chapter === 1/, 'workshop no longer hides chapter-two recipes');
 assert.match(script, /function normalizeWearableSeriesName\(item\)/, 'saved recipes and crafted equipment receive the current series names');
@@ -20,6 +21,7 @@ assert.match(script, /data-workshop-quality="uncommon"[\s\S]*data-workshop-quali
 assert.match(script, /data-workshop-slot="wrist"[\s\S]*data-workshop-slot="cloak"[\s\S]*data-workshop-slot="shoulders"/, 'workshop exposes all three chapter-one equipment slots');
 assert.match(script, /workshop-insufficient/, 'missing resources receive a dedicated UI state');
 assert.match(script, /CraftingPolicy\.getRecipeQuantity\(progress, recipe\.recipeId\)/, 'recipe counts come from the saved backpack');
+assert.match(script, /RecipeImagePolicy\.getImage\(recipe\.quality\)/, 'workshop recipes share artwork by quality instead of recipe name');
 assert.match(script, /CraftingPolicy\.craftEquipment\(progress, recipeId/, 'workshop uses the shared atomic crafting policy');
 assert.match(script, /saveProgress\(progress\);[\s\S]*renderWorkshop\(workshop, result\.item\)/, 'successful craft is saved before UI refresh');
 assert.doesNotMatch(script, /craftingTestDataVersion|testQuantities|craft-cloth|craft-metal/, 'loading a save no longer grants workshop test resources');
