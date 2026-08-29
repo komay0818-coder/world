@@ -1045,14 +1045,14 @@ function getProgress() {
     .map(([slot, item]) => [slot, normalizeWearableSeriesName(item)]));
   saved.crafting = CraftingPolicy.normalizeCraftingState(saved.crafting);
   const existingHealingPotion = inventory.find((item) => item.id === 'healing-potion');
-  if (existingHealingPotion) existingHealingPotion.description = '恢復最大生命 30%。';
+  if (existingHealingPotion) { existingHealingPotion.description = '恢復最大生命 30%。'; existingHealingPotion.image = 'assets/healing-potion.png?v=20260830-user-image-v1'; existingHealingPotion.imageStatus = 'ready'; }
   const existingManaPotion = inventory.find((item) => item.id === 'mana-potion');
-  if (existingManaPotion) existingManaPotion.description = '恢復最大魔力 20%。';
+  if (existingManaPotion) { existingManaPotion.description = '恢復最大魔力 20%。'; existingManaPotion.image = 'assets/mana-potion.png?v=20260830-user-image-v1'; existingManaPotion.imageStatus = 'ready'; }
   if ((saved.potions ?? 5) > 0 && !inventory.some((item) => item.id === 'healing-potion')) {
-    inventory.push({ id: 'healing-potion', kind: 'consumable', icon: '🧪', name: '治癒藥水', description: '恢復最大生命 30%。', quantity: saved.potions ?? 5 });
+    inventory.push({ id: 'healing-potion', kind: 'consumable', icon: '🧪', image: 'assets/healing-potion.png?v=20260830-user-image-v1', imageStatus: 'ready', name: '治癒藥水', description: '恢復最大生命 30%。', quantity: saved.potions ?? 5 });
   }
   if ((saved.manaPotions ?? 0) > 0 && !inventory.some((item) => item.id === 'mana-potion')) {
-    inventory.push({ id: 'mana-potion', kind: 'consumable', icon: '🔷', name: '魔法藥水', description: '恢復最大魔力 20%。', quantity: saved.manaPotions ?? 0 });
+    inventory.push({ id: 'mana-potion', kind: 'consumable', icon: '🔷', image: 'assets/mana-potion.png?v=20260830-user-image-v1', imageStatus: 'ready', name: '魔法藥水', description: '恢復最大魔力 20%。', quantity: saved.manaPotions ?? 0 });
   }
   const normalizedProgress = {
     level: 1,
@@ -2131,13 +2131,13 @@ function logPartyDebug(event, details = {}) {
 function addPotionItem(progress, amount = 1) {
   const potion = progress.inventory.find((item) => item.kind === 'consumable' && item.id === 'healing-potion');
   if (potion) potion.quantity += amount;
-  else progress.inventory.push({ id: 'healing-potion', kind: 'consumable', icon: '🧪', name: '治癒藥水', description: '恢復最大生命 30%。', quantity: amount });
+  else progress.inventory.push({ id: 'healing-potion', kind: 'consumable', icon: '🧪', image: 'assets/healing-potion.png?v=20260830-user-image-v1', imageStatus: 'ready', name: '治癒藥水', description: '恢復最大生命 30%。', quantity: amount });
 }
 
 function addManaPotionItem(progress, amount = 1) {
   const potion = progress.inventory.find((item) => item.kind === 'consumable' && item.id === 'mana-potion');
   if (potion) potion.quantity += amount;
-  else progress.inventory.push({ id: 'mana-potion', kind: 'consumable', icon: '🔷', name: '魔法藥水', description: '恢復最大魔力 20%。', quantity: amount });
+  else progress.inventory.push({ id: 'mana-potion', kind: 'consumable', icon: '🔷', image: 'assets/mana-potion.png?v=20260830-user-image-v1', imageStatus: 'ready', name: '魔法藥水', description: '恢復最大魔力 20%。', quantity: amount });
 }
 
 function removePotionItem(progress) {
