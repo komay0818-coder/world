@@ -2021,10 +2021,11 @@ function getEquipmentStats(progress = getProgress()) {
     manaRegenFlat: stats.manaRegenFlat + effectiveEquipmentStat(item, 'manaRegenFlat'),
     hpRegeneration: stats.hpRegeneration + effectiveEquipmentStat(item, 'hpRegeneration'),
     magicDamageBonus: stats.magicDamageBonus + effectiveEquipmentStat(item, 'magicDamageBonus'),
+    damageBonus: stats.damageBonus + effectiveEquipmentStat(item, 'damageBonus'),
     parry: stats.parry + effectiveEquipmentStat(item, 'parry'),
     damageReduction: stats.damageReduction + effectiveEquipmentStat(item, 'damageReduction'),
     movementSpeedBonus: stats.movementSpeedBonus + effectiveEquipmentStat(item, 'movementSpeedBonus')
-  }), { attack: 0, defense: 0, hp: 0, mana: 0, strength: 0, intelligence: 0, accuracy: 0, dodge: 0, attackSpeedBonus: 0, cooldownSpeedBonus: 0, manaRegenBonus: 0, manaRegenFlat: 0, hpRegeneration: 0, magicDamageBonus: 0, parry: 0, damageReduction: 0, movementSpeedBonus: 0 });
+  }), { attack: 0, defense: 0, hp: 0, mana: 0, strength: 0, intelligence: 0, accuracy: 0, dodge: 0, attackSpeedBonus: 0, cooldownSpeedBonus: 0, manaRegenBonus: 0, manaRegenFlat: 0, hpRegeneration: 0, magicDamageBonus: 0, damageBonus: 0, parry: 0, damageReduction: 0, movementSpeedBonus: 0 });
   const affixes = EquipmentAffixPolicy.getEquippedAffixStats(progress.equipment);
   return {
     ...fixed,
@@ -2096,6 +2097,7 @@ function getCharacterStats(level, progress = getProgress(), character = getActiv
     manaRegen: 1 + equipment.manaRegenBonus + equipment.manaRegenerationPercent,
     manaRegenFlat: equipment.manaRegenFlat,
     magicDamageBonus: Math.max(0, equipment.magicDamageBonus + passiveTotal('magicDamage') + passiveTotal('elementDamage')),
+    damageBonus: Math.max(0, equipment.damageBonus),
     parry: Math.min(.50, Math.max(0, equipment.parry + passiveTotal('parry'))),
     damageReduction: Math.min(.50, Math.max(0, equipment.damageReduction)),
     movementSpeedBonus: Math.max(0, equipment.movementSpeedBonus),
@@ -2217,6 +2219,7 @@ function itemStatsText(item) {
   if (item.manaRegenFlat) parts.push(`每秒回魔 +${effectiveEquipmentStat(item, 'manaRegenFlat')}`);
   if (item.hpRegeneration) parts.push(`每秒生命恢復 +${effectiveEquipmentStat(item, 'hpRegeneration')}`);
   if (item.magicDamageBonus) parts.push(`魔法傷害 +${Math.round(effectiveEquipmentStat(item, 'magicDamageBonus') * 100)}%`);
+  if (item.damageBonus) parts.push(`傷害 +${Math.round(effectiveEquipmentStat(item, 'damageBonus') * 100)}%`);
   if (item.parry) parts.push(`招架 +${Math.round(effectiveEquipmentStat(item, 'parry') * 100)}%`);
   if (item.damageReduction) parts.push(`傷害減免 +${Math.round(effectiveEquipmentStat(item, 'damageReduction') * 100)}%`);
   if (item.movementSpeedBonus) parts.push(`移動速度 +${Math.round(effectiveEquipmentStat(item, 'movementSpeedBonus') * 100)}%`);
@@ -2295,6 +2298,7 @@ function equipmentStackKey(item) {
     manaRegenFlat: item.manaRegenFlat || 0,
     hpRegeneration: item.hpRegeneration || 0,
     magicDamageBonus: item.magicDamageBonus || 0,
+    damageBonus: item.damageBonus || 0,
     maxArrows: item.maxArrows || 0,
     arrowRecoverySpeedBonus: item.arrowRecoverySpeedBonus || 0,
     parry: item.parry || 0,
@@ -4276,7 +4280,7 @@ function applyDamageToMonster(index, baseDamage, profile, options = {}) {
   const statusElementMultiplier = elementalMastery && (battle.enemyDots[index] || []).length ? 1 + elementalMastery.elementDamage : 1;
   const frostResonanceMultiplier = elementalMastery?.resonance && (now < skillState.slowedUntil || now < skillState.frozenUntil) && Math.random() < .1 ? attackerStats.criticalDamageMultiplier : 1;
   const lightningResonanceMultiplier = elementalMastery?.resonance && now < (skillState.paralyzedUntil || 0) && options.attackKind !== 'resonance' && Math.random() < .1 ? 1.3 : 1;
-  const adjustedBaseDamage = magicAdjustedDamage * rankMultiplier * attackKindMultiplier * markMultiplier * vulnerabilityMultiplier * controlledMultiplier * statusElementMultiplier * frostResonanceMultiplier * lightningResonanceMultiplier;
+  const adjustedBaseDamage = magicAdjustedDamage * (1 + (attackerStats.damageBonus || 0)) * rankMultiplier * attackKindMultiplier * markMultiplier * vulnerabilityMultiplier * controlledMultiplier * statusElementMultiplier * frostResonanceMultiplier * lightningResonanceMultiplier;
   if (enemy.mapId) {
     const hitChance = ChapterOneLevelPolicy.getPlayerHitChance(progress.level, enemy.level, attackerStats.accuracy, 0);
     if (Math.random() >= hitChance) {

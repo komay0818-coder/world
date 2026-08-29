@@ -119,9 +119,10 @@
     const random = typeof options.random === 'function' ? options.random : Math.random;
     const craftedAt = options.craftedAt || Date.now();
     const instanceId = options.instanceId || createInstanceId(craftedAt, random);
+    const baseStats = { ...(recipe.baseStats || {}) };
     const template = {
       id: recipe.resultItemId, kind: 'equipment', name: recipe.resultName, slot: recipe.equipmentSlot,
-      equipmentSlot: recipe.equipmentSlot, allowedJobs: [], baseStats: { ...(recipe.baseStats || {}) },
+      equipmentSlot: recipe.equipmentSlot, allowedJobs: [], ...baseStats, baseStats,
       image: recipe.image || null, imageStatus: recipe.image ? 'ready' : 'pending',
       ...(Array.isArray(recipe.fixedAffixIds) ? { fixedAffixIds: [...recipe.fixedAffixIds] } : {})
     };

@@ -515,8 +515,8 @@
       slot: 'boots',
       armorType: 'plate',
       image: 'assets/recruit-iron-boots.png?v=20260729-user-image-v1',
-      defense: 15,
-      hp: 40,
+      defense: 7,
+      hp: 30,
       quality: '普通'
     }),
     guardWarBoots: Object.freeze({
@@ -527,7 +527,7 @@
       slot: 'boots',
       armorType: 'plate',
       image: 'assets/guard-war-boots.png?v=20260729-user-image-v1',
-      defense: 10,
+      defense: 6,
       damageReduction: .02,
       quality: '普通'
     }),
@@ -539,7 +539,7 @@
       slot: 'boots',
       armorType: 'leather',
       image: 'assets/leather-short-boots.png?v=20260815-user-image-v1',
-      defense: 8,
+      defense: 5,
       dodge: .03,
       quality: '普通'
     }),
@@ -551,7 +551,7 @@
       slot: 'boots',
       armorType: 'leather',
       image: 'assets/travel-long-boots.png?v=20260815-user-image-v1',
-      defense: 6,
+      defense: 4,
       movementSpeedBonus: .08,
       quality: '普通'
     }),

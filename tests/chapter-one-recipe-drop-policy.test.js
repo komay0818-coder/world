@@ -12,6 +12,12 @@ assert.deepEqual([policy.RECIPES.greenWrist.resultName, policy.RECIPES.greenCloa
 assert.deepEqual([policy.RECIPES.greenWrist.name, policy.RECIPES.greenCloak.name, policy.RECIPES.greenShoulders.name], ['平原護腕配方', '平原斗篷配方', '平原肩甲配方']);
 assert.deepEqual([policy.RECIPES.greenWrist.image, policy.RECIPES.greenCloak.image, policy.RECIPES.greenShoulders.image].map((image) => image.split('?')[0]), ['assets/plains-wrist.png', 'assets/plains-cloak.png', 'assets/plains-shoulders.png']);
 assert.deepEqual([policy.RECIPES.goblinRareCloak.image, policy.RECIPES.highChiefRareWrist.image, policy.RECIPES.blackKnightRareShoulders.image].map((image) => image.split('?')[0]), ['assets/goblin-rare-cloak.png', 'assets/high-chief-rare-wrist.png', 'assets/black-knight-rare-shoulders.png']);
+assert.deepEqual(policy.RECIPES.greenWrist.baseStats, { defense: 4, hp: 15 });
+assert.deepEqual(policy.RECIPES.greenCloak.baseStats, { defense: 3, hp: 30 });
+assert.deepEqual(policy.RECIPES.greenShoulders.baseStats, { defense: 7, hp: 20 });
+assert.deepEqual(policy.RECIPES.highChiefRareWrist.baseStats, { defense: 5, hp: 20, damageBonus: .02 });
+assert.deepEqual(policy.RECIPES.goblinRareCloak.baseStats, { defense: 4, hp: 40, dodge: .02 });
+assert.deepEqual(policy.RECIPES.blackKnightRareShoulders.baseStats, { defense: 9, hp: 30, damageReduction: .01 });
 Object.values(policy.RECIPES).forEach((recipe) => {
   assert.equal(recipe.kind, 'recipe');
   assert.equal(recipe.itemType, 'recipe');

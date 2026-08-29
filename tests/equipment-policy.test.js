@@ -1,6 +1,5 @@
 const assert = require('assert');
 const policy = require('../equipment-policy.js');
-
 const inventory = [
   { id: 'healing-potion', kind: 'consumable' },
   { id: 'goblin-camp-map', kind: 'material' },
@@ -180,12 +179,12 @@ assert.deepEqual(policy.getEquipSlots(armor.roughLeatherGloves, 'assassin'), ['g
 assert.deepEqual(policy.getEquipSlots(armor.apprenticeGloves, 'mage'), ['gloves'], 'mages can equip cloth gloves');
 assert.deepEqual(policy.getEquipSlots(armor.noviceGloves, 'priest'), ['gloves'], 'priests can equip cloth gloves');
 assert.equal(policy.isRecruitEquipment(armor.recruitIronGauntlets), true, 'recruit iron gauntlets survive starter inventory cleanup');
-assert.deepEqual([armor.recruitIronBoots.defense, armor.recruitIronBoots.hp], [15, 40], 'recruit iron boots stats match the design');
-assert.deepEqual([armor.guardWarBoots.defense, armor.guardWarBoots.damageReduction], [10, .02], 'guard war boots stats match the design');
+assert.deepEqual([armor.recruitIronBoots.defense, armor.recruitIronBoots.hp], [7, 30], 'recruit iron boots stats match the design');
+assert.deepEqual([armor.guardWarBoots.defense, armor.guardWarBoots.damageReduction], [6, .02], 'guard war boots stats match the design');
 assert.equal(armor.recruitIronBoots.image.split('?')[0], 'assets/recruit-iron-boots.png', 'recruit iron boots use their dedicated image');
 assert.equal(armor.guardWarBoots.image.split('?')[0], 'assets/guard-war-boots.png', 'guard war boots use their dedicated image');
-assert.deepEqual([armor.leatherShortBoots.defense, armor.leatherShortBoots.dodge], [8, .03], 'leather short boots stats match the design');
-assert.deepEqual([armor.travelLongBoots.defense, armor.travelLongBoots.movementSpeedBonus], [6, .08], 'travel long boots stats match the design');
+assert.deepEqual([armor.leatherShortBoots.defense, armor.leatherShortBoots.dodge], [5, .03], 'leather short boots stats match the design');
+assert.deepEqual([armor.travelLongBoots.defense, armor.travelLongBoots.movementSpeedBonus], [4, .08], 'travel long boots stats match the design');
 assert.match(armor.leatherShortBoots.image, /assets\/leather-short-boots\.png/, 'leather short boots use their dedicated artwork');
 assert.match(armor.travelLongBoots.image, /assets\/travel-long-boots\.png/, 'travel long boots use their dedicated artwork');
 assert.notEqual(armor.leatherShortBoots.image, armor.travelLongBoots.image, 'the two leather boots no longer share artwork');

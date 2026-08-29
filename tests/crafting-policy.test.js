@@ -42,6 +42,13 @@ assertValidBatch('chapter1-high-chief-rare-wrist', 2, 3, 40);
 assertValidBatch('chapter1-goblin-rare-cloak', 2, 3, 50);
 assertValidBatch('chapter1-black-knight-rare-shoulders', 2, 3, 60);
 
+assert.deepEqual(green[0].baseStats, { defense: 4, hp: 15 });
+assert.equal(green[0].defense, 4);
+assert.equal(green[0].hp, 15);
+const universalWrist = CraftingPolicy.generateCraftedEquipment('chapter1-high-chief-rare-wrist', { random: () => 0 });
+assert.deepEqual(universalWrist.allowedJobs, [], 'chapter-one crafted equipment remains usable by every job');
+assert.equal(universalWrist.damageBonus, .02, 'rare wrist keeps its universal damage bonus as a base stat');
+
 assert.deepEqual(JSON.parse(JSON.stringify(green[0])), green[0], 'save/load stores final values instead of rerolling');
 
 const recipeId = 'chapter1-green-wrist';
