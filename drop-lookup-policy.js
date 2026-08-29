@@ -40,7 +40,7 @@
       const specialSource = options.specialEquipmentPolicy?.DROP_SOURCES?.[monsterId];
       if (specialSource?.mapId === map.id) {
         const template = options.specialEquipmentPolicy.getTemplate?.(specialSource.templateId);
-        addSource(index, template && { ...template, category: 'equipment', typeLabel: '紫色專屬裝備（機率與能力待定）' }, { ...sourceBase, rate: specialSource.dropRate, amount: 1, note: '直接掉落成品；未設保底，目前尚未啟用擲骰' });
+        addSource(index, template && { ...template, category: 'equipment', typeLabel: '紫色專屬裝備（掉落機率待定）' }, { ...sourceBase, rate: specialSource.dropRate, amount: 1, note: '能力與數值已設定；掉落率未定，目前尚未啟用擲骰' });
       }
       (options.skillPolicy?.DROP_CONFIG?.[map.chapter]?.materials || []).filter((drop) => !drop.bossOnly || monster.isBoss).forEach((drop) => { const item = skillById.get(drop.materialId); addSource(index, item && { ...item, category: 'skill', typeLabel: '技能材料' }, { ...sourceBase, rate: drop.chance, amount: drop.amount || 1 }); });
       const loot = monster.lootConfig;

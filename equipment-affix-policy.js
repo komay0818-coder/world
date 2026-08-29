@@ -15,7 +15,7 @@
     legendary: Object.freeze({ fixedCount: Object.freeze([2, 3]), randomCount: Object.freeze([1, 2]), specialChance: 0, requiresLegendaryAbility: true })
   });
   const SLOT_GROUPS = Object.freeze({
-    weapon: 'weapon', head: 'armor', shoulders: 'armor', armor: 'armor', wrist: 'armor', gloves: 'armor',
+    weapon: 'weapon', offhand: 'accessory', head: 'armor', shoulders: 'armor', armor: 'armor', wrist: 'armor', gloves: 'armor',
     pants: 'armor', boots: 'armor', cloak: 'armor', necklace: 'accessory', ring: 'accessory', ring1: 'accessory', ring2: 'accessory'
   });
   const AFFIX_TYPES = Object.freeze({ STAT: 'stat', COMPOSITE: 'composite', SKILL: 'skill' });
@@ -72,7 +72,11 @@
   }
   const SPECIAL_ABILITIES = Object.freeze({
     cooldown_reset_on_critical: specialAbility('cooldown_reset_on_critical', '星火回響', '暴擊時有 10% 機率重置技能冷卻。', { unlockChapter: 3 }),
-    mage_fireball_burn: specialAbility('mage_fireball_burn', '燃燒火球', '火球命中時附加燃燒。', { type: 'special-skill', unlockChapter: 2, jobId: 'mage', skillId: 'fireball', isSpecialSkillEffect: true, allowedGroups: ['weapon', 'accessory'] })
+    mage_fireball_burn: specialAbility('mage_fireball_burn', '燃燒火球', '火球命中時附加燃燒。', { type: 'special-skill', unlockChapter: 2, jobId: 'mage', skillId: 'fireball', isSpecialSkillEffect: true, allowedGroups: ['weapon', 'accessory'] }),
+    warlord_unyielding: specialAbility('warlord_unyielding', '督軍不屈', '生命低於 30% 時，受到傷害降低 15%。', { unlockChapter: 2, allowedGroups: ['armor'], allowedSlots: ['head'] }),
+    corrupted_swiftness: specialAbility('corrupted_swiftness', '腐化迅捷', '攻擊時有 10% 機率使攻擊速度提高 15%，持續 5 秒。', { unlockChapter: 2, allowedGroups: ['armor'], allowedSlots: ['boots'] }),
+    deep_forest_echo: specialAbility('deep_forest_echo', '幽森回響', '施放主動技能時有 15% 機率恢復 6% 最大魔力。', { unlockChapter: 2, allowedGroups: ['accessory'], allowedSlots: ['offhand'] }),
+    thorn_corrosion: specialAbility('thorn_corrosion', '荊棘侵蝕', '傷害型法術命中時有 15% 機率附加持續傷害；傷害數值待後續平衡。', { unlockChapter: 2, allowedGroups: ['weapon'], allowedSlots: ['weapon'] })
   });
   const MUTUAL_EXCLUSIONS = Object.freeze([
     Object.freeze(['critical_chance', 'critical_damage_percent']),
@@ -93,7 +97,7 @@
     return QUALITY.common;
   }
   function getQualityLabel(itemOrQuality) { return QUALITY_LABELS[normalizeQuality(typeof itemOrQuality === 'object' ? itemOrQuality?.quality || itemOrQuality?.rarity : itemOrQuality)]; }
-  function getEquipmentGroup(item) { return item?.kind === 'equipment' && item.slot !== 'offhand' ? SLOT_GROUPS[item.slot] || null : null; }
+  function getEquipmentGroup(item) { return item?.kind === 'equipment' ? SLOT_GROUPS[item.slot] || null : null; }
   function getRuleCount(value, random = Math.random) {
     if (!Array.isArray(value)) return Math.max(0, Number(value) || 0);
     const min = Math.max(0, Number(value[0]) || 0); const max = Math.max(min, Number(value[1]) || min);
@@ -131,12 +135,14 @@
   }
   function normalizeAffix(raw, source = raw?.source || 'random', chapter = 1) {
     const definition = EQUIPMENT_AFFIXES[raw?.id];
-    if (!definition?.enabled) return null;
+    if (!definition?.enabled) return Array.isArray(raw?.components) && raw?.customFixed
+      ? { ...raw, source, components: raw.components.map((entry) => ({ ...entry })) }
+      : null;
     return materializeAffix(definition.id, source, chapter);
   }
   function conflicts(candidate, selected) {
     const candidateStats = candidate.components.map((entry) => entry.stat);
-    if (selected.some((entry) => entry.id === candidate.id || (EQUIPMENT_AFFIXES[entry.id]?.components || []).some((component) => candidateStats.includes(component.stat)))) return true;
+    if (selected.some((entry) => entry.id === candidate.id || (entry.components || EQUIPMENT_AFFIXES[entry.id]?.components || []).some((component) => candidateStats.includes(component.stat)))) return true;
     if (candidate.exclusionGroups.some((group) => selected.some((entry) => EQUIPMENT_AFFIXES[entry.id]?.exclusionGroups.includes(group)))) return true;
     if (candidate.mutuallyExclusiveWith.some((id) => selected.some((entry) => entry.id === id))) return true;
     if (selected.some((entry) => EQUIPMENT_AFFIXES[entry.id]?.mutuallyExclusiveWith.includes(candidate.id))) return true;
@@ -159,7 +165,15 @@
     }
     return result;
   }
-  function getFixedAffixes(template, count, context = {}) {
+  function rollRange(min, max, random) {
+    const lower = Number(min) || 0; const upper = Math.max(lower, Number(max) || lower);
+    return lower + Math.floor(clampRoll(random()) * (upper - lower + 1));
+  }
+  function getFixedAffixes(template, count, context = {}, random = Math.random) {
+    if (Array.isArray(template?.fixedAffixDefinitions)) return template.fixedAffixDefinitions.slice(0, count).map((entry) => {
+      const value = rollRange(entry.min, entry.max, random);
+      return { id: entry.id, name: entry.name, type: 'stat', stat: entry.stat, value, unit: entry.unit || '', components: [{ stat: entry.stat, value, unit: entry.unit || '' }], source: 'fixed', customFixed: true };
+    });
     const group = getEquipmentGroup(template);
     const configured = Array.isArray(template?.fixedAffixIds) ? template.fixedAffixIds : DEFAULT_FIXED_AFFIXES[group] || [];
     return configured.filter((id) => isDefinitionUnlocked(EQUIPMENT_AFFIXES[id], template, context)).map((id) => materializeAffix(id, 'fixed', context.chapter)).filter(Boolean).slice(0, count);
@@ -173,9 +187,9 @@
   }
   function createEquipmentInstance(template, options = {}) {
     const quality = normalizeQuality(options.quality ?? template?.quality);
-    const rule = QUALITY_AFFIX_RULES[quality]; const random = typeof options.random === 'function' ? options.random : Math.random;
+    const baseRule = QUALITY_AFFIX_RULES[quality]; const rule = { ...baseRule, ...(template?.affixRuleOverride || {}) }; const random = typeof options.random === 'function' ? options.random : Math.random;
     const context = { chapter: normalizeChapter(options.chapter || template.affixChapter), quality, jobId: options.jobId || null };
-    const fixedAffixes = getFixedAffixes(template, getRuleCount(rule.fixedCount, random), context);
+    const fixedAffixes = getFixedAffixes(template, getRuleCount(rule.fixedCount, random), context, random);
     const randomAffixes = rollEquipmentAffixes(template, getRuleCount(rule.randomCount, random), random, 1, fixedAffixes, context);
     const item = { ...template, id: options.uniqueId === undefined ? template.id : `${template.id}-${options.uniqueId}`, baseItemId: template.baseItemId || template.id, affixSchemaVersion: SCHEMA_VERSION, affixChapter: context.chapter, quality, rarity: quality, fixedAffixes, randomAffixes, affixes: [...fixedAffixes, ...randomAffixes], specialAbility: rollSpecialAbility(template, quality, random, Number(options.specialChance ?? rule.specialChance) || 0, context) };
     if (quality === QUALITY.legendary) item.legendaryAbility = template.legendaryAbility ? { ...template.legendaryAbility } : null;
@@ -196,6 +210,6 @@
   function getDefinitionComponents(entry) { return Array.isArray(entry?.components) ? entry.components : EQUIPMENT_AFFIXES[entry?.id]?.components || []; }
   function getAffixValue(item, stat) { return (item?.affixes || []).reduce((sum, entry) => sum + getDefinitionComponents(entry).filter((component) => component.stat === stat).reduce((subtotal, component) => subtotal + (Number(component.value) || 0), 0), 0); }
   function getEquippedAffixStats(equipmentBySlot) { return Object.values(equipmentBySlot || {}).filter(Boolean).reduce((totals, item) => { (item.affixes || []).forEach((entry) => getDefinitionComponents(entry).forEach((component) => { totals[component.stat] = (totals[component.stat] || 0) + (Number(component.value) || 0); })); return totals; }, {}); }
-  function formatAffix(entry) { const definition = EQUIPMENT_AFFIXES[entry?.id]; if (!definition?.enabled) return ''; if (definition.components.length === 1) return `${definition.name} +${definition.components[0].value}${definition.components[0].unit || ''}`; return `${definition.name}（${definition.components.map((component) => `${component.stat} +${component.value}${component.unit || ''}`).join('、')}）`; }
+  function formatAffix(entry) { const definition = EQUIPMENT_AFFIXES[entry?.id]; if (!definition?.enabled) return entry?.customFixed ? `${entry.name} +${entry.value}${entry.unit || ''}` : ''; if (definition.components.length === 1) return `${definition.name} +${definition.components[0].value}${definition.components[0].unit || ''}`; return `${definition.name}（${definition.components.map((component) => `${component.stat} +${component.value}${component.unit || ''}`).join('、')}）`; }
   return Object.freeze({ SCHEMA_VERSION, QUALITY, QUALITY_LABELS, QUALITY_AFFIX_RULES, SLOT_GROUPS, AFFIX_TYPES, ROLLABLE_QUALITIES, EQUIPMENT_AFFIXES, SPECIAL_ABILITIES, MUTUAL_EXCLUSIONS, DEFAULT_FIXED_AFFIXES, normalizeQuality, normalizeChapter, getQualityLabel, getEquipmentGroup, getRuleCount, isJobCompatible, isDefinitionUnlocked, normalizeAffix, normalizeEquipment, getAvailableAffixes, rollEquipmentAffix, rollEquipmentAffixes, rollSpecialAbility, createEquipmentInstance, getAffixValue, getEquippedAffixStats, formatAffix });
 }));

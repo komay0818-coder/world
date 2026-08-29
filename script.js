@@ -2028,6 +2028,8 @@ function getEquipmentStats(progress = getProgress()) {
   const affixes = EquipmentAffixPolicy.getEquippedAffixStats(progress.equipment);
   return {
     ...fixed,
+    mana: fixed.mana + (affixes.mana || 0),
+    magicDamageBonus: fixed.magicDamageBonus + (affixes.magicDamageBonus || 0) / 100,
     attackFlat: affixes.attackFlat || 0,
     maxHp: affixes.maxHp || 0,
     hpRegeneration: fixed.hpRegeneration + (affixes.hpRegeneration || 0),
@@ -2253,7 +2255,8 @@ function equipmentDetailsHtml(item) {
     return statMatch ? `<span class="equipment-base-stat"><strong>${statMatch[1]}</strong><span>${statMatch[3]}</span></span>` : `<span class="equipment-base-stat">${part}</span>`;
   }).join('');
   const affixLines = (item.affixes || []).map((entry) => equipmentAffixLineHtml(entry, item)).filter(Boolean);
-  return `<span class="equipment-base-stats">${baseStats}</span>${affixLines.length ? `<span class="equipment-affix-section"><span class="equipment-affix-title">裝備詞綴</span>${affixLines.join('')}</span>` : ''}`;
+  const specialAbility = item.specialAbility ? `<span class="equipment-affix-section equipment-special-ability"><span class="equipment-affix-title">紫裝特殊能力</span><div class="equipment-affix-line"><span class="equipment-affix-source is-special">專屬</span><span class="equipment-affix-name">【${item.specialAbility.name}】${item.specialAbility.description}</span></div></span>` : '';
+  return `<span class="equipment-base-stats">${baseStats}</span>${affixLines.length ? `<span class="equipment-affix-section"><span class="equipment-affix-title">裝備詞綴</span>${affixLines.join('')}</span>` : ''}${specialAbility}`;
 }
 
 function itemCategory(item) {
@@ -4463,6 +4466,25 @@ function useAutoSkillForMember(member, now = Date.now()) {
     member.blinkCooldownReduction = 0;
     member.globalSkillReadyAt = now + 1000;
     const totalDamage = hits.reduce((total, target) => total + target.result.finalDamage, 0);
+    if (hits.length) {
+      const swiftness = ChapterTwoSpecialEquipmentPolicy.rollCorruptedSwiftness(member.progress.equipment);
+      if (swiftness) {
+        member.corruptedSwiftnessUntil = now + swiftness.durationMs;
+        member.corruptedSwiftnessBonus = swiftness.attackSpeedBonus;
+        logBattle(`◆ ${member.name}觸發【腐化迅捷】，攻擊速度提高 15%！`, 'system');
+      }
+      const corrosion = ChapterTwoSpecialEquipmentPolicy.rollThornCorrosion(member.progress.equipment, { attackKind: 'skill', damageType: profile.damageType, finalDamage: totalDamage });
+      if (corrosion) {
+        member.thornCorrosionPendingBalance = true;
+        logBattle(`◆ ${member.name}觸發【荊棘侵蝕】；持續傷害等待後續平衡。`, 'system');
+      }
+    }
+    const echoRecovery = ChapterTwoSpecialEquipmentPolicy.rollDeepForestEcho(member.progress.equipment);
+    if (echoRecovery && member.resourceType === 'mana') {
+      const restored = Math.max(1, Math.ceil(member.resourceMax * echoRecovery));
+      member.resourceCurrent = Math.min(member.resourceMax, member.resourceCurrent + restored);
+      logBattle(`◆ ${member.name}觸發【幽森回響】，恢復 ${restored} 魔力。`, 'system');
+    }
     if (skill.id !== 'companion') playPartyMemberCombatAnimation(member, (skill.id === 'shadow-dance' ? resolvedTargets : (hits.length ? hits : resolvedTargets)).map((target) => target.index), {
       kind: 'skill',
       area: Number(skillEffect.targets || skill.targets || 1) > 1,
@@ -4693,6 +4715,12 @@ function processPartyMemberAttacks(now = Date.now()) {
     const result = applyDamageToMonster(targetIndex, hit, profile, { attacker: member, attackKind: 'basic' });
     playPartyMemberCombatAnimation(member, [targetIndex], { kind: 'basic' });
     if (!result.evaded) {
+      const swiftness = ChapterTwoSpecialEquipmentPolicy.rollCorruptedSwiftness(member.progress.equipment);
+      if (swiftness) {
+        member.corruptedSwiftnessUntil = now + swiftness.durationMs;
+        member.corruptedSwiftnessBonus = swiftness.attackSpeedBonus;
+        logBattle(`◆ ${member.name}觸發【腐化迅捷】，攻擊速度提高 15%！`, 'system');
+      }
       if (member.resourceType === 'rage') member.resourceCurrent = WarriorResourcePolicy.gainFromAttack(member.resourceCurrent);
       logBattle(`⚔ ${member.name}對【${enemy.name}】造成 ${result.finalDamage} 傷害${critical ? '（暴擊）' : ''}${orcRage ? '（狂怒）' : ''}${instinctTriggered ? '（獵人本能）' : ''}`, 'damage-dealt', { aggregateKey: `member-${member.id}-${battle.enemyTypes[targetIndex]}`, damage: result.finalDamage, summary: `⚔ ${member.name}攻擊【${enemy.name}】` });
       if (member.job === 'hunter' && member.level >= 8 && battle.enemyHps[targetIndex] > 0) {
@@ -4732,7 +4760,8 @@ function processPartyMemberAttacks(now = Date.now()) {
       : 1;
     const skillHasteMultiplier = now < (member.skillHasteUntil || 0) ? 1 + (member.skillHasteBonus || 0) : 1;
     const blessingSpeedMultiplier = now < (member.lightGraceUntil || 0) ? 1 + (member.lightGraceAttackSpeed || 0) : 1;
-    PartyPolicy.scheduleNextAttack(member, now, member.attackSpeed * skillHasteMultiplier * blessingSpeedMultiplier * (1 + (desperate?.speed || 0)), exhaustedMultiplier * trailSlowMultiplier);
+    const corruptedSwiftnessMultiplier = now < (member.corruptedSwiftnessUntil || 0) ? 1 + (member.corruptedSwiftnessBonus || 0) : 1;
+    PartyPolicy.scheduleNextAttack(member, now, member.attackSpeed * skillHasteMultiplier * blessingSpeedMultiplier * corruptedSwiftnessMultiplier * (1 + (desperate?.speed || 0)), exhaustedMultiplier * trailSlowMultiplier);
   }
 }
 
@@ -4953,7 +4982,7 @@ function legacyEnemyAttackTick() {
     let enemyHit = dodged ? 0 : MonsterDefense.resolvePlayerDamage({
       baseDamage: rawEnemyHit,
       defense: stats.defense,
-      damageReduction: stats.damageReduction
+      damageReduction: Math.min(.9, stats.damageReduction + ChapterTwoSpecialEquipmentPolicy.getIncomingDamageReduction(progress.equipment, battle.playerHp / maxHp))
     }).finalDamage;
     if (parried) {
       enemyHit = Math.max(1, Math.ceil(enemyHit * .5));
@@ -5615,7 +5644,9 @@ function enemyAttackTick() {
     let damage = dodged ? 0 : MonsterDefense.resolvePlayerDamage({
       baseDamage: rawDamage,
       defense: Math.max(0, Math.round(stats.defense * armorBreakMultiplier * spiderNestArmorMultiplier * piercingMultiplier)),
-      damageReduction: Math.min(.9, stats.damageReduction + (now < (target.manaShieldReductionUntil || 0) ? target.manaShieldDamageReduction || 0 : 0))
+      damageReduction: Math.min(.9, stats.damageReduction
+        + ChapterTwoSpecialEquipmentPolicy.getIncomingDamageReduction(target.progress.equipment, target.currentHp / target.maxHp)
+        + (now < (target.manaShieldReductionUntil || 0) ? target.manaShieldDamageReduction || 0 : 0))
     }).finalDamage;
     if (parried) damage = Math.max(1, Math.ceil(damage * .5));
     const absorbed = Math.min(target.shield || 0, damage);
