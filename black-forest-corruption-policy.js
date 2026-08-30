@@ -15,12 +15,12 @@
   const MAX_HP_LOSS_PER_SECOND_PER_LAYER = .01;
 
   const MAP_MATERIALS = Object.freeze({
-    'black-forest-entrance': Object.freeze({ id: 'forest-purification-leaf', name: '森林淨化葉', mapId: 'black-forest-entrance', chapter: 2, kind: 'chapter-purification-material', icon: '🍃' }),
-    'black-forest-trail': Object.freeze({ id: 'blackstone-cursebreaker-stone', name: '黑石破咒石', mapId: 'black-forest-trail', chapter: 2, kind: 'chapter-purification-material', icon: '◆' }),
-    'spider-nest': Object.freeze({ id: 'spider-venom-purification-sac', name: '蛛毒淨化囊', mapId: 'spider-nest', chapter: 2, kind: 'chapter-purification-material', icon: '◉' }),
-    'blackstone-stronghold': Object.freeze({ id: 'warlord-insignia-fragment', name: '督軍徽記碎片', mapId: 'blackstone-stronghold', chapter: 2, kind: 'chapter-purification-material', icon: '✥' }),
-    'forest-altar': Object.freeze({ id: 'altar-purification-crystal', name: '祭壇淨化結晶', mapId: 'forest-altar', chapter: 2, kind: 'chapter-purification-material', icon: '◇' }),
-    'black-forest-depths': Object.freeze({ id: 'black-forest-heart-fragment', name: '黑森林之心碎片', mapId: 'black-forest-depths', chapter: 2, kind: 'chapter-purification-material', icon: '♥' })
+    'black-forest-entrance': Object.freeze({ id: 'forest-purification-leaf', name: '森林淨化葉', mapId: 'black-forest-entrance', chapter: 2, kind: 'chapter-purification-material', icon: '🍃', image: 'assets/forest-purification-leaf.png', imageStatus: 'ready' }),
+    'black-forest-trail': Object.freeze({ id: 'blackstone-cursebreaker-stone', name: '黑石破咒石', mapId: 'black-forest-trail', chapter: 2, kind: 'chapter-purification-material', icon: '◆', image: 'assets/blackstone-cursebreaker-stone.png', imageStatus: 'ready' }),
+    'spider-nest': Object.freeze({ id: 'spider-venom-purification-sac', name: '蛛毒淨化囊', mapId: 'spider-nest', chapter: 2, kind: 'chapter-purification-material', icon: '◉', image: 'assets/spider-venom-purification-sac.png', imageStatus: 'ready' }),
+    'blackstone-stronghold': Object.freeze({ id: 'warlord-insignia-fragment', name: '督軍徽記碎片', mapId: 'blackstone-stronghold', chapter: 2, kind: 'chapter-purification-material', icon: '✥', image: 'assets/warlord-insignia-fragment.png', imageStatus: 'ready' }),
+    'forest-altar': Object.freeze({ id: 'altar-purification-crystal', name: '祭壇淨化結晶', mapId: 'forest-altar', chapter: 2, kind: 'chapter-purification-material', icon: '◇', image: 'assets/altar-purification-crystal.png', imageStatus: 'ready' }),
+    'black-forest-depths': Object.freeze({ id: 'black-forest-heart-fragment', name: '黑森林之心碎片', mapId: 'black-forest-depths', chapter: 2, kind: 'chapter-purification-material', icon: '♥', image: 'assets/black-forest-heart-fragment.png', imageStatus: 'ready' })
   });
 
   function normalizeState(saved) {

@@ -7,6 +7,15 @@ assert.equal(policy.MATERIAL_COST, 20);
 assert.equal(policy.GOLD_COST, 1000);
 assert.equal(policy.SUCCESS_RATE, .10);
 assert.deepEqual(Object.values(policy.MAP_MATERIALS).map((item) => item.name), ['森林淨化葉', '黑石破咒石', '蛛毒淨化囊', '督軍徽記碎片', '祭壇淨化結晶', '黑森林之心碎片']);
+assert.deepEqual(Object.values(policy.MAP_MATERIALS).map((item) => item.image), [
+  'assets/forest-purification-leaf.png',
+  'assets/blackstone-cursebreaker-stone.png',
+  'assets/spider-venom-purification-sac.png',
+  'assets/warlord-insignia-fragment.png',
+  'assets/altar-purification-crystal.png',
+  'assets/black-forest-heart-fragment.png'
+]);
+assert.ok(Object.values(policy.MAP_MATERIALS).every((item) => item.imageStatus === 'ready'));
 
 const material = policy.MAP_MATERIALS['spider-nest'];
 const failed = { gold: 2000, inventory: [{ ...material, quantity: 40 }], blackForestCorruption: { initialized: true, removedLayers: 0 } };
@@ -27,6 +36,7 @@ assert.equal(policy.createMapDrop('forest-altar', {}, () => .10), null);
 assert.equal(policy.createMapDrop('forest-altar', { isElite: true }, () => .249).quantity, 1);
 assert.equal(policy.createMapDrop('forest-altar', { isElite: true }, () => .25), null);
 assert.equal(policy.createMapDrop('forest-altar', { isBoss: true }, () => .999).quantity, 1);
+assert.equal(policy.createMapDrop('forest-altar', { isBoss: true }, () => .999).image, 'assets/altar-purification-crystal.png');
 
 const legacy = policy.normalizeState({ initialized: true, purifiedMapIds: ['black-forest-entrance', 'spider-nest'] });
 assert.equal(policy.getEffect(legacy).level, 4, 'legacy permanent progress is retained');
