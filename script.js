@@ -2480,7 +2480,9 @@ function getDropLookupItems() {
     skillPolicy: SkillUpgradePolicy,
     bossPolicy: ChapterBossDropPolicy,
     purificationPolicy: BlackForestCorruptionPolicy,
-    specialEquipmentPolicy: ChapterTwoSpecialEquipmentPolicy
+    specialEquipmentPolicy: ChapterTwoSpecialEquipmentPolicy,
+    runeDropPolicy: ChapterTwoRuneDropPolicy,
+    runePolicy: RunePolicy
   });
 }
 
@@ -4041,6 +4043,7 @@ function rewardVictory(index) {
   const skillMaterialDrops = SkillUpgradePolicy.grantChapterDrops(progress, currentMap.chapter, enemy);
   const recipeDrops = ChapterOneRecipeDropPolicy.grantRecipeDrops(progress, enemy, currentMap.id);
   recipeDrops.push(...ChapterTwoRecipeDropPolicy.grantRecipeDrops(progress, enemy, currentMap.id));
+  const runeDrop = ChapterTwoRuneDropPolicy.grantRuneDrop(progress, currentMap.id, enemy);
   let equipmentDrop = null;
   try {
     equipmentDrop = EquipmentDropPolicy.grantEquipmentDrop(progress, enemy, { chapter: currentMap.chapter, dropRateMultiplier: affixDropBonus.equipmentMultiplier });
@@ -4121,6 +4124,7 @@ function rewardVictory(index) {
   if (purificationDrop) addRoundLoot(`purification:${purificationDrop.id || purificationDrop.name}`, purificationDrop.name, purificationDrop.quantity || 1, purificationDrop.icon || '◇');
   skillMaterialDrops.forEach((material) => addRoundLoot(`skill:${material.id || material.name}`, material.name, material.quantity || 1, material.icon || '📜'));
   recipeDrops.forEach((recipe) => addRoundLoot(`recipe:${recipe.id || recipe.name}`, recipe.name, recipe.quantity || 1, recipe.icon || '📜'));
+  if (runeDrop) addRoundLoot(`rune:${runeDrop.id}`, runeDrop.name, 1, runeDrop.icon || '◆');
   if (equipmentDrop) addRoundLoot(`equipment:${equipmentDrop.name}`, equipmentDrop.name, 1, '⚔');
   if (blueEquipmentDrop) addRoundLoot(`equipment:${blueEquipmentDrop.name}`, blueEquipmentDrop.name, 1, '🔷');
   if (specialEquipmentDrop) addRoundLoot(`equipment:${specialEquipmentDrop.name}`, specialEquipmentDrop.name, 1, '🟣');
@@ -4146,6 +4150,10 @@ function rewardVictory(index) {
     showToast(`獲得配方：${recipe.name}`);
     logBattle(`◆ 配方掉落【${recipe.name} ×${recipe.quantity}】`, 'loot');
   });
+  if (runeDrop) {
+    showToast(`獲得符文：${runeDrop.name}`);
+    logBattle(`◆ 符文掉落【${runeDrop.name} ×1】`, 'loot');
+  }
   if (equipmentDrop) {
     const rarityLabel = EquipmentAffixPolicy.getQualityLabel(equipmentDrop);
     showToast(`獲得裝備：${equipmentDrop.name}`);
@@ -4171,7 +4179,7 @@ function rewardVictory(index) {
     rewardKey,
     xp: earnedXp,
     gold: earnedGold,
-    loot: [loot?.name, ...materialDrops.map((material) => material.name), ...recipeDrops.map((recipe) => recipe.name), equipmentDrop?.name, blueEquipmentDrop?.name, specialEquipmentDrop?.name, offhandDrop?.name, ...accountDrops].filter(Boolean).join(',') || 'none'
+    loot: [loot?.name, ...materialDrops.map((material) => material.name), ...recipeDrops.map((recipe) => recipe.name), runeDrop?.name, equipmentDrop?.name, blueEquipmentDrop?.name, specialEquipmentDrop?.name, offhandDrop?.name, ...accountDrops].filter(Boolean).join(',') || 'none'
   });
 }
 

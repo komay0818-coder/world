@@ -7,6 +7,8 @@ const ChapterTwoRecipePolicy = require('../chapter-two-recipe-drop-policy.js');
 const SpecialEquipmentPolicy = require('../chapter-two-special-equipment-policy.js');
 const SkillPolicy = require('../skill-upgrade-policy.js');
 const BossPolicy = require('../chapter-boss-drop-policy.js');
+const RunePolicy = require('../rune-policy.js');
+const RuneDropPolicy = require('../chapter-two-rune-drop-policy.js');
 
 const normalLoot = { equipmentDropRate: .25, rarityWeights: { common: 60, uncommon: 40 } };
 const bossLoot = { equipmentDropRate: 1, rarityWeights: { common: 20, uncommon: 80 } };
@@ -32,7 +34,7 @@ const mapPools = {
   'black-forest-trail': { normal: ['trailWolf', 'blackstoneTrailScout'], boss: ['blackstoneCenturion'] },
   'forest-altar': { elite: ['fallenDruid'] }
 };
-const items = DropLookupPolicy.buildIndex({ maps, mapPools, monsters, materialPolicies: [MaterialPolicy, ChapterTwoMaterialPolicy], recipePolicies: [RecipePolicy, ChapterTwoRecipePolicy], skillPolicy: SkillPolicy, bossPolicy: BossPolicy, specialEquipmentPolicy: SpecialEquipmentPolicy });
+const items = DropLookupPolicy.buildIndex({ maps, mapPools, monsters, materialPolicies: [MaterialPolicy, ChapterTwoMaterialPolicy], recipePolicies: [RecipePolicy, ChapterTwoRecipePolicy], skillPolicy: SkillPolicy, bossPolicy: BossPolicy, specialEquipmentPolicy: SpecialEquipmentPolicy, runePolicy: RunePolicy, runeDropPolicy: RuneDropPolicy });
 
 const wolfFang = items.find((item) => item.id === 'wolf-fang');
 assert(wolfFang, '狼牙應由現有材料掉落設定建立索引');

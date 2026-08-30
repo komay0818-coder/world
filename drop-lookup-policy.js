@@ -5,7 +5,7 @@
 }(typeof globalThis !== 'undefined' ? globalThis : this, function createDropLookupPolicy() {
   'use strict';
   const QUALITY_NAMES = Object.freeze({ common: '白色裝備', uncommon: '綠色裝備', rare: '藍色裝備', epic: '紫色裝備', legendary: '傳奇裝備' });
-  const CATEGORY_NAMES = Object.freeze({ equipment: '裝備', material: '材料', recipe: '配方', skill: '技能材料' });
+  const CATEGORY_NAMES = Object.freeze({ equipment: '裝備', material: '材料', recipe: '配方', skill: '技能材料', rune: '符文' });
   function percent(rate) { const value = Math.max(0, Math.min(1, Number(rate) || 0)) * 100; return `${Number.isInteger(value) ? value : Number(value.toFixed(2))}%`; }
   function uniqueMonsterIds(pool) { return [...new Set(['normal', 'rare', 'elite', 'boss'].flatMap((rank) => pool?.[rank] || []))]; }
   function addSource(index, item, source) {
@@ -28,6 +28,9 @@
     maps.forEach((map) => uniqueMonsterIds(mapPools[map.id]).forEach((monsterId) => {
       const monster = monsters[monsterId]; if (!monster) return;
       const sourceBase = { chapter: map.chapter, mapId: map.id, mapName: map.name, monsterId, monsterName: monster.name };
+      const runeConfig = options.runeDropPolicy?.getDropConfig?.(map.id, monster);
+      const runeItem = runeConfig && options.runePolicy?.RUNE_BY_ID?.get(runeConfig.runeId);
+      if (runeItem) addSource(index, { ...runeItem, category: 'rune', typeLabel: '區域專屬符文' }, { ...sourceBase, rate: runeConfig.dropRate, amount: 1, note: '所在地圖專屬，獨立判定，無保底' });
       const purificationItem = options.purificationPolicy?.MAP_MATERIALS?.[map.id];
       if (purificationItem) {
         const rank = monster.isBoss ? 'boss' : monster.isElite ? 'elite' : 'normal';
