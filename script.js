@@ -4019,6 +4019,12 @@ function rewardVictory(index) {
   } catch (error) {
     console.warn('[ChapterBossDrop] 藍色裝備掉落處理發生未預期錯誤，其他戰鬥獎勵將繼續結算。', error);
   }
+  let specialEquipmentDrop = null;
+  try {
+    specialEquipmentDrop = ChapterTwoSpecialEquipmentPolicy.grantSpecialDrop(progress, enemy, currentMap.id);
+  } catch (error) {
+    console.warn('[SpecialEquipmentDrop] 第二章特殊紫裝掉落處理發生未預期錯誤，其他戰鬥獎勵將繼續結算。', error);
+  }
   let offhandDrop = null;
   if (currentMap.id === 'plains-depths' && Math.random() < EquipmentPolicy.getPlainsDepthsOffhandDropRate(enemy)) {
     offhandDrop = EquipmentPolicy.createRandomOffhandDrop(Math.random(), Math.random(), `${Date.now()}-${Math.floor(Math.random() * 1000000)}`);
@@ -4077,6 +4083,7 @@ function rewardVictory(index) {
   recipeDrops.forEach((recipe) => addRoundLoot(`recipe:${recipe.id || recipe.name}`, recipe.name, recipe.quantity || 1, recipe.icon || '📜'));
   if (equipmentDrop) addRoundLoot(`equipment:${equipmentDrop.name}`, equipmentDrop.name, 1, '⚔');
   if (blueEquipmentDrop) addRoundLoot(`equipment:${blueEquipmentDrop.name}`, blueEquipmentDrop.name, 1, '🔷');
+  if (specialEquipmentDrop) addRoundLoot(`equipment:${specialEquipmentDrop.name}`, specialEquipmentDrop.name, 1, '🟣');
   if (offhandDrop) addRoundLoot(`equipment:${offhandDrop.name}`, offhandDrop.name, 1, '🛡');
   if (goblinCampMapDropped) addRoundLoot('goblin-camp-map', '哥布林營地地圖', 1, '🗺️');
   saveProgress(progress);
@@ -4108,6 +4115,10 @@ function rewardVictory(index) {
     showToast(`額外掉落藍色裝備：${blueEquipmentDrop.name}`);
     logBattle(`◆ 第一章額外掉落：【藍色】${blueEquipmentDrop.name}`, 'loot');
   }
+  if (specialEquipmentDrop) {
+    showToast(`特殊紫裝掉落：${specialEquipmentDrop.name}`);
+    logBattle(`◆ 第二章特殊掉落：【紫色】${specialEquipmentDrop.name}`, 'loot');
+  }
   if (offhandDrop) {
     showToast(`獲得副手：${offhandDrop.name}【${offhandDrop.affix.name}】`);
     logBattle(`🎁 掉落【${offhandDrop.name}】－${offhandDrop.affix.text}`, 'loot');
@@ -4120,7 +4131,7 @@ function rewardVictory(index) {
     rewardKey,
     xp: earnedXp,
     gold: earnedGold,
-    loot: [loot?.name, ...materialDrops.map((material) => material.name), ...recipeDrops.map((recipe) => recipe.name), equipmentDrop?.name, blueEquipmentDrop?.name, offhandDrop?.name, ...accountDrops].filter(Boolean).join(',') || 'none'
+    loot: [loot?.name, ...materialDrops.map((material) => material.name), ...recipeDrops.map((recipe) => recipe.name), equipmentDrop?.name, blueEquipmentDrop?.name, specialEquipmentDrop?.name, offhandDrop?.name, ...accountDrops].filter(Boolean).join(',') || 'none'
   });
 }
 

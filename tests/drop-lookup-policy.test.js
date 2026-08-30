@@ -63,8 +63,8 @@ assert.strictEqual(DropLookupPolicy.filterItems(items, '黑鐵礦石', 'material
 const greenWristRecipe = items.find((item) => item.id === 'recipe-chapter2-green-wrist');
 assert(greenWristRecipe.sources.some((source) => source.mapId === 'black-forest-trail' && source.monsterId === 'blackstoneCenturion' && source.rate === .01));
 const fallenThornWand = items.find((item) => item.id === 'fallen-thorn-wand');
-assert(fallenThornWand.sources.some((source) => source.mapId === 'forest-altar' && source.monsterId === 'fallenDruid' && source.rate === null));
-assert.match(fallenThornWand.typeLabel, /掉落機率待定/);
+assert(fallenThornWand.sources.some((source) => source.mapId === 'forest-altar' && source.monsterId === 'fallenDruid' && source.rate === .02));
+assert.equal(fallenThornWand.typeLabel, '紫色專屬裝備');
 assert.strictEqual(DropLookupPolicy.filterItems(items, '墮落荊棘魔杖', 'equipment', 'black-forest-trail').length, 0);
 assert.strictEqual(DropLookupPolicy.filterItems(items, '墮落荊棘魔杖', 'equipment', 'forest-altar').length, 1);
 assert.strictEqual(DropLookupPolicy.percent(.333333), '33.33%');

@@ -26,10 +26,10 @@
     fallenThornWand: template({ ...WAND_BASE_TEMPLATE, id: 'fallen-thorn-wand', name: '墮落荊棘魔杖', slot: 'weapon', series: '魔杖', weaponType: 'one-handed-wand', image: 'assets/fallen-thorn-wand.png', imageStatus: 'ready', allowedJobs: ['mage', 'priest'], fixedAffixDefinitions: [fixed('thorn-spell-damage', '法術傷害', 'magicDamageBonus', 6, 9, '%'), fixed('thorn-max-mana', '最大魔力', 'mana', 50, 80)], specialAbilityIds: ['thorn_corrosion'] })
   });
   const DROP_SOURCES = Object.freeze({
-    blackstoneStrongholdWarlord: Object.freeze({ mapId: 'blackstone-stronghold', monsterId: 'blackstoneStrongholdWarlord', templateId: TEMPLATES.blackstoneWarlordHelm.id, dropRate: null, enabled: false }),
-    corruptedAltarGuardian: Object.freeze({ mapId: 'forest-altar', monsterId: 'corruptedAltarGuardian', templateId: TEMPLATES.corruptedGuardianLeatherBoots.id, dropRate: null, enabled: false }),
-    heartOfTheBlackForest: Object.freeze({ mapId: 'black-forest-depths', monsterId: 'heartOfTheBlackForest', templateId: TEMPLATES.deepForestMagicOrb.id, dropRate: null, enabled: false }),
-    fallenDruid: Object.freeze({ mapId: 'forest-altar', monsterId: 'fallenDruid', templateId: TEMPLATES.fallenThornWand.id, dropRate: null, enabled: false })
+    blackstoneStrongholdWarlord: Object.freeze({ mapId: 'blackstone-stronghold', monsterId: 'blackstoneStrongholdWarlord', templateId: TEMPLATES.blackstoneWarlordHelm.id, dropRate: .03, enabled: true }),
+    corruptedAltarGuardian: Object.freeze({ mapId: 'forest-altar', monsterId: 'corruptedAltarGuardian', templateId: TEMPLATES.corruptedGuardianLeatherBoots.id, dropRate: .03, enabled: true }),
+    heartOfTheBlackForest: Object.freeze({ mapId: 'black-forest-depths', monsterId: 'heartOfTheBlackForest', templateId: TEMPLATES.deepForestMagicOrb.id, dropRate: .02, enabled: true }),
+    fallenDruid: Object.freeze({ mapId: 'forest-altar', monsterId: 'fallenDruid', templateId: TEMPLATES.fallenThornWand.id, dropRate: .02, enabled: true })
   });
   const TEMPLATE_BY_ID = new Map(Object.values(TEMPLATES).map((entry) => [entry.id, entry]));
   const clampRoll = (value) => Math.max(0, Math.min(.999999, Number(value) || 0));
@@ -52,6 +52,27 @@
     const tickDamage = Number(context.totalAttack) * THORN_CORROSION.damageRatio;
     return { durationSeconds: THORN_CORROSION.durationSeconds, tickIntervalMs: THORN_CORROSION.tickIntervalMs, tickDamage, tickCount: THORN_CORROSION.tickCount, totalDamage: tickDamage * THORN_CORROSION.tickCount };
   }
-  function grantSpecialDrop() { return null; }
+  function grantSpecialDrop(progress, enemy, mapId, options = {}) {
+    const source = getDropSource(enemy?.id);
+    if (!progress || !source?.enabled || source.mapId !== mapId) return null;
+    const random = typeof options.random === 'function' ? options.random : Math.random;
+    const dropRate = Math.max(0, Math.min(1, Number(options.dropRate ?? source.dropRate) || 0));
+    if (random() >= dropRate) return null;
+    progress.inventory = Array.isArray(progress.inventory) ? progress.inventory : [];
+    const obtainedAt = Number(options.obtainedAt) || Date.now();
+    const uniqueId = typeof options.uniqueIdFactory === 'function'
+      ? options.uniqueIdFactory(source, obtainedAt)
+      : `${obtainedAt.toString(36)}-${Math.floor(clampRoll(random()) * 2176782336).toString(36).padStart(6, '0')}`;
+    const item = createSpecialEquipmentInstance(source.templateId, { uniqueId, jobId: options.jobId, random });
+    if (!item) return null;
+    item.instanceId = item.id;
+    item.templateId = source.templateId;
+    item.baseItemId = source.templateId;
+    item.obtainedFrom = enemy.id;
+    item.obtainedAt = obtainedAt;
+    item.specialDropType = 'chapter-two-special-epic';
+    progress.inventory.push(item);
+    return item;
+  }
   return Object.freeze({ SPECIAL_AFFIX_RULE, THORN_CORROSION, WAND_BASE_TEMPLATE, MAGIC_ORB_BASE_TEMPLATE, TEMPLATES, DROP_SOURCES, getTemplate, getDropSource, hasAbility, createSpecialEquipmentInstance, getIncomingDamageReduction, rollCorruptedSwiftness, rollDeepForestEcho, rollThornCorrosion, grantSpecialDrop });
 }));

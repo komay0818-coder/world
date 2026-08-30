@@ -58,8 +58,30 @@ assert.equal(policy.rollThornCorrosion({ weapon: wand }, { attackKind: 'offhand'
 assert.equal(policy.rollThornCorrosion({ weapon: wand }, { attackKind: 'basic', finalDamage: 0, totalAttack: 100 }, () => 0), null, '未命中不觸發');
 
 assert.equal(Object.keys(policy.DROP_SOURCES).length, 4);
-assert.ok(Object.values(policy.DROP_SOURCES).every((source) => source.dropRate === null && source.enabled === false), '未擅自設定掉落率');
-assert.equal(policy.grantSpecialDrop({}, { id: 'blackstoneStrongholdWarlord' }), null, '掉落率未指定前不自動加入背包');
+assert.deepEqual(Object.values(policy.DROP_SOURCES).map((source) => source.dropRate), [.03, .03, .02, .02]);
+assert.ok(Object.values(policy.DROP_SOURCES).every((source) => source.enabled === true), '四件特殊紫裝正式啟用掉落');
+const dropCases = [
+  ['blackstoneStrongholdWarlord', 'blackstone-stronghold', 'blackstone-warlord-warhelm'],
+  ['corruptedAltarGuardian', 'forest-altar', 'corrupted-guardian-leather-boots'],
+  ['heartOfTheBlackForest', 'black-forest-depths', 'deep-forest-magic-orb'],
+  ['fallenDruid', 'forest-altar', 'fallen-thorn-wand']
+];
+dropCases.forEach(([monsterId, mapId, templateId], index) => {
+  const progress = { inventory: [] };
+  const item = policy.grantSpecialDrop(progress, { id: monsterId }, mapId, { dropRate: 1, random: () => 0, uniqueIdFactory: () => `test-${index}`, obtainedAt: 100 + index });
+  assert.ok(item, `${monsterId} 測試機率 100% 時會掉落`);
+  assert.equal(progress.inventory[0], item, '掉落實例直接加入背包');
+  assert.equal(item.templateId, templateId);
+  assert.equal(item.quality, 'epic');
+  assert.equal(item.fixedAffixes.length, 2);
+  assert.equal(item.randomAffixes.length, 2);
+  assert.ok(item.specialAbility);
+  assert.equal(item.obtainedFrom, monsterId);
+  assert.equal(item.specialDropType, 'chapter-two-special-epic');
+});
+assert.equal(policy.grantSpecialDrop({ inventory: [] }, { id: 'fallenDruid' }, 'wrong-map', { dropRate: 1, random: () => 0 }), null, '指定來源也必須位於正確地圖');
+assert.equal(policy.grantSpecialDrop({ inventory: [] }, { id: 'blackstoneStrongholdWarlord' }, 'blackstone-stronghold', { random: () => .03 }), null, '正式 3% 邊界不掉落');
+assert.equal(policy.grantSpecialDrop({ inventory: [] }, { id: 'heartOfTheBlackForest' }, 'black-forest-depths', { random: () => .02 }), null, '正式 2% 邊界不掉落');
 assert.match(script, /getIncomingDamageReduction\(progress\.equipment, battle\.playerHp \/ maxHp\)/, '主角色低生命減傷已接入');
 assert.match(script, /getIncomingDamageReduction\(target\.progress\.equipment, target\.currentHp \/ target\.maxHp\)/, '隊伍成員低生命減傷已接入');
 assert.match(script, /rollCorruptedSwiftness\(member\.progress\.equipment\)/, '腐化迅捷已接入攻擊流程');
@@ -70,5 +92,7 @@ assert.match(script, /existing\.damage = Math\.max\(existing\.damage, damage\)[\
 assert.match(script, /tickIntervalMs[\s\S]*nextTickAt[\s\S]*Math\.floor\(\(now - dot\.nextTickAt\) \/ dot\.tickIntervalMs\)/, '荊棘侵蝕依真實一秒間隔跳傷');
 assert.match(script, /hits\.forEach\(\(target\) => tryApplyThornCorrosion\(member, target\.index, 'skill'/, '每個技能命中目標獨立判定荊棘侵蝕');
 assert.match(script, /tryApplyThornCorrosion\(member, targetIndex, 'basic', result\.finalDamage, now\)/, '普通攻擊命中也會判定荊棘侵蝕');
+assert.match(script, /ChapterTwoSpecialEquipmentPolicy\.grantSpecialDrop\(progress, enemy, currentMap\.id/, '戰鬥獎勵結算會獨立判定第二章特殊紫裝');
+assert.match(script, /specialEquipmentDrop[\s\S]*addRoundLoot[\s\S]*第二章特殊掉落/, '特殊紫裝會顯示在戰利品並寫入戰鬥紀錄');
 
 console.log('chapter-two-special-equipment-policy: assertions passed');
