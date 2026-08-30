@@ -4,10 +4,10 @@
   else root.MonsterDisplayPolicy = api;
 }(typeof globalThis !== 'undefined' ? globalThis : this, function createMonsterDisplayPolicy() {
   const MONSTER_IMAGE_BY_TYPE = Object.freeze({
-    plainsRabbit: 'assets/plains-rabbit.png?v=20260724-transparent-v1',
-    plainsWolfPup: 'assets/plains-wolf-pup.png?v=20260724-user-image-v2',
-    plainsSlime: 'assets/plains-slime.png?v=20260724-transparent-v1',
-    plainsGoblinYoung: 'assets/plains-goblin-young.png?v=20260724-user-image-v1',
+    plainsRabbit: 'assets/plains-rabbit.png?v=20260831-monster-style-v1',
+    plainsWolfPup: 'assets/plains-wolf-pup.png?v=20260831-monster-style-v1',
+    plainsSlime: 'assets/plains-slime.png?v=20260831-monster-style-v1',
+    plainsGoblinYoung: 'assets/plains-goblin-young.png?v=20260831-monster-style-v1',
     lostGoblin: 'assets/lost-goblin.png?v=20260724-user-image-v1',
     denForestWolf: 'assets/wolf-den-forest-wolf.png?v=20260725-user-image-v1',
     ragingWolf: 'assets/wolf-den-raging-wolf.png?v=20260725-user-image-v1',
