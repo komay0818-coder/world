@@ -50,8 +50,12 @@ assert.deepEqual(policy.rollCorruptedSwiftness({ boots }, () => .09), { attackSp
 assert.equal(policy.rollCorruptedSwiftness({ boots }, () => .10), null);
 assert.equal(policy.rollDeepForestEcho({ offhand: orb }, () => .14), .06);
 assert.equal(policy.rollDeepForestEcho({ offhand: orb }, () => .15), 0);
-assert.deepEqual(policy.rollThornCorrosion({ weapon: wand }, { attackKind: 'skill', damageType: 'magic', finalDamage: 1 }, () => .14), { pendingBalance: true, durationMs: null, damage: null });
-assert.equal(policy.rollThornCorrosion({ weapon: wand }, { attackKind: 'basic', damageType: 'magic', finalDamage: 1 }, () => 0), null);
+assert.deepEqual(policy.THORN_CORROSION, { triggerRate: .15, durationSeconds: 5, tickIntervalMs: 1000, damageRatio: .20, tickCount: 5 });
+assert.deepEqual(policy.rollThornCorrosion({ weapon: wand }, { attackKind: 'skill', finalDamage: 1, totalAttack: 100 }, () => .149), { durationSeconds: 5, tickIntervalMs: 1000, tickDamage: 20, tickCount: 5, totalDamage: 100 });
+assert.deepEqual(policy.rollThornCorrosion({ weapon: wand }, { attackKind: 'basic', finalDamage: 1, totalAttack: 250 }, () => .149), { durationSeconds: 5, tickIntervalMs: 1000, tickDamage: 50, tickCount: 5, totalDamage: 250 });
+assert.equal(policy.rollThornCorrosion({ weapon: wand }, { attackKind: 'skill', finalDamage: 1, totalAttack: 100 }, () => .15), null, '15% 邊界不觸發');
+assert.equal(policy.rollThornCorrosion({ weapon: wand }, { attackKind: 'offhand', finalDamage: 1, totalAttack: 100 }, () => 0), null, '非普通攻擊或主動技能不觸發');
+assert.equal(policy.rollThornCorrosion({ weapon: wand }, { attackKind: 'basic', finalDamage: 0, totalAttack: 100 }, () => 0), null, '未命中不觸發');
 
 assert.equal(Object.keys(policy.DROP_SOURCES).length, 4);
 assert.ok(Object.values(policy.DROP_SOURCES).every((source) => source.dropRate === null && source.enabled === false), '未擅自設定掉落率');
@@ -60,6 +64,11 @@ assert.match(script, /getIncomingDamageReduction\(progress\.equipment, battle\.p
 assert.match(script, /getIncomingDamageReduction\(target\.progress\.equipment, target\.currentHp \/ target\.maxHp\)/, '隊伍成員低生命減傷已接入');
 assert.match(script, /rollCorruptedSwiftness\(member\.progress\.equipment\)/, '腐化迅捷已接入攻擊流程');
 assert.match(script, /rollDeepForestEcho\(member\.progress\.equipment\)/, '幽森回響已接入主動技能流程');
-assert.match(script, /thornCorrosionPendingBalance = true/, '荊棘侵蝕只建立待平衡觸發狀態');
+assert.match(script, /function tryApplyThornCorrosion[\s\S]*totalAttack: member\.stats\.attack/, '荊棘侵蝕鎖定觸發當下的角色總攻擊力');
+assert.match(script, /applyDot\(targetIndex, 'thorn-corrosion'[\s\S]*refreshOnly: true[\s\S]*refreshDuration: true/, '荊棘侵蝕不可疊加且重複觸發只刷新五次跳傷');
+assert.match(script, /existing\.damage = Math\.max\(existing\.damage, damage\)[\s\S]*existing\.remaining = options\.refreshDuration \? duration/, '刷新時保留原始快照傷害並重設持續時間');
+assert.match(script, /tickIntervalMs[\s\S]*nextTickAt[\s\S]*Math\.floor\(\(now - dot\.nextTickAt\) \/ dot\.tickIntervalMs\)/, '荊棘侵蝕依真實一秒間隔跳傷');
+assert.match(script, /hits\.forEach\(\(target\) => tryApplyThornCorrosion\(member, target\.index, 'skill'/, '每個技能命中目標獨立判定荊棘侵蝕');
+assert.match(script, /tryApplyThornCorrosion\(member, targetIndex, 'basic', result\.finalDamage, now\)/, '普通攻擊命中也會判定荊棘侵蝕');
 
 console.log('chapter-two-special-equipment-policy: assertions passed');

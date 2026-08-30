@@ -6,6 +6,7 @@
 }(typeof globalThis !== 'undefined' ? globalThis : this, function createChapterTwoSpecialEquipmentPolicy(EquipmentAffixPolicy) {
   'use strict';
   const SPECIAL_AFFIX_RULE = Object.freeze({ fixedCount: 2, randomCount: 2, specialChance: 1 });
+  const THORN_CORROSION = Object.freeze({ triggerRate: .15, durationSeconds: 5, tickIntervalMs: 1000, damageRatio: .20, tickCount: 5 });
   const WAND_BASE_TEMPLATE = Object.freeze({ attackMin: 26, attackMax: 35, attackSpeed: 1.00 });
   const MAGIC_ORB_BASE_TEMPLATE = Object.freeze({});
   function fixed(id, name, stat, min, max, unit = '') { return Object.freeze({ id, name, stat, min, max, unit }); }
@@ -46,9 +47,11 @@
   function rollCorruptedSwiftness(equipment, random = Math.random) { return hasAbility(equipment, 'corrupted_swiftness') && clampRoll(random()) < .10 ? { attackSpeedBonus: .15, durationMs: 5000 } : null; }
   function rollDeepForestEcho(equipment, random = Math.random) { return hasAbility(equipment, 'deep_forest_echo') && clampRoll(random()) < .15 ? .06 : 0; }
   function rollThornCorrosion(equipment, context = {}, random = Math.random) {
-    const eligible = context.attackKind === 'skill' && context.damageType === 'magic' && Number(context.finalDamage) > 0;
-    return hasAbility(equipment, 'thorn_corrosion') && eligible && clampRoll(random()) < .15 ? { pendingBalance: true, durationMs: null, damage: null } : null;
+    const eligible = ['basic', 'skill'].includes(context.attackKind) && Number(context.finalDamage) > 0 && Number(context.totalAttack) > 0;
+    if (!hasAbility(equipment, 'thorn_corrosion') || !eligible || clampRoll(random()) >= THORN_CORROSION.triggerRate) return null;
+    const tickDamage = Number(context.totalAttack) * THORN_CORROSION.damageRatio;
+    return { durationSeconds: THORN_CORROSION.durationSeconds, tickIntervalMs: THORN_CORROSION.tickIntervalMs, tickDamage, tickCount: THORN_CORROSION.tickCount, totalDamage: tickDamage * THORN_CORROSION.tickCount };
   }
   function grantSpecialDrop() { return null; }
-  return Object.freeze({ SPECIAL_AFFIX_RULE, WAND_BASE_TEMPLATE, MAGIC_ORB_BASE_TEMPLATE, TEMPLATES, DROP_SOURCES, getTemplate, getDropSource, hasAbility, createSpecialEquipmentInstance, getIncomingDamageReduction, rollCorruptedSwiftness, rollDeepForestEcho, rollThornCorrosion, grantSpecialDrop });
+  return Object.freeze({ SPECIAL_AFFIX_RULE, THORN_CORROSION, WAND_BASE_TEMPLATE, MAGIC_ORB_BASE_TEMPLATE, TEMPLATES, DROP_SOURCES, getTemplate, getDropSource, hasAbility, createSpecialEquipmentInstance, getIncomingDamageReduction, rollCorruptedSwiftness, rollDeepForestEcho, rollThornCorrosion, grantSpecialDrop });
 }));

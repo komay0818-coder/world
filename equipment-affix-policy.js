@@ -76,7 +76,7 @@
     warlord_unyielding: specialAbility('warlord_unyielding', '督軍不屈', '生命低於 30% 時，受到傷害降低 15%。', { unlockChapter: 2, allowedGroups: ['armor'], allowedSlots: ['head'] }),
     corrupted_swiftness: specialAbility('corrupted_swiftness', '腐化迅捷', '攻擊時有 10% 機率使攻擊速度提高 15%，持續 5 秒。', { unlockChapter: 2, allowedGroups: ['armor'], allowedSlots: ['boots'] }),
     deep_forest_echo: specialAbility('deep_forest_echo', '幽森回響', '施放主動技能時有 15% 機率恢復 6% 最大魔力。', { unlockChapter: 2, allowedGroups: ['accessory'], allowedSlots: ['offhand'] }),
-    thorn_corrosion: specialAbility('thorn_corrosion', '荊棘侵蝕', '傷害型法術命中時有 15% 機率附加持續傷害；傷害數值待後續平衡。', { unlockChapter: 2, allowedGroups: ['weapon'], allowedSlots: ['weapon'] })
+    thorn_corrosion: specialAbility('thorn_corrosion', '荊棘侵蝕', '攻擊命中時有 15% 機率附加 5 秒持續傷害，每秒造成觸發時總攻擊力 20% 傷害；不可疊加，重複觸發刷新持續時間。', { unlockChapter: 2, allowedGroups: ['weapon'], allowedSlots: ['weapon'] })
   });
   const MUTUAL_EXCLUSIONS = Object.freeze([
     Object.freeze(['critical_chance', 'critical_damage_percent']),

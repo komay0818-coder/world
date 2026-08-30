@@ -3276,22 +3276,35 @@ function applyDot(index, type, damage, duration, maxStacks = 1, options = {}) {
   const sameType = dots.filter((dot) => dot.type === type);
   const existing = sameType.length >= maxStacks ? sameType.sort((a, b) => a.remaining - b.remaining)[0] : null;
   if (existing) {
-    existing.damage = Math.max(existing.damage, damage);
-    existing.remaining = Math.max(existing.remaining, duration);
+    if (!options.refreshOnly) existing.damage = Math.max(existing.damage, damage);
+    existing.remaining = options.refreshDuration ? duration : Math.max(existing.remaining, duration);
     existing.defenseReduction = Math.max(existing.defenseReduction || 0, options.defenseReduction || 0);
+    if (options.tickIntervalMs) {
+      existing.tickIntervalMs = options.tickIntervalMs;
+      existing.nextTickAt = (options.now || Date.now()) + options.tickIntervalMs;
+    }
     return;
   }
-  dots.push({ type, damage, remaining: duration, source: options.source || null, defenseReduction: options.defenseReduction || 0 });
+  dots.push({ type, damage, remaining: duration, source: options.source || null, defenseReduction: options.defenseReduction || 0, tickIntervalMs: options.tickIntervalMs || 0, nextTickAt: options.tickIntervalMs ? (options.now || Date.now()) + options.tickIntervalMs : 0 });
   battle.enemyDots[index] = dots;
 }
 
 function processEnemyDots() {
+  const now = Date.now();
   battle.enemyDots.forEach((dots, index) => {
     if (battle.enemyHps[index] <= 0 || !dots.length) return;
     let damage = 0;
     dots.forEach((dot) => {
-      damage += dot.damage;
-      dot.remaining -= 1;
+      if (dot.tickIntervalMs) {
+        if (now < dot.nextTickAt) return;
+        const ticks = Math.min(dot.remaining, Math.floor((now - dot.nextTickAt) / dot.tickIntervalMs) + 1);
+        damage += dot.damage * ticks;
+        dot.remaining -= ticks;
+        dot.nextTickAt += dot.tickIntervalMs * ticks;
+      } else {
+        damage += dot.damage;
+        dot.remaining -= 1;
+      }
     });
     battle.enemyDots[index] = dots.filter((dot) => dot.remaining > 0);
     if (damage <= 0) return;
@@ -3320,6 +3333,20 @@ function getMaxCombatResource(job, level) {
   if (AssassinEnergyPolicy.isAssassin(job)) return AssassinEnergyPolicy.MAX_ENERGY;
   if (HunterArrowPolicy.isHunter(job)) return HunterArrowPolicy.getMaxArrows(getProgress().equipment);
   return getMaxMana(job, level);
+}
+
+function tryApplyThornCorrosion(member, targetIndex, attackKind, finalDamage, now = Date.now()) {
+  const corrosion = ChapterTwoSpecialEquipmentPolicy.rollThornCorrosion(member.progress.equipment, { attackKind, finalDamage, totalAttack: member.stats.attack });
+  if (!corrosion || battle.enemyHps[targetIndex] <= 0) return false;
+  applyDot(targetIndex, 'thorn-corrosion', corrosion.tickDamage, corrosion.tickCount, 1, {
+    source: member,
+    tickIntervalMs: corrosion.tickIntervalMs,
+    now,
+    refreshOnly: true,
+    refreshDuration: true
+  });
+  logBattle(`◆ ${member.name}對【${getEnemyDefinition(targetIndex).name}】觸發【荊棘侵蝕】，每秒造成 ${corrosion.tickDamage} 傷害，持續 5 秒。`, 'system');
+  return true;
 }
 
 function getMaxCombatResourceForMember(character, progress) {
@@ -4472,7 +4499,6 @@ function useAutoSkillForMember(member, now = Date.now()) {
     }
     member.blinkCooldownReduction = 0;
     member.globalSkillReadyAt = now + 1000;
-    const totalDamage = hits.reduce((total, target) => total + target.result.finalDamage, 0);
     if (hits.length) {
       const swiftness = ChapterTwoSpecialEquipmentPolicy.rollCorruptedSwiftness(member.progress.equipment);
       if (swiftness) {
@@ -4480,11 +4506,7 @@ function useAutoSkillForMember(member, now = Date.now()) {
         member.corruptedSwiftnessBonus = swiftness.attackSpeedBonus;
         logBattle(`◆ ${member.name}觸發【腐化迅捷】，攻擊速度提高 15%！`, 'system');
       }
-      const corrosion = ChapterTwoSpecialEquipmentPolicy.rollThornCorrosion(member.progress.equipment, { attackKind: 'skill', damageType: profile.damageType, finalDamage: totalDamage });
-      if (corrosion) {
-        member.thornCorrosionPendingBalance = true;
-        logBattle(`◆ ${member.name}觸發【荊棘侵蝕】；持續傷害等待後續平衡。`, 'system');
-      }
+      hits.forEach((target) => tryApplyThornCorrosion(member, target.index, 'skill', target.result.finalDamage, now));
     }
     const echoRecovery = ChapterTwoSpecialEquipmentPolicy.rollDeepForestEcho(member.progress.equipment);
     if (echoRecovery && member.resourceType === 'mana') {
@@ -4734,6 +4756,7 @@ function processPartyMemberAttacks(now = Date.now()) {
         member.corruptedSwiftnessBonus = swiftness.attackSpeedBonus;
         logBattle(`◆ ${member.name}觸發【腐化迅捷】，攻擊速度提高 15%！`, 'system');
       }
+      tryApplyThornCorrosion(member, targetIndex, 'basic', result.finalDamage, now);
       if (member.resourceType === 'rage') member.resourceCurrent = WarriorResourcePolicy.gainFromAttack(member.resourceCurrent);
       logBattle(`⚔ ${member.name}對【${enemy.name}】造成 ${result.finalDamage} 傷害${critical ? '（暴擊）' : ''}${orcRage ? '（狂怒）' : ''}${instinctTriggered ? '（獵人本能）' : ''}`, 'damage-dealt', { aggregateKey: `member-${member.id}-${battle.enemyTypes[targetIndex]}`, damage: result.finalDamage, summary: `⚔ ${member.name}攻擊【${enemy.name}】` });
       if (member.job === 'hunter' && member.level >= 8 && battle.enemyHps[targetIndex] > 0) {
