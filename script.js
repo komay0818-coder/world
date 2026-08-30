@@ -1006,9 +1006,9 @@ function getProgress() {
     localStorage.setItem('stardust-progress', JSON.stringify(saved));
   }
   if (saved.equipmentAffixMigrationVersion !== 'green-affix-v1') {
-    saved.inventory = (Array.isArray(saved.inventory) ? saved.inventory : []).map((item) => EquipmentAffixPolicy.normalizeEquipment(item));
+    saved.inventory = (Array.isArray(saved.inventory) ? saved.inventory : []).map((item) => RunePolicy.normalizeEquipment(EquipmentAffixPolicy.normalizeEquipment(item)));
     saved.equipment = Object.fromEntries(Object.entries({ ...emptyEquipment(), ...(saved.equipment || {}) })
-      .map(([slot, item]) => [slot, EquipmentAffixPolicy.normalizeEquipment(item)]));
+      .map(([slot, item]) => [slot, RunePolicy.normalizeEquipment(EquipmentAffixPolicy.normalizeEquipment(item))]));
     saved.equipmentAffixMigrationVersion = 'green-affix-v1';
     localStorage.setItem('stardust-progress', JSON.stringify(saved));
   }
@@ -1276,8 +1276,18 @@ function openVillageBuilding(buildingId) {
   else if (buildingId === 'workshop') renderWorkshop(building);
   else if (buildingId === 'alchemy') renderAlchemy(building);
   else if (buildingId === 'rune') renderMagicTower(building);
+  else if (buildingId === 'blacksmith') renderBlacksmith(building);
   else document.querySelector('#village-building-content').innerHTML = `<div class="village-building-icon" aria-hidden="true">${building.icon}</div><h3>${building.name}</h3><small>建築等級 Lv${building.level} / ${building.maxLevel}</small><p>${building.description}</p><p class="village-placeholder">${building.name}功能尚未完成，將於後續版本加入。</p>`;
   document.querySelector('#village-building-modal').classList.remove('hidden');
+}
+
+function renderBlacksmith(building = getVillageBuildingData('blacksmith')) {
+  const equipment = getProgress().inventory.filter((item) => item.kind === 'equipment');
+  const cards = equipment.map((item) => {
+    const max = RunePolicy.getMaxSockets(item), current = Number(item.sockets) || 0;
+    return `<article class="furnace-slot filled"><h4>${item.name}</h4><p>目前插槽：${current} / ${max}</p><button type="button" data-add-rune-socket="${item.id}" ${current >= max ? 'disabled' : ''}>${current >= max ? '已達上限' : '增加 1 個插槽（價格待定）'}</button></article>`;
+  }).join('');
+  document.querySelector('#village-building-content').innerHTML = `<div class="workshop-title"><div class="village-building-icon">${building.icon}</div><div><h3>${building.name}</h3><small>武器最多 3 孔・防具最多 2 孔</small></div></div><p>打洞價格仍待第二章經濟平衡確認，目前保留完整功能入口但不會扣除金幣或改動裝備。</p><section class="furnace-layout">${cards || '<p class="village-placeholder">背包內沒有裝備。</p>'}</section>`;
 }
 
 function renderMagicTower(building = getVillageBuildingData('rune'), message = '') {
@@ -2027,6 +2037,7 @@ function getEquipmentStats(progress = getProgress()) {
     movementSpeedBonus: stats.movementSpeedBonus + effectiveEquipmentStat(item, 'movementSpeedBonus')
   }), { attack: 0, defense: 0, hp: 0, mana: 0, strength: 0, intelligence: 0, accuracy: 0, dodge: 0, attackSpeedBonus: 0, cooldownSpeedBonus: 0, manaRegenBonus: 0, manaRegenFlat: 0, hpRegeneration: 0, magicDamageBonus: 0, damageBonus: 0, parry: 0, damageReduction: 0, movementSpeedBonus: 0 });
   const affixes = EquipmentAffixPolicy.getEquippedAffixStats(progress.equipment);
+  const runes = RunePolicy.getBonuses(progress.equipment);
   return {
     ...fixed,
     mana: fixed.mana + (affixes.mana || 0),
@@ -2049,7 +2060,12 @@ function getEquipmentStats(progress = getProgress()) {
     criticalChance: (affixes.criticalChance || 0) / 100,
     criticalDamagePercent: (affixes.criticalDamagePercent || 0) / 100,
     cooldownSpeedPercent: (affixes.cooldownSpeedPercent || 0) / 100,
-    manaRegenerationPercent: (affixes.manaRegenerationPercent || 0) / 100
+    manaRegenerationPercent: (affixes.manaRegenerationPercent || 0) / 100,
+    runeAttackPercent: runes.attackPercent,
+    runeDefensePercent: runes.defensePercent,
+    runeMaxHpPercent: runes.maxHpPercent,
+    runeCriticalChance: runes.criticalChance,
+    runeResourceMaxPercent: runes.resourceMaxPercent
   };
 }
 
@@ -2085,11 +2101,11 @@ function getCharacterStats(level, progress = getProgress(), character = getActiv
   const lowHealthSpeed = lowHealth ? passiveTotal('speed') : 0;
   const lowHealthCrit = lowHealth ? passiveTotal('crit') : 0;
   const stats = {
-    hp: Math.round((base.hp + race.hp + (level - 1) * 12 + equipment.hp + equipment.maxHp) * (1 + equipment.maxHpPercent + passiveTotal('maxHp')) * humanMultiplier),
-    mana: ['warrior', 'assassin'].includes(character?.job) ? 0 : Math.round((base.mana + race.mana + (level - 1) * 6 + equipment.mana) * humanMultiplier),
-    attack: Math.round((base.attack + race.attack + (level - 1) + equipment.attack + equipment.attackFlat + equipment.strength + equipment.intelligence) * humanMultiplier * (1 + passiveTotal('weaponDamage') + lowHealthAttack)),
-    defense: Math.round((base.defense + race.defense + Math.floor((level - 1) / 5) + equipment.defense) * (1 + equipment.defensePercent) * humanMultiplier),
-    crit: Math.min(.60, base.crit + race.crit + equipment.criticalChance + passiveTotal('crit') + lowHealthCrit),
+    hp: Math.round((base.hp + race.hp + (level - 1) * 12 + equipment.hp + equipment.maxHp) * (1 + equipment.maxHpPercent + equipment.runeMaxHpPercent + passiveTotal('maxHp')) * humanMultiplier),
+    mana: ['warrior', 'assassin'].includes(character?.job) ? 0 : Math.round((base.mana + race.mana + (level - 1) * 6 + equipment.mana) * humanMultiplier * (1 + equipment.runeResourceMaxPercent)),
+    attack: Math.round((base.attack + race.attack + (level - 1) + equipment.attack + equipment.attackFlat + equipment.strength + equipment.intelligence) * humanMultiplier * (1 + passiveTotal('weaponDamage') + lowHealthAttack + equipment.runeAttackPercent)),
+    defense: Math.round((base.defense + race.defense + Math.floor((level - 1) / 5) + equipment.defense) * (1 + equipment.defensePercent + equipment.runeDefensePercent) * humanMultiplier),
+    crit: Math.min(.60, base.crit + race.crit + equipment.criticalChance + equipment.runeCriticalChance + passiveTotal('crit') + lowHealthCrit),
     dodge: Math.min(.45, Math.max(0, base.dodge + race.dodge + equipment.dodge + equipment.dodgePercent + passiveTotal('dodge'))),
     accuracy: Math.min(1.30, 1.05 + equipment.accuracy + equipment.accuracyPercent + (character?.job === 'hunter' ? .05 : 0)),
     attackSpeed: EquipmentPolicy.getAttacksPerSecond(equippedWeapon, base.attackSpeed * 1.15) * (1 + equipment.attackSpeedBonus + equipment.attackSpeedPercent + passiveTotal('attackSpeed') + lowHealthSpeed),
@@ -2235,6 +2251,11 @@ function itemStatsText(item) {
   });
   if (item.specialAbility) parts.push(`特殊能力【${item.specialAbility.description || item.specialAbility.name}】`);
   if (item.legendaryAbility) parts.push(`傳奇能力【${item.legendaryAbility.description || item.legendaryAbility.name}】`);
+  if (item.kind === 'equipment') {
+    const socketed = (item.socketedRunes || []).map((id) => RunePolicy.RUNE_BY_ID.get(id)?.name || id);
+    parts.push(`符文插槽 ${socketed.length}/${Number(item.sockets) || 0}${socketed.length ? `（${socketed.join(' → ')}）` : ''}`);
+    const word = RunePolicy.getWord(item); if (word) parts.push(`符文之語【${word.name}】`);
+  }
   if (item.allowedJobs?.length) parts.push(`職業：${item.allowedJobs.map((job) => ({ warrior: '戰士', assassin: '刺客', hunter: '獵人', mage: '法師', priest: '牧師' })[job] || job).join('、')}`);
   return parts.join('　') || item.description || '';
 }
@@ -2263,7 +2284,7 @@ function equipmentDetailsHtml(item) {
 }
 
 function itemCategory(item) {
-  if (item.kind === 'consumable' || item.kind === 'material' || item.kind === 'recipe') return 'consumable';
+  if (item.kind === 'consumable' || item.kind === 'material' || item.kind === 'recipe' || item.kind === 'rune') return 'consumable';
   if (item.kind === 'equipment' && ['weapon', 'offhand'].includes(item.slot)) return 'weapon';
   if (item.kind === 'equipment') return 'armor';
   return 'other';
@@ -2310,6 +2331,8 @@ function equipmentStackKey(item) {
     requiredLevel: item.requiredLevel || 0,
     isJunk: item.isJunk === true,
     allowedJobs: [...(item.allowedJobs || [])].sort()
+    ,sockets: Number(item.sockets) || 0,
+    socketedRunes: item.socketedRunes || []
   });
 }
 
@@ -2373,7 +2396,9 @@ function renderInventory(view = 'inventory') {
     const comparison = item.kind === 'equipment' && !equipped ? `<aside class="equipment-compare-tooltip"><strong>目前穿戴・${equipmentSlots[item.slot]?.label || item.slot}</strong>${currentItem ? `<div><span class="compare-item-icon"><img src="${itemImagePath(currentItem)}" alt=""></span><p><b>${currentItem.name}</b><small>${equipmentDetailsHtml(currentItem)}</small></p></div>` : '<p class="compare-empty">此欄位目前沒有穿戴裝備</p>'}</aside>` : '';
     const equipSlots = item.kind === 'equipment' ? EquipmentPolicy.getEquipSlots(item, character?.job) : [];
     const equipControls = equipSlots.map((targetSlot) => `<button type="button" data-equip-id="${item.id}" data-equip-slot="${targetSlot}">${equipSlots.length > 1 ? targetSlot === 'weapon' ? '裝主手' : '裝副手' : '穿戴'}</button>`).join('');
-    return `<article class="inventory-item ${itemQualityClass(item)} ${equipped ? 'is-equipped' : ''} ${!wearable ? 'incompatible' : ''} ${selectedCount === stackIds.length && selectedCount ? 'sale-selected' : selectedCount ? 'sale-partial' : ''}" tabindex="${item.kind === 'equipment' && !equipped ? '0' : '-1'}">${junkBadge}<span class="item-icon">${visual}</span><div><b>${item.name}${stackQuantity > 1 ? ` ×${stackQuantity}` : ''}${equipped ? '<mark>已穿戴</mark>' : ''}</b><small>${slot}${slot ? '　' : ''}${item.kind === 'equipment' ? equipmentDetailsHtml(item) : itemStatsText(item)}</small></div>${item.kind === 'equipment' && !equipped ? wearable && equipControls ? equipControls : '<span class="equip-blocked">無法穿戴</span>' : ''}${comparison}</article>`;
+    const runeButtons = item.kind === 'equipment' && (item.socketedRunes || []).length < (Number(item.sockets) || 0)
+      ? Object.values(RunePolicy.RUNES).filter((rune) => progress.inventory.some((entry) => entry.id === rune.id && Number(entry.quantity) > 0)).map((rune) => `<button type="button" data-socket-item="${item.id}" data-socket-rune="${rune.id}">鑲嵌${rune.name}</button>`).join('') : '';
+    return `<article class="inventory-item ${itemQualityClass(item)} ${equipped ? 'is-equipped' : ''} ${!wearable ? 'incompatible' : ''} ${selectedCount === stackIds.length && selectedCount ? 'sale-selected' : selectedCount ? 'sale-partial' : ''}" tabindex="${item.kind === 'equipment' && !equipped ? '0' : '-1'}">${junkBadge}<span class="item-icon">${visual}</span><div><b>${item.name}${stackQuantity > 1 ? ` ×${stackQuantity}` : ''}${equipped ? '<mark>已穿戴</mark>' : ''}</b><small>${slot}${slot ? '　' : ''}${item.kind === 'equipment' ? equipmentDetailsHtml(item) : itemStatsText(item)}</small></div>${item.kind === 'equipment' && !equipped ? wearable && equipControls ? equipControls : '<span class="equip-blocked">無法穿戴</span>' : ''}${runeButtons}${comparison}</article>`;
   };
   const categoryTabs = [
     ['weapon', '武器'],
@@ -3349,10 +3374,25 @@ function tryApplyThornCorrosion(member, targetIndex, attackKind, finalDamage, no
   return true;
 }
 
+function getRuneOutgoingMultiplier(member, targetIndex) {
+  let multiplier = RunePolicy.hasWord(member.progress.equipment, 'battle-will') && member.currentHp / member.maxHp > .70 ? 1.08 : 1;
+  if (RunePolicy.hasWord(member.progress.equipment, 'conquest')) {
+    if (member.runeConquestTarget !== targetIndex) { member.runeConquestTarget = targetIndex; member.runeConquestStacks = 0; }
+    member.runeConquestStacks = Math.min(5, (member.runeConquestStacks || 0) + 1);
+    multiplier *= 1 + member.runeConquestStacks * .02;
+  }
+  return multiplier;
+}
+
+function triggerRuneFrenzy(member, critical, now) {
+  if (critical && RunePolicy.hasWord(member.progress.equipment, 'frenzy')) member.runeFrenzyUntil = now + 3000;
+}
+
 function getMaxCombatResourceForMember(character, progress) {
-  if (WarriorResourcePolicy.isWarrior(character.job)) return WarriorResourcePolicy.MAX_RAGE;
-  if (AssassinEnergyPolicy.isAssassin(character.job)) return AssassinEnergyPolicy.MAX_ENERGY;
-  if (HunterArrowPolicy.isHunter(character.job)) return HunterArrowPolicy.getMaxArrows(progress.equipment);
+  const multiplier = 1 + RunePolicy.getBonuses(progress.equipment).resourceMaxPercent;
+  if (WarriorResourcePolicy.isWarrior(character.job)) return Math.round(WarriorResourcePolicy.MAX_RAGE * multiplier);
+  if (AssassinEnergyPolicy.isAssassin(character.job)) return Math.round(AssassinEnergyPolicy.MAX_ENERGY * multiplier);
+  if (HunterArrowPolicy.isHunter(character.job)) return Math.round(HunterArrowPolicy.getMaxArrows(progress.equipment) * multiplier);
   return getCharacterStats(progress.level || 1, progress, character).mana;
 }
 
@@ -4434,7 +4474,7 @@ function useAutoSkillForMember(member, now = Date.now()) {
     const resolvedTargets = targets.map((index, targetOrder) => {
       const chainMultiplier = skill.id === 'chain-lightning' ? 1 + targetOrder * (skillEffect.bounceBonus || 0) : 1;
       const piercingMultiplier = skill.id === 'piercing-shot' ? Math.max(.1, 1 - targetOrder * .1) : 1;
-      return { index, result: applyDamageToMonster(index, damage * chainMultiplier * piercingMultiplier, profile, {
+      return { index, result: applyDamageToMonster(index, damage * chainMultiplier * piercingMultiplier * getRuneOutgoingMultiplier(member, index), profile, {
         attacker: member,
         attackKind: 'skill',
         armorIgnore: skillEffect.armorIgnore,
@@ -4443,6 +4483,8 @@ function useAutoSkillForMember(member, now = Date.now()) {
       }) };
     });
     const hits = resolvedTargets.filter((target) => !target.result.evaded);
+    const totalDamage = hits.reduce((sum, target) => sum + target.result.finalDamage, 0);
+    if (hits.length) triggerRuneFrenzy(member, critical, now);
     hits.forEach((target) => applyEnemySkillState(target.index, skillEffect, now));
     if (skill.id === 'chain-lightning') hits.forEach((target, order) => {
       const state = getEnemySkillState(target.index);
@@ -4717,6 +4759,10 @@ function updatePartyMemberResource(member, now) {
     member.resourceCurrent = recovery.arrows;
     member.lastArrowRecoveryAt = now - recovery.remainder;
   }
+  if (RunePolicy.hasWord(member.progress.equipment, 'meditation') && now >= (member.runeMeditationAt || 0)) {
+    member.resourceCurrent = Math.min(member.resourceMax, member.resourceCurrent + member.resourceMax * .03);
+    member.runeMeditationAt = now + 5000;
+  }
 }
 
 function updatePartyMemberHealthRegeneration(member, now) {
@@ -4758,9 +4804,10 @@ function processPartyMemberAttacks(now = Date.now()) {
     const hit = Math.max(1, Math.ceil(baseHit * (instinctTriggered ? hunterInstinct.power : 1)));
     const enemy = getEnemyDefinition(targetIndex);
     const profile = getPlayerAttackProfile(member.character);
-    const result = applyDamageToMonster(targetIndex, hit, profile, { attacker: member, attackKind: 'basic' });
+    const result = applyDamageToMonster(targetIndex, hit * getRuneOutgoingMultiplier(member, targetIndex), profile, { attacker: member, attackKind: 'basic' });
     playPartyMemberCombatAnimation(member, [targetIndex], { kind: 'basic' });
     if (!result.evaded) {
+      triggerRuneFrenzy(member, critical, now);
       const swiftness = ChapterTwoSpecialEquipmentPolicy.rollCorruptedSwiftness(member.progress.equipment);
       if (swiftness) {
         member.corruptedSwiftnessUntil = now + swiftness.durationMs;
@@ -4811,7 +4858,8 @@ function processPartyMemberAttacks(now = Date.now()) {
     const skillHasteMultiplier = now < (member.skillHasteUntil || 0) ? 1 + (member.skillHasteBonus || 0) : 1;
     const blessingSpeedMultiplier = now < (member.lightGraceUntil || 0) ? 1 + (member.lightGraceAttackSpeed || 0) : 1;
     const corruptedSwiftnessMultiplier = now < (member.corruptedSwiftnessUntil || 0) ? 1 + (member.corruptedSwiftnessBonus || 0) : 1;
-    PartyPolicy.scheduleNextAttack(member, now, member.attackSpeed * skillHasteMultiplier * blessingSpeedMultiplier * corruptedSwiftnessMultiplier * (1 + (desperate?.speed || 0)), exhaustedMultiplier * trailSlowMultiplier);
+    const runeFrenzyMultiplier = now < (member.runeFrenzyUntil || 0) ? 1.08 : 1;
+    PartyPolicy.scheduleNextAttack(member, now, member.attackSpeed * skillHasteMultiplier * blessingSpeedMultiplier * corruptedSwiftnessMultiplier * runeFrenzyMultiplier * (1 + (desperate?.speed || 0)), exhaustedMultiplier * trailSlowMultiplier);
   }
 }
 
@@ -5691,11 +5739,18 @@ function enemyAttackTick() {
     const spiderNestArmorMultiplier = now < (target.spiderNestArmorBreakUntil || 0) ? .90 : 1;
     const piercingMultiplier = (1 - BlackForestTrailPolicy.getDefenseIgnore(blackForestTrailAction))
       * (1 - BlackstoneStrongholdPolicy.getDefenseIgnore(strongholdAction));
+    const runeIronWallReduction = RunePolicy.hasWord(target.progress.equipment, 'iron-wall') && Math.random() < .15 ? .20 : 0;
+    if (RunePolicy.hasWord(target.progress.equipment, 'unyielding') && target.currentHp / target.maxHp < .30 && now >= (target.runeUnyieldingReadyAt || 0)) {
+      target.runeUnyieldingUntil = now + 5000;
+      target.runeUnyieldingReadyAt = now + 20000;
+    }
+    const runeUnyieldingReduction = now < (target.runeUnyieldingUntil || 0) ? .20 : 0;
     let damage = dodged ? 0 : MonsterDefense.resolvePlayerDamage({
       baseDamage: rawDamage,
       defense: Math.max(0, Math.round(stats.defense * armorBreakMultiplier * spiderNestArmorMultiplier * piercingMultiplier)),
       damageReduction: Math.min(.9, stats.damageReduction
         + ChapterTwoSpecialEquipmentPolicy.getIncomingDamageReduction(target.progress.equipment, target.currentHp / target.maxHp)
+        + runeIronWallReduction + runeUnyieldingReduction
         + (now < (target.manaShieldReductionUntil || 0) ? target.manaShieldDamageReduction || 0 : 0))
     }).finalDamage;
     if (parried) damage = Math.max(1, Math.ceil(damage * .5));
@@ -6173,6 +6228,8 @@ document.querySelector('#village-building-modal').addEventListener('click', (eve
   if (event.target.closest('[data-confirm-alchemy]')) { confirmAlchemy(); return; }
   const magicSynthesis = event.target.closest('[data-synthesize-magic]');
   if (magicSynthesis) { synthesizeSkillBook(magicSynthesis.dataset.synthesizeMagic); return; }
+  const socketButton = event.target.closest('[data-add-rune-socket]');
+  if (socketButton) { showToast('打洞價格尚未設定，暫時不會消耗金幣或增加插槽。'); return; }
   if (event.target.closest('[data-return-alchemy]')) closeVillageBuilding();
 });
 document.querySelector('#party-close').addEventListener('click', () => document.querySelector('#party-modal').classList.add('hidden'));
@@ -6233,6 +6290,12 @@ document.querySelector('#inventory-modal').addEventListener('click', (event) => 
   if (event.target.closest('[data-open-sell-confirm]')) { openSellConfirmation(); return; }
   const equipButton = event.target.closest('[data-equip-id]');
   if (equipButton) { equipItem(equipButton.dataset.equipId, equipButton.dataset.equipSlot || null); return; }
+  const runeButton = event.target.closest('[data-socket-item]');
+  if (runeButton) {
+    const result = RunePolicy.socketRune(getProgress(), runeButton.dataset.socketItem, runeButton.dataset.socketRune);
+    if (result.ok) { saveProgress(getProgress()); showToast(`已鑲嵌${result.rune.name}${result.word ? `，啟動【${result.word.name}】` : ''}`); renderInventory('inventory'); }
+    return;
+  }
   const unequipButton = event.target.closest('[data-unequip-slot]');
   if (unequipButton) { unequipItem(unequipButton.dataset.unequipSlot); return; }
 });

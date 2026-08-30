@@ -1,10 +1,11 @@
 (function attachEquipmentDropPolicy(root, factory) {
   const equipmentPolicy = typeof module === 'object' && module.exports ? require('./equipment-policy.js') : root.EquipmentPolicy;
   const affixPolicy = typeof module === 'object' && module.exports ? require('./equipment-affix-policy.js') : root.EquipmentAffixPolicy;
-  const api = factory(equipmentPolicy, affixPolicy);
+  const runePolicy = typeof module === 'object' && module.exports ? require('./rune-policy.js') : root.RunePolicy;
+  const api = factory(equipmentPolicy, affixPolicy, runePolicy);
   if (typeof module === 'object' && module.exports) module.exports = api;
   else root.EquipmentDropPolicy = api;
-}(typeof globalThis !== 'undefined' ? globalThis : this, function createEquipmentDropPolicy(EquipmentPolicy, EquipmentAffixPolicy) {
+}(typeof globalThis !== 'undefined' ? globalThis : this, function createEquipmentDropPolicy(EquipmentPolicy, EquipmentAffixPolicy, RunePolicy) {
   function chapterTwoTemplate(id, name, slot, stats, options = {}) {
     return Object.freeze({ id, name, kind: 'equipment', slot, chapter: 2, affixChapter: 2, series: options.series || 'black-forest', image: null, imageStatus: 'pending', allowedJobs: Object.freeze(options.allowedJobs || []), ...stats, ...options });
   }
@@ -227,7 +228,8 @@
       allowedJobs: [...allowedClasses],
       baseStats: getBaseStats(template),
       affixes: generated.affixes.map((entry) => ({ ...entry })),
-      sockets: 0,
+      sockets: RunePolicy?.rollNaturalSockets(template, options.chapter, options.socketRandom || options.affixRandom || Math.random) || 0,
+      socketedRunes: [],
       obtainedFrom: String(options.obtainedFrom || ''),
       obtainedAt: Math.max(0, Number(options.obtainedAt) || Date.now())
     };

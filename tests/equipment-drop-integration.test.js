@@ -18,7 +18,7 @@ assert.match(script, /'hunter-shortbow': 'assets\/hunter-shortbow\.png'/, 'hunte
 assert.match(script, /'long-hunting-bow': 'assets\/long-hunting-bow\.png'/, 'long hunting bow artwork migrates into existing items');
 assert.match(script, /'mercenary-greatsword': 'assets\/mercenary-greatsword\.png'/, 'mercenary greatsword artwork migrates into existing items');
 assert.match(script, /'giant-iron-sword': 'assets\/giant-iron-sword\.png'/, 'giant iron sword artwork migrates into existing items');
-assert.match(index, /script\.js\?v=20260830-special-epic-drops-v1/, 'the live page uses the current local game UI');
+assert.match(index, /script\.js\?v=20260830-rune-system-v1/, 'the live page uses the current local game UI');
 assert.match(index, /skill-upgrade-policy\.js\?v=20260816-divine-tome-v1/, 'skill material policy uses the current cache key');
 assert.match(index, /world\/acd8f1313a90f6a64ce6a75259d5892e5aa410a7\/equipment-policy\.js/, 'the live page pins the current equipment catalog to an immutable commit');
 assert.match(script, /'forest-guard-longsword': 'assets\/forest-guard-longsword\.png'/, 'forest guard sword artwork migrates into existing items');
@@ -65,7 +65,7 @@ assert.match(script, /materialDrops\.forEach[\s\S]*材料掉落/, 'material drop
 assert.match(html, /chapter-one-recipe-drop-policy\.js[\s\S]*script\.js/, 'recipe drop policy loads before reward integration');
 assert.match(script, /ChapterOneRecipeDropPolicy\.grantRecipeDrops\(progress, enemy, currentMap\.id\)/, 'rewardVictory grants recipes for configured monsters and maps');
 assert.match(script, /recipeDrops\.forEach[\s\S]*配方掉落/, 'recipe drops are shown in the battle loot log');
-assert.match(script, /item\.kind === 'recipe'\) return 'consumable'/, 'recipe items appear in the existing backpack item category');
+assert.match(script, /item\.kind === 'recipe' \|\| item\.kind === 'rune'\) return 'consumable'/, 'recipe and rune items appear in the existing backpack item category');
 assert.match(script, /item\?\.kind === 'recipe' \? RecipeImagePolicy\.getImage\(item\.quality \|\| item\.rarity\)/, 'recipe inventory artwork is selected by quality');
 assert.match(html, /chapter-boss-drop-policy\.js[\s\S]*script\.js/, 'chapter boss drop policy loads before reward integration');
 assert.match(script, /ChapterBossDropPolicy\.grantChapterOneBlueDrop\(progress, enemy/, 'chapter-one blue equipment uses an independent reward roll');

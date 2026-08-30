@@ -1,9 +1,10 @@
 (function attachChapterTwoSpecialEquipmentPolicy(root, factory) {
   const affixPolicy = typeof module === 'object' && module.exports ? require('./equipment-affix-policy.js') : root.EquipmentAffixPolicy;
-  const api = factory(affixPolicy);
+  const runePolicy = typeof module === 'object' && module.exports ? require('./rune-policy.js') : root.RunePolicy;
+  const api = factory(affixPolicy, runePolicy);
   if (typeof module === 'object' && module.exports) module.exports = api;
   else root.ChapterTwoSpecialEquipmentPolicy = api;
-}(typeof globalThis !== 'undefined' ? globalThis : this, function createChapterTwoSpecialEquipmentPolicy(EquipmentAffixPolicy) {
+}(typeof globalThis !== 'undefined' ? globalThis : this, function createChapterTwoSpecialEquipmentPolicy(EquipmentAffixPolicy, RunePolicy) {
   'use strict';
   const SPECIAL_AFFIX_RULE = Object.freeze({ fixedCount: 2, randomCount: 2, specialChance: 1 });
   const THORN_CORROSION = Object.freeze({ triggerRate: .15, durationSeconds: 5, tickIntervalMs: 1000, damageRatio: .20, tickCount: 5 });
@@ -71,6 +72,8 @@
     item.obtainedFrom = enemy.id;
     item.obtainedAt = obtainedAt;
     item.specialDropType = 'chapter-two-special-epic';
+    item.sockets = RunePolicy?.rollNaturalSockets(item, 2, random) || 0;
+    item.socketedRunes = [];
     progress.inventory.push(item);
     return item;
   }
