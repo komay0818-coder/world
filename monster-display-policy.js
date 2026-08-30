@@ -43,13 +43,13 @@
     moonboneSentinel: 'assets/dungeon-moonbone.png',
     blightOracle: 'assets/dungeon-oracle.png',
     eclipseSovereign: 'assets/dungeon-boss.png',
-    highlandWolf: 'assets/plains-depths-highland-wolf.png?v=20260729-transparent-v2',
-    rockbackBoar: 'assets/plains-depths-rockback-boar.png?v=20260729-transparent-v2',
-    blackstoneScout: 'assets/plains-depths-blackstone-scout.png?v=20260729-transparent-v2',
-    grasslandVulture: 'assets/plains-depths-grassland-vulture.png?v=20260729-transparent-v2',
-    blackstoneRaider: 'assets/plains-depths-blackstone-raider.png?v=20260729-transparent-v2',
-    wanderingBlackKnight: 'assets/plains-depths-wandering-black-knight.png?v=20260729-user-image-v1',
-    blackstoneLeader: 'assets/plains-depths-blackstone-leader.png?v=20260729-transparent-v2'
+    highlandWolf: 'assets/plains-depths-highland-wolf.png?v=20260831-monster-style-v1',
+    rockbackBoar: 'assets/plains-depths-rockback-boar.png?v=20260831-monster-style-v1',
+    blackstoneScout: 'assets/plains-depths-blackstone-scout.png?v=20260831-monster-style-v1',
+    grasslandVulture: 'assets/plains-depths-grassland-vulture.png?v=20260831-monster-style-v1',
+    blackstoneRaider: 'assets/plains-depths-blackstone-raider.png?v=20260831-monster-style-v1',
+    wanderingBlackKnight: 'assets/plains-depths-wandering-black-knight.png?v=20260831-monster-style-v1',
+    blackstoneLeader: 'assets/plains-depths-blackstone-leader.png?v=20260831-monster-style-v1'
   });
 
   const STATUS_DISPLAY = Object.freeze({
