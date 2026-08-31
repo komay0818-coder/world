@@ -173,6 +173,7 @@ assert.doesNotMatch(css.match(/\.battle-effect-heal[\s\S]*?@keyframes healNumber
 
 assert.match(script, /class="enemy-unit monster-battle-slot visual-size-\$\{visualSize\}/, 'monsters keep full-body image slots');
 assert.match(css, /monster-battle-slot\.elite,[\s\S]*?monster-battle-slot\.boss \{[\s\S]*?--unit-rank-scale: 1;/, 'elite and boss monsters are not enlarged');
+assert.doesNotMatch(css, /monster-battle-slot\.(?:elite|boss) \.monster-slot-image \{ scale: 1\.(?:0*[1-9]|[1-9])/i, 'legacy rank rules cannot enlarge elite or boss artwork');
 assert.match(css, /monster-battle-slot\.elite \{[\s\S]*?174, 116, 255[\s\S]*?monster-battle-slot\.boss \{[\s\S]*?255, 194, 73/, 'rank auras remain distinct');
 assert.match(css, /prefers-reduced-motion:\s*reduce/, 'decorative effects still respect reduced-motion settings');
 

@@ -671,12 +671,9 @@ const monsterVisualSizeOverrides = {
   rootExecutioner: 'large', moonboneSentinel: 'large'
 };
 
-// Optional per-asset correction for unusual aspect ratios or transparent
-// padding. New monsters can provide visualScaleCorrection on their definition.
-const monsterVisualScaleCorrections = {
-  plainsRabbit: 1.15,
-  plainsGoblinYoung: .9
-};
+// Optional per-asset correction for unusual aspect ratios. Transparent canvas
+// padding is normalized in the asset itself so rank never changes image size.
+const monsterVisualScaleCorrections = {};
 
 function getMonsterVisualSize(enemy = {}) {
   if (enemy.visualSize) return enemy.visualSize;
