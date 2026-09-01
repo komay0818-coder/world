@@ -198,6 +198,8 @@ Object.entries(spiritweaveArmorImages).forEach(([id, image]) => {
   const template = dropPolicy.CHAPTER_TWO_TEMPLATES.find((item) => item.id === id);
   assert.equal(template.image, image, `${id} uses its dedicated artwork`);
   assert.equal(template.imageStatus, 'ready', `${id} artwork is ready`);
+  assert.deepEqual(template.allowedJobs, ['mage', 'priest'], `${id} is shared by mages and priests`);
+  assert.deepEqual(equipmentPolicy.getEquipSlots(template, 'priest'), [template.slot], `priests can equip ${id}`);
 });
 assert.equal(deepwoodVest.dodge, .03, 'deepwood hunter vest grants three percent dodge as a decimal ratio');
 assert.equal(deepwoodHood.dodge, .02, 'deepwood hunter hood grants two percent dodge as a decimal ratio');
