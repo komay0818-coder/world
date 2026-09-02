@@ -3,7 +3,7 @@ const policy = require('../chapter-three-recipe-drop-policy.js');
 
 assert.equal(policy.BLUE_RECIPE_DROP_RATE, .08);
 assert.equal(policy.BLUE_CRAFT_GOLD_COST, 18000);
-assert.deepEqual(Object.values(policy.RECIPES).map((recipe) => recipe.id), [
+assert.deepEqual(Object.values(policy.RECIPES).filter((recipe) => recipe.quality === 'rare').map((recipe) => recipe.id), [
   'recipe-redrock-refined-shoulders',
   'recipe-wasteland-refined-wrist',
   'recipe-skullcrusher-warpattern-cloak'

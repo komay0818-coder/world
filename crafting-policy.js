@@ -130,7 +130,10 @@
       id: recipe.resultItemId, kind: 'equipment', name: recipe.resultName, slot: recipe.equipmentSlot,
       equipmentSlot: recipe.equipmentSlot, allowedJobs: [], ...baseStats, baseStats,
       image: recipe.image || null, imageStatus: recipe.image ? 'ready' : 'pending',
-      ...(Array.isArray(recipe.fixedAffixIds) ? { fixedAffixIds: [...recipe.fixedAffixIds] } : {})
+      ...(Array.isArray(recipe.fixedAffixIds) ? { fixedAffixIds: [...recipe.fixedAffixIds] } : {}),
+      ...(recipe.affixRuleOverride ? { affixRuleOverride: { ...recipe.affixRuleOverride } } : {}),
+      baseStatsStatus: recipe.baseStatsStatus || 'ready', affixContentStatus: recipe.affixContentStatus || 'ready',
+      specialAbilityStatus: recipe.specialAbilityStatus || 'ready'
     };
     const generated = EquipmentAffixPolicy.createEquipmentInstance(template, { quality: recipe.quality, uniqueId: instanceId, random, chapter: options.chapter || recipe.chapter || 1, jobId: options.jobId });
     return { ...generated, id: instanceId, instanceId, equipmentId: recipe.resultItemId, templateId: recipe.resultItemId, sourceType: 'crafted', recipeId, sockets: 0, craftedAt };

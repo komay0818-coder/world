@@ -21,7 +21,7 @@ function progressFor(recipeId, gold = 18000, materialBonus = 0) {
 
 assert.equal(Object.values(CraftingPolicy.RECIPES).filter((recipe) => recipe.chapter === 1).length, 6);
 assert.equal(Object.values(CraftingPolicy.RECIPES).filter((recipe) => recipe.chapter === 2).length, 6);
-assert.equal(Object.values(CraftingPolicy.RECIPES).filter((recipe) => recipe.chapter === 3).length, 3);
+assert.equal(Object.values(CraftingPolicy.RECIPES).filter((recipe) => recipe.chapter === 3 && recipe.quality === 'rare').length, 3);
 
 recipes.forEach(([recipeId, equipmentId, materials], index) => {
   const recipe = CraftingPolicy.RECIPES[recipeId];
