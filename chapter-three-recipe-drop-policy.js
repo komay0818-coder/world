@@ -1,8 +1,9 @@
 (function attachChapterThreeRecipeDropPolicy(root, factory) {
-  const api = factory();
+  const fragmentPolicy = typeof module === 'object' && module.exports ? require('./chapter-three-weapon-recipe-fragment-policy.js') : root.ChapterThreeWeaponRecipeFragmentPolicy;
+  const api = factory(fragmentPolicy);
   if (typeof module === 'object' && module.exports) module.exports = api;
   else root.ChapterThreeRecipeDropPolicy = api;
-}(typeof globalThis !== 'undefined' ? globalThis : this, function createChapterThreeRecipeDropPolicy() {
+}(typeof globalThis !== 'undefined' ? globalThis : this, function createChapterThreeRecipeDropPolicy(WeaponRecipeFragmentPolicy) {
   'use strict';
 
   const BLUE_RECIPE_DROP_RATE = .08;
@@ -115,11 +116,13 @@
   }
 
   function grantFacilityRewards(progress, facilityId, normalRewards = [], options = {}) {
-    if (!progress || typeof progress !== 'object') return { normalRewards, recipeDrops: [] };
-    const random = typeof options.random === 'function' ? options.random : Math.random;
-    const recipeDrops = rollFacilityRecipeDrop(facilityId, random);
+    if (!progress || typeof progress !== 'object') return { normalRewards, recipeDrops: [], fragmentDrops: [] };
+    const recipeRandom = typeof options.recipeRandom === 'function' ? options.recipeRandom : typeof options.random === 'function' ? options.random : Math.random;
+    const fragmentRandom = typeof options.fragmentRandom === 'function' ? options.fragmentRandom : typeof options.random === 'function' ? options.random : Math.random;
+    const recipeDrops = rollFacilityRecipeDrop(facilityId, recipeRandom);
     recipeDrops.forEach((item) => addStackedRecipe(progress, item, item.quantity));
-    return { normalRewards, recipeDrops };
+    const fragmentDrops = WeaponRecipeFragmentPolicy?.grantArmoryFragmentDrop(progress, facilityId, { random: fragmentRandom }) || [];
+    return { normalRewards, recipeDrops, fragmentDrops };
   }
 
   return Object.freeze({
