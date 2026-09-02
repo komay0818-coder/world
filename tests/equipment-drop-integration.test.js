@@ -53,14 +53,14 @@ assert.match(script, /ragingWolf:.*lootConfig: EquipmentDropPolicy\.TEST_LOOT_CO
 assert.match(script, /greatfangWolf:.*lootConfig: EquipmentDropPolicy\.TEST_LOOT_CONFIGS\.boss/, 'a boss has phase-one loot data');
 assert.match(script, /function rewardVictory\(index\)[\s\S]*EquipmentDropPolicy\.grantEquipmentDrop\(progress, enemy, \{ chapter: currentMap\.chapter/, 'rewardVictory enters the equipment drop flow with scoped options');
 assert.match(script, /const currentMap = getActiveMap\(progress\);\s*renderStrongholdObjective\(currentMap\);/, 'rewardVictory resolves the active map before rendering map objectives');
-assert.match(script, /ChapterOneMaterialDropPolicy\.grantMaterialDrops\(progress, currentMap\.id, enemy\)/, 'rewardVictory grants map and monster-specific materials through the shared inventory');
-assert.match(script, /ChapterTwoMaterialDropPolicy\.grantMaterialDrops\(progress, currentMap\.id, enemy, \{ dropRateMultiplier:/, 'rewardVictory grants second chapter monster-specific materials with a scoped Bonus hook');
+assert.match(script, /function grantCraftingMaterialDrops\([\s\S]*ChapterOneMaterialDropPolicy\.grantMaterialDrops\(progress, map\.id, enemy\)/, 'shared settlement grants chapter-one map and monster-specific materials');
+assert.match(script, /function rewardVictory\(index\)[\s\S]*grantCraftingMaterialDrops\(progress, currentMap, enemy, \{ dropRateMultiplier:/, 'rewardVictory grants chapter materials with a scoped bonus hook');
 assert.match(html, /chapter-two-material-drop-policy\.js[\s\S]*script\.js/, 'second chapter material policy loads before the main game script');
 assert.match(html, /chapter-two-recipe-drop-policy\.js[\s\S]*chapter-two-special-equipment-policy\.js[\s\S]*script\.js/, 'second chapter recipe and special equipment policies load before the main game script');
 assert.match(script, /ChapterTwoRecipeDropPolicy\.grantRecipeDrops\(progress, enemy, currentMap\.id\)/, 'rewardVictory grants second chapter recipes through their independent policy');
 assert.match(script, /VillageUpgradePolicy\.normalizeMaterialInventory\(saved\.inventory\)/, 'legacy building material ids merge into canonical item stacks when a save loads');
 assert.match(script, /SkillUpgradePolicy\.normalizeMaterialInventory\(/, 'saved skill books receive their current rank artwork');
-assert.match(script, /materialDrops\.push\(\.\.\.VillageUpgradePolicy\.grantMapDrops\(progress, currentMap\.id\)\)/, 'the compatibility hook remains while unified building material drops return no duplicates');
+assert.match(script, /materialDrops\.push\(\.\.\.VillageUpgradePolicy\.grantMapDrops\(progress, map\.id\)\)/, 'the compatibility hook remains while unified building material drops return no duplicates');
 assert.match(script, /materialDrops\.forEach[\s\S]*材料掉落/, 'material drops are shown in the battle loot log');
 assert.match(html, /chapter-one-recipe-drop-policy\.js[\s\S]*script\.js/, 'recipe drop policy loads before reward integration');
 assert.match(script, /ChapterOneRecipeDropPolicy\.grantRecipeDrops\(progress, enemy, currentMap\.id\)/, 'rewardVictory grants recipes for configured monsters and maps');

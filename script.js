@@ -1631,6 +1631,14 @@ function getOfflineCombatMonsters(map, playerLevel) {
   return normalMonsters.length ? normalMonsters : [monsterTypes.goblin];
 }
 
+function grantCraftingMaterialDrops(progress, map, enemy, options = {}) {
+  const materialDrops = ChapterOneMaterialDropPolicy.grantMaterialDrops(progress, map.id, enemy);
+  materialDrops.push(...ChapterTwoMaterialDropPolicy.grantMaterialDrops(progress, map.id, enemy, options));
+  materialDrops.push(...ChapterThreeMaterialDropPolicy.grantMaterialDrops(progress, map.id, enemy));
+  materialDrops.push(...VillageUpgradePolicy.grantMapDrops(progress, map.id));
+  return materialDrops;
+}
+
 function claimOfflineRewards() {
   const character = getActiveCharacter();
   if (!character) return null;
@@ -1648,6 +1656,7 @@ function claimOfflineRewards() {
   const activeMap = getActiveMap(progress);
   const attackProfile = getPlayerAttackProfile(character);
   const savedHp = Number(progress.partyMemberState?.currentHp);
+  const offlineMonsters = getOfflineCombatMonsters(activeMap, progress.level);
   const simulation = OfflineCombatPolicy.simulate({
     durationMs: offlineMs,
     player: {
@@ -1661,7 +1670,7 @@ function claimOfflineRewards() {
       healingPotions: progress.potions,
       ...attackProfile
     },
-    monsters: getOfflineCombatMonsters(activeMap, progress.level)
+    monsters: offlineMonsters
   });
   const defeated = simulation.defeated;
   let gainedXp = 0;
@@ -1680,6 +1689,8 @@ function claimOfflineRewards() {
       progress.xp = Math.min(progress.xp, requiredXp(30));
     }
     ChapterOneProgressionPolicy.recordNormalKill(progress, activeMap.id);
+    const defeatedMonster = offlineMonsters[kill % offlineMonsters.length];
+    if (defeatedMonster) grantCraftingMaterialDrops(progress, activeMap, defeatedMonster);
   }
   const gainedGold = defeated * 2;
   progress.gold += gainedGold;
@@ -2472,7 +2483,7 @@ function getDropLookupItems() {
     maps: mapProgression,
     mapPools: dropLookupMapPools,
     monsters: monsterTypes,
-    materialPolicies: [ChapterOneMaterialDropPolicy, ChapterTwoMaterialDropPolicy],
+    materialPolicies: [ChapterOneMaterialDropPolicy, ChapterTwoMaterialDropPolicy, ChapterThreeMaterialDropPolicy],
     recipePolicies: [ChapterOneRecipeDropPolicy, ChapterTwoRecipeDropPolicy],
     skillPolicy: SkillUpgradePolicy,
     bossPolicy: ChapterBossDropPolicy,
@@ -4033,9 +4044,7 @@ function rewardVictory(index) {
   progress.gold += earnedGold;
   const loot = addLoot(progress, enemy);
   const affixDropBonus = EliteAffixPolicy.getDropBonus(enemy.eliteAffixes, currentMap.chapter);
-  const materialDrops = ChapterOneMaterialDropPolicy.grantMaterialDrops(progress, currentMap.id, enemy);
-  materialDrops.push(...ChapterTwoMaterialDropPolicy.grantMaterialDrops(progress, currentMap.id, enemy, { dropRateMultiplier: affixDropBonus.materialMultiplier }));
-  materialDrops.push(...VillageUpgradePolicy.grantMapDrops(progress, currentMap.id));
+  const materialDrops = grantCraftingMaterialDrops(progress, currentMap, enemy, { dropRateMultiplier: affixDropBonus.materialMultiplier });
   const purificationDrop = BlackForestCorruptionPolicy.grantMapDrop(progress, currentMap.id, enemy);
   const skillMaterialDrops = SkillUpgradePolicy.grantChapterDrops(progress, currentMap.chapter, enemy);
   const recipeDrops = ChapterOneRecipeDropPolicy.grantRecipeDrops(progress, enemy, currentMap.id);

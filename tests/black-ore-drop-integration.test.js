@@ -7,8 +7,8 @@ const script = fs.readFileSync(path.join(root, 'script.js'), 'utf8');
 const index = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
 const crafting = fs.readFileSync(path.join(root, 'crafting-policy.js'), 'utf8');
 
-assert.match(script, /grantMaterialDrops\(progress, currentMap\.id, enemy\)/, 'reward settlement passes the defeated monster to the material policy');
-assert.match(script, /VillageUpgradePolicy\.grantMapDrops\(progress, currentMap\.id\)/, 'reward settlement also grants map-based building black ore');
+assert.match(script, /grantCraftingMaterialDrops\(progress, currentMap, enemy/, 'reward settlement passes the defeated monster to the shared material settlement');
+assert.match(script, /VillageUpgradePolicy\.grantMapDrops\(progress, map\.id\)/, 'shared settlement also grants map-based building black ore');
 assert.doesNotMatch(crafting, /blackOre: Object\.freeze/, 'black ore has one canonical material definition in the drop policy');
 assert.match(index, /chapter-one-material-drop-policy\.js\?v=20260815-material-artwork-v1/, 'the material policy cache key includes the current artwork');
 assert.match(index, /script\.js\?v=20260830-region-rune-drops-v1/, 'the integration script uses the current local build');
