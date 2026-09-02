@@ -2093,6 +2093,7 @@ function getEquipmentStats(progress = getProgress()) {
     lowHealthDamagePercent: (affixes.lowHealthDamagePercent || 0) / 100,
     highHealthDamagePercent: (affixes.highHealthDamagePercent || 0) / 100,
     criticalResourceRecoveryPercent: (affixes.criticalResourceRecoveryPercent || 0) / 100,
+    directHitHealthRecoveryPercent: (affixes.directHitHealthRecoveryPercent || 0) / 100,
     maxHpPercent: (affixes.maxHpPercent || 0) / 100,
     defensePercent: (affixes.defensePercent || 0) / 100,
     accuracyPercent: (affixes.accuracyPercent || 0) / 100,
@@ -2170,6 +2171,7 @@ function getCharacterStats(level, progress = getProgress(), character = getActiv
     lowHealthDamagePercent: Math.max(0, equipment.lowHealthDamagePercent),
     highHealthDamagePercent: Math.max(0, equipment.highHealthDamagePercent),
     criticalResourceRecoveryPercent: Math.max(0, equipment.criticalResourceRecoveryPercent),
+    directHitHealthRecoveryPercent: Math.max(0, equipment.directHitHealthRecoveryPercent),
     criticalDamageMultiplier: 1.5 + Math.max(0, equipment.criticalDamagePercent + passiveTotal('criticalDamage') + passiveTotal('skillCriticalDamage')),
     dotMultiplier: character?.race === 'undead' ? 1.20 : 1
   };
@@ -4469,8 +4471,10 @@ function applyDamageToMonster(index, baseDamage, profile, options = {}) {
     const counterDamage = MonsterDefense.resolvePlayerDamage({ baseDamage: counterRaw, defense: counterStats.defense, damageReduction: counterStats.damageReduction }).finalDamage;
     const absorbed = Math.min(attacker.shield || 0, counterDamage);
     attacker.shield = Math.max(0, (attacker.shield || 0) - absorbed);
-    attacker.currentHp = Math.max(0, attacker.currentHp - (counterDamage - absorbed));
-    logBattle(`↩【${enemy.name}】招架後反擊，對${attacker.name}造成 ${counterDamage - absorbed} 傷害。`, 'damage-taken');
+    const actualCounterDamage = counterDamage - absorbed;
+    attacker.currentHp = Math.max(0, attacker.currentHp - actualCounterDamage);
+    resolveEnemyDirectHitRecovery(attacker, actualCounterDamage, counterStats);
+    logBattle(`↩【${enemy.name}】招架後反擊，對${attacker.name}造成 ${actualCounterDamage} 傷害。`, 'damage-taken');
     defeatPartyMember(attacker);
   }
   if (result.parried && captainShieldActive && attacker?.alive) {
@@ -4479,8 +4483,10 @@ function applyDamageToMonster(index, baseDamage, profile, options = {}) {
     const counterDamage = MonsterDefense.resolvePlayerDamage({ baseDamage: counterRaw, defense: counterStats.defense, damageReduction: counterStats.damageReduction }).finalDamage;
     const absorbed = Math.min(attacker.shield || 0, counterDamage);
     attacker.shield = Math.max(0, (attacker.shield || 0) - absorbed);
-    attacker.currentHp = Math.max(0, attacker.currentHp - (counterDamage - absorbed));
-    logBattle(`↩【${enemy.name}】以【盾架反擊】對${attacker.name}造成 ${counterDamage - absorbed} 傷害。`, 'damage-taken');
+    const actualCounterDamage = counterDamage - absorbed;
+    attacker.currentHp = Math.max(0, attacker.currentHp - actualCounterDamage);
+    resolveEnemyDirectHitRecovery(attacker, actualCounterDamage, counterStats);
+    logBattle(`↩【${enemy.name}】以【盾架反擊】對${attacker.name}造成 ${actualCounterDamage} 傷害。`, 'damage-taken');
     defeatPartyMember(attacker);
   }
   const wasAlive = battle.enemyHps[index] > 0;
@@ -5389,6 +5395,14 @@ function processPartyMemberBleed(member, now = Date.now()) {
   return true;
 }
 
+function resolveEnemyDirectHitRecovery(member, actualDamage, stats = member?.stats, random = Math.random) {
+  return DirectHitHealthRecoveryPolicy.resolveDirectHit(member, {
+    damageKind: 'enemy-direct',
+    actualDamage,
+    recoveryPercent: stats?.directHitHealthRecoveryPercent
+  }, random);
+}
+
 function hasSummonedBlackstoneSpider() {
   return (battle.enemyTrailSummoned || []).some((summoned, index) => summoned
     && battle.enemyTypes[index] === 'blackstonePoisonSpider' && battle.enemyHps[index] > 0);
@@ -5835,6 +5849,7 @@ function enemyAttackTick() {
     target.shield = Math.max(0, (target.shield || 0) - absorbed);
     damage -= absorbed;
     target.currentHp = Math.max(0, target.currentHp - damage);
+    resolveEnemyDirectHitRecovery(target, damage, stats);
     const directDamageLeech = EliteAffixPolicy.getDirectDamageLeech(enemy.eliteAffixes);
     if (damage > 0 && directDamageLeech > 0) {
       const restored = Math.min(Math.max(1, Math.floor(damage * directDamageLeech)), enemy.maxHp - battle.enemyHps[enemyIndex]);

@@ -77,7 +77,7 @@
     first_strike_damage_percent: affix('first_strike_damage_percent', '先制', 'highHealthDamagePercent', 8, '%', 5, ['weapon', 'accessory'], { unlockChapter: 3, valuesByChapter: { 3: 8 }, trigger: { hpAbove: .80 }, description: 'HP高於80%時，造成傷害 +{value}%' }),
     critical_resource_recovery_percent: affix('critical_resource_recovery_percent', '暴擊回復', 'criticalResourceRecoveryPercent', 2, '%', 5, ['weapon', 'accessory'], { unlockChapter: 3, valuesByChapter: { 3: 2 }, trigger: { event: 'critical', maxTriggersPerAttack: 1 }, description: '暴擊時恢復 {value}% 最大主要資源' }),
     control_resistance_percent: affix('control_resistance_percent', '控制抗性', 'controlResistancePercent', 15, '%', 6, ['armor', 'accessory'], { unlockChapter: 3, valuesByChapter: { 3: 15 }, rollable: false, combatStatus: 'pending', disabledReason: '等待共用控制效果接線' }),
-    direct_hit_health_recovery_percent: affix('direct_hit_health_recovery_percent', '受擊恢復', 'directHitHealthRecoveryPercent', 2, '%', 5, ['armor', 'accessory'], { unlockChapter: 3, valuesByChapter: { 3: 2 }, rollable: false, combatStatus: 'pending', trigger: { event: 'enemy-direct-hit', chance: .05 }, disabledReason: '等待敵人直接命中事件接線' })
+    direct_hit_health_recovery_percent: affix('direct_hit_health_recovery_percent', '受擊恢復', 'directHitHealthRecoveryPercent', 2, '%', 5, ['armor', 'accessory'], { unlockChapter: 3, valuesByChapter: { 3: 2 }, trigger: { event: 'enemy-direct-hit', chance: .05 }, description: '受到敵人直接命中時，5%機率恢復{value}%最大生命' })
   });
   const EQUIPMENT_AFFIXES = Object.freeze({ ...BASE_EQUIPMENT_AFFIXES, ...CHAPTER_TWO_AFFIXES, ...CHAPTER_THREE_PENDING_AFFIXES });
   function specialAbility(id, name, description, options = {}) {
