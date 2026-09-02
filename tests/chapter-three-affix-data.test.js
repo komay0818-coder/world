@@ -55,7 +55,17 @@ assert.deepEqual(reserved.allowedGroups, ['weapon']);
 assert.deepEqual(reserved.qualities, ['epic', 'legendary']);
 assert.equal(pool(weapon, 3, 'epic').includes(reserved.id), false);
 
-const pendingIds = ['armor_penetration_percent', 'last_stand_damage_percent', 'first_strike_damage_percent', 'critical_resource_recovery_percent', 'control_resistance_percent', 'direct_hit_health_recovery_percent'];
+const armorPenetration = policy.EQUIPMENT_AFFIXES.armor_penetration_percent;
+assert.equal(armorPenetration.rollable, true);
+assert.equal(armorPenetration.combatStatus, 'ready');
+assert.equal(pool(weapon, 1, 'epic').includes(armorPenetration.id), false);
+assert.equal(pool(weapon, 2, 'epic').includes(armorPenetration.id), false);
+assert.equal(pool(weapon, 3, 'epic').includes(armorPenetration.id), true);
+assert.equal(pool(accessory, 3, 'epic').includes(armorPenetration.id), true);
+assert.equal(pool(armor, 3, 'epic').includes(armorPenetration.id), false);
+assert.deepEqual(value('armor_penetration_percent', 3), [8]);
+
+const pendingIds = ['last_stand_damage_percent', 'first_strike_damage_percent', 'critical_resource_recovery_percent', 'control_resistance_percent', 'direct_hit_health_recovery_percent'];
 pendingIds.forEach((id) => {
   const definition = policy.EQUIPMENT_AFFIXES[id];
   assert.ok(definition, `${id} definition exists`);
@@ -64,7 +74,6 @@ pendingIds.forEach((id) => {
   assert.equal(definition.combatStatus, 'pending');
   [weapon, armor, accessory].forEach((item) => assert.equal(pool(item, 3, 'epic').includes(id), false, `${id} cannot be obtained yet`));
 });
-assert.deepEqual(value('armor_penetration_percent', 3), [8]);
 assert.deepEqual(value('last_stand_damage_percent', 3), [12]);
 assert.deepEqual(value('first_strike_damage_percent', 3), [8]);
 assert.deepEqual(value('critical_resource_recovery_percent', 3), [2]);
@@ -72,6 +81,6 @@ assert.deepEqual(value('control_resistance_percent', 3), [15]);
 assert.deepEqual(value('direct_hit_health_recovery_percent', 3), [2]);
 assert.deepEqual(policy.EQUIPMENT_AFFIXES.direct_hit_health_recovery_percent.trigger, { event: 'enemy-direct-hit', chance: .05 });
 const formalExistingPool = Object.values(policy.EQUIPMENT_AFFIXES).filter((definition) => definition.enabled && definition.rollable && definition.unlockChapter <= 3 && (definition.maxChapter == null || definition.maxChapter >= 3));
-assert.equal(formalExistingPool.length, 20, 'the enabled chapter-three foundation contains exactly ten base and ten advanced affixes');
+assert.equal(formalExistingPool.length, 21, 'the formal pool contains twenty existing affixes plus armor penetration');
 
 console.log('chapter-three-affix-data: assertions passed');

@@ -9,8 +9,9 @@ const appCss = fs.readFileSync(path.join(__dirname, '..', 'style.css'), 'utf8');
 
 assert.match(html, /equipment-affix-policy\.js/, 'affix policy loads before the main game script');
 assert.match(html, /href="style\.css\?v=20260822-inventory-image-containment-v1"/, 'the affix UI stylesheet loads from the same deployed revision');
-assert.match(html, /equipment-affix-policy\.js\?v=20260903-chapter3-affix-data-v1/, 'the affix formatter uses the current local build');
-assert.match(html, /script\.js\?v=20260903-chapter2-crafted-stats-v1/, 'the affix UI renderer uses the current local build');
+assert.match(html, /equipment-affix-policy\.js\?v=20260903-armor-penetration-v1/, 'the affix formatter uses the current local build');
+assert.match(html, /armor-penetration-policy\.js\?v=20260903-armor-penetration-v1/, 'armor penetration policy loads before the main game script');
+assert.match(html, /script\.js\?v=20260903-armor-penetration-v1/, 'the affix UI renderer uses the current local build');
 assert.match(source, /equipmentAffixMigrationVersion !== 'green-affix-v1'/, 'legacy saves receive the affix compatibility migration');
 assert.match(source, /EquipmentAffixPolicy\.normalizeEquipment\(item\)/, 'inventory and equipped items are normalized on load');
 assert.match(source, /EquipmentAffixPolicy\.getEquippedAffixStats\(progress\.equipment\)/, 'stats read only the equipped item collection');
@@ -18,6 +19,9 @@ assert.match(source, /equipment\.maxHpPercent/, 'maximum-health affixes feed the
 assert.match(source, /equipment\.defensePercent/, 'defense affixes feed the character calculation');
 assert.match(source, /equipment\.criticalChance/, 'critical chance affixes feed the character calculation');
 assert.match(source, /equipment\.attackSpeedPercent/, 'attack-speed affixes feed the character calculation');
+assert.match(source, /armorPenetrationPercent: \(affixes\.armorPenetrationPercent \|\| 0\) \/ 100/, 'armor penetration enters the shared equipment aggregation');
+assert.match(source, /ArmorPenetrationPolicy\.getTotalArmorIgnore\([\s\S]*skillArmorIgnore: options\.armorIgnore[\s\S]*equipmentArmorPenetration: attackerStats\.armorPenetrationPercent[\s\S]*attackKind: options\.attackKind/, 'online attacks combine skill and eligible equipment armor ignore at one defense entry point');
+assert.match(source, /enemy\.defense \* \(1 - armorIgnore\)/, 'the combined ratio reduces enemy defense');
 ['skillDamagePercent', 'eliteDamagePercent', 'bossDamagePercent', 'basicAttackDamagePercent', 'killHealthRecoveryPercent', 'killResourceRecoveryPercent', 'poisonResistancePercent'].forEach((stat) => {
   assert.match(source, new RegExp(`${stat}: Math`), `chapter-two combat stat ${stat} feeds the character calculation`);
 });

@@ -71,7 +71,7 @@
     poison_resistance_percent: affix('poison_resistance_percent', '中毒抗性', 'poisonResistancePercent', 15, '%', 6, ['armor', 'accessory'], { unlockChapter: 2, maxChapter: 2, valuesByChapter: { 2: 15 } })
   });
   const CHAPTER_THREE_PENDING_AFFIXES = Object.freeze({
-    armor_penetration_percent: affix('armor_penetration_percent', '護甲穿透', 'armorPenetrationPercent', 8, '%', 6, ['weapon', 'accessory'], { unlockChapter: 3, valuesByChapter: { 3: 8 }, rollable: false, combatStatus: 'pending', disabledReason: '等待戰鬥公式接線' }),
+    armor_penetration_percent: affix('armor_penetration_percent', '護甲穿透', 'armorPenetrationPercent', 8, '%', 6, ['weapon', 'accessory'], { unlockChapter: 3, valuesByChapter: { 3: 8 } }),
     last_stand_damage_percent: affix('last_stand_damage_percent', '背水', 'lowHealthDamagePercent', 12, '%', 5, ['weapon', 'accessory'], { unlockChapter: 3, valuesByChapter: { 3: 12 }, rollable: false, combatStatus: 'pending', trigger: { hpBelow: .30 }, disabledReason: '等待依當下生命比例判定' }),
     first_strike_damage_percent: affix('first_strike_damage_percent', '先制', 'highHealthDamagePercent', 8, '%', 5, ['weapon', 'accessory'], { unlockChapter: 3, valuesByChapter: { 3: 8 }, rollable: false, combatStatus: 'pending', trigger: { hpAbove: .80 }, disabledReason: '等待依當下生命比例判定' }),
     critical_resource_recovery_percent: affix('critical_resource_recovery_percent', '暴擊回復', 'criticalResourceRecoveryPercent', 2, '%', 5, ['weapon', 'accessory'], { unlockChapter: 3, valuesByChapter: { 3: 2 }, rollable: false, combatStatus: 'pending', trigger: { event: 'critical', maxTriggersPerAttack: 1 }, disabledReason: '等待暴擊事件接線' }),

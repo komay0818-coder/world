@@ -2089,6 +2089,7 @@ function getEquipmentStats(progress = getProgress()) {
     killHealthRecoveryPercent: (affixes.killHealthRecoveryPercent || 0) / 100,
     killResourceRecoveryPercent: (affixes.killResourceRecoveryPercent || 0) / 100,
     poisonResistancePercent: (affixes.poisonResistancePercent || 0) / 100,
+    armorPenetrationPercent: (affixes.armorPenetrationPercent || 0) / 100,
     maxHpPercent: (affixes.maxHpPercent || 0) / 100,
     defensePercent: (affixes.defensePercent || 0) / 100,
     accuracyPercent: (affixes.accuracyPercent || 0) / 100,
@@ -2162,6 +2163,7 @@ function getCharacterStats(level, progress = getProgress(), character = getActiv
     killHealthRecoveryPercent: Math.max(0, equipment.killHealthRecoveryPercent),
     killResourceRecoveryPercent: Math.max(0, equipment.killResourceRecoveryPercent),
     poisonResistancePercent: Math.min(1, Math.max(0, equipment.poisonResistancePercent)),
+    armorPenetrationPercent: Math.min(ArmorPenetrationPolicy.ARMOR_IGNORE_CAP, Math.max(0, equipment.armorPenetrationPercent)),
     criticalDamageMultiplier: 1.5 + Math.max(0, equipment.criticalDamagePercent + passiveTotal('criticalDamage') + passiveTotal('skillCriticalDamage')),
     dotMultiplier: character?.race === 'undead' ? 1.20 : 1
   };
@@ -4425,11 +4427,16 @@ function applyDamageToMonster(index, baseDamage, profile, options = {}) {
   const strongholdMultipliers = BlackstoneStrongholdPolicy.getCombatMultipliers(enemy.id, battle.enemyHps[index], enemy.maxHp);
   const forestAltarMultipliers = ForestAltarPolicy.getCombatMultipliers(enemy.id, battle.enemyHps[index], enemy.maxHp);
   const depthsMultipliers = BlackForestDepthsPolicy.getCombatMultipliers(enemy.id, battle.enemyHps[index], enemy.maxHp, getBlackForestDepthsCombatContext());
+  const armorIgnore = ArmorPenetrationPolicy.getTotalArmorIgnore({
+    skillArmorIgnore: options.armorIgnore,
+    equipmentArmorPenetration: attackerStats.armorPenetrationPercent,
+    attackKind: options.attackKind
+  });
   const captainShieldActive = enemy.id === 'blackstoneCaptain' && Date.now() < (battle.enemyCaptainShieldUntil?.[index] || 0);
   const assassinDashActive = enemy.id === 'blackstoneVenombladeAssassin' && Date.now() < (battle.enemyAssassinDashUntil?.[index] || 0);
   const defendedEnemy = {
     ...enemy,
-    defense: Math.max(0, Math.round(enemy.defense * (1 - (options.armorIgnore || 0)) * (1 - Math.min(.9, (battle.enemyDots[index] || []).filter((dot) => dot.type === 'poison').reduce((total, dot) => total + (dot.defenseReduction || 0), 0))) * trailMultipliers.defense * spiderNestMultipliers.defense * strongholdMultipliers.defense * forestAltarMultipliers.defense * depthsMultipliers.defense)),
+    defense: Math.max(0, Math.round(enemy.defense * (1 - armorIgnore) * (1 - Math.min(.9, (battle.enemyDots[index] || []).filter((dot) => dot.type === 'poison').reduce((total, dot) => total + (dot.defenseReduction || 0), 0))) * trailMultipliers.defense * spiderNestMultipliers.defense * strongholdMultipliers.defense * forestAltarMultipliers.defense * depthsMultipliers.defense)),
     evasion: (enemy.evasion || 0) + (trailMultipliers.evasion || 0) + (spiderNestMultipliers.evasion || 0) + (strongholdMultipliers.evasion || 0) + (forestAltarMultipliers.evasion || 0) + (depthsMultipliers.evasion || 0) + (assassinDashActive ? SpiderNestPolicy.ASSASSIN.dashEvasionBonus : 0),
     parry: (enemy.parry || 0) + (captainShieldActive ? BlackForestTrailPolicy.CAPTAIN.shieldParryBonus : 0)
   };
