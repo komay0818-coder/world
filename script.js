@@ -1639,6 +1639,10 @@ function grantCraftingMaterialDrops(progress, map, enemy, options = {}) {
   return materialDrops;
 }
 
+function grantChapterThreeSpecialEquipmentDrop(progress, map, enemy, options = {}) {
+  return ChapterThreeSpecialEquipmentPolicy.grantSpecialDrop(progress, enemy, map.id, options);
+}
+
 function claimOfflineRewards() {
   const character = getActiveCharacter();
   if (!character) return null;
@@ -1675,6 +1679,7 @@ function claimOfflineRewards() {
   const defeated = simulation.defeated;
   let gainedXp = 0;
   let levelsGained = 0;
+  let equipmentFound = 0;
   for (let kill = 0; kill < defeated; kill += 1) {
     const gained = MapExpPolicy.calculate(activeMap.normalXp, progress.level, activeMap).actualExp;
     progress.xp += gained;
@@ -1690,7 +1695,10 @@ function claimOfflineRewards() {
     }
     ChapterOneProgressionPolicy.recordNormalKill(progress, activeMap.id);
     const defeatedMonster = offlineMonsters[kill % offlineMonsters.length];
-    if (defeatedMonster) grantCraftingMaterialDrops(progress, activeMap, defeatedMonster);
+    if (defeatedMonster) {
+      grantCraftingMaterialDrops(progress, activeMap, defeatedMonster);
+      if (grantChapterThreeSpecialEquipmentDrop(progress, activeMap, defeatedMonster)) equipmentFound += 1;
+    }
   }
   const gainedGold = defeated * 2;
   progress.gold += gainedGold;
@@ -1711,7 +1719,7 @@ function claimOfflineRewards() {
     progress.requiresMapSelectionAfterDefeat = true;
   }
   saveProgress(progress);
-  pendingOfflineReport = { duration: formatOfflineDuration(simulation.effectiveMs), offlineDuration: formatOfflineDuration(offlineMs), defeated, gainedXp, gainedGold, levelsGained, equipmentFound: 0, capped: now - lastActiveAt > offlineLimitMs, potionsUsed, died: simulation.died };
+  pendingOfflineReport = { duration: formatOfflineDuration(simulation.effectiveMs), offlineDuration: formatOfflineDuration(offlineMs), defeated, gainedXp, gainedGold, levelsGained, equipmentFound, capped: now - lastActiveAt > offlineLimitMs, potionsUsed, died: simulation.died };
   if (simulation.died) {
     openVillage('menu');
     showToast(`角色在離線戰鬥中戰敗，本次掛機已結束。有效掛機時間：${pendingOfflineReport.duration}`);
@@ -4075,6 +4083,12 @@ function rewardVictory(index) {
   } catch (error) {
     console.warn('[SpecialEquipmentDrop] 第二章特殊紫裝掉落處理發生未預期錯誤，其他戰鬥獎勵將繼續結算。', error);
   }
+  let chapterThreeSpecialEquipmentDrop = null;
+  try {
+    chapterThreeSpecialEquipmentDrop = grantChapterThreeSpecialEquipmentDrop(progress, currentMap, enemy);
+  } catch (error) {
+    console.warn('[SpecialEquipmentDrop] 第三章專屬紫裝掉落處理發生未預期錯誤，其他戰鬥獎勵將繼續結算。', error);
+  }
   let offhandDrop = null;
   if (currentMap.id === 'plains-depths' && Math.random() < EquipmentPolicy.getPlainsDepthsOffhandDropRate(enemy)) {
     offhandDrop = EquipmentPolicy.createRandomOffhandDrop(Math.random(), Math.random(), `${Date.now()}-${Math.floor(Math.random() * 1000000)}`);
@@ -4174,6 +4188,10 @@ function rewardVictory(index) {
     showToast(`特殊紫裝掉落：${specialEquipmentDrop.name}`);
     logBattle(`◆ 第二章特殊掉落：【紫色】${specialEquipmentDrop.name}`, 'loot');
   }
+  if (chapterThreeSpecialEquipmentDrop) {
+    showToast(`專屬紫裝掉落：${chapterThreeSpecialEquipmentDrop.name}`);
+    logBattle(`◆ 第三章專屬掉落：【紫色】${chapterThreeSpecialEquipmentDrop.name}`, 'loot');
+  }
   if (offhandDrop) {
     showToast(`獲得副手：${offhandDrop.name}【${offhandDrop.affix.name}】`);
     logBattle(`🎁 掉落【${offhandDrop.name}】－${offhandDrop.affix.text}`, 'loot');
@@ -4186,7 +4204,7 @@ function rewardVictory(index) {
     rewardKey,
     xp: earnedXp,
     gold: earnedGold,
-    loot: [loot?.name, ...materialDrops.map((material) => material.name), ...recipeDrops.map((recipe) => recipe.name), runeDrop?.name, equipmentDrop?.name, blueEquipmentDrop?.name, specialEquipmentDrop?.name, offhandDrop?.name, ...accountDrops].filter(Boolean).join(',') || 'none'
+    loot: [loot?.name, ...materialDrops.map((material) => material.name), ...recipeDrops.map((recipe) => recipe.name), runeDrop?.name, equipmentDrop?.name, blueEquipmentDrop?.name, specialEquipmentDrop?.name, chapterThreeSpecialEquipmentDrop?.name, offhandDrop?.name, ...accountDrops].filter(Boolean).join(',') || 'none'
   });
 }
 
