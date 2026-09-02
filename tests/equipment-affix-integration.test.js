@@ -9,7 +9,8 @@ const appCss = fs.readFileSync(path.join(__dirname, '..', 'style.css'), 'utf8');
 
 assert.match(html, /equipment-affix-policy\.js/, 'affix policy loads before the main game script');
 assert.match(html, /href="style\.css\?v=20260822-inventory-image-containment-v1"/, 'the affix UI stylesheet loads from the same deployed revision');
-assert.match(html, /script\.js\?v=20260902-redrock-weapon-fragments-v1/, 'the affix UI renderer uses the current local build');
+assert.match(html, /equipment-affix-policy\.js\?v=20260903-chapter2-crafted-stats-v1/, 'the affix formatter uses the current local build');
+assert.match(html, /script\.js\?v=20260903-chapter2-crafted-stats-v1/, 'the affix UI renderer uses the current local build');
 assert.match(source, /equipmentAffixMigrationVersion !== 'green-affix-v1'/, 'legacy saves receive the affix compatibility migration');
 assert.match(source, /EquipmentAffixPolicy\.normalizeEquipment\(item\)/, 'inventory and equipped items are normalized on load');
 assert.match(source, /EquipmentAffixPolicy\.getEquippedAffixStats\(progress\.equipment\)/, 'stats read only the equipped item collection');
@@ -25,6 +26,8 @@ assert.match(source, /updatePartyMemberHealthRegeneration\(member, now\)/, 'batt
 assert.match(source, /skill\.id === 'fireball'\) hits\.forEach[\s\S]*applyDot\(target\.index, 'burn'/, 'fireball inherently applies burn on hit');
 assert.doesNotMatch(source, /hasEquippedSpecialAbility\(member\.equipment, 'mage_fireball_burn'\)/, 'fireball burn does not depend on equipment');
 assert.match(source, /EquipmentAffixPolicy\.formatAffix\(entry\)/, 'inventory, comparison and worn views share the affix text renderer');
+assert.match(source, /chapterTwoCraftedBaseStatsMigrationVersion !== 'chapter2-crafted-base-stats-v1'/, 'existing chapter-two crafted instances receive their template base stats once');
+assert.match(source, /CraftingPolicy\.applyCraftedBaseStats\(item\)/, 'inventory and equipped legacy items use the same compatibility path');
 assert.match(source, /function equipmentDetailsHtml\(item\)/, 'equipment inventory rows use a dedicated details renderer');
 assert.match(source, /equipment-affix-title">裝備詞綴/, 'the affix section has a clear title');
 assert.match(source, /source === '固定'/, 'affixes expose fixed and random source labels');

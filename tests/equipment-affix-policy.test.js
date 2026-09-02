@@ -55,6 +55,11 @@ const worn = policy.getEquippedAffixStats({ armor: green });
 assert.ok(Object.keys(worn).length > 0);
 assert.deepEqual(policy.getEquippedAffixStats({}), {});
 assert.match(policy.formatAffix(green.affixes[0]), /\+/);
+const chapterTwoHp = policy.createEquipmentInstance({ ...armor, fixedAffixIds: ['max_hp_percent'] }, { quality: 'uncommon', chapter: 2, random: () => 0 }).fixedAffixes[0];
+assert.equal(chapterTwoHp.value, 12);
+assert.equal(policy.formatAffix(chapterTwoHp), '最大生命 +12%', 'UI formats the chapter-tier value stored on the equipment instance');
+assert.equal(policy.formatAffix({ ...chapterTwoHp, value: 17, components: [{ stat: 'maxHpPercent', value: 17, unit: '%' }] }), '最大生命 +17%', 'UI never replaces an instance value with the chapter-one definition');
+assert.equal(policy.formatAffix({ id: 'max_hp_percent', value: 12, unit: '%' }), '最大生命 +12%', 'legacy single-stat entries also display their stored value');
 
 const chapterTwoAvailable = policy.getAvailableAffixes(weapon, [], { chapter: 2, quality: 'rare' }).map((entry) => entry.id);
 ['elite_damage_percent', 'boss_damage_percent', 'skill_damage_percent', 'basic_attack_damage_percent', 'kill_resource_recovery_percent'].forEach((id) => assert.ok(chapterTwoAvailable.includes(id), `chapter two unlocks ${id}`));

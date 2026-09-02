@@ -138,6 +138,13 @@
     const generated = EquipmentAffixPolicy.createEquipmentInstance(template, { quality: recipe.quality, uniqueId: instanceId, random, chapter: options.chapter || recipe.chapter || 1, jobId: options.jobId });
     return { ...generated, id: instanceId, instanceId, equipmentId: recipe.resultItemId, templateId: recipe.resultItemId, sourceType: 'crafted', recipeId, sockets: 0, craftedAt };
   }
+  function applyCraftedBaseStats(item) {
+    if (!item || item.kind !== 'equipment') return item;
+    const recipe = RECIPES[item.recipeId] || Object.values(RECIPES).find((entry) => entry.resultItemId === (item.equipmentId || item.templateId));
+    if (!recipe?.baseStats || recipe.chapter !== 2) return item;
+    const baseStats = { ...recipe.baseStats };
+    return { ...item, ...baseStats, baseStats };
+  }
   function deductInventoryItems(inventory, costs) {
     const result = (Array.isArray(inventory) ? inventory : []).map((item) => ({ ...item }));
     Object.entries(costs).forEach(([id, amount]) => {
@@ -169,6 +176,6 @@
   return Object.freeze({
     INVENTORY_CAPACITY, RARITIES, STAT_DEFINITIONS, PRIMARY_STAT_POOLS, AFFIX_POOLS, MATERIALS, RECIPES,
     normalizeCraftingState, getItemQuantity, getRecipeQuantity, isRecipeKnown, getProjectedInventorySlots,
-    canCraft, createInstanceId, generateCraftedEquipment, craftEquipment, formatStat
+    canCraft, createInstanceId, generateCraftedEquipment, applyCraftedBaseStats, craftEquipment, formatStat
   });
 }));

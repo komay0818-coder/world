@@ -7,6 +7,12 @@ assert.deepEqual([policy.RECIPES.greenWrist.resultName, policy.RECIPES.greenCloa
 assert.deepEqual(Object.values(policy.RECIPES).map(({ equipmentSlot }) => equipmentSlot), ['cloak', 'wrist', 'shoulders', 'shoulders', 'wrist', 'cloak']);
 assert.deepEqual(Object.values(policy.RECIPES).map(({ quality }) => quality), ['uncommon', 'uncommon', 'uncommon', 'rare', 'rare', 'rare']);
 assert.ok(Object.values(policy.RECIPES).every((recipe) => recipe.chapter === 2 && recipe.craftingStatus === 'ready'));
+assert.deepEqual(policy.RECIPES.greenWrist.baseStats, { defense: 7, hp: 25 });
+assert.deepEqual(policy.RECIPES.greenCloak.baseStats, { defense: 5, hp: 45 });
+assert.deepEqual(policy.RECIPES.greenShoulders.baseStats, { defense: 11, hp: 32 });
+assert.deepEqual(policy.RECIPES.blackstoneBullhornShoulders.baseStats, { defense: 14, hp: 42, damageReduction: .02 });
+assert.deepEqual(policy.RECIPES.sturdyGuardianWrist.baseStats, { defense: 8, hp: 30, damageBonus: .03 });
+assert.deepEqual(policy.RECIPES.corruptedCenturionCloak.baseStats, { defense: 7, hp: 55, dodge: .03 });
 assert.deepEqual(policy.RECIPES.greenCloak.materials, { green_essence_stone: 1, 'black-wood': 8, 'spider-silk': 6 });
 assert.deepEqual(policy.RECIPES.greenWrist.materials, { green_essence_stone: 1, 'black-iron-ore': 8, 'hard-hide': 6 });
 assert.deepEqual(policy.RECIPES.greenShoulders.materials, { green_essence_stone: 1, 'black-iron-ore': 6, 'hard-hide': 6, 'spider-silk': 6 });
