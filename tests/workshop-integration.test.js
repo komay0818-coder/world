@@ -5,7 +5,7 @@ const path = require('node:path');
 const root = path.join(__dirname, '..');
 const script = fs.readFileSync(path.join(root, 'script.js'), 'utf8');
 const html = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
-assert.match(html, /crafting-policy\.js\?v=20260830-chapter-one-base-stats-v1/, 'current crafting base stats load from the dev build');
+assert.match(html, /crafting-policy\.js\?v=20260902-redrock-blue-recipes-v1/, 'current crafting policy loads from the dev build');
 assert.match(html, /world\/67f5ab92db6af0eccead2ff7d5e6db5289fc1adf\/chapter-two-recipe-drop-policy\.js/, 'chapter-two essence recipes are loaded from their immutable commit');
 const css = fs.readFileSync(path.join(root, 'styles', 'village.css'), 'utf8');
 
@@ -16,7 +16,7 @@ assert.doesNotMatch(script, /recipe\.chapter === 1/, 'workshop no longer hides c
 assert.match(script, /function normalizeWearableSeriesName\(item\)/, 'saved recipes and crafted equipment receive the current series names');
 assert.match(script, /'crafted-green-wrist': '平原護腕'/, 'chapter-one crafted equipment migrates to the plains series');
 assert.match(script, /'crafted-chapter2-green-wrist': '黑森林護腕'/, 'chapter-two crafted equipment migrates to the black-forest series');
-assert.match(script, /第一、二章裝備製作/, 'workshop identifies both supported crafting chapters');
+assert.match(script, /第一至三章裝備製作/, 'workshop identifies all supported crafting chapters');
 assert.match(script, /data-workshop-quality="uncommon"[\s\S]*data-workshop-quality="rare"/, 'workshop exposes green and blue quality filters');
 assert.match(script, /data-workshop-slot="wrist"[\s\S]*data-workshop-slot="cloak"[\s\S]*data-workshop-slot="shoulders"/, 'workshop exposes all three chapter-one equipment slots');
 assert.match(script, /workshop-insufficient/, 'missing resources receive a dedicated UI state');

@@ -11,13 +11,19 @@
   const chapterTwoMaterialPolicy = typeof module === 'object' && module.exports
     ? require('./chapter-two-material-drop-policy.js')
     : root.ChapterTwoMaterialDropPolicy;
+  const chapterThreeRecipePolicy = typeof module === 'object' && module.exports
+    ? require('./chapter-three-recipe-drop-policy.js')
+    : root.ChapterThreeRecipeDropPolicy;
+  const chapterThreeMaterialPolicy = typeof module === 'object' && module.exports
+    ? require('./chapter-three-material-drop-policy.js')
+    : root.ChapterThreeMaterialDropPolicy;
   const affixPolicy = typeof module === 'object' && module.exports
     ? require('./equipment-affix-policy.js')
     : root.EquipmentAffixPolicy;
-  const api = factory(recipePolicy, materialPolicy, chapterTwoRecipePolicy, chapterTwoMaterialPolicy, affixPolicy);
+  const api = factory(recipePolicy, materialPolicy, chapterTwoRecipePolicy, chapterTwoMaterialPolicy, chapterThreeRecipePolicy, chapterThreeMaterialPolicy, affixPolicy);
   if (typeof module === 'object' && module.exports) module.exports = api;
   else root.CraftingPolicy = api;
-}(typeof globalThis !== 'undefined' ? globalThis : this, function createCraftingPolicy(RecipePolicy, MaterialPolicy, ChapterTwoRecipePolicy, ChapterTwoMaterialPolicy, EquipmentAffixPolicy) {
+}(typeof globalThis !== 'undefined' ? globalThis : this, function createCraftingPolicy(RecipePolicy, MaterialPolicy, ChapterTwoRecipePolicy, ChapterTwoMaterialPolicy, ChapterThreeRecipePolicy, ChapterThreeMaterialPolicy, EquipmentAffixPolicy) {
   const INVENTORY_CAPACITY = 1000;
   const RARITIES = Object.freeze({
     uncommon: Object.freeze({ id: 'uncommon', label: '綠色', fixedAffixCount: 1, randomAffixCount: 2, affixCount: 3, workshopLevel: 1, essenceId: 'green_essence_stone' }),
@@ -61,9 +67,9 @@
     blueEssence: Object.freeze({ id: 'blue_essence_stone', kind: 'material', materialType: 'crafting', quality: 'rare', stackable: true, icon: '🔵', image: 'assets/blue-essence-stone.png?v=20260815-user-image-v1', imageStatus: 'ready', name: '藍色精華石', description: '由藍色裝備分解後取得，可用於工坊製作高品質裝備。' }),
     purpleEssence: Object.freeze({ id: 'purple_essence_stone', kind: 'material', materialType: 'crafting', quality: 'epic', stackable: true, icon: '🟣', name: '紫色精華石', description: '保留給未來紫色裝備分解與製作。' })
   });
-  const MATERIALS = Object.freeze({ ...(MaterialPolicy?.MATERIALS || {}), ...(ChapterTwoMaterialPolicy?.MATERIALS || {}), ...ESSENCE_MATERIALS });
+  const MATERIALS = Object.freeze({ ...(MaterialPolicy?.MATERIALS || {}), ...(ChapterTwoMaterialPolicy?.MATERIALS || {}), ...(ChapterThreeMaterialPolicy?.MATERIALS || {}), ...ESSENCE_MATERIALS });
   const MATERIAL_BY_ID = new Map(Object.values(MATERIALS).map((entry) => [entry.id, entry]));
-  const RECIPES = Object.freeze(Object.fromEntries([...Object.values(RecipePolicy?.RECIPES || {}), ...Object.values(ChapterTwoRecipePolicy?.RECIPES || {})].map((recipe) => [recipe.recipeId, recipe])));
+  const RECIPES = Object.freeze(Object.fromEntries([...Object.values(RecipePolicy?.RECIPES || {}), ...Object.values(ChapterTwoRecipePolicy?.RECIPES || {}), ...Object.values(ChapterThreeRecipePolicy?.RECIPES || {})].map((recipe) => [recipe.recipeId, recipe])));
 
   function clampRoll(value) { return Math.min(.999999, Math.max(0, Number(value) || 0)); }
   function pick(list, random) { return list[Math.floor(clampRoll(random()) * list.length)]; }
