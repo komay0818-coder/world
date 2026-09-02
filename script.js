@@ -2090,6 +2090,8 @@ function getEquipmentStats(progress = getProgress()) {
     killResourceRecoveryPercent: (affixes.killResourceRecoveryPercent || 0) / 100,
     poisonResistancePercent: (affixes.poisonResistancePercent || 0) / 100,
     armorPenetrationPercent: (affixes.armorPenetrationPercent || 0) / 100,
+    lowHealthDamagePercent: (affixes.lowHealthDamagePercent || 0) / 100,
+    highHealthDamagePercent: (affixes.highHealthDamagePercent || 0) / 100,
     maxHpPercent: (affixes.maxHpPercent || 0) / 100,
     defensePercent: (affixes.defensePercent || 0) / 100,
     accuracyPercent: (affixes.accuracyPercent || 0) / 100,
@@ -2164,6 +2166,8 @@ function getCharacterStats(level, progress = getProgress(), character = getActiv
     killResourceRecoveryPercent: Math.max(0, equipment.killResourceRecoveryPercent),
     poisonResistancePercent: Math.min(1, Math.max(0, equipment.poisonResistancePercent)),
     armorPenetrationPercent: Math.min(ArmorPenetrationPolicy.ARMOR_IGNORE_CAP, Math.max(0, equipment.armorPenetrationPercent)),
+    lowHealthDamagePercent: Math.max(0, equipment.lowHealthDamagePercent),
+    highHealthDamagePercent: Math.max(0, equipment.highHealthDamagePercent),
     criticalDamageMultiplier: 1.5 + Math.max(0, equipment.criticalDamagePercent + passiveTotal('criticalDamage') + passiveTotal('skillCriticalDamage')),
     dotMultiplier: character?.race === 'undead' ? 1.20 : 1
   };
@@ -4414,7 +4418,8 @@ function applyDamageToMonster(index, baseDamage, profile, options = {}) {
   const statusElementMultiplier = elementalMastery && (battle.enemyDots[index] || []).length ? 1 + elementalMastery.elementDamage : 1;
   const frostResonanceMultiplier = elementalMastery?.resonance && (now < skillState.slowedUntil || now < skillState.frozenUntil) && Math.random() < .1 ? attackerStats.criticalDamageMultiplier : 1;
   const lightningResonanceMultiplier = elementalMastery?.resonance && now < (skillState.paralyzedUntil || 0) && options.attackKind !== 'resonance' && Math.random() < .1 ? 1.3 : 1;
-  const adjustedBaseDamage = magicAdjustedDamage * (1 + (attackerStats.damageBonus || 0)) * rankMultiplier * attackKindMultiplier * markMultiplier * vulnerabilityMultiplier * controlledMultiplier * statusElementMultiplier * frostResonanceMultiplier * lightningResonanceMultiplier;
+  const conditionalDamageMultiplier = Number(options.conditionalDamageMultiplier) || ConditionalDamagePolicy.getDamageMultiplier({ currentHp: attacker?.currentHp, maxHp: attacker?.maxHp, lowHealthDamagePercent: attackerStats.lowHealthDamagePercent, highHealthDamagePercent: attackerStats.highHealthDamagePercent, attackKind: options.attackKind });
+  const adjustedBaseDamage = magicAdjustedDamage * (1 + (attackerStats.damageBonus || 0)) * rankMultiplier * attackKindMultiplier * conditionalDamageMultiplier * markMultiplier * vulnerabilityMultiplier * controlledMultiplier * statusElementMultiplier * frostResonanceMultiplier * lightningResonanceMultiplier;
   if (enemy.mapId) {
     const hitChance = ChapterOneLevelPolicy.getPlayerHitChance(progress.level, enemy.level, attackerStats.accuracy, 0);
     if (Math.random() >= hitChance) {
@@ -4527,6 +4532,7 @@ function useAutoSkillForMember(member, now = Date.now()) {
     if (skill.id === 'piercing-shot' && aliveEnemyIndexesByAge().length === 1) damagePower *= skillEffect.singleTargetBonus ? 1 + skillEffect.singleTargetBonus : 1;
     if (skill.id === 'whirlwind') damagePower *= 1 + Math.min(skillEffect.maxTargetBonus || 0, Math.max(0, targets.length - 1) * (skillEffect.perExtraTargetBonus || 0));
     const damage = Math.max(1, Math.ceil(stats.attack * damagePower * (critical ? stats.criticalDamageMultiplier : 1)));
+    const conditionalDamageMultiplier = ConditionalDamagePolicy.getDamageMultiplier({ currentHp: member.currentHp, maxHp: member.maxHp, lowHealthDamagePercent: stats.lowHealthDamagePercent, highHealthDamagePercent: stats.highHealthDamagePercent, attackKind: 'skill' });
     const profile = getPlayerAttackProfile(character, skill);
     const targetAnchors = ['heavy-strike', 'whirlwind', 'charge', 'power-shot', 'multi-shot', 'piercing-shot', 'backstab', 'shadow-dance', 'fireball', 'blizzard', 'chain-lightning', 'holy-light', 'holy-nova'].includes(skill.id)
       ? new Map(targets.map((index) => [index, captureBattleTargetAnchor(index)]))
@@ -4539,6 +4545,7 @@ function useAutoSkillForMember(member, now = Date.now()) {
         attacker: member,
         attackKind: 'skill',
         armorIgnore: skillEffect.armorIgnore,
+        conditionalDamageMultiplier,
         controlledBonus: skillEffect.controlledBonus,
         showDamage: !['heavy-strike', 'whirlwind', 'charge', 'power-shot', 'multi-shot', 'piercing-shot', 'backstab', 'shadow-dance', 'poison-blade', 'fireball', 'blizzard', 'chain-lightning', 'holy-light', 'holy-nova'].includes(skill.id)
       }) };
@@ -4576,7 +4583,7 @@ function useAutoSkillForMember(member, now = Date.now()) {
       hits.forEach((target) => applyDot(target.index, 'poison', Math.max(1, Math.ceil(target.result.finalDamage * .15 * (1 + (skillEffect.poisonBonus || 0)) * stats.dotMultiplier)), 5 + (skillEffect.poisonDuration || 0), skillEffect.poisonStacks || 1, { source: member, defenseReduction: skillEffect.defensePerStack || 0 }));
     }
     if (skill.id === 'fireball' && skillEffect.explosionPower && hits.length) {
-      aliveEnemyIndexesByAge().filter((index) => index !== hits[0].index).slice(0, skillEffect.explosionTargets).forEach((index) => applyDamageToMonster(index, stats.attack * skillEffect.explosionPower, profile, { attacker: member, attackKind: 'skill', effectType: 'magic' }));
+      aliveEnemyIndexesByAge().filter((index) => index !== hits[0].index).slice(0, skillEffect.explosionTargets).forEach((index) => applyDamageToMonster(index, stats.attack * skillEffect.explosionPower, profile, { attacker: member, attackKind: 'skill', conditionalDamageMultiplier, effectType: 'magic' }));
     }
     if (skill.id === 'charge') {
       member.skillHasteUntil = now + (skillEffect.duration || 3) * 1000;
