@@ -78,7 +78,17 @@ assert.deepEqual(value('armor_penetration_percent', 3), [8]);
 assert.equal(policy.formatAffix(policy.normalizeAffix({ id: 'last_stand_damage_percent' }, 'random', 3)), '背水｜HP低於30%時，造成傷害 +12%');
 assert.equal(policy.formatAffix(policy.normalizeAffix({ id: 'first_strike_damage_percent' }, 'random', 3)), '先制｜HP高於80%時，造成傷害 +8%');
 
-const pendingIds = ['critical_resource_recovery_percent', 'control_resistance_percent', 'direct_hit_health_recovery_percent'];
+const criticalRecovery = policy.EQUIPMENT_AFFIXES.critical_resource_recovery_percent;
+assert.equal(criticalRecovery.rollable, true);
+assert.equal(criticalRecovery.combatStatus, 'ready');
+assert.equal(pool(weapon, 1, 'epic').includes(criticalRecovery.id), false);
+assert.equal(pool(weapon, 2, 'epic').includes(criticalRecovery.id), false);
+assert.equal(pool(weapon, 3, 'epic').includes(criticalRecovery.id), true);
+assert.equal(pool(accessory, 3, 'epic').includes(criticalRecovery.id), true);
+assert.equal(pool(armor, 3, 'epic').includes(criticalRecovery.id), false);
+assert.equal(policy.formatAffix(policy.normalizeAffix({ id: criticalRecovery.id }, 'random', 3)), '暴擊回復｜暴擊時恢復 2% 最大主要資源');
+
+const pendingIds = ['control_resistance_percent', 'direct_hit_health_recovery_percent'];
 pendingIds.forEach((id) => {
   const definition = policy.EQUIPMENT_AFFIXES[id];
   assert.ok(definition, `${id} definition exists`);
@@ -94,6 +104,6 @@ assert.deepEqual(value('control_resistance_percent', 3), [15]);
 assert.deepEqual(value('direct_hit_health_recovery_percent', 3), [2]);
 assert.deepEqual(policy.EQUIPMENT_AFFIXES.direct_hit_health_recovery_percent.trigger, { event: 'enemy-direct-hit', chance: .05 });
 const formalExistingPool = Object.values(policy.EQUIPMENT_AFFIXES).filter((definition) => definition.enabled && definition.rollable && definition.unlockChapter <= 3 && (definition.maxChapter == null || definition.maxChapter >= 3));
-assert.equal(formalExistingPool.length, 23, 'the formal pool contains twenty existing affixes plus the three implemented chapter-three affixes');
+assert.equal(formalExistingPool.length, 24, 'the formal pool contains twenty existing affixes plus the four implemented chapter-three affixes');
 
 console.log('chapter-three-affix-data: assertions passed');

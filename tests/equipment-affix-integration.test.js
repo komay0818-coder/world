@@ -9,10 +9,11 @@ const appCss = fs.readFileSync(path.join(__dirname, '..', 'style.css'), 'utf8');
 
 assert.match(html, /equipment-affix-policy\.js/, 'affix policy loads before the main game script');
 assert.match(html, /href="style\.css\?v=20260822-inventory-image-containment-v1"/, 'the affix UI stylesheet loads from the same deployed revision');
-assert.match(html, /equipment-affix-policy\.js\?v=20260903-conditional-damage-v1/, 'the affix formatter uses the current local build');
+assert.match(html, /equipment-affix-policy\.js\?v=20260903-critical-resource-recovery-v1/, 'the affix formatter uses the current local build');
 assert.match(html, /armor-penetration-policy\.js\?v=20260903-armor-penetration-v1/, 'armor penetration policy loads before the main game script');
 assert.match(html, /conditional-damage-policy\.js\?v=20260903-conditional-damage-v1/, 'conditional damage policy loads before the main game script');
-assert.match(html, /script\.js\?v=20260903-conditional-damage-v1/, 'the affix UI renderer uses the current local build');
+assert.match(html, /critical-resource-recovery-policy\.js\?v=20260903-critical-resource-recovery-v1/, 'critical resource recovery policy loads before the main game script');
+assert.match(html, /script\.js\?v=20260903-critical-resource-recovery-v1/, 'the affix UI renderer uses the current local build');
 assert.match(source, /equipmentAffixMigrationVersion !== 'green-affix-v1'/, 'legacy saves receive the affix compatibility migration');
 assert.match(source, /EquipmentAffixPolicy\.normalizeEquipment\(item\)/, 'inventory and equipped items are normalized on load');
 assert.match(source, /EquipmentAffixPolicy\.getEquippedAffixStats\(progress\.equipment\)/, 'stats read only the equipped item collection');
@@ -24,6 +25,9 @@ assert.match(source, /armorPenetrationPercent: \(affixes\.armorPenetrationPercen
 assert.match(source, /ArmorPenetrationPolicy\.getTotalArmorIgnore\([\s\S]*skillArmorIgnore: options\.armorIgnore[\s\S]*equipmentArmorPenetration: attackerStats\.armorPenetrationPercent[\s\S]*attackKind: options\.attackKind/, 'online attacks combine skill and eligible equipment armor ignore at one defense entry point');
 assert.match(source, /enemy\.defense \* \(1 - armorIgnore\)/, 'the combined ratio reduces enemy defense');
 assert.match(source, /lowHealthDamagePercent: \(affixes\.lowHealthDamagePercent \|\| 0\) \/ 100[\s\S]*highHealthDamagePercent: \(affixes\.highHealthDamagePercent \|\| 0\) \/ 100/, 'conditional damage affixes enter shared equipment aggregation');
+assert.match(source, /criticalResourceRecoveryPercent: \(affixes\.criticalResourceRecoveryPercent \|\| 0\) \/ 100/, 'critical recovery enters shared equipment aggregation');
+assert.match(source, /member\.resourceCurrent = member\.resourceType === 'arrows'[\s\S]*CriticalResourceRecoveryPolicy\.resolveExecution\(member, \{[\s\S]*attackKind: skill\.id === 'companion' \? 'companion' : 'skill'[\s\S]*hadDirectHit: hits\.length > 0/, 'one skill execution resolves critical recovery once after paying its resource cost and excludes companion damage');
+assert.match(source, /if \(member\.resourceType === 'rage'\)[^\n]+[\s\S]*CriticalResourceRecoveryPolicy\.resolveExecution\(member, \{ attackKind: 'basic', critical, hadDirectHit: true/, 'a successful basic attack resolves critical recovery once');
 assert.match(source, /ConditionalDamagePolicy\.getDamageMultiplier\([\s\S]*currentHp: attacker\?\.currentHp[\s\S]*attackKind: options\.attackKind/, 'basic and counter damage read current HP at the common damage entry point');
 assert.match(source, /const conditionalDamageMultiplier = ConditionalDamagePolicy\.getDamageMultiplier\(\{ currentHp: member\.currentHp[\s\S]*attackKind: 'skill'[\s\S]*targets\.map[\s\S]*conditionalDamageMultiplier,/, 'multi-target skills snapshot one conditional multiplier before resolving targets');
 ['skillDamagePercent', 'eliteDamagePercent', 'bossDamagePercent', 'basicAttackDamagePercent', 'killHealthRecoveryPercent', 'killResourceRecoveryPercent', 'poisonResistancePercent'].forEach((stat) => {

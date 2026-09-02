@@ -2092,6 +2092,7 @@ function getEquipmentStats(progress = getProgress()) {
     armorPenetrationPercent: (affixes.armorPenetrationPercent || 0) / 100,
     lowHealthDamagePercent: (affixes.lowHealthDamagePercent || 0) / 100,
     highHealthDamagePercent: (affixes.highHealthDamagePercent || 0) / 100,
+    criticalResourceRecoveryPercent: (affixes.criticalResourceRecoveryPercent || 0) / 100,
     maxHpPercent: (affixes.maxHpPercent || 0) / 100,
     defensePercent: (affixes.defensePercent || 0) / 100,
     accuracyPercent: (affixes.accuracyPercent || 0) / 100,
@@ -2168,6 +2169,7 @@ function getCharacterStats(level, progress = getProgress(), character = getActiv
     armorPenetrationPercent: Math.min(ArmorPenetrationPolicy.ARMOR_IGNORE_CAP, Math.max(0, equipment.armorPenetrationPercent)),
     lowHealthDamagePercent: Math.max(0, equipment.lowHealthDamagePercent),
     highHealthDamagePercent: Math.max(0, equipment.highHealthDamagePercent),
+    criticalResourceRecoveryPercent: Math.max(0, equipment.criticalResourceRecoveryPercent),
     criticalDamageMultiplier: 1.5 + Math.max(0, equipment.criticalDamagePercent + passiveTotal('criticalDamage') + passiveTotal('skillCriticalDamage')),
     dotMultiplier: character?.race === 'undead' ? 1.20 : 1
   };
@@ -4611,6 +4613,12 @@ function useAutoSkillForMember(member, now = Date.now()) {
     member.resourceCurrent = member.resourceType === 'arrows'
       ? HunterArrowPolicy.spendArrows(member.resourceCurrent, skill.id, progress.equipment)
       : Math.max(0, member.resourceCurrent - cost);
+    CriticalResourceRecoveryPolicy.resolveExecution(member, {
+      attackKind: skill.id === 'companion' ? 'companion' : 'skill',
+      critical,
+      hadDirectHit: hits.length > 0,
+      recoveryPercent: stats.criticalResourceRecoveryPercent
+    });
     const blinkCooldownMultiplier = member.blinkCooldownReduction ? 1 - member.blinkCooldownReduction : 1;
     const blessingCooldownSpeed = now < (member.lightGraceUntil || 0) ? 1 + (member.lightGraceCooldownSpeed || 0) : 1;
     member.skillCooldowns[skill.id] = now + (skillEffect.cooldown || skill.cooldown) * blinkCooldownMultiplier * skillCooldownMultiplier * 1000 / (stats.cooldownSpeed * blessingCooldownSpeed);
@@ -4884,6 +4892,7 @@ function processPartyMemberAttacks(now = Date.now()) {
       }
       tryApplyThornCorrosion(member, targetIndex, 'basic', result.finalDamage, now);
       if (member.resourceType === 'rage') member.resourceCurrent = WarriorResourcePolicy.gainFromAttack(member.resourceCurrent);
+      CriticalResourceRecoveryPolicy.resolveExecution(member, { attackKind: 'basic', critical, hadDirectHit: true, recoveryPercent: member.stats.criticalResourceRecoveryPercent });
       logBattle(`⚔ ${member.name}對【${enemy.name}】造成 ${result.finalDamage} 傷害${critical ? '（暴擊）' : ''}${orcRage ? '（狂怒）' : ''}${instinctTriggered ? '（獵人本能）' : ''}`, 'damage-dealt', { aggregateKey: `member-${member.id}-${battle.enemyTypes[targetIndex]}`, damage: result.finalDamage, summary: `⚔ ${member.name}攻擊【${enemy.name}】` });
       if (member.job === 'hunter' && member.level >= 8 && battle.enemyHps[targetIndex] > 0) {
         const bond = ClassSkillPolicy.getEffect('hunter', 'wild-bond', Number(member.progress.skillLevels?.['hunter:wild-bond']) || 1);
