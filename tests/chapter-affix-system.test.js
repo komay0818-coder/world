@@ -7,18 +7,19 @@ const ids = (chapter, quality = 'rare', item = weapon) => policy.getAvailableAff
 assert.equal(ids(1).includes('chapter2_berserker'), false, 'chapter two affixes stay locked in chapter one');
 assert.equal(ids(2).includes('chapter2_berserker'), true, 'chapter two unlocks composite affixes');
 assert.equal(ids(2, 'epic').includes('chapter3_berserker_master'), false);
-assert.equal(ids(3, 'epic').includes('chapter3_berserker_master'), true, 'chapter three unlocks three-component affixes');
+assert.equal(ids(3, 'epic').includes('chapter3_berserker_master'), false, 'reserved berserker master stays outside the formal chapter-three pool');
 assert.equal(policy.EQUIPMENT_AFFIXES.chapter2_berserker.components.length, 2);
 assert.equal(policy.EQUIPMENT_AFFIXES.chapter3_berserker_master.components.length, 3);
 
 assert.equal(ids(1, 'uncommon').includes('mage_fireball_damage'), false, 'future skill affix stays locked in chapter one');
 assert.equal(ids(2, 'uncommon').includes('mage_fireball_damage'), true, 'skill affix can roll on matching job equipment after its chapter unlock');
-assert.equal(ids(2, 'uncommon', { ...weapon, allowedJobs: ['hunter'] }).includes('mage_fireball_damage'), false, 'skill affix cannot roll for another job');
+assert.equal(ids(2, 'uncommon', { ...weapon, allowedJobs: ['hunter'] }).includes('mage_fireball_damage'), true, 'skill enhancement is no longer restricted to mages or fireball');
 assert.equal(ids(2, 'legendary').includes('mage_fireball_damage'), false, 'quality restrictions are data-driven');
 const skillDefinition = policy.EQUIPMENT_AFFIXES.mage_fireball_damage;
 assert.equal(skillDefinition.type, policy.AFFIX_TYPES.SKILL);
-assert.equal(skillDefinition.jobId, 'mage');
-assert.equal(skillDefinition.skillId, 'fireball');
+assert.equal(skillDefinition.name, '技能強化');
+assert.equal(skillDefinition.jobId, null);
+assert.equal(skillDefinition.skillId, null);
 assert.equal(skillDefinition.isSpecialAbility, false);
 
 const composite = policy.normalizeAffix({ id: 'chapter2_berserker' });
