@@ -313,7 +313,17 @@ function summarizeEliteLoop(name, jobs, chance, stage) {
   };
 }
 
-if (process.argv.includes('--chapter-32-boss-v1')) {
+if (process.argv.includes('--chapter-33-s14')) {
+  const stagePoints = [0, 4, 8, 12];
+  const partyArg = process.argv.find(value => value.startsWith('--party='));
+  const parties = Object.entries(PARTIES).filter(([name]) => !partyArg || name === partyArg.split('=')[1]);
+  const cells = parties.flatMap(([name, jobs]) => stagePoints.map(cleared => {
+    const stage = proportionalStage(cleared, 20, 14, .14);
+    const cell = summarize(name, jobs, 3, 'B', stage, 0, 1, .02, true, CHAPTER_32_POOL);
+    return { ...curveCell(cell), suppression: cell.suppression, averageWipeSeconds: cell.survivalRate === 1 ? null : cell.averageWipeSeconds, survivorPartyHpPercent: cell.survivalRate === 0 ? null : cell.survivorPartyHpPercent };
+  }));
+  process.stdout.write(`${JSON.stringify({ test: 'Chapter 3-3 S14 suppression TEST V1', runs: RUNS, durationSeconds: DURATION, totalSuppression: 14, totalFacilities: 20, stagePoints, gear: 'B1-R0; one 2% kill-heal affix with opportunity cost', targetWeights: { warrior: 3, others: 1 }, monsterPool: CHAPTER_32_POOL, respawnSeconds: 2, eliteChance: 0, boss: false, cells }, null, 2)}\n`);
+} else if (process.argv.includes('--chapter-32-boss-v1')) {
   const stage = proportionalStage(6, 15, 12, .12);
   const cells = Object.entries(PARTIES).map(([name, jobs]) => {
     const samples = Array.from({ length: RUNS }, (_, i) => simulate(jobs, 0x31c0de + i * 104729 + name.charCodeAt(0), 3, 'B', stage, 0, 1, .02, true, CHAPTER_32_POOL, { templates: [CHAPTER_32_BOSS], duration: 120, stopImmediately: true }));
