@@ -15,8 +15,9 @@ assert.match(html, /conditional-damage-policy\.js\?v=20260903-conditional-damage
 assert.match(html, /critical-resource-recovery-policy\.js\?v=20260903-critical-resource-recovery-v1/, 'critical resource recovery policy loads before the main game script');
 assert.match(html, /direct-hit-health-recovery-policy\.js\?v=20260903-direct-hit-health-recovery-v1/, 'direct-hit health recovery policy loads before the main game script');
 assert.match(html, /chapter-three-crafted-epic-ability-policy\.js\?v=20260903-chapter3-crafted-epic-v1/, 'crafted epic ability policy loads before the main game script');
+assert.match(html, /chapter-three-epic-weapon-policy\.js\?v=20260903-epic-weapons-v1/, 'chapter-three epic weapon policy loads before the main game script');
 assert.match(html, /control-effect-policy\.js\?v=20260903-control-resistance-v1/, 'the shared player control policy loads before the main game script');
-assert.match(html, /script\.js\?v=20260903-special-epic-v1/, 'the affix UI renderer uses the current local build');
+assert.match(html, /script\.js\?v=20260903-epic-weapons-v1/, 'the affix UI renderer uses the current local build');
 assert.match(source, /equipmentAffixMigrationVersion !== 'green-affix-v1'/, 'legacy saves receive the affix compatibility migration');
 assert.match(source, /EquipmentAffixPolicy\.normalizeEquipment\(item\)/, 'inventory and equipped items are normalized on load');
 assert.match(source, /EquipmentAffixPolicy\.getEquippedAffixStats\(progress\.equipment\)/, 'stats read only the equipped item collection');
@@ -24,9 +25,9 @@ assert.match(source, /equipment\.maxHpPercent/, 'maximum-health affixes feed the
 assert.match(source, /equipment\.defensePercent/, 'defense affixes feed the character calculation');
 assert.match(source, /equipment\.criticalChance/, 'critical chance affixes feed the character calculation');
 assert.match(source, /equipment\.attackSpeedPercent/, 'attack-speed affixes feed the character calculation');
-assert.match(source, /armorPenetrationPercent: \(affixes\.armorPenetrationPercent \|\| 0\) \/ 100/, 'armor penetration enters the shared equipment aggregation');
+assert.match(source, /armorPenetrationPercent: fixed\.armorPenetrationBase \+ \(affixes\.armorPenetrationPercent \|\| 0\) \/ 100/, 'base and affix armor penetration enter the shared equipment aggregation');
 assert.match(source, /ArmorPenetrationPolicy\.getTotalArmorIgnore\([\s\S]*skillArmorIgnore: options\.armorIgnore[\s\S]*equipmentArmorPenetration: attackerStats\.armorPenetrationPercent[\s\S]*attackKind: options\.attackKind/, 'online attacks combine skill and eligible equipment armor ignore at one defense entry point');
-assert.match(source, /enemy\.defense \* \(1 - armorIgnore\)/, 'the combined ratio reduces enemy defense');
+assert.match(source, /enemy\.defense \* armorShatterMultiplier \* \(1 - armorIgnore\)/, 'target armor shred is applied before the combined armor-ignore ratio');
 assert.match(source, /lowHealthDamagePercent: \(affixes\.lowHealthDamagePercent \|\| 0\) \/ 100[\s\S]*highHealthDamagePercent: \(affixes\.highHealthDamagePercent \|\| 0\) \/ 100/, 'conditional damage affixes enter shared equipment aggregation');
 assert.match(source, /criticalResourceRecoveryPercent: \(affixes\.criticalResourceRecoveryPercent \|\| 0\) \/ 100/, 'critical recovery enters shared equipment aggregation');
 assert.match(source, /directHitHealthRecoveryPercent: \(affixes\.directHitHealthRecoveryPercent \|\| 0\) \/ 100/, 'direct-hit recovery amount enters shared equipment aggregation');

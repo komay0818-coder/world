@@ -1515,9 +1515,22 @@ function renderWorkshop(building = getVillageBuildingData('workshop'), craftedIt
   const forgingRecipeCount = fragmentPolicy.getQuantity(inventory, fragmentPolicy.FORGING_RECIPE.id);
   const fragmentAssembly = fragmentPolicy.canAssemble(progress);
   const weaponFragmentPanel = `<section class="workshop-result"><h4>${fragmentPolicy.FRAGMENT.name}</h4><p>持有殘頁：${fragmentCount} / ${fragmentPolicy.FRAGMENTS_PER_RECIPE}</p><p>持有${fragmentPolicy.FORGING_RECIPE.name}：${forgingRecipeCount}</p><button type="button" data-assemble-weapon-recipe ${fragmentAssembly.ok ? '' : 'disabled'}>${fragmentAssembly.ok ? `合成${fragmentPolicy.FORGING_RECIPE.name}` : fragmentAssembly.reason}</button></section>`;
+  const weaponCards = workshopQuality === 'epic' && workshopSlot === 'all' ? Object.values(ChapterThreeEpicWeaponPolicy.WEAPONS).map((weapon) => {
+    const core = Object.values(ChapterThreeEpicWeaponPolicy.WEAPON_CORES).find((entry) => entry.id === weapon.coreId);
+    const required = { [fragmentPolicy.FORGING_RECIPE.id]: 1, [weapon.coreId]: 1, ...ChapterThreeEpicWeaponPolicy.COMMON_MATERIALS };
+    const ready = Object.entries(required).every(([id, amount]) => quantity(id) >= amount) && Number(progress.gold) >= ChapterThreeEpicWeaponPolicy.GOLD_COST;
+    return `<article class="workshop-recipe quality-epic"><div class="workshop-recipe-head"><div><h4>${weapon.name}</h4><small>${weapon.series}・${weapon.attackMin}～${weapon.attackMax} 傷害</small></div></div><p>需要：紫色武器鍛造配方 ×1、${core.name} ×1、共通材料、75,000 金幣</p><button type="button" data-craft-epic-weapon="${weapon.id}" ${ready ? '' : 'disabled'}>${ready ? '鍛造武器' : '材料或金幣不足'}</button></article>`;
+  }).join('') : '';
   document.querySelector('#village-building-content').innerHTML = `<div class="workshop-title"><div class="village-building-icon" aria-hidden="true">${building.icon}</div><div><h3>${building.name}</h3><small>第一至三章裝備製作・背包 ${inventory.length} / ${CraftingPolicy.INVENTORY_CAPACITY}</small></div></div><p>製作前只顯示可能能力；實際能力與數值會在製作成功時生成並永久保存。</p>
     <div class="workshop-filters"><div><b>品質</b><button type="button" data-workshop-quality="uncommon" class="${workshopQuality === 'uncommon' ? 'selected' : ''}">綠色</button><button type="button" data-workshop-quality="rare" class="${workshopQuality === 'rare' ? 'selected' : ''}">藍色</button><button type="button" data-workshop-quality="epic" class="${workshopQuality === 'epic' ? 'selected' : ''}">紫色</button></div><div><b>部位</b><button type="button" data-workshop-slot="all" class="${workshopSlot === 'all' ? 'selected' : ''}">全部</button><button type="button" data-workshop-slot="wrist" class="${workshopSlot === 'wrist' ? 'selected' : ''}">護腕</button><button type="button" data-workshop-slot="cloak" class="${workshopSlot === 'cloak' ? 'selected' : ''}">斗篷</button><button type="button" data-workshop-slot="shoulders" class="${workshopSlot === 'shoulders' ? 'selected' : ''}">肩甲</button></div></div>
-    ${weaponFragmentPanel}${result}<section class="workshop-recipes">${cards || '<p class="village-placeholder">此分類目前沒有可製作配方。</p>'}</section>`;
+    ${weaponFragmentPanel}${result}<section class="workshop-recipes">${weaponCards}${cards || (!weaponCards ? '<p class="village-placeholder">此分類目前沒有可製作配方。</p>' : '')}</section>`;
+}
+
+function craftChapterThreeEpicWeapon(weaponId) {
+  const progress = getProgress();
+  const result = ChapterThreeEpicWeaponPolicy.craftWeapon(progress, weaponId);
+  if (!result.ok) { showToast('缺少紫色武器配方、武器之核、材料或金幣。'); renderWorkshop(); return; }
+  saveProgress(progress); renderWorkshop(undefined, result.item); showToast(`鍛造完成：${result.item.name}`);
 }
 
 function assembleWeaponForgingRecipe() {
@@ -2093,7 +2106,10 @@ function getEquipmentStats(progress = getProgress()) {
     parry: stats.parry + effectiveEquipmentStat(item, 'parry'),
     damageReduction: stats.damageReduction + effectiveEquipmentStat(item, 'damageReduction'),
     movementSpeedBonus: stats.movementSpeedBonus + effectiveEquipmentStat(item, 'movementSpeedBonus')
-  }), { attack: 0, defense: 0, hp: 0, mana: 0, strength: 0, intelligence: 0, accuracy: 0, dodge: 0, attackSpeedBonus: 0, cooldownSpeedBonus: 0, manaRegenBonus: 0, manaRegenFlat: 0, hpRegeneration: 0, magicDamageBonus: 0, damageBonus: 0, parry: 0, damageReduction: 0, movementSpeedBonus: 0 });
+    ,criticalChanceBase: stats.criticalChanceBase + effectiveEquipmentStat(item, 'criticalChance')
+    ,criticalDamageBase: stats.criticalDamageBase + effectiveEquipmentStat(item, 'criticalDamageBonus')
+    ,armorPenetrationBase: stats.armorPenetrationBase + effectiveEquipmentStat(item, 'armorPenetrationPercent')
+  }), { attack: 0, defense: 0, hp: 0, mana: 0, strength: 0, intelligence: 0, accuracy: 0, dodge: 0, attackSpeedBonus: 0, cooldownSpeedBonus: 0, manaRegenBonus: 0, manaRegenFlat: 0, hpRegeneration: 0, magicDamageBonus: 0, damageBonus: 0, parry: 0, damageReduction: 0, movementSpeedBonus: 0, criticalChanceBase: 0, criticalDamageBase: 0, armorPenetrationBase: 0 });
   const affixes = EquipmentAffixPolicy.getEquippedAffixStats(progress.equipment);
   const runes = RunePolicy.getBonuses(progress.equipment);
   return {
@@ -2110,7 +2126,7 @@ function getEquipmentStats(progress = getProgress()) {
     killHealthRecoveryPercent: (affixes.killHealthRecoveryPercent || 0) / 100,
     killResourceRecoveryPercent: (affixes.killResourceRecoveryPercent || 0) / 100,
     poisonResistancePercent: (affixes.poisonResistancePercent || 0) / 100,
-    armorPenetrationPercent: (affixes.armorPenetrationPercent || 0) / 100,
+    armorPenetrationPercent: fixed.armorPenetrationBase + (affixes.armorPenetrationPercent || 0) / 100,
     lowHealthDamagePercent: (affixes.lowHealthDamagePercent || 0) / 100,
     highHealthDamagePercent: (affixes.highHealthDamagePercent || 0) / 100,
     criticalResourceRecoveryPercent: (affixes.criticalResourceRecoveryPercent || 0) / 100,
@@ -2121,8 +2137,8 @@ function getEquipmentStats(progress = getProgress()) {
     accuracyPercent: (affixes.accuracyPercent || 0) / 100,
     dodgePercent: (affixes.dodgePercent || 0) / 100,
     attackSpeedPercent: (affixes.attackSpeedPercent || 0) / 100,
-    criticalChance: (affixes.criticalChance || 0) / 100,
-    criticalDamagePercent: (affixes.criticalDamagePercent || 0) / 100,
+    criticalChance: fixed.criticalChanceBase + (affixes.criticalChance || 0) / 100,
+    criticalDamagePercent: fixed.criticalDamageBase + (affixes.criticalDamagePercent || 0) / 100,
     cooldownSpeedPercent: (affixes.cooldownSpeedPercent || 0) / 100,
     manaRegenerationPercent: (affixes.manaRegenerationPercent || 0) / 100,
     runeAttackPercent: runes.attackPercent,
@@ -3373,6 +3389,7 @@ function applyDot(index, type, damage, duration, maxStacks = 1, options = {}) {
   const sameType = dots.filter((dot) => dot.type === type);
   const existing = sameType.length >= maxStacks ? sameType.sort((a, b) => a.remaining - b.remaining)[0] : null;
   if (existing) {
+    if (options.replaceOnlyIfStronger && damage < existing.damage) return;
     if (!options.refreshOnly) existing.damage = Math.max(existing.damage, damage);
     existing.remaining = options.refreshDuration ? duration : Math.max(existing.remaining, duration);
     existing.defenseReduction = Math.max(existing.defenseReduction || 0, options.defenseReduction || 0);
@@ -4468,9 +4485,10 @@ function applyDamageToMonster(index, baseDamage, profile, options = {}) {
   });
   const captainShieldActive = enemy.id === 'blackstoneCaptain' && Date.now() < (battle.enemyCaptainShieldUntil?.[index] || 0);
   const assassinDashActive = enemy.id === 'blackstoneVenombladeAssassin' && Date.now() < (battle.enemyAssassinDashUntil?.[index] || 0);
+  const armorShatterMultiplier = now < (skillState.armorShatterUntil || 0) ? .85 : 1;
   const defendedEnemy = {
     ...enemy,
-    defense: Math.max(0, Math.round(enemy.defense * (1 - armorIgnore) * (1 - Math.min(.9, (battle.enemyDots[index] || []).filter((dot) => dot.type === 'poison').reduce((total, dot) => total + (dot.defenseReduction || 0), 0))) * trailMultipliers.defense * spiderNestMultipliers.defense * strongholdMultipliers.defense * forestAltarMultipliers.defense * depthsMultipliers.defense)),
+    defense: Math.max(0, Math.round(enemy.defense * armorShatterMultiplier * (1 - armorIgnore) * (1 - Math.min(.9, (battle.enemyDots[index] || []).filter((dot) => dot.type === 'poison').reduce((total, dot) => total + (dot.defenseReduction || 0), 0))) * trailMultipliers.defense * spiderNestMultipliers.defense * strongholdMultipliers.defense * forestAltarMultipliers.defense * depthsMultipliers.defense)),
     evasion: (enemy.evasion || 0) + (trailMultipliers.evasion || 0) + (spiderNestMultipliers.evasion || 0) + (strongholdMultipliers.evasion || 0) + (forestAltarMultipliers.evasion || 0) + (depthsMultipliers.evasion || 0) + (assassinDashActive ? SpiderNestPolicy.ASSASSIN.dashEvasionBonus : 0),
     parry: (enemy.parry || 0) + (captainShieldActive ? BlackForestTrailPolicy.CAPTAIN.shieldParryBonus : 0)
   };
@@ -4561,6 +4579,7 @@ function useAutoSkillForMember(member, now = Date.now()) {
     const targets = aliveEnemyIndexesByAge().slice(0, skillEffect.targets || skill.targets || 1);
     if (!targets.length) continue;
     const craftedEpicExecution = ChapterThreeCraftedEpicAbilityPolicy.beginSkillExecution(member, now, { eligible: skill.id !== 'companion' });
+    const epicWeaponExecution = ChapterThreeEpicWeaponPolicy.prepareSkill(member, targets.map((index) => getEnemySkillState(index)), now);
     const critical = Math.random() < stats.crit;
     let damagePower = Number(skillEffect.power) || Number(skill.power) || 1;
     if (skill.id === 'piercing-shot' && aliveEnemyIndexesByAge().length === 1) damagePower *= skillEffect.singleTargetBonus ? 1 + skillEffect.singleTargetBonus : 1;
@@ -4581,11 +4600,13 @@ function useAutoSkillForMember(member, now = Date.now()) {
         armorIgnore: skillEffect.armorIgnore,
         conditionalDamageMultiplier,
         craftedEpicExecution,
+        specialEquipmentMultiplier: epicWeaponExecution.multipliers[targetOrder] || 1,
         controlledBonus: skillEffect.controlledBonus,
         showDamage: !['heavy-strike', 'whirlwind', 'charge', 'power-shot', 'multi-shot', 'piercing-shot', 'backstab', 'shadow-dance', 'poison-blade', 'fireball', 'blizzard', 'chain-lightning', 'holy-light', 'holy-nova'].includes(skill.id)
       }) };
     });
     const hits = resolvedTargets.filter((target) => !target.result.evaded);
+    ChapterThreeEpicWeaponPolicy.completeSkill(member, epicWeaponExecution, targets.map((index) => getEnemySkillState(index)), resolvedTargets.map((target) => !target.result.evaded && target.result.finalDamage > 0));
     const totalDamage = hits.reduce((sum, target) => sum + target.result.finalDamage, 0);
     if (hits.length) triggerRuneFrenzy(member, critical, now);
     hits.forEach((target) => applyEnemySkillState(target.index, skillEffect, now));
@@ -4663,6 +4684,7 @@ function useAutoSkillForMember(member, now = Date.now()) {
       member.skillCooldowns[skill.id] = Math.max(now, member.skillCooldowns[skill.id] - member.pendingSkillCooldownReduction);
       member.pendingSkillCooldownReduction = 0;
     }
+    ChapterThreeEpicWeaponPolicy.resolveRuneCycle(member, actualResourceSpent, skill.id, now);
     member.blinkCooldownReduction = 0;
     member.globalSkillReadyAt = now + 1000;
     if (hits.length) {
@@ -4802,6 +4824,7 @@ function useAutoSkillForMember(member, now = Date.now()) {
   const actualHeal = Math.min(missing, heal);
   const healTargetAnchor = captureBattleAllyAnchor(healTarget);
   healTarget.currentHp = Math.min(healTarget.maxHp, healTarget.currentHp + heal);
+  ChapterThreeEpicWeaponPolicy.createAfterglow(member, healTarget, actualHeal, now);
   healTarget.shield += Math.max(0, heal - missing) * (healEffect.overhealShield || 0);
   if (healTargetAnchor && actualHeal > 0) playBattleSkillEffect('heal', healTargetAnchor, { heal: actualHeal });
   if (graceTriggered && grace.spread && actualHeal > 0) {
@@ -4814,9 +4837,13 @@ function useAutoSkillForMember(member, now = Date.now()) {
     const blessed = blessing.party ? (battle.partyMembers || []).filter((ally) => ally.alive) : [healTarget];
     blessed.forEach((ally) => { ally.lightGraceUntil = now + blessing.duration * 1000; ally.lightGraceAttackSpeed = blessing.attackSpeed; ally.lightGraceCooldownSpeed = blessing.cooldownSpeed || 0; });
   }
+  const resourceBeforeHealCost = member.resourceCurrent;
   member.resourceCurrent -= cost;
+  const actualHealResourceSpent = Math.max(0, resourceBeforeHealCost - member.resourceCurrent);
+  ChapterThreeSpecialEquipmentPolicy.resolveManaSurge(member, actualHealResourceSpent, Math.random);
   member.globalSkillReadyAt = now + 1000;
   member.skillCooldowns[healSkill.id] = now + (healEffect.cooldown || healSkill.cooldown) * skillCooldownMultiplier * 1000 / stats.cooldownSpeed;
+  ChapterThreeEpicWeaponPolicy.resolveRuneCycle(member, actualHealResourceSpent, healSkill.id, now);
   if (healEffect.afterglow && actualHeal > 0) setTimeout(() => {
     if (!healTarget.alive) return;
     healTarget.currentHp = Math.min(healTarget.maxHp, healTarget.currentHp + Math.ceil(actualHeal * healEffect.afterglow));
@@ -4880,6 +4907,7 @@ function updatePartyMemberResource(member, now) {
 
 function updatePartyMemberHealthRegeneration(member, now) {
   if (!member.alive) return;
+  ChapterThreeEpicWeaponPolicy.tickAfterglow(member, now);
   const elapsedSeconds = Math.max(0, now - member.lastHpRegenerationAt) / 1000;
   member.lastHpRegenerationAt = now;
   if (elapsedSeconds <= 0 || member.currentHp >= member.maxHp) return;
@@ -4922,6 +4950,9 @@ function processPartyMemberAttacks(now = Date.now()) {
     const result = applyDamageToMonster(targetIndex, hit * getRuneOutgoingMultiplier(member, targetIndex), profile, { attacker: member, attackKind: 'basic', specialEquipmentMultiplier: specialBasicExecution.damageMultiplier });
     playPartyMemberCombatAnimation(member, [targetIndex], { kind: 'basic' });
     ChapterThreeSpecialEquipmentPolicy.completeMainHandBasicAttack(member, specialBasicExecution, !result.evaded && result.finalDamage > 0, battle.enemyHps[targetIndex] > 0);
+    const epicWeaponHit = ChapterThreeEpicWeaponPolicy.resolveBasicHit(member, { hit: !result.evaded && result.finalDamage > 0, critical, actualDamage: result.finalDamage, enemyState: getEnemySkillState(targetIndex), now, random: Math.random });
+    if (epicWeaponHit.combo && battle.enemyHps[targetIndex] > 0) applyDamageToMonster(targetIndex, Math.max(1, (rolledWeaponAttack ?? displayedWeaponAttack) * .5), profile, { attacker: member, attackKind: 'weapon-proc', canEvade: false, canParry: false });
+    if (epicWeaponHit.wound && battle.enemyHps[targetIndex] > 0) applyDot(targetIndex, 'earthsplit-wound', epicWeaponHit.wound.damage, epicWeaponHit.wound.duration, 1, { source: member, replaceOnlyIfStronger: true, refreshDuration: true });
     if (!result.evaded) {
       triggerRuneFrenzy(member, critical, now);
       const swiftness = ChapterTwoSpecialEquipmentPolicy.rollCorruptedSwiftness(member.progress.equipment);
@@ -4976,7 +5007,8 @@ function processPartyMemberAttacks(now = Date.now()) {
     const blessingSpeedMultiplier = now < (member.lightGraceUntil || 0) ? 1 + (member.lightGraceAttackSpeed || 0) : 1;
     const corruptedSwiftnessMultiplier = now < (member.corruptedSwiftnessUntil || 0) ? 1 + (member.corruptedSwiftnessBonus || 0) : 1;
     const runeFrenzyMultiplier = now < (member.runeFrenzyUntil || 0) ? 1.08 : 1;
-    PartyPolicy.scheduleNextAttack(member, now, member.attackSpeed * skillHasteMultiplier * blessingSpeedMultiplier * corruptedSwiftnessMultiplier * runeFrenzyMultiplier * (1 + (desperate?.speed || 0)), exhaustedMultiplier * trailSlowMultiplier);
+    const huntingRhythmMultiplier = 1 + ChapterThreeEpicWeaponPolicy.getHuntingRhythmSpeed(member, now);
+    PartyPolicy.scheduleNextAttack(member, now, member.attackSpeed * skillHasteMultiplier * blessingSpeedMultiplier * corruptedSwiftnessMultiplier * runeFrenzyMultiplier * huntingRhythmMultiplier * (1 + (desperate?.speed || 0)), exhaustedMultiplier * trailSlowMultiplier);
   }
 }
 
@@ -5519,6 +5551,7 @@ function endBattleAfterPlayerDefeat(now = Date.now()) {
   (battle.partyMembers || []).forEach((member) => {
     ChapterThreeCraftedEpicAbilityPolicy.clear(member);
     ChapterThreeSpecialEquipmentPolicy.clearCombatState(member);
+    ChapterThreeEpicWeaponPolicy.clear(member);
     member.currentHp = member.maxHp;
     member.resourceCurrent = member.resourceType === 'rage' ? 0 : getMaxCombatResourceForMember(member.character, member.progress);
     member.shield = 0;
@@ -5555,6 +5588,7 @@ function defeatPartyMember(member, now = Date.now()) {
   member.currentHp = 0;
   ChapterThreeCraftedEpicAbilityPolicy.clear(member);
   ChapterThreeSpecialEquipmentPolicy.clearCombatState(member);
+  ChapterThreeEpicWeaponPolicy.clear(member);
   member.alive = false;
   member.targetIndex = -1;
   member.bleed = null;
@@ -5608,6 +5642,7 @@ function resetPartyAfterDefeat(now = Date.now()) {
   battle.partyMembers.forEach(member => {
     ChapterThreeCraftedEpicAbilityPolicy.clear(member);
     ChapterThreeSpecialEquipmentPolicy.clearCombatState(member);
+    ChapterThreeEpicWeaponPolicy.clear(member);
     member.currentHp = member.maxHp;
     member.resourceCurrent = member.resourceType === 'rage' ? 0 : getMaxCombatResourceForMember(member.character, member.progress);
     member.shield = 0;
@@ -6368,7 +6403,9 @@ document.querySelector('#village-building-modal').addEventListener('click', (eve
   if (slotButton) { workshopSlot = slotButton.dataset.workshopSlot; renderWorkshop(); return; }
   const craftButton = event.target.closest('[data-craft-recipe]');
   const assembleWeaponRecipeButton = event.target.closest('[data-assemble-weapon-recipe]');
+  const epicWeaponButton = event.target.closest('[data-craft-epic-weapon]');
   if (assembleWeaponRecipeButton) { assembleWeaponForgingRecipe(); return; }
+  if (epicWeaponButton) { craftChapterThreeEpicWeapon(epicWeaponButton.dataset.craftEpicWeapon); return; }
   if (craftButton) craftWorkshopEquipment(craftButton.dataset.craftRecipe);
   const furnaceItem = event.target.closest('[data-select-furnace-item]');
   if (furnaceItem) { selectFurnaceItem(furnaceItem.dataset.selectFurnaceItem); return; }
