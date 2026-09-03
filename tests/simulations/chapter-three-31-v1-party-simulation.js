@@ -2,6 +2,7 @@ const MonsterDefense = require('../../monster-defense.js');
 const Skills = require('../../class-skill-policy.js');
 const { warIntentMultiplier } = require('./chapter-three-32-boss-rules.js');
 const Chapter33 = require('./chapter-three-33-rules.js');
+const Chapter34 = require('./chapter-three-34-rules.js');
 
 const RUNS = Number(process.argv[2]) || 100;
 const DURATION = 600;
@@ -95,14 +96,16 @@ function aliveEnemies(es) { return es.filter(e => e.currentHp > 0).sort((a, b) =
 function cost(job, id, targets) { if (job === 'assassin') return ({ backstab: 35, 'shadow-dance': 60, 'poison-blade': 25 })[id] || 0; if (job === 'hunter') return ({ 'power-shot': 1, 'multi-shot': 3, 'piercing-shot': 2 })[id] || 0; if (id === 'heal') return 28; return targets > 1 ? 26 : 18; }
 function regen(p) { const s = DT; if (p.job === 'assassin') p.resource = Math.min(p.resourceMax, p.resource + 10 * s); else if (p.job === 'hunter') p.resource = Math.min(p.resourceMax, p.resource + s); else if (p.job !== 'warrior') p.resource = Math.min(p.resourceMax, p.resource + (Math.max(.625, p.resourceMax * .01) * p.manaRegen + p.manaRegenFlat) * s); }
 function hit(p, e, raw, random, canParry = true, now = 0) {
+  if (e.despawned34) return 0;
   if (random() >= .99) return 0;
-  const defense = e.defense * (e.lowHpDefense && e.currentHp / e.maxHp <= .5 ? 1 + e.lowHpDefense : 1) * Chapter33.defenseMultiplier(e);
-  const r = MonsterDefense.resolveDamage({ baseDamage: raw, monster: { defense, evasion: e.evasion, parry: e.parry, damageReduction: e.dr }, damageType: p.weapon.type, attackRange: p.weapon.range, canParry, random });
+  const defense = e.defense * (e.lowHpDefense && e.currentHp / e.maxHp <= .5 ? 1 + e.lowHpDefense : 1) * Chapter33.defenseMultiplier(e) * Chapter34.defenseMultiplier(e);
+  const r = MonsterDefense.resolveDamage({ baseDamage: raw, monster: { defense, evasion: e.evasion, parry: e.parry, damageReduction: Chapter34.effectiveDr(e) }, damageType: p.weapon.type, attackRange: p.weapon.range, canParry, random });
   const wasAlive = e.currentHp > 0;
   const damage = Math.ceil(r.finalDamage * (1 + p.damageBonus) * p.outgoing);
   e.currentHp -= damage; p.totalDamage += damage;
   Chapter33.updateAllOut(e, now);
-  if (wasAlive && e.currentHp <= 0) { const heal = Math.min(p.maxHp - p.hp, p.maxHp * p.killHeal); p.hp += heal; p.healing += heal; p.killHealing += heal; p.resource = Math.min(p.resourceMax, p.resource + p.resourceMax * p.killResource); }
+  Chapter34.afterDamage(e, now);
+  if (wasAlive && e.currentHp <= 0) { const heal = Chapter34.killHealAmount(p, e); p.hp += heal; p.healing += heal; p.killHealing += heal; if (e.summoned34) e.killHealPaid = (e.killHealPaid || 0) + heal; p.resource = Math.min(p.resourceMax, p.resource + p.resourceMax * p.killResource); }
   return damage;
 }
 function tryHeal(priest, party, now) {
@@ -169,7 +172,7 @@ function enemyActions(party, enemies, now, random, warriorWeight) {
     if (now + 1e-9 < e.attackAt) continue;
     if (now < e.stunnedUntil) { e.attackAt = now + .25; continue; }
     const slowMultiplier = now < e.slowUntil ? 1 - e.slow : 1;
-    e.attackAt = now + 1 / (e.speed * slowMultiplier * Chapter33.speedMultiplier(e)); if (!alivePlayers(party).length) return;
+    e.attackAt = now + 1 / (e.speed * slowMultiplier * Chapter33.speedMultiplier(e) * Chapter34.speedMultiplier(e, now)); if (!alivePlayers(party).length) return;
     if (e.warDrum && now >= e.skillAt) { Chapter33.castWarDrum(enemies, now); e.skillAt = now + e.skillCooldown; continue; }
     // TEST-only weighted random selection. warriorWeight=1 reproduces the formal equal-weight path.
     const p = chooseWeightedTarget(party, random, warriorWeight); p.targeted++; let raw = e.attack * (now < e.attackDownUntil ? 1 - e.attackDown : 1);
@@ -181,7 +184,7 @@ function enemyActions(party, enemies, now, random, warriorWeight) {
     }
     const usedSkill = now >= e.skillAt;
     if (usedSkill) { raw *= e.skillMultiplier; e.skillAt = now + e.skillCooldown; e.skillCasts = (e.skillCasts || 0) + 1; }
-    raw *= Chapter33.attackMultiplier(e, now) * Chapter33.hunterBasicBonus(e, p, usedSkill);
+    raw *= Chapter33.attackMultiplier(e, now) * Chapter33.hunterBasicBonus(e, p, usedSkill) * Chapter34.attackMultiplier(e);
     if (random() >= Math.max(.45, Math.min(.99, .898 - p.dodge))) continue;
     if (p.job === 'mage' && now >= p.blinkAt && random() < Skills.getEffect('mage', 'blink', 1).chance) { p.blinkAt = now + 10; continue; }
     if (random() < .05) raw *= 1.5;
@@ -193,6 +196,10 @@ function enemyActions(party, enemies, now, random, warriorWeight) {
     if (frontline !== 1) damage = Math.ceil(damage * frontline);
     const absorbed = Math.min(p.shield, damage); p.shield -= absorbed; damage -= absorbed; p.hp -= damage; p.taken += damage; p.damageTakenByEnemy[e.id] = (p.damageTakenByEnemy[e.id] || 0) + damage;
     Chapter33.recordHunterHit(e, p, usedSkill);
+    if (usedSkill) Chapter34.onSkillHit(e, now);
+    const trio34 = enemies.some(other => other.currentHp > 0 && other.warDrum) && enemies.some(other => other.currentHp > 0 && other.charge34) && enemies.some(other => other.currentHp > 0 && other.fervor34);
+    if (trio34) { p.trio34MaxHit = Math.max(p.trio34MaxHit || 0, damage); p.trio34Damage = (p.trio34Damage || 0) + damage; p.trio34Hits = (p.trio34Hits || 0) + 1; }
+    if (e.rage34) e.rage34Damage = (e.rage34Damage || 0) + damage;
     if (frontline > 1 && now < (e.warDrumUntil || 0)) {
       p.dualBuffHits = (p.dualBuffHits || 0) + 1;
       p.dualBuffDamage = (p.dualBuffDamage || 0) + damage;
@@ -210,14 +217,14 @@ function enemyActions(party, enemies, now, random, warriorWeight) {
   }
 }
 function ticks(party, enemies, now) {
-  enemies.forEach(e => { if (e.dot && e.currentHp > 0 && now + 1e-9 >= e.dot.next) { e.currentHp -= e.dot.damage; Chapter33.updateAllOut(e, now); e.dot.owner.totalDamage += e.dot.damage; e.dot.ticks--; e.dot.next++; if (!e.dot.ticks) e.dot = null; } });
+  enemies.forEach(e => { if (e.dot && e.currentHp > 0 && now + 1e-9 >= e.dot.next) { e.currentHp -= e.dot.damage; Chapter33.updateAllOut(e, now); Chapter34.afterDamage(e, now); e.dot.owner.totalDamage += e.dot.damage; e.dot.ticks--; e.dot.next++; if (!e.dot.ticks) e.dot = null; } });
   alivePlayers(party).forEach(p => { if (p.bleed && now + 1e-9 >= p.bleed.next) { p.hp -= p.bleed.damage; p.taken += p.bleed.damage; p.damageTakenByEnemy[p.bleed.sourceId] = (p.damageTakenByEnemy[p.bleed.sourceId] || 0) + p.bleed.damage; p.bleed.ticks--; p.bleed.next++; if (!p.bleed.ticks) p.bleed = null; if (p.hp <= 0) { p.hp = 0; p.alive = false; p.deathAt = now; } } });
 }
 function simulate(jobs, seed, warriorWeight, gearId, stage, regenAffixCount = null, killHealAffixCount = null, killHealPerAffix = .03, applyKillHealOpportunityCost = false, monsterPool = POOL, encounter = null, eliteLoop = null) {
   const random = rng(seed), party = jobs.map(job => makePlayer(job, gearId, stage, regenAffixCount, killHealAffixCount, killHealPerAffix, applyKillHealOpportunityCost)); let serial = 5;
   // Separate spawn rolls preserve the original E0 combat RNG and do not consume extra combat draws.
   const eliteRandom = rng(seed ^ 0x32e117e);
-  const loopStats = { spawns: 0, eliteSpawns: 0, eliteKills: 0, eliteKilledLifetime: 0, elitePresentSeconds: 0, maxConcurrentElites: 0, warDrumSeconds: 0, frontlineSeconds: 0, overlapSeconds: 0 };
+  const loopStats = { spawns: 0, eliteSpawns: 0, eliteKills: 0, eliteKilledLifetime: 0, elitePresentSeconds: 0, maxConcurrentElites: 0, warDrumSeconds: 0, frontlineSeconds: 0, overlapSeconds: 0, fervor34Triggers: 0, killedLifetimes: {}, trio34Seconds: 0 };
   const loopElite = eliteLoop?.elite || CHAPTER_32_ELITE;
   const spawnTemplate = normal => {
     if (!eliteLoop) return normal;
@@ -227,14 +234,23 @@ function simulate(jobs, seed, warriorWeight, gearId, stage, regenAffixCount = nu
   };
   const templates = encounter ? encounter.templates : eliteLoop?.randomOpening ? Array.from({ length: 5 }, () => monsterPool[Math.floor(random() * monsterPool.length)]) : [...monsterPool, monsterPool[Math.floor(random() * monsterPool.length)]];
   let enemies = templates.map((t, i) => makeEnemy(spawnTemplate(t), 0, i, true)), kills = 0, initialKills = 0, firstClearAt = null;
+  if (encounter?.chief34) {
+    const chief = enemies[0];
+    chief.spawnSummon = (template, now) => enemies.push(makeEnemy(template, now, serial++));
+    chief.dismissSummons = now => enemies.filter(e => e.summoned34 && e.currentHp > 0).forEach(e => { e.currentHp = 0; e.despawned34 = true; e.endedAt34 = now; });
+  }
   const duration = encounter?.duration || DURATION;
+  const trio34Window = []; let trio34WindowDamage = 0;
   for (let step = 0; step < duration / DT; step++) {
     const now = step * DT;
+    const takenBefore34 = eliteLoop?.chapter34 ? party.reduce((n, p) => n + p.taken, 0) : 0;
+    const trioActive34 = eliteLoop?.chapter34 && enemies.some(e => e.currentHp > 0 && e.warDrum) && enemies.some(e => e.currentHp > 0 && e.charge34) && enemies.some(e => e.currentHp > 0 && e.fervor34);
     if (eliteLoop) {
       const alive = enemies.filter(e => e.currentHp > 0);
       const eliteCount = alive.filter(e => e.id === loopElite.id).length;
       loopStats.maxConcurrentElites = Math.max(loopStats.maxConcurrentElites, eliteCount);
       if (eliteCount) loopStats.elitePresentSeconds += DT;
+      if (alive.some(e => e.warDrum) && alive.some(e => e.charge34) && alive.some(e => e.fervor34)) loopStats.trio34Seconds += DT;
       if (alive.some(e => now < (e.warDrumUntil || 0))) loopStats.warDrumSeconds += DT;
       if (alive.some(e => e.frontline) && alive.some(e => e.rank === 'normal')) {
         loopStats.frontlineSeconds += DT;
@@ -254,16 +270,31 @@ function simulate(jobs, seed, warriorWeight, gearId, stage, regenAffixCount = nu
       basic(p, enemies, now, random);
     }
     enemyActions(party, enemies, now, random, warriorWeight);
+    if (eliteLoop?.chapter34) {
+      while (trio34Window.length && trio34Window[0].now <= now - 1) trio34WindowDamage -= trio34Window.shift().damage;
+      if (trioActive34) {
+        const damage = party.reduce((n, p) => n + p.taken, 0) - takenBefore34;
+        if (damage) { trio34Window.push({ now, damage }); trio34WindowDamage += damage; }
+        loopStats.trio34MaxOneSecond = Math.max(loopStats.trio34MaxOneSecond || 0, trio34WindowDamage);
+      }
+    }
     enemies.forEach((e, i) => {
       if (e.currentHp <= 0 && e.respawnAt === null) {
+        if (e.despawned34) return;
         kills++; if (e.initial) initialKills++; e.respawnAt = now + 2;
+        if (e.summoned34) e.endedAt34 = now;
+        if (eliteLoop?.chapter34) {
+          const lifetime = loopStats.killedLifetimes[e.id] ||= { count: 0, seconds: 0 };
+          lifetime.count++; lifetime.seconds += now - e.spawnedAt;
+          if (e.fervor34Triggered) loopStats.fervor34Triggers++;
+        }
         if (eliteLoop && e.id === loopElite.id) { loopStats.eliteKills++; loopStats.eliteKilledLifetime += now - e.spawnedAt; }
       }
       if (!encounter && e.respawnAt !== null && e.respawnAt <= now) enemies[i] = makeEnemy(spawnTemplate(monsterPool[Math.floor(random() * monsterPool.length)]), now, serial++);
     });
     if (firstClearAt === null && initialKills === templates.length) firstClearAt = now;
     if (encounter && (initialKills === templates.length || !alivePlayers(party).length)) return { survived: alivePlayers(party).length > 0, time: now, kills, firstClearAt, party, enemies };
-    if (!alivePlayers(party).length) return { survived: false, time: now, kills, firstClearAt, party, loopStats };
+    if (!alivePlayers(party).length) return { survived: false, time: now, kills, firstClearAt, party, loopStats, enemies };
   }
   return { survived: true, time: duration, kills, firstClearAt, party, enemies, loopStats };
 }
@@ -333,7 +364,67 @@ function summarizeEliteLoop(name, jobs, chance, stage) {
   };
 }
 
-if (process.argv.includes('--chapter-33-complete')) {
+if (process.argv.includes('--chapter-34-complete')) {
+  const part = process.argv.find(value => value.startsWith('--part='))?.split('=')[1];
+  const cells = [];
+  for (const [name, jobs] of Object.entries(PARTIES)) for (const mode of ['loop', 'boss']) {
+    if (part && part !== (mode === 'loop' ? `loop${name}` : 'boss')) continue;
+    for (const cleared of mode === 'loop' ? [10, 15] : [15]) {
+      const stage = proportionalStage(cleared, 25, 16, .16);
+      const samples = Array.from({ length: RUNS }, (_, i) => simulate(jobs, 0x31c0de + i * 104729 + name.charCodeAt(0), 3, 'B', stage, 0, 1, .02, true, Chapter34.normals,
+        mode === 'boss' ? { templates: [Chapter34.boss], duration: 120, stopImmediately: true, chief34: true } : null,
+        mode === 'loop' ? { chance: .05, elite: Chapter34.elite, randomOpening: true, chapter34: true } : null));
+      const sum = fn => samples.reduce((n, s) => n + fn(s), 0);
+      const avg = (list, fn) => list.length ? list.reduce((n, s) => n + fn(s), 0) / list.length : null;
+      const ps = (s, key) => s.party.reduce((n, p) => n + (p[key] || 0), 0);
+      const sourceDamage = (s, id) => s.party.reduce((n, p) => n + (p.damageTakenByEnemy[id] || 0), 0);
+      const time = sum(s => s.time), survivors = samples.filter(s => s.survived), wipes = samples.filter(s => !s.survived);
+      const hp = s => ps(s, 'hp') / ps(s, 'maxHp');
+      const common = { mode, party: name, stage: stage.id, runs: RUNS, deathRates: Object.fromEntries(jobs.map((job, i) => [job, sum(s => Number(!s.party[i].alive)) / RUNS])) };
+      if (mode === 'loop') {
+        const enemyDamage = sum(s => ps(s, 'taken'));
+        cells.push({ ...common, fullPartySurvivalRate: sum(s => Number(s.party.every(p => p.alive))) / RUNS, survivalRate: survivors.length / RUNS,
+          averageWipeSeconds: avg(wipes, s => s.time), survivorHpPercent: avg(survivors, hp), dps: sum(s => ps(s, 'totalDamage')) / time,
+          killsPerMinute: sum(s => s.kills) / time * 60, priestHealingPerMinute: sum(s => ps(s, 'spellHealing')) / time * 60, killHealingPerMinute: sum(s => ps(s, 'killHealing')) / time * 60,
+          championsPerMinute: sum(s => s.loopStats.eliteSpawns) / time * 60, championPresence: sum(s => s.loopStats.elitePresentSeconds) / time,
+          enemyDamageShares: Object.fromEntries([...Chapter34.normals, Chapter34.elite].map(e => [e.id, sum(s => sourceDamage(s, e.id)) / enemyDamage])),
+          warDrumCoverage: sum(s => s.loopStats.warDrumSeconds) / time,
+          fervorTriggerRate: sum(s => s.loopStats.fervor34Triggers + s.enemies.filter(e => e.fervor34Triggered && e.respawnAt === null).length) / sum(s => s.loopStats.eliteSpawns),
+          killedEnemyMeanLifetime: Object.fromEntries([...Chapter34.normals, Chapter34.elite].map(e => [e.id, sum(s => s.loopStats.killedLifetimes[e.id]?.seconds || 0) / Math.max(1, sum(s => s.loopStats.killedLifetimes[e.id]?.count || 0))])),
+          trioPresence: sum(s => s.loopStats.trio34Seconds) / time,
+          trioMaxSingleHit: Math.max(...samples.flatMap(s => s.party.map(p => p.trio34MaxHit || 0))),
+          trioMaxOneSecondPartyDamage: Math.max(...samples.map(s => s.loopStats.trio34MaxOneSecond || 0)),
+          observedEliteRate: sum(s => s.loopStats.eliteSpawns) / sum(s => s.loopStats.spawns)
+        });
+      } else {
+        const wins = samples.filter(s => s.firstClearAt !== null), rage = samples.filter(s => s.enemies[0].rage34);
+        const hits = sum(s => s.enemies[0].skillHits || 0);
+        const summonStats = threshold => {
+          const entered = samples.filter(s => s.enemies[0][`summon${threshold}`]);
+          return { triggerRate: entered.length / RUNS, triggerSeconds: avg(entered, s => s.enemies[0][`summon${threshold}`].at),
+            lifetimeSeconds: avg(entered, s => { const e = s.enemies.find(e => e.summonStage === threshold); return (e.endedAt34 ?? s.time) - e.spawnedAt; }),
+            damagePerRun: sum(s => sourceDamage(s, threshold === 70 ? Chapter34.normals[0].id : Chapter34.normals[3].id)) / RUNS,
+            killedRate: entered.filter(s => { const e = s.enemies.find(e => e.summonStage === threshold); return e.currentHp <= 0 && !e.despawned34; }).length / Math.max(1, entered.length),
+            maxTriggers: Math.max(...samples.map(s => s.enemies[0][`summon${threshold}`]?.count || 0)) };
+        };
+        cells.push({ ...common, killRate: wins.length / RUNS, fullPartyKillRate: wins.filter(s => s.party.every(p => p.alive)).length / RUNS,
+          averageKillSeconds: avg(wins, s => s.time), wipeRate: wipes.length / RUNS, timeoutRate: samples.filter(s => s.survived && s.firstClearAt === null).length / RUNS,
+          hpPercentAtBossDeath: avg(wins, hp), bossDamagePerRun: sum(s => sourceDamage(s, Chapter34.boss.id)) / RUNS,
+          summonDamagePerRun: sum(s => ps(s, 'taken') - sourceDamage(s, Chapter34.boss.id)) / RUNS, priestHealingPerRun: sum(s => ps(s, 'spellHealing')) / RUNS,
+          heavySlashDamagePerHit: hits ? sum(s => s.enemies[0].skillDamage || 0) / hits : null, heavySlashHitsPerRun: hits / RUNS,
+          summon70: summonStats(70), summon40: summonStats(40),
+          rageEntryRate: rage.length / RUNS, rageEntrySeconds: avg(rage, s => s.enemies[0].rage34At), rageDurationSeconds: avg(rage, s => s.time - s.enemies[0].rage34At),
+          rageStats: rage.length ? { attack: Chapter34.boss.attack * Chapter34.attackMultiplier(rage[0].enemies[0]), speed: Chapter34.boss.speed * Chapter34.speedMultiplier(rage[0].enemies[0], rage[0].time), defense: Chapter34.boss.defense * Chapter34.defenseMultiplier(rage[0].enemies[0]) } : null,
+          maxRageTriggers: Math.max(...samples.map(s => s.enemies[0].rage34Count || 0)),
+          summonKillHealingTotal: sum(s => s.enemies.reduce((n, e) => n + (e.summoned34 ? e.killHealPaid || 0 : 0), 0)),
+          maxEnemies: Math.max(...samples.map(s => s.enemies.length)),
+          liveSummonsAfterBossDeath: wins.reduce((n, s) => n + s.enemies.filter(e => e.summoned34 && e.currentHp > 0).length, 0)
+        });
+      }
+    }
+  }
+  process.stdout.write(`${JSON.stringify({ test: 'Chapter 3-4 complete TEST V1', runsPerCell: RUNS, gear: 'B1-R0; one 2% kill-heal affix with opportunity cost', suppression: 'S16 / 25 facilities', eliteChance: .05, templates: { normals: Chapter34.normals, elite: Chapter34.elite, boss: Chapter34.boss }, cells }, null, 2)}\n`);
+} else if (process.argv.includes('--chapter-33-complete')) {
   const partArg = process.argv.find(value => value.startsWith('--part='));
   const part = partArg?.split('=')[1];
   const cells = [];
