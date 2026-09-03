@@ -13,6 +13,13 @@ Object.values(policy.RECIPES).filter((recipe) => recipe.quality === 'rare').forE
   assert.deepEqual(recipe.fixedAffixIds, ['max_hp_percent', 'defense_percent']);
   assert.equal(recipe.goldCost, 18000);
 });
+Object.values(policy.RECIPES).filter((recipe) => recipe.quality === 'epic').forEach((recipe) => {
+  assert.equal(recipe.baseStatsStatus, 'ready');
+  assert.equal(recipe.affixRuleOverride.fixedCount, 2);
+  assert.equal(recipe.affixRuleOverride.randomCount, 2);
+  assert.equal(recipe.affixRuleOverride.specialChance, 1);
+  assert.equal(recipe.goldCost, 55000);
+});
 
 const cases = [
   ['canyon-warlord', 'brokenrock-canyon', 'recipe-redrock-refined-shoulders'],

@@ -84,6 +84,9 @@
     return Object.freeze({ id, name, description, type: options.type || 'special', value: options.value ?? null, unlockChapter: Math.max(1, Number(options.unlockChapter) || 1), qualities: Object.freeze(options.qualities || ['epic', 'legendary']), allowedGroups: Object.freeze(options.allowedGroups || ['weapon', 'armor', 'accessory']), allowedSlots: Object.freeze(options.allowedSlots || []), weight: Math.max(0, Number(options.weight) || 1), isComposite: false, isSpecialAbility: true, jobId: options.jobId || null, skillId: options.skillId || null, isSpecialSkillEffect: Boolean(options.isSpecialSkillEffect), mutuallyExclusiveWith: Object.freeze(options.mutuallyExclusiveWith || []), enabled: options.enabled !== false });
   }
   const SPECIAL_ABILITIES = Object.freeze({
+    wasteland_resilience: specialAbility('wasteland_resilience', '荒原韌性', '受到敵人直接傷害後獲得一層荒原韌性：每層傷害減免 +3%，持續 5 秒，最多 3 層；再次觸發刷新持續時間。', { unlockChapter: 3, allowedGroups: ['armor'], allowedSlots: ['cloak'] }),
+    surging_battle_will: specialAbility('surging_battle_will', '戰意沸騰', '成功施放主動技能後獲得 1 層戰意：每層造成傷害 +3%，持續 6 秒，最多 3 層；再次取得刷新持續時間。', { unlockChapter: 3, allowedGroups: ['armor'], allowedSlots: ['shoulders'] }),
+    crafted_rune_resonance: specialAbility('crafted_rune_resonance', '符文共鳴', '成功施放主動技能後獲得符文共鳴，持續 6 秒；下次主動技能消耗共鳴並使該次技能傷害 +15%。', { unlockChapter: 3, allowedGroups: ['armor'], allowedSlots: ['wrist'] }),
     cooldown_reset_on_critical: specialAbility('cooldown_reset_on_critical', '星火回響', '暴擊時有 10% 機率重置技能冷卻。', { unlockChapter: 3 }),
     mage_fireball_burn: specialAbility('mage_fireball_burn', '燃燒火球', '火球命中時附加燃燒。', { type: 'special-skill', unlockChapter: 2, jobId: 'mage', skillId: 'fireball', isSpecialSkillEffect: true, allowedGroups: ['weapon', 'accessory'] }),
     warlord_unyielding: specialAbility('warlord_unyielding', '督軍不屈', '生命低於 30% 時，受到傷害降低 15%。', { unlockChapter: 2, allowedGroups: ['armor'], allowedSlots: ['head'] }),

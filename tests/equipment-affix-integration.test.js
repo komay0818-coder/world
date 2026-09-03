@@ -14,8 +14,9 @@ assert.match(html, /armor-penetration-policy\.js\?v=20260903-armor-penetration-v
 assert.match(html, /conditional-damage-policy\.js\?v=20260903-conditional-damage-v1/, 'conditional damage policy loads before the main game script');
 assert.match(html, /critical-resource-recovery-policy\.js\?v=20260903-critical-resource-recovery-v1/, 'critical resource recovery policy loads before the main game script');
 assert.match(html, /direct-hit-health-recovery-policy\.js\?v=20260903-direct-hit-health-recovery-v1/, 'direct-hit health recovery policy loads before the main game script');
+assert.match(html, /chapter-three-crafted-epic-ability-policy\.js\?v=20260903-chapter3-crafted-epic-v1/, 'crafted epic ability policy loads before the main game script');
 assert.match(html, /control-effect-policy\.js\?v=20260903-control-resistance-v1/, 'the shared player control policy loads before the main game script');
-assert.match(html, /script\.js\?v=20260903-chapter3-blue-crafted-stats-v1/, 'the affix UI renderer uses the current local build');
+assert.match(html, /script\.js\?v=20260903-chapter3-crafted-epic-v1/, 'the affix UI renderer uses the current local build');
 assert.match(source, /equipmentAffixMigrationVersion !== 'green-affix-v1'/, 'legacy saves receive the affix compatibility migration');
 assert.match(source, /EquipmentAffixPolicy\.normalizeEquipment\(item\)/, 'inventory and equipped items are normalized on load');
 assert.match(source, /EquipmentAffixPolicy\.getEquippedAffixStats\(progress\.equipment\)/, 'stats read only the equipped item collection');
@@ -35,9 +36,9 @@ assert.doesNotMatch(source.slice(source.indexOf('function enemyAttackTick()')), 
 assert.match(source, /function applyBlackstoneAttackSpeedPenalty[\s\S]*applyControlEffectToPlayer\(member, \{ type: 'attack-speed-slow'/, 'all existing attack-speed slow callers retain their wrapper and enter the shared policy');
 assert.match(source, /blackForestAction === 'binding-arrow'\) logBattle/, 'binding arrow remains display and damage only');
 assert.match(source, /blackForestAction === 'root-strike'\) logBattle/, 'root strike remains display and damage only');
-assert.match(source, /function resolveEnemyDirectHitRecovery\(member, actualDamage, stats = member\?\.stats, random = Math\.random\)[\s\S]*damageKind: 'enemy-direct'[\s\S]*recoveryPercent: stats\?\.directHitHealthRecoveryPercent/, 'all eligible enemy damage calls one post-damage recovery entry point');
+assert.match(source, /function resolveEnemyDirectHitRecovery\(member, actualDamage, stats = member\?\.stats, random = Math\.random, options = \{\}\)[\s\S]*damageKind: 'enemy-direct'[\s\S]*recoveryPercent: stats\?\.directHitHealthRecoveryPercent/, 'all eligible enemy damage calls one post-damage recovery entry point');
 assert.match(source, /target\.currentHp = Math\.max\(0, target\.currentHp - damage\);\s*resolveEnemyDirectHitRecovery\(target, damage, stats\);/, 'party enemy attacks resolve recovery after actual health damage');
-assert.match(source, /attacker\.currentHp = Math\.max\(0, attacker\.currentHp - actualCounterDamage\);\s*resolveEnemyDirectHitRecovery\(attacker, actualCounterDamage, counterStats\);/g, 'enemy parry counters use the same direct-hit entry point');
+assert.match(source, /attacker\.currentHp = Math\.max\(0, attacker\.currentHp - actualCounterDamage\);\s*resolveEnemyDirectHitRecovery\(attacker, actualCounterDamage, counterStats, Math\.random, \{ triggerWasteland: false \}\);/g, 'enemy parry counters retain recovery handling but do not stack wasteland resilience from reflected damage');
 assert.match(source, /member\.resourceCurrent = member\.resourceType === 'arrows'[\s\S]*CriticalResourceRecoveryPolicy\.resolveExecution\(member, \{[\s\S]*attackKind: skill\.id === 'companion' \? 'companion' : 'skill'[\s\S]*hadDirectHit: hits\.length > 0/, 'one skill execution resolves critical recovery once after paying its resource cost and excludes companion damage');
 assert.match(source, /if \(member\.resourceType === 'rage'\)[^\n]+[\s\S]*CriticalResourceRecoveryPolicy\.resolveExecution\(member, \{ attackKind: 'basic', critical, hadDirectHit: true/, 'a successful basic attack resolves critical recovery once');
 assert.match(source, /ConditionalDamagePolicy\.getDamageMultiplier\([\s\S]*currentHp: attacker\?\.currentHp[\s\S]*attackKind: options\.attackKind/, 'basic and counter damage read current HP at the common damage entry point');
@@ -52,6 +53,10 @@ assert.doesNotMatch(source, /hasEquippedSpecialAbility\(member\.equipment, 'mage
 assert.match(source, /EquipmentAffixPolicy\.formatAffix\(entry\)/, 'inventory, comparison and worn views share the affix text renderer');
 assert.match(source, /chapterTwoCraftedBaseStatsMigrationVersion !== 'chapter2-crafted-base-stats-v1'/, 'existing chapter-two crafted instances receive their template base stats once');
 assert.match(source, /chapterThreeBlueCraftedBaseStatsMigrationVersion !== 'chapter3-blue-crafted-base-stats-v1'/, 'existing chapter-three blue crafted instances receive finalized template base stats once');
+assert.match(source, /chapterThreeEpicCraftedTemplateMigrationVersion !== 'chapter3-epic-crafted-template-v1'/, 'existing chapter-three epic crafted instances receive the finalized template once');
+assert.match(source, /const craftedEpicExecution = ChapterThreeCraftedEpicAbilityPolicy\.beginSkillExecution\(member, now, \{ eligible: skill\.id !== 'companion' \}\)[\s\S]*targets\.map[\s\S]*craftedEpicExecution/, 'a multi-target skill shares one crafted epic execution snapshot and companion skills are excluded');
+assert.match(source, /ChapterThreeCraftedEpicAbilityPolicy\.completeSkillExecution\(member, craftedEpicExecution, now\)/, 'only a validated successful active-skill execution advances crafted epic states');
+assert.match(source, /ChapterThreeCraftedEpicAbilityPolicy\.getWastelandDamageReduction\(target, now\)[\s\S]*target\.currentHp = Math\.max\(0, target\.currentHp - damage\);[\s\S]*resolveEnemyDirectHitRecovery\(target, damage, stats\)/, 'wasteland resilience reduces the next hit before that direct hit adds or refreshes a stack');
 assert.match(source, /CraftingPolicy\.applyCraftedBaseStats\(item\)/, 'inventory and equipped legacy items use the same compatibility path');
 assert.match(source, /function equipmentDetailsHtml\(item\)/, 'equipment inventory rows use a dedicated details renderer');
 assert.match(source, /equipment-affix-title">裝備詞綴/, 'the affix section has a clear title');

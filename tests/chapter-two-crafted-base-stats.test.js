@@ -23,6 +23,6 @@ Object.entries(expected).forEach(([recipeId, spec], index) => {
 assert.deepEqual(crafting.RECIPES['chapter1-green-wrist'].baseStats, { defense: 4, hp: 15 }, 'chapter-one wrist remains unchanged');
 assert.deepEqual(crafting.RECIPES['chapter1-green-cloak'].baseStats, { defense: 3, hp: 30 }, 'chapter-one cloak remains unchanged');
 assert.deepEqual(crafting.RECIPES['chapter1-green-shoulders'].baseStats, { defense: 7, hp: 20 }, 'chapter-one shoulders remain unchanged');
-assert.ok(Object.values(crafting.RECIPES).filter((recipe) => recipe.chapter === 3 && recipe.quality === 'epic').every((recipe) => recipe.baseStatsStatus === 'pending' || Object.keys(recipe.baseStats || {}).length === 0), 'chapter-three epic base stats remain pending');
+assert.ok(Object.values(crafting.RECIPES).filter((recipe) => recipe.chapter === 3 && recipe.quality === 'epic').every((recipe) => recipe.baseStatsStatus === 'ready' && Object.keys(recipe.baseStats || {}).length > 0), 'chapter-three epic base stats are finalized independently');
 
 console.log('chapter-two-crafted-base-stats: assertions passed');

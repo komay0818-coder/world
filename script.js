@@ -1023,6 +1023,13 @@ function getProgress() {
     saved.chapterThreeBlueCraftedBaseStatsMigrationVersion = 'chapter3-blue-crafted-base-stats-v1';
     localStorage.setItem('stardust-progress', JSON.stringify(saved));
   }
+  if (saved.chapterThreeEpicCraftedTemplateMigrationVersion !== 'chapter3-epic-crafted-template-v1') {
+    saved.inventory = (Array.isArray(saved.inventory) ? saved.inventory : []).map(CraftingPolicy.applyCraftedEpicTemplate);
+    saved.equipment = Object.fromEntries(Object.entries(saved.equipment || {})
+      .map(([slot, item]) => [slot, CraftingPolicy.applyCraftedEpicTemplate(item)]));
+    saved.chapterThreeEpicCraftedTemplateMigrationVersion = 'chapter3-epic-crafted-template-v1';
+    localStorage.setItem('stardust-progress', JSON.stringify(saved));
+  }
   if (saved.equipmentDropMigrationVersion !== 'equipment-drop-v1') {
     saved.inventory = Array.isArray(saved.inventory) ? saved.inventory : [];
     saved.equipmentDropMigrationVersion = 'equipment-drop-v1';
@@ -4432,7 +4439,8 @@ function applyDamageToMonster(index, baseDamage, profile, options = {}) {
   const frostResonanceMultiplier = elementalMastery?.resonance && (now < skillState.slowedUntil || now < skillState.frozenUntil) && Math.random() < .1 ? attackerStats.criticalDamageMultiplier : 1;
   const lightningResonanceMultiplier = elementalMastery?.resonance && now < (skillState.paralyzedUntil || 0) && options.attackKind !== 'resonance' && Math.random() < .1 ? 1.3 : 1;
   const conditionalDamageMultiplier = Number(options.conditionalDamageMultiplier) || ConditionalDamagePolicy.getDamageMultiplier({ currentHp: attacker?.currentHp, maxHp: attacker?.maxHp, lowHealthDamagePercent: attackerStats.lowHealthDamagePercent, highHealthDamagePercent: attackerStats.highHealthDamagePercent, attackKind: options.attackKind });
-  const adjustedBaseDamage = magicAdjustedDamage * (1 + (attackerStats.damageBonus || 0)) * rankMultiplier * attackKindMultiplier * conditionalDamageMultiplier * markMultiplier * vulnerabilityMultiplier * controlledMultiplier * statusElementMultiplier * frostResonanceMultiplier * lightningResonanceMultiplier;
+  const craftedEpicMultiplier = ChapterThreeCraftedEpicAbilityPolicy.getOutgoingDamageMultiplier(attacker, options.attackKind, { execution: options.craftedEpicExecution }, now);
+  const adjustedBaseDamage = magicAdjustedDamage * (1 + (attackerStats.damageBonus || 0)) * rankMultiplier * attackKindMultiplier * conditionalDamageMultiplier * craftedEpicMultiplier * markMultiplier * vulnerabilityMultiplier * controlledMultiplier * statusElementMultiplier * frostResonanceMultiplier * lightningResonanceMultiplier;
   if (enemy.mapId) {
     const hitChance = ChapterOneLevelPolicy.getPlayerHitChance(progress.level, enemy.level, attackerStats.accuracy, 0);
     if (Math.random() >= hitChance) {
@@ -4482,7 +4490,7 @@ function applyDamageToMonster(index, baseDamage, profile, options = {}) {
     attacker.shield = Math.max(0, (attacker.shield || 0) - absorbed);
     const actualCounterDamage = counterDamage - absorbed;
     attacker.currentHp = Math.max(0, attacker.currentHp - actualCounterDamage);
-    resolveEnemyDirectHitRecovery(attacker, actualCounterDamage, counterStats);
+    resolveEnemyDirectHitRecovery(attacker, actualCounterDamage, counterStats, Math.random, { triggerWasteland: false });
     logBattle(`↩【${enemy.name}】招架後反擊，對${attacker.name}造成 ${actualCounterDamage} 傷害。`, 'damage-taken');
     defeatPartyMember(attacker);
   }
@@ -4494,7 +4502,7 @@ function applyDamageToMonster(index, baseDamage, profile, options = {}) {
     attacker.shield = Math.max(0, (attacker.shield || 0) - absorbed);
     const actualCounterDamage = counterDamage - absorbed;
     attacker.currentHp = Math.max(0, attacker.currentHp - actualCounterDamage);
-    resolveEnemyDirectHitRecovery(attacker, actualCounterDamage, counterStats);
+    resolveEnemyDirectHitRecovery(attacker, actualCounterDamage, counterStats, Math.random, { triggerWasteland: false });
     logBattle(`↩【${enemy.name}】以【盾架反擊】對${attacker.name}造成 ${actualCounterDamage} 傷害。`, 'damage-taken');
     defeatPartyMember(attacker);
   }
@@ -4544,6 +4552,7 @@ function useAutoSkillForMember(member, now = Date.now()) {
     if (member.resourceType !== 'arrows' && member.resourceCurrent < cost) continue;
     const targets = aliveEnemyIndexesByAge().slice(0, skillEffect.targets || skill.targets || 1);
     if (!targets.length) continue;
+    const craftedEpicExecution = ChapterThreeCraftedEpicAbilityPolicy.beginSkillExecution(member, now, { eligible: skill.id !== 'companion' });
     const critical = Math.random() < stats.crit;
     let damagePower = Number(skillEffect.power) || Number(skill.power) || 1;
     if (skill.id === 'piercing-shot' && aliveEnemyIndexesByAge().length === 1) damagePower *= skillEffect.singleTargetBonus ? 1 + skillEffect.singleTargetBonus : 1;
@@ -4563,6 +4572,7 @@ function useAutoSkillForMember(member, now = Date.now()) {
         attackKind: 'skill',
         armorIgnore: skillEffect.armorIgnore,
         conditionalDamageMultiplier,
+        craftedEpicExecution,
         controlledBonus: skillEffect.controlledBonus,
         showDamage: !['heavy-strike', 'whirlwind', 'charge', 'power-shot', 'multi-shot', 'piercing-shot', 'backstab', 'shadow-dance', 'poison-blade', 'fireball', 'blizzard', 'chain-lightning', 'holy-light', 'holy-nova'].includes(skill.id)
       }) };
@@ -4600,7 +4610,7 @@ function useAutoSkillForMember(member, now = Date.now()) {
       hits.forEach((target) => applyDot(target.index, 'poison', Math.max(1, Math.ceil(target.result.finalDamage * .15 * (1 + (skillEffect.poisonBonus || 0)) * stats.dotMultiplier)), 5 + (skillEffect.poisonDuration || 0), skillEffect.poisonStacks || 1, { source: member, defenseReduction: skillEffect.defensePerStack || 0 }));
     }
     if (skill.id === 'fireball' && skillEffect.explosionPower && hits.length) {
-      aliveEnemyIndexesByAge().filter((index) => index !== hits[0].index).slice(0, skillEffect.explosionTargets).forEach((index) => applyDamageToMonster(index, stats.attack * skillEffect.explosionPower, profile, { attacker: member, attackKind: 'skill', conditionalDamageMultiplier, effectType: 'magic' }));
+      aliveEnemyIndexesByAge().filter((index) => index !== hits[0].index).slice(0, skillEffect.explosionTargets).forEach((index) => applyDamageToMonster(index, stats.attack * skillEffect.explosionPower, profile, { attacker: member, attackKind: 'skill', conditionalDamageMultiplier, craftedEpicExecution, effectType: 'magic' }));
     }
     if (skill.id === 'charge') {
       member.skillHasteUntil = now + (skillEffect.duration || 3) * 1000;
@@ -4628,6 +4638,7 @@ function useAutoSkillForMember(member, now = Date.now()) {
     member.resourceCurrent = member.resourceType === 'arrows'
       ? HunterArrowPolicy.spendArrows(member.resourceCurrent, skill.id, progress.equipment)
       : Math.max(0, member.resourceCurrent - cost);
+    ChapterThreeCraftedEpicAbilityPolicy.completeSkillExecution(member, craftedEpicExecution, now);
     CriticalResourceRecoveryPolicy.resolveExecution(member, {
       attackKind: skill.id === 'companion' ? 'companion' : 'skill',
       critical,
@@ -5172,7 +5183,9 @@ function legacyEnemyAttackTick() {
     let enemyHit = dodged ? 0 : MonsterDefense.resolvePlayerDamage({
       baseDamage: rawEnemyHit,
       defense: stats.defense,
-      damageReduction: Math.min(.9, stats.damageReduction + ChapterTwoSpecialEquipmentPolicy.getIncomingDamageReduction(progress.equipment, battle.playerHp / maxHp))
+      damageReduction: Math.min(.9, stats.damageReduction
+        + ChapterTwoSpecialEquipmentPolicy.getIncomingDamageReduction(progress.equipment, battle.playerHp / maxHp)
+        + ChapterThreeCraftedEpicAbilityPolicy.getWastelandDamageReduction(getMainBattleMember(), now))
     }).finalDamage;
     if (parried) {
       enemyHit = Math.max(1, Math.ceil(enemyHit * .5));
@@ -5182,6 +5195,12 @@ function legacyEnemyAttackTick() {
     battle.playerShield -= absorbed;
     enemyHit -= absorbed;
     battle.playerHp -= enemyHit;
+    const mainMember = getMainBattleMember();
+    if (mainMember) {
+      mainMember.currentHp = battle.playerHp;
+      resolveEnemyDirectHitRecovery(mainMember, enemyHit, stats);
+      battle.playerHp = mainMember.currentHp;
+    }
     if (!dodged && WarriorResourcePolicy.isWarrior(character.job)) {
       battle.playerMana = WarriorResourcePolicy.gainFromHitTaken(battle.playerMana);
     }
@@ -5404,12 +5423,14 @@ function processPartyMemberBleed(member, now = Date.now()) {
   return true;
 }
 
-function resolveEnemyDirectHitRecovery(member, actualDamage, stats = member?.stats, random = Math.random) {
-  return DirectHitHealthRecoveryPolicy.resolveDirectHit(member, {
+function resolveEnemyDirectHitRecovery(member, actualDamage, stats = member?.stats, random = Math.random, options = {}) {
+  const recovery = DirectHitHealthRecoveryPolicy.resolveDirectHit(member, {
     damageKind: 'enemy-direct',
     actualDamage,
     recoveryPercent: stats?.directHitHealthRecoveryPercent
   }, random);
+  if (options.triggerWasteland !== false) ChapterThreeCraftedEpicAbilityPolicy.resolveEnemyDirectHit(member, actualDamage);
+  return recovery;
 }
 
 function hasSummonedBlackstoneSpider() {
@@ -5481,6 +5502,7 @@ function endBattleAfterPlayerDefeat(now = Date.now()) {
   battle.sessionId = ++battleSessionSequence;
   battle.dungeonComplete = true;
   (battle.partyMembers || []).forEach((member) => {
+    ChapterThreeCraftedEpicAbilityPolicy.clear(member);
     member.currentHp = member.maxHp;
     member.resourceCurrent = member.resourceType === 'rage' ? 0 : getMaxCombatResourceForMember(member.character, member.progress);
     member.shield = 0;
@@ -5515,6 +5537,7 @@ function defeatPartyMember(member, now = Date.now()) {
     return false;
   }
   member.currentHp = 0;
+  ChapterThreeCraftedEpicAbilityPolicy.clear(member);
   member.alive = false;
   member.targetIndex = -1;
   member.bleed = null;
@@ -5566,6 +5589,7 @@ function resetPartyAfterDefeat(now = Date.now()) {
     members: battle.partyMembers.map((member) => `${member.id}:${member.name}:dead`).join(',')
   });
   battle.partyMembers.forEach(member => {
+    ChapterThreeCraftedEpicAbilityPolicy.clear(member);
     member.currentHp = member.maxHp;
     member.resourceCurrent = member.resourceType === 'rage' ? 0 : getMaxCombatResourceForMember(member.character, member.progress);
     member.shield = 0;
@@ -5856,6 +5880,7 @@ function enemyAttackTick() {
       defense: Math.max(0, Math.round(stats.defense * armorBreakMultiplier * spiderNestArmorMultiplier * piercingMultiplier)),
       damageReduction: Math.min(.9, stats.damageReduction
         + ChapterTwoSpecialEquipmentPolicy.getIncomingDamageReduction(target.progress.equipment, target.currentHp / target.maxHp)
+        + ChapterThreeCraftedEpicAbilityPolicy.getWastelandDamageReduction(target, now)
         + runeIronWallReduction + runeUnyieldingReduction
         + (now < (target.manaShieldReductionUntil || 0) ? target.manaShieldDamageReduction || 0 : 0))
     }).finalDamage;

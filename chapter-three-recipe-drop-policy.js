@@ -56,21 +56,27 @@
     redrockExpeditionCloak: epicRecipe({
       id: 'recipe-redrock-expedition-cloak', itemId: 'recipe-redrock-expedition-cloak', recipeId: 'chapter3-redrock-expedition-cloak',
       name: '赤岩遠征披風配方', equipmentSlot: 'cloak', resultItemId: 'crafted-redrock-expedition-cloak',
-      resultEquipmentId: 'crafted-redrock-expedition-cloak', resultName: '赤岩遠征披風', baseStats: Object.freeze({}),
+      resultEquipmentId: 'crafted-redrock-expedition-cloak', resultName: '赤岩遠征披風', baseStats: Object.freeze({ defense: 12, hp: 85, dodge: .05 }),
+      baseStatsStatus: 'ready', affixContentStatus: 'ready', specialAbilityStatus: 'ready', fixedAffixIds: Object.freeze(['max_hp_percent', 'hp_regeneration_flat']),
+      specialAbilityIds: Object.freeze(['wasteland_resilience']), affixRuleOverride: Object.freeze({ fixedCount: 2, randomCount: 2, specialChance: 1 }), maxNaturalSockets: 2,
       materials: Object.freeze({ 'vulture-hard-feather': 30, 'warpattern-cloth': 25, 'ancient-runestone': 8, 'temple-core-fragment': 5 }),
       materialRequirements: Object.freeze({ 'vulture-hard-feather': 30, 'warpattern-cloth': 25, 'ancient-runestone': 8, 'temple-core-fragment': 5 }), goldCost: EPIC_CRAFT_GOLD_COST
     }),
     ancientWarpatternShoulders: epicRecipe({
       id: 'recipe-ancient-warpattern-shoulders', itemId: 'recipe-ancient-warpattern-shoulders', recipeId: 'chapter3-ancient-warpattern-shoulders',
       name: '遠古戰紋肩甲配方', equipmentSlot: 'shoulders', resultItemId: 'crafted-ancient-warpattern-shoulders',
-      resultEquipmentId: 'crafted-ancient-warpattern-shoulders', resultName: '遠古戰紋肩甲', baseStats: Object.freeze({}),
+      resultEquipmentId: 'crafted-ancient-warpattern-shoulders', resultName: '遠古戰紋肩甲', baseStats: Object.freeze({ defense: 22, hp: 65, damageReduction: .03 }),
+      baseStatsStatus: 'ready', affixContentStatus: 'ready', specialAbilityStatus: 'ready', fixedAffixIds: Object.freeze(['defense_percent', 'skill_damage_percent']),
+      specialAbilityIds: Object.freeze(['surging_battle_will']), affixRuleOverride: Object.freeze({ fixedCount: 2, randomCount: 2, specialChance: 1 }), maxNaturalSockets: 2,
       materials: Object.freeze({ 'redrock-ore': 40, 'skullcrusher-iron-scrap': 30, 'warbeast-fang': 8, 'ancient-runestone': 6 }),
       materialRequirements: Object.freeze({ 'redrock-ore': 40, 'skullcrusher-iron-scrap': 30, 'warbeast-fang': 8, 'ancient-runestone': 6 }), goldCost: EPIC_CRAFT_GOLD_COST
     }),
     shamanRuneWrist: epicRecipe({
       id: 'recipe-shaman-rune-wrist', itemId: 'recipe-shaman-rune-wrist', recipeId: 'chapter3-shaman-rune-wrist',
       name: '薩滿符文護腕配方', equipmentSlot: 'wrist', resultItemId: 'crafted-shaman-rune-wrist',
-      resultEquipmentId: 'crafted-shaman-rune-wrist', resultName: '薩滿符文護腕', baseStats: Object.freeze({}),
+      resultEquipmentId: 'crafted-shaman-rune-wrist', resultName: '薩滿符文護腕', baseStats: Object.freeze({ defense: 14, hp: 48, damageBonus: .04 }),
+      baseStatsStatus: 'ready', affixContentStatus: 'ready', specialAbilityStatus: 'ready', fixedAffixIds: Object.freeze(['skill_damage_percent', 'cooldown_speed_percent']),
+      specialAbilityIds: Object.freeze(['crafted_rune_resonance']), affixRuleOverride: Object.freeze({ fixedCount: 2, randomCount: 2, specialChance: 1 }), maxNaturalSockets: 2,
       materials: Object.freeze({ 'wasteland-thick-hide': 30, 'warpattern-cloth': 30, 'warbeast-fang': 6, 'ancient-runestone': 8 }),
       materialRequirements: Object.freeze({ 'wasteland-thick-hide': 30, 'warpattern-cloth': 30, 'warbeast-fang': 6, 'ancient-runestone': 8 }), goldCost: EPIC_CRAFT_GOLD_COST
     })

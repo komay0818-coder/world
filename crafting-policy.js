@@ -131,12 +131,13 @@
       equipmentSlot: recipe.equipmentSlot, allowedJobs: [], ...baseStats, baseStats,
       image: recipe.image || null, imageStatus: recipe.image ? 'ready' : 'pending',
       ...(Array.isArray(recipe.fixedAffixIds) ? { fixedAffixIds: [...recipe.fixedAffixIds] } : {}),
+      ...(Array.isArray(recipe.specialAbilityIds) ? { specialAbilityIds: [...recipe.specialAbilityIds] } : {}),
       ...(recipe.affixRuleOverride ? { affixRuleOverride: { ...recipe.affixRuleOverride } } : {}),
       baseStatsStatus: recipe.baseStatsStatus || 'ready', affixContentStatus: recipe.affixContentStatus || 'ready',
       specialAbilityStatus: recipe.specialAbilityStatus || 'ready'
     };
     const generated = EquipmentAffixPolicy.createEquipmentInstance(template, { quality: recipe.quality, uniqueId: instanceId, random, chapter: options.chapter || recipe.chapter || 1, jobId: options.jobId });
-    return { ...generated, id: instanceId, instanceId, equipmentId: recipe.resultItemId, templateId: recipe.resultItemId, sourceType: 'crafted', recipeId, sockets: 0, craftedAt };
+    return { ...generated, id: instanceId, instanceId, equipmentId: recipe.resultItemId, templateId: recipe.resultItemId, sourceType: 'crafted', recipeId, sockets: 0, ...(Number(recipe.maxNaturalSockets) > 0 ? { maxNaturalSockets: Number(recipe.maxNaturalSockets) } : {}), craftedAt };
   }
   function applyCraftedBaseStats(item) {
     if (!item || item.kind !== 'equipment') return item;
@@ -144,6 +145,22 @@
     if (!recipe?.baseStats || (recipe.chapter !== 2 && !(recipe.chapter === 3 && recipe.baseStatsStatus === 'ready'))) return item;
     const baseStats = { ...recipe.baseStats };
     return { ...item, ...baseStats, baseStats };
+  }
+  function applyCraftedEpicTemplate(item) {
+    if (!item || item.kind !== 'equipment') return item;
+    const recipe = RECIPES[item.recipeId] || Object.values(RECIPES).find((entry) => entry.resultItemId === (item.equipmentId || item.templateId));
+    if (recipe?.chapter !== 3 || recipe.quality !== 'epic' || recipe.specialAbilityStatus !== 'ready') return applyCraftedBaseStats(item);
+    const generated = generateCraftedEquipment(recipe.recipeId, { instanceId: item.instanceId || item.id, craftedAt: item.craftedAt, chapter: 3, random: () => .5 });
+    if (!generated) return applyCraftedBaseStats(item);
+    const fixedAffixes = Array.isArray(item.fixedAffixes) && item.fixedAffixes.length ? item.fixedAffixes : generated.fixedAffixes;
+    const randomAffixes = Array.isArray(item.randomAffixes) && item.randomAffixes.length ? item.randomAffixes : generated.randomAffixes;
+    return {
+      ...generated, ...item, ...recipe.baseStats, baseStats: { ...recipe.baseStats },
+      fixedAffixes, randomAffixes, affixes: [...fixedAffixes, ...randomAffixes],
+      specialAbility: item.specialAbility || generated.specialAbility,
+      baseStatsStatus: 'ready', affixContentStatus: 'ready', specialAbilityStatus: 'ready',
+      maxNaturalSockets: Number(recipe.maxNaturalSockets) || item.maxNaturalSockets
+    };
   }
   function deductInventoryItems(inventory, costs) {
     const result = (Array.isArray(inventory) ? inventory : []).map((item) => ({ ...item }));
@@ -176,6 +193,6 @@
   return Object.freeze({
     INVENTORY_CAPACITY, RARITIES, STAT_DEFINITIONS, PRIMARY_STAT_POOLS, AFFIX_POOLS, MATERIALS, RECIPES,
     normalizeCraftingState, getItemQuantity, getRecipeQuantity, isRecipeKnown, getProjectedInventorySlots,
-    canCraft, createInstanceId, generateCraftedEquipment, applyCraftedBaseStats, craftEquipment, formatStat
+    canCraft, createInstanceId, generateCraftedEquipment, applyCraftedBaseStats, applyCraftedEpicTemplate, craftEquipment, formatStat
   });
 }));
