@@ -1691,6 +1691,8 @@ function grantCraftingMaterialDrops(progress, map, enemy, options = {}) {
   materialDrops.push(...ChapterTwoMaterialDropPolicy.grantMaterialDrops(progress, map.id, enemy, options));
   materialDrops.push(...ChapterThreeMaterialDropPolicy.grantMaterialDrops(progress, map.id, enemy));
   materialDrops.push(...VillageUpgradePolicy.grantMapDrops(progress, map.id));
+  const trialMark = PreJobTrialPolicy.grantMarkDrop(progress, map.id, enemy, options);
+  if (trialMark) materialDrops.push(trialMark);
   return materialDrops;
 }
 
@@ -2609,6 +2611,8 @@ function renderMapSelector() {
   const stats = getCharacterStats(progress.level, progress, character);
   const activeMap = getActiveMap(progress);
   const maps = mapProgression.filter((map) => map.implemented && !map.regionOf);
+  const trialMarks = Object.values(PreJobTrialPolicy.MARKS).map((mark) => `${mark.name} ${getInventoryItemQuantity(progress, mark.id)}`).join('・');
+  const trialCard = `<article class="map-selection-card trial-entry-card"><div><b>⚔️ ${PreJobTrialPolicy.ENTRY.name}</b><small>獨立60秒傷害試煉・不屬於3-1～3-6</small><em>${trialMarks}</em><strong class="map-recommendation danger">傷害門檻與守護者基礎數值待實測校準</strong></div><button type="button" data-open-pre-job-trial>查看試煉</button></article>`;
   const modal = document.querySelector('#inventory-modal');
   document.querySelector('#inventory-title').textContent = '選擇冒險地圖';
   document.querySelector('#inventory-content').innerHTML = `<section class="map-selection-grid">${maps.map((map) => {
@@ -2634,7 +2638,7 @@ function renderMapSelector() {
       ? unlocked ? `<button type="button" data-select-map="${map.id}" ${dungeonPasses < 1 ? 'disabled' : ''}>${dungeonPasses > 0 ? map.ticketItemId ? '使用地圖進入' : '消耗鑰匙進入' : `需要${dungeonPassName}`}</button>` : `<span>Lv. ${map.min} 解鎖</span>`
       : unlocked ? map.id === activeMap.id ? '<span>目前地圖</span>' : `<button type="button" data-select-map="${map.id}">前往地圖</button>` : `<span>Lv. ${map.min} 解鎖</span>`;
     return `<article class="map-selection-card ${isRegionHub ? 'region-hub-card' : ''} ${map.dungeon ? 'dungeon-card' : ''} ${map.id === activeMap.id ? 'selected' : ''} ${unlocked ? '' : 'locked'}" style="--map-preview:url('${map.background}')"><div><b>${map.dungeon ? '◆ ' : ''}${map.name}</b><small>${isRegionHub ? `第 ${map.chapter} 章探索地區` : `怪物等級 Lv. ${map.monsterMin || map.min}～${map.monsterMax || map.max}`}</small>${detail}${isRegionHub ? '' : recommendation}</div>${action}</article>`;
-  }).join('')}</section>`;
+  }).join('')}${trialCard}</section>`;
   modal.dataset.view = 'maps';
   modal.classList.remove('hidden');
 }
@@ -2762,6 +2766,37 @@ function unequipItem(slot) {
     battleTimer = setInterval(battleTick, Math.round(1000 / getCharacterStats(progress.level, progress, character).attackSpeed));
     updateBattleUI();
   }
+}
+
+function renderPreJobTrialPanel() {
+  const progress = getProgress();
+  const modal = document.querySelector('#inventory-modal');
+  const cores = Object.values(ChapterThreeEpicWeaponPolicy.WEAPON_CORES);
+  const marks = Object.values(PreJobTrialPolicy.MARKS);
+  const trial = PreJobTrialPolicy.normalizeTrialProgress(progress.preJobTrial);
+  document.querySelector('#inventory-title').textContent = PreJobTrialPolicy.ENTRY.name;
+  document.querySelector('#inventory-content').innerHTML = `
+    <button type="button" class="map-region-back" data-map-region-back>← 返回地圖選擇</button>
+    <section class="region-overview-card trial-overview-card"><div><b>${PreJobTrialPolicy.ENTRY.bossName}</b><small>60秒累積實際有效傷害</small></div><em>最高傷害 ${trial.bestDamage.toLocaleString()}・最高階級 ${trial.bestTier || '尚未突破'}・英雄之證 ${trial.proofTiers.length}/3</em><strong>Ⅰ／Ⅱ／Ⅲ傷害門檻：待實測校準</strong></section>
+    <section class="map-region-grid">${marks.map((mark) => `<article class="map-region-card available"><span>◆</span><div><b>${mark.name}</b><small>持有 ${getInventoryItemQuantity(progress, mark.id)}・開始挑戰消耗1個，失敗不返還</small></div><button type="button" disabled title="Boss攻防與三階門檻尚未校準">平衡資料待定</button></article>`).join('')}</section>
+    <section class="workshop-section"><h3>武器之核 5 換 1</h3><p>選擇目標核心，再從其他核心輸入合計5個作為素材。</p><label>目標核心 <select data-trial-core-target>${cores.map((core) => `<option value="${core.id}">${core.name}</option>`).join('')}</select></label><div class="crafting-material-list">${cores.map((core) => `<label><span>${core.name}（持有 ${getInventoryItemQuantity(progress, core.id)}）</span><input type="number" min="0" max="${getInventoryItemQuantity(progress, core.id)}" value="0" data-trial-core-offer="${core.id}"></label>`).join('')}</div><button type="button" data-exchange-trial-cores>交換指定核心</button></section>
+    <section class="workshop-section"><h3>試煉寶箱</h3>${PreJobTrialPolicy.CHESTS.slice(1).map((chest) => `<p>${chest.name}：核心 ${chest.coreChance * 100}%・神聖法書 ${chest.tomeChance * 100}%・金幣 TBD（持有 ${getInventoryItemQuantity(progress, chest.id)}）</p>`).join('')}<small>金幣數量確定前不會消耗或開啟寶箱。</small></section>`;
+  modal.dataset.view = 'pre-job-trial';
+  modal.classList.remove('hidden');
+}
+
+function exchangePreJobTrialCores() {
+  const target = document.querySelector('[data-trial-core-target]')?.value;
+  const offered = Object.fromEntries([...document.querySelectorAll('[data-trial-core-offer]')].map((input) => [input.dataset.trialCoreOffer, Math.max(0, Math.floor(Number(input.value) || 0))]));
+  const progress = getProgress();
+  const result = PreJobTrialPolicy.exchangeCores(progress, target, offered);
+  if (!result.ok) {
+    showToast(result.code === 'target-core-as-material' ? '目標核心不能作為交換素材。' : result.code === 'invalid-cost' ? '請選擇合計5個非目標核心。' : '核心數量不足或交換資料無效。');
+    return;
+  }
+  saveProgress(progress);
+  showToast('武器之核交換成功。');
+  renderPreJobTrialPanel();
 }
 
 function renderBlackForestRegions() {
@@ -6463,6 +6498,8 @@ document.querySelector('#sell-confirm-modal').addEventListener('click', (event) 
 });
 document.querySelector('#inventory-modal').addEventListener('click', (event) => {
   if (event.target === event.currentTarget) event.currentTarget.classList.add('hidden');
+  if (event.target.closest('[data-open-pre-job-trial]')) { renderPreJobTrialPanel(); return; }
+  if (event.target.closest('[data-exchange-trial-cores]')) { exchangePreJobTrialCores(); return; }
   const regionHubButton = event.target.closest('[data-open-map-region]');
   if (regionHubButton) {
     if (regionHubButton.dataset.openMapRegion === 'black-forest') renderBlackForestRegions();

@@ -4,7 +4,10 @@ const fragments = require('../chapter-three-weapon-recipe-fragment-policy.js');
 
 assert.equal(Object.keys(policy.WEAPONS).length, 8);
 assert.equal(Object.keys(policy.WEAPON_CORES).length, 8);
-Object.values(policy.WEAPON_CORES).forEach((core) => assert.equal(core.sourceStatus, 'pending'));
+Object.values(policy.WEAPON_CORES).forEach((core) => {
+  assert.equal(core.sourceStatus, 'pre-job-trial-chest');
+  assert.equal(core.sourceName, '轉職前試煉寶箱');
+});
 assert.equal(policy.GOLD_COST, 75000);
 assert.deepEqual(policy.COMMON_MATERIALS, { 'redrock-ore': 40, 'skullcrusher-iron-scrap': 35, 'warbeast-fang': 10, 'ancient-runestone': 12, 'temple-core-fragment': 6 });
 
