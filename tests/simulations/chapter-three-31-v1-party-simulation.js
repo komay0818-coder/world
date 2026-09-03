@@ -35,6 +35,8 @@ const PARTIES = { A: ['warrior', 'assassin', 'hunter', 'priest'], B: ['warrior',
 const STAGES = {
   none: { id: '無壓制', drain: 0, penalty: 0 },
   full: { id: '0/10完整壓制', progress: 0, drain: 10, penalty: .10 },
+  progress1: { id: '1/10', progress: 1, drain: 9, penalty: .09 },
+  progress2: { id: '2/10', progress: 2, drain: 8, penalty: .08 },
   progress3: { id: '3/10', progress: 3, drain: 7, penalty: .07 },
   progress5: { id: '5/10', progress: 5, drain: 5, penalty: .05 },
   progress7: { id: '7/10', progress: 7, drain: 3, penalty: .03 },
@@ -219,7 +221,11 @@ function compactCell(cell) {
   return { party: cell.party, stage: cell.stage, killHealAffixCount: cell.killHealAffixCount, killHealPerAffix: cell.killHealPerAffix, fullPartySurvivalRate: cell.fullPartySurvivalRate, survivalRate: cell.survivalRate, averageWipeSeconds: cell.averageWipeSeconds, survivorPartyHpPercent: cell.survivorPartyHpPercent, teamDps: cell.teamDps, killsPerMinute: cell.killsPerMinute, members: cell.members.map(member => ({ job: member.job, deathRate: member.deathRate, averageDeathSeconds: member.averageDeathSeconds, averageEndHpPercent: member.averageEndHpPercent, killHealingPerMinute: member.killHealingPerMinute, priestHealingPerMinute: member.priestHealingPerMinute, damageTakenPerMinute: member.damageTakenPerMinute })) };
 }
 
-if (process.argv.includes('--suppression-curve')) {
+if (process.argv.includes('--suppression-entry-curve')) {
+  const stages = [STAGES.full, STAGES.progress1, STAGES.progress2, STAGES.progress3];
+  const cells = stages.flatMap(stage => Object.entries(PARTIES).map(([name, jobs]) => summarize(name, jobs, 3, 'B', stage, 0, 1, .02, true)));
+  process.stdout.write(`${JSON.stringify({ test: 'Chapter 3-1 TEST V1 suppression entry curve', runs: RUNS, fixedGear: 'B1-R0', targetWeights: { warrior: 3, others: 1 }, killHealPerAffix: .02, opportunityCost: ['one affix replaces basic attack damage +8%'], cells: process.argv.includes('--compact') ? cells.map(compactCell) : cells }, null, 2)}\n`);
+} else if (process.argv.includes('--suppression-curve')) {
   const stages = [STAGES.full, STAGES.progress3, STAGES.progress5, STAGES.progress7, STAGES.cleared];
   const cells = [1, 2].flatMap(killHealAffixCount => stages.flatMap(stage => Object.entries(PARTIES).map(([name, jobs]) => summarize(name, jobs, 3, 'B', stage, 0, killHealAffixCount, .02, true))));
   process.stdout.write(`${JSON.stringify({ test: 'Chapter 3-1 TEST V1 suppression curve', runs: RUNS, fixedGear: 'B-R0', targetWeights: { warrior: 3, others: 1 }, killHealPerAffix: .02, opportunityCost: ['first affix replaces basic attack damage +8%', 'second affix replaces basic attack damage +8%'], cells: process.argv.includes('--compact') ? cells.map(compactCell) : cells }, null, 2)}\n`);
