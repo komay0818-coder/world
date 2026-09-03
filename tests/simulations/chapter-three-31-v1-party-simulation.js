@@ -1,5 +1,6 @@
 const MonsterDefense = require('../../monster-defense.js');
 const Skills = require('../../class-skill-policy.js');
+const { warIntentMultiplier } = require('./chapter-three-32-boss-rules.js');
 
 const RUNS = Number(process.argv[2]) || 100;
 const DURATION = 600;
@@ -17,6 +18,7 @@ const CHAPTER_32_POOL = [
   { id: 'skull-warrior', name: '碎顱戰士', hp: 1217, attack: 92, defense: 90, evasion: 3, parry: 10, dr: 18, speed: .72, skillMultiplier: 1.35, skillCooldown: 10 }
 ];
 const CHAPTER_32_ELITE = { id: 'rift-brute', name: '斷岩蠻兵 TEST V1', hp: 3350, attack: 135, defense: 115, speed: .82, evasion: 3, parry: 20, dr: 24, skillMultiplier: 1.50, skillCooldown: 10 };
+const CHAPTER_32_BOSS = { id: 'canyon-warlord', name: '峽谷督軍 TEST V1', hp: 15500, attack: 162, defense: 132, speed: .82, evasion: 3, parry: 18, dr: 26, skillMultiplier: 1.55, skillCooldown: 10, warIntent: true };
 const WEAPONS = {
   warrior: { name: '斬木巨劍', min: 38, max: 50, speed: .78, range: 'melee', type: 'physical' },
   assassin: { name: '暗林短刃（單持）', min: 22, max: 29, speed: 1.55, range: 'melee', type: 'physical' },
@@ -168,6 +170,12 @@ function enemyActions(party, enemies, now, random, warriorWeight) {
     e.attackAt = now + 1 / (e.speed * slowMultiplier); if (!alivePlayers(party).length) return;
     // TEST-only weighted random selection. warriorWeight=1 reproduces the formal equal-weight path.
     const p = chooseWeightedTarget(party, random, warriorWeight); p.targeted++; let raw = e.attack * (now < e.attackDownUntil ? 1 - e.attackDown : 1);
+    const intent = e.warIntent ? warIntentMultiplier(now - e.spawnedAt) : 1;
+    raw *= intent;
+    if (e.warIntent) {
+      e.intentAttacks ||= {};
+      e.intentAttacks[intent] = (e.intentAttacks[intent] || 0) + 1;
+    }
     const usedSkill = now >= e.skillAt;
     if (usedSkill) { raw *= e.skillMultiplier; e.skillAt = now + e.skillCooldown; e.skillCasts = (e.skillCasts || 0) + 1; }
     if (random() >= Math.max(.45, Math.min(.99, .898 - p.dodge))) continue;
@@ -179,6 +187,7 @@ function enemyActions(party, enemies, now, random, warriorWeight) {
     if (p.gearId === 'C' && p.job === 'warrior' && p.hp / p.maxHp < .30) damage = Math.max(1, Math.ceil(damage * .85));
     const absorbed = Math.min(p.shield, damage); p.shield -= absorbed; damage -= absorbed; p.hp -= damage; p.taken += damage; p.damageTakenByEnemy[e.id] = (p.damageTakenByEnemy[e.id] || 0) + damage;
     if (usedSkill) { e.skillDamage = (e.skillDamage || 0) + damage; e.skillHits = (e.skillHits || 0) + 1; }
+    if (e.warIntent) { e.intentDamage ||= {}; e.intentDamage[intent] = (e.intentDamage[intent] || 0) + damage; }
     if (e.bleedRatio) p.bleed = { damage: Math.ceil(damage * e.bleedRatio), ticks: e.bleedDuration, next: now + 1, sourceId: e.id };
     if (p.hp > 0 && p.hp / p.maxHp < .30 && p.job === 'mage' && now >= p.manaShieldAt) { const effect = Skills.getEffect('mage', 'mana-shield', 1), c = p.resourceMax * effect.manaCost; if (p.resource >= c) { p.resource -= c; p.shield += p.maxHp * effect.shield; p.manaShieldAt = now + effect.internalCooldown; } }
     if (p.hp > 0 && p.hp / p.maxHp < .30 && p.job === 'priest' && now >= p.protectionAt) { const effect = Skills.getEffect('priest', 'holy-protection', 1); p.shield += p.maxHp * effect.shield; p.protectionAt = now + effect.cooldown; }
@@ -204,7 +213,8 @@ function simulate(jobs, seed, warriorWeight, gearId, stage, regenAffixCount = nu
   };
   const templates = encounter ? encounter.templates : [...monsterPool, monsterPool[Math.floor(random() * monsterPool.length)]];
   let enemies = templates.map((t, i) => makeEnemy(spawnTemplate(t), 0, i, true)), kills = 0, initialKills = 0, firstClearAt = null;
-  for (let step = 0; step < DURATION / DT; step++) {
+  const duration = encounter?.duration || DURATION;
+  for (let step = 0; step < duration / DT; step++) {
     const now = step * DT;
     if (eliteLoop) {
       const eliteCount = enemies.filter(e => e.currentHp > 0 && e.id === CHAPTER_32_ELITE.id).length;
@@ -217,7 +227,12 @@ function simulate(jobs, seed, warriorWeight, gearId, stage, regenAffixCount = nu
       if (p.hp <= 0) { p.hp = 0; p.alive = false; p.deathAt = now; }
     });
     ticks(party, enemies, now);
-    alivePlayers(party).forEach(p => { cast(p, party, enemies, now, random); basic(p, enemies, now, random); });
+    for (const p of alivePlayers(party)) {
+      if (encounter?.stopImmediately && !aliveEnemies(enemies).length) break;
+      cast(p, party, enemies, now, random);
+      if (encounter?.stopImmediately && !aliveEnemies(enemies).length) break;
+      basic(p, enemies, now, random);
+    }
     enemyActions(party, enemies, now, random, warriorWeight);
     enemies.forEach((e, i) => {
       if (e.currentHp <= 0 && e.respawnAt === null) {
@@ -226,11 +241,11 @@ function simulate(jobs, seed, warriorWeight, gearId, stage, regenAffixCount = nu
       }
       if (!encounter && e.respawnAt !== null && e.respawnAt <= now) enemies[i] = makeEnemy(spawnTemplate(monsterPool[Math.floor(random() * monsterPool.length)]), now, serial++);
     });
-    if (firstClearAt === null && initialKills === 5) firstClearAt = now;
-    if (encounter && (initialKills === 5 || !alivePlayers(party).length)) return { survived: alivePlayers(party).length > 0, time: now, kills, firstClearAt, party, enemies };
+    if (firstClearAt === null && initialKills === templates.length) firstClearAt = now;
+    if (encounter && (initialKills === templates.length || !alivePlayers(party).length)) return { survived: alivePlayers(party).length > 0, time: now, kills, firstClearAt, party, enemies };
     if (!alivePlayers(party).length) return { survived: false, time: now, kills, firstClearAt, party, loopStats };
   }
-  return { survived: true, time: DURATION, kills, firstClearAt, party, enemies, loopStats };
+  return { survived: true, time: duration, kills, firstClearAt, party, enemies, loopStats };
 }
 function summarize(name, jobs, warriorWeight, gearId, stage, regenAffixCount = null, killHealAffixCount = null, killHealPerAffix = .03, applyKillHealOpportunityCost = false, monsterPool = POOL) {
   const samples = Array.from({ length: RUNS }, (_, i) => simulate(jobs, 0x31c0de + i * 104729 + name.charCodeAt(0), warriorWeight, gearId, stage, regenAffixCount, killHealAffixCount, killHealPerAffix, applyKillHealOpportunityCost, monsterPool));
@@ -298,7 +313,45 @@ function summarizeEliteLoop(name, jobs, chance, stage) {
   };
 }
 
-if (process.argv.includes('--chapter-32-elite-loop')) {
+if (process.argv.includes('--chapter-32-boss-v1')) {
+  const stage = proportionalStage(6, 15, 12, .12);
+  const cells = Object.entries(PARTIES).map(([name, jobs]) => {
+    const samples = Array.from({ length: RUNS }, (_, i) => simulate(jobs, 0x31c0de + i * 104729 + name.charCodeAt(0), 3, 'B', stage, 0, 1, .02, true, CHAPTER_32_POOL, { templates: [CHAPTER_32_BOSS], duration: 120, stopImmediately: true }));
+    const wins = samples.filter(s => s.firstClearAt !== null), wipes = samples.filter(s => !s.survived);
+    const avg = (list, fn) => list.length ? list.reduce((n, s) => n + fn(s), 0) / list.length : null;
+    const total = fn => samples.reduce((n, s) => n + fn(s), 0);
+    const partySum = (s, key) => s.party.reduce((n, p) => n + p[key], 0);
+    const skillHits = total(s => s.enemies[0].skillHits || 0), skillCasts = total(s => s.enemies[0].skillCasts || 0), skillDamage = total(s => s.enemies[0].skillDamage || 0);
+    const bounds = [0, 20, 40, 60, 90, 120];
+    const distribution = Object.fromEntries(bounds.slice(0, -1).map((low, i) => [`${low}-${bounds[i + 1]}`, wins.filter(s => s.time >= low && (i === 4 ? s.time <= 120 : s.time < bounds[i + 1])).length]));
+    distribution.notKilled = RUNS - wins.length;
+    return {
+      party: name, runs: RUNS, killRate: wins.length / RUNS,
+      fullPartyKillRate: wins.filter(s => s.party.every(p => p.alive)).length / RUNS,
+      averageKillSeconds: avg(wins, s => s.time), wipeRate: wipes.length / RUNS,
+      averageWipeSeconds: avg(wipes, s => s.time), timeoutRate: samples.filter(s => s.firstClearAt === null && s.survived).length / RUNS,
+      hpPercentAtBossDeath: avg(wins, s => partySum(s, 'hp') / partySum(s, 'maxHp')),
+      deathRates: Object.fromEntries(jobs.map((job, i) => [job, total(s => Number(!s.party[i].alive)) / RUNS])),
+      averageDeathSeconds: Object.fromEntries(jobs.map((job, i) => [job, avg(samples.filter(s => !s.party[i].alive), s => s.party[i].deathAt)])),
+      priestHealingPerRun: avg(samples, s => partySum(s, 'spellHealing')),
+      bossDamagePerRun: avg(samples, s => partySum(s, 'taken')),
+      environmentDamagePerRun: avg(samples, s => partySum(s, 'environment')),
+      warriorBossDamagePerRun: avg(samples, s => s.party[0].taken),
+      heavySlashDamagePerHit: skillHits ? skillDamage / skillHits : null,
+      heavySlashDamagePerCast: skillCasts ? skillDamage / skillCasts : null,
+      heavySlashHitsPerRun: skillHits / RUNS, heavySlashCastsPerRun: skillCasts / RUNS,
+      killTimeDistribution: distribution,
+      warIntentIEntryRate: total(s => Number(s.time >= 20)) / RUNS,
+      warIntentIIEntryRate: total(s => Number(s.time >= 40)) / RUNS,
+      warIntentAttacksPerRun: Object.fromEntries([1, 1.08, 1.16].map(mult => [mult, avg(samples, s => s.enemies[0].intentAttacks?.[mult] || 0)])),
+      warIntentDamagePerRun: Object.fromEntries([1, 1.08, 1.16].map(mult => [mult, avg(samples, s => s.enemies[0].intentDamage?.[mult] || 0)])),
+      maxKills: Math.max(...samples.map(s => s.kills)), maxEnemyCount: Math.max(...samples.map(s => s.enemies.length)),
+      longestRunSeconds: Math.max(...samples.map(s => s.time)),
+      killHealingPerRun: avg(samples, s => partySum(s, 'killHealing'))
+    };
+  });
+  process.stdout.write(`${JSON.stringify({ test: 'Chapter 3-2 canyon warlord TEST V1', boss: CHAPTER_32_BOSS, runs: RUNS, stage, gear: 'B1-R0; one 2% kill-heal affix with opportunity cost', targetWeights: { warrior: 3, others: 1 }, durationSeconds: 120, respawn: false, cells }, null, 2)}\n`);
+} else if (process.argv.includes('--chapter-32-elite-loop')) {
   const stage = proportionalStage(6, 15, 12, .12);
   const partyArg = process.argv.find(value => value.startsWith('--party='));
   const parties = Object.entries(PARTIES).filter(([name]) => !partyArg || name === partyArg.split('=')[1]);

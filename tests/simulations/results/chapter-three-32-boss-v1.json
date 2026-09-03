@@ -1,0 +1,146 @@
+{
+  "test": "Chapter 3-2 canyon warlord TEST V1",
+  "boss": {
+    "id": "canyon-warlord",
+    "name": "峽谷督軍 TEST V1",
+    "hp": 15500,
+    "attack": 162,
+    "defense": 132,
+    "speed": 0.82,
+    "evasion": 3,
+    "parry": 18,
+    "dr": 26,
+    "skillMultiplier": 1.55,
+    "skillCooldown": 10,
+    "warIntent": true
+  },
+  "runs": 100,
+  "stage": {
+    "id": "6/15",
+    "progress": 6,
+    "total": 15,
+    "completion": 0.4,
+    "drain": 7.199999999999999,
+    "penalty": 0.072,
+    "preserveFraction": true
+  },
+  "gear": "B1-R0; one 2% kill-heal affix with opportunity cost",
+  "targetWeights": {
+    "warrior": 3,
+    "others": 1
+  },
+  "durationSeconds": 120,
+  "respawn": false,
+  "cells": [
+    {
+      "party": "A",
+      "runs": 100,
+      "killRate": 1,
+      "fullPartyKillRate": 1,
+      "averageKillSeconds": 64.17299999999999,
+      "wipeRate": 0,
+      "averageWipeSeconds": null,
+      "timeoutRate": 0,
+      "hpPercentAtBossDeath": 0.7411378235378803,
+      "deathRates": {
+        "warrior": 0,
+        "assassin": 0,
+        "hunter": 0,
+        "priest": 0
+      },
+      "averageDeathSeconds": {
+        "warrior": null,
+        "assassin": null,
+        "hunter": null,
+        "priest": null
+      },
+      "priestHealingPerRun": 144.54,
+      "bossDamagePerRun": 266.86,
+      "environmentDamagePerRun": 1849.6224000000498,
+      "warriorBossDamagePerRun": 120.89,
+      "heavySlashDamagePerHit": 16.65109034267913,
+      "heavySlashDamagePerCast": 10.103969754253308,
+      "heavySlashHitsPerRun": 3.21,
+      "heavySlashCastsPerRun": 5.29,
+      "killTimeDistribution": {
+        "0-20": 0,
+        "20-40": 0,
+        "40-60": 0,
+        "60-90": 100,
+        "90-120": 0,
+        "notKilled": 0
+      },
+      "warIntentIEntryRate": 1,
+      "warIntentIIEntryRate": 1,
+      "warIntentAttacksPerRun": {
+        "1": 12.39,
+        "1.08": 12.85,
+        "1.16": 15.19
+      },
+      "warIntentDamagePerRun": {
+        "1": 74.16,
+        "1.08": 85.83,
+        "1.16": 106.87
+      },
+      "maxKills": 1,
+      "maxEnemyCount": 1,
+      "longestRunSeconds": 66.5,
+      "killHealingPerRun": 33.37320000000002
+    },
+    {
+      "party": "B",
+      "runs": 100,
+      "killRate": 1,
+      "fullPartyKillRate": 1,
+      "averageKillSeconds": 59.27700000000002,
+      "wipeRate": 0,
+      "averageWipeSeconds": null,
+      "timeoutRate": 0,
+      "hpPercentAtBossDeath": 0.7484061242345245,
+      "deathRates": {
+        "warrior": 0,
+        "assassin": 0,
+        "mage": 0,
+        "priest": 0
+      },
+      "averageDeathSeconds": {
+        "warrior": null,
+        "assassin": null,
+        "mage": null,
+        "priest": null
+      },
+      "priestHealingPerRun": 113.88,
+      "bossDamagePerRun": 280.61,
+      "environmentDamagePerRun": 1708.6176000000444,
+      "warriorBossDamagePerRun": 120.05,
+      "heavySlashDamagePerHit": 17.035598705501616,
+      "heavySlashDamagePerCast": 10.528,
+      "heavySlashHitsPerRun": 3.09,
+      "heavySlashCastsPerRun": 5,
+      "killTimeDistribution": {
+        "0-20": 0,
+        "20-40": 0,
+        "40-60": 67,
+        "60-90": 33,
+        "90-120": 0,
+        "notKilled": 0
+      },
+      "warIntentIEntryRate": 1,
+      "warIntentIIEntryRate": 1,
+      "warIntentAttacksPerRun": {
+        "1": 13.37,
+        "1.08": 13.98,
+        "1.16": 13.17
+      },
+      "warIntentDamagePerRun": {
+        "1": 81.66,
+        "1.08": 96.63,
+        "1.16": 102.32
+      },
+      "maxKills": 1,
+      "maxEnemyCount": 1,
+      "longestRunSeconds": 61.75,
+      "killHealingPerRun": 31.36279999999997
+    }
+  ]
+}
