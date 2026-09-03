@@ -239,10 +239,14 @@ function proportionalStage(cleared, total, baseDrain = 10, basePenalty = .10) {
 }
 
 if (process.argv.includes('--chapter-32-suppression-curve')) {
-  const stages = [0, 2, 3, 5, 8, 12, 15].map(cleared => ({ ...proportionalStage(cleared, 15, 12, .12), id: `${cleared}/15` }));
+  const stagesArg = process.argv.find(value => value.startsWith('--stages='));
+  const clearedStages = stagesArg ? stagesArg.split('=')[1].split(',').map(Number) : [0, 2, 3, 5, 8, 12, 15];
+  const stages = clearedStages.map(cleared => ({ ...proportionalStage(cleared, 15, 12, .12), id: `${cleared}/15` }));
   const gearArg = process.argv.find(value => value.startsWith('--gear='));
   const gearCounts = gearArg ? [Number(gearArg.split('=')[1])] : [1, 2];
-  const cells = gearCounts.flatMap(killHealAffixCount => stages.flatMap(stage => Object.entries(PARTIES).map(([name, jobs]) => summarize(name, jobs, 3, 'B', stage, 0, killHealAffixCount, .02, true, CHAPTER_32_POOL))));
+  const partyArg = process.argv.find(value => value.startsWith('--party='));
+  const parties = partyArg ? Object.entries(PARTIES).filter(([name]) => name === partyArg.split('=')[1]) : Object.entries(PARTIES);
+  const cells = gearCounts.flatMap(killHealAffixCount => stages.flatMap(stage => parties.map(([name, jobs]) => summarize(name, jobs, 3, 'B', stage, 0, killHealAffixCount, .02, true, CHAPTER_32_POOL))));
   const outputCells = process.argv.includes('--curve-summary') ? cells.map(curveCell) : process.argv.includes('--compact') ? cells.map(compactCell) : cells;
   process.stdout.write(`${JSON.stringify({ test: 'Chapter 3-2 TEST V1 suppression curve', runs: RUNS, totalSuppression: 12, totalFacilities: 15, monsterPool: CHAPTER_32_POOL, fixedGear: gearCounts.map(count => `B${count}-R0`), cells: outputCells }, null, 2)}\n`);
 } else if (process.argv.includes('--chapter-32-monsters-v1')) {
