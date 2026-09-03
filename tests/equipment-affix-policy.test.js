@@ -61,6 +61,13 @@ assert.equal(policy.formatAffix(chapterTwoHp), '最大生命 +12%', 'UI formats 
 assert.equal(policy.formatAffix({ ...chapterTwoHp, value: 17, components: [{ stat: 'maxHpPercent', value: 17, unit: '%' }] }), '最大生命 +17%', 'UI never replaces an instance value with the chapter-one definition');
 assert.equal(policy.formatAffix({ id: 'max_hp_percent', value: 12, unit: '%' }), '最大生命 +12%', 'legacy single-stat entries also display their stored value');
 
+const killHealAffix = policy.normalizeAffix({ id: 'kill_health_recovery_percent' }, 'random', 2);
+assert.equal(killHealAffix.value, 2, 'each kill-health recovery affix restores 2% maximum health');
+const killHealStats = count => policy.getEquippedAffixStats(Object.fromEntries(Array.from({ length: count }, (_, index) => [`armor${index}`, { affixes: [killHealAffix] }])));
+assert.equal(killHealStats(1).killHealthRecoveryPercent, 2, 'one kill-health recovery affix grants 2%');
+assert.equal(killHealStats(2).killHealthRecoveryPercent, 4, 'two kill-health recovery affixes stack to 4%');
+assert.equal(killHealStats(3).killHealthRecoveryPercent, 6, 'three kill-health recovery affixes stack to 6% without a cap or diminishing returns');
+
 const chapterTwoAvailable = policy.getAvailableAffixes(weapon, [], { chapter: 2, quality: 'rare' }).map((entry) => entry.id);
 ['elite_damage_percent', 'boss_damage_percent', 'skill_damage_percent', 'basic_attack_damage_percent', 'kill_resource_recovery_percent'].forEach((id) => assert.ok(chapterTwoAvailable.includes(id), `chapter two unlocks ${id}`));
 assert.ok(chapterTwoAvailable.includes('critical_damage_percent'), 'chapter two unlocks critical damage');

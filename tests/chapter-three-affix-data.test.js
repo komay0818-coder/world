@@ -13,7 +13,7 @@ Object.entries(simpleTiers).forEach(([id, tiers]) => tiers.forEach((expected, in
 const advancedTiers = {
   skill_damage_percent: [8, 10], critical_damage_percent: [10, 15], cooldown_speed_percent: [8, 10],
   elite_damage_percent: [8, 10], boss_damage_percent: [8, 10], basic_attack_damage_percent: [8, 10],
-  kill_health_recovery_percent: [3, 4], kill_resource_recovery_percent: [5, 7], mage_fireball_damage: [5, 7]
+  kill_health_recovery_percent: [2, 2], kill_resource_recovery_percent: [5, 7], mage_fireball_damage: [5, 7]
 };
 Object.entries(advancedTiers).forEach(([id, tiers]) => tiers.forEach((expected, index) => assert.deepEqual(value(id, index + 2), [expected], `${id} chapter ${index + 2}`)));
 assert.deepEqual(value('chapter2_berserker', 2), [4, 5]);

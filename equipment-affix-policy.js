@@ -67,7 +67,7 @@
     elite_damage_percent: affix('elite_damage_percent', '對菁英怪物傷害', 'eliteDamagePercent', 8, '%', 6, ['weapon', 'accessory'], { unlockChapter: 2, valuesByChapter: { 2: 8, 3: 10 } }),
     boss_damage_percent: affix('boss_damage_percent', '對 Boss 傷害', 'bossDamagePercent', 8, '%', 5, ['weapon', 'accessory'], { unlockChapter: 2, valuesByChapter: { 2: 8, 3: 10 } }),
     basic_attack_damage_percent: affix('basic_attack_damage_percent', '普攻傷害', 'basicAttackDamagePercent', 8, '%', 6, ['weapon', 'armor'], { unlockChapter: 2, valuesByChapter: { 2: 8, 3: 10 } }),
-    kill_health_recovery_percent: affix('kill_health_recovery_percent', '擊殺回復生命', 'killHealthRecoveryPercent', 3, '%', 5, ['armor', 'accessory'], { unlockChapter: 2, valuesByChapter: { 2: 3, 3: 4 } }),
+    kill_health_recovery_percent: affix('kill_health_recovery_percent', '擊殺回復生命', 'killHealthRecoveryPercent', 2, '%', 5, ['armor', 'accessory'], { unlockChapter: 2, valuesByChapter: { 2: 2, 3: 2 } }),
     kill_resource_recovery_percent: affix('kill_resource_recovery_percent', '擊殺回復主要資源', 'killResourceRecoveryPercent', 5, '%', 5, ['weapon', 'accessory'], { unlockChapter: 2, valuesByChapter: { 2: 5, 3: 7 } }),
     poison_resistance_percent: affix('poison_resistance_percent', '中毒抗性', 'poisonResistancePercent', 15, '%', 6, ['armor', 'accessory'], { unlockChapter: 2, maxChapter: 2, valuesByChapter: { 2: 15 } })
   });

@@ -9,7 +9,7 @@ const appCss = fs.readFileSync(path.join(__dirname, '..', 'style.css'), 'utf8');
 
 assert.match(html, /equipment-affix-policy\.js/, 'affix policy loads before the main game script');
 assert.match(html, /href="style\.css\?v=20260822-inventory-image-containment-v1"/, 'the affix UI stylesheet loads from the same deployed revision');
-assert.match(html, /equipment-affix-policy\.js\?v=20260903-special-epic-v1/, 'the affix formatter uses the current local build');
+assert.match(html, /equipment-affix-policy\.js\?v=20260904-kill-heal-v2/, 'the affix formatter uses the current local build');
 assert.match(html, /armor-penetration-policy\.js\?v=20260903-armor-penetration-v1/, 'armor penetration policy loads before the main game script');
 assert.match(html, /conditional-damage-policy\.js\?v=20260903-conditional-damage-v1/, 'conditional damage policy loads before the main game script');
 assert.match(html, /critical-resource-recovery-policy\.js\?v=20260903-critical-resource-recovery-v1/, 'critical resource recovery policy loads before the main game script');
@@ -49,6 +49,8 @@ assert.match(source, /const conditionalDamageMultiplier = ConditionalDamagePolic
 });
 assert.match(source, /criticalDamageMultiplier: 1\.5 \+ Math\.max\(0, equipment\.criticalDamagePercent \+ passiveTotal/, 'equipment and passive critical damage increase the player critical multiplier');
 assert.match(source, /updatePartyMemberHealthRegeneration\(member, now\)/, 'battle ticks apply equipped health regeneration');
+assert.match(source, /const hpRecovery = Math\.ceil\(\(attacker\.maxHp \|\| 0\) \* \(attackerStats\.killHealthRecoveryPercent \|\| 0\)\)[\s\S]*attacker\.currentHp = Math\.min\(attacker\.maxHp, attacker\.currentHp \+ hpRecovery\)/, 'kill health recovery heals only the living character credited with the kill');
+assert.match(source, /const resourceRecovery = Math\.ceil\(\(attacker\.resourceMax \|\| 0\) \* \(attackerStats\.killResourceRecoveryPercent \|\| 0\)\)/, 'kill resource recovery remains an independent kill trigger');
 assert.match(source, /skill\.id === 'fireball'\) hits\.forEach[\s\S]*applyDot\(target\.index, 'burn'/, 'fireball inherently applies burn on hit');
 assert.doesNotMatch(source, /hasEquippedSpecialAbility\(member\.equipment, 'mage_fireball_burn'\)/, 'fireball burn does not depend on equipment');
 assert.match(source, /EquipmentAffixPolicy\.formatAffix\(entry\)/, 'inventory, comparison and worn views share the affix text renderer');
