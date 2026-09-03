@@ -42,7 +42,7 @@ function makePlayer(job) {
   const defense = Math.round((b.defense + 1 + 5 + a.defense) * 1.60 * 1.05);
   const attack = Math.round((b.attack + 29 + (w.min + w.max) / 2) * 1.05 * (1 + passive('weaponDamage')));
   const resourceMax = job === 'warrior' || job === 'assassin' ? 100 : job === 'hunter' ? 8 : Math.round((b.mana + 5 + 29 * 6 + a.mana + (w.mana || 0)) * 1.05);
-  return { job, weapon: w, maxHp: hp, hp, defense, attack, crit: b.crit + passive('crit'), dodge: b.dodge + (['assassin', 'hunter'].includes(job) ? .08 : 0) + passive('dodge'), parry: (job === 'warrior' ? .08 : 0) + passive('parry'), dr: job === 'warrior' ? .03 : 0, speed: w.speed * 1.08 * (1 + passive('attackSpeed')), resourceMax, resource: resourceMax, manaRegenFlat: a.manaRegenFlat || 0, hpRegen: a.hpRegen || 0, alive: true, basicAt: 0, globalAt: 0, skillAt: {}, totalDamage: 0, taken: 0, healing: 0, shield: 0, hunterCount: 0, effectiveHealCount: 0, blinkAt: 0, manaShieldAt: 0, protectionAt: 0, graceUntil: 0, deathAt: null };
+  return { job, weapon: w, maxHp: hp, hp, defense, attack, crit: b.crit + passive('crit'), dodge: b.dodge + (['assassin', 'hunter'].includes(job) ? .08 : 0) + passive('dodge'), parry: (job === 'warrior' ? .08 : 0) + passive('parry'), dr: job === 'warrior' ? .03 : 0, speed: w.speed * 1.08 * (1 + passive('attackSpeed')), resourceMax, resource: resourceMax, manaRegenFlat: a.manaRegenFlat || 0, hpRegen: a.hpRegen || 0, alive: true, basicAt: 0, globalAt: 0, skillAt: {}, totalDamage: 0, taken: 0, targeted: 0, healing: 0, shield: 0, hunterCount: 0, effectiveHealCount: 0, blinkAt: 0, manaShieldAt: 0, protectionAt: 0, graceUntil: 0, deathAt: null };
 }
 function makeEnemy(t, now, serial, initial = false) { return { ...t, maxHp: t.hp, currentHp: t.hp, attackAt: now + 1 / t.speed, skillAt: now + t.skillCooldown, spawnedAt: now, serial, initial, respawnAt: null, stunnedUntil: 0, slowUntil: 0, slow: 0, attackDownUntil: 0, attackDown: 0 }; }
 function alivePlayers(ps) { return ps.filter(p => p.alive); }
@@ -101,14 +101,24 @@ function basic(p, enemies, now, random) {
   const graceSpeed = now < p.graceUntil ? 1 + Skills.getEffect('priest', 'light-grace', 1).attackSpeed : 1;
   p.basicAt = now + 1 / (p.speed * graceSpeed);
 }
-function enemyActions(party, enemies, now, random) {
+function chooseWeightedTarget(party, random, warriorWeight) {
+  const targets = alivePlayers(party);
+  const total = targets.reduce((sum, target) => sum + (target.job === 'warrior' ? warriorWeight : 1), 0);
+  let roll = random() * total;
+  for (const target of targets) {
+    roll -= target.job === 'warrior' ? warriorWeight : 1;
+    if (roll < 0) return target;
+  }
+  return targets[targets.length - 1];
+}
+function enemyActions(party, enemies, now, random, warriorWeight) {
   for (const e of aliveEnemies(enemies)) {
     if (now + 1e-9 < e.attackAt) continue;
     if (now < e.stunnedUntil) { e.attackAt = now + .25; continue; }
     const slowMultiplier = now < e.slowUntil ? 1 - e.slow : 1;
-    e.attackAt = now + 1 / (e.speed * slowMultiplier); const targets = alivePlayers(party); if (!targets.length) return;
-    // Formal generic targeting: every living party member has equal probability; there is no tank threat table.
-    const p = targets[Math.floor(random() * targets.length)]; let raw = e.attack * (now < e.attackDownUntil ? 1 - e.attackDown : 1);
+    e.attackAt = now + 1 / (e.speed * slowMultiplier); if (!alivePlayers(party).length) return;
+    // TEST-only weighted random selection. warriorWeight=1 reproduces the formal equal-weight path.
+    const p = chooseWeightedTarget(party, random, warriorWeight); p.targeted++; let raw = e.attack * (now < e.attackDownUntil ? 1 - e.attackDown : 1);
     if (now >= e.skillAt) { raw *= e.skillMultiplier; e.skillAt = now + e.skillCooldown; }
     if (random() >= Math.max(.45, Math.min(.99, .898 - p.dodge))) continue;
     if (p.job === 'mage' && now >= p.blinkAt && random() < Skills.getEffect('mage', 'blink', 1).chance) { p.blinkAt = now + 10; continue; }
@@ -127,7 +137,7 @@ function ticks(party, enemies, now) {
   enemies.forEach(e => { if (e.dot && e.currentHp > 0 && now + 1e-9 >= e.dot.next) { e.currentHp -= e.dot.damage; e.dot.owner.totalDamage += e.dot.damage; e.dot.ticks--; e.dot.next++; if (!e.dot.ticks) e.dot = null; } });
   alivePlayers(party).forEach(p => { if (p.bleed && now + 1e-9 >= p.bleed.next) { p.hp -= p.bleed.damage; p.taken += p.bleed.damage; p.bleed.ticks--; p.bleed.next++; if (!p.bleed.ticks) p.bleed = null; if (p.hp <= 0) { p.hp = 0; p.alive = false; p.deathAt = now; } } });
 }
-function simulate(jobs, seed) {
+function simulate(jobs, seed, warriorWeight) {
   const random = rng(seed), party = jobs.map(makePlayer); let serial = 5;
   const templates = [...POOL, POOL[Math.floor(random() * 4)]];
   let enemies = templates.map((t, i) => makeEnemy(t, 0, i, true)), kills = 0, initialKills = 0, firstClearAt = null;
@@ -136,7 +146,7 @@ function simulate(jobs, seed) {
     alivePlayers(party).forEach(p => { regen(p); if (p.hpRegen && p.hp < p.maxHp) { const h = Math.min(p.maxHp - p.hp, p.hpRegen * DT); p.hp += h; p.healing += h; } });
     ticks(party, enemies, now);
     alivePlayers(party).forEach(p => { cast(p, party, enemies, now, random); basic(p, enemies, now, random); });
-    enemyActions(party, enemies, now, random);
+    enemyActions(party, enemies, now, random, warriorWeight);
     enemies.forEach((e, i) => {
       if (e.currentHp <= 0 && e.respawnAt === null) { kills++; if (e.initial) initialKills++; e.respawnAt = now + 2; }
       if (e.respawnAt !== null && e.respawnAt <= now) enemies[i] = makeEnemy(POOL[Math.floor(random() * 4)], now, serial++);
@@ -146,14 +156,18 @@ function simulate(jobs, seed) {
   }
   return { survived: true, time: DURATION, kills, firstClearAt, party };
 }
-function summarize(name, jobs) {
-  const samples = Array.from({ length: RUNS }, (_, i) => simulate(jobs, 0x31c0de + i * 104729 + name.charCodeAt(0)));
+function summarize(name, jobs, warriorWeight) {
+  const samples = Array.from({ length: RUNS }, (_, i) => simulate(jobs, 0x31c0de + i * 104729 + name.charCodeAt(0), warriorWeight));
   const totalTime = samples.reduce((n, s) => n + s.time, 0), survivors = samples.filter(s => s.survived), clears = samples.filter(s => s.firstClearAt !== null);
+  const partyDamageTaken = samples.reduce((sum, sample) => sum + sample.party.reduce((n, member) => n + member.taken, 0), 0);
+  const partyTargetSelections = samples.reduce((sum, sample) => sum + sample.party.reduce((n, member) => n + member.targeted, 0), 0);
   const members = jobs.map((job, index) => {
     const all = samples.map(s => s.party[index]);
-    return { job, weapon: WEAPONS[job].name, dps: all.reduce((n, p) => n + p.totalDamage, 0) / totalTime, damageTakenPerMinute: all.reduce((n, p) => n + p.taken, 0) / totalTime * 60, healingPerMinute: all.reduce((n, p) => n + p.healing, 0) / totalTime * 60, deathRate: all.filter(p => !p.alive).length / RUNS, averageEndHp: all.reduce((n, p) => n + p.hp, 0) / RUNS };
+    const deaths = all.filter(p => p.deathAt !== null);
+    const taken = all.reduce((n, p) => n + p.taken, 0);
+    return { job, weapon: WEAPONS[job].name, dps: all.reduce((n, p) => n + p.totalDamage, 0) / totalTime, targetSelectionShare: all.reduce((n, p) => n + p.targeted, 0) / partyTargetSelections, damageTakenPerMinute: taken / totalTime * 60, damageTakenShare: taken / partyDamageTaken, healingPerMinute: all.reduce((n, p) => n + p.healing, 0) / totalTime * 60, deathRate: deaths.length / RUNS, averageDeathSeconds: deaths.reduce((n, p) => n + p.deathAt, 0) / Math.max(1, deaths.length), averageEndHp: all.reduce((n, p) => n + p.hp, 0) / RUNS };
   });
-  return { party: name, jobs, runs: RUNS, survivalRate: survivors.length / RUNS, averageWipeSeconds: samples.filter(s => !s.survived).reduce((n, s) => n + s.time, 0) / Math.max(1, RUNS - survivors.length), killsPerMinute: samples.reduce((n, s) => n + s.kills, 0) / totalTime * 60, teamDps: members.reduce((n, m) => n + m.dps, 0), fiveMonsterClearRate: clears.length / RUNS, averageFiveMonsterClearSeconds: clears.reduce((n, s) => n + s.firstClearAt, 0) / Math.max(1, clears.length), members };
+  return { party: name, jobs, runs: RUNS, targetWeights: { warrior: warriorWeight, others: 1 }, theoreticalWarriorTargetRateWithFourAlive: warriorWeight / (warriorWeight + 3), survivalRate: survivors.length / RUNS, averageWipeSeconds: samples.filter(s => !s.survived).reduce((n, s) => n + s.time, 0) / Math.max(1, RUNS - survivors.length), killsPerMinute: samples.reduce((n, s) => n + s.kills, 0) / totalTime * 60, teamDps: members.reduce((n, m) => n + m.dps, 0), fiveMonsterClearRate: clears.length / RUNS, averageFiveMonsterClearSeconds: clears.reduce((n, s) => n + s.firstClearAt, 0) / Math.max(1, clears.length), members };
 }
 
-process.stdout.write(`${JSON.stringify({ test: 'Chapter 3-1 TEST V1 party round 2', mode: 'normal monsters / no suppression / no potions', targeting: { players: 'oldest living front enemy', monsters: 'uniform random living party member', specialLowestHpTargeting: false }, parties: Object.entries(PARTIES).map(([name, jobs]) => summarize(name, jobs)) }, null, 2)}\n`);
+process.stdout.write(`${JSON.stringify({ test: 'Chapter 3-1 TEST V1 target-weight comparison', mode: 'normal monsters / no suppression / no potions / unchanged monster stats and priest AI', targeting: { players: 'oldest living front enemy', monsters: 'weighted random living party member', specialLowestHpTargeting: false, formalSystemModified: false }, comparisons: [1, 3].map(warriorWeight => ({ warriorWeight, parties: Object.entries(PARTIES).map(([name, jobs]) => summarize(name, jobs, warriorWeight)) })) }, null, 2)}\n`);
