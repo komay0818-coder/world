@@ -228,7 +228,13 @@ function proportionalStage(cleared, total, baseDrain = 10, basePenalty = .10) {
   return { id: `${cleared}/${total}`, progress: cleared, total, completion, drain: baseDrain * (1 - completion), penalty: basePenalty * (1 - completion), preserveFraction: true };
 }
 
-if (process.argv.includes('--proportional-suppression-comparison')) {
+if (process.argv.includes('--chapter-32-suppression-candidates')) {
+  const candidates = [10, 12, 15, 18];
+  const b1 = candidates.flatMap(base => Object.entries(PARTIES).map(([name, jobs]) => summarize(name, jobs, 3, 'B', { ...proportionalStage(0, 15, base, base / 100), id: `S${base} 0/15` }, 0, 1, .02, true)));
+  const b2 = candidates.filter(base => base !== 10).flatMap(base => Object.entries(PARTIES).map(([name, jobs]) => summarize(name, jobs, 3, 'B', { ...proportionalStage(0, 15, base, base / 100), id: `S${base} 0/15` }, 0, 2, .02, true)));
+  const cells = [...b1, ...b2];
+  process.stdout.write(`${JSON.stringify({ test: 'Chapter 3-2 total suppression candidates', runs: RUNS, monsters: 'unchanged Chapter 3-1 TEST V1', totalFacilities: 15, fixedGear: ['B1-R0', 'B2-R0'], targetWeights: { warrior: 3, others: 1 }, cells: process.argv.includes('--compact') ? cells.map(compactCell) : cells }, null, 2)}\n`);
+} else if (process.argv.includes('--proportional-suppression-comparison')) {
   const points = [{ cleared: 0, total: 10 }, { cleared: 2, total: 10 }, { cleared: 8, total: 10 }, { cleared: 10, total: 10 }];
   const cells = points.flatMap(point => Object.entries(PARTIES).map(([name, jobs]) => summarize(name, jobs, 3, 'B', proportionalStage(point.cleared, point.total), 0, 1, .02, true)));
   process.stdout.write(`${JSON.stringify({ test: 'Chapter 3 exact proportional suppression comparison', runs: RUNS, fixedGear: 'B1-R0', cells: process.argv.includes('--compact') ? cells.map(compactCell) : cells }, null, 2)}\n`);
