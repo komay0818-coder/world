@@ -1030,6 +1030,13 @@ function getProgress() {
     saved.chapterThreeEpicCraftedTemplateMigrationVersion = 'chapter3-epic-crafted-template-v1';
     localStorage.setItem('stardust-progress', JSON.stringify(saved));
   }
+  if (saved.chapterThreeSpecialEquipmentTemplateMigrationVersion !== 'chapter3-special-equipment-template-v1') {
+    saved.inventory = (Array.isArray(saved.inventory) ? saved.inventory : []).map(ChapterThreeSpecialEquipmentPolicy.upgradeSpecialEquipmentInstance);
+    saved.equipment = Object.fromEntries(Object.entries(saved.equipment || {})
+      .map(([slot, item]) => [slot, ChapterThreeSpecialEquipmentPolicy.upgradeSpecialEquipmentInstance(item)]));
+    saved.chapterThreeSpecialEquipmentTemplateMigrationVersion = 'chapter3-special-equipment-template-v1';
+    localStorage.setItem('stardust-progress', JSON.stringify(saved));
+  }
   if (saved.equipmentDropMigrationVersion !== 'equipment-drop-v1') {
     saved.inventory = Array.isArray(saved.inventory) ? saved.inventory : [];
     saved.equipmentDropMigrationVersion = 'equipment-drop-v1';
@@ -1702,7 +1709,7 @@ function claimOfflineRewards() {
       maxHp: stats.hp,
       currentHp: Number.isFinite(savedHp) ? Math.max(0, Math.min(stats.hp, savedHp)) : stats.hp,
       attack: stats.attack,
-      defense: stats.defense,
+      defense: Math.round(stats.defense * ChapterThreeSpecialEquipmentPolicy.getDefenseMultiplier(getMainBattleMember(), now)),
       damageReduction: stats.damageReduction,
       attackSpeed: stats.attackSpeed,
       hpRegeneration: stats.hpRegeneration,
@@ -4440,7 +4447,8 @@ function applyDamageToMonster(index, baseDamage, profile, options = {}) {
   const lightningResonanceMultiplier = elementalMastery?.resonance && now < (skillState.paralyzedUntil || 0) && options.attackKind !== 'resonance' && Math.random() < .1 ? 1.3 : 1;
   const conditionalDamageMultiplier = Number(options.conditionalDamageMultiplier) || ConditionalDamagePolicy.getDamageMultiplier({ currentHp: attacker?.currentHp, maxHp: attacker?.maxHp, lowHealthDamagePercent: attackerStats.lowHealthDamagePercent, highHealthDamagePercent: attackerStats.highHealthDamagePercent, attackKind: options.attackKind });
   const craftedEpicMultiplier = ChapterThreeCraftedEpicAbilityPolicy.getOutgoingDamageMultiplier(attacker, options.attackKind, { execution: options.craftedEpicExecution }, now);
-  const adjustedBaseDamage = magicAdjustedDamage * (1 + (attackerStats.damageBonus || 0)) * rankMultiplier * attackKindMultiplier * conditionalDamageMultiplier * craftedEpicMultiplier * markMultiplier * vulnerabilityMultiplier * controlledMultiplier * statusElementMultiplier * frostResonanceMultiplier * lightningResonanceMultiplier;
+  const specialEquipmentMultiplier = Math.max(0, Number(options.specialEquipmentMultiplier) || 1);
+  const adjustedBaseDamage = magicAdjustedDamage * (1 + (attackerStats.damageBonus || 0)) * rankMultiplier * attackKindMultiplier * conditionalDamageMultiplier * craftedEpicMultiplier * specialEquipmentMultiplier * markMultiplier * vulnerabilityMultiplier * controlledMultiplier * statusElementMultiplier * frostResonanceMultiplier * lightningResonanceMultiplier;
   if (enemy.mapId) {
     const hitChance = ChapterOneLevelPolicy.getPlayerHitChance(progress.level, enemy.level, attackerStats.accuracy, 0);
     if (Math.random() >= hitChance) {
@@ -4635,10 +4643,13 @@ function useAutoSkillForMember(member, now = Date.now()) {
       const faith = ClassSkillPolicy.getEffect('priest', 'holy-faith', Number(progress.skillLevels?.['priest:holy-faith']) || 1);
       if (faith.faith) { member.faithStacks = Math.min(3, (member.faithStacks || 0) + 1); member.faithUntil = now + 6000; }
     }
+    const resourceBeforeSkillCost = member.resourceCurrent;
     member.resourceCurrent = member.resourceType === 'arrows'
       ? HunterArrowPolicy.spendArrows(member.resourceCurrent, skill.id, progress.equipment)
       : Math.max(0, member.resourceCurrent - cost);
+    const actualResourceSpent = Math.max(0, resourceBeforeSkillCost - member.resourceCurrent);
     ChapterThreeCraftedEpicAbilityPolicy.completeSkillExecution(member, craftedEpicExecution, now);
+    if (skill.id !== 'companion') ChapterThreeSpecialEquipmentPolicy.resolveManaSurge(member, actualResourceSpent, Math.random);
     CriticalResourceRecoveryPolicy.resolveExecution(member, {
       attackKind: skill.id === 'companion' ? 'companion' : 'skill',
       critical,
@@ -4898,7 +4909,9 @@ function processPartyMemberAttacks(now = Date.now()) {
     const hunterInstinct = member.job === 'hunter' && member.level >= 20 ? getHunterInstinctEffect(member.progress) : null;
     member.hunterAttackCount += 1;
     const instinctTriggered = Boolean(hunterInstinct && member.hunterAttackCount % hunterInstinct.interval === 0);
-    const critical = instinctTriggered && hunterInstinct.guaranteedCrit ? true : Math.random() < Math.min(.95, member.stats.crit + (desperate?.crit || 0));
+    const basicTargetKey = `${battle.enemyTypes[targetIndex]}:${battle.enemySpawnedAt[targetIndex]}:${targetIndex}`;
+    const specialBasicExecution = ChapterThreeSpecialEquipmentPolicy.beginMainHandBasicAttack(member, basicTargetKey);
+    const critical = specialBasicExecution.guaranteedCritical || (instinctTriggered && hunterInstinct.guaranteedCrit ? true : Math.random() < Math.min(.95, member.stats.crit + (desperate?.crit || 0)));
     const temporaryBasicBonus = (now < (member.skillHasteUntil || 0) ? member.skillBasicDamageBonus || 0 : 0) + (member.nextBasicDamageBonus || 0) + (member.nextHunterAttackBonus || 0) + (desperate?.attack || 0);
     const baseHit = Math.max(1, Math.ceil(attackWithWeaponRoll * (1 + temporaryBasicBonus) * (orcRage ? 1.10 : 1) * (critical ? member.stats.criticalDamageMultiplier : 1)));
     member.nextBasicDamageBonus = 0;
@@ -4906,8 +4919,9 @@ function processPartyMemberAttacks(now = Date.now()) {
     const hit = Math.max(1, Math.ceil(baseHit * (instinctTriggered ? hunterInstinct.power : 1)));
     const enemy = getEnemyDefinition(targetIndex);
     const profile = getPlayerAttackProfile(member.character);
-    const result = applyDamageToMonster(targetIndex, hit * getRuneOutgoingMultiplier(member, targetIndex), profile, { attacker: member, attackKind: 'basic' });
+    const result = applyDamageToMonster(targetIndex, hit * getRuneOutgoingMultiplier(member, targetIndex), profile, { attacker: member, attackKind: 'basic', specialEquipmentMultiplier: specialBasicExecution.damageMultiplier });
     playPartyMemberCombatAnimation(member, [targetIndex], { kind: 'basic' });
+    ChapterThreeSpecialEquipmentPolicy.completeMainHandBasicAttack(member, specialBasicExecution, !result.evaded && result.finalDamage > 0, battle.enemyHps[targetIndex] > 0);
     if (!result.evaded) {
       triggerRuneFrenzy(member, critical, now);
       const swiftness = ChapterTwoSpecialEquipmentPolicy.rollCorruptedSwiftness(member.progress.equipment);
@@ -5199,6 +5213,7 @@ function legacyEnemyAttackTick() {
     if (mainMember) {
       mainMember.currentHp = battle.playerHp;
       resolveEnemyDirectHitRecovery(mainMember, enemyHit, stats);
+      ChapterThreeSpecialEquipmentPolicy.resolveEnemyAttackOutcome(mainMember, { actualDamage: enemyHit, parried, dodged }, now);
       battle.playerHp = mainMember.currentHp;
     }
     if (!dodged && WarriorResourcePolicy.isWarrior(character.job)) {
@@ -5503,6 +5518,7 @@ function endBattleAfterPlayerDefeat(now = Date.now()) {
   battle.dungeonComplete = true;
   (battle.partyMembers || []).forEach((member) => {
     ChapterThreeCraftedEpicAbilityPolicy.clear(member);
+    ChapterThreeSpecialEquipmentPolicy.clearCombatState(member);
     member.currentHp = member.maxHp;
     member.resourceCurrent = member.resourceType === 'rage' ? 0 : getMaxCombatResourceForMember(member.character, member.progress);
     member.shield = 0;
@@ -5538,6 +5554,7 @@ function defeatPartyMember(member, now = Date.now()) {
   }
   member.currentHp = 0;
   ChapterThreeCraftedEpicAbilityPolicy.clear(member);
+  ChapterThreeSpecialEquipmentPolicy.clearCombatState(member);
   member.alive = false;
   member.targetIndex = -1;
   member.bleed = null;
@@ -5590,6 +5607,7 @@ function resetPartyAfterDefeat(now = Date.now()) {
   });
   battle.partyMembers.forEach(member => {
     ChapterThreeCraftedEpicAbilityPolicy.clear(member);
+    ChapterThreeSpecialEquipmentPolicy.clearCombatState(member);
     member.currentHp = member.maxHp;
     member.resourceCurrent = member.resourceType === 'rage' ? 0 : getMaxCombatResourceForMember(member.character, member.progress);
     member.shield = 0;
@@ -5738,10 +5756,12 @@ function enemyAttackTick() {
       ? ChapterOneLevelPolicy.getMonsterHitChance(enemy.level, target.level, Math.min(.9, stats.dodge + transientDodge))
       : 1 - Math.min(.9, stats.dodge + transientDodge);
     let dodged = Math.random() >= monsterHitChance;
+    let blinkDodged = false;
     if (!dodged && target.job === 'mage' && target.level >= 8) {
       const blink = ClassSkillPolicy.getEffect('mage', 'blink', Number(target.progress.skillLevels?.['mage:blink']) || 1);
       if (now >= (target.blinkReadyAt || 0) && Math.random() < blink.chance) {
         dodged = true;
+        blinkDodged = true;
         target.blinkReadyAt = now + (blink.internalCooldown || 10) * 1000;
         target.blinkCooldownReduction = blink.nextCooldownReduction || 0;
         logBattle(`💨 ${target.name}觸發【閃現】，完全避開攻擊！`, 'system');
@@ -5877,7 +5897,7 @@ function enemyAttackTick() {
     const runeUnyieldingReduction = now < (target.runeUnyieldingUntil || 0) ? .20 : 0;
     let damage = dodged ? 0 : MonsterDefense.resolvePlayerDamage({
       baseDamage: rawDamage,
-      defense: Math.max(0, Math.round(stats.defense * armorBreakMultiplier * spiderNestArmorMultiplier * piercingMultiplier)),
+      defense: Math.max(0, Math.round(stats.defense * ChapterThreeSpecialEquipmentPolicy.getDefenseMultiplier(target, now) * armorBreakMultiplier * spiderNestArmorMultiplier * piercingMultiplier)),
       damageReduction: Math.min(.9, stats.damageReduction
         + ChapterTwoSpecialEquipmentPolicy.getIncomingDamageReduction(target.progress.equipment, target.currentHp / target.maxHp)
         + ChapterThreeCraftedEpicAbilityPolicy.getWastelandDamageReduction(target, now)
@@ -5890,6 +5910,7 @@ function enemyAttackTick() {
     damage -= absorbed;
     target.currentHp = Math.max(0, target.currentHp - damage);
     resolveEnemyDirectHitRecovery(target, damage, stats);
+    ChapterThreeSpecialEquipmentPolicy.resolveEnemyAttackOutcome(target, { actualDamage: damage, parried, dodged: dodged && !blinkDodged }, now);
     const directDamageLeech = EliteAffixPolicy.getDirectDamageLeech(enemy.eliteAffixes);
     if (damage > 0 && directDamageLeech > 0) {
       const restored = Math.min(Math.max(1, Math.floor(damage * directDamageLeech)), enemy.maxHp - battle.enemyHps[enemyIndex]);

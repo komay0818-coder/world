@@ -9,14 +9,14 @@ const appCss = fs.readFileSync(path.join(__dirname, '..', 'style.css'), 'utf8');
 
 assert.match(html, /equipment-affix-policy\.js/, 'affix policy loads before the main game script');
 assert.match(html, /href="style\.css\?v=20260822-inventory-image-containment-v1"/, 'the affix UI stylesheet loads from the same deployed revision');
-assert.match(html, /equipment-affix-policy\.js\?v=20260903-control-resistance-v1/, 'the affix formatter uses the current local build');
+assert.match(html, /equipment-affix-policy\.js\?v=20260903-special-epic-v1/, 'the affix formatter uses the current local build');
 assert.match(html, /armor-penetration-policy\.js\?v=20260903-armor-penetration-v1/, 'armor penetration policy loads before the main game script');
 assert.match(html, /conditional-damage-policy\.js\?v=20260903-conditional-damage-v1/, 'conditional damage policy loads before the main game script');
 assert.match(html, /critical-resource-recovery-policy\.js\?v=20260903-critical-resource-recovery-v1/, 'critical resource recovery policy loads before the main game script');
 assert.match(html, /direct-hit-health-recovery-policy\.js\?v=20260903-direct-hit-health-recovery-v1/, 'direct-hit health recovery policy loads before the main game script');
 assert.match(html, /chapter-three-crafted-epic-ability-policy\.js\?v=20260903-chapter3-crafted-epic-v1/, 'crafted epic ability policy loads before the main game script');
 assert.match(html, /control-effect-policy\.js\?v=20260903-control-resistance-v1/, 'the shared player control policy loads before the main game script');
-assert.match(html, /script\.js\?v=20260903-chapter3-crafted-epic-v1/, 'the affix UI renderer uses the current local build');
+assert.match(html, /script\.js\?v=20260903-special-epic-v1/, 'the affix UI renderer uses the current local build');
 assert.match(source, /equipmentAffixMigrationVersion !== 'green-affix-v1'/, 'legacy saves receive the affix compatibility migration');
 assert.match(source, /EquipmentAffixPolicy\.normalizeEquipment\(item\)/, 'inventory and equipped items are normalized on load');
 assert.match(source, /EquipmentAffixPolicy\.getEquippedAffixStats\(progress\.equipment\)/, 'stats read only the equipped item collection');
@@ -54,6 +54,9 @@ assert.match(source, /EquipmentAffixPolicy\.formatAffix\(entry\)/, 'inventory, c
 assert.match(source, /chapterTwoCraftedBaseStatsMigrationVersion !== 'chapter2-crafted-base-stats-v1'/, 'existing chapter-two crafted instances receive their template base stats once');
 assert.match(source, /chapterThreeBlueCraftedBaseStatsMigrationVersion !== 'chapter3-blue-crafted-base-stats-v1'/, 'existing chapter-three blue crafted instances receive finalized template base stats once');
 assert.match(source, /chapterThreeEpicCraftedTemplateMigrationVersion !== 'chapter3-epic-crafted-template-v1'/, 'existing chapter-three epic crafted instances receive the finalized template once');
+assert.match(source, /chapterThreeSpecialEquipmentTemplateMigrationVersion !== 'chapter3-special-equipment-template-v1'/, 'existing chapter-three monster epic instances receive the finalized template once');
+assert.match(source, /specialBasicExecution\.guaranteedCritical \|\|[\s\S]*CriticalResourceRecoveryPolicy\.resolveExecution\(member, \{ attackKind: 'basic', critical, hadDirectHit: true/, 'runemark afterimage enters the formal critical path and its result reaches critical recovery');
+assert.match(source, /resourceBeforeSkillCost = member\.resourceCurrent[\s\S]*actualResourceSpent = Math\.max\(0, resourceBeforeSkillCost - member\.resourceCurrent\)[\s\S]*resolveManaSurge\(member, actualResourceSpent/, 'mana surge reads the actual resource delta once per successful skill execution');
 assert.match(source, /const craftedEpicExecution = ChapterThreeCraftedEpicAbilityPolicy\.beginSkillExecution\(member, now, \{ eligible: skill\.id !== 'companion' \}\)[\s\S]*targets\.map[\s\S]*craftedEpicExecution/, 'a multi-target skill shares one crafted epic execution snapshot and companion skills are excluded');
 assert.match(source, /ChapterThreeCraftedEpicAbilityPolicy\.completeSkillExecution\(member, craftedEpicExecution, now\)/, 'only a validated successful active-skill execution advances crafted epic states');
 assert.match(source, /ChapterThreeCraftedEpicAbilityPolicy\.getWastelandDamageReduction\(target, now\)[\s\S]*target\.currentHp = Math\.max\(0, target\.currentHp - damage\);[\s\S]*resolveEnemyDirectHitRecovery\(target, damage, stats\)/, 'wasteland resilience reduces the next hit before that direct hit adds or refreshes a stack');
