@@ -229,13 +229,23 @@ function summarize(name, jobs, warriorWeight, gearId, stage, regenAffixCount = n
 function compactCell(cell) {
   return { party: cell.party, stage: cell.stage, suppression: cell.suppression, monsterPool: cell.monsterPool, damageByEnemy: cell.damageByEnemy, killHealAffixCount: cell.killHealAffixCount, killHealPerAffix: cell.killHealPerAffix, fullPartySurvivalRate: cell.fullPartySurvivalRate, survivalRate: cell.survivalRate, averageWipeSeconds: cell.averageWipeSeconds, survivorPartyHpPercent: cell.survivorPartyHpPercent, teamDps: cell.teamDps, killsPerMinute: cell.killsPerMinute, members: cell.members.map(member => ({ job: member.job, deathRate: member.deathRate, averageDeathSeconds: member.averageDeathSeconds, averageEndHpPercent: member.averageEndHpPercent, killHealingPerMinute: member.killHealingPerMinute, priestHealingPerMinute: member.priestHealingPerMinute, damageTakenPerMinute: member.damageTakenPerMinute })) };
 }
+function curveCell(cell) {
+  return { party: cell.party, stage: cell.stage, killHealAffixCount: cell.killHealAffixCount, fullPartySurvivalRate: cell.fullPartySurvivalRate, survivalRate: cell.survivalRate, averageWipeSeconds: cell.averageWipeSeconds, survivorPartyHpPercent: cell.survivorPartyHpPercent, teamDps: cell.teamDps, killsPerMinute: cell.killsPerMinute, priestHealingPerMinute: cell.members.find(member => member.job === 'priest')?.priestHealingPerMinute || 0, teamKillHealingPerMinute: cell.members.reduce((sum, member) => sum + member.killHealingPerMinute, 0), deathRates: Object.fromEntries(cell.members.map(member => [member.job, member.deathRate])) };
+}
 
 function proportionalStage(cleared, total, baseDrain = 10, basePenalty = .10) {
   const completion = Math.max(0, Math.min(1, cleared / total));
   return { id: `${cleared}/${total}`, progress: cleared, total, completion, drain: baseDrain * (1 - completion), penalty: basePenalty * (1 - completion), preserveFraction: true };
 }
 
-if (process.argv.includes('--chapter-32-monsters-v1')) {
+if (process.argv.includes('--chapter-32-suppression-curve')) {
+  const stages = [0, 2, 3, 5, 8, 12, 15].map(cleared => ({ ...proportionalStage(cleared, 15, 12, .12), id: `${cleared}/15` }));
+  const gearArg = process.argv.find(value => value.startsWith('--gear='));
+  const gearCounts = gearArg ? [Number(gearArg.split('=')[1])] : [1, 2];
+  const cells = gearCounts.flatMap(killHealAffixCount => stages.flatMap(stage => Object.entries(PARTIES).map(([name, jobs]) => summarize(name, jobs, 3, 'B', stage, 0, killHealAffixCount, .02, true, CHAPTER_32_POOL))));
+  const outputCells = process.argv.includes('--curve-summary') ? cells.map(curveCell) : process.argv.includes('--compact') ? cells.map(compactCell) : cells;
+  process.stdout.write(`${JSON.stringify({ test: 'Chapter 3-2 TEST V1 suppression curve', runs: RUNS, totalSuppression: 12, totalFacilities: 15, monsterPool: CHAPTER_32_POOL, fixedGear: gearCounts.map(count => `B${count}-R0`), cells: outputCells }, null, 2)}\n`);
+} else if (process.argv.includes('--chapter-32-monsters-v1')) {
   const stage = { ...proportionalStage(0, 15, 12, .12), id: 'S12 0/15' };
   const cells = [1, 2].flatMap(killHealAffixCount => Object.entries(PARTIES).map(([name, jobs]) => summarize(name, jobs, 3, 'B', stage, 0, killHealAffixCount, .02, true, CHAPTER_32_POOL)));
   process.stdout.write(`${JSON.stringify({ test: 'Chapter 3-2 normal monsters TEST V1', runs: RUNS, stage, monsterPool: CHAPTER_32_POOL, baselines: { spear: { source: '碎顱斥候', hpIncrease: .05, attackIncrease: .08, defenseIncrease: .05 }, warrior: { source: '赤岩蜥蜴', hpIncrease: .08, attackIncrease: .06, defenseIncrease: .08 } }, cells: process.argv.includes('--compact') ? cells.map(compactCell) : cells }, null, 2)}\n`);
