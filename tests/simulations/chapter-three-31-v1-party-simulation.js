@@ -10,6 +10,12 @@ const POOL = [
   { id: 'vulture', name: '荒原禿鷹', hp: 874, attack: 83, defense: 51, evasion: 16, parry: 0, dr: 8, speed: 1.10, skillMultiplier: 1.35, skillCooldown: 8 },
   { id: 'scout', name: '碎顱斥候', hp: 943, attack: 101, defense: 55, evasion: 8, parry: 8, dr: 10, speed: .95, skillMultiplier: 1.15, skillCooldown: 8 }
 ];
+const CHAPTER_32_POOL = [
+  POOL[0],
+  POOL[3],
+  { id: 'skull-spear', name: '碎顱投矛手', hp: 990, attack: 109, defense: 58, evasion: 8, parry: 0, dr: 8, speed: .95, skillMultiplier: 1.30, skillCooldown: 9 },
+  { id: 'skull-warrior', name: '碎顱戰士', hp: 1217, attack: 92, defense: 90, evasion: 3, parry: 10, dr: 18, speed: .72, skillMultiplier: 1.35, skillCooldown: 10 }
+];
 const WEAPONS = {
   warrior: { name: '斬木巨劍', min: 38, max: 50, speed: .78, range: 'melee', type: 'physical' },
   assassin: { name: '暗林短刃（單持）', min: 22, max: 29, speed: 1.55, range: 'melee', type: 'physical' },
@@ -77,7 +83,7 @@ function makePlayer(job, gearId = 'A', stageOrPenalty = 0, regenAffixCount = nul
   const basicDamage = Math.max(0, gear.basicDamage - Math.min(2, replacementCount) * .08);
   const skillDamage = Math.max(0, gear.skillDamage - (replacementCount >= 3 ? .08 : 0));
   const suppressedDefense = normalDefense * (1 - penalty);
-  return { job, gearId, weapon: w, maxHp: hp, hp, normalDefense, defense: typeof stageOrPenalty === 'object' && stageOrPenalty.preserveFraction ? suppressedDefense : Math.round(suppressedDefense), outgoing: 1 - penalty, attack, crit: b.crit + passive('crit') + gear.crit, dodge: Math.min(.45, b.dodge + (['assassin', 'hunter'].includes(job) ? .08 : 0) + passive('dodge') + gear.dodge + purpleDodge), parry: (job === 'warrior' ? .08 : 0) + passive('parry'), dr: job === 'warrior' ? .03 : 0, speed: w.speed * 1.08 * (1 + passive('attackSpeed')), resourceMax, resource: resourceMax, manaRegenFlat: (a.manaRegenFlat || 0) + (gearId === 'B' && ['mage', 'priest'].includes(job) ? 4 : 0), manaRegen: 1 + gear.manaRegen + (gearId === 'C' && ['mage', 'priest'].includes(job) ? .10 : 0), hpRegen: (a.hpRegen || 0) + affixRegen, skillDamage, basicDamage, damageBonus: purpleMagic, killHeal, killResource: gear.killResource, ironWall: gear.ironWall, cooldown: 1 + gear.cooldown, alive: true, basicAt: 0, globalAt: 0, skillAt: {}, totalDamage: 0, taken: 0, environment: 0, targeted: 0, healing: 0, regenerationHealing: 0, killHealing: 0, spellHealing: 0, shield: 0, hunterCount: 0, effectiveHealCount: 0, blinkAt: 0, manaShieldAt: 0, protectionAt: 0, graceUntil: 0, swiftUntil: 0, deathAt: null };
+  return { job, gearId, weapon: w, maxHp: hp, hp, normalDefense, defense: typeof stageOrPenalty === 'object' && stageOrPenalty.preserveFraction ? suppressedDefense : Math.round(suppressedDefense), outgoing: 1 - penalty, attack, crit: b.crit + passive('crit') + gear.crit, dodge: Math.min(.45, b.dodge + (['assassin', 'hunter'].includes(job) ? .08 : 0) + passive('dodge') + gear.dodge + purpleDodge), parry: (job === 'warrior' ? .08 : 0) + passive('parry'), dr: job === 'warrior' ? .03 : 0, speed: w.speed * 1.08 * (1 + passive('attackSpeed')), resourceMax, resource: resourceMax, manaRegenFlat: (a.manaRegenFlat || 0) + (gearId === 'B' && ['mage', 'priest'].includes(job) ? 4 : 0), manaRegen: 1 + gear.manaRegen + (gearId === 'C' && ['mage', 'priest'].includes(job) ? .10 : 0), hpRegen: (a.hpRegen || 0) + affixRegen, skillDamage, basicDamage, damageBonus: purpleMagic, killHeal, killResource: gear.killResource, ironWall: gear.ironWall, cooldown: 1 + gear.cooldown, alive: true, basicAt: 0, globalAt: 0, skillAt: {}, totalDamage: 0, taken: 0, damageTakenByEnemy: {}, environment: 0, targeted: 0, healing: 0, regenerationHealing: 0, killHealing: 0, spellHealing: 0, shield: 0, hunterCount: 0, effectiveHealCount: 0, blinkAt: 0, manaShieldAt: 0, protectionAt: 0, graceUntil: 0, swiftUntil: 0, deathAt: null };
 }
 function makeEnemy(t, now, serial, initial = false) { return { ...t, maxHp: t.hp, currentHp: t.hp, attackAt: now + 1 / t.speed, skillAt: now + t.skillCooldown, spawnedAt: now, serial, initial, respawnAt: null, stunnedUntil: 0, slowUntil: 0, slow: 0, attackDownUntil: 0, attackDown: 0 }; }
 function alivePlayers(ps) { return ps.filter(p => p.alive); }
@@ -169,8 +175,8 @@ function enemyActions(party, enemies, now, random, warriorWeight) {
     if (random() < p.parry) damage = Math.max(1, Math.ceil(damage * .5));
     if (p.ironWall && random() < .15) damage = Math.max(1, Math.ceil(damage * .80));
     if (p.gearId === 'C' && p.job === 'warrior' && p.hp / p.maxHp < .30) damage = Math.max(1, Math.ceil(damage * .85));
-    const absorbed = Math.min(p.shield, damage); p.shield -= absorbed; damage -= absorbed; p.hp -= damage; p.taken += damage;
-    if (e.bleedRatio) p.bleed = { damage: Math.ceil(damage * e.bleedRatio), ticks: e.bleedDuration, next: now + 1 };
+    const absorbed = Math.min(p.shield, damage); p.shield -= absorbed; damage -= absorbed; p.hp -= damage; p.taken += damage; p.damageTakenByEnemy[e.id] = (p.damageTakenByEnemy[e.id] || 0) + damage;
+    if (e.bleedRatio) p.bleed = { damage: Math.ceil(damage * e.bleedRatio), ticks: e.bleedDuration, next: now + 1, sourceId: e.id };
     if (p.hp > 0 && p.hp / p.maxHp < .30 && p.job === 'mage' && now >= p.manaShieldAt) { const effect = Skills.getEffect('mage', 'mana-shield', 1), c = p.resourceMax * effect.manaCost; if (p.resource >= c) { p.resource -= c; p.shield += p.maxHp * effect.shield; p.manaShieldAt = now + effect.internalCooldown; } }
     if (p.hp > 0 && p.hp / p.maxHp < .30 && p.job === 'priest' && now >= p.protectionAt) { const effect = Skills.getEffect('priest', 'holy-protection', 1); p.shield += p.maxHp * effect.shield; p.protectionAt = now + effect.cooldown; }
     if (p.job === 'warrior') p.resource = Math.min(100, p.resource + 2.5);
@@ -180,11 +186,11 @@ function enemyActions(party, enemies, now, random, warriorWeight) {
 }
 function ticks(party, enemies, now) {
   enemies.forEach(e => { if (e.dot && e.currentHp > 0 && now + 1e-9 >= e.dot.next) { e.currentHp -= e.dot.damage; e.dot.owner.totalDamage += e.dot.damage; e.dot.ticks--; e.dot.next++; if (!e.dot.ticks) e.dot = null; } });
-  alivePlayers(party).forEach(p => { if (p.bleed && now + 1e-9 >= p.bleed.next) { p.hp -= p.bleed.damage; p.taken += p.bleed.damage; p.bleed.ticks--; p.bleed.next++; if (!p.bleed.ticks) p.bleed = null; if (p.hp <= 0) { p.hp = 0; p.alive = false; p.deathAt = now; } } });
+  alivePlayers(party).forEach(p => { if (p.bleed && now + 1e-9 >= p.bleed.next) { p.hp -= p.bleed.damage; p.taken += p.bleed.damage; p.damageTakenByEnemy[p.bleed.sourceId] = (p.damageTakenByEnemy[p.bleed.sourceId] || 0) + p.bleed.damage; p.bleed.ticks--; p.bleed.next++; if (!p.bleed.ticks) p.bleed = null; if (p.hp <= 0) { p.hp = 0; p.alive = false; p.deathAt = now; } } });
 }
-function simulate(jobs, seed, warriorWeight, gearId, stage, regenAffixCount = null, killHealAffixCount = null, killHealPerAffix = .03, applyKillHealOpportunityCost = false) {
+function simulate(jobs, seed, warriorWeight, gearId, stage, regenAffixCount = null, killHealAffixCount = null, killHealPerAffix = .03, applyKillHealOpportunityCost = false, monsterPool = POOL) {
   const random = rng(seed), party = jobs.map(job => makePlayer(job, gearId, stage, regenAffixCount, killHealAffixCount, killHealPerAffix, applyKillHealOpportunityCost)); let serial = 5;
-  const templates = [...POOL, POOL[Math.floor(random() * 4)]];
+  const templates = [...monsterPool, monsterPool[Math.floor(random() * monsterPool.length)]];
   let enemies = templates.map((t, i) => makeEnemy(t, 0, i, true)), kills = 0, initialKills = 0, firstClearAt = null;
   for (let step = 0; step < DURATION / DT; step++) {
     const now = step * DT;
@@ -198,15 +204,15 @@ function simulate(jobs, seed, warriorWeight, gearId, stage, regenAffixCount = nu
     enemyActions(party, enemies, now, random, warriorWeight);
     enemies.forEach((e, i) => {
       if (e.currentHp <= 0 && e.respawnAt === null) { kills++; if (e.initial) initialKills++; e.respawnAt = now + 2; }
-      if (e.respawnAt !== null && e.respawnAt <= now) enemies[i] = makeEnemy(POOL[Math.floor(random() * 4)], now, serial++);
+      if (e.respawnAt !== null && e.respawnAt <= now) enemies[i] = makeEnemy(monsterPool[Math.floor(random() * monsterPool.length)], now, serial++);
     });
     if (firstClearAt === null && initialKills === 5) firstClearAt = now;
     if (!alivePlayers(party).length) return { survived: false, time: now, kills, firstClearAt, party };
   }
   return { survived: true, time: DURATION, kills, firstClearAt, party };
 }
-function summarize(name, jobs, warriorWeight, gearId, stage, regenAffixCount = null, killHealAffixCount = null, killHealPerAffix = .03, applyKillHealOpportunityCost = false) {
-  const samples = Array.from({ length: RUNS }, (_, i) => simulate(jobs, 0x31c0de + i * 104729 + name.charCodeAt(0), warriorWeight, gearId, stage, regenAffixCount, killHealAffixCount, killHealPerAffix, applyKillHealOpportunityCost));
+function summarize(name, jobs, warriorWeight, gearId, stage, regenAffixCount = null, killHealAffixCount = null, killHealPerAffix = .03, applyKillHealOpportunityCost = false, monsterPool = POOL) {
+  const samples = Array.from({ length: RUNS }, (_, i) => simulate(jobs, 0x31c0de + i * 104729 + name.charCodeAt(0), warriorWeight, gearId, stage, regenAffixCount, killHealAffixCount, killHealPerAffix, applyKillHealOpportunityCost, monsterPool));
   const totalTime = samples.reduce((n, s) => n + s.time, 0), survivors = samples.filter(s => s.survived), clears = samples.filter(s => s.firstClearAt !== null);
   const fullPartySurvivors = samples.filter(s => s.party.every(member => member.alive));
   const partyDamageTaken = samples.reduce((sum, sample) => sum + sample.party.reduce((n, member) => n + member.taken, 0), 0);
@@ -217,10 +223,11 @@ function summarize(name, jobs, warriorWeight, gearId, stage, regenAffixCount = n
     const taken = all.reduce((n, p) => n + p.taken, 0);
     return { job, weapon: all[0].weapon.name, maxHp: all[0].maxHp, dps: all.reduce((n, p) => n + p.totalDamage, 0) / totalTime, targetSelectionShare: all.reduce((n, p) => n + p.targeted, 0) / partyTargetSelections, damageTakenPerMinute: taken / totalTime * 60, damageTakenShare: taken / partyDamageTaken, recoveryPerMinute: all.reduce((n, p) => n + p.healing, 0) / totalTime * 60, regenerationPerMinute: all.reduce((n, p) => n + p.regenerationHealing, 0) / totalTime * 60, killHealingPerMinute: all.reduce((n, p) => n + p.killHealing, 0) / totalTime * 60, priestHealingPerMinute: all.reduce((n, p) => n + p.spellHealing, 0) / totalTime * 60, deathRate: deaths.length / RUNS, averageDeathSeconds: deaths.reduce((n, p) => n + p.deathAt, 0) / Math.max(1, deaths.length), averageEndHp: all.reduce((n, p) => n + p.hp, 0) / RUNS, averageEndHpPercent: all.reduce((n, p) => n + p.hp / p.maxHp, 0) / RUNS };
   });
-  return { party: name, jobs, runs: RUNS, gear: gearId, regenAffixCount, killHealAffixCount, killHealPerAffix, applyKillHealOpportunityCost, stage: stage.id, suppression: { progress: stage.progress, total: stage.total, completion: stage.completion, drain: stage.drain, damagePenalty: stage.penalty, defensePenalty: stage.penalty }, targetWeights: { warrior: warriorWeight, others: 1 }, theoreticalWarriorTargetRateWithFourAlive: warriorWeight / (warriorWeight + 3), fullPartySurvivalRate: fullPartySurvivors.length / RUNS, survivalRate: survivors.length / RUNS, averageWipeSeconds: samples.filter(s => !s.survived).reduce((n, s) => n + s.time, 0) / Math.max(1, RUNS - survivors.length), averagePartyHpPercent: samples.reduce((n, s) => n + s.party.reduce((sum, p) => sum + p.hp, 0) / s.party.reduce((sum, p) => sum + p.maxHp, 0), 0) / RUNS, survivorPartyHp: survivors.length ? survivors.reduce((n, s) => n + s.party.reduce((sum, p) => sum + p.hp, 0), 0) / survivors.length : 0, survivorPartyHpPercent: survivors.length ? survivors.reduce((n, s) => n + s.party.reduce((sum, p) => sum + p.hp, 0) / s.party.reduce((sum, p) => sum + p.maxHp, 0), 0) / survivors.length : 0, killsPerMinute: samples.reduce((n, s) => n + s.kills, 0) / totalTime * 60, teamDps: members.reduce((n, m) => n + m.dps, 0), fiveMonsterClearRate: clears.length / RUNS, averageFiveMonsterClearSeconds: clears.reduce((n, s) => n + s.firstClearAt, 0) / Math.max(1, clears.length), members };
+  const damageByEnemy = Object.fromEntries(monsterPool.map(enemy => { const damage = samples.reduce((sum, sample) => sum + sample.party.reduce((partySum, member) => partySum + (member.damageTakenByEnemy[enemy.id] || 0), 0), 0); return [enemy.id, { name: enemy.name, damage, share: damage / Math.max(1, partyDamageTaken) }]; }));
+  return { party: name, jobs, runs: RUNS, gear: gearId, regenAffixCount, killHealAffixCount, killHealPerAffix, applyKillHealOpportunityCost, stage: stage.id, monsterPool: monsterPool.map(enemy => enemy.id), damageByEnemy, suppression: { progress: stage.progress, total: stage.total, completion: stage.completion, drain: stage.drain, damagePenalty: stage.penalty, defensePenalty: stage.penalty }, targetWeights: { warrior: warriorWeight, others: 1 }, theoreticalWarriorTargetRateWithFourAlive: warriorWeight / (warriorWeight + 3), fullPartySurvivalRate: fullPartySurvivors.length / RUNS, survivalRate: survivors.length / RUNS, averageWipeSeconds: samples.filter(s => !s.survived).reduce((n, s) => n + s.time, 0) / Math.max(1, RUNS - survivors.length), averagePartyHpPercent: samples.reduce((n, s) => n + s.party.reduce((sum, p) => sum + p.hp, 0) / s.party.reduce((sum, p) => sum + p.maxHp, 0), 0) / RUNS, survivorPartyHp: survivors.length ? survivors.reduce((n, s) => n + s.party.reduce((sum, p) => sum + p.hp, 0), 0) / survivors.length : 0, survivorPartyHpPercent: survivors.length ? survivors.reduce((n, s) => n + s.party.reduce((sum, p) => sum + p.hp, 0) / s.party.reduce((sum, p) => sum + p.maxHp, 0), 0) / survivors.length : 0, killsPerMinute: samples.reduce((n, s) => n + s.kills, 0) / totalTime * 60, teamDps: members.reduce((n, m) => n + m.dps, 0), fiveMonsterClearRate: clears.length / RUNS, averageFiveMonsterClearSeconds: clears.reduce((n, s) => n + s.firstClearAt, 0) / Math.max(1, clears.length), members };
 }
 function compactCell(cell) {
-  return { party: cell.party, stage: cell.stage, suppression: cell.suppression, killHealAffixCount: cell.killHealAffixCount, killHealPerAffix: cell.killHealPerAffix, fullPartySurvivalRate: cell.fullPartySurvivalRate, survivalRate: cell.survivalRate, averageWipeSeconds: cell.averageWipeSeconds, survivorPartyHpPercent: cell.survivorPartyHpPercent, teamDps: cell.teamDps, killsPerMinute: cell.killsPerMinute, members: cell.members.map(member => ({ job: member.job, deathRate: member.deathRate, averageDeathSeconds: member.averageDeathSeconds, averageEndHpPercent: member.averageEndHpPercent, killHealingPerMinute: member.killHealingPerMinute, priestHealingPerMinute: member.priestHealingPerMinute, damageTakenPerMinute: member.damageTakenPerMinute })) };
+  return { party: cell.party, stage: cell.stage, suppression: cell.suppression, monsterPool: cell.monsterPool, damageByEnemy: cell.damageByEnemy, killHealAffixCount: cell.killHealAffixCount, killHealPerAffix: cell.killHealPerAffix, fullPartySurvivalRate: cell.fullPartySurvivalRate, survivalRate: cell.survivalRate, averageWipeSeconds: cell.averageWipeSeconds, survivorPartyHpPercent: cell.survivorPartyHpPercent, teamDps: cell.teamDps, killsPerMinute: cell.killsPerMinute, members: cell.members.map(member => ({ job: member.job, deathRate: member.deathRate, averageDeathSeconds: member.averageDeathSeconds, averageEndHpPercent: member.averageEndHpPercent, killHealingPerMinute: member.killHealingPerMinute, priestHealingPerMinute: member.priestHealingPerMinute, damageTakenPerMinute: member.damageTakenPerMinute })) };
 }
 
 function proportionalStage(cleared, total, baseDrain = 10, basePenalty = .10) {
@@ -228,7 +235,11 @@ function proportionalStage(cleared, total, baseDrain = 10, basePenalty = .10) {
   return { id: `${cleared}/${total}`, progress: cleared, total, completion, drain: baseDrain * (1 - completion), penalty: basePenalty * (1 - completion), preserveFraction: true };
 }
 
-if (process.argv.includes('--chapter-32-suppression-candidates')) {
+if (process.argv.includes('--chapter-32-monsters-v1')) {
+  const stage = { ...proportionalStage(0, 15, 12, .12), id: 'S12 0/15' };
+  const cells = [1, 2].flatMap(killHealAffixCount => Object.entries(PARTIES).map(([name, jobs]) => summarize(name, jobs, 3, 'B', stage, 0, killHealAffixCount, .02, true, CHAPTER_32_POOL)));
+  process.stdout.write(`${JSON.stringify({ test: 'Chapter 3-2 normal monsters TEST V1', runs: RUNS, stage, monsterPool: CHAPTER_32_POOL, baselines: { spear: { source: '碎顱斥候', hpIncrease: .05, attackIncrease: .08, defenseIncrease: .05 }, warrior: { source: '赤岩蜥蜴', hpIncrease: .08, attackIncrease: .06, defenseIncrease: .08 } }, cells: process.argv.includes('--compact') ? cells.map(compactCell) : cells }, null, 2)}\n`);
+} else if (process.argv.includes('--chapter-32-suppression-candidates')) {
   const candidates = [10, 12, 15, 18];
   const b1 = candidates.flatMap(base => Object.entries(PARTIES).map(([name, jobs]) => summarize(name, jobs, 3, 'B', { ...proportionalStage(0, 15, base, base / 100), id: `S${base} 0/15` }, 0, 1, .02, true)));
   const b2 = candidates.filter(base => base !== 10).flatMap(base => Object.entries(PARTIES).map(([name, jobs]) => summarize(name, jobs, 3, 'B', { ...proportionalStage(0, 15, base, base / 100), id: `S${base} 0/15` }, 0, 2, .02, true)));
