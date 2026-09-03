@@ -2094,6 +2094,7 @@ function getEquipmentStats(progress = getProgress()) {
     highHealthDamagePercent: (affixes.highHealthDamagePercent || 0) / 100,
     criticalResourceRecoveryPercent: (affixes.criticalResourceRecoveryPercent || 0) / 100,
     directHitHealthRecoveryPercent: (affixes.directHitHealthRecoveryPercent || 0) / 100,
+    controlResistancePercent: (affixes.controlResistancePercent || 0) / 100,
     maxHpPercent: (affixes.maxHpPercent || 0) / 100,
     defensePercent: (affixes.defensePercent || 0) / 100,
     accuracyPercent: (affixes.accuracyPercent || 0) / 100,
@@ -2172,6 +2173,7 @@ function getCharacterStats(level, progress = getProgress(), character = getActiv
     highHealthDamagePercent: Math.max(0, equipment.highHealthDamagePercent),
     criticalResourceRecoveryPercent: Math.max(0, equipment.criticalResourceRecoveryPercent),
     directHitHealthRecoveryPercent: Math.max(0, equipment.directHitHealthRecoveryPercent),
+    controlResistancePercent: Math.min(ControlEffectPolicy.CONTROL_RESISTANCE_CAP, Math.max(0, equipment.controlResistancePercent)),
     criticalDamageMultiplier: 1.5 + Math.max(0, equipment.criticalDamagePercent + passiveTotal('criticalDamage') + passiveTotal('skillCriticalDamage')),
     dotMultiplier: character?.race === 'undead' ? 1.20 : 1
   };
@@ -5444,10 +5446,16 @@ function summonBlackstonePoisonSpider(beastmasterIndex, now = Date.now()) {
   return true;
 }
 
+function applyControlEffectToPlayer(member, options, now = Date.now()) {
+  return ControlEffectPolicy.applyControlEffectToPlayer(member, {
+    ...options,
+    now,
+    controlResistancePercent: member?.stats?.controlResistancePercent
+  });
+}
+
 function applyBlackstoneAttackSpeedPenalty(member, penalty, durationMs, now, sourceName) {
-  const activePenalty = now < (member.blackstoneAttackSpeedPenaltyUntil || 0) ? member.blackstoneAttackSpeedPenalty || 0 : 0;
-  member.blackstoneAttackSpeedPenalty = Math.min(1 - SpiderNestPolicy.CONTROL.minimumAttackSpeedRatio, Math.max(activePenalty, penalty));
-  member.blackstoneAttackSpeedPenaltyUntil = Math.max(member.blackstoneAttackSpeedPenaltyUntil || 0, now + durationMs);
+  applyControlEffectToPlayer(member, { type: 'attack-speed-slow', baseDurationMs: durationMs, magnitude: penalty, source: sourceName }, now);
   logBattle(`${member.name} 受到【${sourceName}】，攻擊速度降低 ${Math.round(penalty * 100)}%！`, 'system');
 }
 
@@ -5900,15 +5908,15 @@ function enemyAttackTick() {
     }
     if (!dodged && damage > 0 && battle.dungeonId === 'goblin-camp'
       && GoblinCampPolicy.shouldStun(battle.enemyTypes[enemyIndex], Math.random())) {
-      target.stunnedUntil = Math.max(target.stunnedUntil || 0, now + 1500);
+      applyControlEffectToPlayer(target, { type: 'stun', baseDurationMs: 1500, source: '投石暈眩' }, now);
     }
     if (!dodged && damage > 0 && getActiveMap(progress).id === 'boar-woods'
       && BoarWoodsPolicy.shouldCharge(enemy.id, Math.random())) {
-      target.stunnedUntil = Math.max(target.stunnedUntil || 0, now + BoarWoodsPolicy.BOSS_CHARGE_STUN_MS);
+      applyControlEffectToPlayer(target, { type: 'stun', baseDurationMs: BoarWoodsPolicy.BOSS_CHARGE_STUN_MS, source: '衝撞' }, now);
     }
     if (!dodged && damage > 0 && plainsAction === 'rend') inflictPartyMemberBleed(target, enemy, now);
     if (!dodged && damage > 0 && plainsAction === 'charge') {
-      target.stunnedUntil = Math.max(target.stunnedUntil || 0, now + PlainsDepthsPolicy.CHARGE_STUN_MS);
+      applyControlEffectToPlayer(target, { type: 'stun', baseDurationMs: PlainsDepthsPolicy.CHARGE_STUN_MS, source: '衝撞' }, now);
       logBattle(`💥【${enemy.name}】施放【衝撞】，${target.name}暈眩 2 秒！`, 'system');
     }
     if (!dodged && damage > 0 && plainsAction === 'dive') logBattle(`🦅【${enemy.name}】施放【俯衝】，造成雙倍傷害！`, 'system');
@@ -5916,11 +5924,11 @@ function enemyAttackTick() {
     if (!dodged && damage > 0 && blackForestAction === 'shadow-bite') inflictBlackForestDot(target, enemy, 'bleed', now);
     if (!dodged && damage > 0 && blackForestAction === 'venom-fang') inflictBlackForestDot(target, enemy, 'poison', now);
     if (!dodged && damage > 0 && blackForestAction === 'charge') {
-      target.stunnedUntil = Math.max(target.stunnedUntil || 0, now + BlackForestEntrancePolicy.CONTROL.chargeStunMs);
+      applyControlEffectToPlayer(target, { type: 'stun', baseDurationMs: BlackForestEntrancePolicy.CONTROL.chargeStunMs, source: '衝撞' }, now);
       logBattle(`💥【${enemy.name}】施放【衝撞】，${target.name}暈眩 1 秒！`, 'system');
     }
     if (!dodged && damage > 0 && blackForestAction === 'entangling-roots') {
-      target.stunnedUntil = Math.max(target.stunnedUntil || 0, now + BlackForestEntrancePolicy.CONTROL.rootDurationMs);
+      applyControlEffectToPlayer(target, { type: 'stun', baseDurationMs: BlackForestEntrancePolicy.CONTROL.rootDurationMs, source: '纏繞根鬚' }, now);
       logBattle(`🌿【${enemy.name}】施放【纏繞根鬚】，${target.name}受困 4 秒！`, 'system');
     }
     if (!dodged && damage > 0 && blackForestAction === 'binding-arrow') logBattle(`🏹【${enemy.name}】施放【束縛箭】！`, 'system');
@@ -5958,11 +5966,11 @@ function enemyAttackTick() {
     if (!dodged && damage > 0 && spiderNestActionNames[spiderNestAction]) logBattle(`⚔【${enemy.name}】施放【${spiderNestActionNames[spiderNestAction]}】！`, 'system');
     if (!dodged && damage > 0 && strongholdAction === 'rending-bite') inflictPartyMemberBleed(target, enemy, now);
     if (!dodged && damage > 0 && strongholdAction === 'shield-bash') {
-      target.stunnedUntil = Math.max(target.stunnedUntil || 0, now + BlackstoneStrongholdPolicy.GUARD.bashStunMs);
+      applyControlEffectToPlayer(target, { type: 'stun', baseDurationMs: BlackstoneStrongholdPolicy.GUARD.bashStunMs, source: '盾擊' }, now);
       logBattle(`💫【${enemy.name}】以盾擊使 ${target.name} 暈眩 1 秒！`, 'system');
     }
     if (!dodged && damage > 0 && strongholdAction === 'bullhorn-stampede') {
-      target.stunnedUntil = Math.max(target.stunnedUntil || 0, now + BlackstoneStrongholdPolicy.BULLHORN.stampedeStunMs);
+      applyControlEffectToPlayer(target, { type: 'stun', baseDurationMs: BlackstoneStrongholdPolicy.BULLHORN.stampedeStunMs, source: '蠻角衝鋒' }, now);
       logBattle(`💥【${enemy.name}】衝鋒命中，${target.name} 暈眩 1.2 秒！`, 'system');
     }
     const strongholdActionNames = { 'armor-piercing-bolt': '穿甲弩箭', 'aimed-volley': '瞄準齊射', 'twin-axe-cleave': '雙斧橫掃', 'hunting-pounce': '狩獵撲擊', 'crushing-hammer': '碎甲重錘', 'seismic-smash': '震地重擊', 'warhammer-sweep': '戰錘橫掃', 'warlord-execution': '督軍處決' };

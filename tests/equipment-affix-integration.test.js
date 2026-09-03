@@ -9,12 +9,13 @@ const appCss = fs.readFileSync(path.join(__dirname, '..', 'style.css'), 'utf8');
 
 assert.match(html, /equipment-affix-policy\.js/, 'affix policy loads before the main game script');
 assert.match(html, /href="style\.css\?v=20260822-inventory-image-containment-v1"/, 'the affix UI stylesheet loads from the same deployed revision');
-assert.match(html, /equipment-affix-policy\.js\?v=20260903-direct-hit-health-recovery-v1/, 'the affix formatter uses the current local build');
+assert.match(html, /equipment-affix-policy\.js\?v=20260903-control-resistance-v1/, 'the affix formatter uses the current local build');
 assert.match(html, /armor-penetration-policy\.js\?v=20260903-armor-penetration-v1/, 'armor penetration policy loads before the main game script');
 assert.match(html, /conditional-damage-policy\.js\?v=20260903-conditional-damage-v1/, 'conditional damage policy loads before the main game script');
 assert.match(html, /critical-resource-recovery-policy\.js\?v=20260903-critical-resource-recovery-v1/, 'critical resource recovery policy loads before the main game script');
 assert.match(html, /direct-hit-health-recovery-policy\.js\?v=20260903-direct-hit-health-recovery-v1/, 'direct-hit health recovery policy loads before the main game script');
-assert.match(html, /script\.js\?v=20260903-direct-hit-health-recovery-v1/, 'the affix UI renderer uses the current local build');
+assert.match(html, /control-effect-policy\.js\?v=20260903-control-resistance-v1/, 'the shared player control policy loads before the main game script');
+assert.match(html, /script\.js\?v=20260903-control-resistance-v1/, 'the affix UI renderer uses the current local build');
 assert.match(source, /equipmentAffixMigrationVersion !== 'green-affix-v1'/, 'legacy saves receive the affix compatibility migration');
 assert.match(source, /EquipmentAffixPolicy\.normalizeEquipment\(item\)/, 'inventory and equipped items are normalized on load');
 assert.match(source, /EquipmentAffixPolicy\.getEquippedAffixStats\(progress\.equipment\)/, 'stats read only the equipped item collection');
@@ -28,6 +29,12 @@ assert.match(source, /enemy\.defense \* \(1 - armorIgnore\)/, 'the combined rati
 assert.match(source, /lowHealthDamagePercent: \(affixes\.lowHealthDamagePercent \|\| 0\) \/ 100[\s\S]*highHealthDamagePercent: \(affixes\.highHealthDamagePercent \|\| 0\) \/ 100/, 'conditional damage affixes enter shared equipment aggregation');
 assert.match(source, /criticalResourceRecoveryPercent: \(affixes\.criticalResourceRecoveryPercent \|\| 0\) \/ 100/, 'critical recovery enters shared equipment aggregation');
 assert.match(source, /directHitHealthRecoveryPercent: \(affixes\.directHitHealthRecoveryPercent \|\| 0\) \/ 100/, 'direct-hit recovery amount enters shared equipment aggregation');
+assert.match(source, /controlResistancePercent: \(affixes\.controlResistancePercent \|\| 0\) \/ 100/, 'control resistance enters shared equipment aggregation');
+assert.equal((source.match(/applyControlEffectToPlayer\(target, \{ type: 'stun'/g) || []).length, 7, 'all seven active player stun sources use the shared entry point');
+assert.doesNotMatch(source.slice(source.indexOf('function enemyAttackTick()')), /target\.stunnedUntil\s*=/, 'the formal enemy attack path no longer writes stun state directly');
+assert.match(source, /function applyBlackstoneAttackSpeedPenalty[\s\S]*applyControlEffectToPlayer\(member, \{ type: 'attack-speed-slow'/, 'all existing attack-speed slow callers retain their wrapper and enter the shared policy');
+assert.match(source, /blackForestAction === 'binding-arrow'\) logBattle/, 'binding arrow remains display and damage only');
+assert.match(source, /blackForestAction === 'root-strike'\) logBattle/, 'root strike remains display and damage only');
 assert.match(source, /function resolveEnemyDirectHitRecovery\(member, actualDamage, stats = member\?\.stats, random = Math\.random\)[\s\S]*damageKind: 'enemy-direct'[\s\S]*recoveryPercent: stats\?\.directHitHealthRecoveryPercent/, 'all eligible enemy damage calls one post-damage recovery entry point');
 assert.match(source, /target\.currentHp = Math\.max\(0, target\.currentHp - damage\);\s*resolveEnemyDirectHitRecovery\(target, damage, stats\);/, 'party enemy attacks resolve recovery after actual health damage');
 assert.match(source, /attacker\.currentHp = Math\.max\(0, attacker\.currentHp - actualCounterDamage\);\s*resolveEnemyDirectHitRecovery\(attacker, actualCounterDamage, counterStats\);/g, 'enemy parry counters use the same direct-hit entry point');

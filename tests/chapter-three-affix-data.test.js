@@ -98,15 +98,15 @@ assert.equal(pool(armor, 3, 'epic').includes(directHitRecovery.id), true);
 assert.equal(pool(accessory, 3, 'epic').includes(directHitRecovery.id), true);
 assert.equal(policy.formatAffix(policy.normalizeAffix({ id: directHitRecovery.id }, 'random', 3)), '受擊恢復｜受到敵人直接命中時，5%機率恢復2%最大生命');
 
-const pendingIds = ['control_resistance_percent'];
-pendingIds.forEach((id) => {
-  const definition = policy.EQUIPMENT_AFFIXES[id];
-  assert.ok(definition, `${id} definition exists`);
-  assert.equal(definition.unlockChapter, 3);
-  assert.equal(definition.rollable, false);
-  assert.equal(definition.combatStatus, 'pending');
-  [weapon, armor, accessory].forEach((item) => assert.equal(pool(item, 3, 'epic').includes(id), false, `${id} cannot be obtained yet`));
-});
+const controlResistance = policy.EQUIPMENT_AFFIXES.control_resistance_percent;
+assert.equal(controlResistance.rollable, true);
+assert.equal(controlResistance.combatStatus, 'ready');
+assert.equal(pool(weapon, 1, 'epic').includes(controlResistance.id), false);
+assert.equal(pool(weapon, 2, 'epic').includes(controlResistance.id), false);
+assert.equal(pool(weapon, 3, 'epic').includes(controlResistance.id), false);
+assert.equal(pool(armor, 3, 'epic').includes(controlResistance.id), true);
+assert.equal(pool(accessory, 3, 'epic').includes(controlResistance.id), true);
+assert.equal(policy.formatAffix(policy.normalizeAffix({ id: controlResistance.id }, 'random', 3)), '控制抗性｜控制效果持續時間 -15%');
 assert.deepEqual(value('last_stand_damage_percent', 3), [12]);
 assert.deepEqual(value('first_strike_damage_percent', 3), [8]);
 assert.deepEqual(value('critical_resource_recovery_percent', 3), [2]);
@@ -114,6 +114,6 @@ assert.deepEqual(value('control_resistance_percent', 3), [15]);
 assert.deepEqual(value('direct_hit_health_recovery_percent', 3), [2]);
 assert.deepEqual(policy.EQUIPMENT_AFFIXES.direct_hit_health_recovery_percent.trigger, { event: 'enemy-direct-hit', chance: .05 });
 const formalExistingPool = Object.values(policy.EQUIPMENT_AFFIXES).filter((definition) => definition.enabled && definition.rollable && definition.unlockChapter <= 3 && (definition.maxChapter == null || definition.maxChapter >= 3));
-assert.equal(formalExistingPool.length, 25, 'the formal pool contains twenty existing affixes plus the five implemented chapter-three affixes');
+assert.equal(formalExistingPool.length, 26, 'the formal pool contains twenty existing affixes plus all six implemented chapter-three affixes');
 
 console.log('chapter-three-affix-data: assertions passed');
