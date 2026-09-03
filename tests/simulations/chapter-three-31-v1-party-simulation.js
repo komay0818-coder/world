@@ -34,7 +34,11 @@ const ARMOR = {
 const PARTIES = { A: ['warrior', 'assassin', 'hunter', 'priest'], B: ['warrior', 'assassin', 'mage', 'priest'] };
 const STAGES = {
   none: { id: '無壓制', drain: 0, penalty: 0 },
-  full: { id: '0/10完整壓制', drain: 10, penalty: .10 }
+  full: { id: '0/10完整壓制', progress: 0, drain: 10, penalty: .10 },
+  progress3: { id: '3/10', progress: 3, drain: 7, penalty: .07 },
+  progress5: { id: '5/10', progress: 5, drain: 5, penalty: .05 },
+  progress7: { id: '7/10', progress: 7, drain: 3, penalty: .03 },
+  cleared: { id: '10/10', progress: 10, drain: 0, penalty: 0 }
 };
 // Aggregate values below are assembled only from currently implemented chapter-two items/affixes/runes.
 // Jewellery slots exist in the UI but currently have no obtainable chapter-two templates, so none are invented here.
@@ -212,10 +216,14 @@ function summarize(name, jobs, warriorWeight, gearId, stage, regenAffixCount = n
   return { party: name, jobs, runs: RUNS, gear: gearId, regenAffixCount, killHealAffixCount, killHealPerAffix, applyKillHealOpportunityCost, stage: stage.id, targetWeights: { warrior: warriorWeight, others: 1 }, theoreticalWarriorTargetRateWithFourAlive: warriorWeight / (warriorWeight + 3), fullPartySurvivalRate: fullPartySurvivors.length / RUNS, survivalRate: survivors.length / RUNS, averageWipeSeconds: samples.filter(s => !s.survived).reduce((n, s) => n + s.time, 0) / Math.max(1, RUNS - survivors.length), averagePartyHpPercent: samples.reduce((n, s) => n + s.party.reduce((sum, p) => sum + p.hp, 0) / s.party.reduce((sum, p) => sum + p.maxHp, 0), 0) / RUNS, survivorPartyHp: survivors.length ? survivors.reduce((n, s) => n + s.party.reduce((sum, p) => sum + p.hp, 0), 0) / survivors.length : 0, survivorPartyHpPercent: survivors.length ? survivors.reduce((n, s) => n + s.party.reduce((sum, p) => sum + p.hp, 0) / s.party.reduce((sum, p) => sum + p.maxHp, 0), 0) / survivors.length : 0, killsPerMinute: samples.reduce((n, s) => n + s.kills, 0) / totalTime * 60, teamDps: members.reduce((n, m) => n + m.dps, 0), fiveMonsterClearRate: clears.length / RUNS, averageFiveMonsterClearSeconds: clears.reduce((n, s) => n + s.firstClearAt, 0) / Math.max(1, clears.length), members };
 }
 function compactCell(cell) {
-  return { party: cell.party, killHealAffixCount: cell.killHealAffixCount, killHealPerAffix: cell.killHealPerAffix, fullPartySurvivalRate: cell.fullPartySurvivalRate, survivalRate: cell.survivalRate, averageWipeSeconds: cell.averageWipeSeconds, survivorPartyHpPercent: cell.survivorPartyHpPercent, teamDps: cell.teamDps, killsPerMinute: cell.killsPerMinute, members: cell.members.map(member => ({ job: member.job, deathRate: member.deathRate, averageDeathSeconds: member.averageDeathSeconds, averageEndHpPercent: member.averageEndHpPercent, killHealingPerMinute: member.killHealingPerMinute, priestHealingPerMinute: member.priestHealingPerMinute, damageTakenPerMinute: member.damageTakenPerMinute })) };
+  return { party: cell.party, stage: cell.stage, killHealAffixCount: cell.killHealAffixCount, killHealPerAffix: cell.killHealPerAffix, fullPartySurvivalRate: cell.fullPartySurvivalRate, survivalRate: cell.survivalRate, averageWipeSeconds: cell.averageWipeSeconds, survivorPartyHpPercent: cell.survivorPartyHpPercent, teamDps: cell.teamDps, killsPerMinute: cell.killsPerMinute, members: cell.members.map(member => ({ job: member.job, deathRate: member.deathRate, averageDeathSeconds: member.averageDeathSeconds, averageEndHpPercent: member.averageEndHpPercent, killHealingPerMinute: member.killHealingPerMinute, priestHealingPerMinute: member.priestHealingPerMinute, damageTakenPerMinute: member.damageTakenPerMinute })) };
 }
 
-if (process.argv.includes('--kill-heal-value')) {
+if (process.argv.includes('--suppression-curve')) {
+  const stages = [STAGES.full, STAGES.progress3, STAGES.progress5, STAGES.progress7, STAGES.cleared];
+  const cells = [1, 2].flatMap(killHealAffixCount => stages.flatMap(stage => Object.entries(PARTIES).map(([name, jobs]) => summarize(name, jobs, 3, 'B', stage, 0, killHealAffixCount, .02, true))));
+  process.stdout.write(`${JSON.stringify({ test: 'Chapter 3-1 TEST V1 suppression curve', runs: RUNS, fixedGear: 'B-R0', targetWeights: { warrior: 3, others: 1 }, killHealPerAffix: .02, opportunityCost: ['first affix replaces basic attack damage +8%', 'second affix replaces basic attack damage +8%'], cells: process.argv.includes('--compact') ? cells.map(compactCell) : cells }, null, 2)}\n`);
+} else if (process.argv.includes('--kill-heal-value')) {
   const values = [0, .01, .015, .02, .025, .03];
   const cells = values.flatMap(killHealPerAffix => Object.entries(PARTIES).map(([name, jobs]) => summarize(name, jobs, 3, 'B', STAGES.full, 0, killHealPerAffix ? 1 : 0, killHealPerAffix, true)));
   process.stdout.write(`${JSON.stringify({ test: 'Chapter 3-1 single kill-healing affix value', runs: RUNS, fixedGear: 'B-R0', opportunityCost: ['first affix replaces basic attack damage +8%'], cells: process.argv.includes('--compact') ? cells.map(compactCell) : cells }, null, 2)}\n`);
