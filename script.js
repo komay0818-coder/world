@@ -1016,6 +1016,13 @@ function getProgress() {
     saved.chapterTwoCraftedBaseStatsMigrationVersion = 'chapter2-crafted-base-stats-v1';
     localStorage.setItem('stardust-progress', JSON.stringify(saved));
   }
+  if (saved.chapterThreeBlueCraftedBaseStatsMigrationVersion !== 'chapter3-blue-crafted-base-stats-v1') {
+    saved.inventory = (Array.isArray(saved.inventory) ? saved.inventory : []).map(CraftingPolicy.applyCraftedBaseStats);
+    saved.equipment = Object.fromEntries(Object.entries(saved.equipment || {})
+      .map(([slot, item]) => [slot, CraftingPolicy.applyCraftedBaseStats(item)]));
+    saved.chapterThreeBlueCraftedBaseStatsMigrationVersion = 'chapter3-blue-crafted-base-stats-v1';
+    localStorage.setItem('stardust-progress', JSON.stringify(saved));
+  }
   if (saved.equipmentDropMigrationVersion !== 'equipment-drop-v1') {
     saved.inventory = Array.isArray(saved.inventory) ? saved.inventory : [];
     saved.equipmentDropMigrationVersion = 'equipment-drop-v1';

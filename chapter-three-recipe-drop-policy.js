@@ -32,21 +32,24 @@
     redrockRefinedShoulders: recipe({
       id: 'recipe-redrock-refined-shoulders', itemId: 'recipe-redrock-refined-shoulders', recipeId: 'chapter3-redrock-refined-shoulders',
       name: '赤岩精製肩甲配方', equipmentSlot: 'shoulders', resultItemId: 'crafted-redrock-refined-shoulders',
-      resultEquipmentId: 'crafted-redrock-refined-shoulders', resultName: '赤岩精製肩甲', baseStats: Object.freeze({}),
+      resultEquipmentId: 'crafted-redrock-refined-shoulders', resultName: '赤岩精製肩甲', baseStats: Object.freeze({ defense: 18, hp: 55, damageReduction: .03 }),
+      baseStatsStatus: 'ready', fixedAffixIds: Object.freeze(['max_hp_percent', 'defense_percent']),
       materials: Object.freeze({ 'redrock-ore': 30, 'skullcrusher-iron-scrap': 18 }),
       materialRequirements: Object.freeze({ 'redrock-ore': 30, 'skullcrusher-iron-scrap': 18 }), goldCost: BLUE_CRAFT_GOLD_COST
     }),
     wastelandRefinedWrist: recipe({
       id: 'recipe-wasteland-refined-wrist', itemId: 'recipe-wasteland-refined-wrist', recipeId: 'chapter3-wasteland-refined-wrist',
       name: '荒原精製護腕配方', equipmentSlot: 'wrist', resultItemId: 'crafted-wasteland-refined-wrist',
-      resultEquipmentId: 'crafted-wasteland-refined-wrist', resultName: '荒原精製護腕', baseStats: Object.freeze({}),
+      resultEquipmentId: 'crafted-wasteland-refined-wrist', resultName: '荒原精製護腕', baseStats: Object.freeze({ defense: 11, hp: 38, damageBonus: .04 }),
+      baseStatsStatus: 'ready', fixedAffixIds: Object.freeze(['max_hp_percent', 'defense_percent']),
       materials: Object.freeze({ 'wasteland-thick-hide': 24, 'warpattern-cloth': 18 }),
       materialRequirements: Object.freeze({ 'wasteland-thick-hide': 24, 'warpattern-cloth': 18 }), goldCost: BLUE_CRAFT_GOLD_COST
     }),
     skullcrusherWarpatternCloak: recipe({
       id: 'recipe-skullcrusher-warpattern-cloak', itemId: 'recipe-skullcrusher-warpattern-cloak', recipeId: 'chapter3-skullcrusher-warpattern-cloak',
       name: '碎顱戰紋披風配方', equipmentSlot: 'cloak', resultItemId: 'crafted-skullcrusher-warpattern-cloak',
-      resultEquipmentId: 'crafted-skullcrusher-warpattern-cloak', resultName: '碎顱戰紋披風', baseStats: Object.freeze({}),
+      resultEquipmentId: 'crafted-skullcrusher-warpattern-cloak', resultName: '碎顱戰紋披風', baseStats: Object.freeze({ defense: 9, hp: 70, dodge: .04 }),
+      baseStatsStatus: 'ready', fixedAffixIds: Object.freeze(['max_hp_percent', 'defense_percent']),
       materials: Object.freeze({ 'vulture-hard-feather': 20, 'warpattern-cloth': 24 }),
       materialRequirements: Object.freeze({ 'vulture-hard-feather': 20, 'warpattern-cloth': 24 }), goldCost: BLUE_CRAFT_GOLD_COST
     }),

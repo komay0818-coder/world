@@ -141,7 +141,7 @@
   function applyCraftedBaseStats(item) {
     if (!item || item.kind !== 'equipment') return item;
     const recipe = RECIPES[item.recipeId] || Object.values(RECIPES).find((entry) => entry.resultItemId === (item.equipmentId || item.templateId));
-    if (!recipe?.baseStats || recipe.chapter !== 2) return item;
+    if (!recipe?.baseStats || (recipe.chapter !== 2 && !(recipe.chapter === 3 && recipe.baseStatsStatus === 'ready'))) return item;
     const baseStats = { ...recipe.baseStats };
     return { ...item, ...baseStats, baseStats };
   }

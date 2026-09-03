@@ -8,6 +8,11 @@ assert.deepEqual(Object.values(policy.RECIPES).filter((recipe) => recipe.quality
   'recipe-wasteland-refined-wrist',
   'recipe-skullcrusher-warpattern-cloak'
 ]);
+Object.values(policy.RECIPES).filter((recipe) => recipe.quality === 'rare').forEach((recipe) => {
+  assert.equal(recipe.baseStatsStatus, 'ready');
+  assert.deepEqual(recipe.fixedAffixIds, ['max_hp_percent', 'defense_percent']);
+  assert.equal(recipe.goldCost, 18000);
+});
 
 const cases = [
   ['canyon-warlord', 'brokenrock-canyon', 'recipe-redrock-refined-shoulders'],
