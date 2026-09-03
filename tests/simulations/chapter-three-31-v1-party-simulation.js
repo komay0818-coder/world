@@ -46,7 +46,7 @@ const GEAR = {
 const GEAR_WEAPON_UPGRADE = { warrior: { min: 43, max: 57, speed: .65, name: '黑鐵重劍' }, assassin: null, hunter: { min: 28, max: 38, speed: .88, name: '穿林長弓' }, mage: { min: 26, max: 35, speed: 1, name: '孢子魔杖' }, priest: { min: 26, max: 35, speed: 1, name: '孢子魔杖' } };
 
 function rng(seed) { let x = seed >>> 0; return () => ((x = Math.imul(x ^ x >>> 15, 1 | x), x ^= x + Math.imul(x ^ x >>> 7, 61 | x), ((x ^ x >>> 14) >>> 0) / 4294967296)); }
-function makePlayer(job, gearId = 'A', penalty = 0, regenAffixCount = null, killHealAffixCount = null) {
+function makePlayer(job, gearId = 'A', penalty = 0, regenAffixCount = null, killHealAffixCount = null, killHealPerAffix = .03, applyKillHealOpportunityCost = false) {
   const b = BASE[job], a = ARMOR[job], gear = GEAR[gearId];
   const upgrade = gearId === 'C' ? GEAR_WEAPON_UPGRADE[job] : null;
   const w = upgrade ? { ...WEAPONS[job], ...upgrade } : WEAPONS[job];
@@ -65,8 +65,11 @@ function makePlayer(job, gearId = 'A', penalty = 0, regenAffixCount = null, kill
   const resourceMax = Math.round(resourceMaxBase * (1 + gear.resourcePercent));
   const purpleMagic = gearId === 'C' && ['mage', 'priest'].includes(job) ? .075 : 0;
   const affixRegen = regenAffixCount === null ? gear.hpRegen : Math.max(0, regenAffixCount) * 5;
-  const killHeal = killHealAffixCount === null ? gear.killHeal : Math.max(0, killHealAffixCount) * .03;
-  return { job, gearId, weapon: w, maxHp: hp, hp, normalDefense, defense: Math.round(normalDefense * (1 - penalty)), outgoing: 1 - penalty, attack, crit: b.crit + passive('crit') + gear.crit, dodge: Math.min(.45, b.dodge + (['assassin', 'hunter'].includes(job) ? .08 : 0) + passive('dodge') + gear.dodge + purpleDodge), parry: (job === 'warrior' ? .08 : 0) + passive('parry'), dr: job === 'warrior' ? .03 : 0, speed: w.speed * 1.08 * (1 + passive('attackSpeed')), resourceMax, resource: resourceMax, manaRegenFlat: (a.manaRegenFlat || 0) + (gearId === 'B' && ['mage', 'priest'].includes(job) ? 4 : 0), manaRegen: 1 + gear.manaRegen + (gearId === 'C' && ['mage', 'priest'].includes(job) ? .10 : 0), hpRegen: (a.hpRegen || 0) + affixRegen, skillDamage: gear.skillDamage, basicDamage: gear.basicDamage, damageBonus: purpleMagic, killHeal, killResource: gear.killResource, ironWall: gear.ironWall, cooldown: 1 + gear.cooldown, alive: true, basicAt: 0, globalAt: 0, skillAt: {}, totalDamage: 0, taken: 0, environment: 0, targeted: 0, healing: 0, regenerationHealing: 0, killHealing: 0, spellHealing: 0, shield: 0, hunterCount: 0, effectiveHealCount: 0, blinkAt: 0, manaShieldAt: 0, protectionAt: 0, graceUntil: 0, swiftUntil: 0, deathAt: null };
+  const killHeal = killHealAffixCount === null ? gear.killHeal : Math.max(0, killHealAffixCount) * killHealPerAffix;
+  const replacementCount = applyKillHealOpportunityCost ? Math.max(0, killHealAffixCount || 0) : 0;
+  const basicDamage = Math.max(0, gear.basicDamage - Math.min(2, replacementCount) * .08);
+  const skillDamage = Math.max(0, gear.skillDamage - (replacementCount >= 3 ? .08 : 0));
+  return { job, gearId, weapon: w, maxHp: hp, hp, normalDefense, defense: Math.round(normalDefense * (1 - penalty)), outgoing: 1 - penalty, attack, crit: b.crit + passive('crit') + gear.crit, dodge: Math.min(.45, b.dodge + (['assassin', 'hunter'].includes(job) ? .08 : 0) + passive('dodge') + gear.dodge + purpleDodge), parry: (job === 'warrior' ? .08 : 0) + passive('parry'), dr: job === 'warrior' ? .03 : 0, speed: w.speed * 1.08 * (1 + passive('attackSpeed')), resourceMax, resource: resourceMax, manaRegenFlat: (a.manaRegenFlat || 0) + (gearId === 'B' && ['mage', 'priest'].includes(job) ? 4 : 0), manaRegen: 1 + gear.manaRegen + (gearId === 'C' && ['mage', 'priest'].includes(job) ? .10 : 0), hpRegen: (a.hpRegen || 0) + affixRegen, skillDamage, basicDamage, damageBonus: purpleMagic, killHeal, killResource: gear.killResource, ironWall: gear.ironWall, cooldown: 1 + gear.cooldown, alive: true, basicAt: 0, globalAt: 0, skillAt: {}, totalDamage: 0, taken: 0, environment: 0, targeted: 0, healing: 0, regenerationHealing: 0, killHealing: 0, spellHealing: 0, shield: 0, hunterCount: 0, effectiveHealCount: 0, blinkAt: 0, manaShieldAt: 0, protectionAt: 0, graceUntil: 0, swiftUntil: 0, deathAt: null };
 }
 function makeEnemy(t, now, serial, initial = false) { return { ...t, maxHp: t.hp, currentHp: t.hp, attackAt: now + 1 / t.speed, skillAt: now + t.skillCooldown, spawnedAt: now, serial, initial, respawnAt: null, stunnedUntil: 0, slowUntil: 0, slow: 0, attackDownUntil: 0, attackDown: 0 }; }
 function alivePlayers(ps) { return ps.filter(p => p.alive); }
@@ -171,8 +174,8 @@ function ticks(party, enemies, now) {
   enemies.forEach(e => { if (e.dot && e.currentHp > 0 && now + 1e-9 >= e.dot.next) { e.currentHp -= e.dot.damage; e.dot.owner.totalDamage += e.dot.damage; e.dot.ticks--; e.dot.next++; if (!e.dot.ticks) e.dot = null; } });
   alivePlayers(party).forEach(p => { if (p.bleed && now + 1e-9 >= p.bleed.next) { p.hp -= p.bleed.damage; p.taken += p.bleed.damage; p.bleed.ticks--; p.bleed.next++; if (!p.bleed.ticks) p.bleed = null; if (p.hp <= 0) { p.hp = 0; p.alive = false; p.deathAt = now; } } });
 }
-function simulate(jobs, seed, warriorWeight, gearId, stage, regenAffixCount = null, killHealAffixCount = null) {
-  const random = rng(seed), party = jobs.map(job => makePlayer(job, gearId, stage.penalty, regenAffixCount, killHealAffixCount)); let serial = 5;
+function simulate(jobs, seed, warriorWeight, gearId, stage, regenAffixCount = null, killHealAffixCount = null, killHealPerAffix = .03, applyKillHealOpportunityCost = false) {
+  const random = rng(seed), party = jobs.map(job => makePlayer(job, gearId, stage.penalty, regenAffixCount, killHealAffixCount, killHealPerAffix, applyKillHealOpportunityCost)); let serial = 5;
   const templates = [...POOL, POOL[Math.floor(random() * 4)]];
   let enemies = templates.map((t, i) => makeEnemy(t, 0, i, true)), kills = 0, initialKills = 0, firstClearAt = null;
   for (let step = 0; step < DURATION / DT; step++) {
@@ -194,9 +197,10 @@ function simulate(jobs, seed, warriorWeight, gearId, stage, regenAffixCount = nu
   }
   return { survived: true, time: DURATION, kills, firstClearAt, party };
 }
-function summarize(name, jobs, warriorWeight, gearId, stage, regenAffixCount = null, killHealAffixCount = null) {
-  const samples = Array.from({ length: RUNS }, (_, i) => simulate(jobs, 0x31c0de + i * 104729 + name.charCodeAt(0), warriorWeight, gearId, stage, regenAffixCount, killHealAffixCount));
+function summarize(name, jobs, warriorWeight, gearId, stage, regenAffixCount = null, killHealAffixCount = null, killHealPerAffix = .03, applyKillHealOpportunityCost = false) {
+  const samples = Array.from({ length: RUNS }, (_, i) => simulate(jobs, 0x31c0de + i * 104729 + name.charCodeAt(0), warriorWeight, gearId, stage, regenAffixCount, killHealAffixCount, killHealPerAffix, applyKillHealOpportunityCost));
   const totalTime = samples.reduce((n, s) => n + s.time, 0), survivors = samples.filter(s => s.survived), clears = samples.filter(s => s.firstClearAt !== null);
+  const fullPartySurvivors = samples.filter(s => s.party.every(member => member.alive));
   const partyDamageTaken = samples.reduce((sum, sample) => sum + sample.party.reduce((n, member) => n + member.taken, 0), 0);
   const partyTargetSelections = samples.reduce((sum, sample) => sum + sample.party.reduce((n, member) => n + member.targeted, 0), 0);
   const members = jobs.map((job, index) => {
@@ -205,10 +209,22 @@ function summarize(name, jobs, warriorWeight, gearId, stage, regenAffixCount = n
     const taken = all.reduce((n, p) => n + p.taken, 0);
     return { job, weapon: all[0].weapon.name, maxHp: all[0].maxHp, dps: all.reduce((n, p) => n + p.totalDamage, 0) / totalTime, targetSelectionShare: all.reduce((n, p) => n + p.targeted, 0) / partyTargetSelections, damageTakenPerMinute: taken / totalTime * 60, damageTakenShare: taken / partyDamageTaken, recoveryPerMinute: all.reduce((n, p) => n + p.healing, 0) / totalTime * 60, regenerationPerMinute: all.reduce((n, p) => n + p.regenerationHealing, 0) / totalTime * 60, killHealingPerMinute: all.reduce((n, p) => n + p.killHealing, 0) / totalTime * 60, priestHealingPerMinute: all.reduce((n, p) => n + p.spellHealing, 0) / totalTime * 60, deathRate: deaths.length / RUNS, averageDeathSeconds: deaths.reduce((n, p) => n + p.deathAt, 0) / Math.max(1, deaths.length), averageEndHp: all.reduce((n, p) => n + p.hp, 0) / RUNS, averageEndHpPercent: all.reduce((n, p) => n + p.hp / p.maxHp, 0) / RUNS };
   });
-  return { party: name, jobs, runs: RUNS, gear: gearId, regenAffixCount, killHealAffixCount, stage: stage.id, targetWeights: { warrior: warriorWeight, others: 1 }, theoreticalWarriorTargetRateWithFourAlive: warriorWeight / (warriorWeight + 3), survivalRate: survivors.length / RUNS, averageWipeSeconds: samples.filter(s => !s.survived).reduce((n, s) => n + s.time, 0) / Math.max(1, RUNS - survivors.length), averagePartyHpPercent: samples.reduce((n, s) => n + s.party.reduce((sum, p) => sum + p.hp, 0) / s.party.reduce((sum, p) => sum + p.maxHp, 0), 0) / RUNS, survivorPartyHp: survivors.length ? survivors.reduce((n, s) => n + s.party.reduce((sum, p) => sum + p.hp, 0), 0) / survivors.length : 0, survivorPartyHpPercent: survivors.length ? survivors.reduce((n, s) => n + s.party.reduce((sum, p) => sum + p.hp, 0) / s.party.reduce((sum, p) => sum + p.maxHp, 0), 0) / survivors.length : 0, killsPerMinute: samples.reduce((n, s) => n + s.kills, 0) / totalTime * 60, teamDps: members.reduce((n, m) => n + m.dps, 0), fiveMonsterClearRate: clears.length / RUNS, averageFiveMonsterClearSeconds: clears.reduce((n, s) => n + s.firstClearAt, 0) / Math.max(1, clears.length), members };
+  return { party: name, jobs, runs: RUNS, gear: gearId, regenAffixCount, killHealAffixCount, killHealPerAffix, applyKillHealOpportunityCost, stage: stage.id, targetWeights: { warrior: warriorWeight, others: 1 }, theoreticalWarriorTargetRateWithFourAlive: warriorWeight / (warriorWeight + 3), fullPartySurvivalRate: fullPartySurvivors.length / RUNS, survivalRate: survivors.length / RUNS, averageWipeSeconds: samples.filter(s => !s.survived).reduce((n, s) => n + s.time, 0) / Math.max(1, RUNS - survivors.length), averagePartyHpPercent: samples.reduce((n, s) => n + s.party.reduce((sum, p) => sum + p.hp, 0) / s.party.reduce((sum, p) => sum + p.maxHp, 0), 0) / RUNS, survivorPartyHp: survivors.length ? survivors.reduce((n, s) => n + s.party.reduce((sum, p) => sum + p.hp, 0), 0) / survivors.length : 0, survivorPartyHpPercent: survivors.length ? survivors.reduce((n, s) => n + s.party.reduce((sum, p) => sum + p.hp, 0) / s.party.reduce((sum, p) => sum + p.maxHp, 0), 0) / survivors.length : 0, killsPerMinute: samples.reduce((n, s) => n + s.kills, 0) / totalTime * 60, teamDps: members.reduce((n, m) => n + m.dps, 0), fiveMonsterClearRate: clears.length / RUNS, averageFiveMonsterClearSeconds: clears.reduce((n, s) => n + s.firstClearAt, 0) / Math.max(1, clears.length), members };
+}
+function compactCell(cell) {
+  return { party: cell.party, killHealAffixCount: cell.killHealAffixCount, killHealPerAffix: cell.killHealPerAffix, fullPartySurvivalRate: cell.fullPartySurvivalRate, survivalRate: cell.survivalRate, averageWipeSeconds: cell.averageWipeSeconds, survivorPartyHpPercent: cell.survivorPartyHpPercent, teamDps: cell.teamDps, killsPerMinute: cell.killsPerMinute, members: cell.members.map(member => ({ job: member.job, deathRate: member.deathRate, averageDeathSeconds: member.averageDeathSeconds, averageEndHpPercent: member.averageEndHpPercent, killHealingPerMinute: member.killHealingPerMinute, priestHealingPerMinute: member.priestHealingPerMinute, damageTakenPerMinute: member.damageTakenPerMinute })) };
 }
 
-if (process.argv.includes('--kill-heal-sensitivity')) {
+if (process.argv.includes('--kill-heal-value')) {
+  const values = [0, .01, .015, .02, .025, .03];
+  const cells = values.flatMap(killHealPerAffix => Object.entries(PARTIES).map(([name, jobs]) => summarize(name, jobs, 3, 'B', STAGES.full, 0, killHealPerAffix ? 1 : 0, killHealPerAffix, true)));
+  process.stdout.write(`${JSON.stringify({ test: 'Chapter 3-1 single kill-healing affix value', runs: RUNS, fixedGear: 'B-R0', opportunityCost: ['first affix replaces basic attack damage +8%'], cells: process.argv.includes('--compact') ? cells.map(compactCell) : cells }, null, 2)}\n`);
+} else if (process.argv.includes('--kill-heal-stack')) {
+  const arg = process.argv.find(value => value.startsWith('--per-affix='));
+  const killHealPerAffix = arg ? Number(arg.split('=')[1]) / 100 : .02;
+  const cells = [0, 1, 2, 3].flatMap(killHealAffixCount => Object.entries(PARTIES).map(([name, jobs]) => summarize(name, jobs, 3, 'B', STAGES.full, 0, killHealAffixCount, killHealPerAffix, true)));
+  process.stdout.write(`${JSON.stringify({ test: 'Chapter 3-1 stacked kill-healing affixes', runs: RUNS, fixedGear: 'B-R0', killHealPerAffix, opportunityCost: ['first affix replaces basic attack damage +8%', 'second affix replaces basic attack damage +8%', 'third affix replaces skill damage +8%'], cells: process.argv.includes('--compact') ? cells.map(compactCell) : cells }, null, 2)}\n`);
+} else if (process.argv.includes('--kill-heal-sensitivity')) {
   const cells = [0, 1, 2, 3].flatMap(killHealAffixCount => Object.entries(PARTIES).map(([name, jobs]) => summarize(name, jobs, 3, 'B', STAGES.full, 0, killHealAffixCount)));
   process.stdout.write(`${JSON.stringify({ test: 'Chapter 3-1 kill-healing affix sensitivity', runs: RUNS, fixedGear: 'B-R0', replacementForRemovedAffixes: 'empty or neutral non-combat affix; no replacement stats', stage: STAGES.full, cells }, null, 2)}\n`);
 } else if (process.argv.includes('--regen-sensitivity')) {
