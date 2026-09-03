@@ -191,12 +191,26 @@ function ticks(party, enemies, now) {
   enemies.forEach(e => { if (e.dot && e.currentHp > 0 && now + 1e-9 >= e.dot.next) { e.currentHp -= e.dot.damage; e.dot.owner.totalDamage += e.dot.damage; e.dot.ticks--; e.dot.next++; if (!e.dot.ticks) e.dot = null; } });
   alivePlayers(party).forEach(p => { if (p.bleed && now + 1e-9 >= p.bleed.next) { p.hp -= p.bleed.damage; p.taken += p.bleed.damage; p.damageTakenByEnemy[p.bleed.sourceId] = (p.damageTakenByEnemy[p.bleed.sourceId] || 0) + p.bleed.damage; p.bleed.ticks--; p.bleed.next++; if (!p.bleed.ticks) p.bleed = null; if (p.hp <= 0) { p.hp = 0; p.alive = false; p.deathAt = now; } } });
 }
-function simulate(jobs, seed, warriorWeight, gearId, stage, regenAffixCount = null, killHealAffixCount = null, killHealPerAffix = .03, applyKillHealOpportunityCost = false, monsterPool = POOL, encounter = null) {
+function simulate(jobs, seed, warriorWeight, gearId, stage, regenAffixCount = null, killHealAffixCount = null, killHealPerAffix = .03, applyKillHealOpportunityCost = false, monsterPool = POOL, encounter = null, eliteLoop = null) {
   const random = rng(seed), party = jobs.map(job => makePlayer(job, gearId, stage, regenAffixCount, killHealAffixCount, killHealPerAffix, applyKillHealOpportunityCost)); let serial = 5;
+  // Separate spawn rolls preserve the original E0 combat RNG and do not consume extra combat draws.
+  const eliteRandom = rng(seed ^ 0x32e117e);
+  const loopStats = { spawns: 0, eliteSpawns: 0, eliteKills: 0, eliteKilledLifetime: 0, elitePresentSeconds: 0, maxConcurrentElites: 0 };
+  const spawnTemplate = normal => {
+    if (!eliteLoop) return normal;
+    loopStats.spawns++;
+    if (eliteRandom() < eliteLoop.chance) { loopStats.eliteSpawns++; return CHAPTER_32_ELITE; }
+    return normal;
+  };
   const templates = encounter ? encounter.templates : [...monsterPool, monsterPool[Math.floor(random() * monsterPool.length)]];
-  let enemies = templates.map((t, i) => makeEnemy(t, 0, i, true)), kills = 0, initialKills = 0, firstClearAt = null;
+  let enemies = templates.map((t, i) => makeEnemy(spawnTemplate(t), 0, i, true)), kills = 0, initialKills = 0, firstClearAt = null;
   for (let step = 0; step < DURATION / DT; step++) {
     const now = step * DT;
+    if (eliteLoop) {
+      const eliteCount = enemies.filter(e => e.currentHp > 0 && e.id === CHAPTER_32_ELITE.id).length;
+      loopStats.maxConcurrentElites = Math.max(loopStats.maxConcurrentElites, eliteCount);
+      if (eliteCount) loopStats.elitePresentSeconds += DT;
+    }
     alivePlayers(party).forEach(p => { regen(p); if (p.hpRegen && p.hp < p.maxHp) { const h = Math.min(p.maxHp - p.hp, p.hpRegen * DT); p.hp += h; p.healing += h; p.regenerationHealing += h; } });
     alivePlayers(party).forEach(p => {
       const damage = Math.min(p.hp, stage.drain * DT); p.hp -= damage; p.environment += damage;
@@ -206,14 +220,17 @@ function simulate(jobs, seed, warriorWeight, gearId, stage, regenAffixCount = nu
     alivePlayers(party).forEach(p => { cast(p, party, enemies, now, random); basic(p, enemies, now, random); });
     enemyActions(party, enemies, now, random, warriorWeight);
     enemies.forEach((e, i) => {
-      if (e.currentHp <= 0 && e.respawnAt === null) { kills++; if (e.initial) initialKills++; e.respawnAt = now + 2; }
-      if (!encounter && e.respawnAt !== null && e.respawnAt <= now) enemies[i] = makeEnemy(monsterPool[Math.floor(random() * monsterPool.length)], now, serial++);
+      if (e.currentHp <= 0 && e.respawnAt === null) {
+        kills++; if (e.initial) initialKills++; e.respawnAt = now + 2;
+        if (eliteLoop && e.id === CHAPTER_32_ELITE.id) { loopStats.eliteKills++; loopStats.eliteKilledLifetime += now - e.spawnedAt; }
+      }
+      if (!encounter && e.respawnAt !== null && e.respawnAt <= now) enemies[i] = makeEnemy(spawnTemplate(monsterPool[Math.floor(random() * monsterPool.length)]), now, serial++);
     });
     if (firstClearAt === null && initialKills === 5) firstClearAt = now;
     if (encounter && (initialKills === 5 || !alivePlayers(party).length)) return { survived: alivePlayers(party).length > 0, time: now, kills, firstClearAt, party, enemies };
-    if (!alivePlayers(party).length) return { survived: false, time: now, kills, firstClearAt, party };
+    if (!alivePlayers(party).length) return { survived: false, time: now, kills, firstClearAt, party, loopStats };
   }
-  return { survived: true, time: DURATION, kills, firstClearAt, party, enemies };
+  return { survived: true, time: DURATION, kills, firstClearAt, party, enemies, loopStats };
 }
 function summarize(name, jobs, warriorWeight, gearId, stage, regenAffixCount = null, killHealAffixCount = null, killHealPerAffix = .03, applyKillHealOpportunityCost = false, monsterPool = POOL) {
   const samples = Array.from({ length: RUNS }, (_, i) => simulate(jobs, 0x31c0de + i * 104729 + name.charCodeAt(0), warriorWeight, gearId, stage, regenAffixCount, killHealAffixCount, killHealPerAffix, applyKillHealOpportunityCost, monsterPool));
@@ -242,7 +259,59 @@ function proportionalStage(cleared, total, baseDrain = 10, basePenalty = .10) {
   return { id: `${cleared}/${total}`, progress: cleared, total, completion, drain: baseDrain * (1 - completion), penalty: basePenalty * (1 - completion), preserveFraction: true };
 }
 
-if (process.argv.includes('--chapter-32-elite-encounter')) {
+function summarizeEliteLoop(name, jobs, chance, stage) {
+  const samples = Array.from({ length: RUNS }, (_, i) => simulate(jobs, 0x31c0de + i * 104729 + name.charCodeAt(0), 3, 'B', stage, 0, 1, .02, true, CHAPTER_32_POOL, null, { chance }));
+  const sum = fn => samples.reduce((n, s) => n + fn(s), 0);
+  const partySum = (s, key) => s.party.reduce((n, p) => n + p[key], 0);
+  const time = sum(s => s.time), kills = sum(s => s.kills);
+  const survivors = samples.filter(s => s.survived), wipes = samples.filter(s => !s.survived);
+  const enemyDamage = sum(s => partySum(s, 'taken'));
+  const environment = sum(s => partySum(s, 'environment'));
+  const eliteDamage = sum(s => s.party.reduce((n, p) => n + (p.damageTakenByEnemy[CHAPTER_32_ELITE.id] || 0), 0));
+  const spawns = sum(s => s.loopStats.spawns), eliteSpawns = sum(s => s.loopStats.eliteSpawns);
+  const eliteKills = sum(s => s.loopStats.eliteKills);
+  return {
+    party: name, frequency: `E${Math.round(chance * 100)}`, runs: RUNS,
+    fullPartySurvivalRate: sum(s => Number(s.party.every(p => p.alive))) / RUNS,
+    survivalRate: survivors.length / RUNS,
+    averageWipeSeconds: wipes.length ? wipes.reduce((n, s) => n + s.time, 0) / wipes.length : null,
+    averageRunSeconds: time / RUNS,
+    survivorPartyHpPercent: survivors.length ? survivors.reduce((n, s) => n + partySum(s, 'hp') / partySum(s, 'maxHp'), 0) / survivors.length : null,
+    deathRates: Object.fromEntries(jobs.map((job, index) => [job, sum(s => Number(!s.party[index].alive)) / RUNS])),
+    teamDps: sum(s => partySum(s, 'totalDamage')) / time,
+    killsPerMinute: kills / time * 60,
+    priestHealingPerMinute: sum(s => partySum(s, 'spellHealing')) / time * 60,
+    teamKillHealingPerMinute: sum(s => partySum(s, 'killHealing')) / time * 60,
+    eliteSpawnsPerRun: eliteSpawns / RUNS,
+    eliteSpawnsPerMinute: eliteSpawns / time * 60,
+    eliteDirectDamagePerMinute: eliteDamage / time * 60,
+    eliteDamageShare: eliteDamage / enemyDamage,
+    enemyDamagePerMinute: enemyDamage / time * 60,
+    environmentDamagePerRun: environment / RUNS,
+    environmentDamagePerMinute: environment / time * 60,
+    environmentDamagePerKill: environment / kills,
+    elitePresenceTimeShare: sum(s => s.loopStats.elitePresentSeconds) / time,
+    meanKilledEliteLifetimeSeconds: eliteKills ? sum(s => s.loopStats.eliteKilledLifetime) / eliteKills : null,
+    observedEliteSpawnRate: eliteSpawns / spawns,
+    totalSpawns: spawns, totalEliteSpawns: eliteSpawns,
+    maxConcurrentElites: Math.max(...samples.map(s => s.loopStats.maxConcurrentElites))
+  };
+}
+
+if (process.argv.includes('--chapter-32-elite-loop')) {
+  const stage = proportionalStage(6, 15, 12, .12);
+  const partyArg = process.argv.find(value => value.startsWith('--party='));
+  const parties = Object.entries(PARTIES).filter(([name]) => !partyArg || name === partyArg.split('=')[1]);
+  const cells = parties.flatMap(([name, jobs]) => {
+    const results = [0, .05, .10, .15].map(chance => summarizeEliteLoop(name, jobs, chance, stage));
+    const base = results[0];
+    return results.map(cell => ({ ...cell,
+      environmentDamagePerRunDeltaVsE0: cell.environmentDamagePerRun - base.environmentDamagePerRun,
+      environmentDamagePerKillDeltaVsE0: cell.environmentDamagePerKill - base.environmentDamagePerKill
+    }));
+  });
+  process.stdout.write(`${JSON.stringify({ test: 'Chapter 3-2 elite frequency loop TEST', runs: RUNS, durationSeconds: DURATION, stage, elite: CHAPTER_32_ELITE, respawnSeconds: 2, initialSlots: 5, probabilitiesApplyToInitialSpawns: true, normalOpening: 'existing four normal types plus one uniform roll; each slot independently eligible for elite replacement', spawnRandom: 'separate paired-seed stream; E0 preserves previous combat RNG', rateDenominator: 'pooled observed run time until wipe or 600 seconds', environmentNote: 'Fixed 7.2 HP/s per living character; raw total delta is not a causal elite delay estimate. Per-kill delta describes exposure cost, not additional damage per second.', cells }, null, 2)}\n`);
+} else if (process.argv.includes('--chapter-32-elite-encounter')) {
   const stage = proportionalStage(6, 15, 12, .12);
   const cells = Object.entries(PARTIES).flatMap(([name, jobs]) => ['Normal', 'Elite'].map(mode => {
     const samples = Array.from({ length: RUNS }, (_, i) => {
