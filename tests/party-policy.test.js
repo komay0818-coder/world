@@ -31,6 +31,17 @@ const members = [
 assert.equal(policy.chooseRandomAliveMember(members, () => 0).id, 'first', 'random targeting skips dead members');
 assert.equal(policy.chooseRandomAliveMember(members, () => .99).id, 'second', 'random targeting can select another living member');
 assert.equal(policy.chooseRandomAliveMember([members[0], members[2]], () => 0).id, 'second', 'a sole survivor is always selected');
+const weightedMembers = [
+  { id: 'warrior', job: 'warrior', alive: true, currentHp: 10 },
+  { id: 'assassin', job: 'assassin', alive: true, currentHp: 10 },
+  { id: 'mage', job: 'mage', alive: true, currentHp: 10 },
+  { id: 'priest', job: 'priest', alive: true, currentHp: 10 }
+];
+assert.deepEqual(policy.TARGET_WEIGHTS, { warrior: 3, default: 1 });
+assert.equal(policy.chooseRandomAliveMember(weightedMembers, () => .499999).id, 'warrior', 'warrior occupies half of the four-member target distribution');
+assert.equal(policy.chooseRandomAliveMember(weightedMembers, () => .5).id, 'assassin', 'warrior weighting remains random rather than a forced taunt');
+assert.equal(policy.chooseRandomAliveMember(weightedMembers, () => .999999).id, 'priest', 'every other living job remains targetable');
+assert.equal(policy.chooseRandomAliveMember([{ ...weightedMembers[0], alive: false, currentHp: 0 }, ...weightedMembers.slice(1)], () => 0).id, 'assassin', 'a defeated warrior contributes no target weight');
 assert.equal(policy.isPartyDefeated(members), false, 'one death does not defeat the party');
 assert.equal(policy.isPartyDefeated([{ alive: false, currentHp: 0 }]), true, 'all members dead defeats the party');
 assert.equal(policy.getFrontAliveEnemyIndex([0, 20, 10], [1, 30, 20]), 2, 'members target the oldest living front enemy');

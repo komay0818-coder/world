@@ -5,6 +5,7 @@
 })(typeof globalThis !== 'undefined' ? globalThis : this, function () {
   const MAX_PARTY_SIZE = 4;
   const UNLOCK_LEVELS = Object.freeze([1, 10, 20, 30]);
+  const TARGET_WEIGHTS = Object.freeze({ warrior: 3, default: 1 });
 
   function getUnlockedPartySlots(level) {
     const safeLevel = Math.max(1, Number(level) || 1);
@@ -125,7 +126,14 @@
     if (!alive.length) return null;
     if (alive.length === 1) return alive[0];
     const roll = Math.max(0, Math.min(.999999, Number(random()) || 0));
-    return alive[Math.floor(roll * alive.length)];
+    const weighted = alive.map((member) => ({ member, weight: member.job === 'warrior' ? TARGET_WEIGHTS.warrior : TARGET_WEIGHTS.default }));
+    const totalWeight = weighted.reduce((sum, entry) => sum + entry.weight, 0);
+    let cursor = roll * totalWeight;
+    for (const entry of weighted) {
+      cursor -= entry.weight;
+      if (cursor < 0) return entry.member;
+    }
+    return weighted[weighted.length - 1].member;
   }
 
   function getFrontAliveEnemyIndex(enemyHps, enemySpawnedAt = []) {
@@ -177,6 +185,7 @@
   return Object.freeze({
     MAX_PARTY_SIZE,
     UNLOCK_LEVELS,
+    TARGET_WEIGHTS,
     getUnlockedPartySlots,
     getPartySlotUnlockLevel,
     ensureCharacterId,
