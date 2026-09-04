@@ -124,6 +124,7 @@ function tryHeal(priest, party, now) {
   return true;
 }
 function cast(p, party, enemies, now, random) {
+  if (p.exhaustionExperiment && p.manaExhausted) return false;
   if (now < p.globalAt) return false;
   for (const skill of Skills.getSkills(p.job).filter(s => s.type === 'active' && s.id !== 'heal' && s.level <= 30)) {
     if (now < (p.skillAt[skill.id] || 0)) continue;
@@ -142,6 +143,7 @@ function cast(p, party, enemies, now, random) {
     });
     if (skill.id === 'holy-nova' && targets.length) { const amount = Math.min(p.maxHp - p.hp, p.maxHp * (effect.selfHealPerTarget || 0) * targets.length); p.hp += amount; p.healing += amount; }
     p.resource -= c;
+    if (p.exhaustionExperiment) p.testSkillCasts++;
     if (p.gearId === 'C' && ['mage', 'priest'].includes(p.job) && random() < .15) p.resource = Math.min(p.resourceMax, p.resource + p.resourceMax * .06);
     p.skillAt[skill.id] = now + (effect.cooldown || skill.cooldown) / p.cooldown; p.globalAt = now + 1; return true;
   }
@@ -152,6 +154,7 @@ function cast(p, party, enemies, now, random) {
 function basic(p, enemies, now, random) {
   if (now < p.basicAt || now < p.globalAt) return;
   const target = aliveEnemies(enemies)[0]; if (!target) return;
+  if (p.exhaustionExperiment) p.testBasics++;
   const roll = p.weapon.min + Math.floor(random() * (p.weapon.max - p.weapon.min + 1)); let mult = random() < p.crit ? 1.5 : 1;
   if (p.job === 'hunter' && ++p.hunterCount % 6 === 0) mult *= Skills.getEffect('hunter', 'hunting-instinct', 1).power;
   hit(p, target, Math.ceil((p.attack + roll - (p.weapon.min + p.weapon.max) / 2) * mult * (1 + p.basicDamage)), random, true, now);
@@ -159,7 +162,7 @@ function basic(p, enemies, now, random) {
   if (p.job === 'warrior') p.resource = Math.min(100, p.resource + 4);
   const graceSpeed = now < p.graceUntil ? 1 + Skills.getEffect('priest', 'light-grace', 1).attackSpeed : 1;
   const purpleSpeed = now < p.swiftUntil ? 1.15 : 1;
-  p.basicAt = now + 1 / (p.speed * graceSpeed * purpleSpeed);
+  p.basicAt = now + (p.exhaustionExperiment && p.manaExhausted ? 1.25 : 1) / (p.speed * graceSpeed * purpleSpeed);
 }
 function chooseWeightedTarget(party, random, warriorWeight) {
   const targets = alivePlayers(party);
@@ -242,8 +245,9 @@ function ticks(party, enemies, now) {
   enemies.forEach(e => { if (e.dot && e.currentHp > 0 && now + 1e-9 >= e.dot.next) { const damage = Math.ceil(e.dot.damage * Chapter35.playerDamageMultiplier(e.dot.owner, now)); e.currentHp -= damage; Chapter33.updateAllOut(e, now); Chapter34.afterDamage(e, now); Chapter35.afterDamage(e, now); Chapter36.afterDamage(e, now); e.dot.owner.totalDamage += damage; e.dot.ticks--; e.dot.next++; if (!e.dot.ticks) e.dot = null; } });
   alivePlayers(party).forEach(p => { if (p.bleed && now + 1e-9 >= p.bleed.next) { p.hp -= p.bleed.damage; p.taken += p.bleed.damage; p.damageTakenByEnemy[p.bleed.sourceId] = (p.damageTakenByEnemy[p.bleed.sourceId] || 0) + p.bleed.damage; p.bleed.ticks--; p.bleed.next++; if (!p.bleed.ticks) p.bleed = null; if (p.hp <= 0) { p.hp = 0; p.alive = false; p.deathAt = now; } } });
 }
-function simulate(jobs, seed, warriorWeight, gearId, stage, regenAffixCount = null, killHealAffixCount = null, killHealPerAffix = .03, applyKillHealOpportunityCost = false, monsterPool = POOL, encounter = null, eliteLoop = null) {
+function simulate(jobs, seed, warriorWeight, gearId, stage, regenAffixCount = null, killHealAffixCount = null, killHealPerAffix = .03, applyKillHealOpportunityCost = false, monsterPool = POOL, encounter = null, eliteLoop = null, experiment = null) {
   const random = rng(seed), party = jobs.map(job => makePlayer(job, gearId, stage, regenAffixCount, killHealAffixCount, killHealPerAffix, applyKillHealOpportunityCost)); let serial = 5;
+  if (experiment) party.forEach(p => experiment.initialize(p));
   // Separate spawn rolls preserve the original E0 combat RNG and do not consume extra combat draws.
   const eliteRandom = rng(seed ^ 0x32e117e);
   const loopStats = { spawns: 0, eliteSpawns: 0, eliteKills: 0, eliteKilledLifetime: 0, elitePresentSeconds: 0, maxConcurrentElites: 0, warDrumSeconds: 0, frontlineSeconds: 0, overlapSeconds: 0, fervor34Triggers: 0, killedLifetimes: {}, trio34Seconds: 0 };
@@ -295,6 +299,7 @@ function simulate(jobs, seed, warriorWeight, gearId, stage, regenAffixCount = nu
     });
     ticks(party, enemies, now);
     for (const p of alivePlayers(party)) {
+      if (experiment) experiment.update(p, DT);
       if (encounter?.stopImmediately && !aliveEnemies(enemies).length) break;
       cast(p, party, enemies, now, random);
       if (encounter?.stopImmediately && !aliveEnemies(enemies).length) break;
@@ -398,7 +403,9 @@ function summarizeEliteLoop(name, jobs, chance, stage) {
   };
 }
 
-if (process.argv.includes('--chapter-36-mechanics')) {
+if (require.main !== module) {
+  module.exports = { simulate, POOL, STAGES, makePlayer, makeEnemy, cast, basic };
+} else if (process.argv.includes('--chapter-36-mechanics')) {
   require('./chapter-three-36-runner.js')({ simulate, proportionalStage, PARTIES, RUNS });
 } else if (process.argv.includes('--chapter-35-complete')) {
   const part = process.argv.find(value => value.startsWith('--part='))?.split('=')[1];
