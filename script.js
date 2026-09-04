@@ -181,7 +181,8 @@ function getPassiveSkillUpgradeLevel(progress, job, name) {
 }
 
 function getSkillEffect(progress, job, skill) {
-  return ClassSkillPolicy.getEffect(job, skill.id, getSkillUpgradeLevel(progress, job, skill)) || {};
+  return ClassSkillPolicy.getEffect(job, skill.id, getSkillUpgradeLevel(progress, job, skill))
+    || WarriorAdvancementPolicy.getEffect(skill.id, getSkillUpgradeLevel(progress, job, skill)) || {};
 }
 
 function getHunterInstinctEffect(progress = getProgress()) {
@@ -2088,9 +2089,11 @@ function oldestAliveEnemyIndex() {
   return aliveEnemyIndexesByAge()[0] ?? -1;
 }
 
-function getEquipmentStats(progress = getProgress()) {
+function getEquipmentStats(progress = getProgress(), activeCharacter = getActiveCharacter()) {
   const fixed = Object.entries(progress.equipment || {}).filter(([, item]) => Boolean(item)).reduce((stats, [slot, item]) => ({
-    attack: stats.attack + AssassinOffhandPolicy.getEquippedAttack({ ...item, attack: effectiveEquipmentStat(item, 'attack') }, slot),
+    attack: stats.attack + (slot === 'offhand' && WarriorAdvancementPolicy.getTitanAttackContribution(item, activeCharacter, progress) !== null
+      ? WarriorAdvancementPolicy.getTitanAttackContribution(item, activeCharacter, progress)
+      : AssassinOffhandPolicy.getEquippedAttack({ ...item, attack: effectiveEquipmentStat(item, 'attack') }, slot)),
     defense: stats.defense + effectiveEquipmentStat(item, 'defense'),
     hp: stats.hp + effectiveEquipmentStat(item, 'hp'),
     mana: stats.mana + effectiveEquipmentStat(item, 'mana'),
@@ -2165,15 +2168,15 @@ function getActiveMap(progress = getProgress()) {
 }
 
 function getUnlockedPassiveEffects(level, progress, character) {
-  return ClassSkillPolicy.getSkills(character?.job)
+  return getKnownSkills(character?.job, level, progress)
     .filter((skill) => skill.type === 'passive' && level >= skill.level)
-    .map((skill) => ClassSkillPolicy.getEffect(character.job, skill.id, getSkillUpgradeLevel(progress, character.job, skill)) || {});
+    .map((skill) => getSkillEffect(progress, character.job, skill));
 }
 
 function getCharacterStats(level, progress = getProgress(), character = getActiveCharacter()) {
   const base = classBaseStats[character?.job] || classBaseStats.warrior;
   const race = raceAdjustments[character?.race] || raceAdjustments.human;
-  const equipment = getEquipmentStats(progress);
+  const equipment = getEquipmentStats(progress, character);
   const humanMultiplier = character?.race === 'human' ? 1.05 : 1;
   const equippedWeapon = progress.equipment?.weapon;
   const passives = getUnlockedPassiveEffects(level, progress, character);
@@ -2182,15 +2185,16 @@ function getCharacterStats(level, progress = getProgress(), character = getActiv
   const lowHealthAttack = lowHealth ? passiveTotal('attack') : 0;
   const lowHealthSpeed = lowHealth ? passiveTotal('speed') : 0;
   const lowHealthCrit = lowHealth ? passiveTotal('crit') : 0;
+  const advancement = WarriorAdvancementPolicy.getPassiveStats(progress, Number(progress.currentHpRatio) || 1);
   const stats = {
     hp: Math.round((base.hp + race.hp + (level - 1) * 12 + equipment.hp + equipment.maxHp) * (1 + equipment.maxHpPercent + equipment.runeMaxHpPercent + passiveTotal('maxHp')) * humanMultiplier),
     mana: ['warrior', 'assassin'].includes(character?.job) ? 0 : Math.round((base.mana + race.mana + (level - 1) * 6 + equipment.mana) * humanMultiplier * (1 + equipment.runeResourceMaxPercent)),
     attack: Math.round((base.attack + race.attack + (level - 1) + equipment.attack + equipment.attackFlat + equipment.strength + equipment.intelligence) * humanMultiplier * (1 + passiveTotal('weaponDamage') + lowHealthAttack + equipment.runeAttackPercent)),
     defense: Math.round((base.defense + race.defense + Math.floor((level - 1) / 5) + equipment.defense) * (1 + equipment.defensePercent + equipment.runeDefensePercent) * humanMultiplier),
-    crit: Math.min(.60, base.crit + race.crit + equipment.criticalChance + equipment.runeCriticalChance + passiveTotal('crit') + lowHealthCrit),
+    crit: Math.min(.60, base.crit + race.crit + equipment.criticalChance + equipment.runeCriticalChance + passiveTotal('crit') + lowHealthCrit + advancement.crit),
     dodge: Math.min(.45, Math.max(0, base.dodge + race.dodge + equipment.dodge + equipment.dodgePercent + passiveTotal('dodge'))),
     accuracy: Math.min(1.30, 1.05 + equipment.accuracy + equipment.accuracyPercent + (character?.job === 'hunter' ? .05 : 0)),
-    attackSpeed: EquipmentPolicy.getAttacksPerSecond(equippedWeapon, base.attackSpeed * 1.15) * (1 + equipment.attackSpeedBonus + equipment.attackSpeedPercent + passiveTotal('attackSpeed') + lowHealthSpeed),
+    attackSpeed: EquipmentPolicy.getAttacksPerSecond(equippedWeapon, base.attackSpeed * 1.15) * (1 + equipment.attackSpeedBonus + equipment.attackSpeedPercent + passiveTotal('attackSpeed') + lowHealthSpeed + advancement.attackSpeed),
     cooldownSpeed: (character?.race === 'elf' ? 1.03 : 1) * (1 + equipment.cooldownSpeedBonus + equipment.cooldownSpeedPercent),
     manaRegen: 1 + equipment.manaRegenBonus + equipment.manaRegenerationPercent,
     manaRegenFlat: equipment.manaRegenFlat,
@@ -2207,7 +2211,7 @@ function getCharacterStats(level, progress = getProgress(), character = getActiv
     killHealthRecoveryPercent: Math.max(0, equipment.killHealthRecoveryPercent),
     killResourceRecoveryPercent: Math.max(0, equipment.killResourceRecoveryPercent),
     poisonResistancePercent: Math.min(1, Math.max(0, equipment.poisonResistancePercent)),
-    armorPenetrationPercent: Math.min(ArmorPenetrationPolicy.ARMOR_IGNORE_CAP, Math.max(0, equipment.armorPenetrationPercent)),
+    armorPenetrationPercent: Math.min(ArmorPenetrationPolicy.ARMOR_IGNORE_CAP, Math.max(0, equipment.armorPenetrationPercent + advancement.armorPenetration)),
     lowHealthDamagePercent: Math.max(0, equipment.lowHealthDamagePercent),
     highHealthDamagePercent: Math.max(0, equipment.highHealthDamagePercent),
     criticalResourceRecoveryPercent: Math.max(0, equipment.criticalResourceRecoveryPercent),
@@ -2382,11 +2386,17 @@ function isItemWearableByCharacter(item, character, level = 1) {
   if (item.kind !== 'equipment') return true;
   if (item.durability !== undefined && Number(item.durability) <= 0) return false;
   if ((Number(item.requiredLevel) || 0) > (Number(level) || 1)) return false;
-  return Boolean(character && EquipmentPolicy.getEquipSlots(item, character.job).length);
+  return Boolean(character && (EquipmentPolicy.getEquipSlots(item, character.job).length || WarriorAdvancementPolicy.canEquipTwoHandedOffhand(item, character, getProgress())));
+}
+
+function getCompatibleEquipSlots(item, character, progress = getProgress()) {
+  const slots = EquipmentPolicy.getEquipSlots(item, character?.job);
+  if (WarriorAdvancementPolicy.canEquipTwoHandedOffhand(item, character, progress)) slots.push('offhand');
+  return [...new Set(slots)];
 }
 
 function getItemJunkContext(item, character, progress) {
-  return { level: progress.level, canEquip: Boolean(character && EquipmentPolicy.getEquipSlots(item, character.job).length) };
+  return { level: progress.level, canEquip: Boolean(character && getCompatibleEquipSlots(item, character, progress).length) };
 }
 
 function equipmentStackKey(item) {
@@ -2482,7 +2492,7 @@ function renderInventory(view = 'inventory') {
       : item.icon || '◈';
     const currentItem = item.kind === 'equipment' ? progress.equipment[item.slot] : null;
     const comparison = item.kind === 'equipment' && !equipped ? `<aside class="equipment-compare-tooltip"><strong>目前穿戴・${equipmentSlots[item.slot]?.label || item.slot}</strong>${currentItem ? `<div><span class="compare-item-icon"><img src="${itemImagePath(currentItem)}" alt=""></span><p><b>${currentItem.name}</b><small>${equipmentDetailsHtml(currentItem)}</small></p></div>` : '<p class="compare-empty">此欄位目前沒有穿戴裝備</p>'}</aside>` : '';
-    const equipSlots = item.kind === 'equipment' ? EquipmentPolicy.getEquipSlots(item, character?.job) : [];
+    const equipSlots = item.kind === 'equipment' ? getCompatibleEquipSlots(item, character, progress) : [];
     const equipControls = equipSlots.map((targetSlot) => `<button type="button" data-equip-id="${item.id}" data-equip-slot="${targetSlot}">${equipSlots.length > 1 ? targetSlot === 'weapon' ? '裝主手' : '裝副手' : '穿戴'}</button>`).join('');
     const runeButtons = item.kind === 'equipment' && (item.socketedRunes || []).length < (Number(item.sockets) || 0)
       ? Object.values(RunePolicy.RUNES).filter((rune) => progress.inventory.some((entry) => entry.id === rune.id && Number(entry.quantity) > 0)).map((rune) => `<button type="button" data-socket-item="${item.id}" data-socket-rune="${rune.id}">鑲嵌${rune.name}</button>`).join('') : '';
@@ -2530,7 +2540,7 @@ function renderCharacterAbilities() {
   if (!character) return;
   const progress = getProgress();
   const stats = getCharacterStats(progress.level, progress, character);
-  const equipment = getEquipmentStats(progress);
+  const equipment = getEquipmentStats(progress, character);
   const race = Object.values(factions).flat().find((item) => item.id === character.race);
   const job = classes.find((item) => item.id === character.job);
   const usesRage = WarriorResourcePolicy.isWarrior(character.job);
@@ -2539,7 +2549,7 @@ function renderCharacterAbilities() {
   document.querySelector('#inventory-title').textContent = '角色能力';
   document.querySelector('#inventory-content').innerHTML = `
     <section class="ability-summary">
-      <div class="ability-identity"><span class="creation-race-icon race-${character.race}" aria-hidden="true"></span><div><h3>${character.name}</h3><p>${race?.name || character.race}・${job?.name || character.job}・Lv. ${progress.level}</p><small>${race?.trait || ''}</small></div></div>
+      <div class="ability-identity"><span class="creation-race-icon race-${character.race}" aria-hidden="true"></span><div><h3>${character.name}</h3><p>${race?.name || character.race}・${progress.advancedClass ? Object.values(WarriorAdvancementPolicy.ADVANCED_CLASSES).find((entry) => entry.id === progress.advancedClass)?.name : job?.name || character.job}・Lv. ${progress.level}</p><small>${race?.trait || ''}</small></div></div>
       <div class="ability-grid">
         <article><small>最大生命</small><b>${stats.hp}</b><em>裝備 +${equipment.hp}</em></article>
         <article><small>${usesRage ? '最大怒氣' : usesEnergy ? '最大能量' : '最大魔力'}</small><b>${usesRage ? WarriorResourcePolicy.MAX_RAGE : usesEnergy ? AssassinEnergyPolicy.MAX_ENERGY : stats.mana}</b><em>${usesRage ? '攻擊與受到攻擊時取得' : usesEnergy ? `固定恢復 ${AssassinEnergyPolicy.ENERGY_REGEN_PER_SECOND}／秒` : `裝備 +${equipment.mana}`}</em></article>
@@ -2553,6 +2563,7 @@ function renderCharacterAbilities() {
         <article><small>攻擊速度</small><b>${stats.attackSpeed.toFixed(2)}</b><em>次／秒倍率</em></article>
         <article><small>技能冷卻速度</small><b>${Math.round(stats.cooldownSpeed * 100)}%</b><em>${character.race === 'elf' ? '種族加成' : '基礎值'}</em></article>
       </div>
+      ${character.job === 'warrior' && !progress.advancedClass ? `<section class="workshop-section"><h3>Lv45 第一次轉職</h3><p>條件：Lv45＋英雄之證Ⅰ、Ⅱ、Ⅲ。</p>${Object.values(WarriorAdvancementPolicy.ADVANCED_CLASSES).map((entry) => `<button type="button" data-warrior-advance="${entry.id}" ${WarriorAdvancementPolicy.canAdvance(character, progress) ? '' : 'disabled'}>轉職為${entry.name}</button>`).join('')}</section>` : ''}
     </section>`;
   modal.dataset.view = 'abilities';
   modal.classList.remove('hidden');
@@ -2722,7 +2733,7 @@ function equipItem(itemId, preferredSlot = null) {
   const item = progress.inventory[itemIndex];
   const character = getActiveCharacter();
   const targetSlot = preferredSlot || item.slot;
-  if (!character || !isItemWearableByCharacter(item, character, progress.level) || !EquipmentPolicy.canEquipInSlot(item, character.job, targetSlot)) {
+  if (!character || !isItemWearableByCharacter(item, character, progress.level) || !getCompatibleEquipSlots(item, character, progress).includes(targetSlot)) {
     showToast('這件裝備不適合目前職業。');
     return;
   }
@@ -3471,7 +3482,11 @@ function processEnemyDots() {
   });
 }
 
-function getKnownSkills(job, level) { return skillProgression[job] || []; }
+function getKnownSkills(job, level, progress = getProgress()) {
+  const base = skillProgression[job] || [];
+  if (job !== 'warrior' || !progress?.advancedClass) return base;
+  return [...base, ...WarriorAdvancementPolicy.getSkills(progress.advancedClass)];
+}
 
 function getMaxMana(job, level) {
   return getCharacterStats(level, getProgress(), { ...(getActiveCharacter() || {}), job }).mana;
@@ -3697,6 +3712,7 @@ function getSkillManaCost(skill) {
 }
 
 function getSkillResourceCost(job, skill) {
+  if (WarriorAdvancementPolicy.getSkill(skill?.id)) return 0;
   if (HunterArrowPolicy.isHunter(job)) {
     return HunterArrowPolicy.getSkillCost(skill.id) ?? 0;
   }
@@ -3748,7 +3764,7 @@ function updateManaExhaustion(maxMana) {
 function renderSkills(character, level) {
   const skillList = document.querySelector('#skill-list');
   const progress = getProgress();
-  const skills = skillProgression[character.job] || [];
+  const skills = getKnownSkills(character.job, level, progress);
   const activeSkills = skills.filter((skill) => skill.type === 'active');
   const passiveSkills = skills.filter((skill) => skill.type === 'passive');
   const orderedSkills = [...activeSkills, ...passiveSkills];
@@ -3789,7 +3805,7 @@ function refreshSkills(character, level) {
 }
 
 function getSkillEffectPercent(skill, upgradeLevel = 1) {
-  const effect = ClassSkillPolicy.getEffect(getActiveCharacter()?.job, skill.id, upgradeLevel) || {};
+  const effect = ClassSkillPolicy.getEffect(getActiveCharacter()?.job, skill.id, upgradeLevel) || WarriorAdvancementPolicy.getEffect(skill.id, upgradeLevel) || {};
   if (effect.power) return Math.round(effect.power * 100);
   if (effect.healPower) return Math.round(effect.healPower * 100);
   return 0;
@@ -3797,7 +3813,7 @@ function getSkillEffectPercent(skill, upgradeLevel = 1) {
 
 function getSkillDescription(job, skill) {
   const level = getSkillUpgradeLevel(getProgress(), job, skill);
-  const effect = ClassSkillPolicy.getEffect(job, skill.id, level) || {};
+  const effect = ClassSkillPolicy.getEffect(job, skill.id, level) || WarriorAdvancementPolicy.getEffect(skill.id, level) || {};
   const parts = [];
   if (effect.power) parts.push(`造成 ${Math.round(effect.power * 100)}% 傷害`);
   if (effect.healPower) parts.push(`治療量為魔法攻擊 ${Math.round(effect.healPower * 100)}%`);
@@ -3819,13 +3835,14 @@ function renderSkillDetailModal() {
   const content = document.querySelector('#skill-detail-content');
   const character = getActiveCharacter();
   const progress = getProgress();
-  const skill = (skillProgression[character?.job] || []).find((entry) => getSkillKey(character.job, entry) === selectedSkillKey);
+  const skill = getKnownSkills(character?.job, progress.level, progress).find((entry) => getSkillKey(character.job, entry) === selectedSkillKey);
   if (!modal || !content || !character || !skill || progress.level < skill.level) {
     closeSkillDetailModal();
     return;
   }
 
   const upgradeLevel = getSkillUpgradeLevel(progress, character.job, skill);
+  const advancedSkillUpgradePending = Boolean(WarriorAdvancementPolicy.getSkill(skill.id));
   const requirement = SkillUpgradePolicy.getUpgradeRequirement(upgradeLevel);
   const upgradeProgress = { ...progress, unlockedChapter: getUnlockedChapter(progress) };
   const validation = SkillUpgradePolicy.canUpgrade(upgradeProgress, upgradeLevel);
@@ -3834,7 +3851,9 @@ function renderSkillDetailModal() {
   const manaCost = skill.type === 'active' ? getSkillResourceCost(character.job, skill) : 0;
   const currentEffect = getSkillEffectPercent(skill, upgradeLevel);
   const materialStatus = requirement ? requirement.materials.map((material) => `${material.icon} ${material.name} ${SkillUpgradePolicy.getQuantity(progress.inventory, material.id)}/${material.amount}`).join('、') : '';
-  const upgradeStatus = !requirement
+  const upgradeStatus = advancedSkillUpgradePending
+    ? '<p>進階技能升級材料數量、金幣與成功率尚未設定。</p>'
+    : !requirement
     ? '<p>目前已達技能最高等級。</p>'
     : !specialization.ok
       ? `<p>已選擇其他${skill.type === 'active' ? '主動' : '被動'}技能突破：${specialization.occupied.name}。</p>`
@@ -3850,7 +3869,7 @@ function renderSkillDetailModal() {
       <div><dt>消耗</dt><dd>${skill.type === 'active' && manaCost > 0 ? `${manaCost} ${getCombatResourceUnit(character.job)}` : '無'}</dd></div>
     </dl>
     <section class="skill-detail-copy"><h3>技能說明</h3><p>${getSkillDescription(character.job, skill)}</p></section>
-    <section class="skill-upgrade-summary"><h3>技能 Lv${upgradeLevel}</h3>${upgradeStatus}<button id="skill-detail-upgrade" type="button" ${validation.ok && specialization.ok ? '' : 'disabled'}>${requirement ? `升級至 Lv${requirement.targetLevel}` : '已達上限'}</button></section>`;
+    <section class="skill-upgrade-summary"><h3>技能 Lv${upgradeLevel}</h3>${upgradeStatus}<button id="skill-detail-upgrade" type="button" ${!advancedSkillUpgradePending && validation.ok && specialization.ok ? '' : 'disabled'}>${advancedSkillUpgradePending ? '升級需求待定' : requirement ? `升級至 Lv${requirement.targetLevel}` : '已達上限'}</button></section>`;
   modal.classList.remove('hidden');
 }
 
@@ -4498,9 +4517,11 @@ function applyDamageToMonster(index, baseDamage, profile, options = {}) {
   const frostResonanceMultiplier = elementalMastery?.resonance && (now < skillState.slowedUntil || now < skillState.frozenUntil) && Math.random() < .1 ? attackerStats.criticalDamageMultiplier : 1;
   const lightningResonanceMultiplier = elementalMastery?.resonance && now < (skillState.paralyzedUntil || 0) && options.attackKind !== 'resonance' && Math.random() < .1 ? 1.3 : 1;
   const conditionalDamageMultiplier = Number(options.conditionalDamageMultiplier) || ConditionalDamagePolicy.getDamageMultiplier({ currentHp: attacker?.currentHp, maxHp: attacker?.maxHp, lowHealthDamagePercent: attackerStats.lowHealthDamagePercent, highHealthDamagePercent: attackerStats.highHealthDamagePercent, attackKind: options.attackKind });
+  const warriorAdvancement = WarriorAdvancementPolicy.getPassiveStats(progress, attacker?.maxHp > 0 ? attacker.currentHp / attacker.maxHp : 1);
+  const warriorRuntime = WarriorAdvancementPolicy.getRuntimeBonuses(attacker, options.attackKind, now);
   const craftedEpicMultiplier = ChapterThreeCraftedEpicAbilityPolicy.getOutgoingDamageMultiplier(attacker, options.attackKind, { execution: options.craftedEpicExecution }, now);
   const specialEquipmentMultiplier = Math.max(0, Number(options.specialEquipmentMultiplier) || 1);
-  const adjustedBaseDamage = magicAdjustedDamage * (1 + (attackerStats.damageBonus || 0)) * rankMultiplier * attackKindMultiplier * conditionalDamageMultiplier * craftedEpicMultiplier * specialEquipmentMultiplier * markMultiplier * vulnerabilityMultiplier * controlledMultiplier * statusElementMultiplier * frostResonanceMultiplier * lightningResonanceMultiplier;
+  const adjustedBaseDamage = magicAdjustedDamage * (1 + warriorRuntime.attack) * (1 + (attackerStats.damageBonus || 0) + warriorAdvancement.damage + warriorRuntime.damage) * rankMultiplier * attackKindMultiplier * conditionalDamageMultiplier * craftedEpicMultiplier * specialEquipmentMultiplier * markMultiplier * vulnerabilityMultiplier * controlledMultiplier * statusElementMultiplier * frostResonanceMultiplier * lightningResonanceMultiplier;
   if (enemy.mapId) {
     const hitChance = ChapterOneLevelPolicy.getPlayerHitChance(progress.level, enemy.level, attackerStats.accuracy, 0);
     if (Math.random() >= hitChance) {
@@ -4515,7 +4536,7 @@ function applyDamageToMonster(index, baseDamage, profile, options = {}) {
   const depthsMultipliers = BlackForestDepthsPolicy.getCombatMultipliers(enemy.id, battle.enemyHps[index], enemy.maxHp, getBlackForestDepthsCombatContext());
   const armorIgnore = ArmorPenetrationPolicy.getTotalArmorIgnore({
     skillArmorIgnore: options.armorIgnore,
-    equipmentArmorPenetration: attackerStats.armorPenetrationPercent,
+    equipmentArmorPenetration: attackerStats.armorPenetrationPercent + warriorRuntime.armorPenetration,
     attackKind: options.attackKind
   });
   const captainShieldActive = enemy.id === 'blackstoneCaptain' && Date.now() < (battle.enemyCaptainShieldUntil?.[index] || 0);
@@ -4611,12 +4632,24 @@ function useAutoSkillForMember(member, now = Date.now()) {
     const cost = getSkillResourceCost(member.job, skill);
     if (member.resourceType === 'arrows' && !HunterArrowPolicy.canUseSkill(member.resourceCurrent, skill.id, progress.equipment)) continue;
     if (member.resourceType !== 'arrows' && member.resourceCurrent < cost) continue;
+    if (skill.id === 'weapon-stance') {
+      if (!WarriorAdvancementPolicy.applyWeaponStance(member, getSkillUpgradeLevel(progress, member.job, skill), now)) continue;
+      member.skillCooldowns[skill.id] = now + skill.cooldown * 1000; member.globalSkillReadyAt = now + 1000; logBattle(`⚔ ${member.name}施放【武器架勢】。`, 'system'); return true;
+    }
+    if (skill.id === 'blood-rage') {
+      WarriorAdvancementPolicy.applyBloodRage(member, getSkillUpgradeLevel(progress, member.job, skill), now);
+      member.skillCooldowns[skill.id] = now + skill.cooldown * 1000; member.globalSkillReadyAt = now + 1000; logBattle(`🩸 ${member.name}施放【血怒】。`, 'system'); return true;
+    }
     const targets = aliveEnemyIndexesByAge().slice(0, skillEffect.targets || skill.targets || 1);
     if (!targets.length) continue;
     const craftedEpicExecution = ChapterThreeCraftedEpicAbilityPolicy.beginSkillExecution(member, now, { eligible: skill.id !== 'companion' });
     const epicWeaponExecution = ChapterThreeEpicWeaponPolicy.prepareSkill(member, targets.map((index) => getEnemySkillState(index)), now);
-    const critical = Math.random() < stats.crit;
+    const grandmasterSkillBonus = now < (member.weaponGrandmasterSkillUntil || 0) ? .10 : 0;
+    const runtimeBonuses = WarriorAdvancementPolicy.getRuntimeBonuses(member, 'skill', now);
+    const critical = Math.random() < Math.min(.95, stats.crit + runtimeBonuses.crit + (skillEffect.skillCrit || 0));
     let damagePower = Number(skillEffect.power) || Number(skill.power) || 1;
+    const berserkerSlash = skill.id === 'berserker-slash' ? WarriorAdvancementPolicy.getBerserkerSlash(getSkillUpgradeLevel(progress, member.job, skill), member.currentHp / member.maxHp) : null;
+    if (berserkerSlash) damagePower *= berserkerSlash.damageMultiplier;
     if (skill.id === 'piercing-shot' && aliveEnemyIndexesByAge().length === 1) damagePower *= skillEffect.singleTargetBonus ? 1 + skillEffect.singleTargetBonus : 1;
     if (skill.id === 'whirlwind') damagePower *= 1 + Math.min(skillEffect.maxTargetBonus || 0, Math.max(0, targets.length - 1) * (skillEffect.perExtraTargetBonus || 0));
     const damage = Math.max(1, Math.ceil(stats.attack * damagePower * (critical ? stats.criticalDamageMultiplier : 1)));
@@ -4632,10 +4665,10 @@ function useAutoSkillForMember(member, now = Date.now()) {
       return { index, result: applyDamageToMonster(index, damage * chainMultiplier * piercingMultiplier * getRuneOutgoingMultiplier(member, index), profile, {
         attacker: member,
         attackKind: 'skill',
-        armorIgnore: skillEffect.armorIgnore,
+        armorIgnore: (skillEffect.armorIgnore || 0) + (berserkerSlash?.armorIgnore || 0),
         conditionalDamageMultiplier,
         craftedEpicExecution,
-        specialEquipmentMultiplier: epicWeaponExecution.multipliers[targetOrder] || 1,
+        specialEquipmentMultiplier: (epicWeaponExecution.multipliers[targetOrder] || 1) * (1 + grandmasterSkillBonus),
         controlledBonus: skillEffect.controlledBonus,
         showDamage: !['heavy-strike', 'whirlwind', 'charge', 'power-shot', 'multi-shot', 'piercing-shot', 'backstab', 'shadow-dance', 'poison-blade', 'fireball', 'blizzard', 'chain-lightning', 'holy-light', 'holy-nova'].includes(skill.id)
       }) };
@@ -4643,6 +4676,10 @@ function useAutoSkillForMember(member, now = Date.now()) {
     const hits = resolvedTargets.filter((target) => !target.result.evaded);
     ChapterThreeEpicWeaponPolicy.completeSkill(member, epicWeaponExecution, targets.map((index) => getEnemySkillState(index)), resolvedTargets.map((target) => !target.result.evaded && target.result.finalDamage > 0));
     const totalDamage = hits.reduce((sum, target) => sum + target.result.finalDamage, 0);
+    if (grandmasterSkillBonus && hits.length) member.weaponGrandmasterSkillUntil = 0;
+    const grandmaster = WarriorAdvancementPolicy.getEffect('weapon-grandmaster', progress.skillLevels?.['warrior:weapon-grandmaster']);
+    if (hits.length && grandmaster?.mastery && WarriorAdvancementPolicy.isAdvanced(progress, 'weapon-master') && WarriorAdvancementPolicy.weaponFamily(progress.equipment?.weapon) === 'axe') member.weaponGrandmasterBasicUntil = now + 5000;
+    if (skill.id === 'fatal-slash' && critical && skillEffect.mastery && hits.length) member.fatalSlashUntil = now + 5000;
     if (hits.length) triggerRuneFrenzy(member, critical, now);
     hits.forEach((target) => applyEnemySkillState(target.index, skillEffect, now));
     if (skill.id === 'chain-lightning') hits.forEach((target, order) => {
@@ -4730,6 +4767,7 @@ function useAutoSkillForMember(member, now = Date.now()) {
         logBattle(`◆ ${member.name}觸發【腐化迅捷】，攻擊速度提高 15%！`, 'system');
       }
       hits.forEach((target) => tryApplyThornCorrosion(member, target.index, 'skill', target.result.finalDamage, now));
+      resolvedTargets.filter(({ index, result }) => !result.evaded && battle.enemyHps[index] <= 0).forEach(() => WarriorAdvancementPolicy.resolveKill(member));
     }
     const echoRecovery = ChapterTwoSpecialEquipmentPolicy.rollDeepForestEcho(member.progress.equipment);
     if (echoRecovery && member.resourceType === 'mana') {
@@ -4974,8 +5012,11 @@ function processPartyMemberAttacks(now = Date.now()) {
     const instinctTriggered = Boolean(hunterInstinct && member.hunterAttackCount % hunterInstinct.interval === 0);
     const basicTargetKey = `${battle.enemyTypes[targetIndex]}:${battle.enemySpawnedAt[targetIndex]}:${targetIndex}`;
     const specialBasicExecution = ChapterThreeSpecialEquipmentPolicy.beginMainHandBasicAttack(member, basicTargetKey);
-    const critical = specialBasicExecution.guaranteedCritical || (instinctTriggered && hunterInstinct.guaranteedCrit ? true : Math.random() < Math.min(.95, member.stats.crit + (desperate?.crit || 0)));
-    const temporaryBasicBonus = (now < (member.skillHasteUntil || 0) ? member.skillBasicDamageBonus || 0 : 0) + (member.nextBasicDamageBonus || 0) + (member.nextHunterAttackBonus || 0) + (desperate?.attack || 0);
+    const warriorRuntime = WarriorAdvancementPolicy.getRuntimeBonuses(member, 'basic', now);
+    const critical = specialBasicExecution.guaranteedCritical || (instinctTriggered && hunterInstinct.guaranteedCrit ? true : Math.random() < Math.min(.95, member.stats.crit + warriorRuntime.crit + (desperate?.crit || 0)));
+    const fatalSlashBonus = now < (member.fatalSlashUntil || 0) ? .50 : 0;
+    const grandmasterBasicBonus = now < (member.weaponGrandmasterBasicUntil || 0) ? .20 : 0;
+    const temporaryBasicBonus = (now < (member.skillHasteUntil || 0) ? member.skillBasicDamageBonus || 0 : 0) + (member.nextBasicDamageBonus || 0) + (member.nextHunterAttackBonus || 0) + (desperate?.attack || 0) + fatalSlashBonus + grandmasterBasicBonus;
     const baseHit = Math.max(1, Math.ceil(attackWithWeaponRoll * (1 + temporaryBasicBonus) * (orcRage ? 1.10 : 1) * (critical ? member.stats.criticalDamageMultiplier : 1)));
     member.nextBasicDamageBonus = 0;
     member.nextHunterAttackBonus = 0;
@@ -4989,6 +5030,10 @@ function processPartyMemberAttacks(now = Date.now()) {
     if (epicWeaponHit.combo && battle.enemyHps[targetIndex] > 0) applyDamageToMonster(targetIndex, Math.max(1, (rolledWeaponAttack ?? displayedWeaponAttack) * .5), profile, { attacker: member, attackKind: 'weapon-proc', canEvade: false, canParry: false });
     if (epicWeaponHit.wound && battle.enemyHps[targetIndex] > 0) applyDot(targetIndex, 'earthsplit-wound', epicWeaponHit.wound.damage, epicWeaponHit.wound.duration, 1, { source: member, replaceOnlyIfStronger: true, refreshDuration: true });
     if (!result.evaded) {
+      if (fatalSlashBonus) member.fatalSlashUntil = 0;
+      if (grandmasterBasicBonus) member.weaponGrandmasterBasicUntil = 0;
+      const grandmaster = WarriorAdvancementPolicy.getEffect('weapon-grandmaster', member.progress.skillLevels?.['warrior:weapon-grandmaster']);
+      if (critical && grandmaster?.mastery && WarriorAdvancementPolicy.isAdvanced(member.progress, 'weapon-master') && WarriorAdvancementPolicy.weaponFamily(member.progress.equipment?.weapon) === 'sword') member.weaponGrandmasterSkillUntil = now + 5000;
       triggerRuneFrenzy(member, critical, now);
       const swiftness = ChapterTwoSpecialEquipmentPolicy.rollCorruptedSwiftness(member.progress.equipment);
       if (swiftness) {
@@ -5024,6 +5069,12 @@ function processPartyMemberAttacks(now = Date.now()) {
           applyDamageToMonster(targetIndex, offhandStrike.damage, profile, { attacker: member, attackKind: 'offhand', canParry: false });
         }
       }
+      const titanStrike = WarriorAdvancementPolicy.rollTitanStrike(member, battle.enemyHps[targetIndex] > 0, true, Math.random);
+      if (titanStrike) {
+        const titanCritical = Math.random() < Math.min(.95, member.stats.crit + titanStrike.critBonus);
+        applyDamageToMonster(targetIndex, member.stats.attack * titanStrike.power * (titanCritical ? member.stats.criticalDamageMultiplier : 1), profile, { attacker: member, attackKind: 'offhand', canParry: false });
+      }
+      if (battle.enemyHps[targetIndex] <= 0) WarriorAdvancementPolicy.resolveKill(member);
     }
     logPartyDebug('普通攻擊', {
       attackerId: member.id,
@@ -5043,7 +5094,8 @@ function processPartyMemberAttacks(now = Date.now()) {
     const corruptedSwiftnessMultiplier = now < (member.corruptedSwiftnessUntil || 0) ? 1 + (member.corruptedSwiftnessBonus || 0) : 1;
     const runeFrenzyMultiplier = now < (member.runeFrenzyUntil || 0) ? 1.08 : 1;
     const huntingRhythmMultiplier = 1 + ChapterThreeEpicWeaponPolicy.getHuntingRhythmSpeed(member, now);
-    PartyPolicy.scheduleNextAttack(member, now, member.attackSpeed * skillHasteMultiplier * blessingSpeedMultiplier * corruptedSwiftnessMultiplier * runeFrenzyMultiplier * huntingRhythmMultiplier * (1 + (desperate?.speed || 0)), exhaustedMultiplier * trailSlowMultiplier);
+    const warriorSpeedMultiplier = 1 + WarriorAdvancementPolicy.getRuntimeBonuses(member, 'basic', now).attackSpeed;
+    PartyPolicy.scheduleNextAttack(member, now, member.attackSpeed * skillHasteMultiplier * blessingSpeedMultiplier * corruptedSwiftnessMultiplier * runeFrenzyMultiplier * huntingRhythmMultiplier * warriorSpeedMultiplier * (1 + (desperate?.speed || 0)), exhaustedMultiplier * trailSlowMultiplier);
   }
 }
 
@@ -5587,6 +5639,7 @@ function endBattleAfterPlayerDefeat(now = Date.now()) {
     ChapterThreeCraftedEpicAbilityPolicy.clear(member);
     ChapterThreeSpecialEquipmentPolicy.clearCombatState(member);
     ChapterThreeEpicWeaponPolicy.clear(member);
+    WarriorAdvancementPolicy.clear(member);
     member.currentHp = member.maxHp;
     member.resourceCurrent = member.resourceType === 'rage' ? 0 : getMaxCombatResourceForMember(member.character, member.progress);
     member.shield = 0;
@@ -5624,6 +5677,7 @@ function defeatPartyMember(member, now = Date.now()) {
   ChapterThreeCraftedEpicAbilityPolicy.clear(member);
   ChapterThreeSpecialEquipmentPolicy.clearCombatState(member);
   ChapterThreeEpicWeaponPolicy.clear(member);
+  WarriorAdvancementPolicy.clear(member);
   member.alive = false;
   member.targetIndex = -1;
   member.bleed = null;
@@ -5678,6 +5732,7 @@ function resetPartyAfterDefeat(now = Date.now()) {
     ChapterThreeCraftedEpicAbilityPolicy.clear(member);
     ChapterThreeSpecialEquipmentPolicy.clearCombatState(member);
     ChapterThreeEpicWeaponPolicy.clear(member);
+    WarriorAdvancementPolicy.clear(member);
     member.currentHp = member.maxHp;
     member.resourceCurrent = member.resourceType === 'rage' ? 0 : getMaxCombatResourceForMember(member.character, member.progress);
     member.shield = 0;
@@ -5971,6 +6026,7 @@ function enemyAttackTick() {
       damageReduction: Math.min(.9, stats.damageReduction
         + ChapterTwoSpecialEquipmentPolicy.getIncomingDamageReduction(target.progress.equipment, target.currentHp / target.maxHp)
         + ChapterThreeCraftedEpicAbilityPolicy.getWastelandDamageReduction(target, now)
+        + WarriorAdvancementPolicy.getUnyieldingReduction(target, now)
         + runeIronWallReduction + runeUnyieldingReduction
         + (now < (target.manaShieldReductionUntil || 0) ? target.manaShieldDamageReduction || 0 : 0))
     }).finalDamage;
@@ -5978,7 +6034,9 @@ function enemyAttackTick() {
     const absorbed = Math.min(target.shield || 0, damage);
     target.shield = Math.max(0, (target.shield || 0) - absorbed);
     damage -= absorbed;
+    const hpBeforeEnemyHit = target.currentHp;
     target.currentHp = Math.max(0, target.currentHp - damage);
+    WarriorAdvancementPolicy.crossUnyielding(target, hpBeforeEnemyHit, now);
     resolveEnemyDirectHitRecovery(target, damage, stats);
     ChapterThreeSpecialEquipmentPolicy.resolveEnemyAttackOutcome(target, { actualDamage: damage, parried, dodged: dodged && !blinkDodged }, now);
     const directDamageLeech = EliteAffixPolicy.getDirectDamageLeech(enemy.eliteAffixes);
@@ -6015,6 +6073,12 @@ function enemyAttackTick() {
     if (counterTargetAlive && target.job === 'warrior' && target.level >= 20 && parried) {
       const counter = ClassSkillPolicy.getEffect('warrior', 'parry', Number(target.progress.skillLevels?.['warrior:parry']) || 1);
       applyDamageToMonster(enemyIndex, target.stats.attack * counter.counterPower, getPlayerAttackProfile(target.character), { attacker: target, attackKind: 'counter', canParry: false });
+      const shieldCounter = WarriorAdvancementPolicy.getShieldCounter(target);
+      if (shieldCounter && battle.enemyHps[enemyIndex] > 0) {
+        const shieldCritical = Math.random() < target.stats.crit;
+        const shieldResult = applyDamageToMonster(enemyIndex, target.stats.attack * shieldCounter.counterPower * (shieldCritical ? target.stats.criticalDamageMultiplier : 1), getPlayerAttackProfile(target.character), { attacker: target, attackKind: 'shield-counter', canParry: false });
+        if (!shieldResult.evaded && shieldResult.finalDamage > 0 && shieldCounter.armorBreak) getEnemySkillState(enemyIndex).armorShatterUntil = now + shieldCounter.armorBreakDuration * 1000;
+      }
     }
     if (counterTargetAlive && target.job === 'assassin' && target.level >= 8 && dodged) {
       const counter = ClassSkillPolicy.getEffect('assassin', 'evasion', Number(target.progress.skillLevels?.['assassin:evasion']) || 1);
@@ -6354,8 +6418,9 @@ document.querySelector('#skill-detail-modal').addEventListener('click', (event) 
   button.disabled = true;
   const character = getActiveCharacter();
   const progress = getProgress();
-  const skill = (skillProgression[character?.job] || []).find((entry) => getSkillKey(character.job, entry) === selectedSkillKey);
+  const skill = getKnownSkills(character?.job, progress.level, progress).find((entry) => getSkillKey(character.job, entry) === selectedSkillKey);
   if (!skill || progress.level < skill.level) return;
+  if (WarriorAdvancementPolicy.getSkill(skill.id)) { showToast('進階技能升級需求尚未設定。'); renderSkillDetailModal(); return; }
   progress.unlockedChapter = getUnlockedChapter(progress);
   const currentLevel = getSkillUpgradeLevel(progress, character.job, skill);
   const specialization = currentLevel === 5 ? ClassSkillPolicy.canSpecialize(progress.skillLevels, character.job, skill.id) : { ok: true };
@@ -6500,6 +6565,13 @@ document.querySelector('#inventory-modal').addEventListener('click', (event) => 
   if (event.target === event.currentTarget) event.currentTarget.classList.add('hidden');
   if (event.target.closest('[data-open-pre-job-trial]')) { renderPreJobTrialPanel(); return; }
   if (event.target.closest('[data-exchange-trial-cores]')) { exchangePreJobTrialCores(); return; }
+  const advanceButton = event.target.closest('[data-warrior-advance]');
+  if (advanceButton) {
+    const progress = getProgress();
+    const result = WarriorAdvancementPolicy.advance(getActiveCharacter(), progress, advanceButton.dataset.warriorAdvance);
+    if (!result.ok) { showToast('轉職條件尚未完成。'); return; }
+    saveProgress(progress); renderCharacterAbilities(); renderSkills(getActiveCharacter(), progress.level); showToast('第一次轉職完成。'); return;
+  }
   const regionHubButton = event.target.closest('[data-open-map-region]');
   if (regionHubButton) {
     if (regionHubButton.dataset.openMapRegion === 'black-forest') renderBlackForestRegions();

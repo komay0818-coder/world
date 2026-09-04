@@ -5,7 +5,7 @@ const source = fs.readFileSync(path.join(__dirname, '..', 'script.js'), 'utf8');
 
 assert.match(source, /function applyEnemySkillState\(/, 'active skill states share one battle integration');
 assert.match(source, /stunnedUntil[\s\S]*frozenUntil[\s\S]*continue;/, 'stun and freeze prevent enemy actions');
-assert.match(source, /armorIgnore: skillEffect\.armorIgnore/, 'piercing shot forwards defense ignore');
+assert.match(source, /armorIgnore: \(skillEffect\.armorIgnore \|\| 0\) \+ \(berserkerSlash\?\.armorIgnore \|\| 0\)/, 'skills forward their own defense ignore and the conditional berserker bonus');
 assert.match(source, /chainMultiplier[\s\S]*piercingMultiplier/, 'chain and piercing target scaling are applied independently');
 assert.match(source, /attackKind: 'counter'/, 'counter attacks have a non-recursive attack source');
 assert.match(source, /attackKind: 'offhand'/, 'offhand attacks have a non-recursive attack source');
