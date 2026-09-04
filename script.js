@@ -1944,6 +1944,7 @@ function loadDungeonWave(wave) {
   battle.enemyBoarEnraged = enemyTypes.map(() => false);
   battle.goblinScoutSummons = 0;
   battle.enemyNextAttackAt = createEnemyAttackSchedule(enemyTypes, now, battle.dungeonId, battle.enemyLevels);
+  enemyTypes.forEach((_, index) => applyPendingRoguePlagueSpread(index, now));
   battle.targetIndexes = [];
   battle.waveTransitioning = false;
   const waveRange = battle.dungeonId === 'goblin-camp' ? `第 ${wave} 波` : `第 ${wave}／${definition.waves} 波`;
@@ -3460,11 +3461,19 @@ function applyDot(index, type, damage, duration, maxStacks = 1, options = {}) {
   battle.enemyDots[index] = dots;
 }
 
+function applyPendingRoguePlagueSpread(index, now = Date.now()) {
+  const member = (battle.partyMembers || []).find((candidate) => candidate.alive && candidate.plagueSpreadPending);
+  if (!member || !RogueAdvancementPolicy.consumePlague(member)) return false;
+  const poisonBlade = ClassSkillPolicy.getEffect('assassin', 'poison-blade', Number(member.progress.skillLevels?.['assassin:poison-blade']) || 1) || {};
+  applyDot(index, 'poison', Math.max(1, Math.ceil(member.stats.attack * .12 * member.stats.dotMultiplier)), 3, 3, { source: member, defenseReduction: poisonBlade.defensePerStack || 0, tickIntervalMs: 2000, now, refreshDuration: true, refreshAllSameType: true });
+  return true;
+}
+
 function processEnemyDots() {
   const now = Date.now();
   battle.enemyDots.forEach((dots, index) => {
     if (battle.enemyHps[index] <= 0 || !dots.length) return;
-    let damage = 0;
+    const damageBySource = new Map();
     dots.forEach((dot) => {
       let tickCount = 0;
       if (dot.tickIntervalMs) {
@@ -3483,20 +3492,23 @@ function processEnemyDots() {
         multiplier += RogueAdvancementPolicy.getEffect('venom-mastery', source.progress.skillLevels?.['assassin:venom-mastery'])?.poisonDamage || 0;
       }
       if (source) multiplier += RogueAdvancementPolicy.getTargetBonuses(source, dots, getEnemySkillState(index), battle.enemyHps[index] / getEnemyDefinition(index).maxHp, 'dot', now).dotDamage;
-      damage += dot.damage * tickCount * multiplier;
+      const key = dot.source || null;
+      damageBySource.set(key, (damageBySource.get(key) || 0) + dot.damage * tickCount * multiplier);
     });
     battle.enemyDots[index] = dots.filter((dot) => dot.remaining > 0);
-    if (damage <= 0) return;
-    const source = dots.find((dot) => dot.source)?.source || null;
-    const sourceMastery = source?.job === 'mage' && source.level >= 15
-      ? ClassSkillPolicy.getEffect('mage', 'elemental-mastery', Number(source.progress.skillLevels?.['mage:elemental-mastery']) || 1)
-      : null;
-    applyDamageToMonster(index, damage * (sourceMastery?.resonance && dots.some((dot) => dot.type === 'burn') ? 1.2 : 1), { damageType: 'periodic', attackRange: 'none' }, {
-      attacker: source,
-      canEvade: false,
-      canParry: false,
-      logDefense: false,
-      effectType: 'dot'
+    damageBySource.forEach((damage, source) => {
+      if (damage <= 0) return;
+      const sourceMastery = source?.job === 'mage' && source.level >= 15
+        ? ClassSkillPolicy.getEffect('mage', 'elemental-mastery', Number(source.progress.skillLevels?.['mage:elemental-mastery']) || 1)
+        : null;
+      const hasSourceBurn = dots.some((dot) => dot.source === source && dot.type === 'burn');
+      applyDamageToMonster(index, damage * (sourceMastery?.resonance && hasSourceBurn ? 1.2 : 1), { damageType: 'periodic', attackRange: 'none' }, {
+        attacker: source,
+        canEvade: false,
+        canParry: false,
+        logDefense: false,
+        effectType: 'dot'
+      });
     });
   });
 }
@@ -4411,6 +4423,7 @@ function processEnemyRespawns() {
       battle.enemyHps[index] = getEnemyDefinition(index).maxHp;
       battle.enemySpawnedAt[index] = Date.now();
       battle.enemyDots[index] = [];
+      applyPendingRoguePlagueSpread(index, battle.enemySpawnedAt[index]);
       if (battle.enemySkillStates) battle.enemySkillStates[index] = null;
       if (battle.enemyBoarEnraged) battle.enemyBoarEnraged[index] = false;
       battle.enemyNextAttackAt[index] = Date.now() + getMonsterAttackInterval(getEnemyDefinition(index));
@@ -4524,9 +4537,6 @@ function applyDamageToMonster(index, baseDamage, profile, options = {}) {
   const attackerStats = attacker?.stats || getCharacterStats(progress.level, progress, character);
   const skillState = getEnemySkillState(index);
   const now = Date.now();
-  if (attacker && ['basic', 'skill'].includes(options.attackKind) && RogueAdvancementPolicy.consumePlague(attacker)) {
-    applyDot(index, 'poison', Math.max(1, Math.ceil(attackerStats.attack * .12 * attackerStats.dotMultiplier)), 3, 1, { source: attacker, tickIntervalMs: 2000, now, refreshDuration: true });
-  }
   const elementalMastery = attacker?.job === 'mage' && attacker.level >= 15
     ? ClassSkillPolicy.getEffect('mage', 'elemental-mastery', Number(progress.skillLevels?.['mage:elemental-mastery']) || 1)
     : null;
@@ -4545,7 +4555,8 @@ function applyDamageToMonster(index, baseDamage, profile, options = {}) {
   const warriorRuntime = WarriorAdvancementPolicy.getRuntimeBonuses(attacker, options.attackKind, now);
   const craftedEpicMultiplier = ChapterThreeCraftedEpicAbilityPolicy.getOutgoingDamageMultiplier(attacker, options.attackKind, { execution: options.craftedEpicExecution }, now);
   const specialEquipmentMultiplier = Math.max(0, Number(options.specialEquipmentMultiplier) || 1);
-  const adjustedBaseDamage = magicAdjustedDamage * (1 + warriorRuntime.attack) * (1 + (attackerStats.damageBonus || 0) + warriorAdvancement.damage + warriorRuntime.damage) * rankMultiplier * attackKindMultiplier * conditionalDamageMultiplier * craftedEpicMultiplier * specialEquipmentMultiplier * markMultiplier * vulnerabilityMultiplier * controlledMultiplier * statusElementMultiplier * frostResonanceMultiplier * lightningResonanceMultiplier;
+  const deathMarkMultiplier = RogueAdvancementPolicy.getDeathMarkDamageMultiplier(attacker, skillState, now);
+  const adjustedBaseDamage = magicAdjustedDamage * (1 + warriorRuntime.attack) * (1 + (attackerStats.damageBonus || 0) + warriorAdvancement.damage + warriorRuntime.damage) * rankMultiplier * attackKindMultiplier * conditionalDamageMultiplier * craftedEpicMultiplier * specialEquipmentMultiplier * deathMarkMultiplier * markMultiplier * vulnerabilityMultiplier * controlledMultiplier * statusElementMultiplier * frostResonanceMultiplier * lightningResonanceMultiplier;
   if (enemy.mapId) {
     const hitChance = ChapterOneLevelPolicy.getPlayerHitChance(progress.level, enemy.level, attackerStats.accuracy, 0);
     if (Math.random() >= hitChance) {
@@ -4566,7 +4577,7 @@ function applyDamageToMonster(index, baseDamage, profile, options = {}) {
   const captainShieldActive = enemy.id === 'blackstoneCaptain' && Date.now() < (battle.enemyCaptainShieldUntil?.[index] || 0);
   const assassinDashActive = enemy.id === 'blackstoneVenombladeAssassin' && Date.now() < (battle.enemyAssassinDashUntil?.[index] || 0);
   const armorShatterMultiplier = now < (skillState.armorShatterUntil || 0) ? .85 : 1;
-  const rogueDefenseMultiplier = 1 - RogueAdvancementPolicy.getTargetBonuses(attacker, battle.enemyDots[index], skillState, battle.enemyHps[index] / enemy.maxHp, options.attackKind, now).defenseReduction;
+  const rogueDefenseMultiplier = 1 - RogueAdvancementPolicy.getTargetDefenseReduction(battle.enemyDots[index]);
   const defendedEnemy = {
     ...enemy,
     defense: Math.max(0, Math.round(enemy.defense * armorShatterMultiplier * (1 - armorIgnore) * rogueDefenseMultiplier * (1 - Math.min(.9, (battle.enemyDots[index] || []).filter((dot) => dot.type === 'poison').reduce((total, dot) => total + (dot.defenseReduction || 0), 0))) * trailMultipliers.defense * spiderNestMultipliers.defense * strongholdMultipliers.defense * forestAltarMultipliers.defense * depthsMultipliers.defense)),
@@ -4697,14 +4708,14 @@ function useAutoSkillForMember(member, now = Date.now()) {
       const chainMultiplier = skill.id === 'chain-lightning' ? 1 + targetOrder * (skillEffect.bounceBonus || 0) : 1;
       const piercingMultiplier = skill.id === 'piercing-shot' ? Math.max(.1, 1 - targetOrder * .1) : 1;
       const rogueBonuses = RogueAdvancementPolicy.getTargetBonuses(member, battle.enemyDots[index], getEnemySkillState(index), battle.enemyHps[index] / getEnemyDefinition(index).maxHp, 'skill', now);
-      const shadowBleedingMultiplier = skill.id === 'shadow-assassination' && RogueAdvancementPolicy.hasDot(battle.enemyDots[index], 'bleed') ? 1 + skillEffect.bleedingDamage : 1;
+      const shadowBleedingMultiplier = skill.id === 'shadow-assassination' && RogueAdvancementPolicy.hasBleedingStatus(battle.enemyDots[index]) ? 1 + skillEffect.bleedingDamage : 1;
       return { index, result: applyDamageToMonster(index, damage * chainMultiplier * piercingMultiplier * getRuneOutgoingMultiplier(member, index), profile, {
         attacker: member,
         attackKind: 'skill',
         armorIgnore: (skillEffect.armorIgnore || 0) + (berserkerSlash?.armorIgnore || 0),
         conditionalDamageMultiplier,
         craftedEpicExecution,
-        specialEquipmentMultiplier: (epicWeaponExecution.multipliers[targetOrder] || 1) * (1 + grandmasterSkillBonus) * (1 + rogueBonuses.damage) * shadowBleedingMultiplier,
+        specialEquipmentMultiplier: (epicWeaponExecution.multipliers[targetOrder] || 1) * (1 + grandmasterSkillBonus) * shadowBleedingMultiplier,
         controlledBonus: skillEffect.controlledBonus,
         showDamage: !['heavy-strike', 'whirlwind', 'charge', 'power-shot', 'multi-shot', 'piercing-shot', 'backstab', 'shadow-dance', 'poison-blade', 'fireball', 'blizzard', 'chain-lightning', 'holy-light', 'holy-nova'].includes(skill.id)
       }) };
@@ -4719,7 +4730,7 @@ function useAutoSkillForMember(member, now = Date.now()) {
     if (skill.id === 'backstab') RogueAdvancementPolicy.resolveBackstabCrit(member, critical && hits.length > 0, Number(progress.skillLevels?.['assassin:lethal-technique']) || 1, now);
     if (skill.id === 'shadow-assassination' && critical && skillEffect.offhandOnCrit && hits.length && AssassinOffhandPolicy.isDagger(progress.equipment?.offhand)) {
       const mastery = ClassSkillPolicy.getEffect('assassin', 'dagger-mastery', Number(progress.skillLevels?.['assassin:dagger-mastery']) || 1);
-      const strike = AssassinOffhandPolicy.calculateOffhandStrike(stats, mastery, Math.random());
+      const strike = AssassinOffhandPolicy.calculateOffhandStrike({ ...stats, criticalDamageMultiplier: stats.criticalDamageMultiplier + primaryRogueBonuses.criticalDamage }, mastery, Math.random());
       applyDamageToMonster(hits[0].index, strike.damage, profile, { attacker: member, attackKind: 'offhand', canParry: false });
     }
     if (hits.length) triggerRuneFrenzy(member, critical, now);
@@ -4750,7 +4761,7 @@ function useAutoSkillForMember(member, now = Date.now()) {
     });
     if (skill.id === 'poison-blade') {
       member.poisonBladeVisualUntil = now + 800;
-      hits.forEach((target) => applyDot(target.index, 'poison', Math.max(1, Math.ceil(stats.attack * .12 * (1 + (skillEffect.poisonBonus || 0)) * stats.dotMultiplier)), 3, skillEffect.poisonStacks || 1, { source: member, defenseReduction: skillEffect.defensePerStack || 0, tickIntervalMs: 2000, now, refreshDuration: true, refreshAllSameType: true }));
+      hits.forEach((target) => applyDot(target.index, 'poison', Math.max(1, Math.ceil(stats.attack * .12 * stats.dotMultiplier)), 3, skillEffect.poisonStacks || 1, { source: member, defenseReduction: skillEffect.defensePerStack || 0, tickIntervalMs: 2000, now, refreshDuration: true, refreshAllSameType: true }));
     }
     if (skill.id === 'corrosive-strike') hits.forEach((target) => {
       const dots = battle.enemyDots[target.index] || [];
@@ -5079,7 +5090,7 @@ function processPartyMemberAttacks(now = Date.now()) {
     const hit = Math.max(1, Math.ceil(baseHit * (instinctTriggered ? hunterInstinct.power : 1)));
     const enemy = getEnemyDefinition(targetIndex);
     const profile = getPlayerAttackProfile(member.character);
-    const result = applyDamageToMonster(targetIndex, hit * getRuneOutgoingMultiplier(member, targetIndex), profile, { attacker: member, attackKind: 'basic', specialEquipmentMultiplier: specialBasicExecution.damageMultiplier * (1 + rogueBonuses.damage) });
+    const result = applyDamageToMonster(targetIndex, hit * getRuneOutgoingMultiplier(member, targetIndex), profile, { attacker: member, attackKind: 'basic', specialEquipmentMultiplier: specialBasicExecution.damageMultiplier });
     playPartyMemberCombatAnimation(member, [targetIndex], { kind: 'basic' });
     ChapterThreeSpecialEquipmentPolicy.completeMainHandBasicAttack(member, specialBasicExecution, !result.evaded && result.finalDamage > 0, battle.enemyHps[targetIndex] > 0);
     RogueAdvancementPolicy.consumeBasic(member, lethalExecution, !result.evaded && result.finalDamage > 0);
@@ -5124,7 +5135,7 @@ function processPartyMemberAttacks(now = Date.now()) {
         const masteryProc = masteryChance > 0 && Math.random() < masteryChance;
         const danceProc = now < (member.shadowDanceUntil || 0) && Math.random() < (member.shadowDanceOffhandChance || 0);
         if ((masteryProc || danceProc) && AssassinOffhandPolicy.isDagger(member.progress.equipment?.offhand)) {
-          const offhandStrike = AssassinOffhandPolicy.calculateOffhandStrike(member.stats, mastery, Math.random());
+          const offhandStrike = AssassinOffhandPolicy.calculateOffhandStrike({ ...member.stats, criticalDamageMultiplier: member.stats.criticalDamageMultiplier + rogueBonuses.criticalDamage }, mastery, Math.random());
           applyDamageToMonster(targetIndex, offhandStrike.damage, profile, { attacker: member, attackKind: 'offhand', canParry: false });
         }
       }
@@ -5190,6 +5201,7 @@ function spawnStrongholdWarlord(now = Date.now()) {
   battle.enemyCaptainShieldUntil?.push(0);
   battle.enemyAssassinDashUntil?.push(0);
   battle.enemySpiderNestPhase?.push(1);
+  applyPendingRoguePlagueSpread(battle.enemyTypes.length - 1, now);
   logBattle('♛ 五座據點皆已摧毀，【黑石督軍】率軍現身！', 'spawn');
   showToast('⚠ BOSS 出現：黑石督軍');
   return true;
@@ -5284,6 +5296,7 @@ function summonGoblinScout(chiefIndex, now = Date.now()) {
   battle.enemyDots.push([]);
   battle.enemyDamages.push([]);
   battle.enemyNextAttackAt.push(now + getMonsterAttackInterval(scout));
+  applyPendingRoguePlagueSpread(battle.enemyTypes.length - 1, now);
   battle.goblinScoutSummons = (battle.goblinScoutSummons || 0) + 1;
   playMonsterAttackAnimation(chiefIndex, false);
   logBattle('📯【哥布林大酋長】發出召喚，一名【哥布林斥候】加入戰鬥！', 'spawn');
@@ -5549,6 +5562,7 @@ function summonSpiderNestMonster(type, summonerIndex, hpRatio, attackRatio, limi
   const summoned = getEnemyDefinition(index);
   battle.enemyHps[index] = summoned.maxHp;
   battle.enemyNextAttackAt[index] = now + getMonsterAttackInterval(summoned);
+  applyPendingRoguePlagueSpread(index, now);
   playMonsterAttackAnimation(summonerIndex, false);
   logBattle(message, 'spawn');
   return true;
@@ -5589,6 +5603,7 @@ function summonBlackForestDepthsRoot(summonerIndex, now = Date.now()) {
   const summoned = getEnemyDefinition(index);
   battle.enemyHps[index] = summoned.maxHp;
   battle.enemyNextAttackAt[index] = now + getMonsterAttackInterval(summoned);
+  applyPendingRoguePlagueSpread(index, now);
   playMonsterAttackAnimation(summonerIndex, false);
   logBattle('🌑【黑森林之心】喚醒【腐化根鬚】，深林的根系加入戰鬥！', 'spawn');
   return true;
@@ -5648,6 +5663,7 @@ function summonBlackstonePoisonSpider(beastmasterIndex, now = Date.now()) {
     battle.enemyDamages[reusedIndex] = [];
     battle.enemyNextAttackAt[reusedIndex] = now + getMonsterAttackInterval(spider);
     battle.enemyBoarEnraged[reusedIndex] = false;
+    applyPendingRoguePlagueSpread(reusedIndex, now);
     playMonsterAttackAnimation(beastmasterIndex, false);
     logBattle('🕷【黑石訓獸師】施放【放養蜘蛛】，一隻削弱版黑石毒蜘蛛加入戰鬥！', 'spawn');
     return true;
@@ -5662,6 +5678,7 @@ function summonBlackstonePoisonSpider(beastmasterIndex, now = Date.now()) {
   battle.enemyNextAttackAt.push(now + getMonsterAttackInterval(spider));
   battle.enemyBoarEnraged.push(false);
   battle.enemyTrailSummoned.push(true);
+  applyPendingRoguePlagueSpread(battle.enemyTypes.length - 1, now);
   playMonsterAttackAnimation(beastmasterIndex, false);
   logBattle('🕷【黑石訓獸師】施放【放養蜘蛛】，一隻削弱版黑石毒蜘蛛加入戰鬥！', 'spawn');
   return true;

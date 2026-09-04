@@ -3,7 +3,7 @@ const fs = require('node:fs');
 const path = require('node:path');
 const source = fs.readFileSync(path.join(__dirname, '..', 'script.js'), 'utf8');
 
-assert.match(source, /sourceMastery\?\.resonance[\s\S]*dot\.type === 'burn'/, 'burn resonance strengthens sourced burn damage');
+assert.match(source, /hasSourceBurn = dots\.some[\s\S]*dot\.type === 'burn'[\s\S]*sourceMastery\?\.resonance && hasSourceBurn/, 'burn resonance strengthens only burn damage from the same source');
 assert.match(source, /frostResonanceMultiplier[\s\S]*slowedUntil[\s\S]*frozenUntil/, 'frost resonance reads slow and freeze states');
 assert.match(source, /lightningResonanceMultiplier[\s\S]*paralyzedUntil/, 'lightning resonance reads paralysis state');
 assert.match(source, /dot\.type === 'poison'[\s\S]*dot\.defenseReduction/, 'poison stacks reduce enemy defense');
