@@ -5,7 +5,7 @@ const source = fs.readFileSync(path.join(__dirname, '..', 'script.js'), 'utf8');
 const html = fs.readFileSync(path.join(__dirname, '..', 'index.html'), 'utf8');
 
 assert.match(html, /warrior-resource-policy\.js[\s\S]*warrior-advancement-policy\.js[\s\S]*script\.js/);
-assert.match(source, /WarriorAdvancementPolicy\.canAdvance[\s\S]*data-warrior-advance/);
+assert.match(source, /advancementPolicy[\s\S]*\.canAdvance[\s\S]*data-first-advance/);
 assert.match(source, /getKnownSkills[\s\S]*WarriorAdvancementPolicy\.getSkills/);
 assert.match(source, /WarriorAdvancementPolicy\.canEquipTwoHandedOffhand[\s\S]*slots\.push\('offhand'\)/);
 assert.match(source, /WarriorAdvancementPolicy\.getTitanAttackContribution/);
