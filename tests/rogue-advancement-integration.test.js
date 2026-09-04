@@ -14,6 +14,8 @@ assert.match(source, /masteryChance = \(mastery\.offhandChance \|\| 0\) \+ \(let
 assert.match(source, /skill\.id === 'poison-blade'[\s\S]*stats\.attack \* \.12 \* stats\.dotMultiplier[\s\S]*tickIntervalMs: 2000/);
 assert.match(source, /skill\.id === 'backstab'[\s\S]*stats\.attack \* \.18[\s\S]*tickIntervalMs: 2000/);
 assert.match(source, /skill\.id === 'corrosive-strike'[\s\S]*dotVulnerabilityUntil/);
+assert.match(source, /getAutoSkillPriority\(progress, unlocked\)/, 'advanced rogues use their formal specialization priority');
+assert.match(source, /skill\.id === 'corrosive-strike'[\s\S]*stacks < 3[\s\S]*refreshAllSameType: true/, 'corrosive strike adds a stack below three and refreshes all poison');
 assert.match(source, /skill\.id === 'blood-venom-rend'[\s\S]*ruptureTick/);
 assert.match(source, /processEnemyDots[\s\S]*venom-mastery[\s\S]*getTargetBonuses/);
 assert.match(source, /resolveMarkedKill[\s\S]*resolvePlagueDeath/);

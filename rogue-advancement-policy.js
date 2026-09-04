@@ -7,7 +7,7 @@
   const FIRST_JOB_CHANGE_LEVEL = 45;
   const ADVANCED_CLASSES = Object.freeze({ assassination: Object.freeze({ id: 'assassination', name: '刺殺系' }), venom: Object.freeze({ id: 'venom', name: '劇毒系' }) });
   const SKILL_DETAILS = Object.freeze({
-    'shadow-assassination':'單體刺殺；流血目標傷害提高，Lv6 暴擊追加副手攻擊。','death-mark':'標記目標5秒，提高自身對其傷害；擊殺縮短冷卻。','lethal-technique':'提高暴擊傷害；背刺暴擊強化下一次主手普通攻擊。','weakness-insight':'攻擊流血目標時提高暴擊率。','corrosive-strike':'直接傷害並施毒或刷新現有毒層。','blood-venom-rend':'直接傷害並施加割裂流血；中毒目標承受更高割裂傷害。','venom-mastery':'提高中毒傷害。','toxic-blood-symbiosis':'目標同時中毒與流血時提高持續傷害。'
+    'shadow-assassination':'單體刺殺；流血目標傷害提高，Lv6 暴擊追加副手攻擊。','death-mark':'標記目標5秒，提高自身對其傷害；擊殺縮短冷卻。','lethal-technique':'提高暴擊傷害；背刺暴擊強化下一次主手普通攻擊。','weakness-insight':'攻擊流血目標時提高暴擊率。','corrosive-strike':'直接傷害；無毒時施加1層毒，已有毒時增加1層並刷新全部毒層。','blood-venom-rend':'直接傷害並施加割裂流血；中毒目標承受更高割裂傷害。','venom-mastery':'提高中毒傷害；Lv6 敵人帶至少2層毒死亡時保存1次瘟疫蔓延。','toxic-blood-symbiosis':'目標同時中毒與流血時提高持續傷害。'
   });
   const active = (id,name,cooldown,levels,advancedClass) => Object.freeze({ level:45,type:'active',id,name,detail:SKILL_DETAILS[id],cooldown,advancedClass,levels:Object.freeze(levels.map(Object.freeze)) });
   const passive = (id,name,levels,advancedClass) => Object.freeze({ level:45,type:'passive',id,name,detail:SKILL_DETAILS[id],cooldown:0,advancedClass,levels:Object.freeze(levels.map(Object.freeze)) });
@@ -24,6 +24,10 @@
     passive('toxic-blood-symbiosis','血毒共生',[5,7,9,11,13,15].map((dotDamage,i)=>({dotDamage:dotDamage/100,extendOnDirectCrit:i===5?1:0,maxExtension:i===5?3:0})),'venom')
   ]);
   const SKILLS=Object.freeze([...ASSASSINATION_SKILLS,...VENOM_SKILLS]); const BY_ID=new Map(SKILLS.map(s=>[s.id,s]));
+  const AUTO_SKILL_PRIORITY=Object.freeze({
+    assassination:Object.freeze(['death-mark','backstab','shadow-assassination','shadow-dance','poison-blade']),
+    venom:Object.freeze(['poison-blade','backstab','blood-venom-rend','corrosive-strike','shadow-dance'])
+  });
   const levelOf=(n)=>Math.max(1,Math.min(6,Math.floor(Number(n)||1)));
   function getSkill(id){return BY_ID.get(id)||null;} function getSkills(id){return SKILLS.filter(s=>s.advancedClass===id);} function getEffect(id,level){const s=getSkill(id);return s?.levels[levelOf(level)-1]||null;}
   function isAdvanced(progress,id){return progress?.advancedClass===id;} function canAdvance(character,progress){return character?.job==='assassin'&&Number(progress?.level)>=45&&[1,2,3].every(t=>progress?.preJobTrial?.proofTiers?.includes(t));}
@@ -36,9 +40,10 @@
   function resolveMarkedKill(member,state,now=Date.now()){if(state?.deathMarkOwner!==member?.id||now>=state.deathMarkUntil)return false;member.skillCooldowns['death-mark']=Math.max(now,(member.skillCooldowns['death-mark']||now)-2000);state.deathMarkUntil=0;return true;}
   function resolveBackstabCrit(member,critical,level,now=Date.now()){if(!critical||!isAdvanced(member?.progress,'assassination'))return false;const e=getEffect('lethal-technique',level);member.lethalTechniqueUntil=now+5000;member.lethalTechniqueDamage=e.nextBasic;member.lethalTechniqueOffhand=e.extraOffhandChance;return true;}
   function getBasicExecution(member,now=Date.now()){return now<(member?.lethalTechniqueUntil||0)?{damage:member.lethalTechniqueDamage||0,extraOffhandChance:member.lethalTechniqueOffhand||0}:null;} function consumeBasic(member,execution,hit){if(execution&&hit){member.lethalTechniqueUntil=0;member.lethalTechniqueDamage=0;member.lethalTechniqueOffhand=0;}}
-  function resolvePlagueDeath(member,dots){const e=getEffect('venom-mastery',member?.progress?.skillLevels?.['assassin:venom-mastery']);if(isAdvanced(member?.progress,'venom')&&e?.plagueSpread&&poisonStacks(dots)>=3){member.plagueSpreadPending=true;return true;}return false;}
+  function orderAutoSkills(progress,skills){const priority=AUTO_SKILL_PRIORITY[progress?.advancedClass];if(!priority)return[...(skills||[])];const order=new Map(priority.map((id,index)=>[id,index]));return[...(skills||[])].sort((a,b)=>(order.get(a?.id)??priority.length)-(order.get(b?.id)??priority.length));}
+  function resolvePlagueDeath(member,dots){const e=getEffect('venom-mastery',member?.progress?.skillLevels?.['assassin:venom-mastery']);if(isAdvanced(member?.progress,'venom')&&e?.plagueSpread&&poisonStacks(dots)>=2){member.plagueSpreadPending=true;return true;}return false;}
   function consumePlague(member){if(!member?.plagueSpreadPending)return false;member.plagueSpreadPending=false;return true;}
   function extendDotsOnCrit(member,dots,critical){const e=getEffect('toxic-blood-symbiosis',member?.progress?.skillLevels?.['assassin:toxic-blood-symbiosis']);if(!critical||!e?.extendOnDirectCrit||!hasDot(dots,'poison')||!hasBleedingStatus(dots))return false;let changed=false;(dots||[]).filter(d=>['poison','bleed','rupture'].includes(d.type)).forEach(d=>{const added=Math.min(1,Math.max(0,e.maxExtension-(d.extendedSeconds||0)));if(!added)return;d.extendedSeconds=(d.extendedSeconds||0)+added;if(d.nextTickAt)d.nextTickAt+=added*1000;changed=true;});return changed;}
   function clear(member,leaveBattle=false){if(!member)return;['lethalTechniqueUntil','lethalTechniqueDamage','lethalTechniqueOffhand'].forEach(k=>member[k]=0);if(leaveBattle)member.plagueSpreadPending=false;}
-  return Object.freeze({FIRST_JOB_CHANGE_LEVEL,ADVANCED_CLASSES,ASSASSINATION_SKILLS,VENOM_SKILLS,SKILLS,getSkill,getSkills,getEffect,isAdvanced,canAdvance,advance,hasDot,hasBleedingStatus,poisonStacks,getDeathMarkDamageMultiplier,getTargetDefenseReduction,getTargetBonuses,markTarget,resolveMarkedKill,resolveBackstabCrit,getBasicExecution,consumeBasic,resolvePlagueDeath,consumePlague,extendDotsOnCrit,clear});
+  return Object.freeze({FIRST_JOB_CHANGE_LEVEL,ADVANCED_CLASSES,AUTO_SKILL_PRIORITY,ASSASSINATION_SKILLS,VENOM_SKILLS,SKILLS,getSkill,getSkills,getEffect,isAdvanced,canAdvance,advance,hasDot,hasBleedingStatus,poisonStacks,getDeathMarkDamageMultiplier,getTargetDefenseReduction,getTargetBonuses,markTarget,resolveMarkedKill,getAutoSkillPriority:orderAutoSkills,resolveBackstabCrit,getBasicExecution,consumeBasic,resolvePlagueDeath,consumePlague,extendDotsOnCrit,clear});
 }));

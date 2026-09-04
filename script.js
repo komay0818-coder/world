@@ -4666,7 +4666,8 @@ function useAutoSkillForMember(member, now = Date.now()) {
   const { character, progress, stats } = member;
   if (usesManaResource(member.job) && member.manaExhausted) return false;
   const unlocked = getKnownSkills(member.job, member.level).filter((skill) => skill.type === 'active' && skill.level <= member.level);
-  const attackSkills = unlocked.filter((skill) => skill.id !== 'heal' && (member.skillCooldowns[skill.id] || 0) <= now);
+  const attackSkills = RogueAdvancementPolicy.getAutoSkillPriority(progress, unlocked)
+    .filter((skill) => skill.id !== 'heal' && (member.skillCooldowns[skill.id] || 0) <= now);
   for (const skill of attackSkills) {
     const skillEffect = getSkillEffect(progress, member.job, skill);
     const cost = getSkillResourceCost(member.job, skill);
@@ -4766,7 +4767,8 @@ function useAutoSkillForMember(member, now = Date.now()) {
     if (skill.id === 'corrosive-strike') hits.forEach((target) => {
       const dots = battle.enemyDots[target.index] || [];
       const stacks = RogueAdvancementPolicy.poisonStacks(dots);
-      if (!stacks) applyDot(target.index, 'poison', Math.max(1, Math.ceil(stats.attack * .12)), 3, 1, { source: member, tickIntervalMs: 2000, now, refreshDuration: true });
+      if (!stacks) applyDot(target.index, 'poison', Math.max(1, Math.ceil(stats.attack * .12)), 3, 3, { source: member, tickIntervalMs: 2000, now, refreshDuration: true });
+      else if (stacks < 3) applyDot(target.index, 'poison', Math.max(1, Math.ceil(stats.attack * .12)), 3, 3, { source: member, tickIntervalMs: 2000, now, refreshDuration: true, refreshAllSameType: true });
       else dots.filter((dot) => dot.type === 'poison').forEach((dot) => { dot.remaining = 3; dot.nextTickAt = now + 2000; dot.extendedSeconds = 0; });
       if (stacks >= 3 && skillEffect.dotVulnerability) { const state = getEnemySkillState(target.index); state.dotVulnerability = skillEffect.dotVulnerability; state.dotVulnerabilityUntil = now + skillEffect.dotVulnerabilityDuration * 1000; }
     });

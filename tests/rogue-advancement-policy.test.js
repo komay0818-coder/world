@@ -8,6 +8,12 @@ assert.deepEqual(policy.getEffect('shadow-assassination', 6), { power: 2.7, skil
 assert.equal(policy.getEffect('death-mark', 6).executeCritDamage, .25);
 assert.equal(policy.getEffect('corrosive-strike', 6).dotVulnerability, .08);
 assert.equal(policy.getEffect('blood-venom-rend', 6).ruptureTick, .21);
+assert.deepEqual(policy.getAutoSkillPriority({ advancedClass: 'assassination' }, [
+  { id: 'backstab' }, { id: 'shadow-dance' }, { id: 'poison-blade' }, { id: 'shadow-assassination' }, { id: 'death-mark' }
+]).map((skill) => skill.id), ['death-mark', 'backstab', 'shadow-assassination', 'shadow-dance', 'poison-blade']);
+assert.deepEqual(policy.getAutoSkillPriority({ advancedClass: 'venom' }, [
+  { id: 'backstab' }, { id: 'shadow-dance' }, { id: 'poison-blade' }, { id: 'corrosive-strike' }, { id: 'blood-venom-rend' }
+]).map((skill) => skill.id), ['poison-blade', 'backstab', 'blood-venom-rend', 'corrosive-strike', 'shadow-dance']);
 
 const character = { job: 'assassin' };
 const progress = { level: 45, preJobTrial: { proofTiers: [1, 2, 3] } };
@@ -39,5 +45,8 @@ assert.equal(dots[0].nextTickAt, 4000, 'one direct critical extends the schedule
 assert.equal(policy.resolvePlagueDeath(venom, dots), true);
 assert.equal(policy.consumePlague(venom), true);
 assert.equal(policy.consumePlague(venom), false);
+assert.equal(policy.resolvePlagueDeath(venom, dots.slice(0, 2)), true, 'two poison stacks save one plague spread');
+assert.equal(policy.consumePlague(venom), true);
+assert.equal(policy.resolvePlagueDeath(venom, dots.slice(0, 1)), false, 'one poison stack is insufficient');
 
 console.log('rogue-advancement-policy: assertions passed');
