@@ -1,11 +1,12 @@
 // TEST ONLY. Preserve incoming damage/low-HP triggers; prevent death at 1 HP.
-function createExperiment(enabled) {
+function createExperiment(enabled, immortal = true) {
   return {
     initialize(p) {
       p.exhaustionExperiment = true;
       p.manaExhausted = false;
       p.testSkillCasts = p.testBasics = p.exhaustedSeconds = p.exhaustionEntries = p.preventedDeaths = 0;
       p.minimumResource = p.resource;
+      if (!immortal) return;
       let hp = p.hp;
       Object.defineProperty(p, 'hp', { enumerable: true, configurable: true,
         get() { return hp; }, set(value) { if (value < 1) p.preventedDeaths++; hp = Math.max(1, value); } });
