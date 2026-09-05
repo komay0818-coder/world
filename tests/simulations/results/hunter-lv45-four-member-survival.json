@@ -1,0 +1,582 @@
+{
+  "metadata": {
+    "generatedAt": "2026-09-05T19:01:16.223Z",
+    "runs": 1000,
+    "maxKills": 5000,
+    "level": 45,
+    "map": "3-6 赤岩聖殿普通怪",
+    "targeting": "測試用：從存活四名角色等機率隨機選擇",
+    "healingAi": "測試用：治癒術優先最低HP比例且HP<=70%的存活角色；模擬餘暉與神恩，未模擬完整正式牧師施法輪轉",
+    "enemySkills": "只含普通怪直接普通攻擊；沒有AoE、DOT或完整技能輪轉",
+    "teamGear": "隊友沿用既有第二章合理強化B配置；獵人使用指定Lv45面板；各職傷害為分析用聚合DPS",
+    "hunterDpsCalibration": {
+      "marksman": 302.5,
+      "beastmaster100_70_70": 294.33299999999997,
+      "differencePercent": -2.7
+    },
+    "noFormalPolicyChanges": true
+  },
+  "statSheets": {
+    "warrior": {
+      "job": "warrior",
+      "maxHp": 1965,
+      "defense": 305,
+      "dr": 0.03,
+      "attack": 119,
+      "crit": 0.1,
+      "dodge": 0.27,
+      "parry": 0.13,
+      "hpRegen": 17,
+      "dps": 145,
+      "skills": "既有Lv45成長面板；傷害以分析用聚合DPS表示"
+    },
+    "hunter": {
+      "job": "hunter",
+      "maxHp": 1800,
+      "defense": 95,
+      "dr": 0.08,
+      "attack": 200,
+      "crit": 0.3,
+      "dodge": 0.07,
+      "parry": 0,
+      "hpRegen": 0,
+      "dps": 0,
+      "skills": "基礎與轉職技能Lv6"
+    },
+    "mage": {
+      "job": "mage",
+      "maxHp": 1579,
+      "defense": 191,
+      "dr": 0,
+      "attack": 103,
+      "crit": 0.12,
+      "dodge": 0.29,
+      "parry": 0,
+      "hpRegen": 15,
+      "dps": 150,
+      "skills": "既有Lv45成長面板；傷害以分析用聚合DPS表示"
+    },
+    "priest": {
+      "job": "priest",
+      "maxHp": 1632,
+      "defense": 196,
+      "dr": 0,
+      "attack": 97,
+      "crit": 0.1,
+      "dodge": 0.28,
+      "parry": 0,
+      "hpRegen": 15,
+      "dps": 100,
+      "skills": "生存模型模擬治癒術、餘暉、神恩；其他技能僅由聚合DPS表示"
+    }
+  },
+  "cells": {
+    "normalMarksman": {
+      "runs": 1000,
+      "hunterDeathRatePercent": 0,
+      "averageHunterFirstDeathSeconds": null,
+      "medianHunterFirstDeathSeconds": null,
+      "averageKillsBeforeHunterDeath": null,
+      "hunterSurvivalRateByKills": {
+        "100": 100,
+        "500": 100,
+        "1000": 100,
+        "5000": 100
+      },
+      "averageEndHunterHpPercent": 79.205,
+      "averageHunterMinimumHpPercent": 69.036,
+      "averageHunterTargeted": 1251.022,
+      "averageHunterPotentialDamage": 18328.043,
+      "averageHunterDamageTaken": 18328.043,
+      "averageHunterEffectiveHealing": 17953.739,
+      "averageHunterOverheal": 0,
+      "averageHunterShieldReceived": 0,
+      "averagePriestHealsOnHunter": 112.06,
+      "firstPartyDeathDistributionPercent": {
+        "none": 100
+      },
+      "averageFirstPartyDeathSeconds": null,
+      "wipeRatePercent": 0,
+      "averageWipeSeconds": null,
+      "averageKillsBeforeWipe": null,
+      "averageRunSeconds": 10716.69,
+      "averageKills": 5000,
+      "members": {
+        "warrior": {
+          "maxHp": 1965,
+          "defense": 305,
+          "damageReduction": 0.03,
+          "attack": 119,
+          "averageTargeted": 1249.304,
+          "averageDamageTaken": 5138.664,
+          "averageEffectiveHealing": 0,
+          "averageOverheal": 684.05,
+          "averageShieldReceived": 0,
+          "averageHealCount": 13.681
+        },
+        "hunter": {
+          "maxHp": 1800,
+          "defense": 95,
+          "damageReduction": 0.08,
+          "attack": 200,
+          "averageTargeted": 1251.022,
+          "averageDamageTaken": 18328.043,
+          "averageEffectiveHealing": 17953.739,
+          "averageOverheal": 0,
+          "averageShieldReceived": 0,
+          "averageHealCount": 112.06
+        },
+        "mage": {
+          "maxHp": 1579,
+          "defense": 191,
+          "damageReduction": 0,
+          "attack": 103,
+          "averageTargeted": 1248.541,
+          "averageDamageTaken": 8409.379,
+          "averageEffectiveHealing": 0,
+          "averageOverheal": 684.05,
+          "averageShieldReceived": 0,
+          "averageHealCount": 13.681
+        },
+        "priest": {
+          "maxHp": 1632,
+          "defense": 196,
+          "damageReduction": 0,
+          "attack": 97,
+          "averageTargeted": 1251.133,
+          "averageDamageTaken": 8555.346,
+          "averageEffectiveHealing": 0,
+          "averageOverheal": 684.05,
+          "averageShieldReceived": 0,
+          "averageHealCount": 13.681
+        }
+      },
+      "beastmaster": null
+    },
+    "normalBeastmaster": {
+      "runs": 1000,
+      "hunterDeathRatePercent": 0,
+      "averageHunterFirstDeathSeconds": null,
+      "medianHunterFirstDeathSeconds": null,
+      "averageKillsBeforeHunterDeath": null,
+      "hunterSurvivalRateByKills": {
+        "100": 100,
+        "500": 100,
+        "1000": 100,
+        "5000": 100
+      },
+      "averageEndHunterHpPercent": 79.013,
+      "averageHunterMinimumHpPercent": 69.322,
+      "averageHunterTargeted": 933.02,
+      "averageHunterPotentialDamage": 13706.599,
+      "averageHunterDamageTaken": 9608.887,
+      "averageHunterEffectiveHealing": 9231.129,
+      "averageHunterOverheal": 0,
+      "averageHunterShieldReceived": 0,
+      "averagePriestHealsOnHunter": 57.682,
+      "firstPartyDeathDistributionPercent": {
+        "none": 100
+      },
+      "averageFirstPartyDeathSeconds": null,
+      "wipeRatePercent": 0,
+      "averageWipeSeconds": null,
+      "averageKillsBeforeWipe": null,
+      "averageRunSeconds": 11019.214,
+      "averageKills": 5000,
+      "members": {
+        "warrior": {
+          "maxHp": 1965,
+          "defense": 305,
+          "damageReduction": 0.03,
+          "attack": 119,
+          "averageTargeted": 934.92,
+          "averageDamageTaken": 3861.164,
+          "averageEffectiveHealing": 0,
+          "averageOverheal": 347.25,
+          "averageShieldReceived": 0,
+          "averageHealCount": 6.945
+        },
+        "hunter": {
+          "maxHp": 1800,
+          "defense": 95,
+          "damageReduction": 0.08,
+          "attack": 200,
+          "averageTargeted": 933.02,
+          "averageDamageTaken": 9608.887,
+          "averageEffectiveHealing": 9231.129,
+          "averageOverheal": 0,
+          "averageShieldReceived": 0,
+          "averageHealCount": 57.682
+        },
+        "mage": {
+          "maxHp": 1579,
+          "defense": 191,
+          "damageReduction": 0,
+          "attack": 103,
+          "averageTargeted": 931.97,
+          "averageDamageTaken": 6302.538,
+          "averageEffectiveHealing": 0,
+          "averageOverheal": 347.25,
+          "averageShieldReceived": 0,
+          "averageHealCount": 6.945
+        },
+        "priest": {
+          "maxHp": 1632,
+          "defense": 196,
+          "damageReduction": 0,
+          "attack": 97,
+          "averageTargeted": 934.389,
+          "averageDamageTaken": 6411.373,
+          "averageEffectiveHealing": 0,
+          "averageOverheal": 347.25,
+          "averageShieldReceived": 0,
+          "averageHealCount": 6.945
+        }
+      },
+      "beastmaster": {
+        "petAliveTimePercent": {
+          "three": 79.434,
+          "two": 18.171,
+          "one": 2.191,
+          "zero": 0.204
+        },
+        "petDeaths": [
+          28.131,
+          28.551,
+          28.504
+        ],
+        "petRevives": [
+          28.058,
+          28.479,
+          28.449
+        ],
+        "firstPetDeathSeconds": 369.82,
+        "averageGuardEvents": 864.708,
+        "averageGuardAvoidedDamage": 4097.712,
+        "averageGuardAvoidedPerEvent": 4.739,
+        "averageZeroPetHunterAttacks": 2.919,
+        "averageZeroPetHunterDamage": 47.56,
+        "hunterDirectDamageReductionPercent": 29.896,
+        "averagePetBasics": 38086.568,
+        "averageStunRolls": 38086.568,
+        "averageStuns": 2720.149,
+        "averageStunIcdBlocks": 1093.188,
+        "averageAttacksPreventedByStun": 1363.686,
+        "averageDamagePreventedByStun": 13959.544
+      }
+    },
+    "normalBeastmasterNoStun": {
+      "runs": 1000,
+      "hunterDeathRatePercent": 0,
+      "averageHunterFirstDeathSeconds": null,
+      "medianHunterFirstDeathSeconds": null,
+      "averageKillsBeforeHunterDeath": null,
+      "hunterSurvivalRateByKills": {
+        "100": 100,
+        "500": 100,
+        "1000": 100,
+        "5000": 100
+      },
+      "averageEndHunterHpPercent": 79.126,
+      "averageHunterMinimumHpPercent": 69.305,
+      "averageHunterTargeted": 1284.748,
+      "averageHunterPotentialDamage": 18918.479,
+      "averageHunterDamageTaken": 13268.441,
+      "averageHunterEffectiveHealing": 12892.702,
+      "averageHunterOverheal": 0,
+      "averageHunterShieldReceived": 0,
+      "averagePriestHealsOnHunter": 80.503,
+      "firstPartyDeathDistributionPercent": {
+        "none": 100
+      },
+      "averageFirstPartyDeathSeconds": null,
+      "wipeRatePercent": 0,
+      "averageWipeSeconds": null,
+      "averageKillsBeforeWipe": null,
+      "averageRunSeconds": 11085.598,
+      "averageKills": 5000,
+      "members": {
+        "warrior": {
+          "maxHp": 1965,
+          "defense": 305,
+          "damageReduction": 0.03,
+          "attack": 119,
+          "averageTargeted": 1285.508,
+          "averageDamageTaken": 5311.708,
+          "averageEffectiveHealing": 0,
+          "averageOverheal": 489.25,
+          "averageShieldReceived": 0,
+          "averageHealCount": 9.785
+        },
+        "hunter": {
+          "maxHp": 1800,
+          "defense": 95,
+          "damageReduction": 0.08,
+          "attack": 200,
+          "averageTargeted": 1284.748,
+          "averageDamageTaken": 13268.441,
+          "averageEffectiveHealing": 12892.702,
+          "averageOverheal": 0,
+          "averageShieldReceived": 0,
+          "averageHealCount": 80.503
+        },
+        "mage": {
+          "maxHp": 1579,
+          "defense": 191,
+          "damageReduction": 0,
+          "attack": 103,
+          "averageTargeted": 1285.981,
+          "averageDamageTaken": 8712.006,
+          "averageEffectiveHealing": 0,
+          "averageOverheal": 489.25,
+          "averageShieldReceived": 0,
+          "averageHealCount": 9.785
+        },
+        "priest": {
+          "maxHp": 1632,
+          "defense": 196,
+          "damageReduction": 0,
+          "attack": 97,
+          "averageTargeted": 1283.175,
+          "averageDamageTaken": 8814.615,
+          "averageEffectiveHealing": 0,
+          "averageOverheal": 489.25,
+          "averageShieldReceived": 0,
+          "averageHealCount": 9.785
+        }
+      },
+      "beastmaster": {
+        "petAliveTimePercent": {
+          "three": 72.496,
+          "two": 23.545,
+          "one": 3.589,
+          "zero": 0.369
+        },
+        "petDeaths": [
+          38.809,
+          39.434,
+          39.556
+        ],
+        "petRevives": [
+          38.722,
+          39.316,
+          39.436
+        ],
+        "firstPetDeathSeconds": 266.666,
+        "averageGuardEvents": 1189.934,
+        "averageGuardAvoidedDamage": 5650.038,
+        "averageGuardAvoidedPerEvent": 4.748,
+        "averageZeroPetHunterAttacks": 5.223,
+        "averageZeroPetHunterDamage": 85.018,
+        "hunterDirectDamageReductionPercent": 29.865,
+        "averagePetBasics": 37099.937,
+        "averageStunRolls": 37099.937,
+        "averageStuns": 0,
+        "averageStunIcdBlocks": 0,
+        "averageAttacksPreventedByStun": 0,
+        "averageDamagePreventedByStun": 0
+      }
+    },
+    "noHealingMarksman": {
+      "runs": 1000,
+      "hunterDeathRatePercent": 100,
+      "averageHunterFirstDeathSeconds": 1059.532,
+      "medianHunterFirstDeathSeconds": 1058.473,
+      "averageKillsBeforeHunterDeath": 493.725,
+      "hunterSurvivalRateByKills": {
+        "100": 100,
+        "500": 42.9,
+        "1000": 0,
+        "5000": 0
+      },
+      "averageEndHunterHpPercent": 0,
+      "averageHunterMinimumHpPercent": 0,
+      "averageHunterTargeted": 123.501,
+      "averageHunterPotentialDamage": 1807.324,
+      "averageHunterDamageTaken": 1807.324,
+      "averageHunterEffectiveHealing": 0,
+      "averageHunterOverheal": 0,
+      "averageHunterShieldReceived": 0,
+      "averagePriestHealsOnHunter": 0,
+      "firstPartyDeathDistributionPercent": {
+        "hunter": 100
+      },
+      "averageFirstPartyDeathSeconds": 1059.532,
+      "wipeRatePercent": 0,
+      "averageWipeSeconds": null,
+      "averageKillsBeforeWipe": null,
+      "averageRunSeconds": 18112.812,
+      "averageKills": 5000,
+      "members": {
+        "warrior": {
+          "maxHp": 1965,
+          "defense": 305,
+          "damageReduction": 0.03,
+          "attack": 119,
+          "averageTargeted": 3507.053,
+          "averageDamageTaken": 14710.479,
+          "averageEffectiveHealing": 0,
+          "averageOverheal": 0,
+          "averageShieldReceived": 0,
+          "averageHealCount": 0
+        },
+        "hunter": {
+          "maxHp": 1800,
+          "defense": 95,
+          "damageReduction": 0.08,
+          "attack": 200,
+          "averageTargeted": 123.501,
+          "averageDamageTaken": 1807.324,
+          "averageEffectiveHealing": 0,
+          "averageOverheal": 0,
+          "averageShieldReceived": 0,
+          "averageHealCount": 0
+        },
+        "mage": {
+          "maxHp": 1579,
+          "defense": 191,
+          "damageReduction": 0,
+          "attack": 103,
+          "averageTargeted": 3500.98,
+          "averageDamageTaken": 24012.542,
+          "averageEffectiveHealing": 0,
+          "averageOverheal": 0,
+          "averageShieldReceived": 0,
+          "averageHealCount": 0
+        },
+        "priest": {
+          "maxHp": 1632,
+          "defense": 196,
+          "damageReduction": 0,
+          "attack": 97,
+          "averageTargeted": 3501.823,
+          "averageDamageTaken": 24357.152,
+          "averageEffectiveHealing": 0,
+          "averageOverheal": 0,
+          "averageShieldReceived": 0,
+          "averageHealCount": 0
+        }
+      },
+      "beastmaster": null
+    },
+    "noHealingBeastmaster": {
+      "runs": 1000,
+      "hunterDeathRatePercent": 100,
+      "averageHunterFirstDeathSeconds": 2067.396,
+      "medianHunterFirstDeathSeconds": 2063.358,
+      "averageKillsBeforeHunterDeath": 938.663,
+      "hunterSurvivalRateByKills": {
+        "100": 100,
+        "500": 100,
+        "1000": 18.1,
+        "5000": 0
+      },
+      "averageEndHunterHpPercent": 0,
+      "averageHunterMinimumHpPercent": 0,
+      "averageHunterTargeted": 175.342,
+      "averageHunterPotentialDamage": 2576.232,
+      "averageHunterDamageTaken": 1805.734,
+      "averageHunterEffectiveHealing": 0,
+      "averageHunterOverheal": 0,
+      "averageHunterShieldReceived": 0,
+      "averagePriestHealsOnHunter": 0,
+      "firstPartyDeathDistributionPercent": {
+        "hunter": 100
+      },
+      "averageFirstPartyDeathSeconds": 2067.396,
+      "wipeRatePercent": 0,
+      "averageWipeSeconds": null,
+      "averageKillsBeforeWipe": null,
+      "averageRunSeconds": 17435.525,
+      "averageKills": 5000,
+      "members": {
+        "warrior": {
+          "maxHp": 1965,
+          "defense": 305,
+          "damageReduction": 0.03,
+          "attack": 119,
+          "averageTargeted": 3226.025,
+          "averageDamageTaken": 13527.641,
+          "averageEffectiveHealing": 0,
+          "averageOverheal": 0,
+          "averageShieldReceived": 0,
+          "averageHealCount": 0
+        },
+        "hunter": {
+          "maxHp": 1800,
+          "defense": 95,
+          "damageReduction": 0.08,
+          "attack": 200,
+          "averageTargeted": 175.342,
+          "averageDamageTaken": 1805.734,
+          "averageEffectiveHealing": 0,
+          "averageOverheal": 0,
+          "averageShieldReceived": 0,
+          "averageHealCount": 0
+        },
+        "mage": {
+          "maxHp": 1579,
+          "defense": 191,
+          "damageReduction": 0,
+          "attack": 103,
+          "averageTargeted": 3216.954,
+          "averageDamageTaken": 22070.048,
+          "averageEffectiveHealing": 0,
+          "averageOverheal": 0,
+          "averageShieldReceived": 0,
+          "averageHealCount": 0
+        },
+        "priest": {
+          "maxHp": 1632,
+          "defense": 196,
+          "damageReduction": 0,
+          "attack": 97,
+          "averageTargeted": 3218.91,
+          "averageDamageTaken": 22389.384,
+          "averageEffectiveHealing": 0,
+          "averageOverheal": 0,
+          "averageShieldReceived": 0,
+          "averageHealCount": 0
+        }
+      },
+      "beastmaster": {
+        "petAliveTimePercent": {
+          "three": 9.594,
+          "two": 1.999,
+          "one": 0.243,
+          "zero": 88.164
+        },
+        "petDeaths": [
+          4.982,
+          5.036,
+          5.052
+        ],
+        "petRevives": [
+          4.839,
+          4.916,
+          4.924
+        ],
+        "firstPetDeathSeconds": 369.82,
+        "averageGuardEvents": 162.584,
+        "averageGuardAvoidedDamage": 770.498,
+        "averageGuardAvoidedPerEvent": 4.74,
+        "averageZeroPetHunterAttacks": 0.482,
+        "averageZeroPetHunterDamage": 7.906,
+        "hunterDirectDamageReductionPercent": 29.907,
+        "averagePetBasics": 7187.907,
+        "averageStunRolls": 7187.907,
+        "averageStuns": 512.273,
+        "averageStunIcdBlocks": 207.497,
+        "averageAttacksPreventedByStun": 257.029,
+        "averageDamagePreventedByStun": 2631.096
+      }
+    }
+  },
+  "comparisons": {
+    "normalHunterSurvivalAdvantagePercent": null,
+    "noHealingHunterSurvivalAdvantagePercent": 95.124,
+    "guardOnlySurvivalAdvantagePercent": null,
+    "stunAdditionalSurvivalPercent": null,
+    "normalWipeTimeAdvantagePercent": null
+  }
+}
