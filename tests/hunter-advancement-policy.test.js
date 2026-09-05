@@ -2,6 +2,7 @@ const assert = require('node:assert/strict');
 const policy = require('../hunter-advancement-policy.js');
 
 assert.equal(policy.FIRST_JOB_CHANGE_LEVEL, 45);
+assert.equal(policy.PET_REGEN_PER_SECOND, 0, 'pets do not regenerate health during combat');
 assert.equal(policy.MARKSMAN_SKILLS.length, 4);
 assert.equal(policy.BEASTMASTER_SKILLS.length, 4);
 assert.deepEqual(policy.getEffect('sniper-shot', 6), { power: 3, skillCrit: .12, armorIgnore: .12, nextBasicOnCrit: .50 });

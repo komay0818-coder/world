@@ -1,0 +1,382 @@
+{
+  "metadata": {
+    "generatedAt": "2026-09-05T17:54:35.309Z",
+    "map": "3-6 赤岩聖殿",
+    "level": 45,
+    "mode": "純護主壓力；正式3-6敵人普通直接攻擊，未加入完整AoE/技能輪轉",
+    "petBaseHpRatio": 0.6,
+    "petMaxHp": 1404,
+    "packSummoningLv6MaxHpBonus": 0.3,
+    "guardShare": 0.3,
+    "reviveSeconds": 30,
+    "reviveHpRatio": 0.5,
+    "regenPerSecond": 0,
+    "noDamageSkillChanges": true,
+    "runs": {
+      "farm10": 500,
+      "farm100": 500,
+      "farm500": 100,
+      "farm1000": 100
+    }
+  },
+  "farm10": {
+    "runs": 500,
+    "enemyCount": 10,
+    "basePetHpRatio": 0.6,
+    "petMaxHp": 1404,
+    "durationSeconds": 30.507,
+    "killsPerHour": 1180.05,
+    "petDamageSharePercent": 53.439,
+    "petIndividualDamageShares": [
+      17.991,
+      17.879,
+      17.549
+    ],
+    "pets": [
+      {
+        "id": "A",
+        "maxHp": 1404,
+        "averageDeaths": 0,
+        "averageRevives": 0,
+        "firstDeathSeconds": null,
+        "averageAliveSeconds": 30.607,
+        "averageDeadSeconds": 0,
+        "alivePercent": 100,
+        "averageHpPercent": 99.355,
+        "averageMinimumHpPercent": 98.632,
+        "averageNaturalHealing": 0,
+        "averageGuardDamage": 19.21
+      },
+      {
+        "id": "B",
+        "maxHp": 1404,
+        "averageDeaths": 0,
+        "averageRevives": 0,
+        "firstDeathSeconds": null,
+        "averageAliveSeconds": 30.607,
+        "averageDeadSeconds": 0,
+        "alivePercent": 100,
+        "averageHpPercent": 99.355,
+        "averageMinimumHpPercent": 98.632,
+        "averageNaturalHealing": 0,
+        "averageGuardDamage": 19.21
+      },
+      {
+        "id": "C",
+        "maxHp": 1404,
+        "averageDeaths": 0,
+        "averageRevives": 0,
+        "firstDeathSeconds": null,
+        "averageAliveSeconds": 30.607,
+        "averageDeadSeconds": 0,
+        "alivePercent": 100,
+        "averageHpPercent": 99.355,
+        "averageMinimumHpPercent": 98.632,
+        "averageNaturalHealing": 0,
+        "averageGuardDamage": 19.21
+      }
+    ],
+    "groupAlivePercent": {
+      "three": 100,
+      "two": 0,
+      "one": 0,
+      "zero": 0
+    },
+    "survival": {
+      "potentialDamage": 192.096,
+      "hunterDamage": 134.467,
+      "petDamage": 57.629,
+      "petShareOfPotentialPercent": 30,
+      "hunterDeaths": 0,
+      "hunterReductionPercent": 30
+    }
+  },
+  "farm100": {
+    "runs": 500,
+    "enemyCount": 100,
+    "basePetHpRatio": 0.6,
+    "petMaxHp": 1404,
+    "durationSeconds": 297.702,
+    "killsPerHour": 1209.26,
+    "petDamageSharePercent": 53.493,
+    "petIndividualDamageShares": [
+      17.864,
+      17.851,
+      17.778
+    ],
+    "pets": [
+      {
+        "id": "A",
+        "maxHp": 1404,
+        "averageDeaths": 0,
+        "averageRevives": 0,
+        "firstDeathSeconds": null,
+        "averageAliveSeconds": 297.802,
+        "averageDeadSeconds": 0,
+        "alivePercent": 100,
+        "averageHpPercent": 93.114,
+        "averageMinimumHpPercent": 86.177,
+        "averageNaturalHealing": 0,
+        "averageGuardDamage": 194.078
+      },
+      {
+        "id": "B",
+        "maxHp": 1404,
+        "averageDeaths": 0,
+        "averageRevives": 0,
+        "firstDeathSeconds": null,
+        "averageAliveSeconds": 297.802,
+        "averageDeadSeconds": 0,
+        "alivePercent": 100,
+        "averageHpPercent": 93.114,
+        "averageMinimumHpPercent": 86.177,
+        "averageNaturalHealing": 0,
+        "averageGuardDamage": 194.078
+      },
+      {
+        "id": "C",
+        "maxHp": 1404,
+        "averageDeaths": 0,
+        "averageRevives": 0,
+        "firstDeathSeconds": null,
+        "averageAliveSeconds": 297.802,
+        "averageDeadSeconds": 0,
+        "alivePercent": 100,
+        "averageHpPercent": 93.114,
+        "averageMinimumHpPercent": 86.177,
+        "averageNaturalHealing": 0,
+        "averageGuardDamage": 194.078
+      }
+    ],
+    "groupAlivePercent": {
+      "three": 100,
+      "two": 0,
+      "one": 0,
+      "zero": 0
+    },
+    "survival": {
+      "potentialDamage": 1940.784,
+      "hunterDamage": 1358.549,
+      "petDamage": 582.235,
+      "petShareOfPotentialPercent": 30,
+      "hunterDeaths": 0,
+      "hunterReductionPercent": 30
+    }
+  },
+  "farm500": {
+    "runs": 100,
+    "enemyCount": 500,
+    "basePetHpRatio": 0.6,
+    "petMaxHp": 1404,
+    "durationSeconds": 1490.122,
+    "killsPerHour": 1207.95,
+    "petDamageSharePercent": 53.445,
+    "petIndividualDamageShares": [
+      17.823,
+      17.83,
+      17.791
+    ],
+    "pets": [
+      {
+        "id": "A",
+        "maxHp": 1404,
+        "averageDeaths": 0,
+        "averageRevives": 0,
+        "firstDeathSeconds": null,
+        "averageAliveSeconds": 1490.222,
+        "averageDeadSeconds": 0,
+        "alivePercent": 100,
+        "averageHpPercent": 65.299,
+        "averageMinimumHpPercent": 30.539,
+        "averageNaturalHealing": 0,
+        "averageGuardDamage": 975.235
+      },
+      {
+        "id": "B",
+        "maxHp": 1404,
+        "averageDeaths": 0,
+        "averageRevives": 0,
+        "firstDeathSeconds": null,
+        "averageAliveSeconds": 1490.222,
+        "averageDeadSeconds": 0,
+        "alivePercent": 100,
+        "averageHpPercent": 65.299,
+        "averageMinimumHpPercent": 30.539,
+        "averageNaturalHealing": 0,
+        "averageGuardDamage": 975.235
+      },
+      {
+        "id": "C",
+        "maxHp": 1404,
+        "averageDeaths": 0,
+        "averageRevives": 0,
+        "firstDeathSeconds": null,
+        "averageAliveSeconds": 1490.222,
+        "averageDeadSeconds": 0,
+        "alivePercent": 100,
+        "averageHpPercent": 65.299,
+        "averageMinimumHpPercent": 30.539,
+        "averageNaturalHealing": 0,
+        "averageGuardDamage": 975.235
+      }
+    ],
+    "groupAlivePercent": {
+      "three": 100,
+      "two": 0,
+      "one": 0,
+      "zero": 0
+    },
+    "survival": {
+      "potentialDamage": 9752.35,
+      "hunterDamage": 6826.645,
+      "petDamage": 2925.705,
+      "petShareOfPotentialPercent": 30,
+      "hunterDeaths": 3.01,
+      "hunterReductionPercent": 30
+    }
+  },
+  "farm1000": {
+    "runs": 100,
+    "enemyCount": 1000,
+    "basePetHpRatio": 0.6,
+    "petMaxHp": 1404,
+    "durationSeconds": 2987.9,
+    "killsPerHour": 1204.86,
+    "petDamageSharePercent": 53.2,
+    "petIndividualDamageShares": [
+      17.729,
+      17.736,
+      17.735
+    ],
+    "pets": [
+      {
+        "id": "A",
+        "maxHp": 1404,
+        "averageDeaths": 1,
+        "averageRevives": 1,
+        "firstDeathSeconds": 2148.395,
+        "averageAliveSeconds": 2958.1,
+        "averageDeadSeconds": 29.9,
+        "alivePercent": 98.999,
+        "averageHpPercent": 44.833,
+        "averageMinimumHpPercent": 0.057,
+        "averageNaturalHealing": 0,
+        "averageGuardDamage": 1934.48
+      },
+      {
+        "id": "B",
+        "maxHp": 1404,
+        "averageDeaths": 1,
+        "averageRevives": 1,
+        "firstDeathSeconds": 2148.395,
+        "averageAliveSeconds": 2958.1,
+        "averageDeadSeconds": 29.9,
+        "alivePercent": 98.999,
+        "averageHpPercent": 44.833,
+        "averageMinimumHpPercent": 0.057,
+        "averageNaturalHealing": 0,
+        "averageGuardDamage": 1934.48
+      },
+      {
+        "id": "C",
+        "maxHp": 1404,
+        "averageDeaths": 1,
+        "averageRevives": 1,
+        "firstDeathSeconds": 2148.395,
+        "averageAliveSeconds": 2958.1,
+        "averageDeadSeconds": 29.9,
+        "alivePercent": 98.999,
+        "averageHpPercent": 44.833,
+        "averageMinimumHpPercent": 0.057,
+        "averageNaturalHealing": 0,
+        "averageGuardDamage": 1934.48
+      }
+    ],
+    "groupAlivePercent": {
+      "three": 98.999,
+      "two": 0,
+      "one": 0,
+      "zero": 1.001
+    },
+    "survival": {
+      "potentialDamage": 19630.62,
+      "hunterDamage": 13827.18,
+      "petDamage": 5803.44,
+      "petShareOfPotentialPercent": 29.563,
+      "hunterDeaths": 7,
+      "hunterReductionPercent": 29.563
+    }
+  },
+  "reference1000WithFirstRoundRegen": {
+    "runs": 100,
+    "enemyCount": 1000,
+    "basePetHpRatio": 0.6,
+    "petMaxHp": 1404,
+    "durationSeconds": 2968.177,
+    "killsPerHour": 1212.87,
+    "petDamageSharePercent": 53.457,
+    "petIndividualDamageShares": [
+      17.817,
+      17.823,
+      17.818
+    ],
+    "pets": [
+      {
+        "id": "A",
+        "maxHp": 1404,
+        "averageDeaths": 0,
+        "averageRevives": 0,
+        "firstDeathSeconds": null,
+        "averageAliveSeconds": 2968.277,
+        "averageDeadSeconds": 0,
+        "alivePercent": 100,
+        "averageHpPercent": 99.999,
+        "averageMinimumHpPercent": 99.965,
+        "averageNaturalHealing": 1939.548,
+        "averageGuardDamage": 1939.571
+      },
+      {
+        "id": "B",
+        "maxHp": 1404,
+        "averageDeaths": 0,
+        "averageRevives": 0,
+        "firstDeathSeconds": null,
+        "averageAliveSeconds": 2968.277,
+        "averageDeadSeconds": 0,
+        "alivePercent": 100,
+        "averageHpPercent": 99.999,
+        "averageMinimumHpPercent": 99.965,
+        "averageNaturalHealing": 1939.548,
+        "averageGuardDamage": 1939.571
+      },
+      {
+        "id": "C",
+        "maxHp": 1404,
+        "averageDeaths": 0,
+        "averageRevives": 0,
+        "firstDeathSeconds": null,
+        "averageAliveSeconds": 2968.277,
+        "averageDeadSeconds": 0,
+        "alivePercent": 100,
+        "averageHpPercent": 99.999,
+        "averageMinimumHpPercent": 99.965,
+        "averageNaturalHealing": 1939.548,
+        "averageGuardDamage": 1939.571
+      }
+    ],
+    "groupAlivePercent": {
+      "three": 100,
+      "two": 0,
+      "one": 0,
+      "zero": 0
+    },
+    "survival": {
+      "potentialDamage": 19395.71,
+      "hunterDamage": 13576.997,
+      "petDamage": 5818.713,
+      "petShareOfPotentialPercent": 30,
+      "hunterDeaths": 7,
+      "hunterReductionPercent": 30
+    }
+  }
+}

@@ -7,7 +7,7 @@
   const FIRST_JOB_CHANGE_LEVEL = 45;
   const PET_BASE_HP_RATIO = .60;
   const PET_GUARD_SHARE = .30;
-  const PET_REGEN_PER_SECOND = .01;
+  const PET_REGEN_PER_SECOND = 0;
   const PET_REVIVE_DELAY_MS = 30000;
   const PET_REVIVE_HP_RATIO = .50;
   const ADVANCED_CLASSES = Object.freeze({ marksman: Object.freeze({ id: 'marksman', name: '射擊系' }), beastmaster: Object.freeze({ id: 'beastmaster', name: '獸王系' }) });
