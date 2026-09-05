@@ -4,8 +4,10 @@ const policy = require('../mage-advancement-policy.js');
 assert.equal(policy.FIRST_JOB_CHANGE_LEVEL, 45);
 assert.equal(policy.ELEMENTALIST_SKILLS.length, 4);
 assert.equal(policy.ARCANE_SKILLS.length, 4);
-assert.deepEqual(policy.getEffect('elemental-burst', 6), { power:1.6, bonus:.6, collapseBonus:.8, breakthrough:'元素崩解：三種狀態齊全時，每種追加傷害提高為 80%' });
-assert.deepEqual(policy.getElementalBurstParts(policy.getEffect('elemental-burst', 6), { burning:true, slowed:true, paralyzed:true }).map(part=>part.power), [1.6,.8,.8,.8]);
+assert.deepEqual(policy.getEffect('elemental-burst', 6), { power:1.6, bonus:.4, extendStatuses:1, breakthrough:'元素崩解：命中三種元素狀態齊全的目標時，各延長 1 秒' });
+assert.deepEqual(policy.getElementalBurstParts(policy.getEffect('elemental-burst', 6), { burning:true, slowed:true, paralyzed:true }).map(part=>part.power), [1.6,.4,.4,.4]);
+assert.equal(policy.getEffect('elemental-storm',6).power,1.6);
+assert.equal(policy.getEffect('elemental-storm',6).transformPowerMultiplier,.5);
 assert.deepEqual(policy.rollStormElements(policy.getEffect('elemental-storm', 6), (()=>{const rolls=[0,.29,.99];return()=>rolls.shift();})()), ['fire','lightning']);
 
 const elementalist={progress:{advancedClass:'elementalist',skillLevels:{'mage:elemental-marks':6,'mage:resonance-overload':6}},skillCooldowns:{fireball:9000,blizzard:12000,'chain-lightning':10000}};

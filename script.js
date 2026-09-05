@@ -4561,7 +4561,29 @@ function applyEnemySkillState(index, effect, now = Date.now()) {
   if (effect.magicVulnerability) { state.magicVulnerabilityUntil = now + effect.vulnerabilityDuration * 1000; state.magicVulnerability = effect.magicVulnerability; }
   if (effect.attackDown) { state.attackDownUntil = now + effect.duration * 1000; state.attackDown = effect.attackDown; }
   if (effect.paralysis) state.paralyzedUntil = now + (effect.paralysisDuration || 4) * 1000;
-  if (effect.enhancedParalysis) state.enhancedParalysisUntil = now + (effect.paralysisDuration || 4) * 1000;
+  if (effect.enhancedParalysis) {
+    state.enhancedParalysisUntil = now + (effect.paralysisDuration || 4) * 1000;
+    state.enhancedParalysisGeneration = (state.enhancedParalysisGeneration || 0) + 1;
+    state.elementalCollapseExtendedGeneration = 0;
+  }
+}
+
+function extendElementalCollapseStatuses(index, member, now = Date.now()) {
+  const state = getEnemySkillState(index);
+  const burn = (battle.enemyDots[index] || []).find((dot) => dot.type === 'burn' && dot.remaining > 0);
+  if (!burn || !(now < state.slowedUntil || now < state.frozenUntil) || !(now < state.paralyzedUntil || now < state.enhancedParalysisUntil)) return false;
+  const stats = MageAdvancementPolicy.telemetry(member);
+  burn.remaining += 1; stats.elementalCollapses++; stats.burnExtendedSeconds++;
+  if (now < state.frozenUntil) state.frozenUntil += 1000; else state.slowedUntil += 1000;
+  stats.iceExtendedSeconds++;
+  if (now < state.enhancedParalysisUntil) {
+    if (state.elementalCollapseExtendedGeneration !== state.enhancedParalysisGeneration) {
+      state.enhancedParalysisUntil += 1000; state.paralyzedUntil += 1000;
+      state.elementalCollapseExtendedGeneration = state.enhancedParalysisGeneration;
+      stats.enhancedParalysisExtendedSeconds++;
+    }
+  } else { state.paralyzedUntil += 1000; stats.paralysisExtendedSeconds++; }
+  return true;
 }
 
 function applyDamageToMonster(index, baseDamage, profile, options = {}) {
@@ -4816,15 +4838,16 @@ function useAutoSkillForMember(member, now = Date.now()) {
       }) };
     });
     const hits = resolvedTargets.filter((target) => !target.result.evaded);
+    if (skill.id === 'elemental-burst' && skillEffect.extendStatuses) hits.forEach((target) => extendElementalCollapseStatuses(target.index, member, now));
     if (skill.id === 'elemental-storm') {
       hits.forEach(target => applyElementalStormStatus(target.index, stormElements[0], member, target.result.finalDamage, now));
       if (stormElements[1]) targets.filter((index) => battle.enemyHps[index] > 0).forEach((index) => {
         const secondProfile = { ...profile, element:stormElements[1] };
         const secondBonus = MageAdvancementPolicy.getResonanceBonuses(member, stormElements[1], now);
         const secondCritical = Math.random() < Math.min(.95, stats.crit + secondBonus.crit);
-        const secondDamage = Math.max(1, Math.ceil(stats.attack * skillEffect.power * (secondCritical ? stats.criticalDamageMultiplier : 1)));
+        const secondDamage = Math.max(1, Math.ceil(stats.attack * skillEffect.power * skillEffect.transformPowerMultiplier * (secondCritical ? stats.criticalDamageMultiplier : 1)));
         const result = applyDamageToMonster(index, secondDamage * (1 + secondBonus.damage) * getRuneOutgoingMultiplier(member,index), secondProfile, { attacker:member,attackKind:'skill-followup',canParry:false });
-        if (!result.evaded) applyElementalStormStatus(index, stormElements[1], member, result.finalDamage, now);
+        if (!result.evaded) { applyElementalStormStatus(index, stormElements[1], member, result.finalDamage, now); MageAdvancementPolicy.record(member, 'stormFollowupDamage', result.finalDamage); }
       });
     }
     if (skill.id === 'arcane-missile' && skillEffect.repeatChance && hits.length && Math.random() < skillEffect.repeatChance) {

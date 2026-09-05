@@ -7,6 +7,8 @@ assert.match(source,/\['fire', 'ice', 'lightning'\]\.includes\(profile\.element\
 assert.match(source,/'arcane-missile': 'arcane'[\s\S]*'arcane-torrent': 'arcane'/);
 assert.match(source,/MageAdvancementPolicy\.resolveKill/);
 assert.match(source,/getElementalBurstParts[\s\S]*part\.element[\s\S]*recordBonusDamage/);
+assert.match(source,/extendElementalCollapseStatuses[\s\S]*enhancedParalysisGeneration[\s\S]*elementalCollapseExtendedGeneration/);
+assert.match(source,/skillEffect\.transformPowerMultiplier[\s\S]*stormFollowupDamage/);
 assert.match(source,/rollStormElements[\s\S]*applyElementalStormStatus/);
 assert.match(source,/addElementMark[\s\S]*reduceLongestElementCooldown/);
 assert.match(source,/finishResonance[\s\S]*attackKind: 'resonance'/);
