@@ -94,7 +94,7 @@ function simulate(spec, durationSeconds, seed, options={}) {
     const template=options.farmTemplates?options.farmTemplates[Math.floor(random()*options.farmTemplates.length)]:{hp:FARM_HP};
     target=freshTarget(template,now); enemyStarts.push(poisonStacks());
     if(Rogue.consumePlague(member)){
-      addDot('poison',Math.ceil(ATTACK*.12),3,3,now,false,true);counts.plagueTransfers++;
+      addDot('poison',Math.ceil(ATTACK*.14),3,3,now,false,true);counts.plagueTransfers++;
       enemyStarts[enemyStarts.length-1]=poisonStacks();
     }
   }
@@ -122,19 +122,19 @@ function simulate(spec, durationSeconds, seed, options={}) {
       if(existingBleed&&e.bleedTrigger)addDamage('backstabBleed',existingBleed.damage*e.bleedTrigger,now);
       addDot('bleed',Math.ceil(ATTACK*.18),3,1,now,true);
     }
-    if(skill.id==='poison-blade') addDot('poison',Math.ceil(ATTACK*.12),3,e.poisonStacks,now,false,true);
+    if(skill.id==='poison-blade') addDot('poison',Math.ceil(ATTACK*.14),3,e.poisonStacks,now,false,true);
     if(skill.id==='shadow-assassination'){
       counts.shadowAssassinations++;if(critical)counts.shadowAssassinationCrits++;
       if(critical&&e.offhandOnCrit&&target.hp>0){const strike=Offhand.calculateOffhandStrike(stats,mastery,random());addDamage('offhand',strike.damage,now,strike.critical);counts.shadowOffhands++;}
     }
     if(skill.id==='corrosive-strike'){
       const stacks=poisonStacks();
-      if(!stacks)addDot('poison',Math.ceil(ATTACK*.12),3,3,now);
-      else if(stacks<3)addDot('poison',Math.ceil(ATTACK*.12),3,3,now,false,true);
+      if(!stacks)addDot('poison',Math.ceil(ATTACK*.14),3,3,now);
+      else if(stacks<3)addDot('poison',Math.ceil(ATTACK*.14),3,3,now,false,true);
       else target.dots.filter(d=>d.type==='poison').forEach(d=>{d.remaining=3;d.nextTickAt=now+2000;d.extendedSeconds=0;});
       if(stacks>=3){target.state.dotVulnerability=.08;target.state.dotVulnerabilityUntil=now+5000;}
     }
-    if(skill.id==='blood-venom-rend') addDot('rupture',Math.ceil(ATTACK*.21*(poisonStacks()?1.2:1)),3,1,now,true);
+    if(skill.id==='blood-venom-rend') addDot('rupture',Math.ceil(ATTACK*.24*(poisonStacks()?1.2:1)),3,1,now,true);
     if(skill.id==='shadow-dance'){member.shadowDanceUntil=now+4000;member.shadowDanceOffhandChance=.20+.05;}
     if(critical)Rogue.extendDotsOnCrit(member,target.dots,true);
     member.energy=Math.max(0,member.energy-({backstab:35,'shadow-dance':60,'poison-blade':25}[skill.id]||0));
@@ -156,7 +156,7 @@ function simulate(spec, durationSeconds, seed, options={}) {
     for(const d of snapshot){
       if(now+1e-9<d.nextTickAt)continue;
       const ticks=Math.min(d.remaining,Math.floor((now-d.nextTickAt)/2000)+1);d.remaining-=ticks;d.nextTickAt+=2000*ticks;
-      let mult=1;if(d.type==='poison'&&spec==='venom')mult+=.18;
+      let mult=1;if(d.type==='poison'&&spec==='venom')mult+=.20;
       mult+=Rogue.getTargetBonuses(member,target.dots,target.state,target.hp/target.maxHp,'dot',now).dotDamage;
       addDamage(d.type==='bleed'?'backstabBleed':d.type, d.damage*ticks*mult,now);
       if(done)return;
@@ -220,5 +220,5 @@ function runFarm(spec){return aggregate(Array.from({length:FARM_RUNS},(_,i)=>sim
 const result={metadata:{generatedAt:new Date().toISOString(),map:'3-6 赤岩聖殿',attack:ATTACK,baseCritPercent:20,criticalDamagePercent:150,baseAttackSpeed:BASE_SPEED,weapon:'固定雙匕首',skillLevels:'全部 Lv6',runsPerTarget:RUNS,farmGroupsPerSpec:FARM_RUNS,bossExcluded:true},targets:{},farm10:{}};
 for(const template of [...Temple.normals,Temple.elite]){const cell={template};for(const spec of ['assassination','venom'])cell[spec]=runTarget(spec,template);result.targets[template.id]=cell;}
 for(const spec of ['assassination','venom'])result.farm10[spec]=runFarm(spec);
-const output=path.join(__dirname,'results','rogue-lv45-redrock-temple.json');fs.writeFileSync(output,JSON.stringify(result,null,2)+'\n');
+const output=path.join(__dirname,'results','rogue-lv45-redrock-temple-dot-buff.json');fs.writeFileSync(output,JSON.stringify(result,null,2)+'\n');
 console.log(JSON.stringify({output,targets:Object.fromEntries(Object.entries(result.targets).map(([id,x])=>[id,{name:x.template.name,assassination:x.assassination.durationSeconds,venom:x.venom.durationSeconds}])),farm:{assassination:result.farm10.assassination.durationSeconds,venom:result.farm10.venom.durationSeconds}},null,2));
