@@ -19,7 +19,7 @@
   ]);
   const VENOM_SKILLS = Object.freeze([
     active('corrosive-strike','腐蝕刺擊',6,[165,175,185,195,210,225].map((power,i)=>({power:power/100,dotVulnerability:i===5?.12:0,dotVulnerabilityDuration:5})),'venom'),
-    active('blood-venom-rend','血毒割裂',8,[140,150,160,170,185,200].map((power,i)=>({power:power/100,ruptureTick:[15,17,19,21,23,26][i]/100,poisonedRuptureBonus:.20,toxicBloodDefense:i===5?.06:0})),'venom'),
+    active('blood-venom-rend','血毒割裂',8,[140,150,160,170,185,200].map((power,i)=>({power:power/100,ruptureTick:[17,19,21,23,26,30][i]/100,ruptureEntryRatio:.50,poisonedRuptureBonus:.20,toxicBloodDefense:i===5?.06:0})),'venom'),
     passive('venom-mastery','劇毒精通',[7,9,12,15,18,25].map((poisonDamage,i)=>({poisonDamage:poisonDamage/100,plagueSpread:i===5})),'venom'),
     passive('toxic-blood-symbiosis','血毒共生',[6,8,10,13,16,25].map((dotDamage,i)=>({dotDamage:dotDamage/100,extendOnDirectCrit:i===5?1:0,maxExtension:i===5?3:0})),'venom')
   ]);

@@ -16,7 +16,7 @@ const BASE_CRIT = .20;
 const CRIT_DAMAGE = 1.50;
 const BASE_SPEED = 1.0;
 const FARM_HP = 2400;
-const SOURCES = ['mainBasic','offhand','backstabDirect','backstabBleed','shadowDance','poisonBladeDirect','shadowAssassination','corrosiveStrike','bloodVenomRendDirect','poison','rupture','other'];
+const SOURCES = ['mainBasic','offhand','backstabDirect','backstabBleed','shadowDance','poisonBladeDirect','shadowAssassination','corrosiveStrike','bloodVenomRendDirect','poisonEntry','ruptureEntry','poison','rupture','other'];
 const LABELS = { assassination: '刺殺系', venom: '劇毒系' };
 const SKILL_NAMES = { backstab:'背刺', 'shadow-dance':'影刃旋舞', 'poison-blade':'毒刃', 'shadow-assassination':'暗影刺殺', 'death-mark':'死亡標記', 'corrosive-strike':'腐蝕刺擊', 'blood-venom-rend':'血毒割裂' };
 
@@ -77,11 +77,15 @@ function simulate(spec, durationSeconds, seed, options={}) {
     const same=target.dots.filter(d=>d.type===type);
     if(refreshAll) same.forEach(d=>{d.remaining=duration;d.extendedSeconds=0;d.nextTickAt=now+2000;});
     const existing=same.length>=maxStacks?same.sort((a,b)=>a.remaining-b.remaining)[0]:null;
+    let added=false;
     if(existing){ if(!refreshOnly)existing.damage=Math.max(existing.damage,damage); existing.remaining=duration; existing.extendedSeconds=0; existing.nextTickAt=now+2000; }
-    else target.dots.push({type,damage,remaining:duration,nextTickAt:now+2000,extendedSeconds:0,source:member});
+    else {target.dots.push({type,damage,remaining:duration,nextTickAt:now+2000,extendedSeconds:0,source:member});added=true;}
     const stacks=poisonStacks();
     for(let level=1;level<=Math.min(3,stacks);level++)if(!target.reachedStacks.has(level)){target.reachedStacks.add(level);stackTimes[level].push((now-target.born)/1000);}
+    return added;
   }
+  function dotEntry(type,tickDamage,now){let mult=1;if(type==='poison'&&spec==='venom')mult+=.25;mult+=Rogue.getTargetBonuses(member,target.dots,target.state,target.hp/target.maxHp,'dot',now).dotDamage;addDamage(type==='poison'?'poisonEntry':'ruptureEntry',tickDamage*.5*mult,now);}
+  function addPoison(damage,duration,maxStacks,now,refreshOnly=false,refreshAll=false){const before=poisonStacks();addDot('poison',damage,duration,maxStacks,now,refreshOnly,refreshAll);const added=poisonStacks()-before;if(spec==='venom'&&added>0)dotEntry('poison',damage*added,now);return added;}
   function kill(now){
     if(done)return;
     if(target.state.deathMarkOwner===member.id && now<target.state.deathMarkUntil){
@@ -94,7 +98,7 @@ function simulate(spec, durationSeconds, seed, options={}) {
     const template=options.farmTemplates?options.farmTemplates[Math.floor(random()*options.farmTemplates.length)]:{hp:FARM_HP};
     target=freshTarget(template,now); enemyStarts.push(poisonStacks());
     if(Rogue.consumePlague(member)){
-      addDot('poison',Math.ceil(ATTACK*.15),3,3,now,false,true);counts.plagueTransfers++;
+      addPoison(Math.ceil(ATTACK*.18),3,3,now,false,true);counts.plagueTransfers++;
       enemyStarts[enemyStarts.length-1]=poisonStacks();
     }
   }
@@ -122,19 +126,19 @@ function simulate(spec, durationSeconds, seed, options={}) {
       if(existingBleed&&e.bleedTrigger)addDamage('backstabBleed',existingBleed.damage*e.bleedTrigger,now);
       addDot('bleed',Math.ceil(ATTACK*.18),3,1,now,true);
     }
-    if(skill.id==='poison-blade') addDot('poison',Math.ceil(ATTACK*.15),3,e.poisonStacks,now,false,true);
+    if(skill.id==='poison-blade') addPoison(Math.ceil(ATTACK*.18),3,e.poisonStacks,now,false,true);
     if(skill.id==='shadow-assassination'){
       counts.shadowAssassinations++;if(critical)counts.shadowAssassinationCrits++;
       if(critical&&e.offhandOnCrit&&target.hp>0){const strike=Offhand.calculateOffhandStrike(stats,mastery,random());addDamage('offhand',strike.damage,now,strike.critical);counts.shadowOffhands++;}
     }
     if(skill.id==='corrosive-strike'){
       const stacks=poisonStacks();
-      if(!stacks)addDot('poison',Math.ceil(ATTACK*.15),3,3,now);
-      else if(stacks<3)addDot('poison',Math.ceil(ATTACK*.15),3,3,now,false,true);
+      if(!stacks)addPoison(Math.ceil(ATTACK*.18),3,3,now);
+      else if(stacks<3)addPoison(Math.ceil(ATTACK*.18),3,3,now,false,true);
       else target.dots.filter(d=>d.type==='poison').forEach(d=>{d.remaining=3;d.nextTickAt=now+2000;d.extendedSeconds=0;});
       if(stacks>=3){target.state.dotVulnerability=.12;target.state.dotVulnerabilityUntil=now+5000;}
     }
-    if(skill.id==='blood-venom-rend') addDot('rupture',Math.ceil(ATTACK*.26*(poisonStacks()?1.2:1)),3,1,now,true);
+    if(skill.id==='blood-venom-rend'){const rupture=Math.ceil(ATTACK*.30*(poisonStacks()?1.2:1));addDot('rupture',rupture,3,1,now,true);dotEntry('rupture',rupture,now);}
     if(skill.id==='shadow-dance'){member.shadowDanceUntil=now+4000;member.shadowDanceOffhandChance=.20+.05;}
     if(critical)Rogue.extendDotsOnCrit(member,target.dots,true);
     member.energy=Math.max(0,member.energy-({backstab:35,'shadow-dance':60,'poison-blade':25}[skill.id]||0));
@@ -220,5 +224,5 @@ function runFarm(spec){return aggregate(Array.from({length:FARM_RUNS},(_,i)=>sim
 const result={metadata:{generatedAt:new Date().toISOString(),map:'3-6 赤岩聖殿',attack:ATTACK,baseCritPercent:20,criticalDamagePercent:150,baseAttackSpeed:BASE_SPEED,weapon:'固定雙匕首',skillLevels:'全部 Lv6',runsPerTarget:RUNS,farmGroupsPerSpec:FARM_RUNS,bossExcluded:true},targets:{},farm10:{}};
 for(const template of [...Temple.normals,Temple.elite]){const cell={template};for(const spec of ['assassination','venom'])cell[spec]=runTarget(spec,template);result.targets[template.id]=cell;}
 for(const spec of ['assassination','venom'])result.farm10[spec]=runFarm(spec);
-const output=path.join(__dirname,'results','rogue-lv45-redrock-temple-dot-buff-3.json');fs.writeFileSync(output,JSON.stringify(result,null,2)+'\n');
+const output=path.join(__dirname,'results','rogue-lv45-redrock-temple-dot-buff-4.json');fs.writeFileSync(output,JSON.stringify(result,null,2)+'\n');
 console.log(JSON.stringify({output,targets:Object.fromEntries(Object.entries(result.targets).map(([id,x])=>[id,{name:x.template.name,assassination:x.assassination.durationSeconds,venom:x.venom.durationSeconds}])),farm:{assassination:result.farm10.assassination.durationSeconds,venom:result.farm10.venom.durationSeconds}},null,2));
