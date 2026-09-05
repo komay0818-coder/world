@@ -7,9 +7,9 @@ assert.equal(policy.VENOM_SKILLS.length, 4);
 assert.deepEqual(policy.getEffect('shadow-assassination', 6), { power: 2.7, skillCrit: .12, bleedingDamage: .15, offhandOnCrit: true });
 assert.equal(policy.getEffect('death-mark', 6).executeCritDamage, .25);
 assert.equal(policy.getEffect('corrosive-strike', 6).dotVulnerability, .08);
-assert.equal(policy.getEffect('blood-venom-rend', 6).ruptureTick, .24);
-assert.deepEqual([1,2,3,4,5,6].map(level => policy.getEffect('blood-venom-rend', level).ruptureTick), [.15,.16,.18,.20,.22,.24]);
-assert.deepEqual([1,2,3,4,5,6].map(level => policy.getEffect('venom-mastery', level).poisonDamage), [.07,.09,.11,.14,.17,.20]);
+assert.equal(policy.getEffect('blood-venom-rend', 6).ruptureTick, .26);
+assert.deepEqual([1,2,3,4,5,6].map(level => policy.getEffect('blood-venom-rend', level).ruptureTick), [.15,.17,.19,.21,.23,.26]);
+assert.deepEqual([1,2,3,4,5,6].map(level => policy.getEffect('venom-mastery', level).poisonDamage), [.07,.09,.12,.15,.18,.22]);
 assert.deepEqual([1,2,3,4,5,6].map(level => policy.getEffect('toxic-blood-symbiosis', level).dotDamage), [.06,.08,.10,.13,.16,.20]);
 assert.deepEqual(policy.getAutoSkillPriority({ advancedClass: 'assassination' }, [
   { id: 'backstab' }, { id: 'shadow-dance' }, { id: 'poison-blade' }, { id: 'shadow-assassination' }, { id: 'death-mark' }

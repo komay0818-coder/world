@@ -3465,7 +3465,7 @@ function applyPendingRoguePlagueSpread(index, now = Date.now()) {
   const member = (battle.partyMembers || []).find((candidate) => candidate.alive && candidate.plagueSpreadPending);
   if (!member || !RogueAdvancementPolicy.consumePlague(member)) return false;
   const poisonBlade = ClassSkillPolicy.getEffect('assassin', 'poison-blade', Number(member.progress.skillLevels?.['assassin:poison-blade']) || 1) || {};
-  applyDot(index, 'poison', Math.max(1, Math.ceil(member.stats.attack * .14 * member.stats.dotMultiplier)), 3, 3, { source: member, defenseReduction: poisonBlade.defensePerStack || 0, tickIntervalMs: 2000, now, refreshDuration: true, refreshAllSameType: true });
+  applyDot(index, 'poison', Math.max(1, Math.ceil(member.stats.attack * .15 * member.stats.dotMultiplier)), 3, 3, { source: member, defenseReduction: poisonBlade.defensePerStack || 0, tickIntervalMs: 2000, now, refreshDuration: true, refreshAllSameType: true });
   return true;
 }
 
@@ -4762,13 +4762,13 @@ function useAutoSkillForMember(member, now = Date.now()) {
     });
     if (skill.id === 'poison-blade') {
       member.poisonBladeVisualUntil = now + 800;
-      hits.forEach((target) => applyDot(target.index, 'poison', Math.max(1, Math.ceil(stats.attack * .14 * stats.dotMultiplier)), 3, skillEffect.poisonStacks || 1, { source: member, defenseReduction: skillEffect.defensePerStack || 0, tickIntervalMs: 2000, now, refreshDuration: true, refreshAllSameType: true }));
+      hits.forEach((target) => applyDot(target.index, 'poison', Math.max(1, Math.ceil(stats.attack * .15 * stats.dotMultiplier)), 3, skillEffect.poisonStacks || 1, { source: member, defenseReduction: skillEffect.defensePerStack || 0, tickIntervalMs: 2000, now, refreshDuration: true, refreshAllSameType: true }));
     }
     if (skill.id === 'corrosive-strike') hits.forEach((target) => {
       const dots = battle.enemyDots[target.index] || [];
       const stacks = RogueAdvancementPolicy.poisonStacks(dots);
-      if (!stacks) applyDot(target.index, 'poison', Math.max(1, Math.ceil(stats.attack * .14)), 3, 3, { source: member, tickIntervalMs: 2000, now, refreshDuration: true });
-      else if (stacks < 3) applyDot(target.index, 'poison', Math.max(1, Math.ceil(stats.attack * .14)), 3, 3, { source: member, tickIntervalMs: 2000, now, refreshDuration: true, refreshAllSameType: true });
+      if (!stacks) applyDot(target.index, 'poison', Math.max(1, Math.ceil(stats.attack * .15)), 3, 3, { source: member, tickIntervalMs: 2000, now, refreshDuration: true });
+      else if (stacks < 3) applyDot(target.index, 'poison', Math.max(1, Math.ceil(stats.attack * .15)), 3, 3, { source: member, tickIntervalMs: 2000, now, refreshDuration: true, refreshAllSameType: true });
       else dots.filter((dot) => dot.type === 'poison').forEach((dot) => { dot.remaining = 3; dot.nextTickAt = now + 2000; dot.extendedSeconds = 0; });
       if (stacks >= 3 && skillEffect.dotVulnerability) { const state = getEnemySkillState(target.index); state.dotVulnerability = skillEffect.dotVulnerability; state.dotVulnerabilityUntil = now + skillEffect.dotVulnerabilityDuration * 1000; }
     });

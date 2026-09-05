@@ -11,7 +11,7 @@ assert.match(source, /skill\.id === 'death-mark'[\s\S]*markTarget/);
 assert.match(source, /shadow-assassination'[\s\S]*offhandOnCrit[\s\S]*AssassinOffhandPolicy\.calculateOffhandStrike/);
 assert.match(source, /resolveBackstabCrit[\s\S]*getBasicExecution[\s\S]*consumeBasic/);
 assert.match(source, /masteryChance = \(mastery\.offhandChance \|\| 0\) \+ \(lethalExecution\?\.extraOffhandChance \|\| 0\)/);
-assert.match(source, /skill\.id === 'poison-blade'[\s\S]*stats\.attack \* \.14 \* stats\.dotMultiplier[\s\S]*tickIntervalMs: 2000/);
+assert.match(source, /skill\.id === 'poison-blade'[\s\S]*stats\.attack \* \.15 \* stats\.dotMultiplier[\s\S]*tickIntervalMs: 2000/);
 assert.match(source, /skill\.id === 'backstab'[\s\S]*stats\.attack \* \.18[\s\S]*tickIntervalMs: 2000/);
 assert.match(source, /skill\.id === 'corrosive-strike'[\s\S]*dotVulnerabilityUntil/);
 assert.match(source, /getAutoSkillPriority\(progress, unlocked\)/, 'advanced rogues use their formal specialization priority');
