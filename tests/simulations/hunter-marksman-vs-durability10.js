@@ -1,0 +1,10 @@
+'use strict';
+const fs=require('node:fs'),path=require('node:path'),Temple=require('./chapter-three-36-rules.js');
+const {simulate,aggregate}=require('./hunter-lv45-redrock-temple-round1.js');
+const TARGET_RUNS=1000,FARM_RUNS=500,LONG_RUNS=100;
+function optionsFor(spec,count,template){const common={killTarget:count,pool:Temple.normals,template};return spec==='marksman'?common:{...common,petDurability:10};}
+function run(spec,count,runs,template){return aggregate(Array.from({length:runs},(_,i)=>simulate(spec,0xe45000+count*1009+i*7919,optionsFor(spec,count,template))),count);}
+const result={metadata:{generatedAt:new Date().toISOString(),map:'3-6 赤岩聖殿',level:45,comparison:'射擊系1寵無生存資源 vs 獸王平行10耐久制',marksmanPet:{count:1,hasHealth:false,hasDurability:false,canDie:false},beastmasterPets:{count:3,maxDurability:10,guardSelection:'random living pet',reviveSeconds:30,reviveDurability:'full'},sameStats:true,allSkillsLv6:true,noSkillOrDamageChanges:true,aoeIncluded:false,runs:{target:TARGET_RUNS,farm10:FARM_RUNS,farm100:FARM_RUNS,farm500:LONG_RUNS,farm1000:LONG_RUNS}},targets:{},farm10:{},farm100:{},farm500:{},farm1000:{}};
+for(const target of [...Temple.normals,Temple.elite]){result.targets[target.id]={template:target,marksman:run('marksman',1,TARGET_RUNS,target),beastmaster:run('beastmaster',1,TARGET_RUNS,target)};}
+for(const length of [10,100,500,1000]){const runs=length<=100?FARM_RUNS:LONG_RUNS,cell=result[`farm${length}`];cell.marksman=run('marksman',length,runs);cell.beastmaster=run('beastmaster',length,runs);}
+const output=path.join(__dirname,'results','hunter-marksman-vs-durability10.json');fs.writeFileSync(output,JSON.stringify(result,null,2)+'\n');console.log(JSON.stringify({output,targets:Object.fromEntries(Object.entries(result.targets).map(([id,x])=>[id,{name:x.template.name,marksman:x.marksman.durationSeconds,beastmaster:x.beastmaster.durationSeconds}])),farm:Object.fromEntries([10,100,500,1000].map(n=>{const x=result[`farm${n}`];return[n,{marksman:x.marksman.killsPerHour,beastmaster:x.beastmaster.killsPerHour}]}))},null,2));
