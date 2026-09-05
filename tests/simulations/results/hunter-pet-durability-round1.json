@@ -1,0 +1,1212 @@
+{
+  "metadata": {
+    "generatedAt": "2026-09-05T18:05:50.544Z",
+    "mode": "平行耐久制；未修改正式HP版",
+    "map": "3-6 赤岩聖殿",
+    "level": 45,
+    "guardSelection": "每次從存活寵物等機率隨機選1隻",
+    "guardShare": 0.3,
+    "reviveSeconds": 30,
+    "reviveDurability": "full",
+    "aoeIncluded": false,
+    "noDamageSkillChanges": true,
+    "runs": {
+      "farm10": 500,
+      "farm100": 500,
+      "farm500": 100,
+      "farm1000": 100,
+      "farm5000": 20
+    }
+  },
+  "durability5": {
+    "farm10": {
+      "runs": 500,
+      "enemyCount": 10,
+      "maxDurability": 5,
+      "durationSeconds": 33.835,
+      "killsPerHour": 1064,
+      "petDamageSharePercent": 48.446,
+      "petIndividualDamageShares": [
+        16.353,
+        15.988,
+        15.989
+      ],
+      "pets": [
+        {
+          "id": "A",
+          "maxDurability": 5,
+          "averageGuardEvents": 4.386,
+          "averageDurabilitySpent": 4.386,
+          "averageDeaths": 0.628,
+          "averageRevives": 0.01,
+          "firstDeathSeconds": 26.575,
+          "alivePercent": 82.261,
+          "averageDeadSeconds": 6.02,
+          "minimumDurability": 1,
+          "averageRemainingDurability": 3.394,
+          "averageGuardsPerLife": 6.984
+        },
+        {
+          "id": "B",
+          "maxDurability": 5,
+          "averageGuardEvents": 4.354,
+          "averageDurabilitySpent": 4.354,
+          "averageDeaths": 0.636,
+          "averageRevives": 0.01,
+          "firstDeathSeconds": 25.893,
+          "alivePercent": 80.627,
+          "averageDeadSeconds": 6.574,
+          "minimumDurability": 1,
+          "averageRemainingDurability": 3.335,
+          "averageGuardsPerLife": 6.846
+        },
+        {
+          "id": "C",
+          "maxDurability": 5,
+          "averageGuardEvents": 4.4,
+          "averageDurabilitySpent": 4.4,
+          "averageDeaths": 0.646,
+          "averageRevives": 0.01,
+          "firstDeathSeconds": 26.521,
+          "alivePercent": 81.883,
+          "averageDeadSeconds": 6.148,
+          "minimumDurability": 1,
+          "averageRemainingDurability": 3.313,
+          "averageGuardsPerLife": 6.811
+        }
+      ],
+      "groupAlivePercent": {
+        "three": 68.68,
+        "two": 15.807,
+        "one": 7.118,
+        "zero": 8.396
+      },
+      "transitions": {
+        "3->2": 0.864,
+        "2->1": 0.63,
+        "1->0": 0.416,
+        "0->1": 0.03,
+        "0->2": 0,
+        "0->3": 0
+      },
+      "survival": {
+        "potentialDamage": 233.6,
+        "hunterDamage": 171.289,
+        "guardReduction": 62.311,
+        "reductionPercent": 27.657,
+        "zeroPetPercent": 8.396,
+        "hunterDeaths": 0
+      }
+    },
+    "farm100": {
+      "runs": 500,
+      "enemyCount": 100,
+      "maxDurability": 5,
+      "durationSeconds": 462.895,
+      "killsPerHour": 777.71,
+      "petDamageSharePercent": 28.08,
+      "petIndividualDamageShares": [
+        9.374,
+        9.395,
+        9.309
+      ],
+      "pets": [
+        {
+          "id": "A",
+          "maxDurability": 5,
+          "averageGuardEvents": 53.128,
+          "averageDurabilitySpent": 53.128,
+          "averageDeaths": 10.476,
+          "averageRevives": 9.828,
+          "firstDeathSeconds": 29.773,
+          "alivePercent": 34.602,
+          "averageDeadSeconds": 302.789,
+          "minimumDurability": 1,
+          "averageRemainingDurability": 2.936,
+          "averageGuardsPerLife": 5.071
+        },
+        {
+          "id": "B",
+          "maxDurability": 5,
+          "averageGuardEvents": 52.99,
+          "averageDurabilitySpent": 52.99,
+          "averageDeaths": 10.446,
+          "averageRevives": 9.788,
+          "firstDeathSeconds": 29.928,
+          "alivePercent": 34.673,
+          "averageDeadSeconds": 302.463,
+          "minimumDurability": 1,
+          "averageRemainingDurability": 2.918,
+          "averageGuardsPerLife": 5.073
+        },
+        {
+          "id": "C",
+          "maxDurability": 5,
+          "averageGuardEvents": 53.026,
+          "averageDurabilitySpent": 53.026,
+          "averageDeaths": 10.468,
+          "averageRevives": 9.808,
+          "firstDeathSeconds": 29.598,
+          "alivePercent": 34.482,
+          "averageDeadSeconds": 303.347,
+          "minimumDurability": 1,
+          "averageRemainingDurability": 2.922,
+          "averageGuardsPerLife": 5.066
+        }
+      ],
+      "groupAlivePercent": {
+        "three": 9.539,
+        "two": 18.074,
+        "one": 38.992,
+        "zero": 33.395
+      },
+      "transitions": {
+        "3->2": 3.078,
+        "2->1": 9.586,
+        "1->0": 18.566,
+        "0->1": 18.302,
+        "0->2": 0,
+        "0->3": 0
+      },
+      "survival": {
+        "potentialDamage": 3905.898,
+        "hunterDamage": 3146.624,
+        "guardReduction": 759.274,
+        "reductionPercent": 19.403,
+        "zeroPetPercent": 33.395,
+        "hunterDeaths": 1.004
+      }
+    },
+    "farm500": {
+      "runs": 100,
+      "enemyCount": 500,
+      "maxDurability": 5,
+      "durationSeconds": 2415.339,
+      "killsPerHour": 745.24,
+      "petDamageSharePercent": 25.245,
+      "petIndividualDamageShares": [
+        8.428,
+        8.39,
+        8.427
+      ],
+      "pets": [
+        {
+          "id": "A",
+          "maxDurability": 5,
+          "averageGuardEvents": 284.63,
+          "averageDurabilitySpent": 284.63,
+          "averageDeaths": 56.79,
+          "averageRevives": 56.12,
+          "firstDeathSeconds": 30.364,
+          "alivePercent": 30.105,
+          "averageDeadSeconds": 1688.261,
+          "minimumDurability": 1,
+          "averageRemainingDurability": 2.834,
+          "averageGuardsPerLife": 5.012
+        },
+        {
+          "id": "B",
+          "maxDurability": 5,
+          "averageGuardEvents": 285.36,
+          "averageDurabilitySpent": 285.36,
+          "averageDeaths": 56.88,
+          "averageRevives": 56.28,
+          "firstDeathSeconds": 29.751,
+          "alivePercent": 29.986,
+          "averageDeadSeconds": 1691.138,
+          "minimumDurability": 1,
+          "averageRemainingDurability": 2.858,
+          "averageGuardsPerLife": 5.017
+        },
+        {
+          "id": "C",
+          "maxDurability": 5,
+          "averageGuardEvents": 284.92,
+          "averageDurabilitySpent": 284.92,
+          "averageDeaths": 56.83,
+          "averageRevives": 56.19,
+          "firstDeathSeconds": 30.183,
+          "alivePercent": 30.07,
+          "averageDeadSeconds": 1689.109,
+          "minimumDurability": 1,
+          "averageRemainingDurability": 2.857,
+          "averageGuardsPerLife": 5.014
+        }
+      ],
+      "groupAlivePercent": {
+        "three": 3.852,
+        "two": 16.054,
+        "one": 46.497,
+        "zero": 33.597
+      },
+      "transitions": {
+        "3->2": 9.03,
+        "2->1": 47.44,
+        "1->0": 113.24,
+        "0->1": 113,
+        "0->2": 0,
+        "0->3": 0
+      },
+      "survival": {
+        "potentialDamage": 20721.76,
+        "hunterDamage": 16643.491,
+        "guardReduction": 4078.269,
+        "reductionPercent": 19.672,
+        "zeroPetPercent": 33.597,
+        "hunterDeaths": 8.8
+      }
+    },
+    "farm1000": {
+      "runs": 100,
+      "enemyCount": 1000,
+      "maxDurability": 5,
+      "durationSeconds": 4832.943,
+      "killsPerHour": 744.89,
+      "petDamageSharePercent": 24.977,
+      "petIndividualDamageShares": [
+        8.315,
+        8.345,
+        8.315
+      ],
+      "pets": [
+        {
+          "id": "A",
+          "maxDurability": 5,
+          "averageGuardEvents": 571.64,
+          "averageDurabilitySpent": 571.64,
+          "averageDeaths": 114.17,
+          "averageRevives": 113.54,
+          "firstDeathSeconds": 29.515,
+          "alivePercent": 29.568,
+          "averageDeadSeconds": 3404.012,
+          "minimumDurability": 1,
+          "averageRemainingDurability": 2.832,
+          "averageGuardsPerLife": 5.007
+        },
+        {
+          "id": "B",
+          "maxDurability": 5,
+          "averageGuardEvents": 570.46,
+          "averageDurabilitySpent": 570.46,
+          "averageDeaths": 113.96,
+          "averageRevives": 113.22,
+          "firstDeathSeconds": 29.738,
+          "alivePercent": 29.749,
+          "averageDeadSeconds": 3395.275,
+          "minimumDurability": 1,
+          "averageRemainingDurability": 2.836,
+          "averageGuardsPerLife": 5.006
+        },
+        {
+          "id": "C",
+          "maxDurability": 5,
+          "averageGuardEvents": 570.94,
+          "averageDurabilitySpent": 570.94,
+          "averageDeaths": 114.06,
+          "averageRevives": 113.34,
+          "firstDeathSeconds": 29.592,
+          "alivePercent": 29.643,
+          "averageDeadSeconds": 3400.362,
+          "minimumDurability": 1,
+          "averageRemainingDurability": 2.845,
+          "averageGuardsPerLife": 5.006
+        }
+      ],
+      "groupAlivePercent": {
+        "three": 3.391,
+        "two": 15.851,
+        "one": 47.085,
+        "zero": 33.673
+      },
+      "transitions": {
+        "3->2": 17.74,
+        "2->1": 92.45,
+        "1->0": 229.85,
+        "0->1": 229.52,
+        "0->2": 0,
+        "0->3": 0
+      },
+      "survival": {
+        "potentialDamage": 41515.07,
+        "hunterDamage": 33335.042,
+        "guardReduction": 8180.028,
+        "reductionPercent": 19.698,
+        "zeroPetPercent": 33.673,
+        "hunterDeaths": 17.96
+      }
+    },
+    "farm5000": {
+      "runs": 20,
+      "enemyCount": 5000,
+      "maxDurability": 5,
+      "durationSeconds": 24291.75,
+      "killsPerHour": 740.99,
+      "petDamageSharePercent": 24.502,
+      "petIndividualDamageShares": [
+        8.165,
+        8.175,
+        8.162
+      ],
+      "pets": [
+        {
+          "id": "A",
+          "maxDurability": 5,
+          "averageGuardEvents": 2890.75,
+          "averageDurabilitySpent": 2890.75,
+          "averageDeaths": 578,
+          "averageRevives": 577.4,
+          "firstDeathSeconds": 31.65,
+          "alivePercent": 28.895,
+          "averageDeadSeconds": 17272.685,
+          "minimumDurability": 1,
+          "averageRemainingDurability": 2.827,
+          "averageGuardsPerLife": 5.001
+        },
+        {
+          "id": "B",
+          "maxDurability": 5,
+          "averageGuardEvents": 2890.3,
+          "averageDurabilitySpent": 2890.3,
+          "averageDeaths": 577.75,
+          "averageRevives": 577.3,
+          "firstDeathSeconds": 31.335,
+          "alivePercent": 28.927,
+          "averageDeadSeconds": 17265.05,
+          "minimumDurability": 1,
+          "averageRemainingDurability": 2.829,
+          "averageGuardsPerLife": 5.003
+        },
+        {
+          "id": "C",
+          "maxDurability": 5,
+          "averageGuardEvents": 2891.7,
+          "averageDurabilitySpent": 2891.7,
+          "averageDeaths": 578.2,
+          "averageRevives": 577.5,
+          "firstDeathSeconds": 32.09,
+          "alivePercent": 28.88,
+          "averageDeadSeconds": 17276.435,
+          "minimumDurability": 1,
+          "averageRemainingDurability": 2.832,
+          "averageGuardsPerLife": 5.001
+        }
+      ],
+      "groupAlivePercent": {
+        "three": 2.713,
+        "two": 14.983,
+        "one": 48.596,
+        "zero": 33.708
+      },
+      "transitions": {
+        "3->2": 78.05,
+        "2->1": 454.95,
+        "1->0": 1189.8,
+        "0->1": 1189.65,
+        "0->2": 0,
+        "0->3": 0
+      },
+      "survival": {
+        "potentialDamage": 209615.75,
+        "hunterDamage": 168209.57,
+        "guardReduction": 41406.18,
+        "reductionPercent": 19.752,
+        "zeroPetPercent": 33.708,
+        "hunterDeaths": 92.6
+      }
+    }
+  },
+  "durability7": {
+    "farm10": {
+      "runs": 500,
+      "enemyCount": 10,
+      "maxDurability": 7,
+      "durationSeconds": 30.748,
+      "killsPerHour": 1170.8,
+      "petDamageSharePercent": 52.953,
+      "petIndividualDamageShares": [
+        17.82,
+        17.649,
+        17.464
+      ],
+      "pets": [
+        {
+          "id": "A",
+          "maxDurability": 7,
+          "averageGuardEvents": 3.994,
+          "averageDurabilitySpent": 3.994,
+          "averageDeaths": 0.082,
+          "averageRevives": 0,
+          "firstDeathSeconds": 28.92,
+          "alivePercent": 98.912,
+          "averageDeadSeconds": 0.336,
+          "minimumDurability": 1,
+          "averageRemainingDurability": 5.138,
+          "averageGuardsPerLife": 48.707
+        },
+        {
+          "id": "B",
+          "maxDurability": 7,
+          "averageGuardEvents": 4.138,
+          "averageDurabilitySpent": 4.138,
+          "averageDeaths": 0.112,
+          "averageRevives": 0,
+          "firstDeathSeconds": 28.104,
+          "alivePercent": 98.114,
+          "averageDeadSeconds": 0.582,
+          "minimumDurability": 1,
+          "averageRemainingDurability": 5.076,
+          "averageGuardsPerLife": 36.946
+        },
+        {
+          "id": "C",
+          "maxDurability": 7,
+          "averageGuardEvents": 4.04,
+          "averageDurabilitySpent": 4.04,
+          "averageDeaths": 0.068,
+          "averageRevives": 0,
+          "firstDeathSeconds": 28.876,
+          "alivePercent": 98.992,
+          "averageDeadSeconds": 0.311,
+          "minimumDurability": 1,
+          "averageRemainingDurability": 5.133,
+          "averageGuardsPerLife": 59.412
+        }
+      ],
+      "groupAlivePercent": {
+        "three": 96.185,
+        "two": 3.649,
+        "one": 0.167,
+        "zero": 0
+      },
+      "transitions": {
+        "3->2": 0.24,
+        "2->1": 0.022,
+        "1->0": 0,
+        "0->1": 0,
+        "0->2": 0,
+        "0->3": 0
+      },
+      "survival": {
+        "potentialDamage": 192.212,
+        "hunterDamage": 134.548,
+        "guardReduction": 57.664,
+        "reductionPercent": 30,
+        "zeroPetPercent": 0,
+        "hunterDeaths": 0
+      }
+    },
+    "farm100": {
+      "runs": 500,
+      "enemyCount": 100,
+      "maxDurability": 7,
+      "durationSeconds": 416.054,
+      "killsPerHour": 865.27,
+      "petDamageSharePercent": 35.346,
+      "petIndividualDamageShares": [
+        11.788,
+        11.891,
+        11.667
+      ],
+      "pets": [
+        {
+          "id": "A",
+          "maxDurability": 7,
+          "averageGuardEvents": 54.056,
+          "averageDurabilitySpent": 54.056,
+          "averageDeaths": 7.478,
+          "averageRevives": 6.994,
+          "firstDeathSeconds": 43.223,
+          "alivePercent": 48.076,
+          "averageDeadSeconds": 216.082,
+          "minimumDurability": 1,
+          "averageRemainingDurability": 3.98,
+          "averageGuardsPerLife": 7.229
+        },
+        {
+          "id": "B",
+          "maxDurability": 7,
+          "averageGuardEvents": 53.712,
+          "averageDurabilitySpent": 53.712,
+          "averageDeaths": 7.44,
+          "averageRevives": 6.922,
+          "firstDeathSeconds": 43.549,
+          "alivePercent": 48.472,
+          "averageDeadSeconds": 214.437,
+          "minimumDurability": 1,
+          "averageRemainingDurability": 3.976,
+          "averageGuardsPerLife": 7.219
+        },
+        {
+          "id": "C",
+          "maxDurability": 7,
+          "averageGuardEvents": 54.132,
+          "averageDurabilitySpent": 54.132,
+          "averageDeaths": 7.528,
+          "averageRevives": 7.006,
+          "firstDeathSeconds": 42.895,
+          "alivePercent": 47.713,
+          "averageDeadSeconds": 217.595,
+          "minimumDurability": 1,
+          "averageRemainingDurability": 3.976,
+          "averageGuardsPerLife": 7.191
+        }
+      ],
+      "groupAlivePercent": {
+        "three": 18.747,
+        "two": 27.073,
+        "one": 33.875,
+        "zero": 20.305
+      },
+      "transitions": {
+        "3->2": 3.882,
+        "2->1": 8.644,
+        "1->0": 9.806,
+        "0->1": 9.666,
+        "0->2": 0,
+        "0->3": 0
+      },
+      "survival": {
+        "potentialDamage": 3323.55,
+        "hunterDamage": 2551.065,
+        "guardReduction": 772.485,
+        "reductionPercent": 23.183,
+        "zeroPetPercent": 20.305,
+        "hunterDeaths": 1
+      }
+    },
+    "farm500": {
+      "runs": 100,
+      "enemyCount": 500,
+      "maxDurability": 7,
+      "durationSeconds": 2154.114,
+      "killsPerHour": 835.61,
+      "petDamageSharePercent": 32.853,
+      "petIndividualDamageShares": [
+        10.956,
+        10.949,
+        10.949
+      ],
+      "pets": [
+        {
+          "id": "A",
+          "maxDurability": 7,
+          "averageGuardEvents": 289.84,
+          "averageDurabilitySpent": 289.84,
+          "averageDeaths": 41.21,
+          "averageRevives": 40.68,
+          "firstDeathSeconds": 42.706,
+          "alivePercent": 43.147,
+          "averageDeadSeconds": 1224.728,
+          "minimumDurability": 1,
+          "averageRemainingDurability": 3.848,
+          "averageGuardsPerLife": 7.033
+        },
+        {
+          "id": "B",
+          "maxDurability": 7,
+          "averageGuardEvents": 290.69,
+          "averageDurabilitySpent": 290.69,
+          "averageDeaths": 41.31,
+          "averageRevives": 40.78,
+          "firstDeathSeconds": 44.183,
+          "alivePercent": 43.089,
+          "averageDeadSeconds": 1225.985,
+          "minimumDurability": 1,
+          "averageRemainingDurability": 3.847,
+          "averageGuardsPerLife": 7.037
+        },
+        {
+          "id": "C",
+          "maxDurability": 7,
+          "averageGuardEvents": 290.41,
+          "averageDurabilitySpent": 290.41,
+          "averageDeaths": 41.24,
+          "averageRevives": 40.76,
+          "firstDeathSeconds": 44.523,
+          "alivePercent": 43.102,
+          "averageDeadSeconds": 1225.701,
+          "minimumDurability": 1,
+          "averageRemainingDurability": 3.871,
+          "averageGuardsPerLife": 7.042
+        }
+      ],
+      "groupAlivePercent": {
+        "three": 10.47,
+        "two": 28.041,
+        "one": 41.847,
+        "zero": 19.642
+      },
+      "transitions": {
+        "3->2": 15.53,
+        "2->1": 48.88,
+        "1->0": 58.57,
+        "0->1": 58.41,
+        "0->2": 0,
+        "0->3": 0
+      },
+      "survival": {
+        "potentialDamage": 17586.39,
+        "hunterDamage": 13423.386,
+        "guardReduction": 4163.004,
+        "reductionPercent": 23.657,
+        "zeroPetPercent": 19.642,
+        "hunterDeaths": 7
+      }
+    },
+    "farm1000": {
+      "runs": 100,
+      "enemyCount": 1000,
+      "maxDurability": 7,
+      "durationSeconds": 4327.589,
+      "killsPerHour": 831.87,
+      "petDamageSharePercent": 32.677,
+      "petIndividualDamageShares": [
+        10.866,
+        10.919,
+        10.891
+      ],
+      "pets": [
+        {
+          "id": "A",
+          "maxDurability": 7,
+          "averageGuardEvents": 584.48,
+          "averageDurabilitySpent": 584.48,
+          "averageDeaths": 83.23,
+          "averageRevives": 82.79,
+          "firstDeathSeconds": 41.589,
+          "alivePercent": 42.64,
+          "averageDeadSeconds": 2482.368,
+          "minimumDurability": 1,
+          "averageRemainingDurability": 3.853,
+          "averageGuardsPerLife": 7.022
+        },
+        {
+          "id": "B",
+          "maxDurability": 7,
+          "averageGuardEvents": 583.08,
+          "averageDurabilitySpent": 583.08,
+          "averageDeaths": 83.06,
+          "averageRevives": 82.54,
+          "firstDeathSeconds": 41.449,
+          "alivePercent": 42.794,
+          "averageDeadSeconds": 2475.688,
+          "minimumDurability": 1,
+          "averageRemainingDurability": 3.85,
+          "averageGuardsPerLife": 7.02
+        },
+        {
+          "id": "C",
+          "maxDurability": 7,
+          "averageGuardEvents": 583.62,
+          "averageDurabilitySpent": 583.62,
+          "averageDeaths": 83.13,
+          "averageRevives": 82.64,
+          "firstDeathSeconds": 42.392,
+          "alivePercent": 42.773,
+          "averageDeadSeconds": 2476.607,
+          "minimumDurability": 1,
+          "averageRemainingDurability": 3.839,
+          "averageGuardsPerLife": 7.021
+        }
+      ],
+      "groupAlivePercent": {
+        "three": 9.484,
+        "two": 28.886,
+        "one": 41.983,
+        "zero": 19.647
+      },
+      "transitions": {
+        "3->2": 31.36,
+        "2->1": 98.86,
+        "1->0": 117.67,
+        "0->1": 117.55,
+        "0->2": 0,
+        "0->3": 0
+      },
+      "survival": {
+        "potentialDamage": 35372.43,
+        "hunterDamage": 27005.928,
+        "guardReduction": 8366.502,
+        "reductionPercent": 23.645,
+        "zeroPetPercent": 19.647,
+        "hunterDeaths": 14.45
+      }
+    },
+    "farm5000": {
+      "runs": 20,
+      "enemyCount": 5000,
+      "maxDurability": 7,
+      "durationSeconds": 21688.28,
+      "killsPerHour": 829.94,
+      "petDamageSharePercent": 32.426,
+      "petIndividualDamageShares": [
+        10.813,
+        10.784,
+        10.829
+      ],
+      "pets": [
+        {
+          "id": "A",
+          "maxDurability": 7,
+          "averageGuardEvents": 2932.9,
+          "averageDurabilitySpent": 2932.9,
+          "averageDeaths": 418.65,
+          "averageRevives": 418.25,
+          "firstDeathSeconds": 41.105,
+          "alivePercent": 42.311,
+          "averageDeadSeconds": 12511.715,
+          "minimumDurability": 1,
+          "averageRemainingDurability": 3.842,
+          "averageGuardsPerLife": 7.006
+        },
+        {
+          "id": "B",
+          "maxDurability": 7,
+          "averageGuardEvents": 2940.35,
+          "averageDurabilitySpent": 2940.35,
+          "averageDeaths": 419.85,
+          "averageRevives": 419.3,
+          "firstDeathSeconds": 43.46,
+          "alivePercent": 42.156,
+          "averageDeadSeconds": 12545.46,
+          "minimumDurability": 1,
+          "averageRemainingDurability": 3.826,
+          "averageGuardsPerLife": 7.003
+        },
+        {
+          "id": "C",
+          "maxDurability": 7,
+          "averageGuardEvents": 2926.7,
+          "averageDurabilitySpent": 2926.7,
+          "averageDeaths": 417.9,
+          "averageRevives": 417.55,
+          "firstDeathSeconds": 44.63,
+          "alivePercent": 42.403,
+          "averageDeadSeconds": 12491.765,
+          "minimumDurability": 1,
+          "averageRemainingDurability": 3.833,
+          "averageGuardsPerLife": 7.003
+        }
+      ],
+      "groupAlivePercent": {
+        "three": 8.669,
+        "two": 29.21,
+        "one": 42.443,
+        "zero": 19.678
+      },
+      "transitions": {
+        "3->2": 150.4,
+        "2->1": 504,
+        "1->0": 594.9,
+        "0->1": 594.8,
+        "0->2": 0,
+        "0->3": 0
+      },
+      "survival": {
+        "potentialDamage": 177728.15,
+        "hunterDamage": 135661.685,
+        "guardReduction": 42066.465,
+        "reductionPercent": 23.668,
+        "zeroPetPercent": 19.678,
+        "hunterDeaths": 74.65
+      }
+    }
+  },
+  "durability10": {
+    "farm10": {
+      "runs": 500,
+      "enemyCount": 10,
+      "maxDurability": 10,
+      "durationSeconds": 30.358,
+      "killsPerHour": 1185.84,
+      "petDamageSharePercent": 53.448,
+      "petIndividualDamageShares": [
+        17.999,
+        17.891,
+        17.535
+      ],
+      "pets": [
+        {
+          "id": "A",
+          "maxDurability": 10,
+          "averageGuardEvents": 4.13,
+          "averageDurabilitySpent": 4.13,
+          "averageDeaths": 0,
+          "averageRevives": 0,
+          "firstDeathSeconds": null,
+          "alivePercent": 100,
+          "averageDeadSeconds": 0,
+          "minimumDurability": 1,
+          "averageRemainingDurability": 8.031,
+          "averageGuardsPerLife": 2065
+        },
+        {
+          "id": "B",
+          "maxDurability": 10,
+          "averageGuardEvents": 4.098,
+          "averageDurabilitySpent": 4.098,
+          "averageDeaths": 0,
+          "averageRevives": 0,
+          "firstDeathSeconds": null,
+          "alivePercent": 100,
+          "averageDeadSeconds": 0,
+          "minimumDurability": 1,
+          "averageRemainingDurability": 8.058,
+          "averageGuardsPerLife": 2049
+        },
+        {
+          "id": "C",
+          "maxDurability": 10,
+          "averageGuardEvents": 4.014,
+          "averageDurabilitySpent": 4.014,
+          "averageDeaths": 0.002,
+          "averageRevives": 0,
+          "firstDeathSeconds": 36.3,
+          "alivePercent": 99.99,
+          "averageDeadSeconds": 0.003,
+          "minimumDurability": 1,
+          "averageRemainingDurability": 8.055,
+          "averageGuardsPerLife": 2007
+        }
+      ],
+      "groupAlivePercent": {
+        "three": 99.99,
+        "two": 0.01,
+        "one": 0,
+        "zero": 0
+      },
+      "transitions": {
+        "3->2": 0.002,
+        "2->1": 0,
+        "1->0": 0,
+        "0->1": 0,
+        "0->2": 0,
+        "0->3": 0
+      },
+      "survival": {
+        "potentialDamage": 194.108,
+        "hunterDamage": 135.876,
+        "guardReduction": 58.232,
+        "reductionPercent": 30,
+        "zeroPetPercent": 0,
+        "hunterDeaths": 0
+      }
+    },
+    "farm100": {
+      "runs": 500,
+      "enemyCount": 100,
+      "maxDurability": 10,
+      "durationSeconds": 374.157,
+      "killsPerHour": 962.16,
+      "petDamageSharePercent": 41.804,
+      "petIndividualDamageShares": [
+        13.953,
+        13.934,
+        13.918
+      ],
+      "pets": [
+        {
+          "id": "A",
+          "maxDurability": 10,
+          "averageGuardEvents": 51.236,
+          "averageDurabilitySpent": 51.236,
+          "averageDeaths": 4.824,
+          "averageRevives": 4.484,
+          "firstDeathSeconds": 63.604,
+          "alivePercent": 62.925,
+          "averageDeadSeconds": 138.755,
+          "minimumDurability": 1,
+          "averageRemainingDurability": 5.589,
+          "averageGuardsPerLife": 10.621
+        },
+        {
+          "id": "B",
+          "maxDurability": 10,
+          "averageGuardEvents": 50.976,
+          "averageDurabilitySpent": 50.976,
+          "averageDeaths": 4.822,
+          "averageRevives": 4.452,
+          "firstDeathSeconds": 63.361,
+          "alivePercent": 62.799,
+          "averageDeadSeconds": 139.228,
+          "minimumDurability": 1,
+          "averageRemainingDurability": 5.632,
+          "averageGuardsPerLife": 10.572
+        },
+        {
+          "id": "C",
+          "maxDurability": 10,
+          "averageGuardEvents": 51.126,
+          "averageDurabilitySpent": 51.126,
+          "averageDeaths": 4.81,
+          "averageRevives": 4.47,
+          "firstDeathSeconds": 63.293,
+          "alivePercent": 62.855,
+          "averageDeadSeconds": 139.016,
+          "minimumDurability": 1,
+          "averageRemainingDurability": 5.574,
+          "averageGuardsPerLife": 10.629
+        }
+      ],
+      "groupAlivePercent": {
+        "three": 34.112,
+        "two": 31.796,
+        "one": 22.653,
+        "zero": 11.44
+      },
+      "transitions": {
+        "3->2": 4.218,
+        "2->1": 5.878,
+        "1->0": 4.304,
+        "0->1": 4.244,
+        "0->2": 0,
+        "0->3": 0
+      },
+      "survival": {
+        "potentialDamage": 2826.524,
+        "hunterDamage": 2094.05,
+        "guardReduction": 732.474,
+        "reductionPercent": 25.886,
+        "zeroPetPercent": 11.44,
+        "hunterDeaths": 0.988
+      }
+    },
+    "farm500": {
+      "runs": 100,
+      "enemyCount": 500,
+      "maxDurability": 10,
+      "durationSeconds": 1921.725,
+      "killsPerHour": 936.66,
+      "petDamageSharePercent": 39.966,
+      "petIndividualDamageShares": [
+        13.302,
+        13.346,
+        13.317
+      ],
+      "pets": [
+        {
+          "id": "A",
+          "maxDurability": 10,
+          "averageGuardEvents": 273.32,
+          "averageDurabilitySpent": 273.32,
+          "averageDeaths": 27.02,
+          "averageRevives": 26.65,
+          "firstDeathSeconds": 60.554,
+          "alivePercent": 58.269,
+          "averageDeadSeconds": 801.996,
+          "minimumDurability": 1,
+          "averageRemainingDurability": 5.387,
+          "averageGuardsPerLife": 10.115
+        },
+        {
+          "id": "B",
+          "maxDurability": 10,
+          "averageGuardEvents": 272.17,
+          "averageDurabilitySpent": 272.17,
+          "averageDeaths": 26.9,
+          "averageRevives": 26.54,
+          "firstDeathSeconds": 60.035,
+          "alivePercent": 58.412,
+          "averageDeadSeconds": 799.257,
+          "minimumDurability": 1,
+          "averageRemainingDurability": 5.34,
+          "averageGuardsPerLife": 10.118
+        },
+        {
+          "id": "C",
+          "maxDurability": 10,
+          "averageGuardEvents": 272.48,
+          "averageDurabilitySpent": 272.48,
+          "averageDeaths": 26.94,
+          "averageRevives": 26.53,
+          "firstDeathSeconds": 61.942,
+          "alivePercent": 58.402,
+          "averageDeadSeconds": 799.433,
+          "minimumDurability": 1,
+          "averageRemainingDurability": 5.408,
+          "averageGuardsPerLife": 10.114
+        }
+      ],
+      "groupAlivePercent": {
+        "three": 23.271,
+        "two": 38.821,
+        "one": 27.627,
+        "zero": 10.281
+      },
+      "transitions": {
+        "3->2": 21.15,
+        "2->1": 36.3,
+        "1->0": 23.17,
+        "0->1": 23.1,
+        "0->2": 0,
+        "0->3": 0
+      },
+      "survival": {
+        "potentialDamage": 14817.49,
+        "hunterDamage": 10901.269,
+        "guardReduction": 3916.221,
+        "reductionPercent": 26.413,
+        "zeroPetPercent": 10.281,
+        "hunterDeaths": 5.59
+      }
+    },
+    "farm1000": {
+      "runs": 100,
+      "enemyCount": 1000,
+      "maxDurability": 10,
+      "durationSeconds": 3856.477,
+      "killsPerHour": 933.49,
+      "petDamageSharePercent": 39.724,
+      "petIndividualDamageShares": [
+        13.226,
+        13.233,
+        13.265
+      ],
+      "pets": [
+        {
+          "id": "A",
+          "maxDurability": 10,
+          "averageGuardEvents": 551.46,
+          "averageDurabilitySpent": 551.46,
+          "averageDeaths": 54.84,
+          "averageRevives": 54.48,
+          "firstDeathSeconds": 64.175,
+          "alivePercent": 57.634,
+          "averageDeadSeconds": 1633.865,
+          "minimumDurability": 1,
+          "averageRemainingDurability": 5.344,
+          "averageGuardsPerLife": 10.056
+        },
+        {
+          "id": "B",
+          "maxDurability": 10,
+          "averageGuardEvents": 551.22,
+          "averageDurabilitySpent": 551.22,
+          "averageDeaths": 54.83,
+          "averageRevives": 54.47,
+          "firstDeathSeconds": 63.934,
+          "alivePercent": 57.651,
+          "averageDeadSeconds": 1633.225,
+          "minimumDurability": 1,
+          "averageRemainingDurability": 5.371,
+          "averageGuardsPerLife": 10.053
+        },
+        {
+          "id": "C",
+          "maxDurability": 10,
+          "averageGuardEvents": 550.34,
+          "averageDurabilitySpent": 550.34,
+          "averageDeaths": 54.73,
+          "averageRevives": 54.38,
+          "firstDeathSeconds": 63.147,
+          "alivePercent": 57.715,
+          "averageDeadSeconds": 1630.753,
+          "minimumDurability": 1,
+          "averageRemainingDurability": 5.372,
+          "averageGuardsPerLife": 10.056
+        }
+      ],
+      "groupAlivePercent": {
+        "three": 21.437,
+        "two": 40.087,
+        "one": 28.514,
+        "zero": 9.962
+      },
+      "transitions": {
+        "3->2": 42.06,
+        "2->1": 74.54,
+        "1->0": 47.15,
+        "0->1": 47.13,
+        "0->2": 0,
+        "0->3": 0
+      },
+      "survival": {
+        "potentialDamage": 29767.88,
+        "hunterDamage": 21858.605,
+        "guardReduction": 7909.275,
+        "reductionPercent": 26.565,
+        "zeroPetPercent": 9.962,
+        "hunterDeaths": 11.65
+      }
+    },
+    "farm5000": {
+      "runs": 20,
+      "enemyCount": 5000,
+      "maxDurability": 10,
+      "durationSeconds": 19353.21,
+      "killsPerHour": 930.08,
+      "petDamageSharePercent": 39.524,
+      "petIndividualDamageShares": [
+        13.176,
+        13.161,
+        13.188
+      ],
+      "pets": [
+        {
+          "id": "A",
+          "maxDurability": 10,
+          "averageGuardEvents": 2766.6,
+          "averageDurabilitySpent": 2766.6,
+          "averageDeaths": 276.2,
+          "averageRevives": 276.1,
+          "firstDeathSeconds": 67.97,
+          "alivePercent": 57.333,
+          "averageDeadSeconds": 8257.555,
+          "minimumDurability": 1,
+          "averageRemainingDurability": 5.327,
+          "averageGuardsPerLife": 10.017
+        },
+        {
+          "id": "B",
+          "maxDurability": 10,
+          "averageGuardEvents": 2769.5,
+          "averageDurabilitySpent": 2769.5,
+          "averageDeaths": 276.7,
+          "averageRevives": 276.25,
+          "firstDeathSeconds": 61.84,
+          "alivePercent": 57.277,
+          "averageDeadSeconds": 8268.265,
+          "minimumDurability": 1,
+          "averageRemainingDurability": 5.308,
+          "averageGuardsPerLife": 10.009
+        },
+        {
+          "id": "C",
+          "maxDurability": 10,
+          "averageGuardEvents": 2767.05,
+          "averageDurabilitySpent": 2767.05,
+          "averageDeaths": 276.35,
+          "averageRevives": 276.05,
+          "firstDeathSeconds": 68.43,
+          "alivePercent": 57.327,
+          "averageDeadSeconds": 8258.645,
+          "minimumDurability": 1,
+          "averageRemainingDurability": 5.367,
+          "averageGuardsPerLife": 10.013
+        }
+      ],
+      "groupAlivePercent": {
+        "three": 20.893,
+        "two": 40.249,
+        "one": 28.759,
+        "zero": 10.099
+      },
+      "transitions": {
+        "3->2": 214.1,
+        "2->1": 371.15,
+        "1->0": 239.9,
+        "0->1": 239.9,
+        "0->2": 0,
+        "0->3": 0
+      },
+      "survival": {
+        "potentialDamage": 149786.65,
+        "hunterDamage": 110045.92,
+        "guardReduction": 39740.73,
+        "reductionPercent": 26.53,
+        "zeroPetPercent": 10.099,
+        "hunterDeaths": 60.35
+      }
+    }
+  }
+}
