@@ -2193,7 +2193,7 @@ function getCharacterStats(level, progress = getProgress(), character = getActiv
   const advancement = WarriorAdvancementPolicy.getPassiveStats(progress, Number(progress.currentHpRatio) || 1);
   const stats = {
     hp: Math.round((base.hp + race.hp + (level - 1) * 12 + equipment.hp + equipment.maxHp) * (1 + equipment.maxHpPercent + equipment.runeMaxHpPercent + passiveTotal('maxHp')) * humanMultiplier),
-    mana: ['warrior', 'assassin'].includes(character?.job) ? 0 : Math.round((base.mana + race.mana + (level - 1) * 6 + equipment.mana) * humanMultiplier * (1 + equipment.runeResourceMaxPercent)),
+    mana: ['warrior', 'assassin'].includes(character?.job) ? 0 : Math.round((base.mana + race.mana + (level - 1) * 6 + equipment.mana) * humanMultiplier * (1 + equipment.runeResourceMaxPercent) * (1 + MageAdvancementPolicy.getMaxManaBonus(progress))),
     attack: Math.round((base.attack + race.attack + (level - 1) + equipment.attack + equipment.attackFlat + equipment.strength + equipment.intelligence) * humanMultiplier * (1 + passiveTotal('weaponDamage') + lowHealthAttack + equipment.runeAttackPercent)),
     defense: Math.round((base.defense + race.defense + Math.floor((level - 1) / 5) + equipment.defense) * (1 + equipment.defensePercent + equipment.runeDefensePercent) * humanMultiplier),
     crit: Math.min(.60, base.crit + race.crit + equipment.criticalChance + equipment.runeCriticalChance + passiveTotal('crit') + lowHealthCrit + advancement.crit),
@@ -3601,7 +3601,7 @@ function createBattlePartyMember(slot, slotIndex, mainId, now = Date.now()) {
     skillLevels: {},
     ...slot.progress,
     equipment: { ...emptyEquipment(), ...(slot.progress?.equipment || {}) },
-    skillLevels: ClassSkillPolicy.normalizeSkillLevels(slot.progress?.skillLevels)
+    skillLevels: MageAdvancementPolicy.normalizeSkillLevels(ClassSkillPolicy.normalizeSkillLevels(slot.progress?.skillLevels), slot.progress?.advancedClass)
   };
   const stats = getCharacterStats(progress.level, progress, character);
   const maxResource = getMaxCombatResourceForMember(character, progress);
@@ -3611,7 +3611,7 @@ function createBattlePartyMember(slot, slotIndex, mainId, now = Date.now()) {
     : AssassinEnergyPolicy.isAssassin(character.job)
       ? AssassinEnergyPolicy.clampEnergy(savedState.resource?.current ?? progress.energy)
       : maxResource;
-  return {
+  const member = {
     id: character.id,
     slotIndex,
     isMain: character.id === mainId,
@@ -3654,6 +3654,12 @@ function createBattlePartyMember(slot, slotIndex, mainId, now = Date.now()) {
     lastArrowRecoveryAt: now,
     companions: []
   };
+  const mageStats = MageAdvancementPolicy.telemetry(member);
+  if (character.job === 'mage') {
+    mageStats.manaAfterBonus = maxResource;
+    mageStats.manaBeforeBonus = Math.round(maxResource / (1 + MageAdvancementPolicy.getMaxManaBonus(progress)));
+  }
+  return member;
 }
 
 function buildBattlePartyMembers(now = Date.now()) {
@@ -4655,6 +4661,7 @@ function applyDamageToMonster(index, baseDamage, profile, options = {}) {
     logBattle(`↩【${enemy.name}】以【盾架反擊】對${attacker.name}造成 ${actualCounterDamage} 傷害。`, 'damage-taken');
     defeatPartyMember(attacker);
   }
+  if (enhancedParalysisMultiplier > 1 && attacker?.job === 'mage') MageAdvancementPolicy.record(attacker, 'enhancedParalysisDamage', result.finalDamage);
   const wasAlive = battle.enemyHps[index] > 0;
   battle.enemyHps[index] -= result.finalDamage;
   if (wasAlive && battle.enemyHps[index] <= 0 && attacker?.alive) {
@@ -4693,7 +4700,36 @@ function updatePartyMemberManaExhaustion(member) {
   }
 }
 
+function getMageSkillElement(skillId, stormElement = '') {
+  return stormElement || ({ fireball: 'fire', blizzard: 'ice', 'chain-lightning': 'lightning' }[skillId] || '');
+}
+
+function applyElementalStormStatus(index, element, member, damage, now) {
+  const state = getEnemySkillState(index);
+  if (element === 'fire') {
+    applyDot(index, 'burn', Math.max(1, Math.ceil(damage * .18 * member.stats.dotMultiplier)), 4, 1, { source: member });
+    state.visualBurnAt = now + 500;
+  } else if (element === 'ice') {
+    state.slowedUntil = Math.max(state.slowedUntil, now + 4000);
+    state.visualSlowAt = now + 500;
+  } else if (element === 'lightning') {
+    state.paralyzedUntil = now + 4000;
+    state.visualParalyzedAt = now + 500;
+  }
+}
+
+function resolveFinishedMageResonance(member, now) {
+  const release = MageAdvancementPolicy.finishResonance(member, now);
+  if (!release) return;
+  const targetIndex = member.targetIndex >= 0 && battle.enemyHps[member.targetIndex] > 0
+    ? member.targetIndex : aliveEnemyIndexesByAge()[0];
+  if (targetIndex === undefined) return;
+  const result = applyDamageToMonster(targetIndex, member.stats.attack * release.power, { damageType: 'magic', attackRange: 'ranged', element: release.element }, { attacker: member, attackKind: 'resonance', canParry: false });
+  MageAdvancementPolicy.recordOverloadDamage(member, result.finalDamage);
+}
+
 function useAutoSkillForMember(member, now = Date.now()) {
+  if (member?.job === 'mage') resolveFinishedMageResonance(member, now);
   if (!member?.alive || now < member.stunnedUntil || now < member.globalSkillReadyAt) return false;
   const { character, progress, stats } = member;
   if (usesManaResource(member.job) && member.manaExhausted) return false;
@@ -4702,6 +4738,8 @@ function useAutoSkillForMember(member, now = Date.now()) {
     .filter((skill) => skill.id !== 'heal' && (member.skillCooldowns[skill.id] || 0) <= now);
   for (const skill of attackSkills) {
     const skillEffect = getSkillEffect(progress, member.job, skill);
+    const stormElements = skill.id === 'elemental-storm' ? MageAdvancementPolicy.rollStormElements(skillEffect, Math.random, member) : [];
+    const castElement = getMageSkillElement(skill.id, stormElements[0]);
     const cost = getSkillResourceCost(member.job, skill);
     if (member.resourceType === 'arrows' && !HunterArrowPolicy.canUseSkill(member.resourceCurrent, skill.id, progress.equipment)) continue;
     if (member.resourceType !== 'arrows' && member.resourceCurrent < cost) continue;
@@ -4734,7 +4772,8 @@ function useAutoSkillForMember(member, now = Date.now()) {
     const runtimeBonuses = WarriorAdvancementPolicy.getRuntimeBonuses(member, 'skill', now);
     const primaryRogueBonuses = RogueAdvancementPolicy.getTargetBonuses(member, battle.enemyDots[targets[0]], getEnemySkillState(targets[0]), battle.enemyHps[targets[0]] / getEnemyDefinition(targets[0]).maxHp, 'skill', now);
     const shootingBonuses = HunterAdvancementPolicy.getShootingBonuses(member, skill.id, now);
-    const critical = Math.random() < Math.min(.95, stats.crit + runtimeBonuses.crit + primaryRogueBonuses.crit + (skillEffect.skillCrit || 0));
+    const resonanceBonuses = MageAdvancementPolicy.getResonanceBonuses(member, castElement, now);
+    const critical = Math.random() < Math.min(.95, stats.crit + runtimeBonuses.crit + primaryRogueBonuses.crit + (skillEffect.skillCrit || 0) + resonanceBonuses.crit);
     let damagePower = Number(skillEffect.power) || Number(skill.power) || 1;
     const berserkerSlash = skill.id === 'berserker-slash' ? WarriorAdvancementPolicy.getBerserkerSlash(getSkillUpgradeLevel(progress, member.job, skill), member.currentHp / member.maxHp) : null;
     if (berserkerSlash) damagePower *= berserkerSlash.damageMultiplier;
@@ -4742,7 +4781,7 @@ function useAutoSkillForMember(member, now = Date.now()) {
     if (skill.id === 'whirlwind') damagePower *= 1 + Math.min(skillEffect.maxTargetBonus || 0, Math.max(0, targets.length - 1) * (skillEffect.perExtraTargetBonus || 0));
     const damage = Math.max(1, Math.ceil(stats.attack * damagePower * (critical ? stats.criticalDamageMultiplier + primaryRogueBonuses.criticalDamage + shootingBonuses.criticalDamage : 1)));
     const conditionalDamageMultiplier = ConditionalDamagePolicy.getDamageMultiplier({ currentHp: member.currentHp, maxHp: member.maxHp, lowHealthDamagePercent: stats.lowHealthDamagePercent, highHealthDamagePercent: stats.highHealthDamagePercent, attackKind: 'skill' });
-    const profile = getPlayerAttackProfile(character, skill);
+    const profile = { ...getPlayerAttackProfile(character, skill), element: castElement || getPlayerAttackProfile(character, skill).element };
     const targetAnchors = ['heavy-strike', 'whirlwind', 'charge', 'power-shot', 'multi-shot', 'piercing-shot', 'backstab', 'shadow-dance', 'fireball', 'blizzard', 'chain-lightning', 'holy-light', 'holy-nova'].includes(skill.id)
       ? new Map(targets.map((index) => [index, captureBattleTargetAnchor(index)]))
       : null;
@@ -4752,18 +4791,47 @@ function useAutoSkillForMember(member, now = Date.now()) {
       const piercingMultiplier = skill.id === 'piercing-shot' ? Math.max(.1, 1 - targetOrder * .1) : 1;
       const rogueBonuses = RogueAdvancementPolicy.getTargetBonuses(member, battle.enemyDots[index], getEnemySkillState(index), battle.enemyHps[index] / getEnemyDefinition(index).maxHp, 'skill', now);
       const shadowBleedingMultiplier = skill.id === 'shadow-assassination' && RogueAdvancementPolicy.hasBleedingStatus(battle.enemyDots[index]) ? 1 + skillEffect.bleedingDamage : 1;
+      if (skill.id === 'elemental-burst') {
+        const state = getEnemySkillState(index), status = { burning:(battle.enemyDots[index]||[]).some(dot=>dot.type==='burn'),slowed:now<state.slowedUntil,frozen:now<state.frozenUntil,paralyzed:now<state.paralyzedUntil,enhancedParalysis:now<state.enhancedParalysisUntil };
+        const parts = MageAdvancementPolicy.getElementalBurstParts(skillEffect, status, member);
+        const results = parts.map((part) => {
+          const partResonance = MageAdvancementPolicy.getResonanceBonuses(member, part.element, now);
+          const partCritical = Math.random() < Math.min(.95, stats.crit + partResonance.crit);
+          const raw = Math.max(1, Math.ceil(stats.attack * part.power * (partCritical ? stats.criticalDamageMultiplier : 1)));
+          const partResult = applyDamageToMonster(index, raw * getRuneOutgoingMultiplier(member, index), { ...profile, element: part.element || '' }, { attacker:member,attackKind:'skill',conditionalDamageMultiplier,craftedEpicExecution,specialEquipmentMultiplier:(epicWeaponExecution.multipliers[targetOrder]||1)*(1+grandmasterSkillBonus)*(1+partResonance.damage),showDamage:true });
+          if (part.element) MageAdvancementPolicy.recordBonusDamage(member, part.element, partResult.finalDamage);
+          return partResult;
+        });
+        return { index, result:{ finalDamage:results.reduce((sum,result)=>sum+result.finalDamage,0),evaded:results.every(result=>result.evaded),parried:results.some(result=>result.parried) } };
+      }
       return { index, result: applyDamageToMonster(index, damage * chainMultiplier * piercingMultiplier * getRuneOutgoingMultiplier(member, index), profile, {
         attacker: member,
         attackKind: 'skill',
         armorIgnore: (skillEffect.armorIgnore || 0) + (berserkerSlash?.armorIgnore || 0) + shootingBonuses.armorIgnore,
         conditionalDamageMultiplier,
         craftedEpicExecution,
-        specialEquipmentMultiplier: (epicWeaponExecution.multipliers[targetOrder] || 1) * (1 + grandmasterSkillBonus) * shadowBleedingMultiplier,
+        specialEquipmentMultiplier: (epicWeaponExecution.multipliers[targetOrder] || 1) * (1 + grandmasterSkillBonus) * shadowBleedingMultiplier * (1 + resonanceBonuses.damage),
         controlledBonus: skillEffect.controlledBonus,
         showDamage: !['heavy-strike', 'whirlwind', 'charge', 'power-shot', 'multi-shot', 'piercing-shot', 'backstab', 'shadow-dance', 'poison-blade', 'fireball', 'blizzard', 'chain-lightning', 'holy-light', 'holy-nova'].includes(skill.id)
       }) };
     });
     const hits = resolvedTargets.filter((target) => !target.result.evaded);
+    if (skill.id === 'elemental-storm') {
+      hits.forEach(target => applyElementalStormStatus(target.index, stormElements[0], member, target.result.finalDamage, now));
+      if (stormElements[1]) targets.filter((index) => battle.enemyHps[index] > 0).forEach((index) => {
+        const secondProfile = { ...profile, element:stormElements[1] };
+        const secondBonus = MageAdvancementPolicy.getResonanceBonuses(member, stormElements[1], now);
+        const secondCritical = Math.random() < Math.min(.95, stats.crit + secondBonus.crit);
+        const secondDamage = Math.max(1, Math.ceil(stats.attack * skillEffect.power * (secondCritical ? stats.criticalDamageMultiplier : 1)));
+        const result = applyDamageToMonster(index, secondDamage * (1 + secondBonus.damage) * getRuneOutgoingMultiplier(member,index), secondProfile, { attacker:member,attackKind:'skill-followup',canParry:false });
+        if (!result.evaded) applyElementalStormStatus(index, stormElements[1], member, result.finalDamage, now);
+      });
+    }
+    if (skill.id === 'arcane-missile' && skillEffect.repeatChance && hits.length && Math.random() < skillEffect.repeatChance) {
+      const repeatTarget = hits.find(target => battle.enemyHps[target.index] > 0) || hits[0];
+      const repeat = applyDamageToMonster(repeatTarget.index, stats.attack * skillEffect.repeatPower, { ...profile, element:'arcane' }, { attacker:member,attackKind:'skill-followup',canParry:false });
+      MageAdvancementPolicy.recordArcaneRepeat(member);
+    }
     HunterAdvancementPolicy.completeShootingSkill(member, skill.id, hits.length > 0, critical, now);
     if (skill.id === 'sniper-shot') HunterAdvancementPolicy.applySniperCritical(member, skillEffect, critical && hits.length > 0, now);
     ChapterThreeEpicWeaponPolicy.completeSkill(member, epicWeaponExecution, targets.map((index) => getEnemySkillState(index)), resolvedTargets.map((target) => !target.result.evaded && target.result.finalDamage > 0));
@@ -4823,6 +4891,14 @@ function useAutoSkillForMember(member, now = Date.now()) {
       applyRogueDotEntryDamage(target.index, member, 'rupture', ruptureDamage, skillEffect.ruptureEntryRatio || 0, now);
     });
     if (critical) hits.forEach((target) => RogueAdvancementPolicy.extendDotsOnCrit(member, battle.enemyDots[target.index], true));
+    if (MageAdvancementPolicy.isAdvanced(progress, 'elementalist')) {
+      const appliedElements = skill.id === 'elemental-storm' ? stormElements : (castElement ? [castElement] : []);
+      appliedElements.forEach((element) => {
+        MageAdvancementPolicy.useElementDuringResonance(member, element, now);
+        const mark = MageAdvancementPolicy.addElementMark(member, element, now);
+        if (mark.resonance) MageAdvancementPolicy.reduceLongestElementCooldown(member, now);
+      });
+    }
     if (skill.id === 'fireball' && skillEffect.explosionPower && hits.length) {
       aliveEnemyIndexesByAge().filter((index) => index !== hits[0].index).slice(0, skillEffect.explosionTargets).forEach((index) => applyDamageToMonster(index, stats.attack * skillEffect.explosionPower, profile, { attacker: member, attackKind: 'skill', conditionalDamageMultiplier, craftedEpicExecution, effectType: 'magic' }));
     }
@@ -4854,6 +4930,7 @@ function useAutoSkillForMember(member, now = Date.now()) {
       ? HunterArrowPolicy.spendArrows(member.resourceCurrent, skill.id, progress.equipment)
       : Math.max(0, member.resourceCurrent - cost);
     const actualResourceSpent = Math.max(0, resourceBeforeSkillCost - member.resourceCurrent);
+    const arcaneCharge = MageAdvancementPolicy.castArcaneCharge(member, skill.id, now);
     ChapterThreeCraftedEpicAbilityPolicy.completeSkillExecution(member, craftedEpicExecution, now);
     if (skill.id !== 'companion') ChapterThreeSpecialEquipmentPolicy.resolveManaSurge(member, actualResourceSpent, Math.random);
     CriticalResourceRecoveryPolicy.resolveExecution(member, {
@@ -4864,7 +4941,8 @@ function useAutoSkillForMember(member, now = Date.now()) {
     });
     const blinkCooldownMultiplier = member.blinkCooldownReduction ? 1 - member.blinkCooldownReduction : 1;
     const blessingCooldownSpeed = now < (member.lightGraceUntil || 0) ? 1 + (member.lightGraceCooldownSpeed || 0) : 1;
-    member.skillCooldowns[skill.id] = now + (skillEffect.cooldown || skill.cooldown) * blinkCooldownMultiplier * skillCooldownMultiplier * 1000 / (stats.cooldownSpeed * blessingCooldownSpeed);
+    member.skillCooldowns[skill.id] = arcaneCharge.noCooldown ? now : now + (skillEffect.cooldown || skill.cooldown) * blinkCooldownMultiplier * skillCooldownMultiplier * 1000 / (stats.cooldownSpeed * blessingCooldownSpeed);
+    if (skill.id === 'arcane-torrent') MageAdvancementPolicy.advanceOtherCooldowns(member, skill.id, skillEffect.cooldownAdvance || 1, now);
     if (member.pendingSkillCooldownReduction) {
       member.skillCooldowns[skill.id] = Math.max(now, member.skillCooldowns[skill.id] - member.pendingSkillCooldownReduction);
       member.pendingSkillCooldownReduction = 0;
@@ -5067,9 +5145,11 @@ function updatePartyMemberResource(member, now) {
   if (usesManaResource(member.job)) {
     const elapsed = ManaRegenPolicy.getElapsedSeconds(now, member.lastManaRegenAt);
     member.lastManaRegenAt = now;
+    MageAdvancementPolicy.tick(member, elapsed * 1000, now);
+    const mageMana = MageAdvancementPolicy.getManaBonuses(member, now);
     member.resourceCurrent = Math.min(member.resourceMax, member.resourceCurrent + ManaRegenPolicy.calculateRegenAmount({
       maxMana: member.resourceMax,
-      regenMultiplier: member.stats.manaRegen,
+      regenMultiplier: member.stats.manaRegen * (1 + mageMana.regen),
       flatPerSecond: member.stats.manaRegenFlat,
       elapsedSeconds: elapsed
     }));

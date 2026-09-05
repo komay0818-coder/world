@@ -27,6 +27,8 @@ assert.equal(arcane.arcaneChargeStacks,0);
 assert.deepEqual(policy.advanceOtherCooldowns(arcane,'arcane-torrent',2,1000).sort(),['arcane-missile','fireball']);
 assert.equal(policy.resolveKill(arcane,6000),30);
 assert.equal(arcane.soulDrainUntil,11000);
+assert.equal(policy.getMaxManaBonus(arcane.progress),.15);
+assert.equal(policy.telemetry(arcane).killMana,30);
 
 const levels={'mage:elemental-burst':6,'mage:elemental-storm':6,'mage:elemental-marks':6,'mage:resonance-overload':6,'mage:fireball':6,'mage:mana-amplification':6};
 const normalized=policy.normalizeSkillLevels(levels,'elementalist');
