@@ -132,7 +132,7 @@ function simulate(spec, durationSeconds, seed, options={}) {
       if(!stacks)addDot('poison',Math.ceil(ATTACK*.15),3,3,now);
       else if(stacks<3)addDot('poison',Math.ceil(ATTACK*.15),3,3,now,false,true);
       else target.dots.filter(d=>d.type==='poison').forEach(d=>{d.remaining=3;d.nextTickAt=now+2000;d.extendedSeconds=0;});
-      if(stacks>=3){target.state.dotVulnerability=.08;target.state.dotVulnerabilityUntil=now+5000;}
+      if(stacks>=3){target.state.dotVulnerability=.12;target.state.dotVulnerabilityUntil=now+5000;}
     }
     if(skill.id==='blood-venom-rend') addDot('rupture',Math.ceil(ATTACK*.26*(poisonStacks()?1.2:1)),3,1,now,true);
     if(skill.id==='shadow-dance'){member.shadowDanceUntil=now+4000;member.shadowDanceOffhandChance=.20+.05;}
@@ -156,7 +156,7 @@ function simulate(spec, durationSeconds, seed, options={}) {
     for(const d of snapshot){
       if(now+1e-9<d.nextTickAt)continue;
       const ticks=Math.min(d.remaining,Math.floor((now-d.nextTickAt)/2000)+1);d.remaining-=ticks;d.nextTickAt+=2000*ticks;
-      let mult=1;if(d.type==='poison'&&spec==='venom')mult+=.22;
+      let mult=1;if(d.type==='poison'&&spec==='venom')mult+=.25;
       mult+=Rogue.getTargetBonuses(member,target.dots,target.state,target.hp/target.maxHp,'dot',now).dotDamage;
       addDamage(d.type==='bleed'?'backstabBleed':d.type, d.damage*ticks*mult,now);
       if(done)return;
@@ -185,7 +185,7 @@ function simulate(spec, durationSeconds, seed, options={}) {
   const actualDuration=(options.farm||options.stopOnKill)?lastDeath/1000:durationSeconds;
   return {spec,total,dps:total/actualDuration,sources:totals,counts,casts,checkpoints,timeline,
     duration:actualDuration,kills,enemyStarts,stackTimes,deathMarkCastTimes,
-    coverage:{threeStack:threeStackCoverage/(options.farm?lastDeath:durationSeconds*1000),coexist:coexistCoverage/(options.farm?lastDeath:durationSeconds*1000),symbiosis:symbiosisCoverage/(options.farm?lastDeath:durationSeconds*1000),corrosion:corrosionCoverage/(options.farm?lastDeath:durationSeconds*1000),deathMark:deathMarkCoverage/(options.farm?lastDeath:durationSeconds*1000)}};
+    coverage:{threeStack:threeStackCoverage/((options.farm||options.stopOnKill)?lastDeath:durationSeconds*1000),coexist:coexistCoverage/((options.farm||options.stopOnKill)?lastDeath:durationSeconds*1000),symbiosis:symbiosisCoverage/((options.farm||options.stopOnKill)?lastDeath:durationSeconds*1000),corrosion:corrosionCoverage/((options.farm||options.stopOnKill)?lastDeath:durationSeconds*1000),deathMark:deathMarkCoverage/((options.farm||options.stopOnKill)?lastDeath:durationSeconds*1000)}};
 }
 
 function aggregate(rows,duration,farm=false){
@@ -220,5 +220,5 @@ function runFarm(spec){return aggregate(Array.from({length:FARM_RUNS},(_,i)=>sim
 const result={metadata:{generatedAt:new Date().toISOString(),map:'3-6 赤岩聖殿',attack:ATTACK,baseCritPercent:20,criticalDamagePercent:150,baseAttackSpeed:BASE_SPEED,weapon:'固定雙匕首',skillLevels:'全部 Lv6',runsPerTarget:RUNS,farmGroupsPerSpec:FARM_RUNS,bossExcluded:true},targets:{},farm10:{}};
 for(const template of [...Temple.normals,Temple.elite]){const cell={template};for(const spec of ['assassination','venom'])cell[spec]=runTarget(spec,template);result.targets[template.id]=cell;}
 for(const spec of ['assassination','venom'])result.farm10[spec]=runFarm(spec);
-const output=path.join(__dirname,'results','rogue-lv45-redrock-temple-dot-buff-2.json');fs.writeFileSync(output,JSON.stringify(result,null,2)+'\n');
+const output=path.join(__dirname,'results','rogue-lv45-redrock-temple-dot-buff-3.json');fs.writeFileSync(output,JSON.stringify(result,null,2)+'\n');
 console.log(JSON.stringify({output,targets:Object.fromEntries(Object.entries(result.targets).map(([id,x])=>[id,{name:x.template.name,assassination:x.assassination.durationSeconds,venom:x.venom.durationSeconds}])),farm:{assassination:result.farm10.assassination.durationSeconds,venom:result.farm10.venom.durationSeconds}},null,2));
