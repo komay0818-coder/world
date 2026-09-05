@@ -3522,8 +3522,7 @@ function processEnemyDots() {
         ? ClassSkillPolicy.getEffect('mage', 'elemental-mastery', Number(source.progress.skillLevels?.['mage:elemental-mastery']) || 1)
         : null;
       const hasSourceBurn = dots.some((dot) => dot.source === source && dot.type === 'burn');
-      const enhancedParalysisMultiplier = source?.job === 'mage' && hasSourceBurn && now < (getEnemySkillState(index).enhancedParalysisUntil || 0) ? 2 : 1;
-      applyDamageToMonster(index, damage * (sourceMastery?.resonance && hasSourceBurn ? 1.2 : 1) * enhancedParalysisMultiplier, { damageType: 'periodic', attackRange: 'none', element: hasSourceBurn ? 'fire' : '' }, {
+      applyDamageToMonster(index, damage * (sourceMastery?.resonance && hasSourceBurn ? 1.2 : 1), { damageType: 'periodic', attackRange: 'none', element: hasSourceBurn ? 'fire' : '' }, {
         attacker: source,
         canEvade: false,
         canParry: false,
@@ -4707,7 +4706,8 @@ function getMageSkillElement(skillId, stormElement = '') {
 function applyElementalStormStatus(index, element, member, damage, now) {
   const state = getEnemySkillState(index);
   if (element === 'fire') {
-    applyDot(index, 'burn', Math.max(1, Math.ceil(damage * .18 * member.stats.dotMultiplier)), 4, 1, { source: member });
+    const paralysisSnapshot = now < state.enhancedParalysisUntil ? 2 : 1;
+    applyDot(index, 'burn', Math.max(1, Math.ceil(damage / paralysisSnapshot * .18 * member.stats.dotMultiplier)), 4, 1, { source: member });
     state.visualBurnAt = now + 500;
   } else if (element === 'ice') {
     state.slowedUntil = Math.max(state.slowedUntil, now + 4000);
@@ -4863,8 +4863,10 @@ function useAutoSkillForMember(member, now = Date.now()) {
       if (skillEffect.mark) state.visualMarkAt = now + 550;
     });
     if (skill.id === 'fireball') hits.forEach((target) => {
-      applyDot(target.index, 'burn', Math.max(1, Math.ceil(target.result.finalDamage * .18 * (1 + (skillEffect.burnBonus || 0)) * stats.dotMultiplier)), 4 + (skillEffect.burnDuration || 0), 1, { source: member });
-      getEnemySkillState(target.index).visualBurnAt = now + 500;
+      const state = getEnemySkillState(target.index);
+      const paralysisSnapshot = now < state.enhancedParalysisUntil ? 2 : 1;
+      applyDot(target.index, 'burn', Math.max(1, Math.ceil(target.result.finalDamage / paralysisSnapshot * .18 * (1 + (skillEffect.burnBonus || 0)) * stats.dotMultiplier)), 4 + (skillEffect.burnDuration || 0), 1, { source: member });
+      state.visualBurnAt = now + 500;
     });
     if (skill.id === 'backstab') hits.forEach((target) => {
       const bleeding = (battle.enemyDots[target.index] || []).find((dot) => dot.type === 'bleed');

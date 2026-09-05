@@ -19,6 +19,7 @@ assert.match(source, /blessing\.party[\s\S]*lightGraceCooldownSpeed/, 'Light Gra
 assert.match(source, /effect\.paralysis[\s\S]*state\.paralyzedUntil/, 'all configured chain lightning levels apply paralysis');
 assert.match(source, /effect\.enhancedParalysis[\s\S]*state\.enhancedParalysisUntil/, 'enhanced paralysis has an independent refreshable window');
 assert.match(source, /\['fire', 'ice', 'lightning'\]\.includes\(profile\.element\)[\s\S]*enhancedParalysisUntil[\s\S]*\? 2 : 1/, 'enhanced paralysis doubles fire, ice and lightning direct damage only');
-assert.match(source, /dot\.type === 'burn'[\s\S]*enhancedParalysisMultiplier/, 'enhanced paralysis doubles fire burn damage');
+assert.match(source, /damage \* \(sourceMastery\?\.resonance[\s\S]*element: hasSourceBurn \? 'fire'/, 'fire burn delegates enhanced paralysis to the common elemental damage path');
+assert.doesNotMatch(source, /const enhancedParalysisMultiplier = source\?\.job/, 'fire burn does not pre-apply enhanced paralysis a second time');
 
 console.log('class-skill-combat-integration: assertions passed');
