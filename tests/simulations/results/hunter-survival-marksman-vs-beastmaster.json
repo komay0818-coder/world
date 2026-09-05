@@ -1,0 +1,125 @@
+{
+  "metadata": {
+    "generatedAt": "2026-09-05T18:37:41.815Z",
+    "level": 45,
+    "map": "3-6 赤岩聖殿",
+    "runs": 1000,
+    "player": {
+      "maxHp": 1800,
+      "defense": 95,
+      "damageReduction": 0.08,
+      "attack": 200
+    },
+    "marksmanPet": "無HP／耐久／死亡；無護主",
+    "beastmaster": {
+      "output": "100/80/80",
+      "durability": 10,
+      "reviveSeconds": 30,
+      "guardHunterDamageMultiplier": 0.7
+    },
+    "enemyScope": "3-6普通怪直接普通攻擊；未包含完整AoE／技能輪轉",
+    "noFormalPolicyChanges": true
+  },
+  "pureIncoming": {
+    "marksman": {
+      "averageDeathSeconds": 155.001,
+      "medianDeathSeconds": 155.034,
+      "shortestDeathSeconds": 145.827,
+      "longestDeathSeconds": 166.132,
+      "averageKillsBeforeDeath": 0,
+      "medianKillsBeforeDeath": 0,
+      "averageEnemyAttacks": 114.747,
+      "averagePotentialDamage": 1807.658,
+      "averageActualDamage": 1807.658,
+      "averageDamagePerAttack": 15.756,
+      "reach100KillsPercent": 0,
+      "reach500KillsPercent": 0,
+      "reach1000KillsPercent": 0
+    },
+    "beastmaster": {
+      "averageDeathSeconds": 200.947,
+      "medianDeathSeconds": 201.168,
+      "shortestDeathSeconds": 183.033,
+      "longestDeathSeconds": 219.871,
+      "averageKillsBeforeDeath": 0,
+      "medianKillsBeforeDeath": 0,
+      "averageEnemyAttacks": 148.743,
+      "averagePotentialDamage": 2342.78,
+      "averageActualDamage": 1805.771,
+      "averageDamagePerAttack": 12.149,
+      "reach100KillsPercent": 0,
+      "reach500KillsPercent": 0,
+      "reach1000KillsPercent": 0
+    },
+    "survivalTimeIncreasePercent": 29.64,
+    "attackCountIncreasePercent": 29.630000000000003
+  },
+  "fullCombat": {
+    "marksman": {
+      "averageDeathSeconds": 202.901,
+      "medianDeathSeconds": 203.3,
+      "shortestDeathSeconds": 180.7,
+      "longestDeathSeconds": 228.7,
+      "averageKillsBeforeDeath": 48.779,
+      "medianKillsBeforeDeath": 49,
+      "averageEnemyAttacks": 113.437,
+      "averagePotentialDamage": 1807.773,
+      "averageActualDamage": 1807.773,
+      "averageDamagePerAttack": 15.942,
+      "reach100KillsPercent": 0,
+      "reach500KillsPercent": 0,
+      "reach1000KillsPercent": 0
+    },
+    "beastmaster": {
+      "averageDeathSeconds": 315.435,
+      "medianDeathSeconds": 315.7,
+      "shortestDeathSeconds": 271.4,
+      "longestDeathSeconds": 362.1,
+      "averageKillsBeforeDeath": 79.541,
+      "medianKillsBeforeDeath": 79,
+      "averageEnemyAttacks": 152.783,
+      "averagePotentialDamage": 2435.785,
+      "averageActualDamage": 1805.954,
+      "averageDamagePerAttack": 11.831,
+      "reach100KillsPercent": 0,
+      "reach500KillsPercent": 0,
+      "reach1000KillsPercent": 0
+    },
+    "beastmasterNoStun": {
+      "averageDeathSeconds": 272.48,
+      "medianDeathSeconds": 272.7,
+      "shortestDeathSeconds": 237.3,
+      "longestDeathSeconds": 307.6,
+      "averageKillsBeforeDeath": 66.767,
+      "medianKillsBeforeDeath": 67,
+      "averageEnemyAttacks": 152.044,
+      "averagePotentialDamage": 2422.826,
+      "averageActualDamage": 1806.273,
+      "averageDamagePerAttack": 11.89,
+      "reach100KillsPercent": 0,
+      "reach500KillsPercent": 0,
+      "reach1000KillsPercent": 0
+    },
+    "beastmasterDetails": {
+      "petAliveTimePercent": {
+        "three": 35.835,
+        "two": 30.77,
+        "one": 21.705,
+        "zero": 11.69
+      },
+      "averageGuardEvents": 131.759,
+      "averagePetDeaths": 12.414,
+      "averagePetRevives": 10.824,
+      "averageGuardAvoidedDamage": 629.831,
+      "averageZeroPetDamage": 336.347,
+      "averageStuns": 41.861,
+      "averageEnemyAttacksPreventedByStun": 22.024,
+      "averageDamagePreventedByStun": 351.575,
+      "averageDirectDamageReductionPercent": 25.815
+    },
+    "survivalTimeIncreasePercent": 55.463,
+    "killsBeforeDeathIncreasePercent": 63.064,
+    "stunSurvivalTimeContributionPercent": 15.764,
+    "stunKillsContributionPercent": 19.132
+  }
+}
