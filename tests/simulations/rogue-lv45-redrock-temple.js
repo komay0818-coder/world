@@ -10,6 +10,7 @@ const Temple = require('./chapter-three-36-rules.js');
 
 const RUNS = 1000;
 const FARM_RUNS = 500;
+const LONG_FARM_RUNS = 100;
 const STEP = 100;
 const ATTACK = 200;
 const BASE_CRIT = .20;
@@ -220,9 +221,9 @@ function aggregate(rows,duration,farm=false,enemyCount=10){
 }
 
 function runTarget(spec,template){return aggregate(Array.from({length:RUNS},(_,i)=>simulate(spec,180,0x360000+(spec==='venom'?0x100000:0)+i*7919,{template,stopOnKill:true})),180,true);}
-function runFarm(spec,enemyCount){return aggregate(Array.from({length:FARM_RUNS},(_,i)=>simulate(spec,180,0x960000+(spec==='venom'?0x100000:0)+enemyCount*100003+i*7919,{farm:true,farmTemplates:Temple.normals,killTarget:enemyCount})),180,true,enemyCount);}
-const result={metadata:{generatedAt:new Date().toISOString(),map:'3-6 赤岩聖殿',attack:ATTACK,baseCritPercent:20,criticalDamagePercent:150,baseAttackSpeed:BASE_SPEED,weapon:'固定雙匕首',skillLevels:'全部 Lv6',runsPerTarget:RUNS,farmGroupsPerSpec:FARM_RUNS,bossExcluded:true},targets:{},farm10:{},farm100:{}};
+function runFarm(spec,enemyCount,runs=FARM_RUNS){return aggregate(Array.from({length:runs},(_,i)=>simulate(spec,180,0x960000+(spec==='venom'?0x100000:0)+enemyCount*100003+i*7919,{farm:true,farmTemplates:Temple.normals,killTarget:enemyCount})),180,true,enemyCount);}
+const result={metadata:{generatedAt:new Date().toISOString(),map:'3-6 赤岩聖殿',attack:ATTACK,baseCritPercent:20,criticalDamagePercent:150,baseAttackSpeed:BASE_SPEED,weapon:'固定雙匕首',skillLevels:'全部 Lv6',runsPerTarget:RUNS,farmGroupsPerSpec:FARM_RUNS,longFarmGroupsPerSpec:LONG_FARM_RUNS,bossExcluded:true},targets:{},farm10:{},farm100:{},farm500:{}};
 for(const template of [...Temple.normals,Temple.elite]){const cell={template};for(const spec of ['assassination','venom'])cell[spec]=runTarget(spec,template);result.targets[template.id]=cell;}
-for(const spec of ['assassination','venom']){result.farm10[spec]=runFarm(spec,10);result.farm100[spec]=runFarm(spec,100);}
-const output=path.join(__dirname,'results','rogue-lv45-redrock-temple-dot-buff-5.json');fs.writeFileSync(output,JSON.stringify(result,null,2)+'\n');
-console.log(JSON.stringify({output,targets:Object.fromEntries(Object.entries(result.targets).map(([id,x])=>[id,{name:x.template.name,assassination:x.assassination.durationSeconds,venom:x.venom.durationSeconds}])),farm10:{assassination:result.farm10.assassination.durationSeconds,venom:result.farm10.venom.durationSeconds},farm100:{assassination:result.farm100.assassination.durationSeconds,venom:result.farm100.venom.durationSeconds}},null,2));
+for(const spec of ['assassination','venom']){result.farm10[spec]=runFarm(spec,10);result.farm100[spec]=runFarm(spec,100);result.farm500[spec]=runFarm(spec,500,LONG_FARM_RUNS);}
+const output=path.join(__dirname,'results','rogue-lv45-redrock-temple-plague-threshold-3.json');fs.writeFileSync(output,JSON.stringify(result,null,2)+'\n');
+console.log(JSON.stringify({output,targets:Object.fromEntries(Object.entries(result.targets).map(([id,x])=>[id,{name:x.template.name,assassination:x.assassination.durationSeconds,venom:x.venom.durationSeconds}])),farm10:{assassination:result.farm10.assassination.durationSeconds,venom:result.farm10.venom.durationSeconds},farm100:{assassination:result.farm100.assassination.durationSeconds,venom:result.farm100.venom.durationSeconds},farm500:{assassination:result.farm500.assassination.durationSeconds,venom:result.farm500.venom.durationSeconds}},null,2));

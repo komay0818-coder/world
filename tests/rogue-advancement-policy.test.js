@@ -50,8 +50,7 @@ assert.equal(dots[0].nextTickAt, 4000, 'one direct critical extends the schedule
 assert.equal(policy.resolvePlagueDeath(venom, dots), true);
 assert.equal(policy.consumePlague(venom), true);
 assert.equal(policy.consumePlague(venom), false);
-assert.equal(policy.resolvePlagueDeath(venom, dots.slice(0, 2)), true, 'two poison stacks save one plague spread');
-assert.equal(policy.consumePlague(venom), true);
+assert.equal(policy.resolvePlagueDeath(venom, dots.slice(0, 2)), false, 'two poison stacks are insufficient');
 assert.equal(policy.resolvePlagueDeath(venom, dots.slice(0, 1)), false, 'one poison stack is insufficient');
 
 console.log('rogue-advancement-policy: assertions passed');
