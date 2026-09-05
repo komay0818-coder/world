@@ -12,6 +12,13 @@ assert.deepEqual(policy.getSkills('hunter').filter((skill) => skill.type === 'ac
 assert.equal(policy.getEffect('hunter', 'power-shot', 1).power, 1.6);
 assert.equal(policy.getEffect('hunter', 'piercing-shot', 6).singleTargetBonus, .25);
 assert.equal(policy.getEffect('priest', 'heal', 6).afterglow, .2);
+for (let level = 1; level <= 6; level++) {
+  const chain = policy.getEffect('mage', 'chain-lightning', level);
+  assert.equal(chain.paralysis, true, `chain lightning Lv${level} applies paralysis`);
+  assert.equal(chain.paralysisDuration, 4);
+  assert.equal(Boolean(chain.enhancedParalysis), level === 6);
+}
+assert.equal(policy.getEffect('mage', 'chain-lightning', 6).elementalDamageTakenMultiplier, 3);
 
 const levels = { 'warrior:heavy-strike': 6, 'warrior:whirlwind': 5, 'warrior:weapon-mastery': 6 };
 assert.equal(policy.canSpecialize(levels, 'warrior', 'whirlwind').reason, 'specialization-occupied');

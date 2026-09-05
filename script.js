@@ -3520,7 +3520,8 @@ function processEnemyDots() {
         ? ClassSkillPolicy.getEffect('mage', 'elemental-mastery', Number(source.progress.skillLevels?.['mage:elemental-mastery']) || 1)
         : null;
       const hasSourceBurn = dots.some((dot) => dot.source === source && dot.type === 'burn');
-      applyDamageToMonster(index, damage * (sourceMastery?.resonance && hasSourceBurn ? 1.2 : 1), { damageType: 'periodic', attackRange: 'none' }, {
+      const enhancedParalysisMultiplier = source?.job === 'mage' && now < (getEnemySkillState(index).enhancedParalysisUntil || 0) ? 3 : 1;
+      applyDamageToMonster(index, damage * (sourceMastery?.resonance && hasSourceBurn ? 1.2 : 1) * enhancedParalysisMultiplier, { damageType: 'periodic', attackRange: 'none', element: hasSourceBurn ? 'fire' : '' }, {
         attacker: source,
         canEvade: false,
         canParry: false,
@@ -3874,6 +3875,8 @@ function getSkillDescription(job, skill) {
   if (effect.stun) parts.push(`曈眩 ${effect.stun} 秒`);
   if (effect.slow) parts.push(`緩速 ${Math.round(effect.slow * 100)}%`);
   if (effect.attackDown) parts.push(`降低攻擊 ${Math.round(effect.attackDown * 100)}%`);
+  if (effect.paralysis) parts.push(`命中後麻痺 ${effect.paralysisDuration || 4} 秒`);
+  if (effect.enhancedParalysis) parts.push(`強化麻痺期間承受元素傷害 ${effect.elementalDamageTakenMultiplier || 3} 倍`);
   if (effect.breakthrough) parts.push(`Lv6 突破：${effect.breakthrough}`);
   return parts.join('；') || getPassiveSkillDetail(job, skill) || skill.detail;
 }
@@ -4526,7 +4529,8 @@ function getPlayerAttackProfile(character, skill = null) {
   const meleeJob = character.job === 'warrior' || character.job === 'assassin';
   return {
     damageType: magicJob ? 'magic' : 'physical',
-    attackRange: meleeJob ? 'melee' : 'ranged'
+    attackRange: meleeJob ? 'melee' : 'ranged',
+    element: character.job === 'mage' ? ({ fireball: 'fire', blizzard: 'ice', 'chain-lightning': 'lightning' }[skill?.id] || '') : ''
   };
 }
 
@@ -4534,7 +4538,8 @@ function getEnemySkillState(index) {
   battle.enemySkillStates = Array.isArray(battle.enemySkillStates) ? battle.enemySkillStates : [];
   battle.enemySkillStates[index] = battle.enemySkillStates[index] || {
     stunnedUntil: 0, slowedUntil: 0, frozenUntil: 0, markedUntil: 0, markBonus: 0,
-    magicVulnerabilityUntil: 0, magicVulnerability: 0, attackDownUntil: 0, attackDown: 0
+    magicVulnerabilityUntil: 0, magicVulnerability: 0, attackDownUntil: 0, attackDown: 0,
+    paralyzedUntil: 0, enhancedParalysisUntil: 0
   };
   return battle.enemySkillStates[index];
 }
@@ -4547,7 +4552,8 @@ function applyEnemySkillState(index, effect, now = Date.now()) {
   if (effect.mark) { state.markedUntil = now + (effect.duration || 6) * 1000; state.markBonus = effect.mark; }
   if (effect.magicVulnerability) { state.magicVulnerabilityUntil = now + effect.vulnerabilityDuration * 1000; state.magicVulnerability = effect.magicVulnerability; }
   if (effect.attackDown) { state.attackDownUntil = now + effect.duration * 1000; state.attackDown = effect.attackDown; }
-  if (effect.enhancedParalysis) state.paralyzedUntil = now + 4000;
+  if (effect.paralysis) state.paralyzedUntil = now + (effect.paralysisDuration || 4) * 1000;
+  if (effect.enhancedParalysis) state.enhancedParalysisUntil = now + (effect.paralysisDuration || 4) * 1000;
 }
 
 function applyDamageToMonster(index, baseDamage, profile, options = {}) {
@@ -4571,13 +4577,14 @@ function applyDamageToMonster(index, baseDamage, profile, options = {}) {
   const statusElementMultiplier = elementalMastery && (battle.enemyDots[index] || []).length ? 1 + elementalMastery.elementDamage : 1;
   const frostResonanceMultiplier = elementalMastery?.resonance && (now < skillState.slowedUntil || now < skillState.frozenUntil) && Math.random() < .1 ? attackerStats.criticalDamageMultiplier : 1;
   const lightningResonanceMultiplier = elementalMastery?.resonance && now < (skillState.paralyzedUntil || 0) && options.attackKind !== 'resonance' && Math.random() < .1 ? 1.3 : 1;
+  const enhancedParalysisMultiplier = profile.element && now < (skillState.enhancedParalysisUntil || 0) ? 3 : 1;
   const conditionalDamageMultiplier = Number(options.conditionalDamageMultiplier) || ConditionalDamagePolicy.getDamageMultiplier({ currentHp: attacker?.currentHp, maxHp: attacker?.maxHp, lowHealthDamagePercent: attackerStats.lowHealthDamagePercent, highHealthDamagePercent: attackerStats.highHealthDamagePercent, attackKind: options.attackKind });
   const warriorAdvancement = WarriorAdvancementPolicy.getPassiveStats(progress, attacker?.maxHp > 0 ? attacker.currentHp / attacker.maxHp : 1);
   const warriorRuntime = WarriorAdvancementPolicy.getRuntimeBonuses(attacker, options.attackKind, now);
   const craftedEpicMultiplier = ChapterThreeCraftedEpicAbilityPolicy.getOutgoingDamageMultiplier(attacker, options.attackKind, { execution: options.craftedEpicExecution }, now);
   const specialEquipmentMultiplier = Math.max(0, Number(options.specialEquipmentMultiplier) || 1);
   const deathMarkMultiplier = RogueAdvancementPolicy.getDeathMarkDamageMultiplier(attacker, skillState, now);
-  const adjustedBaseDamage = magicAdjustedDamage * (1 + warriorRuntime.attack) * (1 + (attackerStats.damageBonus || 0) + warriorAdvancement.damage + warriorRuntime.damage) * rankMultiplier * attackKindMultiplier * conditionalDamageMultiplier * craftedEpicMultiplier * specialEquipmentMultiplier * deathMarkMultiplier * markMultiplier * vulnerabilityMultiplier * controlledMultiplier * statusElementMultiplier * frostResonanceMultiplier * lightningResonanceMultiplier;
+  const adjustedBaseDamage = magicAdjustedDamage * (1 + warriorRuntime.attack) * (1 + (attackerStats.damageBonus || 0) + warriorAdvancement.damage + warriorRuntime.damage) * rankMultiplier * attackKindMultiplier * conditionalDamageMultiplier * craftedEpicMultiplier * specialEquipmentMultiplier * deathMarkMultiplier * markMultiplier * vulnerabilityMultiplier * controlledMultiplier * statusElementMultiplier * frostResonanceMultiplier * lightningResonanceMultiplier * enhancedParalysisMultiplier;
   if (enemy.mapId) {
     const hitChance = ChapterOneLevelPolicy.getPlayerHitChance(progress.level, enemy.level, attackerStats.accuracy, 0);
     if (Math.random() >= hitChance) {

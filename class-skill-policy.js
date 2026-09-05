@@ -75,7 +75,14 @@
       passive(3, 'mana-amplification', '魔力增幅', [5, 7, 9, 11, 13, 15].map((magicDamage, i) => ({ magicDamage: magicDamage / 100, skillCriticalDamage: i === 5 ? .1 : 0 }))),
       active(5, 'blizzard', '暴風雪', 7, [{ power: .8, targets: 5 }, { power: .85, targets: 5 }, { power: .85, targets: 5, slow: .15 }, { power: .9, targets: 5, slow: .15 }, { power: .9, targets: 5, slow: .25 }, { power: 1, targets: 5, slow: .25, freezeChance: .2, freezeDuration: 1.5, breakthrough: '20% 機率冰凍敵人 1.5 秒' }], { targets: 5 }),
       passive(8, 'blink', '閃現', [{ chance: .05, invulnerable: 1 }, { chance: .06, invulnerable: 1 }, { chance: .07, invulnerable: 1 }, { chance: .08, invulnerable: 1 }, { chance: .1, invulnerable: 1.5 }, { chance: .1, invulnerable: 2, nextCooldownReduction: .3, internalCooldown: 10, breakthrough: '閃現後下一個技能冷卻 -30%' }]),
-      active(10, 'chain-lightning', '閃電鏈', 9, [{ power: 1.3, targets: 4 }, { power: 1.4, targets: 4 }, { power: 1.4, targets: 5 }, { power: 1.5, targets: 5 }, { power: 1.5, targets: 5, enhancedParalysis: true }, { power: 1.6, targets: 5, bounceBonus: .05, breakthrough: '每次彈射傷害 +5%' }], { targets: 5 }),
+      active(10, 'chain-lightning', '閃電鏈', 9, [
+        { power: 1.3, targets: 4, paralysis: true, paralysisDuration: 4 },
+        { power: 1.4, targets: 4, paralysis: true, paralysisDuration: 4 },
+        { power: 1.4, targets: 5, paralysis: true, paralysisDuration: 4 },
+        { power: 1.5, targets: 5, paralysis: true, paralysisDuration: 4 },
+        { power: 1.5, targets: 5, paralysis: true, paralysisDuration: 4 },
+        { power: 1.6, targets: 5, paralysis: true, paralysisDuration: 4, enhancedParalysis: true, elementalDamageTakenMultiplier: 3, bounceBonus: .05, breakthrough: '強化麻痺：承受元素傷害 3 倍；每次彈射傷害 +5%' }
+      ], { targets: 5 }),
       passive(15, 'elemental-mastery', '元素精通', [4, 6, 8, 10, 12, 12].map((elementDamage, i) => ({ elementDamage: elementDamage / 100, resonance: i === 5 }))),
       passive(20, 'mana-shield', '魔力護盾', [10, 12, 14, 16, 20, 20].map((shield, i) => ({ shield: shield / 100, damageReduction: i === 5 ? .1 : 0, manaCost: .15, internalCooldown: 20 })))
     ]),
