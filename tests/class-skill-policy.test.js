@@ -18,7 +18,7 @@ for (let level = 1; level <= 6; level++) {
   assert.equal(chain.paralysisDuration, 4);
   assert.equal(Boolean(chain.enhancedParalysis), level === 6);
 }
-assert.equal(policy.getEffect('mage', 'chain-lightning', 6).elementalDamageTakenMultiplier, 3);
+assert.equal(policy.getEffect('mage', 'chain-lightning', 6).elementalDamageTakenMultiplier, 2);
 
 const levels = { 'warrior:heavy-strike': 6, 'warrior:whirlwind': 5, 'warrior:weapon-mastery': 6 };
 assert.equal(policy.canSpecialize(levels, 'warrior', 'whirlwind').reason, 'specialization-occupied');

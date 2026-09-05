@@ -169,7 +169,8 @@ const skillProgression = Object.fromEntries(Object.keys(ClassSkillPolicy.SKILLS)
 const skillIcons = {
   'heavy-strike': '⚔', whirlwind: '🌀', charge: '➤', fireball: '🔥', blizzard: '❄', 'chain-lightning': '⚡',
   backstab: '🗡', 'shadow-dance': '✦', 'poison-blade': '☠', 'power-shot': '➶', companion: '🐺', 'multi-shot': '≋',
-  'holy-light': '☀', 'holy-nova': '✣', heal: '✚'
+  'holy-light': '☀', 'holy-nova': '✣', heal: '✚',
+  'elemental-burst': '✹', 'elemental-storm': '🜁', 'arcane-missile': '✧', 'arcane-torrent': '◉'
 };
 function getSkillKey(job, skill) {
   return `${job}:${skill.id || `passive-${skill.level}`}`;
@@ -184,7 +185,8 @@ function getSkillEffect(progress, job, skill) {
   return ClassSkillPolicy.getEffect(job, skill.id, getSkillUpgradeLevel(progress, job, skill))
     || WarriorAdvancementPolicy.getEffect(skill.id, getSkillUpgradeLevel(progress, job, skill))
     || RogueAdvancementPolicy.getEffect(skill.id, getSkillUpgradeLevel(progress, job, skill))
-    || HunterAdvancementPolicy.getEffect(skill.id, getSkillUpgradeLevel(progress, job, skill)) || {};
+    || HunterAdvancementPolicy.getEffect(skill.id, getSkillUpgradeLevel(progress, job, skill))
+    || MageAdvancementPolicy.getEffect(skill.id, getSkillUpgradeLevel(progress, job, skill)) || {};
 }
 
 function getHunterInstinctEffect(progress = getProgress()) {
@@ -2548,12 +2550,12 @@ function renderCharacterAbilities() {
   const job = classes.find((item) => item.id === character.job);
   const usesRage = WarriorResourcePolicy.isWarrior(character.job);
   const usesEnergy = AssassinEnergyPolicy.isAssassin(character.job);
-  const advancementPolicy = character.job === 'warrior' ? WarriorAdvancementPolicy : character.job === 'assassin' ? RogueAdvancementPolicy : character.job === 'hunter' ? HunterAdvancementPolicy : null;
+  const advancementPolicy = character.job === 'warrior' ? WarriorAdvancementPolicy : character.job === 'assassin' ? RogueAdvancementPolicy : character.job === 'hunter' ? HunterAdvancementPolicy : character.job === 'mage' ? MageAdvancementPolicy : null;
   const modal = document.querySelector('#inventory-modal');
   document.querySelector('#inventory-title').textContent = '角色能力';
   document.querySelector('#inventory-content').innerHTML = `
     <section class="ability-summary">
-      <div class="ability-identity"><span class="creation-race-icon race-${character.race}" aria-hidden="true"></span><div><h3>${character.name}</h3><p>${race?.name || character.race}・${progress.advancedClass ? [...Object.values(WarriorAdvancementPolicy.ADVANCED_CLASSES), ...Object.values(RogueAdvancementPolicy.ADVANCED_CLASSES), ...Object.values(HunterAdvancementPolicy.ADVANCED_CLASSES)].find((entry) => entry.id === progress.advancedClass)?.name : job?.name || character.job}・Lv. ${progress.level}</p><small>${race?.trait || ''}</small></div></div>
+      <div class="ability-identity"><span class="creation-race-icon race-${character.race}" aria-hidden="true"></span><div><h3>${character.name}</h3><p>${race?.name || character.race}・${progress.advancedClass ? [...Object.values(WarriorAdvancementPolicy.ADVANCED_CLASSES), ...Object.values(RogueAdvancementPolicy.ADVANCED_CLASSES), ...Object.values(HunterAdvancementPolicy.ADVANCED_CLASSES), ...Object.values(MageAdvancementPolicy.ADVANCED_CLASSES)].find((entry) => entry.id === progress.advancedClass)?.name : job?.name || character.job}・Lv. ${progress.level}</p><small>${race?.trait || ''}</small></div></div>
       <div class="ability-grid">
         <article><small>最大生命</small><b>${stats.hp}</b><em>裝備 +${equipment.hp}</em></article>
         <article><small>${usesRage ? '最大怒氣' : usesEnergy ? '最大能量' : '最大魔力'}</small><b>${usesRage ? WarriorResourcePolicy.MAX_RAGE : usesEnergy ? AssassinEnergyPolicy.MAX_ENERGY : stats.mana}</b><em>${usesRage ? '攻擊與受到攻擊時取得' : usesEnergy ? `固定恢復 ${AssassinEnergyPolicy.ENERGY_REGEN_PER_SECOND}／秒` : `裝備 +${equipment.mana}`}</em></article>
@@ -3520,7 +3522,7 @@ function processEnemyDots() {
         ? ClassSkillPolicy.getEffect('mage', 'elemental-mastery', Number(source.progress.skillLevels?.['mage:elemental-mastery']) || 1)
         : null;
       const hasSourceBurn = dots.some((dot) => dot.source === source && dot.type === 'burn');
-      const enhancedParalysisMultiplier = source?.job === 'mage' && now < (getEnemySkillState(index).enhancedParalysisUntil || 0) ? 3 : 1;
+      const enhancedParalysisMultiplier = source?.job === 'mage' && hasSourceBurn && now < (getEnemySkillState(index).enhancedParalysisUntil || 0) ? 2 : 1;
       applyDamageToMonster(index, damage * (sourceMastery?.resonance && hasSourceBurn ? 1.2 : 1) * enhancedParalysisMultiplier, { damageType: 'periodic', attackRange: 'none', element: hasSourceBurn ? 'fire' : '' }, {
         attacker: source,
         canEvade: false,
@@ -3538,6 +3540,7 @@ function getKnownSkills(job, level, progress = getProgress()) {
   if (job === 'warrior') return [...base, ...WarriorAdvancementPolicy.getSkills(progress.advancedClass)];
   if (job === 'assassin') return [...base, ...RogueAdvancementPolicy.getSkills(progress.advancedClass)];
   if (job === 'hunter') return [...base, ...HunterAdvancementPolicy.getSkills(progress.advancedClass)];
+  if (job === 'mage') return [...base, ...MageAdvancementPolicy.getSkills(progress.advancedClass)];
   return base;
 }
 
@@ -3859,7 +3862,7 @@ function refreshSkills(character, level) {
 }
 
 function getSkillEffectPercent(skill, upgradeLevel = 1) {
-  const effect = ClassSkillPolicy.getEffect(getActiveCharacter()?.job, skill.id, upgradeLevel) || WarriorAdvancementPolicy.getEffect(skill.id, upgradeLevel) || RogueAdvancementPolicy.getEffect(skill.id, upgradeLevel) || HunterAdvancementPolicy.getEffect(skill.id, upgradeLevel) || {};
+  const effect = ClassSkillPolicy.getEffect(getActiveCharacter()?.job, skill.id, upgradeLevel) || WarriorAdvancementPolicy.getEffect(skill.id, upgradeLevel) || RogueAdvancementPolicy.getEffect(skill.id, upgradeLevel) || HunterAdvancementPolicy.getEffect(skill.id, upgradeLevel) || MageAdvancementPolicy.getEffect(skill.id, upgradeLevel) || {};
   if (effect.power) return Math.round(effect.power * 100);
   if (effect.healPower) return Math.round(effect.healPower * 100);
   return 0;
@@ -3867,7 +3870,7 @@ function getSkillEffectPercent(skill, upgradeLevel = 1) {
 
 function getSkillDescription(job, skill) {
   const level = getSkillUpgradeLevel(getProgress(), job, skill);
-  const effect = ClassSkillPolicy.getEffect(job, skill.id, level) || WarriorAdvancementPolicy.getEffect(skill.id, level) || RogueAdvancementPolicy.getEffect(skill.id, level) || HunterAdvancementPolicy.getEffect(skill.id, level) || {};
+  const effect = ClassSkillPolicy.getEffect(job, skill.id, level) || WarriorAdvancementPolicy.getEffect(skill.id, level) || RogueAdvancementPolicy.getEffect(skill.id, level) || HunterAdvancementPolicy.getEffect(skill.id, level) || MageAdvancementPolicy.getEffect(skill.id, level) || {};
   const parts = [];
   if (effect.power) parts.push(`造成 ${Math.round(effect.power * 100)}% 傷害`);
   if (effect.healPower) parts.push(`治療量為魔法攻擊 ${Math.round(effect.healPower * 100)}%`);
@@ -3876,7 +3879,7 @@ function getSkillDescription(job, skill) {
   if (effect.slow) parts.push(`緩速 ${Math.round(effect.slow * 100)}%`);
   if (effect.attackDown) parts.push(`降低攻擊 ${Math.round(effect.attackDown * 100)}%`);
   if (effect.paralysis) parts.push(`命中後麻痺 ${effect.paralysisDuration || 4} 秒`);
-  if (effect.enhancedParalysis) parts.push(`強化麻痺期間承受元素傷害 ${effect.elementalDamageTakenMultiplier || 3} 倍`);
+  if (effect.enhancedParalysis) parts.push(`強化麻痺期間承受火、冰、雷元素傷害 ${effect.elementalDamageTakenMultiplier || 2} 倍`);
   if (effect.breakthrough) parts.push(`Lv6 突破：${effect.breakthrough}`);
   return parts.join('；') || getPassiveSkillDetail(job, skill) || skill.detail;
 }
@@ -3898,7 +3901,7 @@ function renderSkillDetailModal() {
   }
 
   const upgradeLevel = getSkillUpgradeLevel(progress, character.job, skill);
-  const advancedSkillUpgradePending = Boolean(WarriorAdvancementPolicy.getSkill(skill.id) || RogueAdvancementPolicy.getSkill(skill.id) || HunterAdvancementPolicy.getSkill(skill.id));
+  const advancedSkillUpgradePending = Boolean(WarriorAdvancementPolicy.getSkill(skill.id) || RogueAdvancementPolicy.getSkill(skill.id) || HunterAdvancementPolicy.getSkill(skill.id) || MageAdvancementPolicy.getSkill(skill.id));
   const requirement = SkillUpgradePolicy.getUpgradeRequirement(upgradeLevel);
   const upgradeProgress = { ...progress, unlockedChapter: getUnlockedChapter(progress) };
   const validation = SkillUpgradePolicy.canUpgrade(upgradeProgress, upgradeLevel);
@@ -4530,7 +4533,7 @@ function getPlayerAttackProfile(character, skill = null) {
   return {
     damageType: magicJob ? 'magic' : 'physical',
     attackRange: meleeJob ? 'melee' : 'ranged',
-    element: character.job === 'mage' ? ({ fireball: 'fire', blizzard: 'ice', 'chain-lightning': 'lightning' }[skill?.id] || '') : ''
+    element: character.job === 'mage' ? ({ fireball: 'fire', blizzard: 'ice', 'chain-lightning': 'lightning', 'arcane-missile': 'arcane', 'arcane-torrent': 'arcane' }[skill?.id] || '') : ''
   };
 }
 
@@ -4577,7 +4580,7 @@ function applyDamageToMonster(index, baseDamage, profile, options = {}) {
   const statusElementMultiplier = elementalMastery && (battle.enemyDots[index] || []).length ? 1 + elementalMastery.elementDamage : 1;
   const frostResonanceMultiplier = elementalMastery?.resonance && (now < skillState.slowedUntil || now < skillState.frozenUntil) && Math.random() < .1 ? attackerStats.criticalDamageMultiplier : 1;
   const lightningResonanceMultiplier = elementalMastery?.resonance && now < (skillState.paralyzedUntil || 0) && options.attackKind !== 'resonance' && Math.random() < .1 ? 1.3 : 1;
-  const enhancedParalysisMultiplier = profile.element && now < (skillState.enhancedParalysisUntil || 0) ? 3 : 1;
+  const enhancedParalysisMultiplier = ['fire', 'ice', 'lightning'].includes(profile.element) && now < (skillState.enhancedParalysisUntil || 0) ? 2 : 1;
   const conditionalDamageMultiplier = Number(options.conditionalDamageMultiplier) || ConditionalDamagePolicy.getDamageMultiplier({ currentHp: attacker?.currentHp, maxHp: attacker?.maxHp, lowHealthDamagePercent: attackerStats.lowHealthDamagePercent, highHealthDamagePercent: attackerStats.highHealthDamagePercent, attackKind: options.attackKind });
   const warriorAdvancement = WarriorAdvancementPolicy.getPassiveStats(progress, attacker?.maxHp > 0 ? attacker.currentHp / attacker.maxHp : 1);
   const warriorRuntime = WarriorAdvancementPolicy.getRuntimeBonuses(attacker, options.attackKind, now);
@@ -4663,6 +4666,7 @@ function applyDamageToMonster(index, baseDamage, profile, options = {}) {
     const resourceRecovery = Math.ceil((attacker.resourceMax || 0) * (attackerStats.killResourceRecoveryPercent || 0));
     if (hpRecovery > 0) attacker.currentHp = Math.min(attacker.maxHp, attacker.currentHp + hpRecovery);
     if (resourceRecovery > 0) attacker.resourceCurrent = Math.min(attacker.resourceMax, attacker.resourceCurrent + resourceRecovery);
+    MageAdvancementPolicy.resolveKill(attacker, now);
     if (attacker.job === 'assassin' && attacker.level >= 20 && attacker.currentHp / attacker.maxHp <= .3) {
       const desperate = ClassSkillPolicy.getEffect('assassin', 'desperate-counter', Number(progress.skillLevels?.['assassin:desperate-counter']) || 1);
       if (desperate.killHeal) attacker.currentHp = Math.min(attacker.maxHp, attacker.currentHp + attacker.maxHp * desperate.killHeal);
@@ -5816,6 +5820,7 @@ function endBattleAfterPlayerDefeat(now = Date.now()) {
     WarriorAdvancementPolicy.clear(member);
     RogueAdvancementPolicy.clear(member, true);
     HunterAdvancementPolicy.clear(member);
+    MageAdvancementPolicy.clear(member);
     member.currentHp = member.maxHp;
     member.resourceCurrent = member.resourceType === 'rage' ? 0 : getMaxCombatResourceForMember(member.character, member.progress);
     member.shield = 0;
@@ -5856,6 +5861,7 @@ function defeatPartyMember(member, now = Date.now()) {
   WarriorAdvancementPolicy.clear(member);
   RogueAdvancementPolicy.clear(member);
   HunterAdvancementPolicy.clear(member);
+  MageAdvancementPolicy.clear(member);
   member.alive = false;
   member.targetIndex = -1;
   member.bleed = null;
@@ -5913,6 +5919,7 @@ function resetPartyAfterDefeat(now = Date.now()) {
     WarriorAdvancementPolicy.clear(member);
     RogueAdvancementPolicy.clear(member, true);
     HunterAdvancementPolicy.clear(member);
+    MageAdvancementPolicy.clear(member);
     member.currentHp = member.maxHp;
     member.resourceCurrent = member.resourceType === 'rage' ? 0 : getMaxCombatResourceForMember(member.character, member.progress);
     member.shield = 0;
@@ -6605,7 +6612,7 @@ document.querySelector('#skill-detail-modal').addEventListener('click', (event) 
   const progress = getProgress();
   const skill = getKnownSkills(character?.job, progress.level, progress).find((entry) => getSkillKey(character.job, entry) === selectedSkillKey);
   if (!skill || progress.level < skill.level) return;
-  if (WarriorAdvancementPolicy.getSkill(skill.id) || RogueAdvancementPolicy.getSkill(skill.id) || HunterAdvancementPolicy.getSkill(skill.id)) { showToast('進階技能升級需求尚未設定。'); renderSkillDetailModal(); return; }
+  if (WarriorAdvancementPolicy.getSkill(skill.id) || RogueAdvancementPolicy.getSkill(skill.id) || HunterAdvancementPolicy.getSkill(skill.id) || MageAdvancementPolicy.getSkill(skill.id)) { showToast('進階技能升級需求尚未設定。'); renderSkillDetailModal(); return; }
   progress.unlockedChapter = getUnlockedChapter(progress);
   const currentLevel = getSkillUpgradeLevel(progress, character.job, skill);
   const specialization = currentLevel === 5 ? ClassSkillPolicy.canSpecialize(progress.skillLevels, character.job, skill.id) : { ok: true };
@@ -6754,7 +6761,7 @@ document.querySelector('#inventory-modal').addEventListener('click', (event) => 
   if (advanceButton) {
     const progress = getProgress();
     const character = getActiveCharacter();
-    const policy = character?.job === 'warrior' ? WarriorAdvancementPolicy : character?.job === 'assassin' ? RogueAdvancementPolicy : character?.job === 'hunter' ? HunterAdvancementPolicy : null;
+    const policy = character?.job === 'warrior' ? WarriorAdvancementPolicy : character?.job === 'assassin' ? RogueAdvancementPolicy : character?.job === 'hunter' ? HunterAdvancementPolicy : character?.job === 'mage' ? MageAdvancementPolicy : null;
     const result = policy?.advance(character, progress, advanceButton.dataset.firstAdvance) || { ok: false };
     if (!result.ok) { showToast('轉職條件尚未完成。'); return; }
     saveProgress(progress); renderCharacterAbilities(); renderSkills(getActiveCharacter(), progress.level); showToast('第一次轉職完成。'); return;

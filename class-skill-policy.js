@@ -81,7 +81,7 @@
         { power: 1.4, targets: 5, paralysis: true, paralysisDuration: 4 },
         { power: 1.5, targets: 5, paralysis: true, paralysisDuration: 4 },
         { power: 1.5, targets: 5, paralysis: true, paralysisDuration: 4 },
-        { power: 1.6, targets: 5, paralysis: true, paralysisDuration: 4, enhancedParalysis: true, elementalDamageTakenMultiplier: 3, bounceBonus: .05, breakthrough: '強化麻痺：承受元素傷害 3 倍；每次彈射傷害 +5%' }
+        { power: 1.6, targets: 5, paralysis: true, paralysisDuration: 4, enhancedParalysis: true, elementalDamageTakenMultiplier: 2, bounceBonus: .05, breakthrough: '強化麻痺：承受火、冰、雷元素傷害 2 倍；每次彈射傷害 +5%' }
       ], { targets: 5 }),
       passive(15, 'elemental-mastery', '元素精通', [4, 6, 8, 10, 12, 12].map((elementDamage, i) => ({ elementDamage: elementDamage / 100, resonance: i === 5 }))),
       passive(20, 'mana-shield', '魔力護盾', [10, 12, 14, 16, 20, 20].map((shield, i) => ({ shield: shield / 100, damageReduction: i === 5 ? .1 : 0, manaCost: .15, internalCooldown: 20 })))

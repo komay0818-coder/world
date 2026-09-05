@@ -18,7 +18,7 @@ assert.match(source, /member\.effectiveHealCount[\s\S]*graceTriggered/, 'divine 
 assert.match(source, /blessing\.party[\s\S]*lightGraceCooldownSpeed/, 'Light Grace can buff the whole party and cooldown speed');
 assert.match(source, /effect\.paralysis[\s\S]*state\.paralyzedUntil/, 'all configured chain lightning levels apply paralysis');
 assert.match(source, /effect\.enhancedParalysis[\s\S]*state\.enhancedParalysisUntil/, 'enhanced paralysis has an independent refreshable window');
-assert.match(source, /profile\.element[\s\S]*enhancedParalysisUntil[\s\S]*\? 3 : 1/, 'enhanced paralysis triples direct elemental damage only');
-assert.match(source, /dot\.type === 'burn'[\s\S]*enhancedParalysisMultiplier/, 'enhanced paralysis triples fire burn damage');
+assert.match(source, /\['fire', 'ice', 'lightning'\]\.includes\(profile\.element\)[\s\S]*enhancedParalysisUntil[\s\S]*\? 2 : 1/, 'enhanced paralysis doubles fire, ice and lightning direct damage only');
+assert.match(source, /dot\.type === 'burn'[\s\S]*enhancedParalysisMultiplier/, 'enhanced paralysis doubles fire burn damage');
 
 console.log('class-skill-combat-integration: assertions passed');
