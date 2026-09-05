@@ -5,6 +5,7 @@
 }(typeof globalThis !== 'undefined' ? globalThis : this, function () {
   'use strict';
   const FIRST_JOB_CHANGE_LEVEL = 45;
+  const POISON_ENTRY_RATIO = .75;
   const ADVANCED_CLASSES = Object.freeze({ assassination: Object.freeze({ id: 'assassination', name: '刺殺系' }), venom: Object.freeze({ id: 'venom', name: '劇毒系' }) });
   const SKILL_DETAILS = Object.freeze({
     'shadow-assassination':'單體刺殺；流血目標傷害提高，Lv6 暴擊追加副手攻擊。','death-mark':'標記目標5秒，提高自身對其傷害；擊殺縮短冷卻。','lethal-technique':'提高暴擊傷害；背刺暴擊強化下一次主手普通攻擊。','weakness-insight':'攻擊流血目標時提高暴擊率。','corrosive-strike':'直接傷害；無毒時施加1層毒，已有毒時增加1層並刷新全部毒層。','blood-venom-rend':'直接傷害並施加割裂流血；中毒目標承受更高割裂傷害。','venom-mastery':'提高中毒傷害；Lv6 敵人帶至少2層毒死亡時保存1次瘟疫蔓延。','toxic-blood-symbiosis':'目標同時中毒與流血時提高持續傷害。'
@@ -19,7 +20,7 @@
   ]);
   const VENOM_SKILLS = Object.freeze([
     active('corrosive-strike','腐蝕刺擊',6,[165,175,185,195,210,225].map((power,i)=>({power:power/100,dotVulnerability:i===5?.12:0,dotVulnerabilityDuration:5})),'venom'),
-    active('blood-venom-rend','血毒割裂',8,[140,150,160,170,185,200].map((power,i)=>({power:power/100,ruptureTick:[17,19,21,23,26,30][i]/100,ruptureEntryRatio:.50,poisonedRuptureBonus:.20,toxicBloodDefense:i===5?.06:0})),'venom'),
+    active('blood-venom-rend','血毒割裂',8,[140,150,160,170,185,200].map((power,i)=>({power:power/100,ruptureTick:[17,19,21,23,26,30][i]/100,ruptureEntryRatio:.75,poisonedRuptureBonus:.20,toxicBloodDefense:i===5?.06:0})),'venom'),
     passive('venom-mastery','劇毒精通',[7,9,12,15,18,25].map((poisonDamage,i)=>({poisonDamage:poisonDamage/100,plagueSpread:i===5})),'venom'),
     passive('toxic-blood-symbiosis','血毒共生',[6,8,10,13,16,25].map((dotDamage,i)=>({dotDamage:dotDamage/100,extendOnDirectCrit:i===5?1:0,maxExtension:i===5?3:0})),'venom')
   ]);
@@ -45,5 +46,5 @@
   function consumePlague(member){if(!member?.plagueSpreadPending)return false;member.plagueSpreadPending=false;return true;}
   function extendDotsOnCrit(member,dots,critical){const e=getEffect('toxic-blood-symbiosis',member?.progress?.skillLevels?.['assassin:toxic-blood-symbiosis']);if(!critical||!e?.extendOnDirectCrit||!hasDot(dots,'poison')||!hasBleedingStatus(dots))return false;let changed=false;(dots||[]).filter(d=>['poison','bleed','rupture'].includes(d.type)).forEach(d=>{const added=Math.min(1,Math.max(0,e.maxExtension-(d.extendedSeconds||0)));if(!added)return;d.extendedSeconds=(d.extendedSeconds||0)+added;if(d.nextTickAt)d.nextTickAt+=added*1000;changed=true;});return changed;}
   function clear(member,leaveBattle=false){if(!member)return;['lethalTechniqueUntil','lethalTechniqueDamage','lethalTechniqueOffhand'].forEach(k=>member[k]=0);if(leaveBattle)member.plagueSpreadPending=false;}
-  return Object.freeze({FIRST_JOB_CHANGE_LEVEL,ADVANCED_CLASSES,AUTO_SKILL_PRIORITY,ASSASSINATION_SKILLS,VENOM_SKILLS,SKILLS,getSkill,getSkills,getEffect,isAdvanced,canAdvance,advance,hasDot,hasBleedingStatus,poisonStacks,getDeathMarkDamageMultiplier,getTargetDefenseReduction,getTargetBonuses,markTarget,resolveMarkedKill,getAutoSkillPriority:orderAutoSkills,resolveBackstabCrit,getBasicExecution,consumeBasic,resolvePlagueDeath,consumePlague,extendDotsOnCrit,clear});
+  return Object.freeze({FIRST_JOB_CHANGE_LEVEL,POISON_ENTRY_RATIO,ADVANCED_CLASSES,AUTO_SKILL_PRIORITY,ASSASSINATION_SKILLS,VENOM_SKILLS,SKILLS,getSkill,getSkills,getEffect,isAdvanced,canAdvance,advance,hasDot,hasBleedingStatus,poisonStacks,getDeathMarkDamageMultiplier,getTargetDefenseReduction,getTargetBonuses,markTarget,resolveMarkedKill,getAutoSkillPriority:orderAutoSkills,resolveBackstabCrit,getBasicExecution,consumeBasic,resolvePlagueDeath,consumePlague,extendDotsOnCrit,clear});
 }));

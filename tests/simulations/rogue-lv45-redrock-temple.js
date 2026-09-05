@@ -57,7 +57,7 @@ function simulate(spec, durationSeconds, seed, options={}) {
   }
   function addDamage(source, amount, now, critical=false) {
     const mark = Rogue.getDeathMarkDamageMultiplier(member,target.state,now);
-    const periodic=['poison','rupture','backstabBleed'].includes(source);
+    const periodic=['poison','rupture','backstabBleed','poisonEntry','ruptureEntry'].includes(source);
     const defenseReduction=Rogue.getTargetDefenseReduction(target.dots);
     const result=MonsterDefense.resolveDamage({baseDamage:amount*mark,monster:{defense:(target.defense||0)*(1-defenseReduction),evasion:target.evasion||0,parry:target.parry||0,damageReduction:(target.dr||0)+(now<target.barrierUntil?8:0)},damageType:periodic?'periodic':'physical',attackRange:periodic?'none':'melee',canEvade:!periodic,canParry:!periodic,random});
     let dealt=result.finalDamage;
@@ -84,7 +84,7 @@ function simulate(spec, durationSeconds, seed, options={}) {
     for(let level=1;level<=Math.min(3,stacks);level++)if(!target.reachedStacks.has(level)){target.reachedStacks.add(level);stackTimes[level].push((now-target.born)/1000);}
     return added;
   }
-  function dotEntry(type,tickDamage,now){let mult=1;if(type==='poison'&&spec==='venom')mult+=.25;mult+=Rogue.getTargetBonuses(member,target.dots,target.state,target.hp/target.maxHp,'dot',now).dotDamage;addDamage(type==='poison'?'poisonEntry':'ruptureEntry',tickDamage*.5*mult,now);}
+  function dotEntry(type,tickDamage,now){let mult=1;if(type==='poison'&&spec==='venom')mult+=.25;mult+=Rogue.getTargetBonuses(member,target.dots,target.state,target.hp/target.maxHp,'dot',now).dotDamage;addDamage(type==='poison'?'poisonEntry':'ruptureEntry',tickDamage*.75*mult,now);}
   function addPoison(damage,duration,maxStacks,now,refreshOnly=false,refreshAll=false){const before=poisonStacks();addDot('poison',damage,duration,maxStacks,now,refreshOnly,refreshAll);const added=poisonStacks()-before;if(spec==='venom'&&added>0)dotEntry('poison',damage*added,now);return added;}
   function kill(now){
     if(done)return;
@@ -94,11 +94,11 @@ function simulate(spec, durationSeconds, seed, options={}) {
     }
     if(target.dots.some(d=>d.type==='poison')) if(Rogue.resolvePlagueDeath(member,target.dots)) counts.plagueTriggers++;
     kills++; lastDeath=now;
-    if(kills>=10){done=true;return;}
+    if(kills>=(options.killTarget||10)){done=true;return;}
     const template=options.farmTemplates?options.farmTemplates[Math.floor(random()*options.farmTemplates.length)]:{hp:FARM_HP};
     target=freshTarget(template,now); enemyStarts.push(poisonStacks());
     if(Rogue.consumePlague(member)){
-      addPoison(Math.ceil(ATTACK*.18),3,3,now,false,true);counts.plagueTransfers++;
+      addPoison(Math.ceil(ATTACK*.20),3,3,now,false,true);counts.plagueTransfers++;
       enemyStarts[enemyStarts.length-1]=poisonStacks();
     }
   }
@@ -126,15 +126,15 @@ function simulate(spec, durationSeconds, seed, options={}) {
       if(existingBleed&&e.bleedTrigger)addDamage('backstabBleed',existingBleed.damage*e.bleedTrigger,now);
       addDot('bleed',Math.ceil(ATTACK*.18),3,1,now,true);
     }
-    if(skill.id==='poison-blade') addPoison(Math.ceil(ATTACK*.18),3,e.poisonStacks,now,false,true);
+    if(skill.id==='poison-blade') addPoison(Math.ceil(ATTACK*.20),3,e.poisonStacks,now,false,true);
     if(skill.id==='shadow-assassination'){
       counts.shadowAssassinations++;if(critical)counts.shadowAssassinationCrits++;
       if(critical&&e.offhandOnCrit&&target.hp>0){const strike=Offhand.calculateOffhandStrike(stats,mastery,random());addDamage('offhand',strike.damage,now,strike.critical);counts.shadowOffhands++;}
     }
     if(skill.id==='corrosive-strike'){
       const stacks=poisonStacks();
-      if(!stacks)addPoison(Math.ceil(ATTACK*.18),3,3,now);
-      else if(stacks<3)addPoison(Math.ceil(ATTACK*.18),3,3,now,false,true);
+      if(!stacks)addPoison(Math.ceil(ATTACK*.20),3,3,now);
+      else if(stacks<3)addPoison(Math.ceil(ATTACK*.20),3,3,now,false,true);
       else target.dots.filter(d=>d.type==='poison').forEach(d=>{d.remaining=3;d.nextTickAt=now+2000;d.extendedSeconds=0;});
       if(stacks>=3){target.state.dotVulnerability=.12;target.state.dotVulnerabilityUntil=now+5000;}
     }
@@ -168,7 +168,7 @@ function simulate(spec, durationSeconds, seed, options={}) {
     target.dots=target.dots.filter(d=>d.remaining>0);
   }
   enemyStarts.push(0);
-  const maxMs=(options.farm||options.stopOnKill)?180000:durationSeconds*1000;
+  const maxMs=options.farm?(options.killTarget||10)*20000:options.stopOnKill?180000:durationSeconds*1000;
   for(let now=0;now<=maxMs&&!done;now+=STEP){
     elapsed=now; member.energy=Math.min(100,member.energy+10*STEP/1000);
     tickDots(now); if(done)break;
@@ -192,7 +192,7 @@ function simulate(spec, durationSeconds, seed, options={}) {
     coverage:{threeStack:threeStackCoverage/((options.farm||options.stopOnKill)?lastDeath:durationSeconds*1000),coexist:coexistCoverage/((options.farm||options.stopOnKill)?lastDeath:durationSeconds*1000),symbiosis:symbiosisCoverage/((options.farm||options.stopOnKill)?lastDeath:durationSeconds*1000),corrosion:corrosionCoverage/((options.farm||options.stopOnKill)?lastDeath:durationSeconds*1000),deathMark:deathMarkCoverage/((options.farm||options.stopOnKill)?lastDeath:durationSeconds*1000)}};
 }
 
-function aggregate(rows,duration,farm=false){
+function aggregate(rows,duration,farm=false,enemyCount=10){
   const total=rows.map(r=>r.total), totalSum=sum(total);
   const sources=Object.fromEntries(SOURCES.map(k=>[k,round(sum(rows.map(r=>r.sources[k]))/rows.length)]));
   const counts={};Object.keys(rows[0].counts).forEach(k=>counts[k]=round(sum(rows.map(r=>r.counts[k]))/rows.length,4));
@@ -212,17 +212,17 @@ function aggregate(rows,duration,farm=false){
     oneStackStartCount:farm?rows.flatMap(r=>r.enemyStarts).filter(x=>x===1).length:undefined,
     oneStackStartPercent:farm?round(rows.flatMap(r=>r.enemyStarts).filter(x=>x===1).length/rows.flatMap(r=>r.enemyStarts).length*100,4):undefined,
     zeroStackStartPercent:farm?round(rows.flatMap(r=>r.enemyStarts).filter(x=>x===0).length/rows.flatMap(r=>r.enemyStarts).length*100,4):undefined,
-    threeStackDeathPercent:farm?round(rows.reduce((s,r)=>s+r.counts.plagueTriggers,0)/(rows.length*10)*100,4):undefined,
-    averageKillSeconds:farm?round(mean(rows.map(r=>r.duration/10)),4):undefined,
-    averageDamagePerEnemy:farm?round(mean(total)/10):undefined,
+    threeStackDeathPercent:farm?round(rows.reduce((s,r)=>s+r.counts.plagueTriggers,0)/(rows.length*enemyCount)*100,4):undefined,
+    averageKillSeconds:farm?round(mean(rows.map(r=>r.duration/enemyCount)),4):undefined,
+    averageDamagePerEnemy:farm?round(mean(total)/enemyCount):undefined,
     averageTimeline:farm?undefined:Array.from({length:rows[0].timeline.length},(_,i)=>round(mean(rows.map(r=>r.timeline[i])))), sampleAiOrder:rows[0].casts.slice(0,15)
   };
 }
 
 function runTarget(spec,template){return aggregate(Array.from({length:RUNS},(_,i)=>simulate(spec,180,0x360000+(spec==='venom'?0x100000:0)+i*7919,{template,stopOnKill:true})),180,true);}
-function runFarm(spec){return aggregate(Array.from({length:FARM_RUNS},(_,i)=>simulate(spec,180,0x960000+(spec==='venom'?0x100000:0)+i*7919,{farm:true,farmTemplates:Temple.normals})),180,true);}
-const result={metadata:{generatedAt:new Date().toISOString(),map:'3-6 赤岩聖殿',attack:ATTACK,baseCritPercent:20,criticalDamagePercent:150,baseAttackSpeed:BASE_SPEED,weapon:'固定雙匕首',skillLevels:'全部 Lv6',runsPerTarget:RUNS,farmGroupsPerSpec:FARM_RUNS,bossExcluded:true},targets:{},farm10:{}};
+function runFarm(spec,enemyCount){return aggregate(Array.from({length:FARM_RUNS},(_,i)=>simulate(spec,180,0x960000+(spec==='venom'?0x100000:0)+enemyCount*100003+i*7919,{farm:true,farmTemplates:Temple.normals,killTarget:enemyCount})),180,true,enemyCount);}
+const result={metadata:{generatedAt:new Date().toISOString(),map:'3-6 赤岩聖殿',attack:ATTACK,baseCritPercent:20,criticalDamagePercent:150,baseAttackSpeed:BASE_SPEED,weapon:'固定雙匕首',skillLevels:'全部 Lv6',runsPerTarget:RUNS,farmGroupsPerSpec:FARM_RUNS,bossExcluded:true},targets:{},farm10:{},farm100:{}};
 for(const template of [...Temple.normals,Temple.elite]){const cell={template};for(const spec of ['assassination','venom'])cell[spec]=runTarget(spec,template);result.targets[template.id]=cell;}
-for(const spec of ['assassination','venom'])result.farm10[spec]=runFarm(spec);
-const output=path.join(__dirname,'results','rogue-lv45-redrock-temple-dot-buff-4.json');fs.writeFileSync(output,JSON.stringify(result,null,2)+'\n');
-console.log(JSON.stringify({output,targets:Object.fromEntries(Object.entries(result.targets).map(([id,x])=>[id,{name:x.template.name,assassination:x.assassination.durationSeconds,venom:x.venom.durationSeconds}])),farm:{assassination:result.farm10.assassination.durationSeconds,venom:result.farm10.venom.durationSeconds}},null,2));
+for(const spec of ['assassination','venom']){result.farm10[spec]=runFarm(spec,10);result.farm100[spec]=runFarm(spec,100);}
+const output=path.join(__dirname,'results','rogue-lv45-redrock-temple-dot-buff-5.json');fs.writeFileSync(output,JSON.stringify(result,null,2)+'\n');
+console.log(JSON.stringify({output,targets:Object.fromEntries(Object.entries(result.targets).map(([id,x])=>[id,{name:x.template.name,assassination:x.assassination.durationSeconds,venom:x.venom.durationSeconds}])),farm10:{assassination:result.farm10.assassination.durationSeconds,venom:result.farm10.venom.durationSeconds},farm100:{assassination:result.farm100.assassination.durationSeconds,venom:result.farm100.venom.durationSeconds}},null,2));

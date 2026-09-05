@@ -1,0 +1,1844 @@
+{
+  "metadata": {
+    "generatedAt": "2026-09-05T00:54:30.749Z",
+    "map": "3-6 赤岩聖殿",
+    "attack": 200,
+    "baseCritPercent": 20,
+    "criticalDamagePercent": 150,
+    "baseAttackSpeed": 1,
+    "weapon": "固定雙匕首",
+    "skillLevels": "全部 Lv6",
+    "runsPerTarget": 1000,
+    "farmGroupsPerSpec": 500,
+    "bossExcluded": true
+  },
+  "targets": {
+    "temple-stone-guard": {
+      "template": {
+        "rank": "normal",
+        "id": "temple-stone-guard",
+        "name": "聖殿石衛",
+        "hp": 1780,
+        "attack": 108,
+        "defense": 128,
+        "speed": 0.62,
+        "evasion": 0,
+        "parry": 14,
+        "dr": 24,
+        "skillMultiplier": 1.35,
+        "skillCooldown": 10,
+        "shell36": true
+      },
+      "assassination": {
+        "runs": 1000,
+        "durationSeconds": 8.131,
+        "averageTotalDamage": 1893.08,
+        "averageDps": 234.55,
+        "minimumDamage": 1780,
+        "maximumDamage": 2219,
+        "averageCriticalCount": 6.52,
+        "totalCriticalCount": 6520,
+        "checkpoints": {
+          "5": 1254.17
+        },
+        "sources": {
+          "mainBasic": 710.05,
+          "offhand": 130.81,
+          "backstabDirect": 355.72,
+          "backstabBleed": 55.15,
+          "shadowDance": 94.65,
+          "poisonBladeDirect": 95.87,
+          "shadowAssassination": 417,
+          "corrosiveStrike": 0,
+          "bloodVenomRendDirect": 0,
+          "poisonEntry": 0,
+          "ruptureEntry": 0,
+          "poison": 33.82,
+          "rupture": 0,
+          "other": 0
+        },
+        "shares": {
+          "mainBasic": 37.5079,
+          "offhand": 6.91,
+          "backstabDirect": 18.7905,
+          "backstabBleed": 2.913,
+          "shadowDance": 4.9998,
+          "poisonBladeDirect": 5.0642,
+          "shadowAssassination": 22.0279,
+          "corrosiveStrike": 0,
+          "bloodVenomRendDirect": 0,
+          "poisonEntry": 0,
+          "ruptureEntry": 0,
+          "poison": 1.7867,
+          "rupture": 0,
+          "other": 0
+        },
+        "counts": {
+          "crits": 6.52,
+          "skillCasts": 5.538,
+          "deathMarkCasts": 1.818,
+          "markedDeaths": 0,
+          "markCdReductions": 0,
+          "markSecondsAdvanced": 0,
+          "backstabsUnderMark": 1.006,
+          "shadowAssassinationsUnderMark": 1.535,
+          "markBonusDamage": 152.4288,
+          "shadowAssassinations": 1.535,
+          "shadowAssassinationCrits": 0.76,
+          "shadowOffhands": 0.487,
+          "lethalTechniqueTriggers": 0.659,
+          "lethalComboOffhands": 0.223,
+          "plagueTriggers": 0,
+          "plagueTransfers": 0
+        },
+        "averageFirstStackSeconds": 4,
+        "averageSecondStackSeconds": null,
+        "averageFirstThreeStackSeconds": null,
+        "reachedThreeStackPercent": 0,
+        "averageFirstDeathMarkCastSeconds": 0,
+        "averageDeathMarkCastSeconds": 3.3746,
+        "coverage": {
+          "threeStack": 0,
+          "coexist": 0,
+          "symbiosis": 0,
+          "corrosion": 0,
+          "deathMark": 71.2705
+        },
+        "averageEnemyStartStacks": 0,
+        "oneStackStartCount": 0,
+        "oneStackStartPercent": 0,
+        "zeroStackStartPercent": 100,
+        "threeStackDeathPercent": 0,
+        "averageKillSeconds": 0.8131,
+        "averageDamagePerEnemy": 189.31,
+        "sampleAiOrder": [
+          [
+            0,
+            "死亡標記"
+          ],
+          [
+            1,
+            "背刺"
+          ],
+          [
+            2,
+            "暗影刺殺"
+          ],
+          [
+            3,
+            "影刃旋舞"
+          ],
+          [
+            4,
+            "毒刃"
+          ],
+          [
+            6.5,
+            "背刺"
+          ],
+          [
+            7.5,
+            "死亡標記"
+          ]
+        ]
+      },
+      "venom": {
+        "runs": 1000,
+        "durationSeconds": 8.5845,
+        "averageTotalDamage": 1822.37,
+        "averageDps": 213.66,
+        "minimumDamage": 1780,
+        "maximumDamage": 2014,
+        "averageCriticalCount": 5.506,
+        "totalCriticalCount": 5506,
+        "checkpoints": {
+          "5": 1221.31
+        },
+        "sources": {
+          "mainBasic": 619.3,
+          "offhand": 98.75,
+          "backstabDirect": 314.76,
+          "backstabBleed": 33.55,
+          "shadowDance": 75.97,
+          "poisonBladeDirect": 126.23,
+          "shadowAssassination": 0,
+          "corrosiveStrike": 147.18,
+          "bloodVenomRendDirect": 155.56,
+          "poisonEntry": 48.35,
+          "ruptureEntry": 34.11,
+          "poison": 94.72,
+          "rupture": 73.89,
+          "other": 0
+        },
+        "shares": {
+          "mainBasic": 33.9832,
+          "offhand": 5.4188,
+          "backstabDirect": 17.2721,
+          "backstabBleed": 1.8411,
+          "shadowDance": 4.1687,
+          "poisonBladeDirect": 6.9267,
+          "shadowAssassination": 0,
+          "corrosiveStrike": 8.0763,
+          "bloodVenomRendDirect": 8.5359,
+          "poisonEntry": 2.6529,
+          "ruptureEntry": 1.8717,
+          "poison": 5.1979,
+          "rupture": 4.0546,
+          "other": 0
+        },
+        "counts": {
+          "crits": 5.506,
+          "skillCasts": 6.482,
+          "deathMarkCasts": 0,
+          "markedDeaths": 0,
+          "markCdReductions": 0,
+          "markSecondsAdvanced": 0,
+          "backstabsUnderMark": 0,
+          "shadowAssassinationsUnderMark": 0,
+          "markBonusDamage": 0,
+          "shadowAssassinations": 0,
+          "shadowAssassinationCrits": 0,
+          "shadowOffhands": 0,
+          "lethalTechniqueTriggers": 0,
+          "lethalComboOffhands": 0,
+          "plagueTriggers": 0,
+          "plagueTransfers": 0
+        },
+        "averageFirstStackSeconds": 0,
+        "averageSecondStackSeconds": 3,
+        "averageFirstThreeStackSeconds": 9,
+        "reachedThreeStackPercent": 42.5,
+        "averageFirstDeathMarkCastSeconds": null,
+        "averageDeathMarkCastSeconds": null,
+        "coverage": {
+          "threeStack": 0.4405,
+          "coexist": 88.2677,
+          "symbiosis": 88.2677,
+          "corrosion": 0,
+          "deathMark": 0
+        },
+        "averageEnemyStartStacks": 0,
+        "oneStackStartCount": 0,
+        "oneStackStartPercent": 0,
+        "zeroStackStartPercent": 100,
+        "threeStackDeathPercent": 0,
+        "averageKillSeconds": 0.8584,
+        "averageDamagePerEnemy": 182.24,
+        "sampleAiOrder": [
+          [
+            0,
+            "毒刃"
+          ],
+          [
+            1,
+            "背刺"
+          ],
+          [
+            2,
+            "血毒割裂"
+          ],
+          [
+            3,
+            "腐蝕刺擊"
+          ],
+          [
+            4,
+            "影刃旋舞"
+          ],
+          [
+            5.5,
+            "背刺"
+          ]
+        ]
+      }
+    },
+    "rune-golem": {
+      "template": {
+        "rank": "normal",
+        "id": "rune-golem",
+        "name": "符文魔像",
+        "hp": 1620,
+        "attack": 116,
+        "defense": 105,
+        "speed": 0.7,
+        "evasion": 0,
+        "parry": 10,
+        "dr": 19,
+        "skillMultiplier": 1.3,
+        "skillCooldown": 11,
+        "defenseRune36": true
+      },
+      "assassination": {
+        "runs": 1000,
+        "durationSeconds": 5.3705,
+        "averageTotalDamage": 1685.51,
+        "averageDps": 326.12,
+        "minimumDamage": 1620,
+        "maximumDamage": 1929,
+        "averageCriticalCount": 4.644,
+        "totalCriticalCount": 4644,
+        "checkpoints": {
+          "5": null
+        },
+        "sources": {
+          "mainBasic": 640.39,
+          "offhand": 121.97,
+          "backstabDirect": 276.26,
+          "backstabBleed": 39.21,
+          "shadowDance": 117.71,
+          "poisonBladeDirect": 134.2,
+          "shadowAssassination": 344.58,
+          "corrosiveStrike": 0,
+          "bloodVenomRendDirect": 0,
+          "poisonEntry": 0,
+          "ruptureEntry": 0,
+          "poison": 11.19,
+          "rupture": 0,
+          "other": 0
+        },
+        "shares": {
+          "mainBasic": 37.9939,
+          "offhand": 7.2362,
+          "backstabDirect": 16.3904,
+          "backstabBleed": 2.3263,
+          "shadowDance": 6.9837,
+          "poisonBladeDirect": 7.9619,
+          "shadowAssassination": 20.4438,
+          "corrosiveStrike": 0,
+          "bloodVenomRendDirect": 0,
+          "poisonEntry": 0,
+          "ruptureEntry": 0,
+          "poison": 0.6638,
+          "rupture": 0,
+          "other": 0
+        },
+        "counts": {
+          "crits": 4.644,
+          "skillCasts": 4.234,
+          "deathMarkCasts": 1.006,
+          "markedDeaths": 0,
+          "markCdReductions": 0,
+          "markSecondsAdvanced": 0,
+          "backstabsUnderMark": 1,
+          "shadowAssassinationsUnderMark": 1,
+          "markBonusDamage": 157.9454,
+          "shadowAssassinations": 1,
+          "shadowAssassinationCrits": 0.48,
+          "shadowOffhands": 0.48,
+          "lethalTechniqueTriggers": 0.392,
+          "lethalComboOffhands": 0.112,
+          "plagueTriggers": 0,
+          "plagueTransfers": 0
+        },
+        "averageFirstStackSeconds": 4,
+        "averageSecondStackSeconds": null,
+        "averageFirstThreeStackSeconds": null,
+        "reachedThreeStackPercent": 0,
+        "averageFirstDeathMarkCastSeconds": 0,
+        "averageDeathMarkCastSeconds": 0.0447,
+        "coverage": {
+          "threeStack": 0,
+          "coexist": 0,
+          "symbiosis": 0,
+          "corrosion": 0,
+          "deathMark": 90.3349
+        },
+        "averageEnemyStartStacks": 0,
+        "oneStackStartCount": 0,
+        "oneStackStartPercent": 0,
+        "zeroStackStartPercent": 100,
+        "threeStackDeathPercent": 0,
+        "averageKillSeconds": 0.537,
+        "averageDamagePerEnemy": 168.55,
+        "sampleAiOrder": [
+          [
+            0,
+            "死亡標記"
+          ],
+          [
+            1,
+            "背刺"
+          ],
+          [
+            2,
+            "暗影刺殺"
+          ],
+          [
+            3,
+            "影刃旋舞"
+          ],
+          [
+            4,
+            "毒刃"
+          ]
+        ]
+      },
+      "venom": {
+        "runs": 1000,
+        "durationSeconds": 5.391,
+        "averageTotalDamage": 1714.14,
+        "averageDps": 319.54,
+        "minimumDamage": 1620,
+        "maximumDamage": 1911,
+        "averageCriticalCount": 3.981,
+        "totalCriticalCount": 3981,
+        "checkpoints": {
+          "5": null
+        },
+        "sources": {
+          "mainBasic": 537.11,
+          "offhand": 74.26,
+          "backstabDirect": 347.66,
+          "backstabBleed": 23.63,
+          "shadowDance": 98.16,
+          "poisonBladeDirect": 106.64,
+          "shadowAssassination": 0,
+          "corrosiveStrike": 199.82,
+          "bloodVenomRendDirect": 181.06,
+          "poisonEntry": 45,
+          "ruptureEntry": 37,
+          "poison": 40.92,
+          "rupture": 22.88,
+          "other": 0
+        },
+        "shares": {
+          "mainBasic": 31.334,
+          "offhand": 4.3323,
+          "backstabDirect": 20.282,
+          "backstabBleed": 1.3782,
+          "shadowDance": 5.7265,
+          "poisonBladeDirect": 6.2211,
+          "shadowAssassination": 0,
+          "corrosiveStrike": 11.6574,
+          "bloodVenomRendDirect": 10.5625,
+          "poisonEntry": 2.6252,
+          "ruptureEntry": 2.1585,
+          "poison": 2.3872,
+          "rupture": 1.335,
+          "other": 0
+        },
+        "counts": {
+          "crits": 3.981,
+          "skillCasts": 5.735,
+          "deathMarkCasts": 0,
+          "markedDeaths": 0,
+          "markCdReductions": 0,
+          "markSecondsAdvanced": 0,
+          "backstabsUnderMark": 0,
+          "shadowAssassinationsUnderMark": 0,
+          "markBonusDamage": 0,
+          "shadowAssassinations": 0,
+          "shadowAssassinationCrits": 0,
+          "shadowOffhands": 0,
+          "lethalTechniqueTriggers": 0,
+          "lethalComboOffhands": 0,
+          "plagueTriggers": 0,
+          "plagueTransfers": 0
+        },
+        "averageFirstStackSeconds": 0,
+        "averageSecondStackSeconds": 3,
+        "averageFirstThreeStackSeconds": null,
+        "reachedThreeStackPercent": 0,
+        "averageFirstDeathMarkCastSeconds": null,
+        "averageDeathMarkCastSeconds": null,
+        "coverage": {
+          "threeStack": 0,
+          "coexist": 81.34,
+          "symbiosis": 81.34,
+          "corrosion": 0,
+          "deathMark": 0
+        },
+        "averageEnemyStartStacks": 0,
+        "oneStackStartCount": 0,
+        "oneStackStartPercent": 0,
+        "zeroStackStartPercent": 100,
+        "threeStackDeathPercent": 0,
+        "averageKillSeconds": 0.5391,
+        "averageDamagePerEnemy": 171.41,
+        "sampleAiOrder": [
+          [
+            0,
+            "毒刃"
+          ],
+          [
+            1,
+            "背刺"
+          ],
+          [
+            2,
+            "血毒割裂"
+          ],
+          [
+            3,
+            "腐蝕刺擊"
+          ],
+          [
+            4,
+            "影刃旋舞"
+          ],
+          [
+            5.5,
+            "背刺"
+          ]
+        ]
+      }
+    },
+    "temple-executor": {
+      "template": {
+        "rank": "normal",
+        "id": "temple-executor",
+        "name": "聖殿執行者",
+        "hp": 1430,
+        "attack": 132,
+        "defense": 82,
+        "speed": 0.9,
+        "evasion": 5,
+        "parry": 8,
+        "dr": 12,
+        "skillMultiplier": 1.5,
+        "skillCooldown": 10,
+        "executor36": true
+      },
+      "assassination": {
+        "runs": 1000,
+        "durationSeconds": 3.562,
+        "averageTotalDamage": 1511.31,
+        "averageDps": 450.94,
+        "minimumDamage": 1430,
+        "maximumDamage": 1796,
+        "averageCriticalCount": 3.294,
+        "totalCriticalCount": 3294,
+        "checkpoints": {},
+        "sources": {
+          "mainBasic": 515.75,
+          "offhand": 94.4,
+          "backstabDirect": 265.75,
+          "backstabBleed": 26.67,
+          "shadowDance": 128.66,
+          "poisonBladeDirect": 80.18,
+          "shadowAssassination": 399.02,
+          "corrosiveStrike": 0,
+          "bloodVenomRendDirect": 0,
+          "poisonEntry": 0,
+          "ruptureEntry": 0,
+          "poison": 0.88,
+          "rupture": 0,
+          "other": 0
+        },
+        "shares": {
+          "mainBasic": 34.1259,
+          "offhand": 6.2464,
+          "backstabDirect": 17.5838,
+          "backstabBleed": 1.765,
+          "shadowDance": 8.513,
+          "poisonBladeDirect": 5.3055,
+          "shadowAssassination": 26.4025,
+          "corrosiveStrike": 0,
+          "bloodVenomRendDirect": 0,
+          "poisonEntry": 0,
+          "ruptureEntry": 0,
+          "poison": 0.0579,
+          "rupture": 0,
+          "other": 0
+        },
+        "counts": {
+          "crits": 3.294,
+          "skillCasts": 3.404,
+          "deathMarkCasts": 1,
+          "markedDeaths": 0,
+          "markCdReductions": 0,
+          "markSecondsAdvanced": 0,
+          "backstabsUnderMark": 1,
+          "shadowAssassinationsUnderMark": 1,
+          "markBonusDamage": 159.4868,
+          "shadowAssassinations": 1,
+          "shadowAssassinationCrits": 0.485,
+          "shadowOffhands": 0.485,
+          "lethalTechniqueTriggers": 0.308,
+          "lethalComboOffhands": 0.109,
+          "plagueTriggers": 0,
+          "plagueTransfers": 0
+        },
+        "averageFirstStackSeconds": 4,
+        "averageSecondStackSeconds": null,
+        "averageFirstThreeStackSeconds": null,
+        "reachedThreeStackPercent": 0,
+        "averageFirstDeathMarkCastSeconds": 0,
+        "averageDeathMarkCastSeconds": 0,
+        "coverage": {
+          "threeStack": 0,
+          "coexist": 0,
+          "symbiosis": 0,
+          "corrosion": 0,
+          "deathMark": 100.7989
+        },
+        "averageEnemyStartStacks": 0,
+        "oneStackStartCount": 0,
+        "oneStackStartPercent": 0,
+        "zeroStackStartPercent": 100,
+        "threeStackDeathPercent": 0,
+        "averageKillSeconds": 0.3562,
+        "averageDamagePerEnemy": 151.13,
+        "sampleAiOrder": [
+          [
+            0,
+            "死亡標記"
+          ],
+          [
+            1,
+            "背刺"
+          ],
+          [
+            2,
+            "暗影刺殺"
+          ],
+          [
+            3,
+            "影刃旋舞"
+          ],
+          [
+            4,
+            "毒刃"
+          ]
+        ]
+      },
+      "venom": {
+        "runs": 1000,
+        "durationSeconds": 3.6495,
+        "averageTotalDamage": 1490.76,
+        "averageDps": 420.89,
+        "minimumDamage": 1430,
+        "maximumDamage": 1738,
+        "averageCriticalCount": 2.869,
+        "totalCriticalCount": 2869,
+        "checkpoints": {},
+        "sources": {
+          "mainBasic": 432.25,
+          "offhand": 44.98,
+          "backstabDirect": 235.74,
+          "backstabBleed": 12.43,
+          "shadowDance": 55.05,
+          "poisonBladeDirect": 125.63,
+          "shadowAssassination": 0,
+          "corrosiveStrike": 234.08,
+          "bloodVenomRendDirect": 214.32,
+          "poisonEntry": 53,
+          "ruptureEntry": 43,
+          "poison": 29.6,
+          "rupture": 10.67,
+          "other": 0
+        },
+        "shares": {
+          "mainBasic": 28.9955,
+          "offhand": 3.0176,
+          "backstabDirect": 15.8132,
+          "backstabBleed": 0.8335,
+          "shadowDance": 3.6929,
+          "poisonBladeDirect": 8.4274,
+          "shadowAssassination": 0,
+          "corrosiveStrike": 15.7021,
+          "bloodVenomRendDirect": 14.3767,
+          "poisonEntry": 3.5552,
+          "ruptureEntry": 2.8844,
+          "poison": 1.9856,
+          "rupture": 0.7159,
+          "other": 0
+        },
+        "counts": {
+          "crits": 2.869,
+          "skillCasts": 4.503,
+          "deathMarkCasts": 0,
+          "markedDeaths": 0,
+          "markCdReductions": 0,
+          "markSecondsAdvanced": 0,
+          "backstabsUnderMark": 0,
+          "shadowAssassinationsUnderMark": 0,
+          "markBonusDamage": 0,
+          "shadowAssassinations": 0,
+          "shadowAssassinationCrits": 0,
+          "shadowOffhands": 0,
+          "lethalTechniqueTriggers": 0,
+          "lethalComboOffhands": 0,
+          "plagueTriggers": 0,
+          "plagueTransfers": 0
+        },
+        "averageFirstStackSeconds": 0,
+        "averageSecondStackSeconds": 3,
+        "averageFirstThreeStackSeconds": null,
+        "reachedThreeStackPercent": 0,
+        "averageFirstDeathMarkCastSeconds": null,
+        "averageDeathMarkCastSeconds": null,
+        "coverage": {
+          "threeStack": 0,
+          "coexist": 71.7509,
+          "symbiosis": 71.7509,
+          "corrosion": 0,
+          "deathMark": 0
+        },
+        "averageEnemyStartStacks": 0,
+        "oneStackStartCount": 0,
+        "oneStackStartPercent": 0,
+        "zeroStackStartPercent": 100,
+        "threeStackDeathPercent": 0,
+        "averageKillSeconds": 0.365,
+        "averageDamagePerEnemy": 149.08,
+        "sampleAiOrder": [
+          [
+            0,
+            "毒刃"
+          ],
+          [
+            1,
+            "背刺"
+          ],
+          [
+            2,
+            "血毒割裂"
+          ],
+          [
+            3,
+            "腐蝕刺擊"
+          ],
+          [
+            4,
+            "影刃旋舞"
+          ]
+        ]
+      }
+    },
+    "ancient-priest": {
+      "template": {
+        "rank": "normal",
+        "id": "ancient-priest",
+        "name": "遠古祭司",
+        "hp": 1150,
+        "attack": 94,
+        "defense": 68,
+        "speed": 0.8,
+        "evasion": 5,
+        "parry": 0,
+        "dr": 10,
+        "skillCooldown": 12,
+        "healer36": true
+      },
+      "assassination": {
+        "runs": 1000,
+        "durationSeconds": 2.322,
+        "averageTotalDamage": 1257.39,
+        "averageDps": 564.67,
+        "minimumDamage": 1150,
+        "maximumDamage": 1650,
+        "averageCriticalCount": 2.047,
+        "totalCriticalCount": 2047,
+        "checkpoints": {},
+        "sources": {
+          "mainBasic": 381.36,
+          "offhand": 51.14,
+          "backstabDirect": 300.98,
+          "backstabBleed": 8.2,
+          "shadowDance": 44.21,
+          "poisonBladeDirect": 5.7,
+          "shadowAssassination": 465.79,
+          "corrosiveStrike": 0,
+          "bloodVenomRendDirect": 0,
+          "poisonEntry": 0,
+          "ruptureEntry": 0,
+          "poison": 0,
+          "rupture": 0,
+          "other": 0
+        },
+        "shares": {
+          "mainBasic": 30.3297,
+          "offhand": 4.0674,
+          "backstabDirect": 23.9367,
+          "backstabBleed": 0.6525,
+          "shadowDance": 3.5159,
+          "poisonBladeDirect": 0.4533,
+          "shadowAssassination": 37.0445,
+          "corrosiveStrike": 0,
+          "bloodVenomRendDirect": 0,
+          "poisonEntry": 0,
+          "ruptureEntry": 0,
+          "poison": 0,
+          "rupture": 0,
+          "other": 0
+        },
+        "counts": {
+          "crits": 2.047,
+          "skillCasts": 2.294,
+          "deathMarkCasts": 1,
+          "markedDeaths": 0,
+          "markCdReductions": 0,
+          "markSecondsAdvanced": 0,
+          "backstabsUnderMark": 1,
+          "shadowAssassinationsUnderMark": 1,
+          "markBonusDamage": 134.7203,
+          "shadowAssassinations": 1,
+          "shadowAssassinationCrits": 0.485,
+          "shadowOffhands": 0.161,
+          "lethalTechniqueTriggers": 0.298,
+          "lethalComboOffhands": 0.109,
+          "plagueTriggers": 0,
+          "plagueTransfers": 0
+        },
+        "averageFirstStackSeconds": 4,
+        "averageSecondStackSeconds": null,
+        "averageFirstThreeStackSeconds": null,
+        "reachedThreeStackPercent": 0,
+        "averageFirstDeathMarkCastSeconds": 0,
+        "averageDeathMarkCastSeconds": 0,
+        "coverage": {
+          "threeStack": 0,
+          "coexist": 0,
+          "symbiosis": 0,
+          "corrosion": 0,
+          "deathMark": 101.4867
+        },
+        "averageEnemyStartStacks": 0,
+        "oneStackStartCount": 0,
+        "oneStackStartPercent": 0,
+        "zeroStackStartPercent": 100,
+        "threeStackDeathPercent": 0,
+        "averageKillSeconds": 0.2322,
+        "averageDamagePerEnemy": 125.74,
+        "sampleAiOrder": [
+          [
+            0,
+            "死亡標記"
+          ],
+          [
+            1,
+            "背刺"
+          ],
+          [
+            2,
+            "暗影刺殺"
+          ],
+          [
+            3,
+            "影刃旋舞"
+          ]
+        ]
+      },
+      "venom": {
+        "runs": 1000,
+        "durationSeconds": 2.432,
+        "averageTotalDamage": 1253.59,
+        "averageDps": 533.02,
+        "minimumDamage": 1150,
+        "maximumDamage": 1549,
+        "averageCriticalCount": 2.044,
+        "totalCriticalCount": 2044,
+        "checkpoints": {},
+        "sources": {
+          "mainBasic": 345.34,
+          "offhand": 35.24,
+          "backstabDirect": 267.38,
+          "backstabBleed": 5.42,
+          "shadowDance": 0.73,
+          "poisonBladeDirect": 145.86,
+          "shadowAssassination": 0,
+          "corrosiveStrike": 95.25,
+          "bloodVenomRendDirect": 247.94,
+          "poisonEntry": 36.85,
+          "ruptureEntry": 47,
+          "poison": 26.28,
+          "rupture": 0.31,
+          "other": 0
+        },
+        "shares": {
+          "mainBasic": 27.5477,
+          "offhand": 2.8109,
+          "backstabDirect": 21.3288,
+          "backstabBleed": 0.4328,
+          "shadowDance": 0.058,
+          "poisonBladeDirect": 11.6353,
+          "shadowAssassination": 0,
+          "corrosiveStrike": 7.5982,
+          "bloodVenomRendDirect": 19.7784,
+          "poisonEntry": 2.9396,
+          "ruptureEntry": 3.7492,
+          "poison": 2.0965,
+          "rupture": 0.0247,
+          "other": 0
+        },
+        "counts": {
+          "crits": 2.044,
+          "skillCasts": 3.357,
+          "deathMarkCasts": 0,
+          "markedDeaths": 0,
+          "markCdReductions": 0,
+          "markSecondsAdvanced": 0,
+          "backstabsUnderMark": 0,
+          "shadowAssassinationsUnderMark": 0,
+          "markBonusDamage": 0,
+          "shadowAssassinations": 0,
+          "shadowAssassinationCrits": 0,
+          "shadowOffhands": 0,
+          "lethalTechniqueTriggers": 0,
+          "lethalComboOffhands": 0,
+          "plagueTriggers": 0,
+          "plagueTransfers": 0
+        },
+        "averageFirstStackSeconds": 0,
+        "averageSecondStackSeconds": 3,
+        "averageFirstThreeStackSeconds": null,
+        "reachedThreeStackPercent": 0,
+        "averageFirstDeathMarkCastSeconds": null,
+        "averageDeathMarkCastSeconds": null,
+        "coverage": {
+          "threeStack": 0,
+          "coexist": 57.1017,
+          "symbiosis": 57.1017,
+          "corrosion": 0,
+          "deathMark": 0
+        },
+        "averageEnemyStartStacks": 0,
+        "oneStackStartCount": 0,
+        "oneStackStartPercent": 0,
+        "zeroStackStartPercent": 100,
+        "threeStackDeathPercent": 0,
+        "averageKillSeconds": 0.2432,
+        "averageDamagePerEnemy": 125.36,
+        "sampleAiOrder": [
+          [
+            0,
+            "毒刃"
+          ],
+          [
+            1,
+            "背刺"
+          ],
+          [
+            2,
+            "血毒割裂"
+          ]
+        ]
+      }
+    },
+    "temple-guardian": {
+      "template": {
+        "id": "temple-guardian",
+        "name": "聖殿守護者",
+        "rank": "elite",
+        "hp": 4750,
+        "attack": 164,
+        "defense": 145,
+        "speed": 0.76,
+        "evasion": 2,
+        "parry": 20,
+        "dr": 29,
+        "skillMultiplier": 1.65,
+        "skillCooldown": 10,
+        "barrier36": true
+      },
+      "assassination": {
+        "runs": 1000,
+        "durationSeconds": 26.863,
+        "averageTotalDamage": 4814.9,
+        "averageDps": 180.31,
+        "minimumDamage": 4750,
+        "maximumDamage": 5110,
+        "averageCriticalCount": 19.163,
+        "totalCriticalCount": 19163,
+        "checkpoints": {
+          "5": 1096.19,
+          "10": 1979.28,
+          "12": 2329.38,
+          "15": 2657.08,
+          "20": 3473.13,
+          "25": null
+        },
+        "sources": {
+          "mainBasic": 1924.9,
+          "offhand": 322.56,
+          "backstabDirect": 919.81,
+          "backstabBleed": 216.11,
+          "shadowDance": 79.47,
+          "poisonBladeDirect": 257.21,
+          "shadowAssassination": 960.75,
+          "corrosiveStrike": 0,
+          "bloodVenomRendDirect": 0,
+          "poisonEntry": 0,
+          "ruptureEntry": 0,
+          "poison": 134.09,
+          "rupture": 0,
+          "other": 0
+        },
+        "shares": {
+          "mainBasic": 39.9781,
+          "offhand": 6.6991,
+          "backstabDirect": 19.1035,
+          "backstabBleed": 4.4883,
+          "shadowDance": 1.6504,
+          "poisonBladeDirect": 5.3419,
+          "shadowAssassination": 19.9538,
+          "corrosiveStrike": 0,
+          "bloodVenomRendDirect": 0,
+          "poisonEntry": 0,
+          "ruptureEntry": 0,
+          "poison": 2.7849,
+          "rupture": 0,
+          "other": 0
+        },
+        "counts": {
+          "crits": 19.163,
+          "skillCasts": 13.983,
+          "deathMarkCasts": 4.288,
+          "markedDeaths": 0,
+          "markCdReductions": 0,
+          "markSecondsAdvanced": 0,
+          "backstabsUnderMark": 3.983,
+          "shadowAssassinationsUnderMark": 4.035,
+          "markBonusDamage": 403.7928,
+          "shadowAssassinations": 4.035,
+          "shadowAssassinationCrits": 2.069,
+          "shadowOffhands": 2.039,
+          "lethalTechniqueTriggers": 2.102,
+          "lethalComboOffhands": 0.758,
+          "plagueTriggers": 0,
+          "plagueTransfers": 0
+        },
+        "averageFirstStackSeconds": 4,
+        "averageSecondStackSeconds": null,
+        "averageFirstThreeStackSeconds": null,
+        "reachedThreeStackPercent": 0,
+        "averageFirstDeathMarkCastSeconds": 0,
+        "averageDeathMarkCastSeconds": 12.0604,
+        "coverage": {
+          "threeStack": 0,
+          "coexist": 0,
+          "symbiosis": 0,
+          "corrosion": 0,
+          "deathMark": 73.161
+        },
+        "averageEnemyStartStacks": 0,
+        "oneStackStartCount": 0,
+        "oneStackStartPercent": 0,
+        "zeroStackStartPercent": 100,
+        "threeStackDeathPercent": 0,
+        "averageKillSeconds": 2.6863,
+        "averageDamagePerEnemy": 481.49,
+        "sampleAiOrder": [
+          [
+            0,
+            "死亡標記"
+          ],
+          [
+            1,
+            "背刺"
+          ],
+          [
+            2,
+            "暗影刺殺"
+          ],
+          [
+            3,
+            "影刃旋舞"
+          ],
+          [
+            4,
+            "毒刃"
+          ],
+          [
+            6.5,
+            "背刺"
+          ],
+          [
+            7.5,
+            "死亡標記"
+          ],
+          [
+            8.5,
+            "暗影刺殺"
+          ],
+          [
+            10.5,
+            "背刺"
+          ],
+          [
+            13,
+            "毒刃"
+          ],
+          [
+            14.5,
+            "死亡標記"
+          ],
+          [
+            15.5,
+            "暗影刺殺"
+          ],
+          [
+            16.5,
+            "背刺"
+          ],
+          [
+            20.5,
+            "背刺"
+          ],
+          [
+            21.5,
+            "死亡標記"
+          ]
+        ]
+      },
+      "venom": {
+        "runs": 1000,
+        "durationSeconds": 26.02,
+        "averageTotalDamage": 4791.77,
+        "averageDps": 184.52,
+        "minimumDamage": 4750,
+        "maximumDamage": 4961,
+        "averageCriticalCount": 15.278,
+        "totalCriticalCount": 15278,
+        "checkpoints": {
+          "5": 1083.23,
+          "10": 1993.28,
+          "12": 2452.67,
+          "15": 2751.51,
+          "20": 3717.15
+        },
+        "sources": {
+          "mainBasic": 1591.37,
+          "offhand": 207.03,
+          "backstabDirect": 811.91,
+          "backstabBleed": 142.98,
+          "shadowDance": 67.4,
+          "poisonBladeDirect": 245.59,
+          "shadowAssassination": 0,
+          "corrosiveStrike": 541.55,
+          "bloodVenomRendDirect": 378.85,
+          "poisonEntry": 60.44,
+          "ruptureEntry": 91.61,
+          "poison": 372.15,
+          "rupture": 280.9,
+          "other": 0
+        },
+        "shares": {
+          "mainBasic": 33.2104,
+          "offhand": 4.3205,
+          "backstabDirect": 16.9438,
+          "backstabBleed": 2.9839,
+          "shadowDance": 1.4065,
+          "poisonBladeDirect": 5.1254,
+          "shadowAssassination": 0,
+          "corrosiveStrike": 11.3016,
+          "bloodVenomRendDirect": 7.9062,
+          "poisonEntry": 1.2613,
+          "ruptureEntry": 1.9118,
+          "poison": 7.7665,
+          "rupture": 5.8622,
+          "other": 0
+        },
+        "counts": {
+          "crits": 15.278,
+          "skillCasts": 17.308,
+          "deathMarkCasts": 0,
+          "markedDeaths": 0,
+          "markCdReductions": 0,
+          "markSecondsAdvanced": 0,
+          "backstabsUnderMark": 0,
+          "shadowAssassinationsUnderMark": 0,
+          "markBonusDamage": 0,
+          "shadowAssassinations": 0,
+          "shadowAssassinationCrits": 0,
+          "shadowOffhands": 0,
+          "lethalTechniqueTriggers": 0,
+          "lethalComboOffhands": 0,
+          "plagueTriggers": 0,
+          "plagueTransfers": 0
+        },
+        "averageFirstStackSeconds": 0,
+        "averageSecondStackSeconds": 3,
+        "averageFirstThreeStackSeconds": 9.332,
+        "reachedThreeStackPercent": 100,
+        "averageFirstDeathMarkCastSeconds": null,
+        "averageDeathMarkCastSeconds": null,
+        "coverage": {
+          "threeStack": 62.9006,
+          "coexist": 96.1493,
+          "symbiosis": 96.1493,
+          "corrosion": 46.7736,
+          "deathMark": 0
+        },
+        "averageEnemyStartStacks": 0,
+        "oneStackStartCount": 0,
+        "oneStackStartPercent": 0,
+        "zeroStackStartPercent": 100,
+        "threeStackDeathPercent": 0,
+        "averageKillSeconds": 2.602,
+        "averageDamagePerEnemy": 479.18,
+        "sampleAiOrder": [
+          [
+            0,
+            "毒刃"
+          ],
+          [
+            1,
+            "背刺"
+          ],
+          [
+            2,
+            "血毒割裂"
+          ],
+          [
+            3,
+            "腐蝕刺擊"
+          ],
+          [
+            4,
+            "影刃旋舞"
+          ],
+          [
+            5.5,
+            "背刺"
+          ],
+          [
+            9,
+            "毒刃"
+          ],
+          [
+            10,
+            "血毒割裂"
+          ],
+          [
+            11,
+            "腐蝕刺擊"
+          ],
+          [
+            12,
+            "背刺"
+          ],
+          [
+            16,
+            "背刺"
+          ],
+          [
+            17,
+            "腐蝕刺擊"
+          ],
+          [
+            18,
+            "毒刃"
+          ],
+          [
+            19,
+            "血毒割裂"
+          ],
+          [
+            21,
+            "背刺"
+          ]
+        ]
+      }
+    }
+  },
+  "farm10": {
+    "assassination": {
+      "runs": 500,
+      "durationSeconds": 62.407,
+      "averageTotalDamage": 17067.1,
+      "averageDps": 275.48,
+      "minimumDamage": 14715,
+      "maximumDamage": 18763,
+      "averageCriticalCount": 41.2,
+      "totalCriticalCount": 20600,
+      "checkpoints": {
+        "5": 3139.57,
+        "10": 4393.41,
+        "12": 4868.57,
+        "15": 5740.46,
+        "20": 6792.67,
+        "25": 7919.29,
+        "30": 9348.17
+      },
+      "sources": {
+        "mainBasic": 6970.78,
+        "offhand": 1103.61,
+        "backstabDirect": 3422.12,
+        "backstabBleed": 366.06,
+        "shadowDance": 187.97,
+        "poisonBladeDirect": 845.58,
+        "shadowAssassination": 3944.46,
+        "corrosiveStrike": 0,
+        "bloodVenomRendDirect": 0,
+        "poisonEntry": 0,
+        "ruptureEntry": 0,
+        "poison": 226.52,
+        "rupture": 0,
+        "other": 0
+      },
+      "shares": {
+        "mainBasic": 40.8434,
+        "offhand": 6.4663,
+        "backstabDirect": 20.051,
+        "backstabBleed": 2.1448,
+        "shadowDance": 1.1014,
+        "poisonBladeDirect": 4.9544,
+        "shadowAssassination": 23.1115,
+        "corrosiveStrike": 0,
+        "bloodVenomRendDirect": 0,
+        "poisonEntry": 0,
+        "ruptureEntry": 0,
+        "poison": 1.3273,
+        "rupture": 0,
+        "other": 0
+      },
+      "counts": {
+        "crits": 41.2,
+        "skillCasts": 31.174,
+        "deathMarkCasts": 11.468,
+        "markedDeaths": 7.748,
+        "markCdReductions": 7.748,
+        "markSecondsAdvanced": 15.496,
+        "backstabsUnderMark": 9.616,
+        "shadowAssassinationsUnderMark": 6.596,
+        "markBonusDamage": 1292.3409,
+        "shadowAssassinations": 10.058,
+        "shadowAssassinationCrits": 4.89,
+        "shadowOffhands": 4.764,
+        "lethalTechniqueTriggers": 4.508,
+        "lethalComboOffhands": 1.734,
+        "plagueTriggers": 0,
+        "plagueTransfers": 0
+      },
+      "averageFirstStackSeconds": 3.2634,
+      "averageSecondStackSeconds": null,
+      "averageFirstThreeStackSeconds": null,
+      "reachedThreeStackPercent": 0,
+      "averageFirstDeathMarkCastSeconds": 0,
+      "averageDeathMarkCastSeconds": 29.6438,
+      "coverage": {
+        "threeStack": 0,
+        "coexist": 0,
+        "symbiosis": 0,
+        "corrosion": 0,
+        "deathMark": 58.3882
+      },
+      "averageEnemyStartStacks": 0,
+      "oneStackStartCount": 0,
+      "oneStackStartPercent": 0,
+      "zeroStackStartPercent": 100,
+      "threeStackDeathPercent": 0,
+      "averageKillSeconds": 6.2407,
+      "averageDamagePerEnemy": 1706.71,
+      "sampleAiOrder": [
+        [
+          0,
+          "死亡標記"
+        ],
+        [
+          1,
+          "背刺"
+        ],
+        [
+          2,
+          "暗影刺殺"
+        ],
+        [
+          3,
+          "影刃旋舞"
+        ],
+        [
+          4,
+          "毒刃"
+        ],
+        [
+          5,
+          "死亡標記"
+        ],
+        [
+          6.5,
+          "背刺"
+        ],
+        [
+          8,
+          "暗影刺殺"
+        ],
+        [
+          10.5,
+          "背刺"
+        ],
+        [
+          12,
+          "死亡標記"
+        ],
+        [
+          13,
+          "毒刃"
+        ],
+        [
+          14,
+          "暗影刺殺"
+        ],
+        [
+          16,
+          "背刺"
+        ],
+        [
+          17,
+          "死亡標記"
+        ],
+        [
+          20,
+          "背刺"
+        ]
+      ]
+    },
+    "venom": {
+      "runs": 500,
+      "durationSeconds": 61.95,
+      "averageTotalDamage": 16731.85,
+      "averageDps": 272.04,
+      "minimumDamage": 14560,
+      "maximumDamage": 18542,
+      "averageCriticalCount": 34.87,
+      "totalCriticalCount": 17435,
+      "checkpoints": {
+        "5": 3171.42,
+        "10": 4320.16,
+        "12": 4978.92,
+        "15": 5364.5,
+        "20": 6734.17,
+        "25": 8019.51,
+        "30": 9181.69
+      },
+      "sources": {
+        "mainBasic": 6066.3,
+        "offhand": 711.89,
+        "backstabDirect": 3045.68,
+        "backstabBleed": 235.93,
+        "shadowDance": 104.64,
+        "poisonBladeDirect": 959.27,
+        "shadowAssassination": 0,
+        "corrosiveStrike": 2136.3,
+        "bloodVenomRendDirect": 1622.97,
+        "poisonEntry": 542.15,
+        "ruptureEntry": 309.42,
+        "poison": 772.57,
+        "rupture": 224.73,
+        "other": 0
+      },
+      "shares": {
+        "mainBasic": 36.256,
+        "offhand": 4.2547,
+        "backstabDirect": 18.2029,
+        "backstabBleed": 1.4101,
+        "shadowDance": 0.6254,
+        "poisonBladeDirect": 5.7332,
+        "shadowAssassination": 0,
+        "corrosiveStrike": 12.7679,
+        "bloodVenomRendDirect": 9.6999,
+        "poisonEntry": 3.2402,
+        "ruptureEntry": 1.8493,
+        "poison": 4.6173,
+        "rupture": 1.3431,
+        "other": 0
+      },
+      "counts": {
+        "crits": 34.87,
+        "skillCasts": 38.148,
+        "deathMarkCasts": 0,
+        "markedDeaths": 0,
+        "markCdReductions": 0,
+        "markSecondsAdvanced": 0,
+        "backstabsUnderMark": 0,
+        "shadowAssassinationsUnderMark": 0,
+        "markBonusDamage": 0,
+        "shadowAssassinations": 0,
+        "shadowAssassinationCrits": 0,
+        "shadowOffhands": 0,
+        "lethalTechniqueTriggers": 0,
+        "lethalComboOffhands": 0,
+        "plagueTriggers": 7.684,
+        "plagueTransfers": 6.946
+      },
+      "averageFirstStackSeconds": 0.1137,
+      "averageSecondStackSeconds": 2.6261,
+      "averageFirstThreeStackSeconds": 4.8255,
+      "reachedThreeStackPercent": 100,
+      "averageFirstDeathMarkCastSeconds": null,
+      "averageDeathMarkCastSeconds": null,
+      "coverage": {
+        "threeStack": 19.234,
+        "coexist": 74.4285,
+        "symbiosis": 74.4285,
+        "corrosion": 1.4771,
+        "deathMark": 0
+      },
+      "averageEnemyStartStacks": 0.6946,
+      "oneStackStartCount": 3473,
+      "oneStackStartPercent": 69.46,
+      "zeroStackStartPercent": 30.54,
+      "threeStackDeathPercent": 76.84,
+      "averageKillSeconds": 6.195,
+      "averageDamagePerEnemy": 1673.19,
+      "sampleAiOrder": [
+        [
+          0,
+          "毒刃"
+        ],
+        [
+          1,
+          "背刺"
+        ],
+        [
+          2,
+          "血毒割裂"
+        ],
+        [
+          3,
+          "腐蝕刺擊"
+        ],
+        [
+          4,
+          "影刃旋舞"
+        ],
+        [
+          5.5,
+          "背刺"
+        ],
+        [
+          9,
+          "毒刃"
+        ],
+        [
+          10,
+          "血毒割裂"
+        ],
+        [
+          11,
+          "腐蝕刺擊"
+        ],
+        [
+          12,
+          "背刺"
+        ],
+        [
+          16,
+          "背刺"
+        ],
+        [
+          17,
+          "腐蝕刺擊"
+        ],
+        [
+          18,
+          "毒刃"
+        ],
+        [
+          19,
+          "血毒割裂"
+        ],
+        [
+          21,
+          "背刺"
+        ]
+      ]
+    }
+  },
+  "farm100": {
+    "assassination": {
+      "runs": 500,
+      "durationSeconds": 665.057,
+      "averageTotalDamage": 161985.73,
+      "averageDps": 243.75,
+      "minimumDamage": 155496,
+      "maximumDamage": 168665,
+      "averageCriticalCount": 428.208,
+      "totalCriticalCount": 214104,
+      "checkpoints": {
+        "5": 3135.19,
+        "10": 4387.47,
+        "12": 4864.11,
+        "15": 5707.41,
+        "20": 6760.74,
+        "25": 7852.25,
+        "30": 9273.55
+      },
+      "sources": {
+        "mainBasic": 68896.43,
+        "offhand": 10644.1,
+        "backstabDirect": 32361.91,
+        "backstabBleed": 4164.27,
+        "shadowDance": 197.55,
+        "poisonBladeDirect": 8738.71,
+        "shadowAssassination": 34761.06,
+        "corrosiveStrike": 0,
+        "bloodVenomRendDirect": 0,
+        "poisonEntry": 0,
+        "ruptureEntry": 0,
+        "poison": 2221.7,
+        "rupture": 0,
+        "other": 0
+      },
+      "shares": {
+        "mainBasic": 42.5324,
+        "offhand": 6.571,
+        "backstabDirect": 19.9782,
+        "backstabBleed": 2.5708,
+        "shadowDance": 0.122,
+        "poisonBladeDirect": 5.3947,
+        "shadowAssassination": 21.4593,
+        "corrosiveStrike": 0,
+        "bloodVenomRendDirect": 0,
+        "poisonEntry": 0,
+        "ruptureEntry": 0,
+        "poison": 1.3715,
+        "rupture": 0,
+        "other": 0
+      },
+      "counts": {
+        "crits": 428.208,
+        "skillCasts": 314.79,
+        "deathMarkCasts": 116.054,
+        "markedDeaths": 75.104,
+        "markCdReductions": 75.104,
+        "markSecondsAdvanced": 150.208,
+        "backstabsUnderMark": 95.132,
+        "shadowAssassinationsUnderMark": 63.846,
+        "markBonusDamage": 11339.7639,
+        "shadowAssassinations": 103.878,
+        "shadowAssassinationCrits": 50.02,
+        "shadowOffhands": 49.888,
+        "lethalTechniqueTriggers": 46.922,
+        "lethalComboOffhands": 18.704,
+        "plagueTriggers": 0,
+        "plagueTransfers": 0
+      },
+      "averageFirstStackSeconds": 3.4783,
+      "averageSecondStackSeconds": null,
+      "averageFirstThreeStackSeconds": null,
+      "reachedThreeStackPercent": 0,
+      "averageFirstDeathMarkCastSeconds": 0,
+      "averageDeathMarkCastSeconds": 330.9811,
+      "coverage": {
+        "threeStack": 0,
+        "coexist": 0,
+        "symbiosis": 0,
+        "corrosion": 0,
+        "deathMark": 57.1771
+      },
+      "averageEnemyStartStacks": 0,
+      "oneStackStartCount": 0,
+      "oneStackStartPercent": 0,
+      "zeroStackStartPercent": 100,
+      "threeStackDeathPercent": 0,
+      "averageKillSeconds": 6.6506,
+      "averageDamagePerEnemy": 1619.86,
+      "sampleAiOrder": [
+        [
+          0,
+          "死亡標記"
+        ],
+        [
+          1,
+          "背刺"
+        ],
+        [
+          2,
+          "暗影刺殺"
+        ],
+        [
+          3,
+          "影刃旋舞"
+        ],
+        [
+          4,
+          "毒刃"
+        ],
+        [
+          5,
+          "死亡標記"
+        ],
+        [
+          6.5,
+          "背刺"
+        ],
+        [
+          8,
+          "暗影刺殺"
+        ],
+        [
+          10,
+          "死亡標記"
+        ],
+        [
+          11,
+          "背刺"
+        ],
+        [
+          13,
+          "毒刃"
+        ],
+        [
+          14,
+          "暗影刺殺"
+        ],
+        [
+          15,
+          "死亡標記"
+        ],
+        [
+          16,
+          "背刺"
+        ],
+        [
+          20,
+          "死亡標記"
+        ]
+      ]
+    },
+    "venom": {
+      "runs": 500,
+      "durationSeconds": 646.383,
+      "averageTotalDamage": 157589.48,
+      "averageDps": 243.94,
+      "minimumDamage": 150156,
+      "maximumDamage": 162736,
+      "averageCriticalCount": 354.628,
+      "totalCriticalCount": 177314,
+      "checkpoints": {
+        "5": 3158.92,
+        "10": 4301.51,
+        "12": 4948.15,
+        "15": 5329.51,
+        "20": 6702.01,
+        "25": 8001.24,
+        "30": 9172.95
+      },
+      "sources": {
+        "mainBasic": 58426.85,
+        "offhand": 6607.03,
+        "backstabDirect": 28242.66,
+        "backstabBleed": 2582.07,
+        "shadowDance": 102.45,
+        "poisonBladeDirect": 7866.55,
+        "shadowAssassination": 0,
+        "corrosiveStrike": 20087.46,
+        "bloodVenomRendDirect": 13875.09,
+        "poisonEntry": 5677.99,
+        "ruptureEntry": 2855.61,
+        "poison": 8397.09,
+        "rupture": 2868.63,
+        "other": 0
+      },
+      "shares": {
+        "mainBasic": 37.0754,
+        "offhand": 4.1926,
+        "backstabDirect": 17.9217,
+        "backstabBleed": 1.6385,
+        "shadowDance": 0.065,
+        "poisonBladeDirect": 4.9918,
+        "shadowAssassination": 0,
+        "corrosiveStrike": 12.7467,
+        "bloodVenomRendDirect": 8.8046,
+        "poisonEntry": 3.603,
+        "ruptureEntry": 1.8121,
+        "poison": 5.3285,
+        "rupture": 1.8203,
+        "other": 0
+      },
+      "counts": {
+        "crits": 354.628,
+        "skillCasts": 380.148,
+        "deathMarkCasts": 0,
+        "markedDeaths": 0,
+        "markCdReductions": 0,
+        "markSecondsAdvanced": 0,
+        "backstabsUnderMark": 0,
+        "shadowAssassinationsUnderMark": 0,
+        "markBonusDamage": 0,
+        "shadowAssassinations": 0,
+        "shadowAssassinationCrits": 0,
+        "shadowOffhands": 0,
+        "lethalTechniqueTriggers": 0,
+        "lethalComboOffhands": 0,
+        "plagueTriggers": 86.662,
+        "plagueTransfers": 85.804
+      },
+      "averageFirstStackSeconds": 0.0873,
+      "averageSecondStackSeconds": 2.206,
+      "averageFirstThreeStackSeconds": 4.619,
+      "reachedThreeStackPercent": 100,
+      "averageFirstDeathMarkCastSeconds": null,
+      "averageDeathMarkCastSeconds": null,
+      "coverage": {
+        "threeStack": 23.9472,
+        "coexist": 76.1861,
+        "symbiosis": 76.1861,
+        "corrosion": 1.9408,
+        "deathMark": 0
+      },
+      "averageEnemyStartStacks": 0.858,
+      "oneStackStartCount": 42902,
+      "oneStackStartPercent": 85.804,
+      "zeroStackStartPercent": 14.196,
+      "threeStackDeathPercent": 86.662,
+      "averageKillSeconds": 6.4638,
+      "averageDamagePerEnemy": 1575.89,
+      "sampleAiOrder": [
+        [
+          0,
+          "毒刃"
+        ],
+        [
+          1,
+          "背刺"
+        ],
+        [
+          2,
+          "血毒割裂"
+        ],
+        [
+          3,
+          "腐蝕刺擊"
+        ],
+        [
+          4,
+          "影刃旋舞"
+        ],
+        [
+          5.5,
+          "背刺"
+        ],
+        [
+          9,
+          "毒刃"
+        ],
+        [
+          10,
+          "血毒割裂"
+        ],
+        [
+          11,
+          "腐蝕刺擊"
+        ],
+        [
+          12,
+          "背刺"
+        ],
+        [
+          16,
+          "背刺"
+        ],
+        [
+          17,
+          "腐蝕刺擊"
+        ],
+        [
+          18,
+          "毒刃"
+        ],
+        [
+          19,
+          "血毒割裂"
+        ],
+        [
+          21,
+          "背刺"
+        ]
+      ]
+    }
+  }
+}
