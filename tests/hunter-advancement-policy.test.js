@@ -8,7 +8,7 @@ assert.deepEqual(policy.getEffect('sniper-shot', 6), { power: 3, skillCrit: .12,
 assert.deepEqual(policy.getEffect('gale-rapid-fire', 6), { duration: 6, attackSpeed: .20, basicDamage: .12, windArrowEvery: 3, windArrowPower: .60 });
 assert.equal(policy.getEffect('beast-fury', 6).petDamage, .25);
 assert.equal(policy.getEffect('bloody-hunt', 6).bleedTick, .18);
-assert.deepEqual(policy.getEffect('pack-summoning', 6), { maxPets: 3, protectChance: .10, stunChance: .10, stunDuration: 1, stunIcd: 5 });
+assert.deepEqual(policy.getEffect('pack-summoning', 6), { maxPets: 3, petMaxHp: .30, stunChance: .10, stunDuration: 1, stunIcd: 5 });
 
 const character = { job: 'hunter' };
 const progress = { level: 45, preJobTrial: { proofTiers: [1, 2, 3] } };
@@ -32,8 +32,25 @@ assert.equal(policy.resolveGaleBasicHit(marksman, true, 2200), .60);
 
 const beastmaster = { progress: { advancedClass: 'beastmaster', skillLevels: { 'hunter:pack-summoning': 6, 'hunter:pack-leader': 6 } }, companions: [{ id: 1 }] };
 assert.equal(policy.getPetCount(beastmaster), 3);
-assert.equal(policy.canProtect(beastmaster, () => .099), true);
-assert.equal(policy.canProtect(beastmaster, () => .10), false, 'only one ten-percent protection roll is made');
+beastmaster.maxHp = 1800;
+beastmaster.companions = [policy.createPet(beastmaster, 'a', 0), policy.createPet(beastmaster, 'b', 0), policy.createPet(beastmaster, 'c', 0)];
+assert.equal(policy.getPetMaxHp(beastmaster), 1404);
+assert.deepEqual(policy.applyGuardDamage(beastmaster, 1000, 1000), { hunterDamage: 700, petDamage: 300, livingPets: 3, perPet: 100 });
+assert.deepEqual(beastmaster.companions.map((pet) => pet.currentHp), [1304, 1304, 1304]);
+beastmaster.companions[2].alive = false;
+beastmaster.companions[2].currentHp = 0;
+assert.deepEqual(policy.applyGuardDamage(beastmaster, 1000, 1500), { hunterDamage: 700, petDamage: 300, livingPets: 2, perPet: 150 });
+beastmaster.companions[2].reviveAt = 31500;
+beastmaster.companions[0].currentHp = 5;
+policy.applyGuardDamage(beastmaster, 100, 2000);
+assert.equal(beastmaster.companions[0].alive, false);
+assert.equal(beastmaster.companions[0].reviveAt, 32000);
+beastmaster.petHealthUpdatedAt = 2000;
+policy.updatePetSurvival(beastmaster, 32000);
+assert.equal(beastmaster.companions[0].currentHp, 702);
+assert.equal(beastmaster.companions[2].currentHp, 702);
+const noPets = { companions: [] };
+assert.deepEqual(policy.applyGuardDamage(noPets, 1000, 0), { hunterDamage: 1000, petDamage: 0, livingPets: 0 });
 const targetState = { stunnedUntil: 0, packStunReadyAt: 0 };
 assert.equal(policy.tryStun(beastmaster, targetState, true, () => .09, 1000), true);
 assert.equal(policy.tryStun(beastmaster, targetState, true, () => 0, 2000), false, 'pack stun has a target-owned five-second ICD');

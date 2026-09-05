@@ -5207,7 +5207,8 @@ function ensureHunterCompanions(member, now = Date.now()) {
   if (member?.job !== 'hunter' || member.level < 8) return [];
   const count = HunterAdvancementPolicy.getPetCount(member);
   member.companions = Array.isArray(member.companions) ? member.companions.slice(0, count) : [];
-  while (member.companions.length < count) member.companions.push({ id: `${member.id}:pet:${member.companions.length + 1}`, nextAttackAt: now, attackCount: 0, furyHitCount: 0, wildAwakeningUntil: 0, wildAwakeningDamage: 0 });
+  while (member.companions.length < count) member.companions.push(HunterAdvancementPolicy.createPet(member, `${member.id}:pet:${member.companions.length + 1}`, now));
+  member.companions.forEach((pet) => HunterAdvancementPolicy.syncPetHealth(member, pet));
   return member.companions;
 }
 
@@ -5216,8 +5217,10 @@ function processHunterCompanionAttacks(now = Date.now()) {
     if (!member.alive) continue;
     const bond = member.job === 'hunter' && member.level >= 8 ? ClassSkillPolicy.getEffect('hunter', 'wild-bond', Number(member.progress.skillLevels?.['hunter:wild-bond']) || 1) : null;
     if (!bond) continue;
+    HunterAdvancementPolicy.updatePetSurvival(member, now);
     const bonuses = HunterAdvancementPolicy.getPetBonuses(member, now);
     for (const pet of ensureHunterCompanions(member, now)) {
+      if (pet.alive === false || pet.currentHp <= 0) continue;
       if (now < pet.nextAttackAt) continue;
       const targetIndex = PartyPolicy.getFrontAliveEnemyIndex(battle.enemyHps, battle.enemySpawnedAt);
       if (targetIndex < 0) continue;
@@ -6200,13 +6203,12 @@ function enemyAttackTick() {
         + runeIronWallReduction + runeUnyieldingReduction
         + (now < (target.manaShieldReductionUntil || 0) ? target.manaShieldDamageReduction || 0 : 0))
     }).finalDamage;
-    ensureHunterCompanions(target, now);
-    const protectedByPet = damage > 0 && HunterAdvancementPolicy.canProtect(target, Math.random);
-    if (protectedByPet) {
-      damage = 0;
-      logBattle(`🐾 ${target.name}的戰寵觸發【寵物護主】，擋下本次直接傷害！`, 'system');
-    }
     if (parried && damage > 0) damage = Math.max(1, Math.ceil(damage * .5));
+    ensureHunterCompanions(target, now);
+    HunterAdvancementPolicy.updatePetSurvival(target, now);
+    const guard = HunterAdvancementPolicy.applyGuardDamage(target, damage, now);
+    damage = guard.hunterDamage;
+    if (guard.petDamage > 0) logBattle(`🐾 ${target.name}的戰寵群分攤 ${Math.round(guard.petDamage)} 點直接傷害。`, 'system');
     const absorbed = Math.min(target.shield || 0, damage);
     target.shield = Math.max(0, (target.shield || 0) - absorbed);
     damage -= absorbed;

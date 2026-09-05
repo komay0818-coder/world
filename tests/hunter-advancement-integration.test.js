@@ -18,7 +18,8 @@ assert.match(source, /pet\.furyHitCount[\s\S]*attackKind: 'pet-bite'/);
 assert.match(source, /`pet-bleed:\$\{pet\.id\}`[\s\S]*tickIntervalMs: 2000/);
 assert.match(source, /pet\.wildAwakeningUntil[\s\S]*attackKind: 'beast-slam'/);
 assert.match(source, /HunterAdvancementPolicy\.tryStun[\s\S]*getEnemySkillState/);
-assert.match(source, /protectedByPet[\s\S]*damage = 0/);
+assert.match(source, /applyGuardDamage\(target, damage, now\)[\s\S]*damage = guard\.hunterDamage/);
+assert.match(source, /pet\.alive === false \|\| pet\.currentHp <= 0/);
 assert.match(source, /advancedSkillUpgradePending[\s\S]*HunterAdvancementPolicy\.getSkill[\s\S]*升級需求待定/);
 
 console.log('hunter-advancement-integration: assertions passed');
