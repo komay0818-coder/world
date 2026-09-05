@@ -183,7 +183,8 @@ function getPassiveSkillUpgradeLevel(progress, job, name) {
 function getSkillEffect(progress, job, skill) {
   return ClassSkillPolicy.getEffect(job, skill.id, getSkillUpgradeLevel(progress, job, skill))
     || WarriorAdvancementPolicy.getEffect(skill.id, getSkillUpgradeLevel(progress, job, skill))
-    || RogueAdvancementPolicy.getEffect(skill.id, getSkillUpgradeLevel(progress, job, skill)) || {};
+    || RogueAdvancementPolicy.getEffect(skill.id, getSkillUpgradeLevel(progress, job, skill))
+    || HunterAdvancementPolicy.getEffect(skill.id, getSkillUpgradeLevel(progress, job, skill)) || {};
 }
 
 function getHunterInstinctEffect(progress = getProgress()) {
@@ -2547,12 +2548,12 @@ function renderCharacterAbilities() {
   const job = classes.find((item) => item.id === character.job);
   const usesRage = WarriorResourcePolicy.isWarrior(character.job);
   const usesEnergy = AssassinEnergyPolicy.isAssassin(character.job);
-  const advancementPolicy = character.job === 'warrior' ? WarriorAdvancementPolicy : character.job === 'assassin' ? RogueAdvancementPolicy : null;
+  const advancementPolicy = character.job === 'warrior' ? WarriorAdvancementPolicy : character.job === 'assassin' ? RogueAdvancementPolicy : character.job === 'hunter' ? HunterAdvancementPolicy : null;
   const modal = document.querySelector('#inventory-modal');
   document.querySelector('#inventory-title').textContent = '角色能力';
   document.querySelector('#inventory-content').innerHTML = `
     <section class="ability-summary">
-      <div class="ability-identity"><span class="creation-race-icon race-${character.race}" aria-hidden="true"></span><div><h3>${character.name}</h3><p>${race?.name || character.race}・${progress.advancedClass ? [...Object.values(WarriorAdvancementPolicy.ADVANCED_CLASSES), ...Object.values(RogueAdvancementPolicy.ADVANCED_CLASSES)].find((entry) => entry.id === progress.advancedClass)?.name : job?.name || character.job}・Lv. ${progress.level}</p><small>${race?.trait || ''}</small></div></div>
+      <div class="ability-identity"><span class="creation-race-icon race-${character.race}" aria-hidden="true"></span><div><h3>${character.name}</h3><p>${race?.name || character.race}・${progress.advancedClass ? [...Object.values(WarriorAdvancementPolicy.ADVANCED_CLASSES), ...Object.values(RogueAdvancementPolicy.ADVANCED_CLASSES), ...Object.values(HunterAdvancementPolicy.ADVANCED_CLASSES)].find((entry) => entry.id === progress.advancedClass)?.name : job?.name || character.job}・Lv. ${progress.level}</p><small>${race?.trait || ''}</small></div></div>
       <div class="ability-grid">
         <article><small>最大生命</small><b>${stats.hp}</b><em>裝備 +${equipment.hp}</em></article>
         <article><small>${usesRage ? '最大怒氣' : usesEnergy ? '最大能量' : '最大魔力'}</small><b>${usesRage ? WarriorResourcePolicy.MAX_RAGE : usesEnergy ? AssassinEnergyPolicy.MAX_ENERGY : stats.mana}</b><em>${usesRage ? '攻擊與受到攻擊時取得' : usesEnergy ? `固定恢復 ${AssassinEnergyPolicy.ENERGY_REGEN_PER_SECOND}／秒` : `裝備 +${equipment.mana}`}</em></article>
@@ -3535,6 +3536,7 @@ function getKnownSkills(job, level, progress = getProgress()) {
   if (!progress?.advancedClass) return base;
   if (job === 'warrior') return [...base, ...WarriorAdvancementPolicy.getSkills(progress.advancedClass)];
   if (job === 'assassin') return [...base, ...RogueAdvancementPolicy.getSkills(progress.advancedClass)];
+  if (job === 'hunter') return [...base, ...HunterAdvancementPolicy.getSkills(progress.advancedClass)];
   return base;
 }
 
@@ -3645,7 +3647,8 @@ function createBattlePartyMember(slot, slotIndex, mainId, now = Date.now()) {
     lastManaRegenAt: now,
     lastHpRegenerationAt: now,
     lastResourceUpdatedAt: now,
-    lastArrowRecoveryAt: now
+    lastArrowRecoveryAt: now,
+    companions: []
   };
 }
 
@@ -3855,7 +3858,7 @@ function refreshSkills(character, level) {
 }
 
 function getSkillEffectPercent(skill, upgradeLevel = 1) {
-  const effect = ClassSkillPolicy.getEffect(getActiveCharacter()?.job, skill.id, upgradeLevel) || WarriorAdvancementPolicy.getEffect(skill.id, upgradeLevel) || RogueAdvancementPolicy.getEffect(skill.id, upgradeLevel) || {};
+  const effect = ClassSkillPolicy.getEffect(getActiveCharacter()?.job, skill.id, upgradeLevel) || WarriorAdvancementPolicy.getEffect(skill.id, upgradeLevel) || RogueAdvancementPolicy.getEffect(skill.id, upgradeLevel) || HunterAdvancementPolicy.getEffect(skill.id, upgradeLevel) || {};
   if (effect.power) return Math.round(effect.power * 100);
   if (effect.healPower) return Math.round(effect.healPower * 100);
   return 0;
@@ -3863,7 +3866,7 @@ function getSkillEffectPercent(skill, upgradeLevel = 1) {
 
 function getSkillDescription(job, skill) {
   const level = getSkillUpgradeLevel(getProgress(), job, skill);
-  const effect = ClassSkillPolicy.getEffect(job, skill.id, level) || WarriorAdvancementPolicy.getEffect(skill.id, level) || RogueAdvancementPolicy.getEffect(skill.id, level) || {};
+  const effect = ClassSkillPolicy.getEffect(job, skill.id, level) || WarriorAdvancementPolicy.getEffect(skill.id, level) || RogueAdvancementPolicy.getEffect(skill.id, level) || HunterAdvancementPolicy.getEffect(skill.id, level) || {};
   const parts = [];
   if (effect.power) parts.push(`造成 ${Math.round(effect.power * 100)}% 傷害`);
   if (effect.healPower) parts.push(`治療量為魔法攻擊 ${Math.round(effect.healPower * 100)}%`);
@@ -3892,7 +3895,7 @@ function renderSkillDetailModal() {
   }
 
   const upgradeLevel = getSkillUpgradeLevel(progress, character.job, skill);
-  const advancedSkillUpgradePending = Boolean(WarriorAdvancementPolicy.getSkill(skill.id) || RogueAdvancementPolicy.getSkill(skill.id));
+  const advancedSkillUpgradePending = Boolean(WarriorAdvancementPolicy.getSkill(skill.id) || RogueAdvancementPolicy.getSkill(skill.id) || HunterAdvancementPolicy.getSkill(skill.id));
   const requirement = SkillUpgradePolicy.getUpgradeRequirement(upgradeLevel);
   const upgradeProgress = { ...progress, unlockedChapter: getUnlockedChapter(progress) };
   const validation = SkillUpgradePolicy.canUpgrade(upgradeProgress, upgradeLevel);
@@ -4072,8 +4075,9 @@ function updateBattleUI() {
   }
   const companionIcons = document.querySelector('#battle-companion-icons');
   const racialCompanion = racialCompanions[character.race] || racialCompanions.human;
+  const displayedPetCount = character.job === 'hunter' && progress.level >= 8 ? HunterAdvancementPolicy.getPetCount({ progress }) : 0;
   const activeBattleCompanions = character.job === 'hunter' && progress.level >= 8
-    ? [{ id: 'hunter-companion', image: racialCompanion.icon || racialCompanion.image, portrait: racialCompanion.portrait, name: racialCompanion.name }]
+    ? Array.from({ length: displayedPetCount }, (_, index) => ({ id: `hunter-companion-${index + 1}`, image: racialCompanion.icon || racialCompanion.image, portrait: racialCompanion.portrait, name: `${racialCompanion.name}${displayedPetCount > 1 ? ` ${index + 1}` : ''}` }))
     : [];
   if (companionIcons) {
     companionIcons.classList.toggle('hidden', activeBattleCompanions.length === 0);
@@ -4700,6 +4704,15 @@ function useAutoSkillForMember(member, now = Date.now()) {
     }
     const targets = aliveEnemyIndexesByAge().slice(0, skillEffect.targets || skill.targets || 1);
     if (!targets.length) continue;
+    if (skill.id === 'gale-rapid-fire' || skill.id === 'beast-fury' || skill.id === 'bloody-hunt') {
+      if (skill.id === 'gale-rapid-fire') HunterAdvancementPolicy.applyGale(member, skillEffect, now);
+      else HunterAdvancementPolicy.applyPetBuff(member, skill.id, skillEffect, now);
+      member.resourceCurrent = HunterArrowPolicy.spendArrows(member.resourceCurrent, skill.id, progress.equipment);
+      member.skillCooldowns[skill.id] = now + skill.cooldown * 1000;
+      member.globalSkillReadyAt = now + 1000;
+      logBattle(`➶ ${member.name}施放【${skill.name}】。`, 'system');
+      return true;
+    }
     if (skill.id === 'death-mark') {
       RogueAdvancementPolicy.markTarget(member, getEnemySkillState(targets[0]), getSkillUpgradeLevel(progress, member.job, skill), now);
       member.skillCooldowns[skill.id] = now + skill.cooldown * 1000; member.globalSkillReadyAt = now + 1000; logBattle(`☠ ${member.name}對【${getEnemyDefinition(targets[0]).name}】施加【死亡標記】。`, 'system'); return true;
@@ -4709,13 +4722,14 @@ function useAutoSkillForMember(member, now = Date.now()) {
     const grandmasterSkillBonus = now < (member.weaponGrandmasterSkillUntil || 0) ? .10 : 0;
     const runtimeBonuses = WarriorAdvancementPolicy.getRuntimeBonuses(member, 'skill', now);
     const primaryRogueBonuses = RogueAdvancementPolicy.getTargetBonuses(member, battle.enemyDots[targets[0]], getEnemySkillState(targets[0]), battle.enemyHps[targets[0]] / getEnemyDefinition(targets[0]).maxHp, 'skill', now);
+    const shootingBonuses = HunterAdvancementPolicy.getShootingBonuses(member, skill.id, now);
     const critical = Math.random() < Math.min(.95, stats.crit + runtimeBonuses.crit + primaryRogueBonuses.crit + (skillEffect.skillCrit || 0));
     let damagePower = Number(skillEffect.power) || Number(skill.power) || 1;
     const berserkerSlash = skill.id === 'berserker-slash' ? WarriorAdvancementPolicy.getBerserkerSlash(getSkillUpgradeLevel(progress, member.job, skill), member.currentHp / member.maxHp) : null;
     if (berserkerSlash) damagePower *= berserkerSlash.damageMultiplier;
     if (skill.id === 'piercing-shot' && aliveEnemyIndexesByAge().length === 1) damagePower *= skillEffect.singleTargetBonus ? 1 + skillEffect.singleTargetBonus : 1;
     if (skill.id === 'whirlwind') damagePower *= 1 + Math.min(skillEffect.maxTargetBonus || 0, Math.max(0, targets.length - 1) * (skillEffect.perExtraTargetBonus || 0));
-    const damage = Math.max(1, Math.ceil(stats.attack * damagePower * (critical ? stats.criticalDamageMultiplier + primaryRogueBonuses.criticalDamage : 1)));
+    const damage = Math.max(1, Math.ceil(stats.attack * damagePower * (critical ? stats.criticalDamageMultiplier + primaryRogueBonuses.criticalDamage + shootingBonuses.criticalDamage : 1)));
     const conditionalDamageMultiplier = ConditionalDamagePolicy.getDamageMultiplier({ currentHp: member.currentHp, maxHp: member.maxHp, lowHealthDamagePercent: stats.lowHealthDamagePercent, highHealthDamagePercent: stats.highHealthDamagePercent, attackKind: 'skill' });
     const profile = getPlayerAttackProfile(character, skill);
     const targetAnchors = ['heavy-strike', 'whirlwind', 'charge', 'power-shot', 'multi-shot', 'piercing-shot', 'backstab', 'shadow-dance', 'fireball', 'blizzard', 'chain-lightning', 'holy-light', 'holy-nova'].includes(skill.id)
@@ -4730,7 +4744,7 @@ function useAutoSkillForMember(member, now = Date.now()) {
       return { index, result: applyDamageToMonster(index, damage * chainMultiplier * piercingMultiplier * getRuneOutgoingMultiplier(member, index), profile, {
         attacker: member,
         attackKind: 'skill',
-        armorIgnore: (skillEffect.armorIgnore || 0) + (berserkerSlash?.armorIgnore || 0),
+        armorIgnore: (skillEffect.armorIgnore || 0) + (berserkerSlash?.armorIgnore || 0) + shootingBonuses.armorIgnore,
         conditionalDamageMultiplier,
         craftedEpicExecution,
         specialEquipmentMultiplier: (epicWeaponExecution.multipliers[targetOrder] || 1) * (1 + grandmasterSkillBonus) * shadowBleedingMultiplier,
@@ -4739,6 +4753,8 @@ function useAutoSkillForMember(member, now = Date.now()) {
       }) };
     });
     const hits = resolvedTargets.filter((target) => !target.result.evaded);
+    HunterAdvancementPolicy.completeShootingSkill(member, skill.id, hits.length > 0, critical, now);
+    if (skill.id === 'sniper-shot') HunterAdvancementPolicy.applySniperCritical(member, skillEffect, critical && hits.length > 0, now);
     ChapterThreeEpicWeaponPolicy.completeSkill(member, epicWeaponExecution, targets.map((index) => getEnemySkillState(index)), resolvedTargets.map((target) => !target.result.evaded && target.result.finalDamage > 0));
     const totalDamage = hits.reduce((sum, target) => sum + target.result.finalDamage, 0);
     if (grandmasterSkillBonus && hits.length) member.weaponGrandmasterSkillUntil = 0;
@@ -5101,10 +5117,11 @@ function processPartyMemberAttacks(now = Date.now()) {
     const warriorRuntime = WarriorAdvancementPolicy.getRuntimeBonuses(member, 'basic', now);
     const rogueBonuses = RogueAdvancementPolicy.getTargetBonuses(member, battle.enemyDots[targetIndex], getEnemySkillState(targetIndex), battle.enemyHps[targetIndex] / getEnemyDefinition(targetIndex).maxHp, 'basic', now);
     const lethalExecution = RogueAdvancementPolicy.getBasicExecution(member, now);
+    const hunterExecution = HunterAdvancementPolicy.getBasicExecution(member, now);
     const critical = specialBasicExecution.guaranteedCritical || (instinctTriggered && hunterInstinct.guaranteedCrit ? true : Math.random() < Math.min(.95, member.stats.crit + warriorRuntime.crit + rogueBonuses.crit + (desperate?.crit || 0)));
     const fatalSlashBonus = now < (member.fatalSlashUntil || 0) ? .50 : 0;
     const grandmasterBasicBonus = now < (member.weaponGrandmasterBasicUntil || 0) ? .20 : 0;
-    const temporaryBasicBonus = (now < (member.skillHasteUntil || 0) ? member.skillBasicDamageBonus || 0 : 0) + (member.nextBasicDamageBonus || 0) + (member.nextHunterAttackBonus || 0) + (desperate?.attack || 0) + fatalSlashBonus + grandmasterBasicBonus + (lethalExecution?.damage || 0);
+    const temporaryBasicBonus = (now < (member.skillHasteUntil || 0) ? member.skillBasicDamageBonus || 0 : 0) + (now < (member.galeUntil || 0) ? member.galeBasicDamage || 0 : 0) + (member.nextBasicDamageBonus || 0) + (member.nextHunterAttackBonus || 0) + (desperate?.attack || 0) + fatalSlashBonus + grandmasterBasicBonus + (lethalExecution?.damage || 0) + hunterExecution.sniper + hunterExecution.eagle;
     const baseHit = Math.max(1, Math.ceil(attackWithWeaponRoll * (1 + temporaryBasicBonus) * (orcRage ? 1.10 : 1) * (critical ? member.stats.criticalDamageMultiplier + rogueBonuses.criticalDamage : 1)));
     member.nextBasicDamageBonus = 0;
     member.nextHunterAttackBonus = 0;
@@ -5115,6 +5132,7 @@ function processPartyMemberAttacks(now = Date.now()) {
     playPartyMemberCombatAnimation(member, [targetIndex], { kind: 'basic' });
     ChapterThreeSpecialEquipmentPolicy.completeMainHandBasicAttack(member, specialBasicExecution, !result.evaded && result.finalDamage > 0, battle.enemyHps[targetIndex] > 0);
     RogueAdvancementPolicy.consumeBasic(member, lethalExecution, !result.evaded && result.finalDamage > 0);
+    HunterAdvancementPolicy.consumeBasic(member, hunterExecution, !result.evaded && result.finalDamage > 0, critical, now);
     if (!result.evaded && result.finalDamage > 0) RogueAdvancementPolicy.extendDotsOnCrit(member, battle.enemyDots[targetIndex], critical);
     const epicWeaponHit = ChapterThreeEpicWeaponPolicy.resolveBasicHit(member, { hit: !result.evaded && result.finalDamage > 0, critical, actualDamage: result.finalDamage, enemyState: getEnemySkillState(targetIndex), now, random: Math.random });
     if (epicWeaponHit.combo && battle.enemyHps[targetIndex] > 0) applyDamageToMonster(targetIndex, Math.max(1, (rolledWeaponAttack ?? displayedWeaponAttack) * .5), profile, { attacker: member, attackKind: 'weapon-proc', canEvade: false, canParry: false });
@@ -5135,16 +5153,10 @@ function processPartyMemberAttacks(now = Date.now()) {
       if (member.resourceType === 'rage') member.resourceCurrent = WarriorResourcePolicy.gainFromAttack(member.resourceCurrent);
       CriticalResourceRecoveryPolicy.resolveExecution(member, { attackKind: 'basic', critical, hadDirectHit: true, recoveryPercent: member.stats.criticalResourceRecoveryPercent });
       logBattle(`⚔ ${member.name}對【${enemy.name}】造成 ${result.finalDamage} 傷害${critical ? '（暴擊）' : ''}${orcRage ? '（狂怒）' : ''}${instinctTriggered ? '（獵人本能）' : ''}`, 'damage-dealt', { aggregateKey: `member-${member.id}-${battle.enemyTypes[targetIndex]}`, damage: result.finalDamage, summary: `⚔ ${member.name}攻擊【${enemy.name}】` });
-      if (member.job === 'hunter' && member.level >= 8 && battle.enemyHps[targetIndex] > 0) {
-        const bond = ClassSkillPolicy.getEffect('hunter', 'wild-bond', Number(member.progress.skillLevels?.['hunter:wild-bond']) || 1);
-        const pet = applyDamageToMonster(targetIndex, member.stats.attack * bond.companionAttack, { damageType: 'physical', attackRange: 'melee' }, { attacker: member, attackKind: 'companion', canParry: false });
-        if (!pet.evaded) playCompanionAttackAnimation([targetIndex]);
-        member.petAttackCount = (member.petAttackCount || 0) + 1;
-        if (bond.beastSlam && member.petAttackCount % 6 === 0 && battle.enemyHps[targetIndex] > 0) {
-          applyDamageToMonster(targetIndex, member.stats.attack * bond.companionAttack * bond.beastSlam, { damageType: 'physical', attackRange: 'melee' }, { attacker: member, attackKind: 'beast-slam', canParry: false });
-          member.nextHunterAttackBonus = bond.nextHunterAttack || 0;
-          logBattle(`🐾 ${member.name}的寵物發動【野獸猛擊】！`, 'damage-dealt');
-        }
+      const galeArrowPower = member.job === 'hunter' ? HunterAdvancementPolicy.resolveGaleBasicHit(member, true, now) : 0;
+      if (galeArrowPower && battle.enemyHps[targetIndex] > 0) {
+        const galeCritical = Math.random() < member.stats.crit;
+        applyDamageToMonster(targetIndex, member.stats.attack * galeArrowPower * (galeCritical ? member.stats.criticalDamageMultiplier : 1), profile, { attacker: member, attackKind: 'wind-arrow', canParry: false });
       }
       if (member.job === 'hunter' && member.level >= 15) {
         const reload = ClassSkillPolicy.getEffect('hunter', 'quick-reload', Number(member.progress.skillLevels?.['hunter:quick-reload']) || 1);
@@ -5186,7 +5198,61 @@ function processPartyMemberAttacks(now = Date.now()) {
     const runeFrenzyMultiplier = now < (member.runeFrenzyUntil || 0) ? 1.08 : 1;
     const huntingRhythmMultiplier = 1 + ChapterThreeEpicWeaponPolicy.getHuntingRhythmSpeed(member, now);
     const warriorSpeedMultiplier = 1 + WarriorAdvancementPolicy.getRuntimeBonuses(member, 'basic', now).attackSpeed;
-    PartyPolicy.scheduleNextAttack(member, now, member.attackSpeed * skillHasteMultiplier * blessingSpeedMultiplier * corruptedSwiftnessMultiplier * runeFrenzyMultiplier * huntingRhythmMultiplier * warriorSpeedMultiplier * (1 + (desperate?.speed || 0)), exhaustedMultiplier * trailSlowMultiplier);
+    const galeSpeedMultiplier = now < (member.galeUntil || 0) ? 1 + (member.galeAttackSpeed || 0) : 1;
+    PartyPolicy.scheduleNextAttack(member, now, member.attackSpeed * skillHasteMultiplier * blessingSpeedMultiplier * corruptedSwiftnessMultiplier * runeFrenzyMultiplier * huntingRhythmMultiplier * warriorSpeedMultiplier * galeSpeedMultiplier * (1 + (desperate?.speed || 0)), exhaustedMultiplier * trailSlowMultiplier);
+  }
+}
+
+function ensureHunterCompanions(member, now = Date.now()) {
+  if (member?.job !== 'hunter' || member.level < 8) return [];
+  const count = HunterAdvancementPolicy.getPetCount(member);
+  member.companions = Array.isArray(member.companions) ? member.companions.slice(0, count) : [];
+  while (member.companions.length < count) member.companions.push({ id: `${member.id}:pet:${member.companions.length + 1}`, nextAttackAt: now, attackCount: 0, furyHitCount: 0, wildAwakeningUntil: 0, wildAwakeningDamage: 0 });
+  return member.companions;
+}
+
+function processHunterCompanionAttacks(now = Date.now()) {
+  for (const member of battle.partyMembers || []) {
+    if (!member.alive) continue;
+    const bond = member.job === 'hunter' && member.level >= 8 ? ClassSkillPolicy.getEffect('hunter', 'wild-bond', Number(member.progress.skillLevels?.['hunter:wild-bond']) || 1) : null;
+    if (!bond) continue;
+    const bonuses = HunterAdvancementPolicy.getPetBonuses(member, now);
+    for (const pet of ensureHunterCompanions(member, now)) {
+      if (now < pet.nextAttackAt) continue;
+      const targetIndex = PartyPolicy.getFrontAliveEnemyIndex(battle.enemyHps, battle.enemySpawnedAt);
+      if (targetIndex < 0) continue;
+      const profile = { damageType: 'physical', attackRange: 'melee' };
+      const critical = Math.random() < Math.min(.95, member.stats.crit + bonuses.crit);
+      const hasPetBleed = (battle.enemyDots[targetIndex] || []).some((dot) => String(dot.type).startsWith('pet-bleed:') && dot.remaining > 0);
+      const bloody = now < (member.bloodyHuntUntil || 0) ? member.bloodyHuntEffect || {} : {};
+      const bleedingMultiplier = bloody.bleedingBasicDamage && hasPetBleed ? 1 + bloody.bleedingBasicDamage : 1;
+      const petAttack = member.stats.attack * bond.companionAttack * (1 + bonuses.damage);
+      const result = applyDamageToMonster(targetIndex, petAttack * bleedingMultiplier * (critical ? member.stats.criticalDamageMultiplier : 1), profile, { attacker: member, attackKind: 'companion', canParry: false });
+      const hit = !result.evaded && result.finalDamage > 0;
+      if (hit) {
+        playCompanionAttackAnimation([targetIndex]);
+        pet.attackCount += 1;
+        if (critical && bonuses.wildAwakening) { pet.wildAwakeningUntil = now + 6000; pet.wildAwakeningDamage = bonuses.wildAwakening; }
+        if (bloody.bleedTick) applyDot(targetIndex, `pet-bleed:${pet.id}`, Math.max(1, Math.ceil(petAttack * bloody.bleedTick)), 2, 1, { source: member, tickIntervalMs: 2000, now, refreshOnly: true, refreshDuration: true });
+        HunterAdvancementPolicy.tryStun(member, getEnemySkillState(targetIndex), true, Math.random, now);
+        if (bonuses.biteEvery) {
+          pet.furyHitCount += 1;
+          if (pet.furyHitCount % bonuses.biteEvery === 0 && battle.enemyHps[targetIndex] > 0) {
+            const biteCritical = Math.random() < Math.min(.95, member.stats.crit + bonuses.crit);
+            applyDamageToMonster(targetIndex, petAttack * bonuses.bitePower * (biteCritical ? member.stats.criticalDamageMultiplier : 1), profile, { attacker: member, attackKind: 'pet-bite', canParry: false });
+          }
+        }
+        if (bond.beastSlam && pet.attackCount % 6 === 0 && battle.enemyHps[targetIndex] > 0) {
+          const awakening = now < (pet.wildAwakeningUntil || 0) ? pet.wildAwakeningDamage || 0 : 0;
+          const slamCritical = Math.random() < Math.min(.95, member.stats.crit + bonuses.crit);
+          const slam = applyDamageToMonster(targetIndex, petAttack * bond.beastSlam * (1 + awakening) * (slamCritical ? member.stats.criticalDamageMultiplier : 1), profile, { attacker: member, attackKind: 'beast-slam', canParry: false });
+          if (!slam.evaded && slam.finalDamage > 0 && awakening) { pet.wildAwakeningUntil = 0; pet.wildAwakeningDamage = 0; }
+          if (!slam.evaded && slam.finalDamage > 0) member.nextHunterAttackBonus = bond.nextHunterAttack || 0;
+        }
+      }
+      const attacksPerSecond = Math.max(.1, member.attackSpeed * (1 + (bond.companionSpeed || 0) + bonuses.attackSpeed));
+      pet.nextAttackAt = now + 1000 / attacksPerSecond;
+    }
   }
 }
 
@@ -5261,6 +5327,7 @@ function battleTick() {
     updatePartyMemberHealthRegeneration(member, now);
   });
   processPartyMemberAttacks(now);
+  processHunterCompanionAttacks(now);
   queueDefeatedEnemies();
   syncLegacyBattleStateFromMain();
   updateBattleUI();
@@ -5738,6 +5805,7 @@ function endBattleAfterPlayerDefeat(now = Date.now()) {
     ChapterThreeEpicWeaponPolicy.clear(member);
     WarriorAdvancementPolicy.clear(member);
     RogueAdvancementPolicy.clear(member, true);
+    HunterAdvancementPolicy.clear(member);
     member.currentHp = member.maxHp;
     member.resourceCurrent = member.resourceType === 'rage' ? 0 : getMaxCombatResourceForMember(member.character, member.progress);
     member.shield = 0;
@@ -5777,6 +5845,7 @@ function defeatPartyMember(member, now = Date.now()) {
   ChapterThreeEpicWeaponPolicy.clear(member);
   WarriorAdvancementPolicy.clear(member);
   RogueAdvancementPolicy.clear(member);
+  HunterAdvancementPolicy.clear(member);
   member.alive = false;
   member.targetIndex = -1;
   member.bleed = null;
@@ -5833,6 +5902,7 @@ function resetPartyAfterDefeat(now = Date.now()) {
     ChapterThreeEpicWeaponPolicy.clear(member);
     WarriorAdvancementPolicy.clear(member);
     RogueAdvancementPolicy.clear(member, true);
+    HunterAdvancementPolicy.clear(member);
     member.currentHp = member.maxHp;
     member.resourceCurrent = member.resourceType === 'rage' ? 0 : getMaxCombatResourceForMember(member.character, member.progress);
     member.shield = 0;
@@ -6130,7 +6200,13 @@ function enemyAttackTick() {
         + runeIronWallReduction + runeUnyieldingReduction
         + (now < (target.manaShieldReductionUntil || 0) ? target.manaShieldDamageReduction || 0 : 0))
     }).finalDamage;
-    if (parried) damage = Math.max(1, Math.ceil(damage * .5));
+    ensureHunterCompanions(target, now);
+    const protectedByPet = damage > 0 && HunterAdvancementPolicy.canProtect(target, Math.random);
+    if (protectedByPet) {
+      damage = 0;
+      logBattle(`🐾 ${target.name}的戰寵觸發【寵物護主】，擋下本次直接傷害！`, 'system');
+    }
+    if (parried && damage > 0) damage = Math.max(1, Math.ceil(damage * .5));
     const absorbed = Math.min(target.shield || 0, damage);
     target.shield = Math.max(0, (target.shield || 0) - absorbed);
     damage -= absorbed;
@@ -6520,7 +6596,7 @@ document.querySelector('#skill-detail-modal').addEventListener('click', (event) 
   const progress = getProgress();
   const skill = getKnownSkills(character?.job, progress.level, progress).find((entry) => getSkillKey(character.job, entry) === selectedSkillKey);
   if (!skill || progress.level < skill.level) return;
-  if (WarriorAdvancementPolicy.getSkill(skill.id) || RogueAdvancementPolicy.getSkill(skill.id)) { showToast('進階技能升級需求尚未設定。'); renderSkillDetailModal(); return; }
+  if (WarriorAdvancementPolicy.getSkill(skill.id) || RogueAdvancementPolicy.getSkill(skill.id) || HunterAdvancementPolicy.getSkill(skill.id)) { showToast('進階技能升級需求尚未設定。'); renderSkillDetailModal(); return; }
   progress.unlockedChapter = getUnlockedChapter(progress);
   const currentLevel = getSkillUpgradeLevel(progress, character.job, skill);
   const specialization = currentLevel === 5 ? ClassSkillPolicy.canSpecialize(progress.skillLevels, character.job, skill.id) : { ok: true };
@@ -6669,7 +6745,7 @@ document.querySelector('#inventory-modal').addEventListener('click', (event) => 
   if (advanceButton) {
     const progress = getProgress();
     const character = getActiveCharacter();
-    const policy = character?.job === 'warrior' ? WarriorAdvancementPolicy : character?.job === 'assassin' ? RogueAdvancementPolicy : null;
+    const policy = character?.job === 'warrior' ? WarriorAdvancementPolicy : character?.job === 'assassin' ? RogueAdvancementPolicy : character?.job === 'hunter' ? HunterAdvancementPolicy : null;
     const result = policy?.advance(character, progress, advanceButton.dataset.firstAdvance) || { ok: false };
     if (!result.ok) { showToast('轉職條件尚未完成。'); return; }
     saveProgress(progress); renderCharacterAbilities(); renderSkills(getActiveCharacter(), progress.level); showToast('第一次轉職完成。'); return;

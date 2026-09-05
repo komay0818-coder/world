@@ -18,7 +18,11 @@
   const SKILL_COSTS = Object.freeze({
     'power-shot': 1,
     'multi-shot': 3,
-    'piercing-shot': 2
+    'piercing-shot': 2,
+    'sniper-shot': 2,
+    'gale-rapid-fire': 3,
+    'beast-fury': 0,
+    'bloody-hunt': 0
   });
 
   function isHunter(job) {

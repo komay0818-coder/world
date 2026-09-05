@@ -1,0 +1,45 @@
+(function (root, factory) {
+  const api = factory();
+  if (typeof module === 'object' && module.exports) module.exports = api;
+  else root.HunterAdvancementPolicy = api;
+}(typeof globalThis !== 'undefined' ? globalThis : this, function () {
+  'use strict';
+  const FIRST_JOB_CHANGE_LEVEL = 45;
+  const ADVANCED_CLASSES = Object.freeze({ marksman: Object.freeze({ id: 'marksman', name: '射擊系' }), beastmaster: Object.freeze({ id: 'beastmaster', name: '獸王系' }) });
+  const SHOOTING_SKILLS = Object.freeze(['power-shot', 'multi-shot', 'piercing-shot', 'sniper-shot']);
+  const active = (id, name, cooldown, levels, advancedClass, detail) => Object.freeze({ level: 45, type: 'active', id, name, detail, cooldown, advancedClass, levels: Object.freeze(levels.map(Object.freeze)) });
+  const passive = (id, name, levels, advancedClass, detail) => Object.freeze({ level: 45, type: 'passive', id, name, detail, cooldown: 0, advancedClass, levels: Object.freeze(levels.map(Object.freeze)) });
+  const MARKSMAN_SKILLS = Object.freeze([
+    active('sniper-shot', '狙擊射擊', 7, [210,225,240,255,275,300].map((power,i)=>({ power:power/100, skillCrit:[5,6,7,8,10,12][i]/100, armorIgnore:[5,6,7,8,10,12][i]/100, nextBasicOnCrit:i===5?.50:0 })), 'marksman', '高傷害單體射擊，附帶額外暴擊率與護甲穿透。'),
+    active('gale-rapid-fire', '疾風連射', 10, [8,10,12,14,17,20].map((speed,i)=>({ duration:6, attackSpeed:speed/100, basicDamage:[5,6,7,8,10,12][i]/100, windArrowEvery:i===5?3:0, windArrowPower:i===5?.60:0 })), 'marksman', '6秒內提高自身攻速與主手普通攻擊傷害。'),
+    passive('lethal-aim', '致命瞄準', [6,8,10,12,15,18].map((criticalDamage,i)=>({ shootingCriticalDamage:criticalDamage/100, weaknessShot:i===5?.10:0 })), 'marksman', '提高射擊技能的暴擊傷害。'),
+    passive('eagle-eye-instinct', '鷹眼本能', [8,10,12,14,17,20].map((damage,i)=>({ nextBasicDamage:damage/100, precisePursuit:i===5?1:0 })), 'marksman', '射擊技能命中後強化下一次主手普通攻擊。')
+  ]);
+  const BEASTMASTER_SKILLS = Object.freeze([
+    active('beast-fury', '野獸狂怒', 14, [10,12,14,17,20,25].map((damage,i)=>({ duration:8, petDamage:damage/100, petAttackSpeed:[8,10,12,14,17,20][i]/100, biteEvery:i===5?3:0, bitePower:i===5?.70:0 })), 'beastmaster', '8秒內提高所有出戰寵物的傷害與攻速。'),
+    active('bloody-hunt', '血腥獵殺', 10, [8,10,12,14,16,18].map((bleed,i)=>({ duration:6, bleedTick:bleed/100, bleedingBasicDamage:i===5?.15:0 })), 'beastmaster', '6秒內使所有寵物普通攻擊附加獨立流血。'),
+    passive('pack-leader', '獸群領袖', [6,8,10,12,15,18].map((damage,i)=>({ petDamage:damage/100, petCrit:[2,3,4,5,6,8][i]/100, wildAwakening:i===5?.30:0 })), 'beastmaster', '提高所有出戰寵物傷害與暴擊率。'),
+    passive('pack-summoning', '獸群召喚', [2,2,2,2,3,3].map((maxPets,i)=>({ maxPets, protectChance:[3,4,5,7,8,10][i]/100, stunChance:i===5?.10:0, stunDuration:i===5?1:0, stunIcd:i===5?5:0 })), 'beastmaster', '提高最大出戰寵物數並提供寵物護主。')
+  ]);
+  const SKILLS=Object.freeze([...MARKSMAN_SKILLS,...BEASTMASTER_SKILLS]); const BY_ID=new Map(SKILLS.map(skill=>[skill.id,skill]));
+  const levelOf=value=>Math.max(1,Math.min(6,Math.floor(Number(value)||1)));
+  function getSkill(id){return BY_ID.get(id)||null;} function getSkills(id){return SKILLS.filter(skill=>skill.advancedClass===id);} function getEffect(id,level){return getSkill(id)?.levels[levelOf(level)-1]||null;}
+  function isAdvanced(progress,id){return progress?.advancedClass===id;} function isShootingSkill(id){return SHOOTING_SKILLS.includes(id);}
+  function canAdvance(character,progress){return character?.job==='hunter'&&Number(progress?.level)>=45&&[1,2,3].every(tier=>progress?.preJobTrial?.proofTiers?.includes(tier));}
+  function advance(character,progress,id){if(!Object.values(ADVANCED_CLASSES).some(entry=>entry.id===id))return{ok:false,code:'unknown-class'};if(progress?.advancedClass)return{ok:false,code:'already-advanced'};if(!canAdvance(character,progress))return{ok:false,code:'requirements'};progress.advancedClass=id;return{ok:true,advancedClass:id};}
+  function level(member,id){return member?.progress?.skillLevels?.[`hunter:${id}`]||1;}
+  function getShootingBonuses(member,skillId,now=Date.now()){if(!isAdvanced(member?.progress,'marksman')||!isShootingSkill(skillId))return{criticalDamage:0,armorIgnore:0};const aim=getEffect('lethal-aim',level(member,'lethal-aim'));return{criticalDamage:aim?.shootingCriticalDamage||0,armorIgnore:now<(member.weaknessShotUntil||0)?member.weaknessShotArmorIgnore||0:0};}
+  function completeShootingSkill(member,skillId,hit,critical,now=Date.now()){if(!isAdvanced(member?.progress,'marksman')||!isShootingSkill(skillId))return;if(hit&&now<(member.weaknessShotUntil||0)){member.weaknessShotUntil=0;member.weaknessShotArmorIgnore=0;}const aim=getEffect('lethal-aim',level(member,'lethal-aim'));if(critical&&aim?.weaknessShot){member.weaknessShotUntil=now+5000;member.weaknessShotArmorIgnore=aim.weaknessShot;}if(hit){const eagle=getEffect('eagle-eye-instinct',level(member,'eagle-eye-instinct'));member.eagleEyeUntil=now+5000;member.eagleEyeDamage=eagle?.nextBasicDamage||0;member.eagleEyePrecise=eagle?.precisePursuit||0;}}
+  function applySniperCritical(member,effect,critical,now=Date.now()){if(critical&&effect?.nextBasicOnCrit){member.sniperBasicUntil=now+5000;member.sniperBasicDamage=effect.nextBasicOnCrit;}}
+  function getBasicExecution(member,now=Date.now()){return{sniper:now<(member?.sniperBasicUntil||0)?member.sniperBasicDamage||0:0,eagle:now<(member?.eagleEyeUntil||0)?member.eagleEyeDamage||0:0,precise:now<(member?.eagleEyeUntil||0)?member.eagleEyePrecise||0:0};}
+  function consumeBasic(member,execution,hit,critical,now=Date.now()){if(!hit)return null;if(execution.sniper){member.sniperBasicUntil=0;member.sniperBasicDamage=0;}let reduced=null;if(execution.eagle){member.eagleEyeUntil=0;member.eagleEyeDamage=0;member.eagleEyePrecise=0;if(critical&&execution.precise){const candidates=SHOOTING_SKILLS.map(id=>({id,remaining:Math.max(0,(member.skillCooldowns?.[id]||now)-now)})).sort((a,b)=>b.remaining-a.remaining);if(candidates[0]?.remaining>0){reduced=candidates[0].id;member.skillCooldowns[reduced]=Math.max(now,member.skillCooldowns[reduced]-1000);}}}return reduced;}
+  function applyGale(member,effect,now=Date.now()){member.galeUntil=now+effect.duration*1000;member.galeAttackSpeed=effect.attackSpeed;member.galeBasicDamage=effect.basicDamage;member.galeEvery=effect.windArrowEvery||0;member.galePower=effect.windArrowPower||0;member.galeHitCount=0;}
+  function resolveGaleBasicHit(member,hit,now=Date.now()){if(!hit||now>=(member.galeUntil||0)||!member.galeEvery)return 0;member.galeHitCount=(member.galeHitCount||0)+1;return member.galeHitCount%member.galeEvery===0?member.galePower:0;}
+  function applyPetBuff(member,id,effect,now=Date.now()){if(id==='beast-fury'){member.beastFuryUntil=now+effect.duration*1000;member.beastFuryEffect=effect;}if(id==='bloody-hunt'){member.bloodyHuntUntil=now+effect.duration*1000;member.bloodyHuntEffect=effect;}}
+  function getPetCount(member){if(!isAdvanced(member?.progress,'beastmaster'))return 1;return getEffect('pack-summoning',level(member,'pack-summoning'))?.maxPets||1;}
+  function getPetBonuses(member,now=Date.now()){const leader=isAdvanced(member?.progress,'beastmaster')?getEffect('pack-leader',level(member,'pack-leader')):{};const fury=now<(member?.beastFuryUntil||0)?member.beastFuryEffect||{}:{};return{damage:(leader?.petDamage||0)+(fury.petDamage||0),crit:leader?.petCrit||0,attackSpeed:fury.petAttackSpeed||0,biteEvery:fury.biteEvery||0,bitePower:fury.bitePower||0,wildAwakening:leader?.wildAwakening||0};}
+  function canProtect(member,random=Math.random){if(!isAdvanced(member?.progress,'beastmaster')||!(member.companions||[]).length)return false;const effect=getEffect('pack-summoning',level(member,'pack-summoning'));return random()<effect.protectChance;}
+  function tryStun(member,state,hit,random=Math.random,now=Date.now()){const effect=isAdvanced(member?.progress,'beastmaster')?getEffect('pack-summoning',level(member,'pack-summoning')):null;if(!hit||!effect?.stunChance||now<(state.packStunReadyAt||0)||random()>=effect.stunChance)return false;state.packStunReadyAt=now+effect.stunIcd*1000;state.stunnedUntil=Math.max(state.stunnedUntil||0,now+effect.stunDuration*1000);return true;}
+  function clear(member){if(!member)return;['sniperBasicUntil','sniperBasicDamage','weaknessShotUntil','weaknessShotArmorIgnore','eagleEyeUntil','eagleEyeDamage','eagleEyePrecise','galeUntil','galeAttackSpeed','galeBasicDamage','galeEvery','galePower','galeHitCount','beastFuryUntil','bloodyHuntUntil'].forEach(key=>member[key]=0);member.beastFuryEffect=null;member.bloodyHuntEffect=null;member.companions=[];}
+  return Object.freeze({FIRST_JOB_CHANGE_LEVEL,ADVANCED_CLASSES,SHOOTING_SKILLS,MARKSMAN_SKILLS,BEASTMASTER_SKILLS,SKILLS,getSkill,getSkills,getEffect,isAdvanced,isShootingSkill,canAdvance,advance,getShootingBonuses,completeShootingSkill,applySniperCritical,getBasicExecution,consumeBasic,applyGale,resolveGaleBasicHit,applyPetBuff,getPetCount,getPetBonuses,canProtect,tryStun,clear});
+}));
