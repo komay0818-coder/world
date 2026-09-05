@@ -70,12 +70,12 @@ function simulate(spec,seed,options={}){
   }
   function pets(){
     const bond=Skills.getEffect('hunter','wild-bond',6), b=Hunter.getPetBonuses(member,clock);
-    member.companions.forEach((pet,i)=>{if((survival&&!pet.alive)||clock<pet.nextAttackAt||done)return;const label=`pet${'ABC'[i]}`, petAttack=ATTACK*bond.companionAttack*(1+b.damage), critical=random()<CRIT+b.crit;
-      const r=hit(`${label}-basic`,petAttack*(critical?CRIT_MULT:1),{crit:critical});counts.petBasics[i]++;
-      if(r.hit){if(clock<(member.bloodyHuntUntil||0)){const type=`${label}-bleed`,existing=target.dots.find(d=>d.type===type);if(existing){counts.bleedRefreshes++;existing.next=clock+2000;existing.ticks=2;existing.damage=petAttack*member.bloodyHuntEffect.bleedTick;}else{counts.bleedApplies++;target.dots.push({type,next:clock+2000,ticks:2,damage:petAttack*member.bloodyHuntEffect.bleedTick});}}
+    member.companions.forEach((pet,i)=>{if((survival&&!pet.alive)||clock<pet.nextAttackAt||done)return;const label=`pet${'ABC'[i]}`, petAttack=ATTACK*bond.companionAttack*(1+b.damage), outputMultiplier=Number(options.petOutputMultipliers?.[i])||1, critical=random()<CRIT+b.crit;
+      const r=hit(`${label}-basic`,petAttack*outputMultiplier*(critical?CRIT_MULT:1),{crit:critical});counts.petBasics[i]++;
+      if(r.hit){if(clock<(member.bloodyHuntUntil||0)){const type=`${label}-bleed`,existing=target.dots.find(d=>d.type===type);if(existing){counts.bleedRefreshes++;existing.next=clock+2000;existing.ticks=2;existing.damage=petAttack*member.bloodyHuntEffect.bleedTick*outputMultiplier;}else{counts.bleedApplies++;target.dots.push({type,next:clock+2000,ticks:2,damage:petAttack*member.bloodyHuntEffect.bleedTick*outputMultiplier});}}
         if(spec==='beastmaster'&&effect(member,'pack-summoning').stunChance&&random()<.10){counts.stunRollSuccess++;if(clock<(target.packStunReadyAt||0))counts.stunIcdBlocks++;else{target.packStunReadyAt=clock+5000;target.stunnedUntil=Math.max(target.stunnedUntil,clock+1000);counts.stuns++;}}
-        pet.furyHitCount++;if(b.biteEvery&&pet.furyHitCount%b.biteEvery===0){counts.petBites[i]++;hit(`${label}-bite`,petAttack*b.bitePower*(random()<CRIT+b.crit?CRIT_MULT:1));}
-        pet.attackCount++;if(pet.attackCount%6===0){counts.petSlams[i]++;const slamCrit=random()<CRIT+b.crit;hit(`${label}-slam`,ATTACK*bond.companionAttack*bond.beastSlam*(1+b.damage)*(slamCrit?CRIT_MULT:1),{crit:slamCrit});}
+        pet.furyHitCount++;if(b.biteEvery&&pet.furyHitCount%b.biteEvery===0){counts.petBites[i]++;hit(`${label}-bite`,petAttack*b.bitePower*outputMultiplier*(random()<CRIT+b.crit?CRIT_MULT:1));}
+        pet.attackCount++;if(pet.attackCount%6===0){counts.petSlams[i]++;const slamCrit=random()<CRIT+b.crit;hit(`${label}-slam`,ATTACK*bond.companionAttack*bond.beastSlam*(1+b.damage)*outputMultiplier*(slamCrit?CRIT_MULT:1),{crit:slamCrit});}
       }pet.nextAttackAt=clock+1000/((1+(bond.companionSpeed||0))*(1+b.attackSpeed));});
   }
   function dots(){for(const d of [...target.dots])if(clock>=d.next){hit(d.type,d.damage,{canEvade:false,damageType:'periodic'});d.ticks--;d.next+=2000;}target.dots=target.dots.filter(d=>d.ticks>0);}

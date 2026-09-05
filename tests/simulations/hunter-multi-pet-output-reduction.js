@@ -1,0 +1,13 @@
+'use strict';
+const fs=require('node:fs'),path=require('node:path'),Temple=require('./chapter-three-36-rules.js');
+const {simulate,aggregate:balanceAggregate}=require('./hunter-lv45-redrock-temple-round1.js');
+const {aggregate:survivalAggregate}=require('./hunter-pet-durability-round1.js');
+const VERSIONS={full:[1,1,1],p90:[1,.9,.9],p85:[1,.85,.85],p80:[1,.8,.8]};
+const TARGET_RUNS=1000,FARM_RUNS=500,LONG_RUNS=100,STEADY_RUNS=20;
+function rows(spec,count,runs,template,multipliers){return Array.from({length:runs},(_,i)=>simulate(spec,0xf45000+count*1009+i*7919,spec==='marksman'?{killTarget:count,pool:Temple.normals,template}:{killTarget:count,pool:Temple.normals,template,petDurability:10,petOutputMultipliers:multipliers}));}
+function marksman(count,runs,template){return balanceAggregate(rows('marksman',count,runs,template),count);}
+function beast(count,runs,multipliers,template){const samples=rows('beastmaster',count,runs,template,multipliers);return{balance:balanceAggregate(samples,count),survival:survivalAggregate(samples,count,10)};}
+const result={metadata:{generatedAt:new Date().toISOString(),map:'3-6 赤岩聖殿',level:45,marksmanPet:'無HP／耐久／死亡',beastmasterDurability:10,beastmasterReviveSeconds:30,outputMultipliers:{full:'100/100/100',p90:'100/90/90',p85:'100/85/85',p80:'100/80/80'},reductionScope:['pet basic','beast slam','wild bite','bloody hunt bleed'],unaffected:['main pet','hunter damage','pet attack speed','pet critical chance','pack stun','guard','death/revive'],noFormalValueChanges:true,runs:{target:TARGET_RUNS,farm100:FARM_RUNS,farm500:LONG_RUNS,farm1000:LONG_RUNS,farm5000:STEADY_RUNS}},targets:{},farm100:{marksman:null},farm500:{marksman:null},farm1000:{marksman:null},farm5000:{marksman:null}};
+for(const target of [...Temple.normals,Temple.elite]){const cell=result.targets[target.id]={template:target,marksman:marksman(1,TARGET_RUNS,target)};for(const [id,m] of Object.entries(VERSIONS))cell[id]=beast(1,TARGET_RUNS,m,target).balance;}
+for(const count of [100,500,1000,5000]){const runs=count===100?FARM_RUNS:count===5000?STEADY_RUNS:LONG_RUNS,cell=result[`farm${count}`];cell.marksman=marksman(count,runs);for(const [id,m] of Object.entries(VERSIONS))cell[id]=beast(count,runs,m);}
+const output=path.join(__dirname,'results','hunter-multi-pet-output-reduction.json');fs.writeFileSync(output,JSON.stringify(result,null,2)+'\n');console.log(JSON.stringify({output,steady:Object.fromEntries(['marksman',...Object.keys(VERSIONS)].map(id=>{const x=result.farm5000[id].balance||result.farm5000[id];return[id,{kph:x.killsPerHour,seconds:x.durationSeconds,petShare:x.petDamageSharePercent}]}))},null,2));
