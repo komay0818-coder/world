@@ -8,6 +8,7 @@ assert.deepEqual(policy.getEffect('elemental-burst', 6), { power:1.6, bonus:.4, 
 assert.deepEqual(policy.getElementalBurstParts(policy.getEffect('elemental-burst', 6), { burning:true, slowed:true, paralyzed:true }).map(part=>part.power), [1.6,.4,.4,.4]);
 assert.equal(policy.getEffect('elemental-storm',6).power,1.6);
 assert.equal(policy.getEffect('elemental-storm',6).transformPowerMultiplier,.5);
+assert.equal(policy.getElementalBurstParts(policy.getEffect('elemental-burst',6),{burning:true,slowed:true,shockedVulnerability:true}).length,4);
 assert.deepEqual(policy.rollStormElements(policy.getEffect('elemental-storm', 6), (()=>{const rolls=[0,.29,.99];return()=>rolls.shift();})()), ['fire','lightning']);
 
 const elementalist={progress:{advancedClass:'elementalist',skillLevels:{'mage:elemental-marks':6,'mage:resonance-overload':6}},skillCooldowns:{fireball:9000,blizzard:12000,'chain-lightning':10000}};
@@ -26,7 +27,10 @@ const arcane={progress:{advancedClass:'arcane-mage',skillLevels:{'mage:arcane-ch
 for(let i=0;i<5;i++)assert.equal(policy.castArcaneCharge(arcane,'fireball',i*1000).noCooldown,false);
 assert.equal(policy.castArcaneCharge(arcane,'arcane-missile',5000).noCooldown,true);
 assert.equal(arcane.arcaneChargeStacks,0);
-assert.deepEqual(policy.advanceOtherCooldowns(arcane,'arcane-torrent',2,1000).sort(),['arcane-missile','fireball']);
+const torrent=policy.resolveArcaneTorrentMana(arcane,policy.getEffect('arcane-torrent',6),5);
+assert.deepEqual(torrent,{hits:5,base:75,surge:30,theoretical:105,actual:100,overflow:5});
+assert.equal(arcane.resourceCurrent,1000);
+arcane.resourceCurrent=900;
 assert.equal(policy.resolveKill(arcane,6000),30);
 assert.equal(arcane.soulDrainUntil,11000);
 assert.equal(policy.getMaxManaBonus(arcane.progress),.15);

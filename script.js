@@ -3524,6 +3524,7 @@ function processEnemyDots() {
       const hasSourceBurn = dots.some((dot) => dot.source === source && dot.type === 'burn');
       applyDamageToMonster(index, damage * (sourceMastery?.resonance && hasSourceBurn ? 1.2 : 1), { damageType: 'periodic', attackRange: 'none', element: hasSourceBurn ? 'fire' : '' }, {
         attacker: source,
+        sourceSkill: hasSourceBurn ? 'burn' : 'dot',
         canEvade: false,
         canParry: false,
         logDefense: false,
@@ -3884,7 +3885,7 @@ function getSkillDescription(job, skill) {
   if (effect.slow) parts.push(`緩速 ${Math.round(effect.slow * 100)}%`);
   if (effect.attackDown) parts.push(`降低攻擊 ${Math.round(effect.attackDown * 100)}%`);
   if (effect.paralysis) parts.push(`命中後麻痺 ${effect.paralysisDuration || 4} 秒`);
-  if (effect.enhancedParalysis) parts.push(`強化麻痺期間承受火、冰、雷元素傷害 ${effect.elementalDamageTakenMultiplier || 2} 倍`);
+  if (effect.shockedVulnerability) parts.push(`感電易傷 ${effect.shockedDuration || 4} 秒：施法者本人後續所有傷害 ×${1 + effect.shockedVulnerability}`);
   if (effect.breakthrough) parts.push(`Lv6 突破：${effect.breakthrough}`);
   return parts.join('；') || getPassiveSkillDetail(job, skill) || skill.detail;
 }
@@ -4547,12 +4548,20 @@ function getEnemySkillState(index) {
   battle.enemySkillStates[index] = battle.enemySkillStates[index] || {
     stunnedUntil: 0, slowedUntil: 0, frozenUntil: 0, markedUntil: 0, markBonus: 0,
     magicVulnerabilityUntil: 0, magicVulnerability: 0, attackDownUntil: 0, attackDown: 0,
-    paralyzedUntil: 0, enhancedParalysisUntil: 0
+    paralyzedUntil: 0, shockedByMage: {}
   };
   return battle.enemySkillStates[index];
 }
 
-function applyEnemySkillState(index, effect, now = Date.now()) {
+function getMageShockKey(member) { return member?.id || member?.character?.id || ''; }
+
+function getMageShockState(index, member) {
+  const state = getEnemySkillState(index), key = getMageShockKey(member);
+  state.shockedByMage = state.shockedByMage || {};
+  return key ? state.shockedByMage[key] || null : null;
+}
+
+function applyEnemySkillState(index, effect, now = Date.now(), source = null) {
   const state = getEnemySkillState(index);
   if (effect.stun) state.stunnedUntil = Math.max(state.stunnedUntil, now + effect.stun * 1000);
   if (effect.freezeChance && Math.random() < effect.freezeChance) state.frozenUntil = Math.max(state.frozenUntil, now + effect.freezeDuration * 1000);
@@ -4561,27 +4570,25 @@ function applyEnemySkillState(index, effect, now = Date.now()) {
   if (effect.magicVulnerability) { state.magicVulnerabilityUntil = now + effect.vulnerabilityDuration * 1000; state.magicVulnerability = effect.magicVulnerability; }
   if (effect.attackDown) { state.attackDownUntil = now + effect.duration * 1000; state.attackDown = effect.attackDown; }
   if (effect.paralysis) state.paralyzedUntil = now + (effect.paralysisDuration || 4) * 1000;
-  if (effect.enhancedParalysis) {
-    state.enhancedParalysisUntil = now + (effect.paralysisDuration || 4) * 1000;
-    state.enhancedParalysisGeneration = (state.enhancedParalysisGeneration || 0) + 1;
-    state.elementalCollapseExtendedGeneration = 0;
+  if (effect.shockedVulnerability && source?.job === 'mage') {
+    const key = getMageShockKey(source), previous = key ? state.shockedByMage?.[key] : null, stats = MageAdvancementPolicy.telemetry(source);
+    if (previous?.until > now) stats.shockedRefreshes++; else stats.shockedApplications++;
+    state.shockedByMage = state.shockedByMage || {};
+    if (key) state.shockedByMage[key] = { until:now+(effect.shockedDuration||4)*1000,generation:(previous?.generation||0)+1,extended:false };
   }
 }
 
 function extendElementalCollapseStatuses(index, member, now = Date.now()) {
   const state = getEnemySkillState(index);
   const burn = (battle.enemyDots[index] || []).find((dot) => dot.type === 'burn' && dot.remaining > 0);
-  if (!burn || !(now < state.slowedUntil || now < state.frozenUntil) || !(now < state.paralyzedUntil || now < state.enhancedParalysisUntil)) return false;
+  const shock = getMageShockState(index, member);
+  if (!burn || !(now < state.slowedUntil || now < state.frozenUntil) || !(now < state.paralyzedUntil || shock?.until > now)) return false;
   const stats = MageAdvancementPolicy.telemetry(member);
   burn.remaining += 1; stats.elementalCollapses++; stats.burnExtendedSeconds++;
   if (now < state.frozenUntil) state.frozenUntil += 1000; else state.slowedUntil += 1000;
   stats.iceExtendedSeconds++;
-  if (now < state.enhancedParalysisUntil) {
-    if (state.elementalCollapseExtendedGeneration !== state.enhancedParalysisGeneration) {
-      state.enhancedParalysisUntil += 1000; state.paralyzedUntil += 1000;
-      state.elementalCollapseExtendedGeneration = state.enhancedParalysisGeneration;
-      stats.enhancedParalysisExtendedSeconds++;
-    }
+  if (shock?.until > now) {
+    if (!shock.extended) { shock.until += 1000; shock.extended = true; stats.shockedExtendedSeconds++; }
   } else { state.paralyzedUntil += 1000; stats.paralysisExtendedSeconds++; }
   return true;
 }
@@ -4607,14 +4614,14 @@ function applyDamageToMonster(index, baseDamage, profile, options = {}) {
   const statusElementMultiplier = elementalMastery && (battle.enemyDots[index] || []).length ? 1 + elementalMastery.elementDamage : 1;
   const frostResonanceMultiplier = elementalMastery?.resonance && (now < skillState.slowedUntil || now < skillState.frozenUntil) && Math.random() < .1 ? attackerStats.criticalDamageMultiplier : 1;
   const lightningResonanceMultiplier = elementalMastery?.resonance && now < (skillState.paralyzedUntil || 0) && options.attackKind !== 'resonance' && Math.random() < .1 ? 1.3 : 1;
-  const enhancedParalysisMultiplier = ['fire', 'ice', 'lightning'].includes(profile.element) && now < (skillState.enhancedParalysisUntil || 0) ? 2 : 1;
+  const shockedVulnerabilityMultiplier = getMageShockState(index, attacker)?.until > now ? 1.5 : 1;
   const conditionalDamageMultiplier = Number(options.conditionalDamageMultiplier) || ConditionalDamagePolicy.getDamageMultiplier({ currentHp: attacker?.currentHp, maxHp: attacker?.maxHp, lowHealthDamagePercent: attackerStats.lowHealthDamagePercent, highHealthDamagePercent: attackerStats.highHealthDamagePercent, attackKind: options.attackKind });
   const warriorAdvancement = WarriorAdvancementPolicy.getPassiveStats(progress, attacker?.maxHp > 0 ? attacker.currentHp / attacker.maxHp : 1);
   const warriorRuntime = WarriorAdvancementPolicy.getRuntimeBonuses(attacker, options.attackKind, now);
   const craftedEpicMultiplier = ChapterThreeCraftedEpicAbilityPolicy.getOutgoingDamageMultiplier(attacker, options.attackKind, { execution: options.craftedEpicExecution }, now);
   const specialEquipmentMultiplier = Math.max(0, Number(options.specialEquipmentMultiplier) || 1);
   const deathMarkMultiplier = RogueAdvancementPolicy.getDeathMarkDamageMultiplier(attacker, skillState, now);
-  const adjustedBaseDamage = magicAdjustedDamage * (1 + warriorRuntime.attack) * (1 + (attackerStats.damageBonus || 0) + warriorAdvancement.damage + warriorRuntime.damage) * rankMultiplier * attackKindMultiplier * conditionalDamageMultiplier * craftedEpicMultiplier * specialEquipmentMultiplier * deathMarkMultiplier * markMultiplier * vulnerabilityMultiplier * controlledMultiplier * statusElementMultiplier * frostResonanceMultiplier * lightningResonanceMultiplier * enhancedParalysisMultiplier;
+  const adjustedBaseDamage = magicAdjustedDamage * (1 + warriorRuntime.attack) * (1 + (attackerStats.damageBonus || 0) + warriorAdvancement.damage + warriorRuntime.damage) * rankMultiplier * attackKindMultiplier * conditionalDamageMultiplier * craftedEpicMultiplier * specialEquipmentMultiplier * deathMarkMultiplier * markMultiplier * vulnerabilityMultiplier * controlledMultiplier * statusElementMultiplier * frostResonanceMultiplier * lightningResonanceMultiplier * shockedVulnerabilityMultiplier;
   if (enemy.mapId) {
     const hitChance = ChapterOneLevelPolicy.getPlayerHitChance(progress.level, enemy.level, attackerStats.accuracy, 0);
     if (Math.random() >= hitChance) {
@@ -4682,7 +4689,10 @@ function applyDamageToMonster(index, baseDamage, profile, options = {}) {
     logBattle(`↩【${enemy.name}】以【盾架反擊】對${attacker.name}造成 ${actualCounterDamage} 傷害。`, 'damage-taken');
     defeatPartyMember(attacker);
   }
-  if (enhancedParalysisMultiplier > 1 && attacker?.job === 'mage') MageAdvancementPolicy.record(attacker, 'enhancedParalysisDamage', result.finalDamage);
+  if (shockedVulnerabilityMultiplier > 1 && attacker?.job === 'mage') {
+    const mageStats=MageAdvancementPolicy.telemetry(attacker),sourceSkill=options.sourceSkill||profile.element||options.attackKind||'other',bonus=result.finalDamage/3;
+    mageStats.shockedBonusDamage+=bonus;mageStats.shockedBonusBySkill[sourceSkill]=(mageStats.shockedBonusBySkill[sourceSkill]||0)+bonus;
+  }
   const wasAlive = battle.enemyHps[index] > 0;
   battle.enemyHps[index] -= result.finalDamage;
   if (wasAlive && battle.enemyHps[index] <= 0 && attacker?.alive) {
@@ -4728,8 +4738,8 @@ function getMageSkillElement(skillId, stormElement = '') {
 function applyElementalStormStatus(index, element, member, damage, now) {
   const state = getEnemySkillState(index);
   if (element === 'fire') {
-    const paralysisSnapshot = now < state.enhancedParalysisUntil ? 2 : 1;
-    applyDot(index, 'burn', Math.max(1, Math.ceil(damage / paralysisSnapshot * .18 * member.stats.dotMultiplier)), 4, 1, { source: member });
+    const shockSnapshot = getMageShockState(index,member)?.until > now ? 1.5 : 1;
+    applyDot(index, 'burn', Math.max(1, Math.ceil(damage / shockSnapshot * .18 * member.stats.dotMultiplier)), 4, 1, { source: member });
     state.visualBurnAt = now + 500;
   } else if (element === 'ice') {
     state.slowedUntil = Math.max(state.slowedUntil, now + 4000);
@@ -4746,7 +4756,7 @@ function resolveFinishedMageResonance(member, now) {
   const targetIndex = member.targetIndex >= 0 && battle.enemyHps[member.targetIndex] > 0
     ? member.targetIndex : aliveEnemyIndexesByAge()[0];
   if (targetIndex === undefined) return;
-  const result = applyDamageToMonster(targetIndex, member.stats.attack * release.power, { damageType: 'magic', attackRange: 'ranged', element: release.element }, { attacker: member, attackKind: 'resonance', canParry: false });
+  const result = applyDamageToMonster(targetIndex, member.stats.attack * release.power, { damageType: 'magic', attackRange: 'ranged', element: release.element }, { attacker: member, attackKind: 'resonance', sourceSkill:'resonance-overload', canParry: false });
   MageAdvancementPolicy.recordOverloadDamage(member, result.finalDamage);
 }
 
@@ -4814,13 +4824,13 @@ function useAutoSkillForMember(member, now = Date.now()) {
       const rogueBonuses = RogueAdvancementPolicy.getTargetBonuses(member, battle.enemyDots[index], getEnemySkillState(index), battle.enemyHps[index] / getEnemyDefinition(index).maxHp, 'skill', now);
       const shadowBleedingMultiplier = skill.id === 'shadow-assassination' && RogueAdvancementPolicy.hasBleedingStatus(battle.enemyDots[index]) ? 1 + skillEffect.bleedingDamage : 1;
       if (skill.id === 'elemental-burst') {
-        const state = getEnemySkillState(index), status = { burning:(battle.enemyDots[index]||[]).some(dot=>dot.type==='burn'),slowed:now<state.slowedUntil,frozen:now<state.frozenUntil,paralyzed:now<state.paralyzedUntil,enhancedParalysis:now<state.enhancedParalysisUntil };
+        const state = getEnemySkillState(index), status = { burning:(battle.enemyDots[index]||[]).some(dot=>dot.type==='burn'),slowed:now<state.slowedUntil,frozen:now<state.frozenUntil,paralyzed:now<state.paralyzedUntil,shockedVulnerability:getMageShockState(index,member)?.until>now };
         const parts = MageAdvancementPolicy.getElementalBurstParts(skillEffect, status, member);
         const results = parts.map((part) => {
           const partResonance = MageAdvancementPolicy.getResonanceBonuses(member, part.element, now);
           const partCritical = Math.random() < Math.min(.95, stats.crit + partResonance.crit);
           const raw = Math.max(1, Math.ceil(stats.attack * part.power * (partCritical ? stats.criticalDamageMultiplier : 1)));
-          const partResult = applyDamageToMonster(index, raw * getRuneOutgoingMultiplier(member, index), { ...profile, element: part.element || '' }, { attacker:member,attackKind:'skill',conditionalDamageMultiplier,craftedEpicExecution,specialEquipmentMultiplier:(epicWeaponExecution.multipliers[targetOrder]||1)*(1+grandmasterSkillBonus)*(1+partResonance.damage),showDamage:true });
+          const partResult = applyDamageToMonster(index, raw * getRuneOutgoingMultiplier(member, index), { ...profile, element: part.element || '' }, { attacker:member,attackKind:'skill',sourceSkill:'elemental-burst',conditionalDamageMultiplier,craftedEpicExecution,specialEquipmentMultiplier:(epicWeaponExecution.multipliers[targetOrder]||1)*(1+grandmasterSkillBonus)*(1+partResonance.damage),showDamage:true });
           if (part.element) MageAdvancementPolicy.recordBonusDamage(member, part.element, partResult.finalDamage);
           return partResult;
         });
@@ -4829,6 +4839,7 @@ function useAutoSkillForMember(member, now = Date.now()) {
       return { index, result: applyDamageToMonster(index, damage * chainMultiplier * piercingMultiplier * getRuneOutgoingMultiplier(member, index), profile, {
         attacker: member,
         attackKind: 'skill',
+        sourceSkill: skill.id,
         armorIgnore: (skillEffect.armorIgnore || 0) + (berserkerSlash?.armorIgnore || 0) + shootingBonuses.armorIgnore,
         conditionalDamageMultiplier,
         craftedEpicExecution,
@@ -4846,13 +4857,13 @@ function useAutoSkillForMember(member, now = Date.now()) {
         const secondBonus = MageAdvancementPolicy.getResonanceBonuses(member, stormElements[1], now);
         const secondCritical = Math.random() < Math.min(.95, stats.crit + secondBonus.crit);
         const secondDamage = Math.max(1, Math.ceil(stats.attack * skillEffect.power * skillEffect.transformPowerMultiplier * (secondCritical ? stats.criticalDamageMultiplier : 1)));
-        const result = applyDamageToMonster(index, secondDamage * (1 + secondBonus.damage) * getRuneOutgoingMultiplier(member,index), secondProfile, { attacker:member,attackKind:'skill-followup',canParry:false });
+        const result = applyDamageToMonster(index, secondDamage * (1 + secondBonus.damage) * getRuneOutgoingMultiplier(member,index), secondProfile, { attacker:member,attackKind:'skill-followup',sourceSkill:'elemental-storm',canParry:false });
         if (!result.evaded) { applyElementalStormStatus(index, stormElements[1], member, result.finalDamage, now); MageAdvancementPolicy.record(member, 'stormFollowupDamage', result.finalDamage); }
       });
     }
     if (skill.id === 'arcane-missile' && skillEffect.repeatChance && hits.length && Math.random() < skillEffect.repeatChance) {
       const repeatTarget = hits.find(target => battle.enemyHps[target.index] > 0) || hits[0];
-      const repeat = applyDamageToMonster(repeatTarget.index, stats.attack * skillEffect.repeatPower, { ...profile, element:'arcane' }, { attacker:member,attackKind:'skill-followup',canParry:false });
+      const repeat = applyDamageToMonster(repeatTarget.index, stats.attack * skillEffect.repeatPower, { ...profile, element:'arcane' }, { attacker:member,attackKind:'skill-followup',sourceSkill:'arcane-missile',canParry:false });
       MageAdvancementPolicy.recordArcaneRepeat(member);
     }
     HunterAdvancementPolicy.completeShootingSkill(member, skill.id, hits.length > 0, critical, now);
@@ -4870,7 +4881,7 @@ function useAutoSkillForMember(member, now = Date.now()) {
       applyDamageToMonster(hits[0].index, strike.damage, profile, { attacker: member, attackKind: 'offhand', canParry: false });
     }
     if (hits.length) triggerRuneFrenzy(member, critical, now);
-    hits.forEach((target) => applyEnemySkillState(target.index, skillEffect, now));
+    hits.forEach((target) => applyEnemySkillState(target.index, skillEffect, now, member));
     if (skill.id === 'chain-lightning') hits.forEach((target, order) => {
       const state = getEnemySkillState(target.index);
       if (state.paralyzedUntil > now) state.visualParalyzedAt = now + 330 + order * 100;
@@ -4887,8 +4898,8 @@ function useAutoSkillForMember(member, now = Date.now()) {
     });
     if (skill.id === 'fireball') hits.forEach((target) => {
       const state = getEnemySkillState(target.index);
-      const paralysisSnapshot = now < state.enhancedParalysisUntil ? 2 : 1;
-      applyDot(target.index, 'burn', Math.max(1, Math.ceil(target.result.finalDamage / paralysisSnapshot * .18 * (1 + (skillEffect.burnBonus || 0)) * stats.dotMultiplier)), 4 + (skillEffect.burnDuration || 0), 1, { source: member });
+      const shockSnapshot = getMageShockState(target.index,member)?.until > now ? 1.5 : 1;
+      applyDot(target.index, 'burn', Math.max(1, Math.ceil(target.result.finalDamage / shockSnapshot * .18 * (1 + (skillEffect.burnBonus || 0)) * stats.dotMultiplier)), 4 + (skillEffect.burnDuration || 0), 1, { source: member });
       state.visualBurnAt = now + 500;
     });
     if (skill.id === 'backstab') hits.forEach((target) => {
@@ -4955,6 +4966,7 @@ function useAutoSkillForMember(member, now = Date.now()) {
       ? HunterArrowPolicy.spendArrows(member.resourceCurrent, skill.id, progress.equipment)
       : Math.max(0, member.resourceCurrent - cost);
     const actualResourceSpent = Math.max(0, resourceBeforeSkillCost - member.resourceCurrent);
+    if (skill.id === 'arcane-torrent') MageAdvancementPolicy.resolveArcaneTorrentMana(member,skillEffect,hits.length);
     const arcaneCharge = MageAdvancementPolicy.castArcaneCharge(member, skill.id, now);
     ChapterThreeCraftedEpicAbilityPolicy.completeSkillExecution(member, craftedEpicExecution, now);
     if (skill.id !== 'companion') ChapterThreeSpecialEquipmentPolicy.resolveManaSurge(member, actualResourceSpent, Math.random);
@@ -4967,7 +4979,6 @@ function useAutoSkillForMember(member, now = Date.now()) {
     const blinkCooldownMultiplier = member.blinkCooldownReduction ? 1 - member.blinkCooldownReduction : 1;
     const blessingCooldownSpeed = now < (member.lightGraceUntil || 0) ? 1 + (member.lightGraceCooldownSpeed || 0) : 1;
     member.skillCooldowns[skill.id] = arcaneCharge.noCooldown ? now : now + (skillEffect.cooldown || skill.cooldown) * blinkCooldownMultiplier * skillCooldownMultiplier * 1000 / (stats.cooldownSpeed * blessingCooldownSpeed);
-    if (skill.id === 'arcane-torrent') MageAdvancementPolicy.advanceOtherCooldowns(member, skill.id, skillEffect.cooldownAdvance || 1, now);
     if (member.pendingSkillCooldownReduction) {
       member.skillCooldowns[skill.id] = Math.max(now, member.skillCooldowns[skill.id] - member.pendingSkillCooldownReduction);
       member.pendingSkillCooldownReduction = 0;
@@ -5244,7 +5255,7 @@ function processPartyMemberAttacks(now = Date.now()) {
     const hit = Math.max(1, Math.ceil(baseHit * (instinctTriggered ? hunterInstinct.power : 1)));
     const enemy = getEnemyDefinition(targetIndex);
     const profile = getPlayerAttackProfile(member.character);
-    const result = applyDamageToMonster(targetIndex, hit * getRuneOutgoingMultiplier(member, targetIndex), profile, { attacker: member, attackKind: 'basic', specialEquipmentMultiplier: specialBasicExecution.damageMultiplier });
+    const result = applyDamageToMonster(targetIndex, hit * getRuneOutgoingMultiplier(member, targetIndex), profile, { attacker: member, attackKind: 'basic', sourceSkill:'basic-attack', specialEquipmentMultiplier: specialBasicExecution.damageMultiplier });
     playPartyMemberCombatAnimation(member, [targetIndex], { kind: 'basic' });
     ChapterThreeSpecialEquipmentPolicy.completeMainHandBasicAttack(member, specialBasicExecution, !result.evaded && result.finalDamage > 0, battle.enemyHps[targetIndex] > 0);
     RogueAdvancementPolicy.consumeBasic(member, lethalExecution, !result.evaded && result.finalDamage > 0);

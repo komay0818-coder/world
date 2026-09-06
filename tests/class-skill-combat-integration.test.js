@@ -17,9 +17,9 @@ assert.match(source, /target\.manaShieldReadyAt[\s\S]*target\.resourceCurrent -=
 assert.match(source, /member\.effectiveHealCount[\s\S]*graceTriggered/, 'divine grace uses deterministic effective-heal counting');
 assert.match(source, /blessing\.party[\s\S]*lightGraceCooldownSpeed/, 'Light Grace can buff the whole party and cooldown speed');
 assert.match(source, /effect\.paralysis[\s\S]*state\.paralyzedUntil/, 'all configured chain lightning levels apply paralysis');
-assert.match(source, /effect\.enhancedParalysis[\s\S]*state\.enhancedParalysisUntil/, 'enhanced paralysis has an independent refreshable window');
-assert.match(source, /\['fire', 'ice', 'lightning'\]\.includes\(profile\.element\)[\s\S]*enhancedParalysisUntil[\s\S]*\? 2 : 1/, 'enhanced paralysis doubles fire, ice and lightning direct damage only');
-assert.match(source, /damage \* \(sourceMastery\?\.resonance[\s\S]*element: hasSourceBurn \? 'fire'/, 'fire burn delegates enhanced paralysis to the common elemental damage path');
-assert.doesNotMatch(source, /const enhancedParalysisMultiplier = source\?\.job/, 'fire burn does not pre-apply enhanced paralysis a second time');
+assert.match(source, /effect\.shockedVulnerability[\s\S]*state\.shockedByMage/, 'shocked vulnerability has a per-mage refreshable window');
+assert.match(source, /getMageShockState\(index, attacker\)[\s\S]*\? 1\.5 : 1/, 'only the applying mage receives the universal 1.5 damage multiplier');
+assert.match(source, /damage \* \(sourceMastery\?\.resonance[\s\S]*sourceSkill: hasSourceBurn \? 'burn'/, 'burn delegates shocked vulnerability to the common damage path');
+assert.doesNotMatch(source, /elementalDamageTakenMultiplier|enhancedParalysisMultiplier/, 'the removed elemental-only multiplier is not retained');
 
 console.log('class-skill-combat-integration: assertions passed');

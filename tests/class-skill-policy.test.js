@@ -16,9 +16,10 @@ for (let level = 1; level <= 6; level++) {
   const chain = policy.getEffect('mage', 'chain-lightning', level);
   assert.equal(chain.paralysis, true, `chain lightning Lv${level} applies paralysis`);
   assert.equal(chain.paralysisDuration, 4);
-  assert.equal(Boolean(chain.enhancedParalysis), level === 6);
+  assert.equal(Boolean(chain.shockedVulnerability), level === 6);
 }
-assert.equal(policy.getEffect('mage', 'chain-lightning', 6).elementalDamageTakenMultiplier, 2);
+assert.equal(policy.getEffect('mage', 'chain-lightning', 6).shockedVulnerability, .5);
+assert.equal(policy.getEffect('mage', 'chain-lightning', 6).shockedDuration, 4);
 
 const levels = { 'warrior:heavy-strike': 6, 'warrior:whirlwind': 5, 'warrior:weapon-mastery': 6 };
 assert.equal(policy.canSpecialize(levels, 'warrior', 'whirlwind').reason, 'specialization-occupied');
