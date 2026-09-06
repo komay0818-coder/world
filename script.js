@@ -3514,6 +3514,7 @@ function processEnemyDots() {
       if (source) multiplier += RogueAdvancementPolicy.getTargetBonuses(source, dots, getEnemySkillState(index), battle.enemyHps[index] / getEnemyDefinition(index).maxHp, 'dot', now).dotDamage;
       const key = dot.source || null;
       damageBySource.set(key, (damageBySource.get(key) || 0) + dot.damage * tickCount * multiplier);
+      if (source) CombatCorePolicy.record(source, 'dotTicks', tickCount);
     });
     battle.enemyDots[index] = dots.filter((dot) => dot.remaining > 0);
     damageBySource.forEach((damage, source) => {
@@ -4693,9 +4694,11 @@ function applyDamageToMonster(index, baseDamage, profile, options = {}) {
     const mageStats=MageAdvancementPolicy.telemetry(attacker),sourceSkill=options.sourceSkill||profile.element||options.attackKind||'other',bonus=result.finalDamage/3;
     mageStats.shockedBonusDamage+=bonus;mageStats.shockedBonusBySkill[sourceSkill]=(mageStats.shockedBonusBySkill[sourceSkill]||0)+bonus;
   }
+  CombatCorePolicy.recordDamage(attacker, options.sourceSkill || options.attackKind || profile.element || 'other', result.finalDamage);
   const wasAlive = battle.enemyHps[index] > 0;
   battle.enemyHps[index] -= result.finalDamage;
   if (wasAlive && battle.enemyHps[index] <= 0 && attacker?.alive) {
+    CombatCorePolicy.record(attacker, 'kills');
     const markOwner = (battle.partyMembers || []).find((member) => member.id === skillState.deathMarkOwner);
     if (markOwner) RogueAdvancementPolicy.resolveMarkedKill(markOwner, skillState, now);
     const poisonSource = (battle.enemyDots[index] || []).find((dot) => dot.type === 'poison' && dot.source)?.source;
@@ -4966,6 +4969,8 @@ function useAutoSkillForMember(member, now = Date.now()) {
       ? HunterArrowPolicy.spendArrows(member.resourceCurrent, skill.id, progress.equipment)
       : Math.max(0, member.resourceCurrent - cost);
     const actualResourceSpent = Math.max(0, resourceBeforeSkillCost - member.resourceCurrent);
+    CombatCorePolicy.recordSkillCast(member, skill.id);
+    CombatCorePolicy.record(member, 'resourceSpent', actualResourceSpent);
     if (skill.id === 'arcane-torrent') MageAdvancementPolicy.resolveArcaneTorrentMana(member,skillEffect,hits.length);
     const arcaneCharge = MageAdvancementPolicy.castArcaneCharge(member, skill.id, now);
     ChapterThreeCraftedEpicAbilityPolicy.completeSkillExecution(member, craftedEpicExecution, now);
@@ -5179,6 +5184,7 @@ function autoSkillTick() {
 function updatePartyMemberResource(member, now) {
   if (!member.alive) return;
   if (usesManaResource(member.job)) {
+    const resourceBeforeRecovery = member.resourceCurrent;
     const elapsed = ManaRegenPolicy.getElapsedSeconds(now, member.lastManaRegenAt);
     member.lastManaRegenAt = now;
     MageAdvancementPolicy.tick(member, elapsed * 1000, now);
@@ -5189,6 +5195,7 @@ function updatePartyMemberResource(member, now) {
       flatPerSecond: member.stats.manaRegenFlat,
       elapsedSeconds: elapsed
     }));
+    CombatCorePolicy.record(member, 'resourceRecovered', Math.max(0, member.resourceCurrent - resourceBeforeRecovery));
     updatePartyMemberManaExhaustion(member);
   } else if (member.resourceType === 'energy') {
     const elapsed = AssassinEnergyPolicy.getElapsedSeconds(now, member.lastResourceUpdatedAt);
@@ -5256,6 +5263,7 @@ function processPartyMemberAttacks(now = Date.now()) {
     const enemy = getEnemyDefinition(targetIndex);
     const profile = getPlayerAttackProfile(member.character);
     const result = applyDamageToMonster(targetIndex, hit * getRuneOutgoingMultiplier(member, targetIndex), profile, { attacker: member, attackKind: 'basic', sourceSkill:'basic-attack', specialEquipmentMultiplier: specialBasicExecution.damageMultiplier });
+    CombatCorePolicy.record(member, 'basicAttacks');
     playPartyMemberCombatAnimation(member, [targetIndex], { kind: 'basic' });
     ChapterThreeSpecialEquipmentPolicy.completeMainHandBasicAttack(member, specialBasicExecution, !result.evaded && result.finalDamage > 0, battle.enemyHps[targetIndex] > 0);
     RogueAdvancementPolicy.consumeBasic(member, lethalExecution, !result.evaded && result.finalDamage > 0);
@@ -5443,24 +5451,27 @@ function processStrongholdOutpost(now = Date.now()) {
   return true;
 }
 
+function createBattleTickRuntime() {
+  return {
+    isFighting: () => fighting,
+    enemyRespawns: processEnemyRespawns,
+    enemyDots: processEnemyDots,
+    environment: processBlackForestCorruption,
+    outpost: processStrongholdOutpost,
+    revive: reviveDefeatedTeammates,
+    members: () => battle.partyMembers || [],
+    resources: updatePartyMemberResource,
+    healthRegen: updatePartyMemberHealthRegeneration,
+    partyAttacks: processPartyMemberAttacks,
+    companions: processHunterCompanionAttacks,
+    queueDefeated: queueDefeatedEnemies,
+    syncLegacy: syncLegacyBattleStateFromMain,
+    render: updateBattleUI
+  };
+}
+
 function battleTick() {
-  if (!fighting) return;
-  processEnemyRespawns();
-  processEnemyDots();
-  const now = Date.now();
-  processBlackForestCorruption(now);
-  if (!fighting) return;
-  processStrongholdOutpost(now);
-  reviveDefeatedTeammates(now);
-  (battle.partyMembers || []).forEach((member) => {
-    updatePartyMemberResource(member, now);
-    updatePartyMemberHealthRegeneration(member, now);
-  });
-  processPartyMemberAttacks(now);
-  processHunterCompanionAttacks(now);
-  queueDefeatedEnemies();
-  syncLegacyBattleStateFromMain();
-  updateBattleUI();
+  CombatCorePolicy.runPlayerTick(createBattleTickRuntime(), Date.now());
 }
 
 function getWoundedEnemyIndexes() {

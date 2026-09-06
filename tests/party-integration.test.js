@@ -3,6 +3,7 @@ const fs = require('node:fs');
 const path = require('node:path');
 
 const script = fs.readFileSync(path.join(__dirname, '..', 'script.js'), 'utf8');
+const combatCore = fs.readFileSync(path.join(__dirname, '..', 'combat-core-policy.js'), 'utf8');
 const html = fs.readFileSync(path.join(__dirname, '..', 'index.html'), 'utf8');
 const layoutCss = fs.readFileSync(path.join(__dirname, '..', 'styles', 'mmorpg-layout.css'), 'utf8');
 
@@ -42,7 +43,8 @@ const manaExhaustionBody = script.match(/function updatePartyMemberManaExhaustio
 assert.doesNotMatch(manaExhaustionBody, /enemy|rewardKey|earnedXp|earnedGold|accountDrops/, 'mana state updates cannot throw on unrelated reward variables before normal attacks');
 assert.match(manaExhaustionBody, /!member\.manaExhausted && ratio <= \.15[\s\S]*member\.isMain[\s\S]*useManaPotion\(\)/, 'the main character automatically uses one mana potion when entering mana exhaustion');
 assert.doesNotMatch(manaExhaustionBody, /else if \(member\.manaExhausted[\s\S]*useManaPotion\(\)/, 'an already exhausted character does not repeatedly consume mana potions');
-assert.match(script, /updatePartyMemberResource\(member, now\)[\s\S]*processPartyMemberAttacks\(now\)/, 'resource updates complete before the independent normal attack pass');
+assert.match(script, /resources: updatePartyMemberResource[\s\S]*partyAttacks: processPartyMemberAttacks/, 'the formal runtime maps resource and attack callbacks into the shared core');
+assert.match(combatCore, /runtime\.resources\(member, now\)[\s\S]*runtime\.partyAttacks\(now\)/, 'resource updates complete before the independent normal attack pass');
 assert.match(script, /PlainsDepthsPolicy\.resolveActiveSkill/, 'plains depths active skills resolve on monster attack turns');
 assert.match(script, /PlainsDepthsPolicy\.applyBlackstoneAura/, 'alive blackstone monsters feed the shared attack and defense aura');
 assert.match(script, /enemy\.id === 'wanderingBlackKnight'[\s\S]*COUNTER_DAMAGE_MULTIPLIER/, 'black knight parries trigger counterattack damage');

@@ -1,0 +1,11 @@
+const assert=require('node:assert/strict');
+const {run,builds}=require('../tools/mage-formal-consistency.js');
+for(const spec of ['elementalist','arcane-mage'])assert.equal(builds(spec).length,48);
+const build=builds('arcane-mage')[0],first=run('arcane-mage',build,20,1e9,1,12345),second=run('arcane-mage',build,20,1e9,1,12345);
+assert.deepEqual(second,first,'same formal core, initial state and RNG seed must be exactly deterministic');
+const browser=run('arcane-mage',build,20,1e9,1,12345,'browser');
+assert.deepEqual(browser,first,'browser battleTick and headless entry must resolve the same events');
+assert.ok(first.combat.basicAttacks>0);
+assert.ok(Object.keys(first.combat.skillCasts).length>0);
+assert.equal(first.total,first.combat.totalDamage);
+console.log('mage-formal-consistency: assertions passed');

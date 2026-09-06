@@ -3,7 +3,7 @@ const fs = require('node:fs');
 const path = require('node:path');
 const script = fs.readFileSync(path.join(__dirname, '..', 'script.js'), 'utf8');
 
-const defeatFlow = script.match(/function endBattleAfterPlayerDefeat\([\s\S]*?\n}\n\nfunction defeatPartyMember/)?.[0] || '';
+const defeatFlow = script.match(/function endBattleAfterPlayerDefeat\([\s\S]*?\r?\n}\r?\n\r?\nfunction defeatPartyMember/)?.[0] || '';
 assert.match(defeatFlow, /battle\.defeatHandled/, 'defeat handling is idempotent');
 assert.match(defeatFlow, /fighting = false;[\s\S]*clearInterval\(battleTimer\)[\s\S]*clearInterval\(skillTimer\)[\s\S]*clearInterval\(enemyAttackTimer\)/, 'all online combat loops stop immediately');
 assert.match(defeatFlow, /battle\.sessionId = \+\+battleSessionSequence/, 'delayed wave and dungeon callbacks are invalidated');

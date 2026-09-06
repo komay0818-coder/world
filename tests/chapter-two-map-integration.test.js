@@ -4,6 +4,7 @@ const path = require('node:path');
 
 const root = path.resolve(__dirname, '..');
 const script = fs.readFileSync(path.join(root, 'script.js'), 'utf8');
+const combatCore = fs.readFileSync(path.join(root, 'combat-core-policy.js'), 'utf8');
 const index = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
 const rendererStart = script.indexOf('function renderBlackForestRegions()');
 const rendererEnd = script.indexOf('function selectAllCommonEquipment', rendererStart);
@@ -83,7 +84,8 @@ assert.match(script, /if \(map\.chapter === 2\) BlackForestCorruptionPolicy\.ent
 assert.match(script, /BlackForestCorruptionPolicy\.applyCombatStats\(stats, progress\.blackForestCorruption, activeMap\.chapter === 2\)/);
 assert.match(script, /BlackForestDepthsPolicy\.applyDenseFogAccuracy\(corruptedStats\.accuracy, activeMap\.id\)/);
 assert.match(script, /function processBlackForestCorruption\(now = Date\.now\(\)\)[\s\S]*BlackForestCorruptionPolicy\.getHpLoss/);
-assert.match(script, /processBlackForestCorruption\(now\)/);
+assert.match(script, /environment: processBlackForestCorruption/);
+assert.match(combatCore, /runtime\.environment\(now\)/);
 assert.match(script, /previousMapId: 'plains-depths'/, 'chapter two connects from the first chapter finale');
 assert.match(script, /function renderBlackForestRegions\(/, 'black forest has a chapter region view');
 assert.match(blackForestRenderer, /ChapterTwoMapPolicy\.getDungeon\(region\.id\)/, 'the stronghold preview reads the dungeon foundation');

@@ -1,0 +1,13 @@
+const assert=require('node:assert/strict');
+const Core=require('../combat-core-policy.js');
+const calls=[];
+const runtime={isFighting:()=>true,members:()=>['a','b']};
+for(const name of Core.PLAYER_TICK_ORDER)runtime[name]=(...args)=>calls.push([name,...args]);
+assert.equal(Core.runPlayerTick(runtime,123),true);
+assert.deepEqual(calls.map(x=>x[0]),['enemyRespawns','enemyDots','environment','outpost','revive','resources','healthRegen','resources','healthRegen','partyAttacks','companions','queueDefeated','syncLegacy','render']);
+assert.deepEqual(calls.filter(x=>x[0]==='resources').map(x=>x.slice(1)),[['a',123],['b',123]]);
+const stopped=[];let active=true;const halted={...runtime,isFighting:()=>active,environment:()=>{stopped.push('environment');active=false;}};
+for(const name of Core.PLAYER_TICK_ORDER)if(name!=='environment')halted[name]=()=>stopped.push(name);
+assert.equal(Core.runPlayerTick(halted,456),false);
+assert.deepEqual(stopped,['enemyRespawns','enemyDots','environment']);
+console.log('combat-core-policy: assertions passed');
