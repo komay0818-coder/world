@@ -1,0 +1,374 @@
+{
+  "metadata": {
+    "version": "battle-priest-mp-v2-test",
+    "generatedAt": "2026-09-06T23:50:16.208Z",
+    "secondsPerRun": 3600,
+    "runsPerCombination": 32,
+    "fixedConditions": {
+      "attack": 300,
+      "maxMp": 520,
+      "naturalMpPerSecond": 10,
+      "partyHp": [
+        6500,
+        4500,
+        3800,
+        4200
+      ],
+      "otherTeamDps": 1550
+    },
+    "scope": "simulation only; production skill policy and combat are unchanged",
+    "actualDamageMultiplier": 0.82,
+    "variants": {
+      "A": {
+        "name": "舊版基準：無傷害轉MP",
+        "smiteMp": false,
+        "devotionMp": false,
+        "oldHealing": true
+      },
+      "B": {
+        "name": "只有神聖懲擊回MP",
+        "smiteMp": true,
+        "devotionMp": false,
+        "oldHealing": false
+      },
+      "C": {
+        "name": "只有光明奉獻回MP",
+        "smiteMp": false,
+        "devotionMp": true,
+        "oldHealing": false
+      },
+      "D": {
+        "name": "神聖懲擊＋光明奉獻回MP",
+        "smiteMp": true,
+        "devotionMp": true,
+        "oldHealing": false
+      }
+    }
+  },
+  "results": {
+    "boss": {
+      "A": {
+        "mp": {
+          "spent": 36352.69,
+          "recovered": 36000,
+          "natural": 36000,
+          "smite": 0,
+          "devotion": 0,
+          "overflow": 0,
+          "average": 155.63,
+          "minimum": 61.78,
+          "below25Percent": 32.64,
+          "zeroEvents": 0,
+          "exhaustions": 68,
+          "blockedCasts": 68,
+          "end": 167.31
+        },
+        "casts": {
+          "smite": 565.81,
+          "storm": 365.16,
+          "other": 584.81
+        },
+        "combat": {
+          "priestDps": 260.5,
+          "teamDps": 1810.5,
+          "effectiveHealing": 202774.57,
+          "averageHpPercent": 77.95,
+          "minimumHpPercent": 61.62,
+          "finalSurvivors": 4
+        },
+        "faith": {
+          "coveragePercent": [
+            20.62,
+            2.07,
+            2.07,
+            75.24
+          ],
+          "averageStacks": 2.32,
+          "interruptions": 68
+        }
+      },
+      "B": {
+        "mp": {
+          "spent": 53450.13,
+          "recovered": 53433.66,
+          "natural": 22594.31,
+          "smite": 30839.34,
+          "devotion": 0,
+          "overflow": 62964.66,
+          "average": 506.52,
+          "minimum": 463,
+          "below25Percent": 0,
+          "zeroEvents": 0,
+          "exhaustions": 0,
+          "blockedCasts": 0,
+          "end": 503.53
+        },
+        "casts": {
+          "smite": 763.09,
+          "storm": 460.19,
+          "other": 1001.31
+        },
+        "combat": {
+          "priestDps": 363.17,
+          "teamDps": 1913.17,
+          "effectiveHealing": 203156.63,
+          "averageHpPercent": 78.11,
+          "minimumHpPercent": 62.53,
+          "finalSurvivors": 4
+        },
+        "faith": {
+          "coveragePercent": [
+            0,
+            0.03,
+            0.03,
+            99.94
+          ],
+          "averageStacks": 3,
+          "interruptions": 0
+        }
+      },
+      "C": {
+        "mp": {
+          "spent": 53456.75,
+          "recovered": 53451.15,
+          "natural": 6505.97,
+          "smite": 0,
+          "devotion": 46945.18,
+          "overflow": 57696.87,
+          "average": 517.68,
+          "minimum": 493,
+          "below25Percent": 0,
+          "zeroEvents": 0,
+          "exhaustions": 0,
+          "blockedCasts": 0,
+          "end": 514.4
+        },
+        "casts": {
+          "smite": 763.56,
+          "storm": 459.84,
+          "other": 1001.72
+        },
+        "combat": {
+          "priestDps": 363.34,
+          "teamDps": 1913.34,
+          "effectiveHealing": 203073.47,
+          "averageHpPercent": 78.09,
+          "minimumHpPercent": 61.7,
+          "finalSurvivors": 4
+        },
+        "faith": {
+          "coveragePercent": [
+            0,
+            0.03,
+            0.03,
+            99.94
+          ],
+          "averageStacks": 3,
+          "interruptions": 0
+        }
+      },
+      "D": {
+        "mp": {
+          "spent": 53449.63,
+          "recovered": 53446.5,
+          "natural": 6506.73,
+          "smite": 20425.75,
+          "devotion": 26514.01,
+          "overflow": 151478.84,
+          "average": 517.69,
+          "minimum": 493,
+          "below25Percent": 0,
+          "zeroEvents": 0,
+          "exhaustions": 0,
+          "blockedCasts": 0,
+          "end": 516.87
+        },
+        "casts": {
+          "smite": 763.19,
+          "storm": 459.97,
+          "other": 1001.53
+        },
+        "combat": {
+          "priestDps": 363.21,
+          "teamDps": 1913.21,
+          "effectiveHealing": 203174.72,
+          "averageHpPercent": 78.11,
+          "minimumHpPercent": 62.39,
+          "finalSurvivors": 4
+        },
+        "faith": {
+          "coveragePercent": [
+            0,
+            0.03,
+            0.03,
+            99.94
+          ],
+          "averageStacks": 3,
+          "interruptions": 0
+        }
+      }
+    },
+    "five": {
+      "A": {
+        "mp": {
+          "spent": 36416,
+          "recovered": 36000,
+          "natural": 36000,
+          "smite": 0,
+          "devotion": 0,
+          "overflow": 0,
+          "average": 156.98,
+          "minimum": 62,
+          "below25Percent": 31.8,
+          "zeroEvents": 0,
+          "exhaustions": 61,
+          "blockedCasts": 61,
+          "end": 104
+        },
+        "casts": {
+          "smite": 576,
+          "storm": 382,
+          "other": 576
+        },
+        "combat": {
+          "priestDps": 406.57,
+          "teamDps": 1956.57,
+          "effectiveHealing": 274803.06,
+          "averageHpPercent": 93.85,
+          "minimumHpPercent": 82.93,
+          "finalSurvivors": 4
+        },
+        "faith": {
+          "coveragePercent": [
+            18.24,
+            1.86,
+            1.85,
+            78.05
+          ],
+          "averageStacks": 2.4,
+          "interruptions": 61
+        }
+      },
+      "B": {
+        "mp": {
+          "spent": 52727.69,
+          "recovered": 52714.75,
+          "natural": 22426.09,
+          "smite": 30288.66,
+          "devotion": 0,
+          "overflow": 63811.2,
+          "average": 506.88,
+          "minimum": 463,
+          "below25Percent": 0,
+          "zeroEvents": 0,
+          "exhaustions": 0,
+          "blockedCasts": 0,
+          "end": 507.06
+        },
+        "casts": {
+          "smite": 765.5,
+          "storm": 456.22,
+          "other": 978.84
+        },
+        "combat": {
+          "priestDps": 524.91,
+          "teamDps": 2074.91,
+          "effectiveHealing": 271619.55,
+          "averageHpPercent": 78.38,
+          "minimumHpPercent": 64.42,
+          "finalSurvivors": 4
+        },
+        "faith": {
+          "coveragePercent": [
+            0,
+            0.03,
+            0.03,
+            99.94
+          ],
+          "averageStacks": 3,
+          "interruptions": 0
+        }
+      },
+      "C": {
+        "mp": {
+          "spent": 52731.06,
+          "recovered": 52728.78,
+          "natural": 2745.91,
+          "smite": 0,
+          "devotion": 49982.88,
+          "overflow": 101191.81,
+          "average": 518.45,
+          "minimum": 493,
+          "below25Percent": 0,
+          "zeroEvents": 0,
+          "exhaustions": 0,
+          "blockedCasts": 0,
+          "end": 517.72
+        },
+        "casts": {
+          "smite": 765.59,
+          "storm": 456.09,
+          "other": 979.09
+        },
+        "combat": {
+          "priestDps": 524.91,
+          "teamDps": 2074.91,
+          "effectiveHealing": 271635.6,
+          "averageHpPercent": 78.36,
+          "minimumHpPercent": 64.37,
+          "finalSurvivors": 4
+        },
+        "faith": {
+          "coveragePercent": [
+            0,
+            0.03,
+            0.03,
+            99.94
+          ],
+          "averageStacks": 3,
+          "interruptions": 0
+        }
+      },
+      "D": {
+        "mp": {
+          "spent": 52738.13,
+          "recovered": 52734.28,
+          "natural": 2764.66,
+          "smite": 19631.28,
+          "devotion": 30338.34,
+          "overflow": 195326.34,
+          "average": 518.44,
+          "minimum": 493,
+          "below25Percent": 0,
+          "zeroEvents": 0,
+          "exhaustions": 0,
+          "blockedCasts": 0,
+          "end": 516.16
+        },
+        "casts": {
+          "smite": 765.44,
+          "storm": 456.5,
+          "other": 978.94
+        },
+        "combat": {
+          "priestDps": 525.01,
+          "teamDps": 2075.01,
+          "effectiveHealing": 271779.16,
+          "averageHpPercent": 78.39,
+          "minimumHpPercent": 64.35,
+          "finalSurvivors": 4
+        },
+        "faith": {
+          "coveragePercent": [
+            0,
+            0.03,
+            0.03,
+            99.94
+          ],
+          "averageStacks": 3,
+          "interruptions": 0
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,36 @@
+const fs=require('node:fs'),path=require('node:path');
+const P=require('../priest-advancement-policy.js'),B=require('../class-skill-policy.js');
+const DT=.1,SECONDS=3600,ATTACK=300,MAX_MP=520,NATURAL_REGEN=10,OTHER_TEAM_DPS=1550,HP=[6500,4500,3800,4200],RUNS=32;
+const variants={A:{name:'舊版基準：無傷害轉MP',smiteMp:false,devotionMp:false,oldHealing:true},B:{name:'只有神聖懲擊回MP',smiteMp:true,devotionMp:false,oldHealing:false},C:{name:'只有光明奉獻回MP',smiteMp:false,devotionMp:true,oldHealing:false},D:{name:'神聖懲擊＋光明奉獻回MP',smiteMp:true,devotionMp:true,oldHealing:false}};
+const scenarios={boss:{name:'單體Boss',enemies:1},five:{name:'五怪群戰',enemies:5}};
+const round=(n,d=2)=>+n.toFixed(d),rng=s=>()=>((s=Math.imul(s^s>>>15,1|s),s^=s+Math.imul(s^s>>>7,61|s),((s^s>>>14)>>>0)/4294967296));
+function run(variantId,scenarioId,seed){
+ const variant=variants[variantId],enemies=scenarios[scenarioId].enemies,rand=rng(seed),levels={'priest:holy-faith':6,'priest:holy-smite':6,'priest:holy-storm':5,'priest:fanatical-faith':6,'priest:light-devotion':6},priest={job:'priest',stats:{attack:ATTACK},progress:{advancedClass:'battle-priest',skillLevels:levels}},party=HP.map((maxHp,id)=>({id,maxHp,currentHp:maxHp,alive:true}));
+ const cd={},casts={smite:0,storm:0,other:0},mpRecovery={natural:0,smite:0,devotion:0,overflow:0},damage={smite:0,storm:0,other:0};
+ let time=0,mp=MAX_MP,spent=0,mpSum=0,mpSamples=0,minMp=mp,below25=0,zeroEvents=0,wasZero=false,exhausted=false,exhaustions=0,blocked=0,gcd=0,nextEnemy=0,effectiveHealing=0,hpIntegral=0,hpSamples=0,minHp=100,faithTimes=[0,0,0,0],previousFaith=0,faithBreaks=0;
+ const living=()=>party.filter(x=>x.alive),lowest=()=>living().sort((a,b)=>a.currentHp/a.maxHp-b.currentHp/b.maxHp)[0];
+ function heal(target,amount){if(!target?.alive)return 0;const actual=Math.min(amount,target.maxHp-target.currentHp);target.currentHp+=actual;effectiveHealing+=actual;return actual;}
+ function spend(cost){if(mp<cost)return false;mp-=cost;spent+=cost;return true;}
+ function restore(source,amount){const actual=Math.min(amount,MAX_MP-mp);mp+=actual;mpRecovery[source]+=actual;mpRecovery.overflow+=amount-actual;return actual;}
+ function directDamage(power,count=1){return ATTACK*power*(1+.15+P.getFaithBonuses(priest,time*1000).magicDamage)*.82*count;}
+ function castAttack(id,effect,cost,count){if(!spend(cost))return false;const actual=directDamage(effect.power,count);damage[id]+=actual;casts[id]++;P.addFaith(priest,time*1000);cd[id]=time+effect.cooldown/(1+P.getFaithBonuses(priest,time*1000).cooldownSpeed);gcd=time+1;return actual;}
+ for(;time<SECONDS;time+=DT){
+  const natural=Math.min(NATURAL_REGEN*DT,MAX_MP-mp);mp+=natural;mpRecovery.natural+=natural;
+  if(!exhausted&&mp/MAX_MP<=.15){exhausted=true;exhaustions++;blocked++;}else if(exhausted&&mp/MAX_MP>=.45)exhausted=false;
+  if(mp/MAX_MP<.25)below25+=DT;if(mp<=0&&!wasZero){zeroEvents++;wasZero=true;}if(mp>0)wasZero=false;mpSum+=mp;mpSamples++;minMp=Math.min(minMp,mp);
+  const stacks=P.getFaithStacks(priest,time*1000);faithTimes[stacks]+=DT;if(previousFaith>0&&stacks===0)faithBreaks++;previousFaith=stacks;
+  if(time>=nextEnemy){const hits=enemies===1?1:Math.min(3,enemies);for(let n=0;n<hits;n++){const targets=living();if(!targets.length)break;const target=targets[Math.floor(rand()*targets.length)],incoming=enemies===1?85:(18+rand()*10);target.currentHp=Math.max(0,target.currentHp-incoming);if(target.currentHp<=0)target.alive=false;}nextEnemy=time+(enemies===1?1.4:.85);}
+  if(!exhausted&&time>=gcd&&party[3].alive){const target=lowest();if(!target)continue;const ratio=target.currentHp/target.maxHp;
+    if(ratio<.7&&(cd.heal||0)<=time&&spend(28)){const base=ATTACK*2.2*1.15;heal(target,base);casts.other++;cd.heal=time+8;gcd=time+1;continue;}
+    if((cd.smite||0)<=time){const e=P.getEffect('holy-smite',6),actual=castAttack('smite',e,24,1);if(actual){if(variant.oldHealing)heal(lowest(),actual*e.damageHealing);if(variant.smiteMp)restore('smite',actual*e.damageHealing);if(variant.oldHealing){const d=P.getEffect('light-devotion',6);heal(lowest(),actual*d.directDamageHealing);}if(variant.devotionMp)restore('devotion',actual*P.getEffect('light-devotion',6).directDamageHealing);continue;}}
+    if((cd.storm||0)<=time){const e=P.getEffect('holy-storm',5),actual=castAttack('storm',e,32,enemies);if(actual){for(const ally of living())heal(ally,ATTACK*e.partyHealPerHit*enemies);if(variant.oldHealing)heal(lowest(),actual*P.getEffect('light-devotion',6).directDamageHealing);if(variant.devotionMp)restore('devotion',actual*P.getEffect('light-devotion',6).directDamageHealing);continue;}}
+    if((cd.other||0)<=time&&spend(18)){const actual=directDamage(2.1);damage.other+=actual;casts.other++;P.addFaith(priest,time*1000);if(variant.oldHealing)heal(lowest(),actual*P.getEffect('light-devotion',6).directDamageHealing);if(variant.devotionMp)restore('devotion',actual*P.getEffect('light-devotion',6).directDamageHealing);cd.other=time+4;gcd=time+1;}
+  }
+  const ratios=party.map(x=>x.currentHp/x.maxHp);hpIntegral+=ratios.reduce((a,b)=>a+b,0)/4;hpSamples++;minHp=Math.min(minHp,...ratios.map(x=>x*100));
+ }
+ const priestDamage=Object.values(damage).reduce((a,b)=>a+b,0),faithTotal=faithTimes.reduce((a,b)=>a+b,0);return{variant:variantId,scenario:scenarioId,mp:{spent,recovered:mpRecovery.natural+mpRecovery.smite+mpRecovery.devotion,natural:mpRecovery.natural,smite:mpRecovery.smite,devotion:mpRecovery.devotion,overflow:mpRecovery.overflow,average:mpSum/mpSamples,minimum:minMp,below25Percent:below25/SECONDS*100,zeroEvents,exhaustions,blockedCasts:blocked,end:mp},casts,combat:{priestDps:priestDamage/SECONDS,teamDps:OTHER_TEAM_DPS+priestDamage/SECONDS,effectiveHealing,averageHpPercent:hpIntegral/hpSamples*100,minimumHpPercent:minHp,finalSurvivors:living().length},faith:{coveragePercent:faithTimes.map(x=>x/faithTotal*100),averageStacks:faithTimes.reduce((s,x,i)=>s+x*i,0)/faithTotal,interruptions:faithBreaks}};
+}
+function add(a,b){for(const[k,v]of Object.entries(b)){if(typeof v==='number')a[k]=(a[k]||0)+v;else if(v&&typeof v==='object'){a[k]=a[k]||(Array.isArray(v)?[]:{});add(a[k],v);}}return a;}function divide(a,n){for(const[k,v]of Object.entries(a)){if(typeof v==='number')a[k]=round(v/n);else if(v&&typeof v==='object')divide(v,n);}return a;}
+const results={};for(const scenario of Object.keys(scenarios)){results[scenario]={};for(const variant of Object.keys(variants)){let sum={};for(let i=0;i<RUNS;i++)add(sum,run(variant,scenario,0x6d7000+i*7919+variant.charCodeAt(0)*101+(scenario==='five'?50000:0)));results[scenario][variant]=divide(sum,RUNS);}}
+const output={metadata:{version:'battle-priest-mp-v2-test',generatedAt:new Date().toISOString(),secondsPerRun:SECONDS,runsPerCombination:RUNS,fixedConditions:{attack:ATTACK,maxMp:MAX_MP,naturalMpPerSecond:NATURAL_REGEN,partyHp:HP,otherTeamDps:OTHER_TEAM_DPS},scope:'simulation only; production skill policy and combat are unchanged',actualDamageMultiplier:.82,variants},results};
+const outputPath=path.join(__dirname,'..','tests','simulations','results','battle-priest-mp-v2.json');if(require.main===module){if(process.argv.includes('--write'))fs.writeFileSync(outputPath,JSON.stringify(output,null,2)+'\n');console.log(JSON.stringify(output,null,2));}module.exports={run,variants,scenarios,output};
