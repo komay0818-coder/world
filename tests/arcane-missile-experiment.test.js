@@ -1,0 +1,16 @@
+'use strict';
+const assert=require('node:assert/strict');
+const {run,runMissileExperiment}=require('../tools/mage-formal-consistency.js');
+const build={baseActive:'chain-lightning',basePassive:'elemental-mastery',advancedActive:'arcane-missile',advancedPassive:'arcane-charge'};
+const formalBefore=run('arcane-mage',build,20,1e9,1,450001);
+const a=runMissileExperiment('A','arcane-mage',build,20,1e9,1,450001);
+const formalAfter=run('arcane-mage',build,20,1e9,1,450001);
+assert.deepEqual(formalAfter,formalBefore,'installing the experiment cannot alter formal combat while inactive');
+assert.equal(a.marks.missilesFired,a.marks.missileCasts*4,'variant A fires exactly four missiles per cast');
+assert.equal(a.marks.missilesHit,a.marks.missilesFired,'zero-evasion fixture records every experimental missile hit');
+assert.ok(a.marks.detonations>0,'later spells detonate arcane marks');
+assert.ok(a.marks.averageDetonationStacks<=4,'marks never exceed four stacks per enemy');
+const b=runMissileExperiment('B','arcane-mage',build,180,1e9,5,450002);
+assert.ok(b.marks.missilesFired>=b.marks.missileCasts*4&&b.marks.missilesFired<=b.marks.missileCasts*5,'variant B adds at most one fifth missile');
+assert.equal(b.marks.detonations,Object.values(b.marks.detonationsByStacks).reduce((sum,value)=>sum+value,0));
+console.log('arcane-missile-experiment: assertions passed');

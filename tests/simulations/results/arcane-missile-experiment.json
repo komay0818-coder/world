@@ -1,0 +1,3558 @@
+{
+  "metadata": {
+    "searchRuns": 5,
+    "finalRuns": 200,
+    "source": "formal shared combat resolver with headless-only arcane missile overlay",
+    "formalSkillDataModified": false,
+    "variants": {
+      "A": "four missiles plus marks; no Lv6 repeat",
+      "B": "A plus 30% fifth missile at 32%"
+    }
+  },
+  "scenarios": {
+    "normal": {
+      "elementalist": {
+        "build": {
+          "baseActive": "chain-lightning",
+          "basePassive": "elemental-mastery",
+          "advancedActive": "elemental-storm",
+          "advancedPassive": "elemental-marks"
+        },
+        "metrics": {
+          "total": 2606.945,
+          "dps": 552.5980334822594,
+          "duration": 4.7280000000000095,
+          "combat": {
+            "totalDamage": 2606.945,
+            "damageBySource": {
+              "fireball": 498.315,
+              "burn": 833.355,
+              "basic-attack": 630.35,
+              "blizzard": 76.34,
+              "chain-lightning": 142.03,
+              "elemental-burst": 336.715,
+              "elemental-storm": 89.84
+            },
+            "skillCasts": {
+              "fireball": 2,
+              "blizzard": 1,
+              "chain-lightning": 1,
+              "elemental-burst": 1,
+              "elemental-storm": 0.35
+            },
+            "basicAttacks": 5.67,
+            "dotTicks": 11.53,
+            "resourceSpent": 112.3,
+            "resourceRecovered": 19.425119999998834,
+            "kills": 1,
+            "respawns": 0
+          },
+          "mage": {
+            "elementalBurstStatuses": {
+              "0": 0,
+              "1": 0,
+              "2": 1,
+              "3": 0
+            },
+            "elementalBurstBonusDamage": {
+              "fire": 0,
+              "ice": 68.605,
+              "lightning": 69.865
+            },
+            "elementalCollapses": 0,
+            "burnExtendedSeconds": 0,
+            "iceExtendedSeconds": 0,
+            "paralysisExtendedSeconds": 0,
+            "shockedExtendedSeconds": 0,
+            "stormElements": {
+              "fire": 0.165,
+              "ice": 0.155,
+              "lightning": 0.13
+            },
+            "stormTransforms": 0.1,
+            "stormFollowupDamage": 0,
+            "marks": {
+              "fire": 2.165,
+              "ice": 1.155,
+              "lightning": 1.13
+            },
+            "resonanceTriggers": 1.02,
+            "resonanceActiveMs": 2728,
+            "resonanceExtensions": 1.31,
+            "resonanceCooldownReduced": 2.04,
+            "overloadReleases": 0,
+            "overloadDamage": 0,
+            "shockedApplications": 1,
+            "shockedRefreshes": 0,
+            "shockedActiveMs": 0,
+            "shockedBonusDamage": 549.8616666666667,
+            "shockedBonusBySkill": {
+              "basic-attack": 119.85333333333334,
+              "elemental-burst": 112.23833333333336,
+              "fireball": 109.74666666666677,
+              "burn": 178.07666666666674,
+              "elemental-storm": 29.946666666666665
+            },
+            "arcaneRepeats": 0,
+            "arcaneTorrentCasts": 0,
+            "arcaneTorrentHits": 0,
+            "arcaneTorrentBaseMana": 0,
+            "arcaneTorrentManaFlowTriggers": 0,
+            "arcaneTorrentManaFlowBonus": 0,
+            "arcaneTorrentTheoreticalMana": 0,
+            "arcaneTorrentOverflowMana": 0,
+            "arcaneTorrentActualMana": 0,
+            "chargeSamples": 45.28,
+            "chargeStackTotal": 0,
+            "chargeFullSamples": 0,
+            "chargeTimeouts": 0,
+            "chargeReleases": 0,
+            "zeroCooldownSkills": {},
+            "manaBeforeBonus": 429,
+            "manaAfterBonus": 429,
+            "killMana": 0,
+            "soulDrainTriggers": 0,
+            "soulDrainActiveMs": 0,
+            "manaExhaustedMs": 0
+          },
+          "exhaust": 0,
+          "exhaustRate": 0,
+          "shockCoverage": 0.5754700435801371,
+          "resonanceCoverage": 0.5754700435801371,
+          "manaEnd": 336.12511999999833
+        },
+        "source": "8650eb8 formal baseline"
+      },
+      "A": {
+        "build": {
+          "baseActive": "chain-lightning",
+          "basePassive": "elemental-mastery",
+          "advancedActive": "arcane-missile",
+          "advancedPassive": "arcane-charge"
+        },
+        "metrics": {
+          "total": 2569.13,
+          "dps": 489.99370918504434,
+          "duration": 5.272500000000005,
+          "combat": {
+            "totalDamage": 2569.13,
+            "damageBySource": {
+              "fireball": 431.465,
+              "burn": 769.16,
+              "basic-attack": 743.675,
+              "blizzard": 76.52,
+              "chain-lightning": 142.52,
+              "arcane-missile": 228.58,
+              "arcane-mark-explosion": 19.66,
+              "arcane-torrent": 157.55
+            },
+            "skillCasts": {
+              "fireball": 2,
+              "blizzard": 1,
+              "chain-lightning": 1,
+              "arcane-missile": 1.065,
+              "arcane-torrent": 0.84
+            },
+            "basicAttacks": 6.5,
+            "dotTicks": 11.955,
+            "resourceSpent": 122.29,
+            "resourceRecovered": 25.058150000001476,
+            "kills": 1,
+            "respawns": 0
+          },
+          "mage": {
+            "elementalBurstStatuses": {
+              "0": 0,
+              "1": 0,
+              "2": 0,
+              "3": 0
+            },
+            "elementalBurstBonusDamage": {
+              "fire": 0,
+              "ice": 0,
+              "lightning": 0
+            },
+            "elementalCollapses": 0,
+            "burnExtendedSeconds": 0,
+            "iceExtendedSeconds": 0,
+            "paralysisExtendedSeconds": 0,
+            "shockedExtendedSeconds": 0,
+            "stormElements": {
+              "fire": 0,
+              "ice": 0,
+              "lightning": 0
+            },
+            "stormTransforms": 0,
+            "stormFollowupDamage": 0,
+            "marks": {
+              "fire": 0,
+              "ice": 0,
+              "lightning": 0
+            },
+            "resonanceTriggers": 0,
+            "resonanceActiveMs": 0,
+            "resonanceExtensions": 0,
+            "resonanceCooldownReduced": 0,
+            "overloadReleases": 0,
+            "overloadDamage": 0,
+            "shockedApplications": 1,
+            "shockedRefreshes": 0,
+            "shockedActiveMs": 0,
+            "shockedBonusDamage": 536.2050000000002,
+            "shockedBonusBySkill": {
+              "basic-attack": 157.91333333333338,
+              "arcane-missile": 73.28000000000007,
+              "fireball": 88.13833333333343,
+              "arcane-mark-explosion": 6.553333333333329,
+              "burn": 157.80333333333317,
+              "arcane-torrent": 52.51666666666666
+            },
+            "arcaneRepeats": 0.33,
+            "arcaneTorrentCasts": 0.84,
+            "arcaneTorrentHits": 0.84,
+            "arcaneTorrentBaseMana": 10.788960000000031,
+            "arcaneTorrentManaFlowTriggers": 0,
+            "arcaneTorrentManaFlowBonus": 0,
+            "arcaneTorrentTheoreticalMana": 10.788960000000031,
+            "arcaneTorrentOverflowMana": 0,
+            "arcaneTorrentActualMana": 10.788960000000031,
+            "chargeSamples": 56.63,
+            "chargeStackTotal": 159.705,
+            "chargeFullSamples": 10.315,
+            "chargeTimeouts": 0,
+            "chargeReleases": 0.84,
+            "zeroCooldownSkills": {
+              "arcane-torrent": 0.84
+            },
+            "manaBeforeBonus": 430,
+            "manaAfterBonus": 494,
+            "killMana": 15,
+            "soulDrainTriggers": 0,
+            "soulDrainActiveMs": 0,
+            "manaExhaustedMs": 0
+          },
+          "marks": {
+            "missileCasts": 1.065,
+            "missilesFired": 4.26,
+            "missilesHit": 4.26,
+            "targetHits": {
+              "0": 4.26
+            },
+            "markSamples": 52.725,
+            "markStackSamples": 40,
+            "detonationsByStacks": {
+              "1": 0,
+              "2": 0,
+              "3": 0,
+              "4": 1
+            },
+            "detonations": 1,
+            "detonationDamage": 19.66,
+            "expiredMarks": 0,
+            "expiredStacks": 0,
+            "deathWasteMarks": 0,
+            "deathWasteStacks": 0,
+            "detonationsBySource": {
+              "fireball": 1
+            },
+            "detonationTargets": 1,
+            "detonationStacks": 4,
+            "mpSamples": 52.725,
+            "mpTotal": 23216.947430000044,
+            "mpMinimum": 407.14828000000233,
+            "mpBelow30Samples": 0,
+            "mpBelow15Samples": 0,
+            "averageStacks": 0.7631086740485103,
+            "averageDetonationStacks": 4,
+            "averageTargetsPerDetonatingCast": 0.9675,
+            "damageShare": 0.007653430006943752
+          },
+          "exhaust": 0,
+          "exhaustRate": 0,
+          "shockCoverage": 0.6173800892052538,
+          "resonanceCoverage": 0,
+          "manaEnd": 422.5571100000012,
+          "mpAverage": 440.52219628274224,
+          "mpMinimum": 407.14828000000233,
+          "mpBelow30Rate": 0,
+          "mpBelow15Rate": 0
+        }
+      },
+      "B": {
+        "build": {
+          "baseActive": "chain-lightning",
+          "basePassive": "elemental-mastery",
+          "advancedActive": "arcane-missile",
+          "advancedPassive": "arcane-charge"
+        },
+        "metrics": {
+          "total": 2568.92,
+          "dps": 491.6654234112126,
+          "duration": 5.253500000000007,
+          "combat": {
+            "totalDamage": 2568.92,
+            "damageBySource": {
+              "fireball": 434.145,
+              "burn": 771.78,
+              "basic-attack": 730.885,
+              "blizzard": 76.52,
+              "chain-lightning": 142.52,
+              "arcane-missile": 238.89,
+              "arcane-mark-explosion": 19.54,
+              "arcane-torrent": 154.64
+            },
+            "skillCasts": {
+              "fireball": 2,
+              "blizzard": 1,
+              "chain-lightning": 1,
+              "arcane-missile": 1.055,
+              "arcane-torrent": 0.835
+            },
+            "basicAttacks": 6.445,
+            "dotTicks": 11.95,
+            "resourceSpent": 122.02,
+            "resourceRecovered": 24.96429000000147,
+            "kills": 1,
+            "respawns": 0
+          },
+          "mage": {
+            "elementalBurstStatuses": {
+              "0": 0,
+              "1": 0,
+              "2": 0,
+              "3": 0
+            },
+            "elementalBurstBonusDamage": {
+              "fire": 0,
+              "ice": 0,
+              "lightning": 0
+            },
+            "elementalCollapses": 0,
+            "burnExtendedSeconds": 0,
+            "iceExtendedSeconds": 0,
+            "paralysisExtendedSeconds": 0,
+            "shockedExtendedSeconds": 0,
+            "stormElements": {
+              "fire": 0,
+              "ice": 0,
+              "lightning": 0
+            },
+            "stormTransforms": 0,
+            "stormFollowupDamage": 0,
+            "marks": {
+              "fire": 0,
+              "ice": 0,
+              "lightning": 0
+            },
+            "resonanceTriggers": 0,
+            "resonanceActiveMs": 0,
+            "resonanceExtensions": 0,
+            "resonanceCooldownReduced": 0,
+            "overloadReleases": 0,
+            "overloadDamage": 0,
+            "shockedApplications": 1,
+            "shockedRefreshes": 0,
+            "shockedActiveMs": 0,
+            "shockedBonusDamage": 536.44,
+            "shockedBonusBySkill": {
+              "basic-attack": 153.6500000000001,
+              "arcane-missile": 77.02166666666665,
+              "fireball": 89.03166666666671,
+              "arcane-mark-explosion": 6.513333333333329,
+              "burn": 158.67666666666656,
+              "arcane-torrent": 51.54666666666665
+            },
+            "arcaneRepeats": 0.32,
+            "arcaneTorrentCasts": 0.835,
+            "arcaneTorrentHits": 0.835,
+            "arcaneTorrentBaseMana": 10.72474000000003,
+            "arcaneTorrentManaFlowTriggers": 0,
+            "arcaneTorrentManaFlowBonus": 0,
+            "arcaneTorrentTheoreticalMana": 10.72474000000003,
+            "arcaneTorrentOverflowMana": 0,
+            "arcaneTorrentActualMana": 10.72474000000003,
+            "chargeSamples": 56.425,
+            "chargeStackTotal": 159.56,
+            "chargeFullSamples": 10.29,
+            "chargeTimeouts": 0,
+            "chargeReleases": 0.835,
+            "zeroCooldownSkills": {
+              "arcane-torrent": 0.835
+            },
+            "manaBeforeBonus": 430,
+            "manaAfterBonus": 494,
+            "killMana": 15,
+            "soulDrainTriggers": 0,
+            "soulDrainActiveMs": 0,
+            "manaExhaustedMs": 0
+          },
+          "marks": {
+            "missileCasts": 1.055,
+            "missilesFired": 4.455,
+            "missilesHit": 4.455,
+            "targetHits": {
+              "0": 4.455
+            },
+            "markSamples": 52.535,
+            "markStackSamples": 40,
+            "detonationsByStacks": {
+              "1": 0,
+              "2": 0,
+              "3": 0,
+              "4": 1
+            },
+            "detonations": 1,
+            "detonationDamage": 19.54,
+            "expiredMarks": 0,
+            "expiredStacks": 0,
+            "deathWasteMarks": 0,
+            "deathWasteStacks": 0,
+            "detonationsBySource": {
+              "fireball": 1
+            },
+            "detonationTargets": 1,
+            "detonationStacks": 4,
+            "mpSamples": 52.535,
+            "mpTotal": 23139.238360000047,
+            "mpMinimum": 407.15368000000234,
+            "mpBelow30Samples": 0,
+            "mpBelow15Samples": 0,
+            "averageStacks": 0.7657729250444872,
+            "averageDetonationStacks": 4,
+            "averageTargetsPerDetonatingCast": 0.9725,
+            "damageShare": 0.007608455171669485
+          },
+          "exhaust": 0,
+          "exhaustRate": 0,
+          "shockCoverage": 0.6162118981334949,
+          "resonanceCoverage": 0,
+          "manaEnd": 422.66903000000116,
+          "mpAverage": 440.6323792454649,
+          "mpMinimum": 407.15368000000234,
+          "mpBelow30Rate": 0,
+          "mpBelow15Rate": 0
+        }
+      }
+    },
+    "boss180": {
+      "elementalist": {
+        "build": {
+          "baseActive": "chain-lightning",
+          "basePassive": "elemental-mastery",
+          "advancedActive": "elemental-storm",
+          "advancedPassive": "resonance-overload"
+        },
+        "metrics": {
+          "total": 35739.775,
+          "dps": 198.5543055555554,
+          "duration": 180,
+          "combat": {
+            "totalDamage": 35739.775,
+            "damageBySource": {
+              "fireball": 4240.22,
+              "burn": 8218.355,
+              "basic-attack": 16669.275,
+              "blizzard": 1034.995,
+              "chain-lightning": 1033.585,
+              "elemental-burst": 2103.485,
+              "elemental-storm": 1542.55,
+              "resonance-overload": 897.31
+            },
+            "skillCasts": {
+              "fireball": 17.635,
+              "blizzard": 11,
+              "chain-lightning": 7,
+              "elemental-burst": 6.4,
+              "elemental-storm": 5.965
+            },
+            "basicAttacks": 175.615,
+            "dotTicks": 116.43,
+            "resourceSpent": 1008,
+            "resourceRecovered": 771.3419999999653,
+            "kills": 0,
+            "respawns": 0
+          },
+          "mage": {
+            "elementalBurstStatuses": {
+              "0": 0,
+              "1": 0.725,
+              "2": 5.675,
+              "3": 0
+            },
+            "elementalBurstBonusDamage": {
+              "fire": 0,
+              "ice": 407.775,
+              "lightning": 418.645
+            },
+            "elementalCollapses": 0,
+            "burnExtendedSeconds": 0,
+            "iceExtendedSeconds": 0,
+            "paralysisExtendedSeconds": 0,
+            "shockedExtendedSeconds": 0,
+            "stormElements": {
+              "fire": 2.655,
+              "ice": 2.615,
+              "lightning": 2.48
+            },
+            "stormTransforms": 1.785,
+            "stormFollowupDamage": 210.99,
+            "marks": {
+              "fire": 20.29,
+              "ice": 13.615,
+              "lightning": 9.48
+            },
+            "resonanceTriggers": 9.23,
+            "resonanceActiveMs": 50760,
+            "resonanceExtensions": 0,
+            "resonanceCooldownReduced": 18.43,
+            "overloadReleases": 6.98,
+            "overloadDamage": 897.31,
+            "shockedApplications": 7,
+            "shockedRefreshes": 0,
+            "shockedActiveMs": 0,
+            "shockedBonusDamage": 4821.836666666666,
+            "shockedBonusBySkill": {
+              "basic-attack": 1380.8516666666671,
+              "elemental-burst": 683.0933333333332,
+              "fireball": 750.7783333333334,
+              "burn": 1501.1566666666663,
+              "elemental-storm": 399.9399999999998,
+              "resonance-overload": 30.195,
+              "blizzard": 75.82166666666674
+            },
+            "arcaneRepeats": 0,
+            "arcaneTorrentCasts": 0,
+            "arcaneTorrentHits": 0,
+            "arcaneTorrentBaseMana": 0,
+            "arcaneTorrentManaFlowTriggers": 0,
+            "arcaneTorrentManaFlowBonus": 0,
+            "arcaneTorrentTheoreticalMana": 0,
+            "arcaneTorrentOverflowMana": 0,
+            "arcaneTorrentActualMana": 0,
+            "chargeSamples": 1798,
+            "chargeStackTotal": 0,
+            "chargeFullSamples": 0,
+            "chargeTimeouts": 0,
+            "chargeReleases": 0,
+            "zeroCooldownSkills": {},
+            "manaBeforeBonus": 429,
+            "manaAfterBonus": 429,
+            "killMana": 0,
+            "soulDrainTriggers": 0,
+            "soulDrainActiveMs": 0,
+            "manaExhaustedMs": 124420
+          },
+          "exhaust": 124.12000000000043,
+          "exhaustRate": 0.6895555555555554,
+          "shockCoverage": 0.15555555555555517,
+          "resonanceCoverage": 0.2820000000000002,
+          "manaEnd": 192.34199999999987
+        },
+        "source": "8650eb8 formal baseline"
+      },
+      "A": {
+        "build": {
+          "baseActive": "chain-lightning",
+          "basePassive": "elemental-mastery",
+          "advancedActive": "arcane-torrent",
+          "advancedPassive": "mana-drain"
+        },
+        "metrics": {
+          "total": 34757.44,
+          "dps": 193.0968888888887,
+          "duration": 180,
+          "combat": {
+            "totalDamage": 34757.44,
+            "damageBySource": {
+              "fireball": 3748.115,
+              "burn": 6794.845,
+              "basic-attack": 17346.17,
+              "blizzard": 965.555,
+              "chain-lightning": 1511.91,
+              "arcane-missile": 2944.965,
+              "arcane-mark-explosion": 268.68,
+              "arcane-torrent": 1177.2
+            },
+            "skillCasts": {
+              "fireball": 18,
+              "blizzard": 11,
+              "chain-lightning": 11,
+              "arcane-missile": 18,
+              "arcane-torrent": 7
+            },
+            "basicAttacks": 177,
+            "dotTicks": 108,
+            "resourceSpent": 1346,
+            "resourceRecovered": 888.2120000000389,
+            "kills": 0,
+            "respawns": 0
+          },
+          "mage": {
+            "elementalBurstStatuses": {
+              "0": 0,
+              "1": 0,
+              "2": 0,
+              "3": 0
+            },
+            "elementalBurstBonusDamage": {
+              "fire": 0,
+              "ice": 0,
+              "lightning": 0
+            },
+            "elementalCollapses": 0,
+            "burnExtendedSeconds": 0,
+            "iceExtendedSeconds": 0,
+            "paralysisExtendedSeconds": 0,
+            "shockedExtendedSeconds": 0,
+            "stormElements": {
+              "fire": 0,
+              "ice": 0,
+              "lightning": 0
+            },
+            "stormTransforms": 0,
+            "stormFollowupDamage": 0,
+            "marks": {
+              "fire": 0,
+              "ice": 0,
+              "lightning": 0
+            },
+            "resonanceTriggers": 0,
+            "resonanceActiveMs": 0,
+            "resonanceExtensions": 0,
+            "resonanceCooldownReduced": 0,
+            "overloadReleases": 0,
+            "overloadDamage": 0,
+            "shockedApplications": 11,
+            "shockedRefreshes": 0,
+            "shockedActiveMs": 0,
+            "shockedBonusDamage": 4577.341666666665,
+            "shockedBonusBySkill": {
+              "basic-attack": 1957.47,
+              "arcane-missile": 487.585,
+              "fireball": 612.683333333333,
+              "arcane-mark-explosion": 32.80666666666674,
+              "burn": 1105.9633333333334,
+              "arcane-torrent": 263.0950000000003,
+              "blizzard": 117.73833333333334
+            },
+            "arcaneRepeats": 0,
+            "arcaneTorrentCasts": 7,
+            "arcaneTorrentHits": 7,
+            "arcaneTorrentBaseMana": 103.7400000000002,
+            "arcaneTorrentManaFlowTriggers": 4,
+            "arcaneTorrentManaFlowBonus": 29.64000000000007,
+            "arcaneTorrentTheoreticalMana": 133.3800000000002,
+            "arcaneTorrentOverflowMana": 0,
+            "arcaneTorrentActualMana": 133.3800000000002,
+            "chargeSamples": 1863,
+            "chargeStackTotal": 4238,
+            "chargeFullSamples": 760,
+            "chargeTimeouts": 4,
+            "chargeReleases": 0,
+            "zeroCooldownSkills": {},
+            "manaBeforeBonus": 430,
+            "manaAfterBonus": 494,
+            "killMana": 0,
+            "soulDrainTriggers": 0,
+            "soulDrainActiveMs": 0,
+            "manaExhaustedMs": 116900
+          },
+          "marks": {
+            "missileCasts": 18,
+            "missilesFired": 72,
+            "missilesHit": 72,
+            "targetHits": {
+              "0": 72
+            },
+            "markSamples": 1800,
+            "markStackSamples": 772,
+            "detonationsByStacks": {
+              "1": 0,
+              "2": 0,
+              "3": 0,
+              "4": 18
+            },
+            "detonations": 18,
+            "detonationDamage": 268.68,
+            "expiredMarks": 0,
+            "expiredStacks": 0,
+            "deathWasteMarks": 0,
+            "deathWasteStacks": 0,
+            "detonationsBySource": {
+              "fireball": 6,
+              "blizzard": 5,
+              "chain-lightning": 6,
+              "arcane-torrent": 1
+            },
+            "detonationTargets": 18,
+            "detonationStacks": 72,
+            "mpSamples": 1800,
+            "mpTotal": 294150.962000007,
+            "mpMinimum": 64.95000000000451,
+            "mpBelow30Samples": 905,
+            "mpBelow15Samples": 72,
+            "averageStacks": 0.4288888888888907,
+            "averageDetonationStacks": 4,
+            "averageTargetsPerDetonatingCast": 1,
+            "damageShare": 0.007731495581322283
+          },
+          "exhaust": 116.59999999999974,
+          "exhaustRate": 0.6477777777777763,
+          "shockCoverage": 0.24444444444444496,
+          "resonanceCoverage": 0,
+          "manaEnd": 169.59200000000428,
+          "mpAverage": 163.41720111111516,
+          "mpMinimum": 64.95000000000451,
+          "mpBelow30Rate": 0.5027777777777791,
+          "mpBelow15Rate": 0.04000000000000003
+        }
+      },
+      "B": {
+        "build": {
+          "baseActive": "chain-lightning",
+          "basePassive": "elemental-mastery",
+          "advancedActive": "arcane-missile",
+          "advancedPassive": "mana-drain"
+        },
+        "metrics": {
+          "total": 34464.225,
+          "dps": 191.46791666666675,
+          "duration": 180,
+          "combat": {
+            "totalDamage": 34464.225,
+            "damageBySource": {
+              "fireball": 3727.405,
+              "burn": 6773.035,
+              "basic-attack": 17151.43,
+              "blizzard": 969.54,
+              "chain-lightning": 1379.81,
+              "arcane-missile": 3232.83,
+              "arcane-mark-explosion": 254.99,
+              "arcane-torrent": 975.185
+            },
+            "skillCasts": {
+              "fireball": 18,
+              "blizzard": 11,
+              "chain-lightning": 10,
+              "arcane-missile": 18,
+              "arcane-torrent": 6
+            },
+            "basicAttacks": 177,
+            "dotTicks": 108,
+            "resourceSpent": 1302,
+            "resourceRecovered": 888.2120000000389,
+            "kills": 0,
+            "respawns": 0
+          },
+          "mage": {
+            "elementalBurstStatuses": {
+              "0": 0,
+              "1": 0,
+              "2": 0,
+              "3": 0
+            },
+            "elementalBurstBonusDamage": {
+              "fire": 0,
+              "ice": 0,
+              "lightning": 0
+            },
+            "elementalCollapses": 0,
+            "burnExtendedSeconds": 0,
+            "iceExtendedSeconds": 0,
+            "paralysisExtendedSeconds": 0,
+            "shockedExtendedSeconds": 0,
+            "stormElements": {
+              "fire": 0,
+              "ice": 0,
+              "lightning": 0
+            },
+            "stormTransforms": 0,
+            "stormFollowupDamage": 0,
+            "marks": {
+              "fire": 0,
+              "ice": 0,
+              "lightning": 0
+            },
+            "resonanceTriggers": 0,
+            "resonanceActiveMs": 0,
+            "resonanceExtensions": 0,
+            "resonanceCooldownReduced": 0,
+            "overloadReleases": 0,
+            "overloadDamage": 0,
+            "shockedApplications": 10,
+            "shockedRefreshes": 0,
+            "shockedActiveMs": 0,
+            "shockedBonusDamage": 4431.323333333336,
+            "shockedBonusBySkill": {
+              "basic-attack": 1791.9133333333325,
+              "arcane-missile": 537.7283333333332,
+              "fireball": 607.5366666666665,
+              "arcane-mark-explosion": 32.64666666666674,
+              "burn": 1098.7916666666672,
+              "arcane-torrent": 244.05999999999992,
+              "blizzard": 118.6466666666667
+            },
+            "arcaneRepeats": 5.33,
+            "arcaneTorrentCasts": 6,
+            "arcaneTorrentHits": 6,
+            "arcaneTorrentBaseMana": 77.0640000000002,
+            "arcaneTorrentManaFlowTriggers": 0,
+            "arcaneTorrentManaFlowBonus": 0,
+            "arcaneTorrentTheoreticalMana": 77.0640000000002,
+            "arcaneTorrentOverflowMana": 0,
+            "arcaneTorrentActualMana": 77.0640000000002,
+            "chargeSamples": 1861,
+            "chargeStackTotal": 4128,
+            "chargeFullSamples": 738,
+            "chargeTimeouts": 4,
+            "chargeReleases": 0,
+            "zeroCooldownSkills": {},
+            "manaBeforeBonus": 430,
+            "manaAfterBonus": 494,
+            "killMana": 0,
+            "soulDrainTriggers": 0,
+            "soulDrainActiveMs": 0,
+            "manaExhaustedMs": 118900
+          },
+          "marks": {
+            "missileCasts": 18,
+            "missilesFired": 77.245,
+            "missilesHit": 77.245,
+            "targetHits": {
+              "0": 77.245
+            },
+            "markSamples": 1800,
+            "markStackSamples": 968,
+            "detonationsByStacks": {
+              "1": 0,
+              "2": 0,
+              "3": 0,
+              "4": 17
+            },
+            "detonations": 17,
+            "detonationDamage": 254.99,
+            "expiredMarks": 1,
+            "expiredStacks": 4,
+            "deathWasteMarks": 0,
+            "deathWasteStacks": 0,
+            "detonationsBySource": {
+              "fireball": 6,
+              "blizzard": 5,
+              "chain-lightning": 6
+            },
+            "detonationTargets": 17,
+            "detonationStacks": 68,
+            "mpSamples": 1800,
+            "mpTotal": 288612.590000009,
+            "mpMinimum": 55.598000000004774,
+            "mpBelow30Samples": 955,
+            "mpBelow15Samples": 117,
+            "averageStacks": 0.5377777777777768,
+            "averageDetonationStacks": 4,
+            "averageTargetsPerDetonatingCast": 0.9444444444444475,
+            "damageShare": 0.007399934853191427
+          },
+          "exhaust": 118.59999999999972,
+          "exhaustRate": 0.6588888888888924,
+          "shockCoverage": 0.2222222222222216,
+          "resonanceCoverage": 0,
+          "manaEnd": 157.27600000000507,
+          "mpAverage": 160.34032777778265,
+          "mpMinimum": 55.598000000004774,
+          "mpBelow30Rate": 0.5305555555555547,
+          "mpBelow15Rate": 0.06499999999999992
+        }
+      }
+    },
+    "three": {
+      "elementalist": {
+        "build": {
+          "baseActive": "chain-lightning",
+          "basePassive": "elemental-mastery",
+          "advancedActive": "elemental-storm",
+          "advancedPassive": "elemental-marks"
+        },
+        "metrics": {
+          "total": 7775.275,
+          "dps": 495.58738471239275,
+          "duration": 15.842999999999977,
+          "combat": {
+            "totalDamage": 7775.275,
+            "damageBySource": {
+              "fireball": 1201.405,
+              "burn": 1913.195,
+              "basic-attack": 1956.765,
+              "blizzard": 563.11,
+              "chain-lightning": 747.88,
+              "elemental-burst": 634.655,
+              "elemental-storm": 758.265
+            },
+            "skillCasts": {
+              "fireball": 4.72,
+              "blizzard": 2.94,
+              "chain-lightning": 2.005,
+              "elemental-burst": 1.88,
+              "elemental-storm": 1.33
+            },
+            "basicAttacks": 18.005,
+            "dotTicks": 26.965,
+            "resourceSpent": 271.31,
+            "resourceRecovered": 67.10846999999657,
+            "kills": 3,
+            "respawns": 0
+          },
+          "mage": {
+            "elementalBurstStatuses": {
+              "0": 0,
+              "1": 0.105,
+              "2": 1.775,
+              "3": 0
+            },
+            "elementalBurstBonusDamage": {
+              "fire": 0,
+              "ice": 121.56,
+              "lightning": 130.725
+            },
+            "elementalCollapses": 0,
+            "burnExtendedSeconds": 0,
+            "iceExtendedSeconds": 0,
+            "paralysisExtendedSeconds": 0,
+            "shockedExtendedSeconds": 0,
+            "stormElements": {
+              "fire": 0.615,
+              "ice": 0.575,
+              "lightning": 0.545
+            },
+            "stormTransforms": 0.405,
+            "stormFollowupDamage": 83.04,
+            "marks": {
+              "fire": 5.335,
+              "ice": 3.515,
+              "lightning": 2.55
+            },
+            "resonanceTriggers": 2.49,
+            "resonanceActiveMs": 13843,
+            "resonanceExtensions": 6.395,
+            "resonanceCooldownReduced": 4.98,
+            "overloadReleases": 0,
+            "overloadDamage": 0,
+            "shockedApplications": 4.965,
+            "shockedRefreshes": 0,
+            "shockedActiveMs": 0,
+            "shockedBonusDamage": 1380.0099999999998,
+            "shockedBonusBySkill": {
+              "basic-attack": 345.2683333333334,
+              "elemental-burst": 211.55166666666668,
+              "fireball": 218.11666666666682,
+              "burn": 329.5733333333334,
+              "elemental-storm": 232.92833333333326,
+              "blizzard": 42.57166666666661
+            },
+            "arcaneRepeats": 0,
+            "arcaneTorrentCasts": 0,
+            "arcaneTorrentHits": 0,
+            "arcaneTorrentBaseMana": 0,
+            "arcaneTorrentManaFlowTriggers": 0,
+            "arcaneTorrentManaFlowBonus": 0,
+            "arcaneTorrentTheoreticalMana": 0,
+            "arcaneTorrentOverflowMana": 0,
+            "arcaneTorrentActualMana": 0,
+            "chargeSamples": 156.43,
+            "chargeStackTotal": 0,
+            "chargeFullSamples": 0,
+            "chargeTimeouts": 0,
+            "chargeReleases": 0,
+            "zeroCooldownSkills": {},
+            "manaBeforeBonus": 429,
+            "manaAfterBonus": 429,
+            "killMana": 0,
+            "soulDrainTriggers": 0,
+            "soulDrainActiveMs": 0,
+            "manaExhaustedMs": 0
+          },
+          "exhaust": 0,
+          "exhaustRate": 0,
+          "shockCoverage": 0.4066824298097728,
+          "resonanceCoverage": 0.8725177198084478,
+          "manaEnd": 224.79846999999663
+        },
+        "source": "8650eb8 formal baseline"
+      },
+      "A": {
+        "build": {
+          "baseActive": "chain-lightning",
+          "basePassive": "elemental-mastery",
+          "advancedActive": "arcane-missile",
+          "advancedPassive": "mana-drain"
+        },
+        "metrics": {
+          "total": 7657.275,
+          "dps": 454.50042645634136,
+          "duration": 16.866499999999952,
+          "combat": {
+            "totalDamage": 7657.275,
+            "damageBySource": {
+              "fireball": 1047.81,
+              "burn": 1701.68,
+              "basic-attack": 2086.05,
+              "blizzard": 520.79,
+              "chain-lightning": 744.88,
+              "arcane-missile": 813.56,
+              "arcane-mark-explosion": 68.205,
+              "arcane-torrent": 674.3
+            },
+            "skillCasts": {
+              "fireball": 5,
+              "blizzard": 3,
+              "chain-lightning": 2.21,
+              "arcane-missile": 4.76,
+              "arcane-torrent": 2
+            },
+            "basicAttacks": 19.33,
+            "dotTicks": 27.44,
+            "resourceSpent": 347.14,
+            "resourceRecovered": 96.69753600000222,
+            "kills": 3,
+            "respawns": 0
+          },
+          "mage": {
+            "elementalBurstStatuses": {
+              "0": 0,
+              "1": 0,
+              "2": 0,
+              "3": 0
+            },
+            "elementalBurstBonusDamage": {
+              "fire": 0,
+              "ice": 0,
+              "lightning": 0
+            },
+            "elementalCollapses": 0,
+            "burnExtendedSeconds": 0,
+            "iceExtendedSeconds": 0,
+            "paralysisExtendedSeconds": 0,
+            "shockedExtendedSeconds": 0,
+            "stormElements": {
+              "fire": 0,
+              "ice": 0,
+              "lightning": 0
+            },
+            "stormTransforms": 0,
+            "stormFollowupDamage": 0,
+            "marks": {
+              "fire": 0,
+              "ice": 0,
+              "lightning": 0
+            },
+            "resonanceTriggers": 0,
+            "resonanceActiveMs": 0,
+            "resonanceExtensions": 0,
+            "resonanceCooldownReduced": 0,
+            "overloadReleases": 0,
+            "overloadDamage": 0,
+            "shockedApplications": 5.21,
+            "shockedRefreshes": 0,
+            "shockedActiveMs": 0,
+            "shockedBonusDamage": 1166.5249999999996,
+            "shockedBonusBySkill": {
+              "basic-attack": 359.615,
+              "arcane-missile": 143.61833333333342,
+              "fireball": 175.19833333333347,
+              "arcane-mark-explosion": 13.104999999999995,
+              "burn": 251.9883333333334,
+              "arcane-torrent": 182.98333333333332,
+              "blizzard": 40.01666666666667
+            },
+            "arcaneRepeats": 1.45,
+            "arcaneTorrentCasts": 2,
+            "arcaneTorrentHits": 3.965,
+            "arcaneTorrentBaseMana": 34.424389999999946,
+            "arcaneTorrentManaFlowTriggers": 0,
+            "arcaneTorrentManaFlowBonus": 0,
+            "arcaneTorrentTheoreticalMana": 34.424389999999946,
+            "arcaneTorrentOverflowMana": 0,
+            "arcaneTorrentActualMana": 34.424389999999946,
+            "chargeSamples": 183.635,
+            "chargeStackTotal": 816.175,
+            "chargeFullSamples": 141.635,
+            "chargeTimeouts": 0,
+            "chargeReleases": 0,
+            "zeroCooldownSkills": {},
+            "manaBeforeBonus": 430,
+            "manaAfterBonus": 494,
+            "killMana": 45,
+            "soulDrainTriggers": 3,
+            "soulDrainActiveMs": 9693,
+            "manaExhaustedMs": 0
+          },
+          "marks": {
+            "missileCasts": 4.76,
+            "missilesFired": 19.04,
+            "missilesHit": 19.04,
+            "targetHits": {
+              "0": 2.105,
+              "1": 4.9,
+              "2": 12.035
+            },
+            "markSamples": 505.995,
+            "markStackSamples": 204.09,
+            "detonationsByStacks": {
+              "1": 2.57,
+              "2": 2.375,
+              "3": 1.13,
+              "4": 1.37
+            },
+            "detonations": 7.445,
+            "detonationDamage": 68.205,
+            "expiredMarks": 0.05,
+            "expiredStacks": 0.055,
+            "deathWasteMarks": 0.47,
+            "deathWasteStacks": 1.295,
+            "detonationsBySource": {
+              "fireball": 0.805,
+              "arcane-torrent": 1.615,
+              "blizzard": 2.94,
+              "chain-lightning": 2.085
+            },
+            "detonationTargets": 7.445,
+            "detonationStacks": 16.19,
+            "mpSamples": 168.665,
+            "mpTotal": 65872.47163600031,
+            "mpMinimum": 314.05043000000217,
+            "mpBelow30Samples": 0,
+            "mpBelow15Samples": 0,
+            "averageStacks": 0.40274643924789616,
+            "averageDetonationStacks": 2.1975218253968243,
+            "averageTargetsPerDetonatingCast": 1.57375,
+            "damageShare": 0.008906014143376568
+          },
+          "exhaust": 0,
+          "exhaustRate": 0,
+          "shockCoverage": 0.39619406059763795,
+          "resonanceCoverage": 0,
+          "manaEnd": 322.98192600000226,
+          "mpAverage": 390.65225198311214,
+          "mpMinimum": 314.05043000000217,
+          "mpBelow30Rate": 0,
+          "mpBelow15Rate": 0
+        }
+      },
+      "B": {
+        "build": {
+          "baseActive": "chain-lightning",
+          "basePassive": "elemental-mastery",
+          "advancedActive": "arcane-missile",
+          "advancedPassive": "arcane-charge"
+        },
+        "metrics": {
+          "total": 7679.345,
+          "dps": 464.53749222099543,
+          "duration": 16.532999999999983,
+          "combat": {
+            "totalDamage": 7679.345,
+            "damageBySource": {
+              "fireball": 1133.455,
+              "burn": 1352.615,
+              "basic-attack": 2129.58,
+              "blizzard": 502.815,
+              "chain-lightning": 940.18,
+              "arcane-missile": 749.935,
+              "arcane-mark-explosion": 69.745,
+              "arcane-torrent": 801.02
+            },
+            "skillCasts": {
+              "fireball": 4.985,
+              "blizzard": 2.995,
+              "chain-lightning": 3,
+              "arcane-missile": 4,
+              "arcane-torrent": 2
+            },
+            "basicAttacks": 18.99,
+            "dotTicks": 21.515,
+            "resourceSpent": 353.6,
+            "resourceRecovered": 80.68502000000457,
+            "kills": 3,
+            "respawns": 0
+          },
+          "mage": {
+            "elementalBurstStatuses": {
+              "0": 0,
+              "1": 0,
+              "2": 0,
+              "3": 0
+            },
+            "elementalBurstBonusDamage": {
+              "fire": 0,
+              "ice": 0,
+              "lightning": 0
+            },
+            "elementalCollapses": 0,
+            "burnExtendedSeconds": 0,
+            "iceExtendedSeconds": 0,
+            "paralysisExtendedSeconds": 0,
+            "shockedExtendedSeconds": 0,
+            "stormElements": {
+              "fire": 0,
+              "ice": 0,
+              "lightning": 0
+            },
+            "stormTransforms": 0,
+            "stormFollowupDamage": 0,
+            "marks": {
+              "fire": 0,
+              "ice": 0,
+              "lightning": 0
+            },
+            "resonanceTriggers": 0,
+            "resonanceActiveMs": 0,
+            "resonanceExtensions": 0,
+            "resonanceCooldownReduced": 0,
+            "overloadReleases": 0,
+            "overloadDamage": 0,
+            "shockedApplications": 5,
+            "shockedRefreshes": 1,
+            "shockedActiveMs": 0,
+            "shockedBonusDamage": 1413.2483333333328,
+            "shockedBonusBySkill": {
+              "basic-attack": 444.21833333333313,
+              "arcane-missile": 151.4466666666667,
+              "fireball": 264.96666666666664,
+              "arcane-mark-explosion": 13.74333333333333,
+              "burn": 251.22999999999993,
+              "arcane-torrent": 179.29,
+              "chain-lightning": 68.76166666666666,
+              "blizzard": 39.59166666666667
+            },
+            "arcaneRepeats": 1.17,
+            "arcaneTorrentCasts": 2,
+            "arcaneTorrentHits": 5.215,
+            "arcaneTorrentBaseMana": 39.98188999999991,
+            "arcaneTorrentManaFlowTriggers": 0,
+            "arcaneTorrentManaFlowBonus": 0,
+            "arcaneTorrentTheoreticalMana": 39.98188999999991,
+            "arcaneTorrentOverflowMana": 0,
+            "arcaneTorrentActualMana": 39.98188999999991,
+            "chargeSamples": 180.31,
+            "chargeStackTotal": 461.705,
+            "chargeFullSamples": 24.42,
+            "chargeTimeouts": 0,
+            "chargeReleases": 2,
+            "zeroCooldownSkills": {
+              "arcane-torrent": 1,
+              "chain-lightning": 1
+            },
+            "manaBeforeBonus": 430,
+            "manaAfterBonus": 494,
+            "killMana": 45,
+            "soulDrainTriggers": 0,
+            "soulDrainActiveMs": 0,
+            "manaExhaustedMs": 0
+          },
+          "marks": {
+            "missileCasts": 4,
+            "missilesFired": 17.145,
+            "missilesHit": 17.145,
+            "targetHits": {
+              "0": 2.185,
+              "1": 5.355,
+              "2": 9.605
+            },
+            "markSamples": 495.99,
+            "markStackSamples": 212.505,
+            "detonationsByStacks": {
+              "1": 2.295,
+              "2": 2.375,
+              "3": 1.23,
+              "4": 1.36
+            },
+            "detonations": 7.26,
+            "detonationDamage": 69.745,
+            "expiredMarks": 0.055,
+            "expiredStacks": 0.08,
+            "deathWasteMarks": 0.225,
+            "deathWasteStacks": 0.365,
+            "detonationsBySource": {
+              "fireball": 0.79,
+              "arcane-torrent": 3.595,
+              "chain-lightning": 1.88,
+              "blizzard": 0.995
+            },
+            "detonationTargets": 7.26,
+            "detonationStacks": 16.175,
+            "mpSamples": 165.33,
+            "mpTotal": 65182.01528000043,
+            "mpMinimum": 299.54541000000484,
+            "mpBelow30Samples": 0,
+            "mpBelow15Samples": 0,
+            "averageStacks": 0.4284828347095684,
+            "averageDetonationStacks": 2.252484126984127,
+            "averageTargetsPerDetonatingCast": 1.815,
+            "damageShare": 0.009081677410854349
+          },
+          "exhaust": 0,
+          "exhaustRate": 0,
+          "shockCoverage": 0.4340953944073867,
+          "resonanceCoverage": 0,
+          "manaEnd": 306.06691000000444,
+          "mpAverage": 394.26361846023434,
+          "mpMinimum": 299.54541000000484,
+          "mpBelow30Rate": 0,
+          "mpBelow15Rate": 0
+        }
+      }
+    },
+    "five": {
+      "elementalist": {
+        "build": {
+          "baseActive": "chain-lightning",
+          "basePassive": "elemental-mastery",
+          "advancedActive": "elemental-storm",
+          "advancedPassive": "resonance-overload"
+        },
+        "metrics": {
+          "total": 12965.185,
+          "dps": 559.9173552259685,
+          "duration": 23.298500000000008,
+          "combat": {
+            "totalDamage": 12965.185,
+            "damageBySource": {
+              "fireball": 1642.855,
+              "burn": 2690.9,
+              "basic-attack": 2852.61,
+              "blizzard": 1274.12,
+              "chain-lightning": 1675.215,
+              "elemental-burst": 903.15,
+              "elemental-storm": 1661.29,
+              "resonance-overload": 265.045
+            },
+            "skillCasts": {
+              "fireball": 6.645,
+              "blizzard": 3.825,
+              "chain-lightning": 2.935,
+              "elemental-burst": 2.77,
+              "elemental-storm": 2
+            },
+            "basicAttacks": 26.32,
+            "dotTicks": 41.53,
+            "resourceSpent": 381.23,
+            "resourceRecovered": 99.09256499999685,
+            "kills": 5,
+            "respawns": 0
+          },
+          "mage": {
+            "elementalBurstStatuses": {
+              "0": 0,
+              "1": 0.35,
+              "2": 2.42,
+              "3": 0
+            },
+            "elementalBurstBonusDamage": {
+              "fire": 0,
+              "ice": 177.485,
+              "lightning": 173.155
+            },
+            "elementalCollapses": 0,
+            "burnExtendedSeconds": 0,
+            "iceExtendedSeconds": 0,
+            "paralysisExtendedSeconds": 0,
+            "shockedExtendedSeconds": 0,
+            "stormElements": {
+              "fire": 0.85,
+              "ice": 0.89,
+              "lightning": 0.85
+            },
+            "stormTransforms": 0.59,
+            "stormFollowupDamage": 217.61,
+            "marks": {
+              "fire": 7.495,
+              "ice": 4.715,
+              "lightning": 3.785
+            },
+            "resonanceTriggers": 3.57,
+            "resonanceActiveMs": 16977.5,
+            "resonanceExtensions": 0,
+            "resonanceCooldownReduced": 7.14,
+            "overloadReleases": 1.845,
+            "overloadDamage": 265.045,
+            "shockedApplications": 10.56,
+            "shockedRefreshes": 0,
+            "shockedActiveMs": 0,
+            "shockedBonusDamage": 2141.6583333333324,
+            "shockedBonusBySkill": {
+              "basic-attack": 494.11166666666674,
+              "elemental-burst": 286.58833333333337,
+              "fireball": 303.29333333333324,
+              "burn": 457.03500000000037,
+              "elemental-storm": 429.6466666666669,
+              "resonance-overload": 36.6,
+              "blizzard": 134.38333333333333
+            },
+            "arcaneRepeats": 0,
+            "arcaneTorrentCasts": 0,
+            "arcaneTorrentHits": 0,
+            "arcaneTorrentBaseMana": 0,
+            "arcaneTorrentManaFlowTriggers": 0,
+            "arcaneTorrentManaFlowBonus": 0,
+            "arcaneTorrentTheoreticalMana": 0,
+            "arcaneTorrentOverflowMana": 0,
+            "arcaneTorrentActualMana": 0,
+            "chargeSamples": 230.985,
+            "chargeStackTotal": 0,
+            "chargeFullSamples": 0,
+            "chargeTimeouts": 0,
+            "chargeReleases": 0,
+            "zeroCooldownSkills": {},
+            "manaBeforeBonus": 429,
+            "manaAfterBonus": 429,
+            "killMana": 0,
+            "soulDrainTriggers": 0,
+            "soulDrainActiveMs": 0,
+            "manaExhaustedMs": 0
+          },
+          "exhaust": 0,
+          "exhaustRate": 0,
+          "shockCoverage": 0.34939849682603247,
+          "resonanceCoverage": 0.7303817428468414,
+          "manaEnd": 146.86256499999658
+        },
+        "source": "8650eb8 formal baseline"
+      },
+      "A": {
+        "build": {
+          "baseActive": "chain-lightning",
+          "basePassive": "mana-amplification",
+          "advancedActive": "arcane-torrent",
+          "advancedPassive": "arcane-charge"
+        },
+        "metrics": {
+          "total": 12851.01,
+          "dps": 529.6032864531411,
+          "duration": 24.270500000000013,
+          "combat": {
+            "totalDamage": 12851.01,
+            "damageBySource": {
+              "fireball": 1426.77,
+              "burn": 1757.765,
+              "basic-attack": 3007.445,
+              "blizzard": 1202.235,
+              "chain-lightning": 2342.575,
+              "arcane-missile": 1132.64,
+              "arcane-mark-explosion": 100.505,
+              "arcane-torrent": 1881.075
+            },
+            "skillCasts": {
+              "fireball": 6.52,
+              "blizzard": 4,
+              "chain-lightning": 4,
+              "arcane-missile": 7,
+              "arcane-torrent": 3
+            },
+            "basicAttacks": 27.73,
+            "dotTicks": 34.025,
+            "resourceSpent": 505.36,
+            "resourceRecovered": 118.90827000000685,
+            "kills": 5,
+            "respawns": 0
+          },
+          "mage": {
+            "elementalBurstStatuses": {
+              "0": 0,
+              "1": 0,
+              "2": 0,
+              "3": 0
+            },
+            "elementalBurstBonusDamage": {
+              "fire": 0,
+              "ice": 0,
+              "lightning": 0
+            },
+            "elementalCollapses": 0,
+            "burnExtendedSeconds": 0,
+            "iceExtendedSeconds": 0,
+            "paralysisExtendedSeconds": 0,
+            "shockedExtendedSeconds": 0,
+            "stormElements": {
+              "fire": 0,
+              "ice": 0,
+              "lightning": 0
+            },
+            "stormTransforms": 0,
+            "stormFollowupDamage": 0,
+            "marks": {
+              "fire": 0,
+              "ice": 0,
+              "lightning": 0
+            },
+            "resonanceTriggers": 0,
+            "resonanceActiveMs": 0,
+            "resonanceExtensions": 0,
+            "resonanceCooldownReduced": 0,
+            "overloadReleases": 0,
+            "overloadDamage": 0,
+            "shockedApplications": 10.795,
+            "shockedRefreshes": 3.345,
+            "shockedActiveMs": 0,
+            "shockedBonusDamage": 2198.493333333334,
+            "shockedBonusBySkill": {
+              "basic-attack": 587.1316666666676,
+              "arcane-missile": 200.19,
+              "fireball": 303.15499999999963,
+              "arcane-mark-explosion": 16.501666666666676,
+              "burn": 350.0916666666666,
+              "arcane-torrent": 327.3916666666657,
+              "chain-lightning": 247.43666666666616,
+              "blizzard": 166.59500000000025
+            },
+            "arcaneRepeats": 0,
+            "arcaneTorrentCasts": 3,
+            "arcaneTorrentHits": 11.91,
+            "arcaneTorrentBaseMana": 88.4753999999999,
+            "arcaneTorrentManaFlowTriggers": 0,
+            "arcaneTorrentManaFlowBonus": 0,
+            "arcaneTorrentTheoreticalMana": 88.4753999999999,
+            "arcaneTorrentOverflowMana": 0,
+            "arcaneTorrentActualMana": 88.4753999999999,
+            "chargeSamples": 265.225,
+            "chargeStackTotal": 671.07,
+            "chargeFullSamples": 44,
+            "chargeTimeouts": 0,
+            "chargeReleases": 4,
+            "zeroCooldownSkills": {
+              "arcane-torrent": 1,
+              "chain-lightning": 1,
+              "arcane-missile": 2
+            },
+            "manaBeforeBonus": 430,
+            "manaAfterBonus": 494,
+            "killMana": 75,
+            "soulDrainTriggers": 0,
+            "soulDrainActiveMs": 0,
+            "manaExhaustedMs": 0
+          },
+          "marks": {
+            "missileCasts": 7,
+            "missilesFired": 28,
+            "missilesHit": 28,
+            "targetHits": {
+              "0": 1.56,
+              "1": 2.405,
+              "2": 4.875,
+              "3": 7.685,
+              "4": 11.475
+            },
+            "markSamples": 1213.525,
+            "markStackSamples": 345.745,
+            "detonationsByStacks": {
+              "1": 6.99,
+              "2": 3.64,
+              "3": 1.345,
+              "4": 1.535
+            },
+            "detonations": 13.51,
+            "detonationDamage": 100.505,
+            "expiredMarks": 0.065,
+            "expiredStacks": 0.1,
+            "deathWasteMarks": 0.675,
+            "deathWasteStacks": 2.09,
+            "detonationsBySource": {
+              "fireball": 1.115,
+              "arcane-torrent": 7.225,
+              "chain-lightning": 2.775,
+              "blizzard": 2.395
+            },
+            "detonationTargets": 13.51,
+            "detonationStacks": 24.445,
+            "mpSamples": 242.705,
+            "mpTotal": 91294.94905000094,
+            "mpMinimum": 263.8577000000065,
+            "mpBelow30Samples": 0,
+            "mpBelow15Samples": 0,
+            "averageStacks": 0.28476699875472766,
+            "averageDetonationStacks": 1.8256894282188412,
+            "averageTargetsPerDetonatingCast": 1.9299999999999995,
+            "damageShare": 0.007818282985707688
+          },
+          "exhaust": 0,
+          "exhaustRate": 0,
+          "shockCoverage": 0.39462904227887596,
+          "resonanceCoverage": 0,
+          "manaEnd": 271.0236700000068,
+          "mpAverage": 376.1915421848656,
+          "mpMinimum": 263.8577000000065,
+          "mpBelow30Rate": 0,
+          "mpBelow15Rate": 0
+        }
+      },
+      "B": {
+        "build": {
+          "baseActive": "chain-lightning",
+          "basePassive": "elemental-mastery",
+          "advancedActive": "arcane-missile",
+          "advancedPassive": "mana-drain"
+        },
+        "metrics": {
+          "total": 12825.24,
+          "dps": 519.3975452453668,
+          "duration": 24.77599999999999,
+          "combat": {
+            "totalDamage": 12825.24,
+            "damageBySource": {
+              "fireball": 1577.07,
+              "burn": 2334.96,
+              "basic-attack": 3067.445,
+              "blizzard": 1305.25,
+              "chain-lightning": 1826.22,
+              "arcane-missile": 1217.6,
+              "arcane-torrent": 1389.55,
+              "arcane-mark-explosion": 107.145
+            },
+            "skillCasts": {
+              "fireball": 7.36,
+              "blizzard": 4,
+              "chain-lightning": 3.435,
+              "arcane-missile": 6.605,
+              "arcane-torrent": 2.825
+            },
+            "basicAttacks": 28.08,
+            "dotTicks": 37.125,
+            "resourceSpent": 495.53,
+            "resourceRecovered": 145.64725500000253,
+            "kills": 5,
+            "respawns": 0
+          },
+          "mage": {
+            "elementalBurstStatuses": {
+              "0": 0,
+              "1": 0,
+              "2": 0,
+              "3": 0
+            },
+            "elementalBurstBonusDamage": {
+              "fire": 0,
+              "ice": 0,
+              "lightning": 0
+            },
+            "elementalCollapses": 0,
+            "burnExtendedSeconds": 0,
+            "iceExtendedSeconds": 0,
+            "paralysisExtendedSeconds": 0,
+            "shockedExtendedSeconds": 0,
+            "stormElements": {
+              "fire": 0,
+              "ice": 0,
+              "lightning": 0
+            },
+            "stormTransforms": 0,
+            "stormFollowupDamage": 0,
+            "marks": {
+              "fire": 0,
+              "ice": 0,
+              "lightning": 0
+            },
+            "resonanceTriggers": 0,
+            "resonanceActiveMs": 0,
+            "resonanceExtensions": 0,
+            "resonanceCooldownReduced": 0,
+            "overloadReleases": 0,
+            "overloadDamage": 0,
+            "shockedApplications": 12.355,
+            "shockedRefreshes": 0,
+            "shockedActiveMs": 0,
+            "shockedBonusDamage": 1964.816666666665,
+            "shockedBonusBySkill": {
+              "basic-attack": 556.2983333333332,
+              "arcane-missile": 230.4683333333334,
+              "fireball": 293.2316666666668,
+              "burn": 372.3566666666668,
+              "arcane-torrent": 302.73500000000007,
+              "arcane-mark-explosion": 14.256666666666677,
+              "blizzard": 195.47
+            },
+            "arcaneRepeats": 2.07,
+            "arcaneTorrentCasts": 2.825,
+            "arcaneTorrentHits": 8.88,
+            "arcaneTorrentBaseMana": 63.20483000000001,
+            "arcaneTorrentManaFlowTriggers": 0,
+            "arcaneTorrentManaFlowBonus": 0,
+            "arcaneTorrentTheoreticalMana": 63.20483000000001,
+            "arcaneTorrentOverflowMana": 0,
+            "arcaneTorrentActualMana": 63.20483000000001,
+            "chargeSamples": 269.985,
+            "chargeStackTotal": 1247.925,
+            "chargeFullSamples": 227.985,
+            "chargeTimeouts": 0,
+            "chargeReleases": 0,
+            "zeroCooldownSkills": {},
+            "manaBeforeBonus": 430,
+            "manaAfterBonus": 494,
+            "killMana": 75,
+            "soulDrainTriggers": 5,
+            "soulDrainActiveMs": 16357.5,
+            "manaExhaustedMs": 0
+          },
+          "marks": {
+            "missileCasts": 6.605,
+            "missilesFired": 28.31,
+            "missilesHit": 28.31,
+            "targetHits": {
+              "0": 1.38,
+              "1": 2.9,
+              "2": 5.685,
+              "3": 6.88,
+              "4": 11.465
+            },
+            "markSamples": 1238.8,
+            "markStackSamples": 340.44,
+            "detonationsByStacks": {
+              "1": 7.88,
+              "2": 4.565,
+              "3": 1.575,
+              "4": 1.165
+            },
+            "detonations": 15.185,
+            "detonationDamage": 107.145,
+            "expiredMarks": 0.06,
+            "expiredStacks": 0.075,
+            "deathWasteMarks": 0.355,
+            "deathWasteStacks": 0.665,
+            "detonationsBySource": {
+              "arcane-torrent": 2.82,
+              "blizzard": 5.15,
+              "chain-lightning": 5.625,
+              "fireball": 1.59
+            },
+            "detonationTargets": 15.185,
+            "detonationStacks": 26.395,
+            "mpSamples": 247.76,
+            "mpTotal": 90709.59499800048,
+            "mpMinimum": 271.5030350000028,
+            "mpBelow30Samples": 0,
+            "mpBelow15Samples": 0,
+            "averageStacks": 0.27447947071272577,
+            "averageDetonationStacks": 1.7510273030418149,
+            "averageTargetsPerDetonatingCast": 2.306309523809527,
+            "damageShare": 0.008351576249360657
+          },
+          "exhaust": 0,
+          "exhaustRate": 0,
+          "shockCoverage": 0.3896924188597541,
+          "resonanceCoverage": 0,
+          "manaEnd": 282.32208500000274,
+          "mpAverage": 366.5387607442251,
+          "mpMinimum": 271.5030350000028,
+          "mpBelow30Rate": 0,
+          "mpBelow15Rate": 0
+        }
+      }
+    },
+    "boss300": {
+      "elementalist": {
+        "build": {
+          "baseActive": "chain-lightning",
+          "basePassive": "elemental-mastery",
+          "advancedActive": "elemental-storm",
+          "advancedPassive": "resonance-overload"
+        },
+        "metrics": {
+          "total": 56349.795,
+          "dps": 187.83265,
+          "duration": 300,
+          "combat": {
+            "totalDamage": 56349.795,
+            "damageBySource": {
+              "fireball": 6485.01,
+              "burn": 12570.745,
+              "basic-attack": 27209.41,
+              "blizzard": 1640.1,
+              "chain-lightning": 1598.615,
+              "elemental-burst": 3119.015,
+              "elemental-storm": 2449.56,
+              "resonance-overload": 1277.34
+            },
+            "skillCasts": {
+              "fireball": 27.635,
+              "blizzard": 18,
+              "chain-lightning": 11,
+              "elemental-burst": 9.4,
+              "elemental-storm": 8.965
+            },
+            "basicAttacks": 289.965,
+            "dotTicks": 181.33,
+            "resourceSpent": 1582,
+            "resourceRecovered": 1286.1419999999996,
+            "kills": 0,
+            "respawns": 0
+          },
+          "mage": {
+            "elementalBurstStatuses": {
+              "0": 0,
+              "1": 0.725,
+              "2": 8.675,
+              "3": 0
+            },
+            "elementalBurstBonusDamage": {
+              "fire": 0,
+              "ice": 611.7,
+              "lightning": 624.115
+            },
+            "elementalCollapses": 0,
+            "burnExtendedSeconds": 0,
+            "iceExtendedSeconds": 0,
+            "paralysisExtendedSeconds": 0,
+            "shockedExtendedSeconds": 0,
+            "stormElements": {
+              "fire": 3.88,
+              "ice": 3.975,
+              "lightning": 3.775
+            },
+            "stormTransforms": 2.665,
+            "stormFollowupDamage": 331.62,
+            "marks": {
+              "fire": 31.515,
+              "ice": 21.975,
+              "lightning": 14.775
+            },
+            "resonanceTriggers": 14.525,
+            "resonanceActiveMs": 73915,
+            "resonanceExtensions": 0,
+            "resonanceCooldownReduced": 29.02,
+            "overloadReleases": 9.98,
+            "overloadDamage": 1277.34,
+            "shockedApplications": 11,
+            "shockedRefreshes": 0,
+            "shockedActiveMs": 0,
+            "shockedBonusDamage": 7117.210000000001,
+            "shockedBonusBySkill": {
+              "basic-attack": 2028.8949999999998,
+              "elemental-burst": 1021.603333333333,
+              "fireball": 1075.3283333333331,
+              "burn": 2183.09,
+              "elemental-storm": 702.2766666666668,
+              "resonance-overload": 30.195,
+              "blizzard": 75.82166666666674
+            },
+            "arcaneRepeats": 0,
+            "arcaneTorrentCasts": 0,
+            "arcaneTorrentHits": 0,
+            "arcaneTorrentBaseMana": 0,
+            "arcaneTorrentManaFlowTriggers": 0,
+            "arcaneTorrentManaFlowBonus": 0,
+            "arcaneTorrentTheoreticalMana": 0,
+            "arcaneTorrentOverflowMana": 0,
+            "arcaneTorrentActualMana": 0,
+            "chargeSamples": 2998,
+            "chargeStackTotal": 0,
+            "chargeFullSamples": 0,
+            "chargeTimeouts": 0,
+            "chargeReleases": 0,
+            "zeroCooldownSkills": {},
+            "manaBeforeBonus": 429,
+            "manaAfterBonus": 429,
+            "killMana": 0,
+            "soulDrainTriggers": 0,
+            "soulDrainActiveMs": 0,
+            "manaExhaustedMs": 218120
+          },
+          "exhaust": 217.42,
+          "exhaustRate": 0.7247333333333329,
+          "shockCoverage": 0.13433333333333383,
+          "resonanceCoverage": 0.24638333333333334,
+          "manaEnd": 133.14200000000267
+        },
+        "source": "8650eb8 formal baseline"
+      },
+      "A": {
+        "build": {
+          "baseActive": "chain-lightning",
+          "basePassive": "elemental-mastery",
+          "advancedActive": "arcane-torrent",
+          "advancedPassive": "mana-drain"
+        },
+        "metrics": {
+          "total": 54479.425,
+          "dps": 181.59808333333342,
+          "duration": 300,
+          "combat": {
+            "totalDamage": 54479.425,
+            "damageBySource": {
+              "fireball": 5586.495,
+              "burn": 10120.445,
+              "basic-attack": 28447.315,
+              "blizzard": 1425.935,
+              "chain-lightning": 2335.31,
+              "arcane-missile": 4389.315,
+              "arcane-mark-explosion": 405.18,
+              "arcane-torrent": 1769.43
+            },
+            "skillCasts": {
+              "fireball": 27,
+              "blizzard": 17,
+              "chain-lightning": 17,
+              "arcane-missile": 27,
+              "arcane-torrent": 10
+            },
+            "basicAttacks": 292,
+            "dotTicks": 162,
+            "resourceSpent": 2036,
+            "resourceRecovered": 1481.0119999999672,
+            "kills": 0,
+            "respawns": 0
+          },
+          "mage": {
+            "elementalBurstStatuses": {
+              "0": 0,
+              "1": 0,
+              "2": 0,
+              "3": 0
+            },
+            "elementalBurstBonusDamage": {
+              "fire": 0,
+              "ice": 0,
+              "lightning": 0
+            },
+            "elementalCollapses": 0,
+            "burnExtendedSeconds": 0,
+            "iceExtendedSeconds": 0,
+            "paralysisExtendedSeconds": 0,
+            "shockedExtendedSeconds": 0,
+            "stormElements": {
+              "fire": 0,
+              "ice": 0,
+              "lightning": 0
+            },
+            "stormTransforms": 0,
+            "stormFollowupDamage": 0,
+            "marks": {
+              "fire": 0,
+              "ice": 0,
+              "lightning": 0
+            },
+            "resonanceTriggers": 0,
+            "resonanceActiveMs": 0,
+            "resonanceExtensions": 0,
+            "resonanceCooldownReduced": 0,
+            "overloadReleases": 0,
+            "overloadDamage": 0,
+            "shockedApplications": 17,
+            "shockedRefreshes": 0,
+            "shockedActiveMs": 0,
+            "shockedBonusDamage": 6898.0033333333395,
+            "shockedBonusBySkill": {
+              "basic-attack": 3114.501666666669,
+              "arcane-missile": 698.5466666666667,
+              "fireball": 874.6999999999996,
+              "arcane-mark-explosion": 52.306666666666636,
+              "burn": 1579.7049999999995,
+              "arcane-torrent": 460.5049999999997,
+              "blizzard": 117.73833333333334
+            },
+            "arcaneRepeats": 0,
+            "arcaneTorrentCasts": 10,
+            "arcaneTorrentHits": 10,
+            "arcaneTorrentBaseMana": 148.2000000000005,
+            "arcaneTorrentManaFlowTriggers": 7,
+            "arcaneTorrentManaFlowBonus": 51.8700000000001,
+            "arcaneTorrentTheoreticalMana": 200.06999999999974,
+            "arcaneTorrentOverflowMana": 0,
+            "arcaneTorrentActualMana": 200.06999999999974,
+            "chargeSamples": 3096,
+            "chargeStackTotal": 6488,
+            "chargeFullSamples": 1144,
+            "chargeTimeouts": 7,
+            "chargeReleases": 0,
+            "zeroCooldownSkills": {},
+            "manaBeforeBonus": 430,
+            "manaAfterBonus": 494,
+            "killMana": 0,
+            "soulDrainTriggers": 0,
+            "soulDrainActiveMs": 0,
+            "manaExhaustedMs": 206600
+          },
+          "marks": {
+            "missileCasts": 27,
+            "missilesFired": 108,
+            "missilesHit": 108,
+            "targetHits": {
+              "0": 108
+            },
+            "markSamples": 3000,
+            "markStackSamples": 1144,
+            "detonationsByStacks": {
+              "1": 0,
+              "2": 0,
+              "3": 0,
+              "4": 27
+            },
+            "detonations": 27,
+            "detonationDamage": 405.18,
+            "expiredMarks": 0,
+            "expiredStacks": 0,
+            "deathWasteMarks": 0,
+            "deathWasteStacks": 0,
+            "detonationsBySource": {
+              "fireball": 9,
+              "blizzard": 8,
+              "chain-lightning": 9,
+              "arcane-torrent": 1
+            },
+            "detonationTargets": 27,
+            "detonationStacks": 108,
+            "mpSamples": 3000,
+            "mpTotal": 466025.68200001225,
+            "mpMinimum": 64.95000000000451,
+            "mpBelow30Samples": 1560,
+            "mpBelow15Samples": 128,
+            "averageStacks": 0.38133333333333186,
+            "averageDetonationStacks": 4,
+            "averageTargetsPerDetonatingCast": 1,
+            "damageShare": 0.007438240852678242
+          },
+          "exhaust": 206,
+          "exhaustRate": 0.6866666666666673,
+          "shockCoverage": 0.2266666666666666,
+          "resonanceCoverage": 0,
+          "manaEnd": 139.08200000000474,
+          "mpAverage": 155.34189400000463,
+          "mpMinimum": 64.95000000000451,
+          "mpBelow30Rate": 0.5199999999999994,
+          "mpBelow15Rate": 0.042666666666666624
+        }
+      },
+      "B": {
+        "build": {
+          "baseActive": "chain-lightning",
+          "basePassive": "elemental-mastery",
+          "advancedActive": "arcane-missile",
+          "advancedPassive": "arcane-charge"
+        },
+        "metrics": {
+          "total": 54480.425,
+          "dps": 181.60141666666678,
+          "duration": 300,
+          "combat": {
+            "totalDamage": 54480.425,
+            "damageBySource": {
+              "fireball": 5319.14,
+              "burn": 9562.18,
+              "basic-attack": 28297.505,
+              "blizzard": 1382.205,
+              "chain-lightning": 2468.94,
+              "arcane-missile": 4839.49,
+              "arcane-mark-explosion": 389.35,
+              "arcane-torrent": 2221.615
+            },
+            "skillCasts": {
+              "fireball": 26,
+              "blizzard": 17,
+              "chain-lightning": 17,
+              "arcane-missile": 27,
+              "arcane-torrent": 15
+            },
+            "basicAttacks": 293,
+            "dotTicks": 156,
+            "resourceSpent": 2108,
+            "resourceRecovered": 1481.0119999999672,
+            "kills": 0,
+            "respawns": 0
+          },
+          "mage": {
+            "elementalBurstStatuses": {
+              "0": 0,
+              "1": 0,
+              "2": 0,
+              "3": 0
+            },
+            "elementalBurstBonusDamage": {
+              "fire": 0,
+              "ice": 0,
+              "lightning": 0
+            },
+            "elementalCollapses": 0,
+            "burnExtendedSeconds": 0,
+            "iceExtendedSeconds": 0,
+            "paralysisExtendedSeconds": 0,
+            "shockedExtendedSeconds": 0,
+            "stormElements": {
+              "fire": 0,
+              "ice": 0,
+              "lightning": 0
+            },
+            "stormTransforms": 0,
+            "stormFollowupDamage": 0,
+            "marks": {
+              "fire": 0,
+              "ice": 0,
+              "lightning": 0
+            },
+            "resonanceTriggers": 0,
+            "resonanceActiveMs": 0,
+            "resonanceExtensions": 0,
+            "resonanceCooldownReduced": 0,
+            "overloadReleases": 0,
+            "overloadDamage": 0,
+            "shockedApplications": 16,
+            "shockedRefreshes": 1,
+            "shockedActiveMs": 0,
+            "shockedBonusDamage": 6784.629999999999,
+            "shockedBonusBySkill": {
+              "basic-attack": 2904.695000000001,
+              "arcane-missile": 771.2366666666667,
+              "fireball": 875.7683333333341,
+              "arcane-mark-explosion": 59.01000000000001,
+              "burn": 1599.4849999999988,
+              "arcane-torrent": 425.61500000000024,
+              "chain-lightning": 70.26499999999997,
+              "blizzard": 78.555
+            },
+            "arcaneRepeats": 8.06,
+            "arcaneTorrentCasts": 15,
+            "arcaneTorrentHits": 15,
+            "arcaneTorrentBaseMana": 192.6600000000004,
+            "arcaneTorrentManaFlowTriggers": 0,
+            "arcaneTorrentManaFlowBonus": 0,
+            "arcaneTorrentTheoreticalMana": 192.6600000000004,
+            "arcaneTorrentOverflowMana": 0,
+            "arcaneTorrentActualMana": 192.6600000000004,
+            "chargeSamples": 3100,
+            "chargeStackTotal": 2851,
+            "chargeFullSamples": 187,
+            "chargeTimeouts": 0,
+            "chargeReleases": 17,
+            "zeroCooldownSkills": {
+              "arcane-torrent": 7,
+              "chain-lightning": 7,
+              "arcane-missile": 3
+            },
+            "manaBeforeBonus": 430,
+            "manaAfterBonus": 494,
+            "killMana": 0,
+            "soulDrainTriggers": 0,
+            "soulDrainActiveMs": 0,
+            "manaExhaustedMs": 202800
+          },
+          "marks": {
+            "missileCasts": 27,
+            "missilesFired": 116.195,
+            "missilesHit": 116.195,
+            "targetHits": {
+              "0": 116.195
+            },
+            "markSamples": 3000,
+            "markStackSamples": 1364,
+            "detonationsByStacks": {
+              "1": 0,
+              "2": 0,
+              "3": 0,
+              "4": 25
+            },
+            "detonations": 25,
+            "detonationDamage": 389.35,
+            "expiredMarks": 1,
+            "expiredStacks": 4,
+            "deathWasteMarks": 0,
+            "deathWasteStacks": 0,
+            "detonationsBySource": {
+              "fireball": 9,
+              "arcane-torrent": 8,
+              "chain-lightning": 7,
+              "blizzard": 1
+            },
+            "detonationTargets": 25,
+            "detonationStacks": 100,
+            "mpSamples": 3000,
+            "mpTotal": 460220.48600001226,
+            "mpMinimum": 55.22600000000404,
+            "mpBelow30Samples": 1609,
+            "mpBelow15Samples": 221,
+            "averageStacks": 0.4546666666666678,
+            "averageDetonationStacks": 4,
+            "averageTargetsPerDetonatingCast": 0.9259259259259244,
+            "damageShare": 0.007147334550970706
+          },
+          "exhaust": 202.19999999999985,
+          "exhaustRate": 0.6740000000000034,
+          "shockCoverage": 0.21000000000000069,
+          "resonanceCoverage": 0,
+          "manaEnd": 59.672000000004,
+          "mpAverage": 153.4068286666705,
+          "mpMinimum": 55.22600000000404,
+          "mpBelow30Rate": 0.5363333333333319,
+          "mpBelow15Rate": 0.07366666666666649
+        }
+      }
+    },
+    "burst20": {
+      "elementalist": {
+        "build": {
+          "baseActive": "chain-lightning",
+          "basePassive": "elemental-mastery",
+          "advancedActive": "elemental-storm",
+          "advancedPassive": "resonance-overload"
+        },
+        "metrics": {
+          "total": 8132.015,
+          "dps": 406.6007499999999,
+          "duration": 20,
+          "combat": {
+            "totalDamage": 8132.015,
+            "damageBySource": {
+              "fireball": 1220.92,
+              "burn": 2353.115,
+              "basic-attack": 2479.555,
+              "blizzard": 310.445,
+              "chain-lightning": 355.73,
+              "elemental-burst": 693.175,
+              "elemental-storm": 468.06,
+              "resonance-overload": 251.015
+            },
+            "skillCasts": {
+              "fireball": 5.035,
+              "blizzard": 3,
+              "chain-lightning": 2.4,
+              "elemental-burst": 2.055,
+              "elemental-storm": 2
+            },
+            "basicAttacks": 23,
+            "dotTicks": 33.53,
+            "resourceSpent": 304.02,
+            "resourceRecovered": 84.9419999999969,
+            "kills": 0,
+            "respawns": 0
+          },
+          "mage": {
+            "elementalBurstStatuses": {
+              "0": 0,
+              "1": 0.095,
+              "2": 1.96,
+              "3": 0
+            },
+            "elementalBurstBonusDamage": {
+              "fire": 0,
+              "ice": 134.76,
+              "lightning": 143.255
+            },
+            "elementalCollapses": 0,
+            "burnExtendedSeconds": 0,
+            "iceExtendedSeconds": 0,
+            "paralysisExtendedSeconds": 0,
+            "shockedExtendedSeconds": 0,
+            "stormElements": {
+              "fire": 0.83,
+              "ice": 0.96,
+              "lightning": 0.795
+            },
+            "stormTransforms": 0.585,
+            "stormFollowupDamage": 63.635,
+            "marks": {
+              "fire": 5.865,
+              "ice": 3.96,
+              "lightning": 3.195
+            },
+            "resonanceTriggers": 2.83,
+            "resonanceActiveMs": 14315,
+            "resonanceExtensions": 0,
+            "resonanceCooldownReduced": 5.66,
+            "overloadReleases": 1.785,
+            "overloadDamage": 251.015,
+            "shockedApplications": 2.4,
+            "shockedRefreshes": 0,
+            "shockedActiveMs": 0,
+            "shockedBonusDamage": 1442.926666666667,
+            "shockedBonusBySkill": {
+              "basic-attack": 412.24166666666633,
+              "elemental-burst": 231.05833333333337,
+              "fireball": 212.26333333333346,
+              "burn": 416.6966666666668,
+              "elemental-storm": 99.07333333333334,
+              "resonance-overload": 30.195,
+              "blizzard": 41.39833333333329
+            },
+            "arcaneRepeats": 0,
+            "arcaneTorrentCasts": 0,
+            "arcaneTorrentHits": 0,
+            "arcaneTorrentBaseMana": 0,
+            "arcaneTorrentManaFlowTriggers": 0,
+            "arcaneTorrentManaFlowBonus": 0,
+            "arcaneTorrentTheoreticalMana": 0,
+            "arcaneTorrentOverflowMana": 0,
+            "arcaneTorrentActualMana": 0,
+            "chargeSamples": 198,
+            "chargeStackTotal": 0,
+            "chargeFullSamples": 0,
+            "chargeTimeouts": 0,
+            "chargeReleases": 0,
+            "zeroCooldownSkills": {},
+            "manaBeforeBonus": 429,
+            "manaAfterBonus": 429,
+            "killMana": 0,
+            "soulDrainTriggers": 0,
+            "soulDrainActiveMs": 0,
+            "manaExhaustedMs": 0
+          },
+          "exhaust": 0,
+          "exhaustRate": 0,
+          "shockCoverage": 0.43825000000000053,
+          "resonanceCoverage": 0.7157499999999986,
+          "manaEnd": 209.92199999999605
+        },
+        "source": "8650eb8 formal baseline"
+      },
+      "A": {
+        "build": {
+          "baseActive": "chain-lightning",
+          "basePassive": "elemental-mastery",
+          "advancedActive": "arcane-missile",
+          "advancedPassive": "mana-drain"
+        },
+        "metrics": {
+          "total": 8280.59,
+          "dps": 414.0295,
+          "duration": 20,
+          "combat": {
+            "totalDamage": 8280.59,
+            "damageBySource": {
+              "fireball": 1309.765,
+              "burn": 2372.425,
+              "basic-attack": 2562.635,
+              "blizzard": 390.23,
+              "chain-lightning": 411.295,
+              "arcane-missile": 846.485,
+              "arcane-mark-explosion": 78.32,
+              "arcane-torrent": 309.435
+            },
+            "skillCasts": {
+              "fireball": 6,
+              "blizzard": 4,
+              "chain-lightning": 3,
+              "arcane-missile": 5,
+              "arcane-torrent": 2
+            },
+            "basicAttacks": 23,
+            "dotTicks": 36,
+            "resourceSpent": 416,
+            "resourceRecovered": 97.81200000000507,
+            "kills": 0,
+            "respawns": 0
+          },
+          "mage": {
+            "elementalBurstStatuses": {
+              "0": 0,
+              "1": 0,
+              "2": 0,
+              "3": 0
+            },
+            "elementalBurstBonusDamage": {
+              "fire": 0,
+              "ice": 0,
+              "lightning": 0
+            },
+            "elementalCollapses": 0,
+            "burnExtendedSeconds": 0,
+            "iceExtendedSeconds": 0,
+            "paralysisExtendedSeconds": 0,
+            "shockedExtendedSeconds": 0,
+            "stormElements": {
+              "fire": 0,
+              "ice": 0,
+              "lightning": 0
+            },
+            "stormTransforms": 0,
+            "stormFollowupDamage": 0,
+            "marks": {
+              "fire": 0,
+              "ice": 0,
+              "lightning": 0
+            },
+            "resonanceTriggers": 0,
+            "resonanceActiveMs": 0,
+            "resonanceExtensions": 0,
+            "resonanceCooldownReduced": 0,
+            "overloadReleases": 0,
+            "overloadDamage": 0,
+            "shockedApplications": 3,
+            "shockedRefreshes": 0,
+            "shockedActiveMs": 0,
+            "shockedBonusDamage": 1529.9516666666666,
+            "shockedBonusBySkill": {
+              "basic-attack": 497.3066666666663,
+              "arcane-missile": 143.07000000000008,
+              "fireball": 262.17833333333346,
+              "arcane-mark-explosion": 13.106666666666657,
+              "burn": 473.31166666666684,
+              "arcane-torrent": 62.03499999999999,
+              "blizzard": 78.94333333333333
+            },
+            "arcaneRepeats": 1.5,
+            "arcaneTorrentCasts": 2,
+            "arcaneTorrentHits": 2,
+            "arcaneTorrentBaseMana": 25.68800000000008,
+            "arcaneTorrentManaFlowTriggers": 0,
+            "arcaneTorrentManaFlowBonus": 0,
+            "arcaneTorrentTheoreticalMana": 25.68800000000008,
+            "arcaneTorrentOverflowMana": 0,
+            "arcaneTorrentActualMana": 25.68800000000008,
+            "chargeSamples": 218,
+            "chargeStackTotal": 988,
+            "chargeFullSamples": 176,
+            "chargeTimeouts": 0,
+            "chargeReleases": 0,
+            "zeroCooldownSkills": {},
+            "manaBeforeBonus": 430,
+            "manaAfterBonus": 494,
+            "killMana": 0,
+            "soulDrainTriggers": 0,
+            "soulDrainActiveMs": 0,
+            "manaExhaustedMs": 0
+          },
+          "marks": {
+            "missileCasts": 5,
+            "missilesFired": 20,
+            "missilesHit": 20,
+            "targetHits": {
+              "0": 20
+            },
+            "markSamples": 200,
+            "markStackSamples": 208,
+            "detonationsByStacks": {
+              "1": 0,
+              "2": 0,
+              "3": 0,
+              "4": 5
+            },
+            "detonations": 5,
+            "detonationDamage": 78.32,
+            "expiredMarks": 0,
+            "expiredStacks": 0,
+            "deathWasteMarks": 0,
+            "deathWasteStacks": 0,
+            "detonationsBySource": {
+              "fireball": 1,
+              "blizzard": 2,
+              "chain-lightning": 2
+            },
+            "detonationTargets": 5,
+            "detonationStacks": 20,
+            "mpSamples": 200,
+            "mpTotal": 69197.81400000073,
+            "mpMinimum": 222.56000000000492,
+            "mpBelow30Samples": 0,
+            "mpBelow15Samples": 0,
+            "averageStacks": 1.0399999999999987,
+            "averageDetonationStacks": 4,
+            "averageTargetsPerDetonatingCast": 1,
+            "damageShare": 0.009468816837265213
+          },
+          "exhaust": 0,
+          "exhaustRate": 0,
+          "shockCoverage": 0.5199999999999994,
+          "resonanceCoverage": 0,
+          "manaEnd": 201.5000000000049,
+          "mpAverage": 345.98907000000276,
+          "mpMinimum": 222.56000000000492,
+          "mpBelow30Rate": 0,
+          "mpBelow15Rate": 0
+        }
+      },
+      "B": {
+        "build": {
+          "baseActive": "chain-lightning",
+          "basePassive": "elemental-mastery",
+          "advancedActive": "arcane-missile",
+          "advancedPassive": "mana-drain"
+        },
+        "metrics": {
+          "total": 8338.055,
+          "dps": 416.90274999999997,
+          "duration": 20,
+          "combat": {
+            "totalDamage": 8338.055,
+            "damageBySource": {
+              "fireball": 1306.36,
+              "burn": 2373.91,
+              "basic-attack": 2568.33,
+              "blizzard": 392.945,
+              "chain-lightning": 413.57,
+              "arcane-missile": 896.785,
+              "arcane-mark-explosion": 78.2,
+              "arcane-torrent": 307.955
+            },
+            "skillCasts": {
+              "fireball": 6,
+              "blizzard": 4,
+              "chain-lightning": 3,
+              "arcane-missile": 5,
+              "arcane-torrent": 2
+            },
+            "basicAttacks": 23,
+            "dotTicks": 36,
+            "resourceSpent": 416,
+            "resourceRecovered": 97.81200000000507,
+            "kills": 0,
+            "respawns": 0
+          },
+          "mage": {
+            "elementalBurstStatuses": {
+              "0": 0,
+              "1": 0,
+              "2": 0,
+              "3": 0
+            },
+            "elementalBurstBonusDamage": {
+              "fire": 0,
+              "ice": 0,
+              "lightning": 0
+            },
+            "elementalCollapses": 0,
+            "burnExtendedSeconds": 0,
+            "iceExtendedSeconds": 0,
+            "paralysisExtendedSeconds": 0,
+            "shockedExtendedSeconds": 0,
+            "stormElements": {
+              "fire": 0,
+              "ice": 0,
+              "lightning": 0
+            },
+            "stormTransforms": 0,
+            "stormFollowupDamage": 0,
+            "marks": {
+              "fire": 0,
+              "ice": 0,
+              "lightning": 0
+            },
+            "resonanceTriggers": 0,
+            "resonanceActiveMs": 0,
+            "resonanceExtensions": 0,
+            "resonanceCooldownReduced": 0,
+            "overloadReleases": 0,
+            "overloadDamage": 0,
+            "shockedApplications": 3,
+            "shockedRefreshes": 0,
+            "shockedActiveMs": 0,
+            "shockedBonusDamage": 1538.4150000000016,
+            "shockedBonusBySkill": {
+              "basic-attack": 497.9016666666666,
+              "arcane-missile": 151.0966666666667,
+              "fireball": 261.8533333333334,
+              "arcane-mark-explosion": 13.066666666666658,
+              "burn": 472.9083333333331,
+              "arcane-torrent": 61.67999999999999,
+              "blizzard": 79.90833333333333
+            },
+            "arcaneRepeats": 1.56,
+            "arcaneTorrentCasts": 2,
+            "arcaneTorrentHits": 2,
+            "arcaneTorrentBaseMana": 25.68800000000008,
+            "arcaneTorrentManaFlowTriggers": 0,
+            "arcaneTorrentManaFlowBonus": 0,
+            "arcaneTorrentTheoreticalMana": 25.68800000000008,
+            "arcaneTorrentOverflowMana": 0,
+            "arcaneTorrentActualMana": 25.68800000000008,
+            "chargeSamples": 218,
+            "chargeStackTotal": 988,
+            "chargeFullSamples": 176,
+            "chargeTimeouts": 0,
+            "chargeReleases": 0,
+            "zeroCooldownSkills": {},
+            "manaBeforeBonus": 430,
+            "manaAfterBonus": 494,
+            "killMana": 0,
+            "soulDrainTriggers": 0,
+            "soulDrainActiveMs": 0,
+            "manaExhaustedMs": 0
+          },
+          "marks": {
+            "missileCasts": 5,
+            "missilesFired": 21.43,
+            "missilesHit": 21.43,
+            "targetHits": {
+              "0": 21.43
+            },
+            "markSamples": 200,
+            "markStackSamples": 208,
+            "detonationsByStacks": {
+              "1": 0,
+              "2": 0,
+              "3": 0,
+              "4": 5
+            },
+            "detonations": 5,
+            "detonationDamage": 78.2,
+            "expiredMarks": 0,
+            "expiredStacks": 0,
+            "deathWasteMarks": 0,
+            "deathWasteStacks": 0,
+            "detonationsBySource": {
+              "fireball": 1,
+              "blizzard": 2,
+              "chain-lightning": 2
+            },
+            "detonationTargets": 5,
+            "detonationStacks": 20,
+            "mpSamples": 200,
+            "mpTotal": 69197.81400000073,
+            "mpMinimum": 222.56000000000492,
+            "mpBelow30Samples": 0,
+            "mpBelow15Samples": 0,
+            "averageStacks": 1.0399999999999987,
+            "averageDetonationStacks": 4,
+            "averageTargetsPerDetonatingCast": 1,
+            "damageShare": 0.009388066308742143
+          },
+          "exhaust": 0,
+          "exhaustRate": 0,
+          "shockCoverage": 0.5199999999999994,
+          "resonanceCoverage": 0,
+          "manaEnd": 201.5000000000049,
+          "mpAverage": 345.98907000000276,
+          "mpMinimum": 222.56000000000492,
+          "mpBelow30Rate": 0,
+          "mpBelow15Rate": 0
+        }
+      }
+    },
+    "continuous3": {
+      "elementalist": {
+        "build": {
+          "baseActive": "chain-lightning",
+          "basePassive": "elemental-mastery",
+          "advancedActive": "elemental-storm",
+          "advancedPassive": "elemental-marks"
+        },
+        "metrics": {
+          "total": 124914.88,
+          "dps": 208.19146666666677,
+          "duration": 600,
+          "combat": {
+            "totalDamage": 124914.88,
+            "damageBySource": {
+              "fireball": 12380.32,
+              "burn": 22413.72,
+              "basic-attack": 53328.19,
+              "blizzard": 8915.525,
+              "chain-lightning": 8197.195,
+              "elemental-burst": 5919.105,
+              "elemental-storm": 13760.825
+            },
+            "skillCasts": {
+              "fireball": 50.615,
+              "blizzard": 33,
+              "chain-lightning": 18,
+              "elemental-burst": 17.425,
+              "elemental-storm": 16.96
+            },
+            "basicAttacks": 574.96,
+            "dotTicks": 330.175,
+            "resourceSpent": 2856,
+            "resourceRecovered": 2573.142000000272,
+            "kills": 48.1,
+            "respawns": 48.1
+          },
+          "mage": {
+            "elementalBurstStatuses": {
+              "0": 0,
+              "1": 0.745,
+              "2": 16.68,
+              "3": 0
+            },
+            "elementalBurstBonusDamage": {
+              "fire": 0,
+              "ice": 1172.32,
+              "lightning": 1182.56
+            },
+            "elementalCollapses": 0,
+            "burnExtendedSeconds": 0,
+            "iceExtendedSeconds": 0,
+            "paralysisExtendedSeconds": 0,
+            "shockedExtendedSeconds": 0,
+            "stormElements": {
+              "fire": 7.36,
+              "ice": 7.38,
+              "lightning": 7.405
+            },
+            "stormTransforms": 5.185,
+            "stormFollowupDamage": 1817.085,
+            "marks": {
+              "fire": 57.975,
+              "ice": 40.38,
+              "lightning": 25.405
+            },
+            "resonanceTriggers": 25.205,
+            "resonanceActiveMs": 171760,
+            "resonanceExtensions": 60.44,
+            "resonanceCooldownReduced": 50.39,
+            "overloadReleases": 0,
+            "overloadDamage": 0,
+            "shockedApplications": 54,
+            "shockedRefreshes": 0,
+            "shockedActiveMs": 0,
+            "shockedBonusDamage": 15082.754999999996,
+            "shockedBonusBySkill": {
+              "basic-attack": 3563.6016666666696,
+              "elemental-burst": 1955.6233333333334,
+              "fireball": 1972.12,
+              "burn": 3756.906666666664,
+              "elemental-storm": 3655.1566666666677,
+              "blizzard": 179.3466666666667
+            },
+            "arcaneRepeats": 0,
+            "arcaneTorrentCasts": 0,
+            "arcaneTorrentHits": 0,
+            "arcaneTorrentBaseMana": 0,
+            "arcaneTorrentManaFlowTriggers": 0,
+            "arcaneTorrentManaFlowBonus": 0,
+            "arcaneTorrentTheoreticalMana": 0,
+            "arcaneTorrentOverflowMana": 0,
+            "arcaneTorrentActualMana": 0,
+            "chargeSamples": 5998,
+            "chargeStackTotal": 0,
+            "chargeFullSamples": 0,
+            "chargeTimeouts": 0,
+            "chargeReleases": 0,
+            "zeroCooldownSkills": {},
+            "manaBeforeBonus": 429,
+            "manaAfterBonus": 429,
+            "killMana": 0,
+            "soulDrainTriggers": 0,
+            "soulDrainActiveMs": 0,
+            "manaExhaustedMs": 456455
+          },
+          "marks": {
+            "missileCasts": 0,
+            "missilesFired": 0,
+            "missilesHit": 0,
+            "targetHits": {},
+            "markSamples": 18000,
+            "markStackSamples": 0,
+            "detonationsByStacks": {
+              "1": 0,
+              "2": 0,
+              "3": 0,
+              "4": 0
+            },
+            "detonations": 0,
+            "detonationDamage": 0,
+            "expiredMarks": 0,
+            "expiredStacks": 0,
+            "deathWasteMarks": 0,
+            "deathWasteStacks": 0,
+            "detonationsBySource": {},
+            "detonationTargets": 0,
+            "detonationStacks": 0,
+            "mpSamples": 6000,
+            "mpTotal": 778598.6870000135,
+            "mpMinimum": 58.69867500000215,
+            "mpBelow30Samples": 3144.26,
+            "mpBelow15Samples": 159.55,
+            "averageStacks": 0,
+            "averageDetonationStacks": 0,
+            "averageTargetsPerDetonatingCast": 0,
+            "damageShare": 0
+          },
+          "exhaust": 455.05500000000086,
+          "exhaustRate": 0.7584249999999986,
+          "shockCoverage": 0.10331527777777774,
+          "resonanceCoverage": 0.28626666666666667,
+          "manaEnd": 146.1420000000081,
+          "mpAverage": 129.76644783333614,
+          "mpMinimum": 58.69867500000215,
+          "mpBelow30Rate": 0.5240433333333329,
+          "mpBelow15Rate": 0.02659166666666659
+        },
+        "source": "formal continuous baseline"
+      },
+      "A": {
+        "build": {
+          "baseActive": "chain-lightning",
+          "basePassive": "elemental-mastery",
+          "advancedActive": "arcane-torrent",
+          "advancedPassive": "mana-drain"
+        },
+        "metrics": {
+          "total": 157691.29,
+          "dps": 262.81881666666663,
+          "duration": 600,
+          "combat": {
+            "totalDamage": 157691.29,
+            "damageBySource": {
+              "fireball": 16923.3,
+              "burn": 22275.99,
+              "basic-attack": 60455.81,
+              "blizzard": 12433.315,
+              "chain-lightning": 18805.845,
+              "arcane-missile": 12009.555,
+              "arcane-mark-explosion": 1184.395,
+              "arcane-torrent": 13603.08
+            },
+            "skillCasts": {
+              "fireball": 79.91,
+              "blizzard": 46.955,
+              "chain-lightning": 43.61,
+              "arcane-missile": 75.075,
+              "arcane-torrent": 29.41
+            },
+            "basicAttacks": 601.555,
+            "dotTicks": 365.035,
+            "resourceSpent": 5673.8,
+            "resourceRecovered": 3404.4019880003816,
+            "kills": 60.945,
+            "respawns": 60.945
+          },
+          "mage": {
+            "elementalBurstStatuses": {
+              "0": 0,
+              "1": 0,
+              "2": 0,
+              "3": 0
+            },
+            "elementalBurstBonusDamage": {
+              "fire": 0,
+              "ice": 0,
+              "lightning": 0
+            },
+            "elementalCollapses": 0,
+            "burnExtendedSeconds": 0,
+            "iceExtendedSeconds": 0,
+            "paralysisExtendedSeconds": 0,
+            "shockedExtendedSeconds": 0,
+            "stormElements": {
+              "fire": 0,
+              "ice": 0,
+              "lightning": 0
+            },
+            "stormTransforms": 0,
+            "stormFollowupDamage": 0,
+            "marks": {
+              "fire": 0,
+              "ice": 0,
+              "lightning": 0
+            },
+            "resonanceTriggers": 0,
+            "resonanceActiveMs": 0,
+            "resonanceExtensions": 0,
+            "resonanceCooldownReduced": 0,
+            "overloadReleases": 0,
+            "overloadDamage": 0,
+            "shockedApplications": 130.83,
+            "shockedRefreshes": 0,
+            "shockedActiveMs": 0,
+            "shockedBonusDamage": 19754.258333333328,
+            "shockedBonusBySkill": {
+              "basic-attack": 8031.271666666671,
+              "arcane-missile": 1852.6216666666671,
+              "fireball": 3035.4533333333316,
+              "arcane-mark-explosion": 155.06833333333338,
+              "burn": 3083.5100000000007,
+              "arcane-torrent": 2042.1316666666653,
+              "blizzard": 1554.201666666666
+            },
+            "arcaneRepeats": 0,
+            "arcaneTorrentCasts": 29.41,
+            "arcaneTorrentHits": 88.23,
+            "arcaneTorrentBaseMana": 726.427000000001,
+            "arcaneTorrentManaFlowTriggers": 24.225,
+            "arcaneTorrentManaFlowBonus": 299.1787500000005,
+            "arcaneTorrentTheoreticalMana": 1025.6057500000009,
+            "arcaneTorrentOverflowMana": 0,
+            "arcaneTorrentActualMana": 1025.6057500000009,
+            "chargeSamples": 6272.96,
+            "chargeStackTotal": 17495.69,
+            "chargeFullSamples": 3201.265,
+            "chargeTimeouts": 13.005,
+            "chargeReleases": 0,
+            "zeroCooldownSkills": {},
+            "manaBeforeBonus": 430,
+            "manaAfterBonus": 494,
+            "killMana": 914.175,
+            "soulDrainTriggers": 60.945,
+            "soulDrainActiveMs": 297834,
+            "manaExhaustedMs": 325655.5
+          },
+          "marks": {
+            "missileCasts": 75.075,
+            "missilesFired": 300.3,
+            "missilesHit": 300.3,
+            "targetHits": {
+              "0": 99.64,
+              "1": 101.95,
+              "2": 98.71
+            },
+            "markSamples": 18000,
+            "markStackSamples": 3714.6,
+            "detonationsByStacks": {
+              "1": 83.445,
+              "2": 64.085,
+              "3": 21.68,
+              "4": 3.795
+            },
+            "detonations": 173.005,
+            "detonationDamage": 1184.395,
+            "expiredMarks": 0.025,
+            "expiredStacks": 0.04,
+            "deathWasteMarks": 3.195,
+            "deathWasteStacks": 5.11,
+            "detonationsBySource": {
+              "fireball": 14.015,
+              "arcane-torrent": 28.235,
+              "blizzard": 64.85,
+              "chain-lightning": 65.905
+            },
+            "detonationTargets": 173.005,
+            "detonationStacks": 291.835,
+            "mpSamples": 6000,
+            "mpTotal": 918049.5840260359,
+            "mpMinimum": 57.373626000006915,
+            "mpBelow30Samples": 3050.035,
+            "mpBelow15Samples": 106.68,
+            "averageStacks": 0.20636666666666678,
+            "averageDetonationStacks": 1.6879356633162204,
+            "averageTargetsPerDetonatingCast": 2.3043634432349607,
+            "damageShare": 0.007513079296519489
+          },
+          "exhaust": 324.38550000000004,
+          "exhaustRate": 0.5406425000000001,
+          "shockCoverage": 0.24378000000000002,
+          "resonanceCoverage": 0,
+          "manaEnd": 164.3827380000095,
+          "mpAverage": 153.00826400433937,
+          "mpMinimum": 57.373626000006915,
+          "mpBelow30Rate": 0.5083391666666665,
+          "mpBelow15Rate": 0.017779999999999997
+        }
+      },
+      "B": {
+        "build": {
+          "baseActive": "chain-lightning",
+          "basePassive": "elemental-mastery",
+          "advancedActive": "arcane-torrent",
+          "advancedPassive": "mana-drain"
+        },
+        "metrics": {
+          "total": 157691.29,
+          "dps": 262.81881666666663,
+          "duration": 600,
+          "combat": {
+            "totalDamage": 157691.29,
+            "damageBySource": {
+              "fireball": 16923.3,
+              "burn": 22275.99,
+              "basic-attack": 60455.81,
+              "blizzard": 12433.315,
+              "chain-lightning": 18805.845,
+              "arcane-missile": 12009.555,
+              "arcane-mark-explosion": 1184.395,
+              "arcane-torrent": 13603.08
+            },
+            "skillCasts": {
+              "fireball": 79.91,
+              "blizzard": 46.955,
+              "chain-lightning": 43.61,
+              "arcane-missile": 75.075,
+              "arcane-torrent": 29.41
+            },
+            "basicAttacks": 601.555,
+            "dotTicks": 365.035,
+            "resourceSpent": 5673.8,
+            "resourceRecovered": 3404.4019880003816,
+            "kills": 60.945,
+            "respawns": 60.945
+          },
+          "mage": {
+            "elementalBurstStatuses": {
+              "0": 0,
+              "1": 0,
+              "2": 0,
+              "3": 0
+            },
+            "elementalBurstBonusDamage": {
+              "fire": 0,
+              "ice": 0,
+              "lightning": 0
+            },
+            "elementalCollapses": 0,
+            "burnExtendedSeconds": 0,
+            "iceExtendedSeconds": 0,
+            "paralysisExtendedSeconds": 0,
+            "shockedExtendedSeconds": 0,
+            "stormElements": {
+              "fire": 0,
+              "ice": 0,
+              "lightning": 0
+            },
+            "stormTransforms": 0,
+            "stormFollowupDamage": 0,
+            "marks": {
+              "fire": 0,
+              "ice": 0,
+              "lightning": 0
+            },
+            "resonanceTriggers": 0,
+            "resonanceActiveMs": 0,
+            "resonanceExtensions": 0,
+            "resonanceCooldownReduced": 0,
+            "overloadReleases": 0,
+            "overloadDamage": 0,
+            "shockedApplications": 130.83,
+            "shockedRefreshes": 0,
+            "shockedActiveMs": 0,
+            "shockedBonusDamage": 19754.258333333328,
+            "shockedBonusBySkill": {
+              "basic-attack": 8031.271666666671,
+              "arcane-missile": 1852.6216666666671,
+              "fireball": 3035.4533333333316,
+              "arcane-mark-explosion": 155.06833333333338,
+              "burn": 3083.5100000000007,
+              "arcane-torrent": 2042.1316666666653,
+              "blizzard": 1554.201666666666
+            },
+            "arcaneRepeats": 0,
+            "arcaneTorrentCasts": 29.41,
+            "arcaneTorrentHits": 88.23,
+            "arcaneTorrentBaseMana": 726.427000000001,
+            "arcaneTorrentManaFlowTriggers": 24.225,
+            "arcaneTorrentManaFlowBonus": 299.1787500000005,
+            "arcaneTorrentTheoreticalMana": 1025.6057500000009,
+            "arcaneTorrentOverflowMana": 0,
+            "arcaneTorrentActualMana": 1025.6057500000009,
+            "chargeSamples": 6272.96,
+            "chargeStackTotal": 17495.69,
+            "chargeFullSamples": 3201.265,
+            "chargeTimeouts": 13.005,
+            "chargeReleases": 0,
+            "zeroCooldownSkills": {},
+            "manaBeforeBonus": 430,
+            "manaAfterBonus": 494,
+            "killMana": 914.175,
+            "soulDrainTriggers": 60.945,
+            "soulDrainActiveMs": 297834,
+            "manaExhaustedMs": 325655.5
+          },
+          "marks": {
+            "missileCasts": 75.075,
+            "missilesFired": 300.3,
+            "missilesHit": 300.3,
+            "targetHits": {
+              "0": 99.64,
+              "1": 101.95,
+              "2": 98.71
+            },
+            "markSamples": 18000,
+            "markStackSamples": 3714.6,
+            "detonationsByStacks": {
+              "1": 83.445,
+              "2": 64.085,
+              "3": 21.68,
+              "4": 3.795
+            },
+            "detonations": 173.005,
+            "detonationDamage": 1184.395,
+            "expiredMarks": 0.025,
+            "expiredStacks": 0.04,
+            "deathWasteMarks": 3.195,
+            "deathWasteStacks": 5.11,
+            "detonationsBySource": {
+              "fireball": 14.015,
+              "arcane-torrent": 28.235,
+              "blizzard": 64.85,
+              "chain-lightning": 65.905
+            },
+            "detonationTargets": 173.005,
+            "detonationStacks": 291.835,
+            "mpSamples": 6000,
+            "mpTotal": 918049.5840260359,
+            "mpMinimum": 57.373626000006915,
+            "mpBelow30Samples": 3050.035,
+            "mpBelow15Samples": 106.68,
+            "averageStacks": 0.20636666666666678,
+            "averageDetonationStacks": 1.6879356633162204,
+            "averageTargetsPerDetonatingCast": 2.3043634432349607,
+            "damageShare": 0.007513079296519489
+          },
+          "exhaust": 324.38550000000004,
+          "exhaustRate": 0.5406425000000001,
+          "shockCoverage": 0.24378000000000002,
+          "resonanceCoverage": 0,
+          "manaEnd": 164.3827380000095,
+          "mpAverage": 153.00826400433937,
+          "mpMinimum": 57.373626000006915,
+          "mpBelow30Rate": 0.5083391666666665,
+          "mpBelow15Rate": 0.017779999999999997
+        }
+      }
+    },
+    "continuous5": {
+      "elementalist": {
+        "build": {
+          "baseActive": "chain-lightning",
+          "basePassive": "elemental-mastery",
+          "advancedActive": "elemental-storm",
+          "advancedPassive": "resonance-overload"
+        },
+        "metrics": {
+          "total": 148781.2,
+          "dps": 247.9686666666665,
+          "duration": 600,
+          "combat": {
+            "totalDamage": 148781.2,
+            "damageBySource": {
+              "fireball": 11918.66,
+              "burn": 23810.255,
+              "basic-attack": 53305.405,
+              "blizzard": 14824.68,
+              "chain-lightning": 14223.1,
+              "elemental-burst": 5915.39,
+              "elemental-storm": 22507.8,
+              "resonance-overload": 2275.91
+            },
+            "skillCasts": {
+              "fireball": 50.64,
+              "blizzard": 33,
+              "chain-lightning": 18,
+              "elemental-burst": 17.395,
+              "elemental-storm": 16.965
+            },
+            "basicAttacks": 574.965,
+            "dotTicks": 386.4,
+            "resourceSpent": 2856,
+            "resourceRecovered": 2573.142000000272,
+            "kills": 56.7,
+            "respawns": 56.7
+          },
+          "mage": {
+            "elementalBurstStatuses": {
+              "0": 0,
+              "1": 0.705,
+              "2": 16.69,
+              "3": 0
+            },
+            "elementalBurstBonusDamage": {
+              "fire": 0,
+              "ice": 1171.25,
+              "lightning": 1183.12
+            },
+            "elementalCollapses": 0,
+            "burnExtendedSeconds": 0,
+            "iceExtendedSeconds": 0,
+            "paralysisExtendedSeconds": 0,
+            "shockedExtendedSeconds": 0,
+            "stormElements": {
+              "fire": 7.355,
+              "ice": 7.275,
+              "lightning": 7.345
+            },
+            "stormTransforms": 5.01,
+            "stormFollowupDamage": 3000.735,
+            "marks": {
+              "fire": 57.995,
+              "ice": 40.275,
+              "lightning": 25.345
+            },
+            "resonanceTriggers": 25.135,
+            "resonanceActiveMs": 135280,
+            "resonanceExtensions": 0,
+            "resonanceCooldownReduced": 50.22,
+            "overloadReleases": 17.975,
+            "overloadDamage": 2275.91,
+            "shockedApplications": 90,
+            "shockedRefreshes": 0,
+            "shockedActiveMs": 0,
+            "shockedBonusDamage": 17926.93499999999,
+            "shockedBonusBySkill": {
+              "basic-attack": 3553.2216666666664,
+              "elemental-burst": 1953.2183333333328,
+              "fireball": 1958.6466666666668,
+              "burn": 4172.511666666666,
+              "elemental-storm": 5954.5049999999965,
+              "blizzard": 304.94166666666683,
+              "resonance-overload": 29.89
+            },
+            "arcaneRepeats": 0,
+            "arcaneTorrentCasts": 0,
+            "arcaneTorrentHits": 0,
+            "arcaneTorrentBaseMana": 0,
+            "arcaneTorrentManaFlowTriggers": 0,
+            "arcaneTorrentManaFlowBonus": 0,
+            "arcaneTorrentTheoreticalMana": 0,
+            "arcaneTorrentOverflowMana": 0,
+            "arcaneTorrentActualMana": 0,
+            "chargeSamples": 5998,
+            "chargeStackTotal": 0,
+            "chargeFullSamples": 0,
+            "chargeTimeouts": 0,
+            "chargeReleases": 0,
+            "zeroCooldownSkills": {},
+            "manaBeforeBonus": 429,
+            "manaAfterBonus": 429,
+            "killMana": 0,
+            "soulDrainTriggers": 0,
+            "soulDrainActiveMs": 0,
+            "manaExhaustedMs": 456405
+          },
+          "marks": {
+            "missileCasts": 0,
+            "missilesFired": 0,
+            "missilesHit": 0,
+            "targetHits": {},
+            "markSamples": 30000,
+            "markStackSamples": 0,
+            "detonationsByStacks": {
+              "1": 0,
+              "2": 0,
+              "3": 0,
+              "4": 0
+            },
+            "detonations": 0,
+            "detonationDamage": 0,
+            "expiredMarks": 0,
+            "expiredStacks": 0,
+            "deathWasteMarks": 0,
+            "deathWasteStacks": 0,
+            "detonationsBySource": {},
+            "detonationTargets": 0,
+            "detonationStacks": 0,
+            "mpSamples": 6000,
+            "mpTotal": 778757.8870000137,
+            "mpMinimum": 58.78843500000237,
+            "mpBelow30Samples": 3143.565,
+            "mpBelow15Samples": 159.05,
+            "averageStacks": 0,
+            "averageDetonationStacks": 0,
+            "averageTargetsPerDetonatingCast": 0,
+            "damageShare": 0
+          },
+          "exhaust": 455.00500000000085,
+          "exhaustRate": 0.7583416666666651,
+          "shockCoverage": 0.10464716666666661,
+          "resonanceCoverage": 0.2254666666666667,
+          "manaEnd": 146.1420000000081,
+          "mpAverage": 129.79298116666945,
+          "mpMinimum": 58.78843500000237,
+          "mpBelow30Rate": 0.5239274999999992,
+          "mpBelow15Rate": 0.026508333333333255
+        },
+        "source": "formal continuous baseline"
+      },
+      "A": {
+        "build": {
+          "baseActive": "chain-lightning",
+          "basePassive": "elemental-mastery",
+          "advancedActive": "arcane-torrent",
+          "advancedPassive": "mana-drain"
+        },
+        "metrics": {
+          "total": 216619.85,
+          "dps": 361.03308333333325,
+          "duration": 600,
+          "combat": {
+            "totalDamage": 216619.85,
+            "damageBySource": {
+              "fireball": 21001.69,
+              "burn": 29539.13,
+              "basic-attack": 62398.9,
+              "blizzard": 27961.77,
+              "chain-lightning": 34377.845,
+              "arcane-missile": 14903.94,
+              "arcane-torrent": 25132.295,
+              "arcane-mark-explosion": 1304.28
+            },
+            "skillCasts": {
+              "fireball": 97.88,
+              "blizzard": 58.5,
+              "chain-lightning": 45.65,
+              "arcane-missile": 90.67,
+              "arcane-torrent": 32.8
+            },
+            "basicAttacks": 612.96,
+            "dotTicks": 467.32,
+            "resourceSpent": 6692.2,
+            "resourceRecovered": 3520.058750000447,
+            "kills": 83.24,
+            "respawns": 83.24
+          },
+          "mage": {
+            "elementalBurstStatuses": {
+              "0": 0,
+              "1": 0,
+              "2": 0,
+              "3": 0
+            },
+            "elementalBurstBonusDamage": {
+              "fire": 0,
+              "ice": 0,
+              "lightning": 0
+            },
+            "elementalCollapses": 0,
+            "burnExtendedSeconds": 0,
+            "iceExtendedSeconds": 0,
+            "paralysisExtendedSeconds": 0,
+            "shockedExtendedSeconds": 0,
+            "stormElements": {
+              "fire": 0,
+              "ice": 0,
+              "lightning": 0
+            },
+            "stormTransforms": 0,
+            "stormFollowupDamage": 0,
+            "marks": {
+              "fire": 0,
+              "ice": 0,
+              "lightning": 0
+            },
+            "resonanceTriggers": 0,
+            "resonanceActiveMs": 0,
+            "resonanceExtensions": 0,
+            "resonanceCooldownReduced": 0,
+            "overloadReleases": 0,
+            "overloadDamage": 0,
+            "shockedApplications": 228.25,
+            "shockedRefreshes": 0,
+            "shockedActiveMs": 0,
+            "shockedBonusDamage": 29180.768333333355,
+            "shockedBonusBySkill": {
+              "basic-attack": 8732.455000000005,
+              "arcane-missile": 2588.436666666666,
+              "fireball": 3942.9750000000013,
+              "burn": 4831.781666666668,
+              "arcane-torrent": 3664.5316666666663,
+              "arcane-mark-explosion": 146.44833333333344,
+              "blizzard": 5274.139999999997
+            },
+            "arcaneRepeats": 0,
+            "arcaneTorrentCasts": 32.8,
+            "arcaneTorrentHits": 164,
+            "arcaneTorrentBaseMana": 1134.224000000001,
+            "arcaneTorrentManaFlowTriggers": 25.625,
+            "arcaneTorrentManaFlowBonus": 443.0562500000005,
+            "arcaneTorrentTheoreticalMana": 1577.2802499999984,
+            "arcaneTorrentOverflowMana": 0,
+            "arcaneTorrentActualMana": 1577.2802499999984,
+            "chargeSamples": 6323.5,
+            "chargeStackTotal": 20401.815,
+            "chargeFullSamples": 3816.22,
+            "chargeTimeouts": 11.46,
+            "chargeReleases": 0,
+            "zeroCooldownSkills": {},
+            "manaBeforeBonus": 430,
+            "manaAfterBonus": 494,
+            "killMana": 1248.6,
+            "soulDrainTriggers": 83.24,
+            "soulDrainActiveMs": 375875,
+            "manaExhaustedMs": 267194.5
+          },
+          "marks": {
+            "missileCasts": 90.67,
+            "missilesFired": 362.68,
+            "missilesHit": 362.68,
+            "targetHits": {
+              "0": 73.045,
+              "1": 71.975,
+              "2": 72.405,
+              "3": 73.48,
+              "4": 71.775
+            },
+            "markSamples": 30000,
+            "markStackSamples": 6495.18,
+            "detonationsByStacks": {
+              "1": 156.285,
+              "2": 60.65,
+              "3": 11.265,
+              "4": 1.54
+            },
+            "detonations": 229.74,
+            "detonationDamage": 1304.28,
+            "expiredMarks": 24.705,
+            "expiredStacks": 35.32,
+            "deathWasteMarks": 4.68,
+            "deathWasteStacks": 6.28,
+            "detonationsBySource": {
+              "arcane-torrent": 49.785,
+              "blizzard": 72.355,
+              "chain-lightning": 92.105,
+              "fireball": 15.495
+            },
+            "detonationTargets": 229.74,
+            "detonationStacks": 317.54,
+            "mpSamples": 6000,
+            "mpTotal": 952678.5130280425,
+            "mpMinimum": 65.4363150000076,
+            "mpBelow30Samples": 2964.55,
+            "mpBelow15Samples": 61.435,
+            "averageStacks": 0.21650599999999995,
+            "averageDetonationStacks": 1.3832632356182617,
+            "averageTargetsPerDetonatingCast": 2.53439302104825,
+            "damageShare": 0.0060214339830945126
+          },
+          "exhaust": 266.0875,
+          "exhaustRate": 0.4434791666666667,
+          "shockCoverage": 0.26761766666666675,
+          "resonanceCoverage": 0,
+          "manaEnd": 147.73900000001154,
+          "mpAverage": 158.77975217134048,
+          "mpMinimum": 65.4363150000076,
+          "mpBelow30Rate": 0.4940916666666666,
+          "mpBelow15Rate": 0.010239166666666666
+        }
+      },
+      "B": {
+        "build": {
+          "baseActive": "chain-lightning",
+          "basePassive": "elemental-mastery",
+          "advancedActive": "arcane-torrent",
+          "advancedPassive": "mana-drain"
+        },
+        "metrics": {
+          "total": 216619.85,
+          "dps": 361.03308333333325,
+          "duration": 600,
+          "combat": {
+            "totalDamage": 216619.85,
+            "damageBySource": {
+              "fireball": 21001.69,
+              "burn": 29539.13,
+              "basic-attack": 62398.9,
+              "blizzard": 27961.77,
+              "chain-lightning": 34377.845,
+              "arcane-missile": 14903.94,
+              "arcane-torrent": 25132.295,
+              "arcane-mark-explosion": 1304.28
+            },
+            "skillCasts": {
+              "fireball": 97.88,
+              "blizzard": 58.5,
+              "chain-lightning": 45.65,
+              "arcane-missile": 90.67,
+              "arcane-torrent": 32.8
+            },
+            "basicAttacks": 612.96,
+            "dotTicks": 467.32,
+            "resourceSpent": 6692.2,
+            "resourceRecovered": 3520.058750000447,
+            "kills": 83.24,
+            "respawns": 83.24
+          },
+          "mage": {
+            "elementalBurstStatuses": {
+              "0": 0,
+              "1": 0,
+              "2": 0,
+              "3": 0
+            },
+            "elementalBurstBonusDamage": {
+              "fire": 0,
+              "ice": 0,
+              "lightning": 0
+            },
+            "elementalCollapses": 0,
+            "burnExtendedSeconds": 0,
+            "iceExtendedSeconds": 0,
+            "paralysisExtendedSeconds": 0,
+            "shockedExtendedSeconds": 0,
+            "stormElements": {
+              "fire": 0,
+              "ice": 0,
+              "lightning": 0
+            },
+            "stormTransforms": 0,
+            "stormFollowupDamage": 0,
+            "marks": {
+              "fire": 0,
+              "ice": 0,
+              "lightning": 0
+            },
+            "resonanceTriggers": 0,
+            "resonanceActiveMs": 0,
+            "resonanceExtensions": 0,
+            "resonanceCooldownReduced": 0,
+            "overloadReleases": 0,
+            "overloadDamage": 0,
+            "shockedApplications": 228.25,
+            "shockedRefreshes": 0,
+            "shockedActiveMs": 0,
+            "shockedBonusDamage": 29180.768333333355,
+            "shockedBonusBySkill": {
+              "basic-attack": 8732.455000000005,
+              "arcane-missile": 2588.436666666666,
+              "fireball": 3942.9750000000013,
+              "burn": 4831.781666666668,
+              "arcane-torrent": 3664.5316666666663,
+              "arcane-mark-explosion": 146.44833333333344,
+              "blizzard": 5274.139999999997
+            },
+            "arcaneRepeats": 0,
+            "arcaneTorrentCasts": 32.8,
+            "arcaneTorrentHits": 164,
+            "arcaneTorrentBaseMana": 1134.224000000001,
+            "arcaneTorrentManaFlowTriggers": 25.625,
+            "arcaneTorrentManaFlowBonus": 443.0562500000005,
+            "arcaneTorrentTheoreticalMana": 1577.2802499999984,
+            "arcaneTorrentOverflowMana": 0,
+            "arcaneTorrentActualMana": 1577.2802499999984,
+            "chargeSamples": 6323.5,
+            "chargeStackTotal": 20401.815,
+            "chargeFullSamples": 3816.22,
+            "chargeTimeouts": 11.46,
+            "chargeReleases": 0,
+            "zeroCooldownSkills": {},
+            "manaBeforeBonus": 430,
+            "manaAfterBonus": 494,
+            "killMana": 1248.6,
+            "soulDrainTriggers": 83.24,
+            "soulDrainActiveMs": 375875,
+            "manaExhaustedMs": 267194.5
+          },
+          "marks": {
+            "missileCasts": 90.67,
+            "missilesFired": 362.68,
+            "missilesHit": 362.68,
+            "targetHits": {
+              "0": 73.045,
+              "1": 71.975,
+              "2": 72.405,
+              "3": 73.48,
+              "4": 71.775
+            },
+            "markSamples": 30000,
+            "markStackSamples": 6495.18,
+            "detonationsByStacks": {
+              "1": 156.285,
+              "2": 60.65,
+              "3": 11.265,
+              "4": 1.54
+            },
+            "detonations": 229.74,
+            "detonationDamage": 1304.28,
+            "expiredMarks": 24.705,
+            "expiredStacks": 35.32,
+            "deathWasteMarks": 4.68,
+            "deathWasteStacks": 6.28,
+            "detonationsBySource": {
+              "arcane-torrent": 49.785,
+              "blizzard": 72.355,
+              "chain-lightning": 92.105,
+              "fireball": 15.495
+            },
+            "detonationTargets": 229.74,
+            "detonationStacks": 317.54,
+            "mpSamples": 6000,
+            "mpTotal": 952678.5130280425,
+            "mpMinimum": 65.4363150000076,
+            "mpBelow30Samples": 2964.55,
+            "mpBelow15Samples": 61.435,
+            "averageStacks": 0.21650599999999995,
+            "averageDetonationStacks": 1.3832632356182617,
+            "averageTargetsPerDetonatingCast": 2.53439302104825,
+            "damageShare": 0.0060214339830945126
+          },
+          "exhaust": 266.0875,
+          "exhaustRate": 0.4434791666666667,
+          "shockCoverage": 0.26761766666666675,
+          "resonanceCoverage": 0,
+          "manaEnd": 147.73900000001154,
+          "mpAverage": 158.77975217134048,
+          "mpMinimum": 65.4363150000076,
+          "mpBelow30Rate": 0.4940916666666666,
+          "mpBelow15Rate": 0.010239166666666666
+        }
+      }
+    }
+  }
+}
