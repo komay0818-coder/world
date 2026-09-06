@@ -28,8 +28,20 @@ for(let i=0;i<5;i++)assert.equal(policy.castArcaneCharge(arcane,'fireball',i*100
 assert.equal(policy.castArcaneCharge(arcane,'arcane-missile',5000).noCooldown,true);
 assert.equal(arcane.arcaneChargeStacks,0);
 const torrent=policy.resolveArcaneTorrentMana(arcane,policy.getEffect('arcane-torrent',6),5);
-assert.deepEqual(torrent,{hits:5,base:75,surge:30,theoretical:105,actual:100,overflow:5});
-assert.equal(arcane.resourceCurrent,1000);
+assert.deepEqual(torrent,{hits:5,base:70,manaFlow:false,manaFlowBonus:0,theoretical:70,actual:70,overflow:0});
+assert.equal(arcane.resourceCurrent,970);
+arcane.resourceCurrent=299;
+const lowManaTorrent=policy.resolveArcaneTorrentMana(arcane,policy.getEffect('arcane-torrent',6),1);
+assert.deepEqual(lowManaTorrent,{hits:1,base:30,manaFlow:true,manaFlowBonus:15,theoretical:45,actual:45,overflow:0});
+arcane.resourceCurrent=300;
+assert.equal(policy.resolveArcaneTorrentMana(arcane,policy.getEffect('arcane-torrent',6),1).manaFlow,false,'exactly 30% does not trigger Mana Torrent');
+assert.deepEqual([1,2,3,4,5].map(hits=>{
+  arcane.resourceCurrent=500;
+  return policy.resolveArcaneTorrentMana(arcane,policy.getEffect('arcane-torrent',6),hits).base;
+}),[30,40,50,60,70]);
+arcane.resourceCurrent=100;
+assert.deepEqual(policy.resolveArcaneTorrentMana(arcane,policy.getEffect('arcane-torrent',6),0),{hits:0,base:0,manaFlow:false,manaFlowBonus:0,theoretical:0,actual:0,overflow:0},'a miss-only cast restores no mana and cannot trigger Mana Torrent');
+assert.equal(policy.telemetry(arcane).arcaneTorrentManaFlowTriggers,1,'Mana Torrent triggers once per eligible cast, not once per target');
 arcane.resourceCurrent=900;
 assert.equal(policy.resolveKill(arcane,6000),30);
 assert.equal(arcane.soulDrainUntil,11000);
