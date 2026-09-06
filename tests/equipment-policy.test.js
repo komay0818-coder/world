@@ -48,6 +48,8 @@ assert.equal(sturdyShield.damageReduction, .03, 'wooden round shield can roll 3%
 assert.equal(parryShield.parry, .06, 'wooden round shield combines its 3% base block with a 3% block affix');
 assert.deepEqual([expandedQuiver.maxArrows, expandedQuiver.arrowRecoveryInterval], [12, 1000], 'expanded rough quiver holds twelve arrows');
 assert.deepEqual([quickQuiver.maxArrows, quickQuiver.arrowRecoverySpeedBonus], [10, .10], 'quick rough quiver starts at ten arrows and gains 10% recovery speed');
+assert.equal(expandedQuiver.quality, '優良', 'expanded rough quiver is green quality');
+assert.equal(quickQuiver.quality, '優良', 'quick rough quiver is green quality');
 assert.equal(magicBook.magicDamageBonus, .05, 'beginner spellbook can roll 5% magic damage');
 assert.equal(regenBook.manaRegenFlat, 4, 'beginner spellbook combines 1 base mana regen with a 3 mana regen affix');
 assert.equal(policy.applyMagicDamageBonus(100, magicBook.magicDamageBonus), 105, 'the magic damage affix increases magic damage by 5%');
