@@ -1,0 +1,12 @@
+const fs=require('node:fs'),path=require('node:path'),assert=require('node:assert/strict');
+const html=fs.readFileSync(path.join(__dirname,'..','index.html'),'utf8');
+const source=fs.readFileSync(path.join(__dirname,'..','script.js'),'utf8');
+assert.match(html,/priest-advancement-policy\.js[\s\S]*script\.js/);
+assert.match(source,/job === 'priest'[\s\S]*PriestAdvancementPolicy\.getSkills/);
+assert.match(source,/PriestAdvancementPolicy\.addFaith/);
+assert.match(source,/selfDamageReduction/);
+assert.match(source,/trySacredGuardian/);
+assert.match(source,/\['light-fountain','guardian-sanctuary'\]/);
+assert.match(source,/directDamageHealing/);
+assert.match(source,/holyStormSpeedMultiplier/);
+console.log('priest-advancement-integration: assertions passed');

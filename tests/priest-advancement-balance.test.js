@@ -1,0 +1,3 @@
+const {spawnSync}=require('node:child_process'),path=require('node:path'),assert=require('node:assert/strict');
+const run=spawnSync(process.execPath,[path.join(__dirname,'..','tools','priest-lv45-balance.js')],{encoding:'utf8'});assert.equal(run.status,0,run.stderr);const result=JSON.parse(run.stdout);
+assert.equal(result.holyPriest.durationSeconds,600);assert.deepEqual(result.battlePriest.map(x=>x.enemies),[1,3,5]);assert.ok(result.battlePriest[2].stormHealing>result.battlePriest[0].stormHealing);assert.ok(result.battlePriest[0].faithThreeStackUptime>0);console.log('priest-advancement-balance: assertions passed');
