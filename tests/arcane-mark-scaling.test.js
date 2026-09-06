@@ -1,0 +1,12 @@
+'use strict';
+const assert=require('node:assert/strict');
+const {runMissileExperiment}=require('../tools/mage-formal-consistency.js');
+const build={baseActive:'chain-lightning',basePassive:'elemental-mastery',advancedActive:'arcane-missile',advancedPassive:'arcane-charge'};
+const one=runMissileExperiment('A','arcane-mage',build,20,1e9,1,510001,false,.01);
+const two=runMissileExperiment('A','arcane-mage',build,20,1e9,1,510001,false,.02);
+assert.equal(one.marks.missilesFired,one.marks.missileCasts*4);
+assert.equal(two.marks.missilesFired,two.marks.missileCasts*4);
+assert.equal(one.marks.detonations,two.marks.detonations,'damage scaling cannot alter mark trigger count against a durable target');
+assert.ok(two.marks.detonationDamage>one.marks.detonationDamage*1.9,'two-percent marks approximately double one-percent mark damage');
+assert.ok(two.dps>one.dps,'higher mark damage raises DPS without changing formal skill data');
+console.log('arcane-mark-scaling: assertions passed');
