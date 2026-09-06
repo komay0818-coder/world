@@ -5,4 +5,9 @@ assert.equal(rows.length,12); assert.deepEqual([...new Set(rows.map(row=>row.sce
 assert.ok(rows.every(row=>Number.isFinite(row.dps)&&row.dps>0));
 assert.ok(rows.find(row=>row.class==='elementalist').resonance>0);
 assert.ok(rows.find(row=>row.class==='arcane-mage').charge>0);
+const positioning=spawnSync(process.execPath,[path.join(__dirname,'..','tools','mage-advancement-balance.js'),'--positioning'],{encoding:'utf8',env:{...process.env,MAGE_BALANCE_RUNS:'2'}});
+assert.equal(positioning.status,0,positioning.stderr);const positionRows=positioning.stdout.trim().split(/\r?\n/).map(JSON.parse);
+assert.equal(positionRows.length,24);assert.deepEqual([...new Set(positionRows.map(row=>row.profile))],['A','B','C']);
+assert.deepEqual([...new Set(positionRows.map(row=>row.scenario))],['boss','three','five','burst']);
+assert.ok(positionRows.filter(row=>row.class==='elementalist').every(row=>Number.isFinite(row.resonanceCoverage)&&Number.isFinite(row.resonanceElementDamage)));
 console.log('mage-advancement-balance: assertions passed');
