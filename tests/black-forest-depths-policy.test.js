@@ -76,10 +76,10 @@ assert.equal(heart.subarray(1, 4).toString(), 'PNG', 'the heart of the black for
 assert.equal(heart[25], 6, 'the heart of the black forest uses RGBA color with transparency');
 const druid = fs.readFileSync(path.join(__dirname, '..', policy.getMonster('corrupted-fallen-druid').image));
 assert.equal(druid.subarray(1, 4).toString(), 'PNG', 'the corrupted fallen druid is a PNG asset');
-assert.equal(druid[25], 2, 'the corrupted fallen druid preserves the supplied RGB artwork');
+assert.equal(druid[25], 6, 'the corrupted fallen druid uses the normalized RGBA canvas');
 const centurion = fs.readFileSync(path.join(__dirname, '..', policy.getMonster('corrupted-blackstone-centurion').image));
 assert.equal(centurion.subarray(1, 4).toString(), 'PNG', 'the corrupted blackstone centurion is a PNG asset');
-assert.equal(centurion[25], 2, 'the corrupted blackstone centurion preserves the supplied RGB artwork');
+assert.equal(centurion[25], 6, 'the corrupted blackstone centurion uses the normalized RGBA canvas');
 const spirit = fs.readFileSync(path.join(__dirname, '..', policy.getMonster('forest-spirit').image));
 assert.equal(spirit.subarray(1, 4).toString(), 'PNG', 'the forest spirit is a PNG asset');
 assert.equal(spirit[25], 6, 'the forest spirit uses RGBA color with transparency');
@@ -88,7 +88,7 @@ assert.equal(sporeBeast.subarray(1, 4).toString(), 'PNG', 'the dark spore beast 
 assert.equal(sporeBeast[25], 6, 'the dark spore beast uses RGBA color with transparency');
 const treant = fs.readFileSync(path.join(__dirname, '..', policy.getMonster('corrupted-treant').image));
 assert.equal(treant.subarray(1, 4).toString(), 'PNG', 'the corrupted treant is a PNG asset');
-assert.equal(treant[25], 2, 'the corrupted treant preserves the supplied RGB artwork');
+assert.equal(treant[25], 6, 'the corrupted treant uses the normalized RGBA canvas');
 const corruptedWolf = fs.readFileSync(path.join(__dirname, '..', policy.getMonster('corrupted-forest-wolf').image));
 assert.equal(corruptedWolf.subarray(1, 4).toString(), 'PNG', 'the depths corrupted forest wolf reuses the existing PNG asset');
 assert.equal(corruptedWolf[25], 6, 'the reused corrupted forest wolf uses RGBA transparency');
