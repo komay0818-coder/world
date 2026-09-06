@@ -46,12 +46,16 @@ const magicBook = policy.createRandomOffhandDrop(.8, 0, 'book-test');
 const regenBook = policy.createRandomOffhandDrop(.8, .9, 'regen-test');
 assert.equal(sturdyShield.damageReduction, .03, 'wooden round shield can roll 3% damage reduction');
 assert.equal(parryShield.parry, .06, 'wooden round shield combines its 3% base block with a 3% block affix');
+assert.equal(sturdyShield.quality, '優良', 'sturdy wooden round shield is green quality');
+assert.equal(parryShield.quality, '優良', 'blocking wooden round shield is green quality');
 assert.deepEqual([expandedQuiver.maxArrows, expandedQuiver.arrowRecoveryInterval], [12, 1000], 'expanded rough quiver holds twelve arrows');
 assert.deepEqual([quickQuiver.maxArrows, quickQuiver.arrowRecoverySpeedBonus], [10, .10], 'quick rough quiver starts at ten arrows and gains 10% recovery speed');
 assert.equal(expandedQuiver.quality, '優良', 'expanded rough quiver is green quality');
 assert.equal(quickQuiver.quality, '優良', 'quick rough quiver is green quality');
 assert.equal(magicBook.magicDamageBonus, .05, 'beginner spellbook can roll 5% magic damage');
 assert.equal(regenBook.manaRegenFlat, 4, 'beginner spellbook combines 1 base mana regen with a 3 mana regen affix');
+assert.equal(magicBook.quality, '優良', 'magic beginner spellbook is green quality');
+assert.equal(regenBook.quality, '優良', 'mana-spring beginner spellbook is green quality');
 assert.equal(policy.applyMagicDamageBonus(100, magicBook.magicDamageBonus), 105, 'the magic damage affix increases magic damage by 5%');
 assert.equal(policy.isPreservedEquipment(sturdyShield), true, 'random offhand variants survive save cleanup');
 

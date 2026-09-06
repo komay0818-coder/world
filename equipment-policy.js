@@ -701,7 +701,7 @@
       id: `${template.id}-${uniqueId}`,
       baseItemId: template.id,
       allowedJobs: [...template.allowedJobs],
-      quality: key === 'roughQuiver' ? '優良' : template.quality,
+      quality: '優良',
       [affix.stat]: (Number(template[affix.stat]) || 0) + affix.value,
       affix: { ...affix }
     };
