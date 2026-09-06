@@ -1,0 +1,2638 @@
+{
+  "metadata": {
+    "version": "V1",
+    "generatedAt": "2026-09-06T23:32:30.916Z",
+    "runs": "8–40 deterministic seeded runs per case",
+    "level": 45,
+    "fixedParty": [
+      "warrior",
+      "hunter",
+      "mage",
+      "priest"
+    ],
+    "fixedStats": {
+      "priestMagicAttack": 300,
+      "maxMp": 520,
+      "mpRegenPerSecond": 13.2,
+      "nonPriestTeamDps": 1550,
+      "partyHp": [
+        6500,
+        4500,
+        3800,
+        4200
+      ]
+    },
+    "rules": "formal priest skill policy; fixed comparative encounter model; no skill values changed"
+  },
+  "tests": {
+    "pressure": {
+      "base": {
+        "teamDps": 463.9,
+        "priestDps": 110.1,
+        "effectiveHealing": 15244.8,
+        "averageHpPercent": 11.4,
+        "minimumHpPercent": 0,
+        "firstDeathSeconds": 135.4,
+        "finalSurvivors": 0,
+        "survivalRate": 0,
+        "mana": {
+          "average": 516,
+          "minimum": 475.7,
+          "exhaustions": 0,
+          "blockedCasts": 0
+        },
+        "sample": {
+          "build": "base",
+          "spec": "base-priest",
+          "seconds": 600,
+          "enemies": 5,
+          "teamDps": 476.4,
+          "priestDps": 108.7,
+          "effectiveHealing": 15713.3,
+          "averageHpPercent": 11.7,
+          "minimumHpPercent": 0,
+          "firstDeathSeconds": 144,
+          "finalSurvivors": 0,
+          "survivalRate": 0,
+          "faith": {
+            "coveragePercent": [
+              75.38,
+              0.18,
+              0.48,
+              23.95
+            ],
+            "averageStacks": 0.73,
+            "interruptions": 1
+          },
+          "guardian": {
+            "triggers": 0,
+            "prevented": 0,
+            "self": 0,
+            "allies": 0,
+            "deathsDuringCooldown": 0,
+            "crossEncounterMaintained": true
+          },
+          "healingSources": {
+            "治癒術": {
+              "total": 13094.4,
+              "effective": 13094.4,
+              "overheal": 0,
+              "effectiveSharePercent": 83.33
+            },
+            "神恩": {
+              "total": 2618.9,
+              "effective": 2618.9,
+              "overheal": 0,
+              "effectiveSharePercent": 16.67
+            },
+            "生命禱言": {
+              "total": 0,
+              "effective": 0,
+              "overheal": 0,
+              "effectiveSharePercent": 0
+            },
+            "聖光湧泉": {
+              "total": 0,
+              "effective": 0,
+              "overheal": 0,
+              "effectiveSharePercent": 0
+            },
+            "守護聖域": {
+              "total": 0,
+              "effective": 0,
+              "overheal": 0,
+              "effectiveSharePercent": 0
+            },
+            "聖光回響": {
+              "total": 0,
+              "effective": 0,
+              "overheal": 0,
+              "effectiveSharePercent": 0
+            },
+            "神聖懲擊": {
+              "total": 0,
+              "effective": 0,
+              "overheal": 0,
+              "effectiveSharePercent": 0
+            },
+            "光明奉獻": {
+              "total": 0,
+              "effective": 0,
+              "overheal": 0,
+              "effectiveSharePercent": 0
+            },
+            "神聖風暴": {
+              "total": 0,
+              "effective": 0,
+              "overheal": 0,
+              "effectiveSharePercent": 0
+            }
+          },
+          "shieldAbsorbed": 0,
+          "sanctuaryPrevented": 0,
+          "damage": {
+            "holySmite": 0,
+            "holyStorm": 0
+          },
+          "conversionHealing": {
+            "smite": 0,
+            "devotion": 0,
+            "storm": 0,
+            "sharePercent": 0
+          },
+          "mana": {
+            "average": 516.1,
+            "minimum": 475.7,
+            "exhaustions": 0,
+            "blockedCasts": 0,
+            "end": 520
+          }
+        }
+      },
+      "holyFountain": {
+        "teamDps": 1919.9,
+        "priestDps": 432.9,
+        "effectiveHealing": 127009.9,
+        "averageHpPercent": 76.7,
+        "minimumHpPercent": 55.2,
+        "firstDeathSeconds": null,
+        "finalSurvivors": 4,
+        "survivalRate": 100,
+        "mana": {
+          "average": 277.4,
+          "minimum": 54.8,
+          "exhaustions": 2.3,
+          "blockedCasts": 2.3
+        },
+        "sample": {
+          "build": "holyFountain",
+          "spec": "holy-priest",
+          "seconds": 600,
+          "enemies": 5,
+          "teamDps": 1924.9,
+          "priestDps": 437.1,
+          "effectiveHealing": 126525.5,
+          "averageHpPercent": 78.2,
+          "minimumHpPercent": 54.2,
+          "firstDeathSeconds": null,
+          "finalSurvivors": 4,
+          "survivalRate": 100,
+          "faith": {
+            "coveragePercent": [
+              3.23,
+              0.7,
+              1.98,
+              94.08
+            ],
+            "averageStacks": 2.869,
+            "interruptions": 3
+          },
+          "guardian": {
+            "triggers": 0,
+            "prevented": 0,
+            "self": 0,
+            "allies": 0,
+            "deathsDuringCooldown": 0,
+            "crossEncounterMaintained": true
+          },
+          "healingSources": {
+            "治癒術": {
+              "total": 45711.6,
+              "effective": 45711.6,
+              "overheal": 0,
+              "effectiveSharePercent": 36.13
+            },
+            "神恩": {
+              "total": 9118.6,
+              "effective": 9118.6,
+              "overheal": 0,
+              "effectiveSharePercent": 7.21
+            },
+            "生命禱言": {
+              "total": 0,
+              "effective": 0,
+              "overheal": 0,
+              "effectiveSharePercent": 0
+            },
+            "聖光湧泉": {
+              "total": 27864.4,
+              "effective": 27593.7,
+              "overheal": 270.7,
+              "effectiveSharePercent": 21.81
+            },
+            "守護聖域": {
+              "total": 32764,
+              "effective": 32701.6,
+              "overheal": 62.3,
+              "effectiveSharePercent": 25.85
+            },
+            "聖光回響": {
+              "total": 11400,
+              "effective": 11400,
+              "overheal": 0,
+              "effectiveSharePercent": 9.01
+            },
+            "神聖懲擊": {
+              "total": 0,
+              "effective": 0,
+              "overheal": 0,
+              "effectiveSharePercent": 0
+            },
+            "光明奉獻": {
+              "total": 0,
+              "effective": 0,
+              "overheal": 0,
+              "effectiveSharePercent": 0
+            },
+            "神聖風暴": {
+              "total": 0,
+              "effective": 0,
+              "overheal": 0,
+              "effectiveSharePercent": 0
+            }
+          },
+          "shieldAbsorbed": 0,
+          "sanctuaryPrevented": 6343.1,
+          "damage": {
+            "holySmite": 0,
+            "holyStorm": 0
+          },
+          "conversionHealing": {
+            "smite": 0,
+            "devotion": 0,
+            "storm": 0,
+            "sharePercent": 0
+          },
+          "mana": {
+            "average": 279.1,
+            "minimum": 66.2,
+            "exhaustions": 2,
+            "blockedCasts": 2,
+            "end": 183
+          }
+        }
+      },
+      "battleSmite": {
+        "teamDps": 794,
+        "priestDps": 258.5,
+        "effectiveHealing": 32309.8,
+        "averageHpPercent": 18.4,
+        "minimumHpPercent": 0,
+        "firstDeathSeconds": 211.5,
+        "finalSurvivors": 0,
+        "survivalRate": 0,
+        "mana": {
+          "average": 399.5,
+          "minimum": 61.9,
+          "exhaustions": 5,
+          "blockedCasts": 5
+        },
+        "sample": {
+          "build": "battleSmite",
+          "spec": "battle-priest",
+          "seconds": 600,
+          "enemies": 5,
+          "teamDps": 838.5,
+          "priestDps": 283.1,
+          "effectiveHealing": 36414.6,
+          "averageHpPercent": 19.1,
+          "minimumHpPercent": 0,
+          "firstDeathSeconds": 216.9,
+          "finalSurvivors": 0,
+          "survivalRate": 0,
+          "faith": {
+            "coveragePercent": [
+              65.7,
+              1.1,
+              1.08,
+              32.12
+            ],
+            "averageStacks": 0.996,
+            "interruptions": 6
+          },
+          "guardian": {
+            "triggers": 0,
+            "prevented": 0,
+            "self": 0,
+            "allies": 0,
+            "deathsDuringCooldown": 0,
+            "crossEncounterMaintained": true
+          },
+          "healingSources": {
+            "治癒術": {
+              "total": 16889.4,
+              "effective": 16889.4,
+              "overheal": 0,
+              "effectiveSharePercent": 46.38
+            },
+            "神恩": {
+              "total": 3103.3,
+              "effective": 3103.3,
+              "overheal": 0,
+              "effectiveSharePercent": 8.52
+            },
+            "生命禱言": {
+              "total": 0,
+              "effective": 0,
+              "overheal": 0,
+              "effectiveSharePercent": 0
+            },
+            "聖光湧泉": {
+              "total": 0,
+              "effective": 0,
+              "overheal": 0,
+              "effectiveSharePercent": 0
+            },
+            "守護聖域": {
+              "total": 0,
+              "effective": 0,
+              "overheal": 0,
+              "effectiveSharePercent": 0
+            },
+            "聖光回響": {
+              "total": 0,
+              "effective": 0,
+              "overheal": 0,
+              "effectiveSharePercent": 0
+            },
+            "神聖懲擊": {
+              "total": 5258.9,
+              "effective": 5195.3,
+              "overheal": 63.6,
+              "effectiveSharePercent": 14.27
+            },
+            "光明奉獻": {
+              "total": 5761.9,
+              "effective": 5652,
+              "overheal": 109.9,
+              "effectiveSharePercent": 15.52
+            },
+            "神聖風暴": {
+              "total": 5640,
+              "effective": 5574.5,
+              "overheal": 65.5,
+              "effectiveSharePercent": 15.31
+            }
+          },
+          "shieldAbsorbed": 0,
+          "sanctuaryPrevented": 0,
+          "damage": {
+            "holySmite": 35059.5,
+            "holyStorm": 47253
+          },
+          "conversionHealing": {
+            "smite": 5195.3,
+            "devotion": 5652,
+            "storm": 5574.5,
+            "sharePercent": 45.1
+          },
+          "mana": {
+            "average": 383,
+            "minimum": 70.9,
+            "exhaustions": 6,
+            "blockedCasts": 6,
+            "end": 520
+          }
+        }
+      }
+    },
+    "faith": {
+      "base": {
+        "teamDps": 1967.1,
+        "priestDps": 466.2,
+        "effectiveHealing": 41552.9,
+        "averageHpPercent": 82.4,
+        "minimumHpPercent": 52.8,
+        "firstDeathSeconds": null,
+        "finalSurvivors": 4,
+        "survivalRate": 100,
+        "mana": {
+          "average": 506.1,
+          "minimum": 475.7,
+          "exhaustions": 0,
+          "blockedCasts": 0
+        },
+        "sample": {
+          "build": "base",
+          "spec": "base-priest",
+          "seconds": 600,
+          "enemies": 5,
+          "teamDps": 1962.6,
+          "priestDps": 462.5,
+          "effectiveHealing": 44029.9,
+          "averageHpPercent": 82.6,
+          "minimumHpPercent": 57,
+          "firstDeathSeconds": null,
+          "finalSurvivors": 4,
+          "survivalRate": 100,
+          "faith": {
+            "coveragePercent": [
+              0.02,
+              0.18,
+              0.48,
+              99.32
+            ],
+            "averageStacks": 2.991,
+            "interruptions": 0
+          },
+          "guardian": {
+            "triggers": 0,
+            "prevented": 0,
+            "self": 0,
+            "allies": 0,
+            "deathsDuringCooldown": 0,
+            "crossEncounterMaintained": true
+          },
+          "healingSources": {
+            "治癒術": {
+              "total": 36828,
+              "effective": 36828,
+              "overheal": 0,
+              "effectiveSharePercent": 83.64
+            },
+            "神恩": {
+              "total": 7201.9,
+              "effective": 7201.9,
+              "overheal": 0,
+              "effectiveSharePercent": 16.36
+            },
+            "生命禱言": {
+              "total": 0,
+              "effective": 0,
+              "overheal": 0,
+              "effectiveSharePercent": 0
+            },
+            "聖光湧泉": {
+              "total": 0,
+              "effective": 0,
+              "overheal": 0,
+              "effectiveSharePercent": 0
+            },
+            "守護聖域": {
+              "total": 0,
+              "effective": 0,
+              "overheal": 0,
+              "effectiveSharePercent": 0
+            },
+            "聖光回響": {
+              "total": 0,
+              "effective": 0,
+              "overheal": 0,
+              "effectiveSharePercent": 0
+            },
+            "神聖懲擊": {
+              "total": 0,
+              "effective": 0,
+              "overheal": 0,
+              "effectiveSharePercent": 0
+            },
+            "光明奉獻": {
+              "total": 0,
+              "effective": 0,
+              "overheal": 0,
+              "effectiveSharePercent": 0
+            },
+            "神聖風暴": {
+              "total": 0,
+              "effective": 0,
+              "overheal": 0,
+              "effectiveSharePercent": 0
+            }
+          },
+          "shieldAbsorbed": 0,
+          "sanctuaryPrevented": 0,
+          "damage": {
+            "holySmite": 0,
+            "holyStorm": 0
+          },
+          "conversionHealing": {
+            "smite": 0,
+            "devotion": 0,
+            "storm": 0,
+            "sharePercent": 0
+          },
+          "mana": {
+            "average": 505.7,
+            "minimum": 475.7,
+            "exhaustions": 0,
+            "blockedCasts": 0,
+            "end": 520
+          }
+        }
+      },
+      "holyFountain": {
+        "teamDps": 1964,
+        "priestDps": 465.1,
+        "effectiveHealing": 57470.7,
+        "averageHpPercent": 84.5,
+        "minimumHpPercent": 60.5,
+        "firstDeathSeconds": null,
+        "finalSurvivors": 4,
+        "survivalRate": 100,
+        "mana": {
+          "average": 497.6,
+          "minimum": 431.6,
+          "exhaustions": 0,
+          "blockedCasts": 0
+        },
+        "sample": {
+          "build": "holyFountain",
+          "spec": "holy-priest",
+          "seconds": 600,
+          "enemies": 5,
+          "teamDps": 1964.4,
+          "priestDps": 466.1,
+          "effectiveHealing": 58531.6,
+          "averageHpPercent": 84.8,
+          "minimumHpPercent": 61.1,
+          "firstDeathSeconds": null,
+          "finalSurvivors": 4,
+          "survivalRate": 100,
+          "faith": {
+            "coveragePercent": [
+              0.02,
+              0.18,
+              0.48,
+              99.32
+            ],
+            "averageStacks": 2.991,
+            "interruptions": 0
+          },
+          "guardian": {
+            "triggers": 0,
+            "prevented": 0,
+            "self": 0,
+            "allies": 0,
+            "deathsDuringCooldown": 0,
+            "crossEncounterMaintained": true
+          },
+          "healingSources": {
+            "治癒術": {
+              "total": 22915.2,
+              "effective": 22915.2,
+              "overheal": 0,
+              "effectiveSharePercent": 39.15
+            },
+            "神恩": {
+              "total": 4583,
+              "effective": 4583,
+              "overheal": 0,
+              "effectiveSharePercent": 7.83
+            },
+            "生命禱言": {
+              "total": 0,
+              "effective": 0,
+              "overheal": 0,
+              "effectiveSharePercent": 0
+            },
+            "聖光湧泉": {
+              "total": 0,
+              "effective": 0,
+              "overheal": 0,
+              "effectiveSharePercent": 0
+            },
+            "守護聖域": {
+              "total": 26694.7,
+              "effective": 25933.4,
+              "overheal": 761.3,
+              "effectiveSharePercent": 44.31
+            },
+            "聖光回響": {
+              "total": 5100,
+              "effective": 5100,
+              "overheal": 0,
+              "effectiveSharePercent": 8.71
+            },
+            "神聖懲擊": {
+              "total": 0,
+              "effective": 0,
+              "overheal": 0,
+              "effectiveSharePercent": 0
+            },
+            "光明奉獻": {
+              "total": 0,
+              "effective": 0,
+              "overheal": 0,
+              "effectiveSharePercent": 0
+            },
+            "神聖風暴": {
+              "total": 0,
+              "effective": 0,
+              "overheal": 0,
+              "effectiveSharePercent": 0
+            }
+          },
+          "shieldAbsorbed": 0,
+          "sanctuaryPrevented": 4221,
+          "damage": {
+            "holySmite": 0,
+            "holyStorm": 0
+          },
+          "conversionHealing": {
+            "smite": 0,
+            "devotion": 0,
+            "storm": 0,
+            "sharePercent": 0
+          },
+          "mana": {
+            "average": 497.9,
+            "minimum": 442.9,
+            "exhaustions": 0,
+            "blockedCasts": 0,
+            "end": 506
+          }
+        }
+      },
+      "battleSmite": {
+        "teamDps": 2256.2,
+        "priestDps": 773.8,
+        "effectiveHealing": 49692,
+        "averageHpPercent": 86.4,
+        "minimumHpPercent": 61.9,
+        "firstDeathSeconds": null,
+        "finalSurvivors": 4,
+        "survivalRate": 100,
+        "mana": {
+          "average": 179.6,
+          "minimum": 60.3,
+          "exhaustions": 11.4,
+          "blockedCasts": 11.4
+        },
+        "sample": {
+          "build": "battleSmite",
+          "spec": "battle-priest",
+          "seconds": 600,
+          "enemies": 5,
+          "teamDps": 2247.4,
+          "priestDps": 765.4,
+          "effectiveHealing": 52253.7,
+          "averageHpPercent": 86,
+          "minimumHpPercent": 62.8,
+          "firstDeathSeconds": null,
+          "finalSurvivors": 4,
+          "survivalRate": 100,
+          "faith": {
+            "coveragePercent": [
+              13.07,
+              2.25,
+              2.23,
+              82.45
+            ],
+            "averageStacks": 2.541,
+            "interruptions": 12
+          },
+          "guardian": {
+            "triggers": 0,
+            "prevented": 0,
+            "self": 0,
+            "allies": 0,
+            "deathsDuringCooldown": 0,
+            "crossEncounterMaintained": true
+          },
+          "healingSources": {
+            "治癒術": {
+              "total": 7306.2,
+              "effective": 7306.2,
+              "overheal": 0,
+              "effectiveSharePercent": 13.98
+            },
+            "神恩": {
+              "total": 1309.4,
+              "effective": 1309.4,
+              "overheal": 0,
+              "effectiveSharePercent": 2.51
+            },
+            "生命禱言": {
+              "total": 0,
+              "effective": 0,
+              "overheal": 0,
+              "effectiveSharePercent": 0
+            },
+            "聖光湧泉": {
+              "total": 0,
+              "effective": 0,
+              "overheal": 0,
+              "effectiveSharePercent": 0
+            },
+            "守護聖域": {
+              "total": 0,
+              "effective": 0,
+              "overheal": 0,
+              "effectiveSharePercent": 0
+            },
+            "聖光回響": {
+              "total": 0,
+              "effective": 0,
+              "overheal": 0,
+              "effectiveSharePercent": 0
+            },
+            "神聖懲擊": {
+              "total": 14093.3,
+              "effective": 13874.3,
+              "overheal": 219,
+              "effectiveSharePercent": 26.55
+            },
+            "光明奉獻": {
+              "total": 15213.2,
+              "effective": 14555.8,
+              "overheal": 657.4,
+              "effectiveSharePercent": 27.86
+            },
+            "神聖風暴": {
+              "total": 15600,
+              "effective": 15208,
+              "overheal": 392,
+              "effectiveSharePercent": 29.1
+            }
+          },
+          "shieldAbsorbed": 0,
+          "sanctuaryPrevented": 0,
+          "damage": {
+            "holySmite": 93955.1,
+            "holyStorm": 123376.5
+          },
+          "conversionHealing": {
+            "smite": 13874.3,
+            "devotion": 14555.8,
+            "storm": 15208,
+            "sharePercent": 83.51
+          },
+          "mana": {
+            "average": 178.9,
+            "minimum": 60.3,
+            "exhaustions": 12,
+            "blockedCasts": 12,
+            "end": 152.7
+          }
+        }
+      }
+    },
+    "guardian": {
+      "holyFountain": {
+        "teamDps": 920,
+        "priestDps": 223.7,
+        "effectiveHealing": 174696.7,
+        "averageHpPercent": 26.2,
+        "minimumHpPercent": 0,
+        "firstDeathSeconds": 14.8,
+        "finalSurvivors": 0,
+        "survivalRate": 0,
+        "mana": {
+          "average": 480.3,
+          "minimum": 367.7,
+          "exhaustions": 0,
+          "blockedCasts": 0
+        },
+        "sample": {
+          "build": "holyFountain",
+          "spec": "holy-priest",
+          "seconds": 900,
+          "enemies": 5,
+          "teamDps": 892.2,
+          "priestDps": 223,
+          "effectiveHealing": 162992.3,
+          "averageHpPercent": 25.7,
+          "minimumHpPercent": 0,
+          "firstDeathSeconds": 18,
+          "finalSurvivors": 0,
+          "survivalRate": 0,
+          "faith": {
+            "coveragePercent": [
+              42.4,
+              3.98,
+              9.89,
+              43.73
+            ],
+            "averageStacks": 1.55,
+            "interruptions": 26
+          },
+          "guardian": {
+            "triggers": 7,
+            "prevented": 7,
+            "self": 4,
+            "allies": 3,
+            "deathsDuringCooldown": 104,
+            "crossEncounterMaintained": true,
+            "readyAt": 975900.0000001261
+          },
+          "healingSources": {
+            "治癒術": {
+              "total": 40246.8,
+              "effective": 40246.8,
+              "overheal": 0,
+              "effectiveSharePercent": 24.69
+            },
+            "神恩": {
+              "total": 8047.1,
+              "effective": 7690.7,
+              "overheal": 356.4,
+              "effectiveSharePercent": 4.72
+            },
+            "生命禱言": {
+              "total": 4335,
+              "effective": 4335,
+              "overheal": 0,
+              "effectiveSharePercent": 2.66
+            },
+            "聖光湧泉": {
+              "total": 72272.1,
+              "effective": 70673.1,
+              "overheal": 1599.1,
+              "effectiveSharePercent": 43.36
+            },
+            "守護聖域": {
+              "total": 26516,
+              "effective": 25646.8,
+              "overheal": 869.2,
+              "effectiveSharePercent": 15.73
+            },
+            "聖光回響": {
+              "total": 14400,
+              "effective": 14400,
+              "overheal": 0,
+              "effectiveSharePercent": 8.83
+            },
+            "神聖懲擊": {
+              "total": 0,
+              "effective": 0,
+              "overheal": 0,
+              "effectiveSharePercent": 0
+            },
+            "光明奉獻": {
+              "total": 0,
+              "effective": 0,
+              "overheal": 0,
+              "effectiveSharePercent": 0
+            },
+            "神聖風暴": {
+              "total": 0,
+              "effective": 0,
+              "overheal": 0,
+              "effectiveSharePercent": 0
+            }
+          },
+          "shieldAbsorbed": 13432,
+          "sanctuaryPrevented": 33842.9,
+          "damage": {
+            "holySmite": 0,
+            "holyStorm": 0
+          },
+          "conversionHealing": {
+            "smite": 0,
+            "devotion": 0,
+            "storm": 0,
+            "sharePercent": 0
+          },
+          "mana": {
+            "average": 482.1,
+            "minimum": 400.5,
+            "exhaustions": 0,
+            "blockedCasts": 0,
+            "end": 520
+          }
+        }
+      }
+    },
+    "holySources": {
+      "holyFountain": {
+        "teamDps": 1606.3,
+        "priestDps": 297.5,
+        "effectiveHealing": 195226.5,
+        "averageHpPercent": 41.2,
+        "minimumHpPercent": 0.5,
+        "firstDeathSeconds": 413.4,
+        "finalSurvivors": 2.5,
+        "survivalRate": 61.9,
+        "mana": {
+          "average": 222.2,
+          "minimum": 53.8,
+          "exhaustions": 10.8,
+          "blockedCasts": 10.8
+        },
+        "sample": {
+          "build": "holyFountain",
+          "spec": "holy-priest",
+          "seconds": 600,
+          "enemies": 5,
+          "teamDps": 1799.7,
+          "priestDps": 336.3,
+          "effectiveHealing": 220310.7,
+          "averageHpPercent": 45,
+          "minimumHpPercent": 0,
+          "firstDeathSeconds": 576,
+          "finalSurvivors": 3,
+          "survivalRate": 75,
+          "faith": {
+            "coveragePercent": [
+              17.95,
+              2.77,
+              7.28,
+              72
+            ],
+            "averageStacks": 2.333,
+            "interruptions": 14
+          },
+          "guardian": {
+            "triggers": 3,
+            "prevented": 3,
+            "self": 0,
+            "allies": 3,
+            "deathsDuringCooldown": 1,
+            "crossEncounterMaintained": true,
+            "readyAt": 693300.0000000618
+          },
+          "healingSources": {
+            "治癒術": {
+              "total": 49572.6,
+              "effective": 49572.6,
+              "overheal": 0,
+              "effectiveSharePercent": 22.5
+            },
+            "神恩": {
+              "total": 9847.5,
+              "effective": 9847.5,
+              "overheal": 0,
+              "effectiveSharePercent": 4.47
+            },
+            "生命禱言": {
+              "total": 1815,
+              "effective": 1815,
+              "overheal": 0,
+              "effectiveSharePercent": 0.82
+            },
+            "聖光湧泉": {
+              "total": 106372.2,
+              "effective": 106372.2,
+              "overheal": 0,
+              "effectiveSharePercent": 48.28
+            },
+            "守護聖域": {
+              "total": 32903.3,
+              "effective": 32903.3,
+              "overheal": 0,
+              "effectiveSharePercent": 14.93
+            },
+            "聖光回響": {
+              "total": 19800,
+              "effective": 19800,
+              "overheal": 0,
+              "effectiveSharePercent": 8.99
+            },
+            "神聖懲擊": {
+              "total": 0,
+              "effective": 0,
+              "overheal": 0,
+              "effectiveSharePercent": 0
+            },
+            "光明奉獻": {
+              "total": 0,
+              "effective": 0,
+              "overheal": 0,
+              "effectiveSharePercent": 0
+            },
+            "神聖風暴": {
+              "total": 0,
+              "effective": 0,
+              "overheal": 0,
+              "effectiveSharePercent": 0
+            }
+          },
+          "shieldAbsorbed": 40466.3,
+          "sanctuaryPrevented": 13690.1,
+          "damage": {
+            "holySmite": 0,
+            "holyStorm": 0
+          },
+          "conversionHealing": {
+            "smite": 0,
+            "devotion": 0,
+            "storm": 0,
+            "sharePercent": 0
+          },
+          "mana": {
+            "average": 190.1,
+            "minimum": 54.2,
+            "exhaustions": 12,
+            "blockedCasts": 12,
+            "end": 93.5
+          }
+        }
+      }
+    },
+    "battleSources": {
+      "battleSmite": {
+        "teamDps": 794,
+        "priestDps": 258.5,
+        "effectiveHealing": 32309.8,
+        "averageHpPercent": 18.4,
+        "minimumHpPercent": 0,
+        "firstDeathSeconds": 211.5,
+        "finalSurvivors": 0,
+        "survivalRate": 0,
+        "mana": {
+          "average": 399.5,
+          "minimum": 61.9,
+          "exhaustions": 5,
+          "blockedCasts": 5
+        },
+        "sample": {
+          "build": "battleSmite",
+          "spec": "battle-priest",
+          "seconds": 600,
+          "enemies": 5,
+          "teamDps": 838.5,
+          "priestDps": 283.1,
+          "effectiveHealing": 36414.6,
+          "averageHpPercent": 19.1,
+          "minimumHpPercent": 0,
+          "firstDeathSeconds": 216.9,
+          "finalSurvivors": 0,
+          "survivalRate": 0,
+          "faith": {
+            "coveragePercent": [
+              65.7,
+              1.1,
+              1.08,
+              32.12
+            ],
+            "averageStacks": 0.996,
+            "interruptions": 6
+          },
+          "guardian": {
+            "triggers": 0,
+            "prevented": 0,
+            "self": 0,
+            "allies": 0,
+            "deathsDuringCooldown": 0,
+            "crossEncounterMaintained": true
+          },
+          "healingSources": {
+            "治癒術": {
+              "total": 16889.4,
+              "effective": 16889.4,
+              "overheal": 0,
+              "effectiveSharePercent": 46.38
+            },
+            "神恩": {
+              "total": 3103.3,
+              "effective": 3103.3,
+              "overheal": 0,
+              "effectiveSharePercent": 8.52
+            },
+            "生命禱言": {
+              "total": 0,
+              "effective": 0,
+              "overheal": 0,
+              "effectiveSharePercent": 0
+            },
+            "聖光湧泉": {
+              "total": 0,
+              "effective": 0,
+              "overheal": 0,
+              "effectiveSharePercent": 0
+            },
+            "守護聖域": {
+              "total": 0,
+              "effective": 0,
+              "overheal": 0,
+              "effectiveSharePercent": 0
+            },
+            "聖光回響": {
+              "total": 0,
+              "effective": 0,
+              "overheal": 0,
+              "effectiveSharePercent": 0
+            },
+            "神聖懲擊": {
+              "total": 5258.9,
+              "effective": 5195.3,
+              "overheal": 63.6,
+              "effectiveSharePercent": 14.27
+            },
+            "光明奉獻": {
+              "total": 5761.9,
+              "effective": 5652,
+              "overheal": 109.9,
+              "effectiveSharePercent": 15.52
+            },
+            "神聖風暴": {
+              "total": 5640,
+              "effective": 5574.5,
+              "overheal": 65.5,
+              "effectiveSharePercent": 15.31
+            }
+          },
+          "shieldAbsorbed": 0,
+          "sanctuaryPrevented": 0,
+          "damage": {
+            "holySmite": 35059.5,
+            "holyStorm": 47253
+          },
+          "conversionHealing": {
+            "smite": 5195.3,
+            "devotion": 5652,
+            "storm": 5574.5,
+            "sharePercent": 45.1
+          },
+          "mana": {
+            "average": 383,
+            "minimum": 70.9,
+            "exhaustions": 6,
+            "blockedCasts": 6,
+            "end": 520
+          }
+        }
+      }
+    },
+    "contexts": {
+      "five": {
+        "battleSmite": {
+          "teamDps": 794,
+          "priestDps": 258.5,
+          "effectiveHealing": 32309.8,
+          "averageHpPercent": 18.4,
+          "minimumHpPercent": 0,
+          "firstDeathSeconds": 211.5,
+          "finalSurvivors": 0,
+          "survivalRate": 0,
+          "mana": {
+            "average": 399.5,
+            "minimum": 61.9,
+            "exhaustions": 5,
+            "blockedCasts": 5
+          },
+          "sample": {
+            "build": "battleSmite",
+            "spec": "battle-priest",
+            "seconds": 600,
+            "enemies": 5,
+            "teamDps": 838.5,
+            "priestDps": 283.1,
+            "effectiveHealing": 36414.6,
+            "averageHpPercent": 19.1,
+            "minimumHpPercent": 0,
+            "firstDeathSeconds": 216.9,
+            "finalSurvivors": 0,
+            "survivalRate": 0,
+            "faith": {
+              "coveragePercent": [
+                65.7,
+                1.1,
+                1.08,
+                32.12
+              ],
+              "averageStacks": 0.996,
+              "interruptions": 6
+            },
+            "guardian": {
+              "triggers": 0,
+              "prevented": 0,
+              "self": 0,
+              "allies": 0,
+              "deathsDuringCooldown": 0,
+              "crossEncounterMaintained": true
+            },
+            "healingSources": {
+              "治癒術": {
+                "total": 16889.4,
+                "effective": 16889.4,
+                "overheal": 0,
+                "effectiveSharePercent": 46.38
+              },
+              "神恩": {
+                "total": 3103.3,
+                "effective": 3103.3,
+                "overheal": 0,
+                "effectiveSharePercent": 8.52
+              },
+              "生命禱言": {
+                "total": 0,
+                "effective": 0,
+                "overheal": 0,
+                "effectiveSharePercent": 0
+              },
+              "聖光湧泉": {
+                "total": 0,
+                "effective": 0,
+                "overheal": 0,
+                "effectiveSharePercent": 0
+              },
+              "守護聖域": {
+                "total": 0,
+                "effective": 0,
+                "overheal": 0,
+                "effectiveSharePercent": 0
+              },
+              "聖光回響": {
+                "total": 0,
+                "effective": 0,
+                "overheal": 0,
+                "effectiveSharePercent": 0
+              },
+              "神聖懲擊": {
+                "total": 5258.9,
+                "effective": 5195.3,
+                "overheal": 63.6,
+                "effectiveSharePercent": 14.27
+              },
+              "光明奉獻": {
+                "total": 5761.9,
+                "effective": 5652,
+                "overheal": 109.9,
+                "effectiveSharePercent": 15.52
+              },
+              "神聖風暴": {
+                "total": 5640,
+                "effective": 5574.5,
+                "overheal": 65.5,
+                "effectiveSharePercent": 15.31
+              }
+            },
+            "shieldAbsorbed": 0,
+            "sanctuaryPrevented": 0,
+            "damage": {
+              "holySmite": 35059.5,
+              "holyStorm": 47253
+            },
+            "conversionHealing": {
+              "smite": 5195.3,
+              "devotion": 5652,
+              "storm": 5574.5,
+              "sharePercent": 45.1
+            },
+            "mana": {
+              "average": 383,
+              "minimum": 70.9,
+              "exhaustions": 6,
+              "blockedCasts": 6,
+              "end": 520
+            }
+          }
+        }
+      },
+      "boss": {
+        "battleSmite": {
+          "teamDps": 1798.8,
+          "priestDps": 317.5,
+          "effectiveHealing": 71867.4,
+          "averageHpPercent": 68.3,
+          "minimumHpPercent": 35.7,
+          "firstDeathSeconds": null,
+          "finalSurvivors": 4,
+          "survivalRate": 100,
+          "mana": {
+            "average": 175.9,
+            "minimum": 64.6,
+            "exhaustions": 16.9,
+            "blockedCasts": 16.9
+          },
+          "sample": {
+            "build": "battleSmite",
+            "spec": "battle-priest",
+            "seconds": 600,
+            "enemies": 1,
+            "teamDps": 1800.5,
+            "priestDps": 319.5,
+            "effectiveHealing": 71969.3,
+            "averageHpPercent": 66.4,
+            "minimumHpPercent": 28.2,
+            "firstDeathSeconds": null,
+            "finalSurvivors": 4,
+            "survivalRate": 100,
+            "faith": {
+              "coveragePercent": [
+                20.95,
+                2.93,
+                2.92,
+                73.2
+              ],
+              "averageStacks": 2.284,
+              "interruptions": 16
+            },
+            "guardian": {
+              "triggers": 0,
+              "prevented": 0,
+              "self": 0,
+              "allies": 0,
+              "deathsDuringCooldown": 0,
+              "crossEncounterMaintained": true
+            },
+            "healingSources": {
+              "治癒術": {
+                "total": 41606.4,
+                "effective": 41606.4,
+                "overheal": 0,
+                "effectiveSharePercent": 57.81
+              },
+              "神恩": {
+                "total": 8321.3,
+                "effective": 8321.3,
+                "overheal": 0,
+                "effectiveSharePercent": 11.56
+              },
+              "生命禱言": {
+                "total": 0,
+                "effective": 0,
+                "overheal": 0,
+                "effectiveSharePercent": 0
+              },
+              "聖光湧泉": {
+                "total": 0,
+                "effective": 0,
+                "overheal": 0,
+                "effectiveSharePercent": 0
+              },
+              "守護聖域": {
+                "total": 0,
+                "effective": 0,
+                "overheal": 0,
+                "effectiveSharePercent": 0
+              },
+              "聖光回響": {
+                "total": 0,
+                "effective": 0,
+                "overheal": 0,
+                "effectiveSharePercent": 0
+              },
+              "神聖懲擊": {
+                "total": 12051.4,
+                "effective": 12051.4,
+                "overheal": 0,
+                "effectiveSharePercent": 16.75
+              },
+              "光明奉獻": {
+                "total": 7204.4,
+                "effective": 7152.2,
+                "overheal": 52.3,
+                "effectiveSharePercent": 9.94
+              },
+              "神聖風暴": {
+                "total": 2880,
+                "effective": 2838,
+                "overheal": 42,
+                "effectiveSharePercent": 3.94
+              }
+            },
+            "shieldAbsorbed": 0,
+            "sanctuaryPrevented": 0,
+            "damage": {
+              "holySmite": 80342.9,
+              "holyStorm": 22577.7
+            },
+            "conversionHealing": {
+              "smite": 12051.4,
+              "devotion": 7152.2,
+              "storm": 2838,
+              "sharePercent": 30.63
+            },
+            "mana": {
+              "average": 176.5,
+              "minimum": 65,
+              "exhaustions": 17,
+              "blockedCasts": 17,
+              "end": 84.7
+            }
+          }
+        }
+      }
+    },
+    "mana": {
+      "minutes30": {
+        "base": {
+          "teamDps": 1963.1,
+          "priestDps": 462,
+          "effectiveHealing": 127533,
+          "averageHpPercent": 82.2,
+          "minimumHpPercent": 50.9,
+          "firstDeathSeconds": null,
+          "finalSurvivors": 4,
+          "survivalRate": 100,
+          "mana": {
+            "average": 506.2,
+            "minimum": 475.7,
+            "exhaustions": 0,
+            "blockedCasts": 0
+          },
+          "sample": {
+            "build": "base",
+            "spec": "base-priest",
+            "seconds": 1800,
+            "enemies": 5,
+            "teamDps": 1961.9,
+            "priestDps": 461.1,
+            "effectiveHealing": 131271.4,
+            "averageHpPercent": 82.3,
+            "minimumHpPercent": 53.9,
+            "firstDeathSeconds": null,
+            "finalSurvivors": 4,
+            "survivalRate": 100,
+            "faith": {
+              "coveragePercent": [
+                0.01,
+                0.06,
+                0.16,
+                99.77
+              ],
+              "averageStacks": 2.997,
+              "interruptions": 0
+            },
+            "guardian": {
+              "triggers": 0,
+              "prevented": 0,
+              "self": 0,
+              "allies": 0,
+              "deathsDuringCooldown": 0,
+              "crossEncounterMaintained": true
+            },
+            "healingSources": {
+              "治癒術": {
+                "total": 109665.6,
+                "effective": 109665.6,
+                "overheal": 0,
+                "effectiveSharePercent": 83.54
+              },
+              "神恩": {
+                "total": 21605.8,
+                "effective": 21605.8,
+                "overheal": 0,
+                "effectiveSharePercent": 16.46
+              },
+              "生命禱言": {
+                "total": 0,
+                "effective": 0,
+                "overheal": 0,
+                "effectiveSharePercent": 0
+              },
+              "聖光湧泉": {
+                "total": 0,
+                "effective": 0,
+                "overheal": 0,
+                "effectiveSharePercent": 0
+              },
+              "守護聖域": {
+                "total": 0,
+                "effective": 0,
+                "overheal": 0,
+                "effectiveSharePercent": 0
+              },
+              "聖光回響": {
+                "total": 0,
+                "effective": 0,
+                "overheal": 0,
+                "effectiveSharePercent": 0
+              },
+              "神聖懲擊": {
+                "total": 0,
+                "effective": 0,
+                "overheal": 0,
+                "effectiveSharePercent": 0
+              },
+              "光明奉獻": {
+                "total": 0,
+                "effective": 0,
+                "overheal": 0,
+                "effectiveSharePercent": 0
+              },
+              "神聖風暴": {
+                "total": 0,
+                "effective": 0,
+                "overheal": 0,
+                "effectiveSharePercent": 0
+              }
+            },
+            "shieldAbsorbed": 0,
+            "sanctuaryPrevented": 0,
+            "damage": {
+              "holySmite": 0,
+              "holyStorm": 0
+            },
+            "conversionHealing": {
+              "smite": 0,
+              "devotion": 0,
+              "storm": 0,
+              "sharePercent": 0
+            },
+            "mana": {
+              "average": 506,
+              "minimum": 475.7,
+              "exhaustions": 0,
+              "blockedCasts": 0,
+              "end": 515.8
+            }
+          }
+        },
+        "holyFountain": {
+          "teamDps": 1959.7,
+          "priestDps": 460.6,
+          "effectiveHealing": 177926.4,
+          "averageHpPercent": 84.4,
+          "minimumHpPercent": 58.4,
+          "firstDeathSeconds": null,
+          "finalSurvivors": 4,
+          "survivalRate": 100,
+          "mana": {
+            "average": 497.9,
+            "minimum": 429.7,
+            "exhaustions": 0,
+            "blockedCasts": 0
+          },
+          "sample": {
+            "build": "holyFountain",
+            "spec": "holy-priest",
+            "seconds": 1800,
+            "enemies": 5,
+            "teamDps": 1958.3,
+            "priestDps": 459.1,
+            "effectiveHealing": 178621.3,
+            "averageHpPercent": 84.6,
+            "minimumHpPercent": 53.5,
+            "firstDeathSeconds": null,
+            "finalSurvivors": 4,
+            "survivalRate": 100,
+            "faith": {
+              "coveragePercent": [
+                0.02,
+                0.17,
+                0.49,
+                99.32
+              ],
+              "averageStacks": 2.991,
+              "interruptions": 2
+            },
+            "guardian": {
+              "triggers": 0,
+              "prevented": 0,
+              "self": 0,
+              "allies": 0,
+              "deathsDuringCooldown": 0,
+              "crossEncounterMaintained": true
+            },
+            "healingSources": {
+              "治癒術": {
+                "total": 65472,
+                "effective": 65472,
+                "overheal": 0,
+                "effectiveSharePercent": 36.65
+              },
+              "神恩": {
+                "total": 13094.4,
+                "effective": 13094.4,
+                "overheal": 0,
+                "effectiveSharePercent": 7.33
+              },
+              "生命禱言": {
+                "total": 0,
+                "effective": 0,
+                "overheal": 0,
+                "effectiveSharePercent": 0
+              },
+              "聖光湧泉": {
+                "total": 3396.4,
+                "effective": 3396.4,
+                "overheal": 0,
+                "effectiveSharePercent": 1.9
+              },
+              "守護聖域": {
+                "total": 82104.5,
+                "effective": 80458.5,
+                "overheal": 1645.9,
+                "effectiveSharePercent": 45.04
+              },
+              "聖光回響": {
+                "total": 16200,
+                "effective": 16200,
+                "overheal": 0,
+                "effectiveSharePercent": 9.07
+              },
+              "神聖懲擊": {
+                "total": 0,
+                "effective": 0,
+                "overheal": 0,
+                "effectiveSharePercent": 0
+              },
+              "光明奉獻": {
+                "total": 0,
+                "effective": 0,
+                "overheal": 0,
+                "effectiveSharePercent": 0
+              },
+              "神聖風暴": {
+                "total": 0,
+                "effective": 0,
+                "overheal": 0,
+                "effectiveSharePercent": 0
+              }
+            },
+            "shieldAbsorbed": 0,
+            "sanctuaryPrevented": 13057.5,
+            "damage": {
+              "holySmite": 0,
+              "holyStorm": 0
+            },
+            "conversionHealing": {
+              "smite": 0,
+              "devotion": 0,
+              "storm": 0,
+              "sharePercent": 0
+            },
+            "mana": {
+              "average": 498.2,
+              "minimum": 436.7,
+              "exhaustions": 0,
+              "blockedCasts": 0,
+              "end": 512.3
+            }
+          }
+        },
+        "battleSmite": {
+          "teamDps": 2227.8,
+          "priestDps": 743.4,
+          "effectiveHealing": 154618.4,
+          "averageHpPercent": 85.6,
+          "minimumHpPercent": 60.9,
+          "firstDeathSeconds": null,
+          "finalSurvivors": 4,
+          "survivalRate": 100,
+          "mana": {
+            "average": 161.6,
+            "minimum": 59.8,
+            "exhaustions": 38.8,
+            "blockedCasts": 38.8
+          },
+          "sample": {
+            "build": "battleSmite",
+            "spec": "battle-priest",
+            "seconds": 1800,
+            "enemies": 5,
+            "teamDps": 2223.7,
+            "priestDps": 739.4,
+            "effectiveHealing": 157857.6,
+            "averageHpPercent": 85.6,
+            "minimumHpPercent": 62.7,
+            "firstDeathSeconds": null,
+            "finalSurvivors": 4,
+            "survivalRate": 100,
+            "faith": {
+              "coveragePercent": [
+                14.31,
+                2.34,
+                2.34,
+                81.01
+              ],
+              "averageStacks": 2.5,
+              "interruptions": 39
+            },
+            "guardian": {
+              "triggers": 0,
+              "prevented": 0,
+              "self": 0,
+              "allies": 0,
+              "deathsDuringCooldown": 0,
+              "crossEncounterMaintained": true
+            },
+            "healingSources": {
+              "治癒術": {
+                "total": 26769.6,
+                "effective": 26769.6,
+                "overheal": 0,
+                "effectiveSharePercent": 16.96
+              },
+              "神恩": {
+                "total": 5190.2,
+                "effective": 5190.2,
+                "overheal": 0,
+                "effectiveSharePercent": 3.29
+              },
+              "生命禱言": {
+                "total": 0,
+                "effective": 0,
+                "overheal": 0,
+                "effectiveSharePercent": 0
+              },
+              "聖光湧泉": {
+                "total": 0,
+                "effective": 0,
+                "overheal": 0,
+                "effectiveSharePercent": 0
+              },
+              "守護聖域": {
+                "total": 0,
+                "effective": 0,
+                "overheal": 0,
+                "effectiveSharePercent": 0
+              },
+              "聖光回響": {
+                "total": 0,
+                "effective": 0,
+                "overheal": 0,
+                "effectiveSharePercent": 0
+              },
+              "神聖懲擊": {
+                "total": 40607.3,
+                "effective": 40374.8,
+                "overheal": 232.5,
+                "effectiveSharePercent": 25.58
+              },
+              "光明奉獻": {
+                "total": 43352.9,
+                "effective": 42160.5,
+                "overheal": 1192.4,
+                "effectiveSharePercent": 26.71
+              },
+              "神聖風暴": {
+                "total": 44160,
+                "effective": 43362.4,
+                "overheal": 797.6,
+                "effectiveSharePercent": 27.47
+              }
+            },
+            "shieldAbsorbed": 0,
+            "sanctuaryPrevented": 0,
+            "damage": {
+              "holySmite": 270715.2,
+              "holyStorm": 348612
+            },
+            "conversionHealing": {
+              "smite": 40374.8,
+              "devotion": 42160.5,
+              "storm": 43362.4,
+              "sharePercent": 79.75
+            },
+            "mana": {
+              "average": 161.4,
+              "minimum": 60.1,
+              "exhaustions": 40,
+              "blockedCasts": 40,
+              "end": 110
+            }
+          }
+        }
+      },
+      "minutes60": {
+        "base": {
+          "teamDps": 1960.5,
+          "priestDps": 458.9,
+          "effectiveHealing": 252230.9,
+          "averageHpPercent": 82.3,
+          "minimumHpPercent": 48.5,
+          "firstDeathSeconds": null,
+          "finalSurvivors": 4,
+          "survivalRate": 100,
+          "mana": {
+            "average": 506.5,
+            "minimum": 475.7,
+            "exhaustions": 0,
+            "blockedCasts": 0
+          },
+          "sample": {
+            "build": "base",
+            "spec": "base-priest",
+            "seconds": 3600,
+            "enemies": 5,
+            "teamDps": 1960.1,
+            "priestDps": 458.7,
+            "effectiveHealing": 257796,
+            "averageHpPercent": 82.5,
+            "minimumHpPercent": 50.5,
+            "firstDeathSeconds": null,
+            "finalSurvivors": 4,
+            "survivalRate": 100,
+            "faith": {
+              "coveragePercent": [
+                0,
+                0.03,
+                0.08,
+                99.89
+              ],
+              "averageStacks": 2.999,
+              "interruptions": 0
+            },
+            "guardian": {
+              "triggers": 0,
+              "prevented": 0,
+              "self": 0,
+              "allies": 0,
+              "deathsDuringCooldown": 0,
+              "crossEncounterMaintained": true
+            },
+            "healingSources": {
+              "治癒術": {
+                "total": 215239.2,
+                "effective": 215239.2,
+                "overheal": 0,
+                "effectiveSharePercent": 83.49
+              },
+              "神恩": {
+                "total": 42556.8,
+                "effective": 42556.8,
+                "overheal": 0,
+                "effectiveSharePercent": 16.51
+              },
+              "生命禱言": {
+                "total": 0,
+                "effective": 0,
+                "overheal": 0,
+                "effectiveSharePercent": 0
+              },
+              "聖光湧泉": {
+                "total": 0,
+                "effective": 0,
+                "overheal": 0,
+                "effectiveSharePercent": 0
+              },
+              "守護聖域": {
+                "total": 0,
+                "effective": 0,
+                "overheal": 0,
+                "effectiveSharePercent": 0
+              },
+              "聖光回響": {
+                "total": 0,
+                "effective": 0,
+                "overheal": 0,
+                "effectiveSharePercent": 0
+              },
+              "神聖懲擊": {
+                "total": 0,
+                "effective": 0,
+                "overheal": 0,
+                "effectiveSharePercent": 0
+              },
+              "光明奉獻": {
+                "total": 0,
+                "effective": 0,
+                "overheal": 0,
+                "effectiveSharePercent": 0
+              },
+              "神聖風暴": {
+                "total": 0,
+                "effective": 0,
+                "overheal": 0,
+                "effectiveSharePercent": 0
+              }
+            },
+            "shieldAbsorbed": 0,
+            "sanctuaryPrevented": 0,
+            "damage": {
+              "holySmite": 0,
+              "holyStorm": 0
+            },
+            "conversionHealing": {
+              "smite": 0,
+              "devotion": 0,
+              "storm": 0,
+              "sharePercent": 0
+            },
+            "mana": {
+              "average": 506.4,
+              "minimum": 475.7,
+              "exhaustions": 0,
+              "blockedCasts": 0,
+              "end": 513.9
+            }
+          }
+        },
+        "holyFountain": {
+          "teamDps": 1956.7,
+          "priestDps": 457.2,
+          "effectiveHealing": 351073.8,
+          "averageHpPercent": 84.5,
+          "minimumHpPercent": 57,
+          "firstDeathSeconds": null,
+          "finalSurvivors": 4,
+          "survivalRate": 100,
+          "mana": {
+            "average": 498.5,
+            "minimum": 430.5,
+            "exhaustions": 0,
+            "blockedCasts": 0
+          },
+          "sample": {
+            "build": "holyFountain",
+            "spec": "holy-priest",
+            "seconds": 3600,
+            "enemies": 5,
+            "teamDps": 1956.7,
+            "priestDps": 457.2,
+            "effectiveHealing": 354017.7,
+            "averageHpPercent": 84.7,
+            "minimumHpPercent": 53.5,
+            "firstDeathSeconds": null,
+            "finalSurvivors": 4,
+            "survivalRate": 100,
+            "faith": {
+              "coveragePercent": [
+                0.01,
+                0.09,
+                0.25,
+                99.66
+              ],
+              "averageStacks": 2.996,
+              "interruptions": 2
+            },
+            "guardian": {
+              "triggers": 0,
+              "prevented": 0,
+              "self": 0,
+              "allies": 0,
+              "deathsDuringCooldown": 0,
+              "crossEncounterMaintained": true
+            },
+            "healingSources": {
+              "治癒術": {
+                "total": 126033.6,
+                "effective": 126033.6,
+                "overheal": 0,
+                "effectiveSharePercent": 35.6
+              },
+              "神恩": {
+                "total": 24879.4,
+                "effective": 24879.4,
+                "overheal": 0,
+                "effectiveSharePercent": 7.03
+              },
+              "生命禱言": {
+                "total": 0,
+                "effective": 0,
+                "overheal": 0,
+                "effectiveSharePercent": 0
+              },
+              "聖光湧泉": {
+                "total": 13831,
+                "effective": 13831,
+                "overheal": 0,
+                "effectiveSharePercent": 3.91
+              },
+              "守護聖域": {
+                "total": 163899.8,
+                "effective": 157173.8,
+                "overheal": 6726,
+                "effectiveSharePercent": 44.4
+              },
+              "聖光回響": {
+                "total": 32100,
+                "effective": 32100,
+                "overheal": 0,
+                "effectiveSharePercent": 9.07
+              },
+              "神聖懲擊": {
+                "total": 0,
+                "effective": 0,
+                "overheal": 0,
+                "effectiveSharePercent": 0
+              },
+              "光明奉獻": {
+                "total": 0,
+                "effective": 0,
+                "overheal": 0,
+                "effectiveSharePercent": 0
+              },
+              "神聖風暴": {
+                "total": 0,
+                "effective": 0,
+                "overheal": 0,
+                "effectiveSharePercent": 0
+              }
+            },
+            "shieldAbsorbed": 0,
+            "sanctuaryPrevented": 26132.8,
+            "damage": {
+              "holySmite": 0,
+              "holyStorm": 0
+            },
+            "conversionHealing": {
+              "smite": 0,
+              "devotion": 0,
+              "storm": 0,
+              "sharePercent": 0
+            },
+            "mana": {
+              "average": 498.6,
+              "minimum": 436.7,
+              "exhaustions": 0,
+              "blockedCasts": 0,
+              "end": 471.4
+            }
+          }
+        },
+        "battleSmite": {
+          "teamDps": 2219.1,
+          "priestDps": 733.8,
+          "effectiveHealing": 313784.5,
+          "averageHpPercent": 85.3,
+          "minimumHpPercent": 60.8,
+          "firstDeathSeconds": null,
+          "finalSurvivors": 4,
+          "survivalRate": 100,
+          "mana": {
+            "average": 158,
+            "minimum": 59.8,
+            "exhaustions": 79.1,
+            "blockedCasts": 79.1
+          },
+          "sample": {
+            "build": "battleSmite",
+            "spec": "battle-priest",
+            "seconds": 3600,
+            "enemies": 5,
+            "teamDps": 2218.7,
+            "priestDps": 733.4,
+            "effectiveHealing": 315913.4,
+            "averageHpPercent": 85.3,
+            "minimumHpPercent": 62.7,
+            "firstDeathSeconds": null,
+            "finalSurvivors": 4,
+            "survivalRate": 100,
+            "faith": {
+              "coveragePercent": [
+                14.45,
+                2.39,
+                2.39,
+                80.76
+              ],
+              "averageStacks": 2.495,
+              "interruptions": 79
+            },
+            "guardian": {
+              "triggers": 0,
+              "prevented": 0,
+              "self": 0,
+              "allies": 0,
+              "deathsDuringCooldown": 0,
+              "crossEncounterMaintained": true
+            },
+            "healingSources": {
+              "治癒術": {
+                "total": 56232,
+                "effective": 56232,
+                "overheal": 0,
+                "effectiveSharePercent": 17.8
+              },
+              "神恩": {
+                "total": 11082.7,
+                "effective": 11082.7,
+                "overheal": 0,
+                "effectiveSharePercent": 3.51
+              },
+              "生命禱言": {
+                "total": 0,
+                "effective": 0,
+                "overheal": 0,
+                "effectiveSharePercent": 0
+              },
+              "聖光湧泉": {
+                "total": 0,
+                "effective": 0,
+                "overheal": 0,
+                "effectiveSharePercent": 0
+              },
+              "守護聖域": {
+                "total": 0,
+                "effective": 0,
+                "overheal": 0,
+                "effectiveSharePercent": 0
+              },
+              "聖光回響": {
+                "total": 0,
+                "effective": 0,
+                "overheal": 0,
+                "effectiveSharePercent": 0
+              },
+              "神聖懲擊": {
+                "total": 81214.6,
+                "effective": 80832.2,
+                "overheal": 382.4,
+                "effectiveSharePercent": 25.59
+              },
+              "光明奉獻": {
+                "total": 85213.5,
+                "effective": 83423.2,
+                "overheal": 1790.3,
+                "effectiveSharePercent": 26.41
+              },
+              "神聖風暴": {
+                "total": 85680,
+                "effective": 84343.3,
+                "overheal": 1336.7,
+                "effectiveSharePercent": 26.7
+              }
+            },
+            "shieldAbsorbed": 0,
+            "sanctuaryPrevented": 0,
+            "damage": {
+              "holySmite": 541430.4,
+              "holyStorm": 675906
+            },
+            "conversionHealing": {
+              "smite": 80832.2,
+              "devotion": 83423.2,
+              "storm": 84343.3,
+              "sharePercent": 78.69
+            },
+            "mana": {
+              "average": 158,
+              "minimum": 60.1,
+              "exhaustions": 79,
+              "blockedCasts": 79,
+              "end": 82
+            }
+          }
+        }
+      }
+    },
+    "builds": {
+      "holyFountain": {
+        "teamDps": 1919.9,
+        "priestDps": 432.9,
+        "effectiveHealing": 127009.9,
+        "averageHpPercent": 76.7,
+        "minimumHpPercent": 55.2,
+        "firstDeathSeconds": null,
+        "finalSurvivors": 4,
+        "survivalRate": 100,
+        "mana": {
+          "average": 277.4,
+          "minimum": 54.8,
+          "exhaustions": 2.3,
+          "blockedCasts": 2.3
+        },
+        "sample": {
+          "build": "holyFountain",
+          "spec": "holy-priest",
+          "seconds": 600,
+          "enemies": 5,
+          "teamDps": 1924.9,
+          "priestDps": 437.1,
+          "effectiveHealing": 126525.5,
+          "averageHpPercent": 78.2,
+          "minimumHpPercent": 54.2,
+          "firstDeathSeconds": null,
+          "finalSurvivors": 4,
+          "survivalRate": 100,
+          "faith": {
+            "coveragePercent": [
+              3.23,
+              0.7,
+              1.98,
+              94.08
+            ],
+            "averageStacks": 2.869,
+            "interruptions": 3
+          },
+          "guardian": {
+            "triggers": 0,
+            "prevented": 0,
+            "self": 0,
+            "allies": 0,
+            "deathsDuringCooldown": 0,
+            "crossEncounterMaintained": true
+          },
+          "healingSources": {
+            "治癒術": {
+              "total": 45711.6,
+              "effective": 45711.6,
+              "overheal": 0,
+              "effectiveSharePercent": 36.13
+            },
+            "神恩": {
+              "total": 9118.6,
+              "effective": 9118.6,
+              "overheal": 0,
+              "effectiveSharePercent": 7.21
+            },
+            "生命禱言": {
+              "total": 0,
+              "effective": 0,
+              "overheal": 0,
+              "effectiveSharePercent": 0
+            },
+            "聖光湧泉": {
+              "total": 27864.4,
+              "effective": 27593.7,
+              "overheal": 270.7,
+              "effectiveSharePercent": 21.81
+            },
+            "守護聖域": {
+              "total": 32764,
+              "effective": 32701.6,
+              "overheal": 62.3,
+              "effectiveSharePercent": 25.85
+            },
+            "聖光回響": {
+              "total": 11400,
+              "effective": 11400,
+              "overheal": 0,
+              "effectiveSharePercent": 9.01
+            },
+            "神聖懲擊": {
+              "total": 0,
+              "effective": 0,
+              "overheal": 0,
+              "effectiveSharePercent": 0
+            },
+            "光明奉獻": {
+              "total": 0,
+              "effective": 0,
+              "overheal": 0,
+              "effectiveSharePercent": 0
+            },
+            "神聖風暴": {
+              "total": 0,
+              "effective": 0,
+              "overheal": 0,
+              "effectiveSharePercent": 0
+            }
+          },
+          "shieldAbsorbed": 0,
+          "sanctuaryPrevented": 6343.1,
+          "damage": {
+            "holySmite": 0,
+            "holyStorm": 0
+          },
+          "conversionHealing": {
+            "smite": 0,
+            "devotion": 0,
+            "storm": 0,
+            "sharePercent": 0
+          },
+          "mana": {
+            "average": 279.1,
+            "minimum": 66.2,
+            "exhaustions": 2,
+            "blockedCasts": 2,
+            "end": 183
+          }
+        }
+      },
+      "holySanctuary": {
+        "teamDps": 1938.4,
+        "priestDps": 451.1,
+        "effectiveHealing": 126991.3,
+        "averageHpPercent": 77.5,
+        "minimumHpPercent": 56.7,
+        "firstDeathSeconds": null,
+        "finalSurvivors": 4,
+        "survivalRate": 100,
+        "mana": {
+          "average": 331.3,
+          "minimum": 60.8,
+          "exhaustions": 0.5,
+          "blockedCasts": 0.5
+        },
+        "sample": {
+          "build": "holySanctuary",
+          "spec": "holy-priest",
+          "seconds": 600,
+          "enemies": 5,
+          "teamDps": 1942.5,
+          "priestDps": 455.2,
+          "effectiveHealing": 127330.7,
+          "averageHpPercent": 77,
+          "minimumHpPercent": 53,
+          "firstDeathSeconds": null,
+          "finalSurvivors": 4,
+          "survivalRate": 100,
+          "faith": {
+            "coveragePercent": [
+              1.45,
+              0.52,
+              0.82,
+              97.22
+            ],
+            "averageStacks": 2.938,
+            "interruptions": 1
+          },
+          "guardian": {
+            "triggers": 0,
+            "prevented": 0,
+            "self": 0,
+            "allies": 0,
+            "deathsDuringCooldown": 0,
+            "crossEncounterMaintained": true
+          },
+          "healingSources": {
+            "治癒術": {
+              "total": 50681.4,
+              "effective": 50681.4,
+              "overheal": 0,
+              "effectiveSharePercent": 39.8
+            },
+            "神恩": {
+              "total": 9820.8,
+              "effective": 9820.8,
+              "overheal": 0,
+              "effectiveSharePercent": 7.71
+            },
+            "生命禱言": {
+              "total": 0,
+              "effective": 0,
+              "overheal": 0,
+              "effectiveSharePercent": 0
+            },
+            "聖光湧泉": {
+              "total": 10965.4,
+              "effective": 10965.4,
+              "overheal": 0,
+              "effectiveSharePercent": 8.61
+            },
+            "守護聖域": {
+              "total": 35703,
+              "effective": 35703,
+              "overheal": 0,
+              "effectiveSharePercent": 28.04
+            },
+            "聖光回響": {
+              "total": 20160,
+              "effective": 20160,
+              "overheal": 0,
+              "effectiveSharePercent": 15.83
+            },
+            "神聖懲擊": {
+              "total": 0,
+              "effective": 0,
+              "overheal": 0,
+              "effectiveSharePercent": 0
+            },
+            "光明奉獻": {
+              "total": 0,
+              "effective": 0,
+              "overheal": 0,
+              "effectiveSharePercent": 0
+            },
+            "神聖風暴": {
+              "total": 0,
+              "effective": 0,
+              "overheal": 0,
+              "effectiveSharePercent": 0
+            }
+          },
+          "shieldAbsorbed": 0,
+          "sanctuaryPrevented": 6293.6,
+          "damage": {
+            "holySmite": 0,
+            "holyStorm": 0
+          },
+          "conversionHealing": {
+            "smite": 0,
+            "devotion": 0,
+            "storm": 0,
+            "sharePercent": 0
+          },
+          "mana": {
+            "average": 303.4,
+            "minimum": 70.7,
+            "exhaustions": 1,
+            "blockedCasts": 1,
+            "end": 124.1
+          }
+        }
+      },
+      "battleSmite": {
+        "teamDps": 794,
+        "priestDps": 258.5,
+        "effectiveHealing": 32309.8,
+        "averageHpPercent": 18.4,
+        "minimumHpPercent": 0,
+        "firstDeathSeconds": 211.5,
+        "finalSurvivors": 0,
+        "survivalRate": 0,
+        "mana": {
+          "average": 399.5,
+          "minimum": 61.9,
+          "exhaustions": 5,
+          "blockedCasts": 5
+        },
+        "sample": {
+          "build": "battleSmite",
+          "spec": "battle-priest",
+          "seconds": 600,
+          "enemies": 5,
+          "teamDps": 838.5,
+          "priestDps": 283.1,
+          "effectiveHealing": 36414.6,
+          "averageHpPercent": 19.1,
+          "minimumHpPercent": 0,
+          "firstDeathSeconds": 216.9,
+          "finalSurvivors": 0,
+          "survivalRate": 0,
+          "faith": {
+            "coveragePercent": [
+              65.7,
+              1.1,
+              1.08,
+              32.12
+            ],
+            "averageStacks": 0.996,
+            "interruptions": 6
+          },
+          "guardian": {
+            "triggers": 0,
+            "prevented": 0,
+            "self": 0,
+            "allies": 0,
+            "deathsDuringCooldown": 0,
+            "crossEncounterMaintained": true
+          },
+          "healingSources": {
+            "治癒術": {
+              "total": 16889.4,
+              "effective": 16889.4,
+              "overheal": 0,
+              "effectiveSharePercent": 46.38
+            },
+            "神恩": {
+              "total": 3103.3,
+              "effective": 3103.3,
+              "overheal": 0,
+              "effectiveSharePercent": 8.52
+            },
+            "生命禱言": {
+              "total": 0,
+              "effective": 0,
+              "overheal": 0,
+              "effectiveSharePercent": 0
+            },
+            "聖光湧泉": {
+              "total": 0,
+              "effective": 0,
+              "overheal": 0,
+              "effectiveSharePercent": 0
+            },
+            "守護聖域": {
+              "total": 0,
+              "effective": 0,
+              "overheal": 0,
+              "effectiveSharePercent": 0
+            },
+            "聖光回響": {
+              "total": 0,
+              "effective": 0,
+              "overheal": 0,
+              "effectiveSharePercent": 0
+            },
+            "神聖懲擊": {
+              "total": 5258.9,
+              "effective": 5195.3,
+              "overheal": 63.6,
+              "effectiveSharePercent": 14.27
+            },
+            "光明奉獻": {
+              "total": 5761.9,
+              "effective": 5652,
+              "overheal": 109.9,
+              "effectiveSharePercent": 15.52
+            },
+            "神聖風暴": {
+              "total": 5640,
+              "effective": 5574.5,
+              "overheal": 65.5,
+              "effectiveSharePercent": 15.31
+            }
+          },
+          "shieldAbsorbed": 0,
+          "sanctuaryPrevented": 0,
+          "damage": {
+            "holySmite": 35059.5,
+            "holyStorm": 47253
+          },
+          "conversionHealing": {
+            "smite": 5195.3,
+            "devotion": 5652,
+            "storm": 5574.5,
+            "sharePercent": 45.1
+          },
+          "mana": {
+            "average": 383,
+            "minimum": 70.9,
+            "exhaustions": 6,
+            "blockedCasts": 6,
+            "end": 520
+          }
+        }
+      },
+      "battleStorm": {
+        "teamDps": 914.5,
+        "priestDps": 293.7,
+        "effectiveHealing": 41060.4,
+        "averageHpPercent": 21.8,
+        "minimumHpPercent": 0,
+        "firstDeathSeconds": 243.2,
+        "finalSurvivors": 0,
+        "survivalRate": 0,
+        "mana": {
+          "average": 379.2,
+          "minimum": 63.7,
+          "exhaustions": 5.6,
+          "blockedCasts": 5.6
+        },
+        "sample": {
+          "build": "battleStorm",
+          "spec": "battle-priest",
+          "seconds": 600,
+          "enemies": 5,
+          "teamDps": 856,
+          "priestDps": 265.9,
+          "effectiveHealing": 36512.8,
+          "averageHpPercent": 21.4,
+          "minimumHpPercent": 0,
+          "firstDeathSeconds": 233.1,
+          "finalSurvivors": 0,
+          "survivalRate": 0,
+          "faith": {
+            "coveragePercent": [
+              66.7,
+              0.92,
+              0.9,
+              31.48
+            ],
+            "averageStacks": 0.972,
+            "interruptions": 5
+          },
+          "guardian": {
+            "triggers": 0,
+            "prevented": 0,
+            "self": 0,
+            "allies": 0,
+            "deathsDuringCooldown": 0,
+            "crossEncounterMaintained": true
+          },
+          "healingSources": {
+            "治癒術": {
+              "total": 15312,
+              "effective": 15312,
+              "overheal": 0,
+              "effectiveSharePercent": 41.94
+            },
+            "神恩": {
+              "total": 2571.4,
+              "effective": 2571.4,
+              "overheal": 0,
+              "effectiveSharePercent": 7.04
+            },
+            "生命禱言": {
+              "total": 0,
+              "effective": 0,
+              "overheal": 0,
+              "effectiveSharePercent": 0
+            },
+            "聖光湧泉": {
+              "total": 0,
+              "effective": 0,
+              "overheal": 0,
+              "effectiveSharePercent": 0
+            },
+            "守護聖域": {
+              "total": 0,
+              "effective": 0,
+              "overheal": 0,
+              "effectiveSharePercent": 0
+            },
+            "聖光回響": {
+              "total": 0,
+              "effective": 0,
+              "overheal": 0,
+              "effectiveSharePercent": 0
+            },
+            "神聖懲擊": {
+              "total": 4000.1,
+              "effective": 3968,
+              "overheal": 32,
+              "effectiveSharePercent": 10.87
+            },
+            "光明奉獻": {
+              "total": 8016.8,
+              "effective": 7856.8,
+              "overheal": 160,
+              "effectiveSharePercent": 21.52
+            },
+            "神聖風暴": {
+              "total": 6900,
+              "effective": 6804.5,
+              "overheal": 95.5,
+              "effectiveSharePercent": 18.64
+            }
+          },
+          "shieldAbsorbed": 0,
+          "sanctuaryPrevented": 0,
+          "damage": {
+            "holySmite": 33333.9,
+            "holyStorm": 47234.2
+          },
+          "conversionHealing": {
+            "smite": 3968,
+            "devotion": 7856.8,
+            "storm": 6804.5,
+            "sharePercent": 51.02
+          },
+          "mana": {
+            "average": 395.6,
+            "minimum": 76,
+            "exhaustions": 5,
+            "blockedCasts": 5,
+            "end": 520
+          }
+        }
+      }
+    }
+  }
+}
