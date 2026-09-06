@@ -23,7 +23,16 @@ assert.equal(elementalist.resonanceUntil,8000);
 assert.deepEqual(policy.getResonanceBonuses(elementalist,'fire',2000),{damage:.2,crit:.1});
 assert.deepEqual(policy.finishResonance(elementalist,8000),{power:1.5,element:'fire'});
 
-const arcane={progress:{advancedClass:'arcane-mage',skillLevels:{'mage:arcane-charge':6,'mage:mana-drain':6}},resourceMax:1000,resourceCurrent:900,skillCooldowns:{'arcane-missile':5000,fireball:9000}};
+const arcane={id:'arcane-test',progress:{advancedClass:'arcane-mage',skillLevels:{'mage:arcane-missile':6,'mage:arcane-charge':6,'mage:mana-drain':6}},resourceMax:1000,resourceCurrent:900,skillCooldowns:{'arcane-missile':5000,fireball:9000}};
+const missileEffect=policy.getEffect('arcane-missile',6);
+assert.deepEqual({missiles:missileEffect.missiles,missilePower:missileEffect.missilePower,markDamage:missileEffect.markManaDamage,repeatChance:missileEffect.repeatChance},{missiles:4,missilePower:.4,markDamage:.015,repeatChance:undefined});
+const markedEnemy={};
+assert.equal(policy.addArcaneMark(markedEnemy,arcane,missileEffect,1000).stacks,1);
+assert.equal(policy.addArcaneMark(markedEnemy,arcane,missileEffect,1000).stacks,3,'Lv6 resonance adds a second stack only to an already marked target');
+assert.equal(policy.addArcaneMark(markedEnemy,arcane,missileEffect,1000).stacks,4);
+const detonation=policy.consumeArcaneMark(markedEnemy,arcane,'arcane-torrent',2000);
+assert.deepEqual(detonation,{stacks:4,power:60});
+assert.equal(policy.consumeArcaneMark(markedEnemy,arcane,'arcane-torrent',2000),null,'detonation consumes all marks');
 for(let i=0;i<5;i++)assert.equal(policy.castArcaneCharge(arcane,'fireball',i*1000).noCooldown,false);
 assert.equal(policy.castArcaneCharge(arcane,'arcane-missile',5000).noCooldown,true);
 assert.equal(arcane.arcaneChargeStacks,0);
@@ -47,6 +56,8 @@ assert.equal(policy.resolveKill(arcane,6000),30);
 assert.equal(arcane.soulDrainUntil,11000);
 assert.equal(policy.getMaxManaBonus(arcane.progress),.15);
 assert.equal(policy.telemetry(arcane).killMana,30);
+assert.equal(policy.telemetry(arcane).arcaneMarkBonusStacks,2);
+assert.equal(policy.telemetry(arcane).arcaneMarkDetonations,1);
 
 const levels={'mage:elemental-burst':6,'mage:elemental-storm':6,'mage:elemental-marks':6,'mage:resonance-overload':6,'mage:fireball':6,'mage:mana-amplification':6};
 const normalized=policy.normalizeSkillLevels(levels,'elementalist');

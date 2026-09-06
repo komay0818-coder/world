@@ -3492,6 +3492,7 @@ function applyPendingRoguePlagueSpread(index, now = Date.now()) {
 function processEnemyDots() {
   const now = Date.now();
   battle.enemyDots.forEach((dots, index) => {
+    MageAdvancementPolicy.expireArcaneMarks(getEnemySkillState(index), battle.partyMembers || [], now);
     if (battle.enemyHps[index] <= 0 || !dots.length) return;
     const damageBySource = new Map();
     dots.forEach((dot) => {
@@ -4695,10 +4696,19 @@ function applyDamageToMonster(index, baseDamage, profile, options = {}) {
     mageStats.shockedBonusDamage+=bonus;mageStats.shockedBonusBySkill[sourceSkill]=(mageStats.shockedBonusBySkill[sourceSkill]||0)+bonus;
   }
   CombatCorePolicy.recordDamage(attacker, options.sourceSkill || options.attackKind || profile.element || 'other', result.finalDamage);
+  const arcaneMarkExplosion = attacker
+    && MageAdvancementPolicy.isAdvanced(attacker.progress, 'arcane-mage')
+    && profile.damageType === 'magic'
+    && options.attackKind !== 'basic'
+    && options.sourceSkill !== 'arcane-missile'
+    && options.sourceSkill !== 'arcane-mark-explosion'
+    ? MageAdvancementPolicy.consumeArcaneMark(skillState, attacker, options.sourceSkill || options.attackKind || 'other', now)
+    : null;
   const wasAlive = battle.enemyHps[index] > 0;
   battle.enemyHps[index] -= result.finalDamage;
   if (wasAlive && battle.enemyHps[index] <= 0 && attacker?.alive) {
     CombatCorePolicy.record(attacker, 'kills');
+    MageAdvancementPolicy.clearArcaneMarksOnDeath(skillState, battle.partyMembers || []);
     const markOwner = (battle.partyMembers || []).find((member) => member.id === skillState.deathMarkOwner);
     if (markOwner) RogueAdvancementPolicy.resolveMarkedKill(markOwner, skillState, now);
     const poisonSource = (battle.enemyDots[index] || []).find((dot) => dot.type === 'poison' && dot.source)?.source;
@@ -4712,6 +4722,10 @@ function applyDamageToMonster(index, baseDamage, profile, options = {}) {
       const desperate = ClassSkillPolicy.getEffect('assassin', 'desperate-counter', Number(progress.skillLevels?.['assassin:desperate-counter']) || 1);
       if (desperate.killHeal) attacker.currentHp = Math.min(attacker.maxHp, attacker.currentHp + attacker.maxHp * desperate.killHeal);
     }
+  }
+  if (arcaneMarkExplosion) {
+    const explosion = applyDamageToMonster(index, arcaneMarkExplosion.power, { damageType: 'magic', attackRange: 'ranged', element: 'arcane' }, { attacker, attackKind: 'skill-followup', sourceSkill: 'arcane-mark-explosion', canEvade: false, canParry: false });
+    MageAdvancementPolicy.recordArcaneMarkDamage(attacker, explosion.finalDamage);
   }
   if (options.showDamage !== false) showEnemyDamage([index], result.finalDamage, options.effectType || 'normal');
   return result;
@@ -4786,7 +4800,10 @@ function useAutoSkillForMember(member, now = Date.now()) {
       WarriorAdvancementPolicy.applyBloodRage(member, getSkillUpgradeLevel(progress, member.job, skill), now);
       member.skillCooldowns[skill.id] = now + skill.cooldown * 1000; member.globalSkillReadyAt = now + 1000; logBattle(`🩸 ${member.name}施放【血怒】。`, 'system'); return true;
     }
-    const targets = aliveEnemyIndexesByAge().slice(0, skillEffect.targets || skill.targets || 1);
+    const livingTargets = aliveEnemyIndexesByAge();
+    const targets = skill.id === 'arcane-missile'
+      ? Array.from({ length: skillEffect.missiles || 4 }, () => livingTargets[Math.floor(Math.random() * livingTargets.length)])
+      : livingTargets.slice(0, skillEffect.targets || skill.targets || 1);
     if (!targets.length) continue;
     if (skill.id === 'gale-rapid-fire' || skill.id === 'beast-fury' || skill.id === 'bloody-hunt') {
       if (skill.id === 'gale-rapid-fire') HunterAdvancementPolicy.applyGale(member, skillEffect, now);
@@ -4826,6 +4843,16 @@ function useAutoSkillForMember(member, now = Date.now()) {
       const piercingMultiplier = skill.id === 'piercing-shot' ? Math.max(.1, 1 - targetOrder * .1) : 1;
       const rogueBonuses = RogueAdvancementPolicy.getTargetBonuses(member, battle.enemyDots[index], getEnemySkillState(index), battle.enemyHps[index] / getEnemyDefinition(index).maxHp, 'skill', now);
       const shadowBleedingMultiplier = skill.id === 'shadow-assassination' && RogueAdvancementPolicy.hasBleedingStatus(battle.enemyDots[index]) ? 1 + skillEffect.bleedingDamage : 1;
+      if (skill.id === 'arcane-missile') {
+        const missileCritical = Math.random() < Math.min(.95, stats.crit + runtimeBonuses.crit + primaryRogueBonuses.crit + resonanceBonuses.crit);
+        const missileDamage = Math.max(1, Math.ceil(stats.attack * skillEffect.missilePower * (missileCritical ? stats.criticalDamageMultiplier : 1)));
+        const missileResult = applyDamageToMonster(index, missileDamage * getRuneOutgoingMultiplier(member, index), profile, { attacker:member,attackKind:'skill',sourceSkill:'arcane-missile',conditionalDamageMultiplier,craftedEpicExecution,specialEquipmentMultiplier:(epicWeaponExecution.multipliers[targetOrder]||1)*(1+grandmasterSkillBonus),showDamage:true });
+        if (!missileResult.evaded) {
+          MageAdvancementPolicy.recordArcaneMissileHit(member);
+          if (battle.enemyHps[index] > 0) MageAdvancementPolicy.addArcaneMark(getEnemySkillState(index), member, skillEffect, now);
+        }
+        return { index, result: missileResult };
+      }
       if (skill.id === 'elemental-burst') {
         const state = getEnemySkillState(index), status = { burning:(battle.enemyDots[index]||[]).some(dot=>dot.type==='burn'),slowed:now<state.slowedUntil,frozen:now<state.frozenUntil,paralyzed:now<state.paralyzedUntil,shockedVulnerability:getMageShockState(index,member)?.until>now };
         const parts = MageAdvancementPolicy.getElementalBurstParts(skillEffect, status, member);
@@ -4851,6 +4878,7 @@ function useAutoSkillForMember(member, now = Date.now()) {
         showDamage: !['heavy-strike', 'whirlwind', 'charge', 'power-shot', 'multi-shot', 'piercing-shot', 'backstab', 'shadow-dance', 'poison-blade', 'fireball', 'blizzard', 'chain-lightning', 'holy-light', 'holy-nova'].includes(skill.id)
       }) };
     });
+    if (skill.id === 'arcane-missile') MageAdvancementPolicy.recordArcaneMissileCast(member, targets.length, new Set(targets).size);
     const hits = resolvedTargets.filter((target) => !target.result.evaded);
     if (skill.id === 'elemental-burst' && skillEffect.extendStatuses) hits.forEach((target) => extendElementalCollapseStatuses(target.index, member, now));
     if (skill.id === 'elemental-storm') {
@@ -4863,11 +4891,6 @@ function useAutoSkillForMember(member, now = Date.now()) {
         const result = applyDamageToMonster(index, secondDamage * (1 + secondBonus.damage) * getRuneOutgoingMultiplier(member,index), secondProfile, { attacker:member,attackKind:'skill-followup',sourceSkill:'elemental-storm',canParry:false });
         if (!result.evaded) { applyElementalStormStatus(index, stormElements[1], member, result.finalDamage, now); MageAdvancementPolicy.record(member, 'stormFollowupDamage', result.finalDamage); }
       });
-    }
-    if (skill.id === 'arcane-missile' && skillEffect.repeatChance && hits.length && Math.random() < skillEffect.repeatChance) {
-      const repeatTarget = hits.find(target => battle.enemyHps[target.index] > 0) || hits[0];
-      const repeat = applyDamageToMonster(repeatTarget.index, stats.attack * skillEffect.repeatPower, { ...profile, element:'arcane' }, { attacker:member,attackKind:'skill-followup',sourceSkill:'arcane-missile',canParry:false });
-      MageAdvancementPolicy.recordArcaneRepeat(member);
     }
     HunterAdvancementPolicy.completeShootingSkill(member, skill.id, hits.length > 0, critical, now);
     if (skill.id === 'sniper-shot') HunterAdvancementPolicy.applySniperCritical(member, skillEffect, critical && hits.length > 0, now);

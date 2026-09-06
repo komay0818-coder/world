@@ -1,0 +1,18 @@
+'use strict';
+const assert=require('node:assert/strict');
+const policy=require('../mage-advancement-policy.js');
+const {runFormalScenario}=require('../tools/mage-formal-consistency.js');
+const missile=policy.getEffect('arcane-missile',6);
+assert.equal(missile.missiles,4);
+assert.equal(missile.missilePower,.4);
+assert.equal(missile.markManaDamage,.015);
+assert.equal(missile.markResonance,true);
+assert.equal(missile.repeatChance,undefined);
+const build={baseActive:'chain-lightning',basePassive:'elemental-mastery',advancedActive:'arcane-missile',advancedPassive:'arcane-charge'};
+const result=runFormalScenario('arcane-mage',build,20,1e9,5,610001);
+assert.equal(result.mage.arcaneMissilesFired,result.mage.arcaneMissileCasts*4);
+assert.ok(result.mage.arcaneMarkApplications>0);
+assert.ok(result.mage.arcaneMarkBonusStacks>0);
+assert.ok(result.mage.arcaneMarkDetonations>0);
+assert.ok(result.mage.arcaneMarkDamage>0);
+console.log('arcane-missile-formal: assertions passed');
