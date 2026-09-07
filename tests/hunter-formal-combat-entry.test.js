@@ -69,7 +69,7 @@ assert.ok(exhaustion.arrows.recovered > 0);
 assert.deepEqual(runCombat({ ...exhaustionConfig, entry: 'ui' }), exhaustion, 'arrow exhaustion and recovery must be UI/headless identical');
 
 const petGuardConfig = {
-  ...marksmanConfig, seconds: 33, seed: 901,
+  ...marksmanConfig, seconds: 70, seed: 901,
   advancedClass: 'beastmaster',
   skills: { activeLv6: 'beast-fury', passiveLv6: 'pack-summoning' },
   enemy: { hp: 100000, defense: 10, attack: .05, attackSpeed: 1 }

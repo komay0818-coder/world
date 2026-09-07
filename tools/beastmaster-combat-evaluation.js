@@ -10,6 +10,12 @@ const ENEMY_FIVE = { hp: 2500, defense: 20, attack: .1, attackSpeed: 1, level: 4
 const ENEMY_BOSS = { hp: 12000, defense: 20, attack: .1, attackSpeed: 1, level: 45, evasion: 0, parry: 0 };
 const skills = listSkills('hunter', 'beastmaster');
 const combinations = skills.filter((skill) => skill.type === 'active').flatMap((active) => skills.filter((skill) => skill.type === 'passive').map((passive) => ({ activeLv6: active.id, passiveLv6: passive.id })));
+const focusedCombinations = [
+  { activeLv6: 'power-shot', passiveLv6: 'hunting-instinct' },
+  { activeLv6: 'power-shot', passiveLv6: 'pack-summoning' },
+  { activeLv6: 'power-shot', passiveLv6: 'wild-bond' },
+  { activeLv6: 'beast-fury', passiveLv6: 'pack-leader' }
+];
 const mean = (values) => values.reduce((sum, value) => sum + value, 0) / values.length;
 const stat = (values) => { const average = mean(values); return { mean: average, sd: Math.sqrt(mean(values.map((value) => (value - average) ** 2))) }; };
 
@@ -58,9 +64,9 @@ function aggregate(runs, config) {
   return { config, ...Object.fromEntries(keys.map((key) => [key, stat(runs.map((run) => run[key]))])) };
 }
 
-function evaluate(mode) {
+function evaluate(mode, configs) {
   const fixedFive = mode === 'five';
-  return combinations.map((config) => aggregate(SEEDS.map((seed) => sample(runCombat({
+  return configs.map((config) => aggregate(SEEDS.map((seed) => sample(runCombat({
     job: 'hunter', advancedClass: 'beastmaster', level: 45,
     mode: fixedFive ? 'fixed-five' : 'boss', seconds: fixedFive ? 120 : undefined, maxSeconds: fixedFive ? undefined : 900,
     seed, equipment: EQUIPMENT, skills: config, enemy: fixedFive ? ENEMY_FIVE : ENEMY_BOSS
@@ -69,8 +75,10 @@ function evaluate(mode) {
 
 const mode = process.argv.find((argument) => argument.startsWith('--mode='))?.split('=')[1];
 const output = process.argv.find((argument) => argument.startsWith('--output='))?.slice(9);
+const focused = process.argv.includes('--focused');
 if (!['five', 'boss'].includes(mode) || !output) throw new Error('Required --mode=five|boss --output=<file>');
-const report = { mode, seeds: SEEDS.length, combinations: combinations.length, equipment: EQUIPMENT, enemy: mode === 'five' ? ENEMY_FIVE : ENEMY_BOSS, results: evaluate(mode) };
+const selectedCombinations = focused ? focusedCombinations : combinations;
+const report = { mode, seeds: SEEDS.length, combinations: selectedCombinations.length, focused, equipment: EQUIPMENT, enemy: mode === 'five' ? ENEMY_FIVE : ENEMY_BOSS, results: evaluate(mode, selectedCombinations) };
 fs.mkdirSync(path.dirname(output), { recursive: true });
 fs.writeFileSync(output, JSON.stringify(report, null, 2));
 console.log(`${mode} complete`);
