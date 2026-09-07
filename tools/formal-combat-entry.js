@@ -11,11 +11,14 @@ let formalProgress = null;
 let formalEnemy = null;
 let formalTimers = [];
 let formalTimerSequence = 0;
+let formalSensitivity = { petDamageMultiplier: 1, wildBondLv6Scale: 1 };
 
 Date.now = () => formalNow;
 setTimeout = (callback, delay = 0) => { const id = ++formalTimerSequence; formalTimers.push({ id, at: formalNow + Math.max(0, Number(delay) || 0), callback }); return id; };
 clearTimeout = (id) => { formalTimers = formalTimers.filter((timer) => timer.id !== id); };
 function runFormalTimers() { for (;;) { const due = formalTimers.filter((timer) => timer.at <= formalNow).sort((a,b)=>a.at-b.at||a.id-b.id)[0]; if (!due) break; formalTimers = formalTimers.filter((timer) => timer.id !== due.id); due.callback(); } }
+getCombatSensitivityDamageMultiplier = (source) => ['pet-basic','pet-bite','beast-slam'].includes(source) ? formalSensitivity.petDamageMultiplier : 1;
+getCombatSensitivityWildBondLv6Scale = () => formalSensitivity.wildBondLv6Scale;
 
 function seedFormalCombat(seed) {
   formalSeed = seed >>> 0;
@@ -84,6 +87,7 @@ function buildFormalSkillLevels(job, advancedClass, requested) {
 function setupFormalCombat(config) {
   seedFormalCombat(config.seed);
   formalTimers=[];formalTimerSequence=0;
+  formalSensitivity={petDamageMultiplier:config.sensitivity?.petDamageMultiplier??1,wildBondLv6Scale:config.sensitivity?.wildBondLv6Scale??1};
   const character = { id: 'formal-' + config.job, name: 'Formal ' + config.job, job: config.job, race: config.race || 'human' };
   const formalEquipment = { ...emptyEquipment(), ...(config.equipment || {}) };
   if (config.job === 'hunter') HunterArrowPolicy.ensureStarterQuiver(formalEquipment);
@@ -288,6 +292,7 @@ function normalizeConfig(input = {}) {
     petStates: input.petStates || [],
     party: input.party || [],
     potions: Math.max(0, Number(input.potions) || 0),
+    sensitivity: { petDamageMultiplier: input.sensitivity?.petDamageMultiplier ?? 1, wildBondLv6Scale: input.sensitivity?.wildBondLv6Scale ?? 1 },
     seconds: input.seconds || 60, maxSeconds: input.maxSeconds || 600, entry: input.entry || 'headless',
     enemy: { hp: mode === 'boss' ? 25000 : 1200, defense: 20, attack: 8, attackSpeed: 1, level: 45, ...(input.enemy || {}) }
   };

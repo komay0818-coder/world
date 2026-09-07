@@ -4652,7 +4652,7 @@ function applyDamageToMonster(index, baseDamage, profile, options = {}) {
   const magicDamageBonus = profile.damageType === 'magic' ? attackerStats.magicDamageBonus : 0;
   const rankMultiplier = enemy.isBoss ? 1 + (attackerStats.bossDamagePercent || 0) : enemy.isElite ? 1 + (attackerStats.eliteDamagePercent || 0) : 1;
   const attackKindMultiplier = options.attackKind === 'skill' ? 1 + (attackerStats.skillDamagePercent || 0) : options.attackKind === 'basic' ? 1 + (attackerStats.basicAttackDamagePercent || 0) : 1;
-  const magicAdjustedDamage = EquipmentPolicy.applyMagicDamageBonus(baseDamage, magicDamageBonus);
+  let magicAdjustedDamage = EquipmentPolicy.applyMagicDamageBonus(baseDamage, magicDamageBonus);
   const markMultiplier = now < skillState.markedUntil && attacker?.job === 'hunter' ? 1 + skillState.markBonus : 1;
   const vulnerabilityMultiplier = profile.damageType === 'magic' && now < skillState.magicVulnerabilityUntil ? 1 + skillState.magicVulnerability : 1;
   const controlledMultiplier = options.controlledBonus && (now < skillState.stunnedUntil || now < skillState.frozenUntil) ? 1 + options.controlledBonus : 1;
@@ -4666,6 +4666,8 @@ function applyDamageToMonster(index, baseDamage, profile, options = {}) {
   const craftedEpicMultiplier = ChapterThreeCraftedEpicAbilityPolicy.getOutgoingDamageMultiplier(attacker, options.attackKind, { execution: options.craftedEpicExecution }, now);
   const specialEquipmentMultiplier = Math.max(0, Number(options.specialEquipmentMultiplier) || 1);
   const deathMarkMultiplier = RogueAdvancementPolicy.getDeathMarkDamageMultiplier(attacker, skillState, now);
+  const sensitivityMultiplier = typeof getCombatSensitivityDamageMultiplier === 'function' ? Math.max(0,Number(getCombatSensitivityDamageMultiplier(options.sourceSkill||options.attackKind||'',attacker))||0) : 1;
+  magicAdjustedDamage *= sensitivityMultiplier;
   const adjustedBaseDamage = magicAdjustedDamage * (1 + warriorRuntime.attack) * (1 + (attackerStats.damageBonus || 0) + warriorAdvancement.damage + warriorRuntime.damage) * rankMultiplier * attackKindMultiplier * conditionalDamageMultiplier * craftedEpicMultiplier * specialEquipmentMultiplier * deathMarkMultiplier * markMultiplier * vulnerabilityMultiplier * controlledMultiplier * statusElementMultiplier * frostResonanceMultiplier * lightningResonanceMultiplier * shockedVulnerabilityMultiplier;
   if (enemy.mapId) {
     const hitChance = ChapterOneLevelPolicy.getPlayerHitChance(progress.level, enemy.level, attackerStats.accuracy, 0);
@@ -5549,7 +5551,9 @@ function ensureHunterCompanions(member, now = Date.now()) {
 function processHunterCompanionAttacks(now = Date.now()) {
   for (const member of battle.partyMembers || []) {
     if (!member.alive) continue;
-    const bond = member.job === 'hunter' && member.level >= 8 ? ClassSkillPolicy.getEffect('hunter', 'wild-bond', Number(member.progress.skillLevels?.['hunter:wild-bond']) || 1) : null;
+    const rawBond = member.job === 'hunter' && member.level >= 8 ? ClassSkillPolicy.getEffect('hunter', 'wild-bond', Number(member.progress.skillLevels?.['hunter:wild-bond']) || 1) : null;
+    const wildBondScale=rawBond&&Number(member.progress.skillLevels?.['hunter:wild-bond'])>=6&&typeof getCombatSensitivityWildBondLv6Scale==='function'?Math.max(0,Number(getCombatSensitivityWildBondLv6Scale(member))||0):1;
+    const bond=rawBond&&wildBondScale!==1?{...rawBond,companionAttack:.4+(rawBond.companionAttack-.4)*wildBondScale,beastSlam:1.8+(rawBond.beastSlam-1.8)*wildBondScale,nextHunterAttack:(rawBond.nextHunterAttack||0)*wildBondScale}:rawBond;
     if (!bond) continue;
     const deadBeforeUpdate = new Set((member.companions || []).filter((pet) => pet.alive === false).map((pet) => pet.id));
     HunterAdvancementPolicy.updatePetSurvival(member, now);
@@ -5580,7 +5584,7 @@ function processHunterCompanionAttacks(now = Date.now()) {
         playCompanionAttackAnimation([targetIndex]);
         pet.attackCount += 1;
         if (critical && bonuses.wildAwakening) { pet.wildAwakeningUntil = now + 6000; pet.wildAwakeningDamage = bonuses.wildAwakening; }
-        if (bloody.bleedTick) applyDot(targetIndex, `pet-bleed:${pet.id}`, Math.max(1, Math.ceil(petAttack * bloody.bleedTick)), 2, 1, { source: member, tickIntervalMs: 2000, now, refreshOnly: true, refreshDuration: true });
+        if (bloody.bleedTick) { const petBleedMultiplier=typeof getCombatSensitivityDamageMultiplier==='function'?Math.max(0,Number(getCombatSensitivityDamageMultiplier('pet-bleed',member))||0):1;applyDot(targetIndex, `pet-bleed:${pet.id}`, Math.max(1, Math.ceil(petAttack * bloody.bleedTick*petBleedMultiplier)), 2, 1, { source: member, tickIntervalMs: 2000, now, refreshOnly: true, refreshDuration: true }); }
         HunterAdvancementPolicy.tryStun(member, getEnemySkillState(targetIndex), true, Math.random, now);
         if (bonuses.biteEvery) {
           pet.furyHitCount += 1;
