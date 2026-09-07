@@ -35,6 +35,10 @@ const beastmasterConfig = {
 };
 const beastmaster = runCombat(beastmasterConfig);
 assert.equal(beastmaster.final.companions.length, 3);
+assert.equal(beastmaster.final.petGuardUsesRemaining, 0);
+assert.equal(beastmaster.combat.petGuardTriggers, 3);
+assert.ok(beastmaster.combat.petGuardAbsorbed > 0);
+assert.equal(beastmaster.combat.petEvents.filter((event) => event.kind === 'pet-guard').length, 3);
 assert.ok(beastmaster.skillCasts['beast-fury'] > 0);
 assert.ok(beastmaster.skillCasts['bloody-hunt'] > 0);
 assert.ok((beastmaster.skillDamage['pet-basic'] || 0) > 0);
@@ -68,15 +72,16 @@ assert.ok(exhaustion.arrows.spent > 0, 'skills must resume after formal arrow re
 assert.ok(exhaustion.arrows.recovered > 0);
 assert.deepEqual(runCombat({ ...exhaustionConfig, entry: 'ui' }), exhaustion, 'arrow exhaustion and recovery must be UI/headless identical');
 
-const petLifecycleConfig = {
+const petGuardConfig = {
   ...marksmanConfig, seconds: 33, seed: 901,
-  petStates: [{ currentHp: 1 }],
+  advancedClass: 'beastmaster',
+  skills: { activeLv6: 'beast-fury', passiveLv6: 'pack-summoning' },
   enemy: { hp: 100000, defense: 10, attack: .05, attackSpeed: 1 }
 };
-const petLifecycle = runCombat(petLifecycleConfig);
-assert.ok(petLifecycle.combat.petEvents.some((event) => event.kind === 'pet-death'));
-assert.ok(petLifecycle.combat.petEvents.some((event) => event.kind === 'pet-revive'));
-assert.equal(petLifecycle.final.companions[0].alive, true);
+const petGuard = runCombat(petGuardConfig);
+assert.equal(petGuard.combat.petGuardTriggers, 3);
+assert.equal(petGuard.final.petGuardUsesRemaining, 0);
+assert.ok(petGuard.combat.petEvents.filter((event) => event.kind === 'pet-guard').every((event, index) => event.usesRemaining === 2 - index));
 
 assert.throws(() => runCombat({
   ...marksmanConfig,
