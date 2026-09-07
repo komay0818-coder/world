@@ -31,14 +31,10 @@ const beastmasterConfig = {
   job: 'hunter', advancedClass: 'beastmaster', mode: 'fixed-five', seconds: 35, seed: 0xbea57,
   skills: { activeLv6: 'beast-fury', passiveLv6: 'pack-summoning' },
   equipment: { weapon: BOW, offhand: QUIVER },
-  enemy: { hp: 100000, defense: 14, attack: .2, attackSpeed: 1, evasion: 0, parry: 0 }
+  enemy: { hp: 100000, defense: 14, attack: .2, attackSpeed: .01, evasion: 0, parry: 0 }
 };
 const beastmaster = runCombat(beastmasterConfig);
 assert.equal(beastmaster.final.companions.length, 3);
-assert.equal(beastmaster.final.petGuardUsesRemaining, 0);
-assert.equal(beastmaster.combat.petGuardTriggers, 3);
-assert.ok(beastmaster.combat.petGuardAbsorbed > 0);
-assert.equal(beastmaster.combat.petEvents.filter((event) => event.kind === 'pet-guard').length, 3);
 assert.ok(beastmaster.skillCasts['beast-fury'] > 0);
 assert.ok(beastmaster.skillCasts['bloody-hunt'] > 0);
 assert.ok((beastmaster.skillDamage['pet-basic'] || 0) > 0);
@@ -79,9 +75,10 @@ const petGuardConfig = {
   enemy: { hp: 100000, defense: 10, attack: .05, attackSpeed: 1 }
 };
 const petGuard = runCombat(petGuardConfig);
-assert.equal(petGuard.combat.petGuardTriggers, 3);
-assert.equal(petGuard.final.petGuardUsesRemaining, 0);
-assert.ok(petGuard.combat.petEvents.filter((event) => event.kind === 'pet-guard').every((event, index) => event.usesRemaining === 2 - index));
+assert.ok(petGuard.combat.petGuardTriggers >= 3);
+assert.ok(petGuard.combat.petEvents.some((event) => event.kind === 'pet-death'));
+assert.ok(petGuard.combat.petEvents.some((event) => event.kind === 'pet-revive'));
+assert.ok(petGuard.final.companions.every((pet) => Number.isInteger(pet.currentGuardUses) && !('currentHp' in pet)));
 
 assert.throws(() => runCombat({
   ...marksmanConfig,

@@ -3714,8 +3714,7 @@ function createBattlePartyMember(slot, slotIndex, mainId, now = Date.now()) {
     lastHpRegenerationAt: now,
     lastResourceUpdatedAt: now,
     lastArrowRecoveryAt: now,
-    companions: [],
-    petGuardUsesRemaining: HunterAdvancementPolicy.getGuardUses({ progress })
+    companions: []
   };
   const mageStats = MageAdvancementPolicy.telemetry(member);
   if (character.job === 'mage') {
@@ -5570,6 +5569,7 @@ function ensureHunterCompanions(member, now = Date.now()) {
   const count = HunterAdvancementPolicy.getPetCount(member);
   member.companions = Array.isArray(member.companions) ? member.companions.slice(0, count) : [];
   while (member.companions.length < count) member.companions.push(HunterAdvancementPolicy.createPet(member, `${member.id}:pet:${member.companions.length + 1}`, now));
+  member.companions.forEach((pet) => HunterAdvancementPolicy.syncPetGuard(member, pet));
   return member.companions;
 }
 
@@ -5580,8 +5580,14 @@ function processHunterCompanionAttacks(now = Date.now()) {
     const wildBondScale=rawBond&&Number(member.progress.skillLevels?.['hunter:wild-bond'])>=6&&typeof getCombatSensitivityWildBondLv6Scale==='function'?Math.max(0,Number(getCombatSensitivityWildBondLv6Scale(member))||0):1;
     const bond=rawBond&&wildBondScale!==1?{...rawBond,companionAttack:.28+(rawBond.companionAttack-.28)*wildBondScale,beastSlam:1.8+(rawBond.beastSlam-1.8)*wildBondScale,nextHunterAttack:(rawBond.nextHunterAttack||0)*wildBondScale}:rawBond;
     if (!bond) continue;
+    const deadBeforeUpdate = new Set((member.companions || []).filter((pet) => pet.alive === false).map((pet) => pet.id));
+    HunterAdvancementPolicy.updatePetSurvival(member, now);
+    (member.companions || []).filter((pet) => deadBeforeUpdate.has(pet.id) && pet.alive !== false).forEach((pet) => {
+      CombatCorePolicy.recordEvent(member, 'petEvents', { atMs: now, petId: pet.id, kind: 'pet-revive', guardUses: pet.currentGuardUses });
+    });
     const bonuses = HunterAdvancementPolicy.getPetBonuses(member, now);
     for (const pet of ensureHunterCompanions(member, now)) {
+      if (pet.alive === false) continue;
       if (now < pet.nextAttackAt) continue;
       const targetIndex = PartyPolicy.getFrontAliveEnemyIndex(battle.enemyHps, battle.enemySpawnedAt);
       if (targetIndex < 0) continue;
@@ -6595,13 +6601,15 @@ function enemyAttackTick() {
     }).finalDamage;
     if (parried && damage > 0) damage = Math.max(1, Math.ceil(damage * .5));
     ensureHunterCompanions(target, now);
-    const guard = HunterAdvancementPolicy.applyGuardDamage(target, damage, now);
+    HunterAdvancementPolicy.updatePetSurvival(target, now);
+    const guard = HunterAdvancementPolicy.applyGuardDamage(target, damage, now, Math.random);
     damage = guard.hunterDamage;
     if (guard.triggered) {
       CombatCorePolicy.record(target, 'petGuardTriggers');
       CombatCorePolicy.record(target, 'petGuardAbsorbed', guard.petDamage);
-      CombatCorePolicy.recordEvent(target, 'petEvents', { atMs: now, kind: 'pet-guard', damage: guard.petDamage, share: guard.share, usesRemaining: guard.usesRemaining });
-      logBattle(`🐾 ${target.name}的戰寵發動護主，承受 ${Math.round(guard.petDamage)} 點傷害（剩餘 ${guard.usesRemaining} 次）。`, 'system');
+      CombatCorePolicy.recordEvent(target, 'petEvents', { atMs: now, petId: guard.petId, kind: 'pet-guard', damage: guard.petDamage, share: guard.share, usesRemaining: guard.petUsesRemaining });
+      if (guard.petDied) CombatCorePolicy.recordEvent(target, 'petEvents', { atMs: now, petId: guard.petId, kind: 'pet-death', reviveAt: guard.reviveAt });
+      logBattle(`🐾 ${target.name}的戰寵發動護主，承受 ${Math.round(guard.petDamage)} 點傷害（該寵物剩餘 ${guard.petUsesRemaining} 次）。`, 'system');
     }
     const absorbed = Math.min(target.shield || 0, damage);
     target.shield = Math.max(0, (target.shield || 0) - absorbed);

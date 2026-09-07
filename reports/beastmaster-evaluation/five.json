@@ -1,0 +1,2012 @@
+{
+  "mode": "five",
+  "seeds": 100,
+  "combinations": 30,
+  "equipment": {
+    "chest": {
+      "id": "baseline-chest",
+      "slot": "chest",
+      "defense": 12
+    },
+    "weapon": {
+      "id": "baseline-bow",
+      "slot": "weapon",
+      "attack": 24,
+      "attackMin": 22,
+      "attackMax": 26,
+      "criticalChance": 0.1,
+      "weaponType": "two-handed-bow"
+    }
+  },
+  "enemy": {
+    "hp": 2500,
+    "defense": 20,
+    "attack": 0.1,
+    "attackSpeed": 1,
+    "level": 45,
+    "evasion": 0,
+    "parry": 0
+  },
+  "results": [
+    {
+      "config": {
+        "activeLv6": "power-shot",
+        "passiveLv6": "hunting-instinct"
+      },
+      "dps": {
+        "mean": 299.01674999999994,
+        "sd": 4.122262474627523
+      },
+      "ttk": {
+        "mean": 0,
+        "sd": 0
+      },
+      "kpm": {
+        "mean": 6.51,
+        "sd": 0.06999999999999997
+      },
+      "totalDamage": {
+        "mean": 35882.01,
+        "sd": 494.67149695530264
+      },
+      "petDamage": {
+        "mean": 394.07,
+        "sd": 56.97109003696524
+      },
+      "petDps": {
+        "mean": 3.2839166666666677,
+        "sd": 0.47475908364137703
+      },
+      "petShare": {
+        "mean": 0.010981203967387108,
+        "sd": 0.0015697328560915183
+      },
+      "basicDamage": {
+        "mean": 19049.57,
+        "sd": 241.43704168996112
+      },
+      "activeSkillDamage": {
+        "mean": 16438.37,
+        "sd": 426.5307879860491
+      },
+      "petAliveRate": {
+        "mean": 0.02271666666666666,
+        "sd": 0.00610312988919984
+      },
+      "zeroPetRate": {
+        "mean": 0.9662916666666668,
+        "sd": 0.006499332230656047
+      },
+      "deaths": {
+        "mean": 8,
+        "sd": 0
+      },
+      "revives": {
+        "mean": 6,
+        "sd": 0
+      },
+      "guardTriggers": {
+        "mean": 24,
+        "sd": 0
+      },
+      "guardAbsorbed": {
+        "mean": 6,
+        "sd": 0
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "power-shot",
+        "passiveLv6": "precision-shot"
+      },
+      "dps": {
+        "mean": 290.9388333333333,
+        "sd": 6.041553357558152
+      },
+      "ttk": {
+        "mean": 0,
+        "sd": 0
+      },
+      "kpm": {
+        "mean": 6.395,
+        "sd": 0.21558061137310094
+      },
+      "totalDamage": {
+        "mean": 34912.66,
+        "sd": 724.9864029069787
+      },
+      "petDamage": {
+        "mean": 428.06,
+        "sd": 65.13383452553673
+      },
+      "petDps": {
+        "mean": 3.5671666666666653,
+        "sd": 0.5427819543794727
+      },
+      "petShare": {
+        "mean": 0.012266812147347634,
+        "sd": 0.0018891671181290818
+      },
+      "basicDamage": {
+        "mean": 17070.76,
+        "sd": 388.774770786377
+      },
+      "activeSkillDamage": {
+        "mean": 17413.84,
+        "sd": 629.2760875800066
+      },
+      "petAliveRate": {
+        "mean": 0.02308333333333334,
+        "sd": 0.0062907008088659445
+      },
+      "zeroPetRate": {
+        "mean": 0.9655333333333337,
+        "sd": 0.006908649972638972
+      },
+      "deaths": {
+        "mean": 8,
+        "sd": 0
+      },
+      "revives": {
+        "mean": 6,
+        "sd": 0
+      },
+      "guardTriggers": {
+        "mean": 24,
+        "sd": 0
+      },
+      "guardAbsorbed": {
+        "mean": 6,
+        "sd": 0
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "piercing-shot",
+        "passiveLv6": "hunting-instinct"
+      },
+      "dps": {
+        "mean": 288.93475000000007,
+        "sd": 4.618697666219821
+      },
+      "ttk": {
+        "mean": 0,
+        "sd": 0
+      },
+      "kpm": {
+        "mean": 6.23,
+        "sd": 0.24919871588754222
+      },
+      "totalDamage": {
+        "mean": 34672.17,
+        "sd": 554.2437199463787
+      },
+      "petDamage": {
+        "mean": 348.91,
+        "sd": 39.90992232515619
+      },
+      "petDps": {
+        "mean": 2.907583333333333,
+        "sd": 0.3325826860429682
+      },
+      "petShare": {
+        "mean": 0.01006707503032465,
+        "sd": 0.0011771571693020711
+      },
+      "basicDamage": {
+        "mean": 17047.44,
+        "sd": 182.71460368563862
+      },
+      "activeSkillDamage": {
+        "mean": 17275.82,
+        "sd": 537.7267778342455
+      },
+      "petAliveRate": {
+        "mean": 0.021954166666666674,
+        "sd": 0.005747793960874611
+      },
+      "zeroPetRate": {
+        "mean": 0.96735,
+        "sd": 0.0071776853279219965
+      },
+      "deaths": {
+        "mean": 8,
+        "sd": 0
+      },
+      "revives": {
+        "mean": 6,
+        "sd": 0
+      },
+      "guardTriggers": {
+        "mean": 24,
+        "sd": 0
+      },
+      "guardAbsorbed": {
+        "mean": 6,
+        "sd": 0
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "multi-shot",
+        "passiveLv6": "hunting-instinct"
+      },
+      "dps": {
+        "mean": 287.7667499999999,
+        "sd": 4.474771020678041
+      },
+      "ttk": {
+        "mean": 0,
+        "sd": 0
+      },
+      "kpm": {
+        "mean": 6.16,
+        "sd": 0.23323807579381178
+      },
+      "totalDamage": {
+        "mean": 34532.01,
+        "sd": 536.9725224813649
+      },
+      "petDamage": {
+        "mean": 347.51,
+        "sd": 41.2457258391703
+      },
+      "petDps": {
+        "mean": 2.8959166666666665,
+        "sd": 0.3437143819930858
+      },
+      "petShare": {
+        "mean": 0.010060887676621687,
+        "sd": 0.0011563610270214307
+      },
+      "basicDamage": {
+        "mean": 17101.4,
+        "sd": 189.97047138963467
+      },
+      "activeSkillDamage": {
+        "mean": 17083.1,
+        "sd": 482.6372032904219
+      },
+      "petAliveRate": {
+        "mean": 0.020725000000000004,
+        "sd": 0.006473133579135636
+      },
+      "zeroPetRate": {
+        "mean": 0.9695583333333334,
+        "sd": 0.007661642375423749
+      },
+      "deaths": {
+        "mean": 8,
+        "sd": 0
+      },
+      "revives": {
+        "mean": 6,
+        "sd": 0
+      },
+      "guardTriggers": {
+        "mean": 24,
+        "sd": 0
+      },
+      "guardAbsorbed": {
+        "mean": 6,
+        "sd": 0
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "piercing-shot",
+        "passiveLv6": "precision-shot"
+      },
+      "dps": {
+        "mean": 284.18016666666676,
+        "sd": 7.508914681526517
+      },
+      "ttk": {
+        "mean": 0,
+        "sd": 0
+      },
+      "kpm": {
+        "mean": 6.1,
+        "sd": 0.2345207879911713
+      },
+      "totalDamage": {
+        "mean": 34101.62,
+        "sd": 901.0697617831819
+      },
+      "petDamage": {
+        "mean": 363,
+        "sd": 42.97953001139031
+      },
+      "petDps": {
+        "mean": 3.025,
+        "sd": 0.3581627500949192
+      },
+      "petShare": {
+        "mean": 0.01065130802358861,
+        "sd": 0.001282932793255074
+      },
+      "basicDamage": {
+        "mean": 15339.19,
+        "sd": 328.26972735846357
+      },
+      "activeSkillDamage": {
+        "mean": 18399.43,
+        "sd": 817.0091217973028
+      },
+      "petAliveRate": {
+        "mean": 0.021816666666666665,
+        "sd": 0.006108259435660319
+      },
+      "zeroPetRate": {
+        "mean": 0.9674333333333336,
+        "sd": 0.007766273237531628
+      },
+      "deaths": {
+        "mean": 8,
+        "sd": 0
+      },
+      "revives": {
+        "mean": 6,
+        "sd": 0
+      },
+      "guardTriggers": {
+        "mean": 24,
+        "sd": 0
+      },
+      "guardAbsorbed": {
+        "mean": 6,
+        "sd": 0
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "multi-shot",
+        "passiveLv6": "precision-shot"
+      },
+      "dps": {
+        "mean": 281.39224999999993,
+        "sd": 8.010671376964744
+      },
+      "ttk": {
+        "mean": 0,
+        "sd": 0
+      },
+      "kpm": {
+        "mean": 6.04,
+        "sd": 0.18275666882497055
+      },
+      "totalDamage": {
+        "mean": 33767.07,
+        "sd": 961.2805652357695
+      },
+      "petDamage": {
+        "mean": 360.72,
+        "sd": 43.64219976124026
+      },
+      "petDps": {
+        "mean": 3.0060000000000002,
+        "sd": 0.36368499801033544
+      },
+      "petShare": {
+        "mean": 0.010686832705546118,
+        "sd": 0.0012920457542193512
+      },
+      "basicDamage": {
+        "mean": 15318.06,
+        "sd": 385.71999740744576
+      },
+      "activeSkillDamage": {
+        "mean": 18088.29,
+        "sd": 828.8365978285466
+      },
+      "petAliveRate": {
+        "mean": 0.02102499999999999,
+        "sd": 0.005395284721145143
+      },
+      "zeroPetRate": {
+        "mean": 0.9683750000000007,
+        "sd": 0.0067908997522010605
+      },
+      "deaths": {
+        "mean": 8,
+        "sd": 0
+      },
+      "revives": {
+        "mean": 6,
+        "sd": 0
+      },
+      "guardTriggers": {
+        "mean": 24,
+        "sd": 0
+      },
+      "guardAbsorbed": {
+        "mean": 6,
+        "sd": 0
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "power-shot",
+        "passiveLv6": "pack-summoning"
+      },
+      "dps": {
+        "mean": 278.01808333333327,
+        "sd": 4.633353875104347
+      },
+      "ttk": {
+        "mean": 0,
+        "sd": 0
+      },
+      "kpm": {
+        "mean": 6.02,
+        "sd": 0.09797958971132704
+      },
+      "totalDamage": {
+        "mean": 33362.17,
+        "sd": 556.0024650125214
+      },
+      "petDamage": {
+        "mean": 721.75,
+        "sd": 90.42149910281293
+      },
+      "petDps": {
+        "mean": 6.0145833333333325,
+        "sd": 0.7535124925234409
+      },
+      "petShare": {
+        "mean": 0.021632624483709794,
+        "sd": 0.0026712811583151064
+      },
+      "basicDamage": {
+        "mean": 16171.59,
+        "sd": 285.37831364699036
+      },
+      "activeSkillDamage": {
+        "mean": 16468.83,
+        "sd": 440.50514310277924
+      },
+      "petAliveRate": {
+        "mean": 0.032133333333333326,
+        "sd": 0.008024353364202019
+      },
+      "zeroPetRate": {
+        "mean": 0.9471333333333334,
+        "sd": 0.010139526616169018
+      },
+      "deaths": {
+        "mean": 12,
+        "sd": 0
+      },
+      "revives": {
+        "mean": 9,
+        "sd": 0
+      },
+      "guardTriggers": {
+        "mean": 36,
+        "sd": 0
+      },
+      "guardAbsorbed": {
+        "mean": 9,
+        "sd": 0
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "power-shot",
+        "passiveLv6": "wild-bond"
+      },
+      "dps": {
+        "mean": 275.11841666666675,
+        "sd": 3.841065443735052
+      },
+      "ttk": {
+        "mean": 0,
+        "sd": 0
+      },
+      "kpm": {
+        "mean": 5.995,
+        "sd": 0.04974937185533099
+      },
+      "totalDamage": {
+        "mean": 33014.21,
+        "sd": 460.9278532482063
+      },
+      "petDamage": {
+        "mean": 433.94,
+        "sd": 51.99438815872345
+      },
+      "petDps": {
+        "mean": 3.616166666666668,
+        "sd": 0.433286567989362
+      },
+      "petShare": {
+        "mean": 0.013145448556684954,
+        "sd": 0.001574034052004703
+      },
+      "basicDamage": {
+        "mean": 16206.45,
+        "sd": 280.5122234413324
+      },
+      "activeSkillDamage": {
+        "mean": 16373.82,
+        "sd": 363.9563265008592
+      },
+      "petAliveRate": {
+        "mean": 0.0213375,
+        "sd": 0.006433499296218538
+      },
+      "zeroPetRate": {
+        "mean": 0.96845,
+        "sd": 0.008637788425800246
+      },
+      "deaths": {
+        "mean": 8,
+        "sd": 0
+      },
+      "revives": {
+        "mean": 6,
+        "sd": 0
+      },
+      "guardTriggers": {
+        "mean": 24,
+        "sd": 0
+      },
+      "guardAbsorbed": {
+        "mean": 6,
+        "sd": 0
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "power-shot",
+        "passiveLv6": "pack-leader"
+      },
+      "dps": {
+        "mean": 274.92574999999994,
+        "sd": 3.9377468344148805
+      },
+      "ttk": {
+        "mean": 0,
+        "sd": 0
+      },
+      "kpm": {
+        "mean": 5.995,
+        "sd": 0.04974937185533099
+      },
+      "totalDamage": {
+        "mean": 32991.09,
+        "sd": 472.5296201297861
+      },
+      "petDamage": {
+        "mean": 412.25,
+        "sd": 49.81232277258309
+      },
+      "petDps": {
+        "mean": 3.4354166666666663,
+        "sd": 0.41510268977152576
+      },
+      "petShare": {
+        "mean": 0.012495634751473916,
+        "sd": 0.0014939866991335647
+      },
+      "basicDamage": {
+        "mean": 16182.15,
+        "sd": 262.8253555119825
+      },
+      "activeSkillDamage": {
+        "mean": 16396.69,
+        "sd": 386.94655173550774
+      },
+      "petAliveRate": {
+        "mean": 0.020895833333333322,
+        "sd": 0.006199623364456191
+      },
+      "zeroPetRate": {
+        "mean": 0.9691249999999999,
+        "sd": 0.008506839568514517
+      },
+      "deaths": {
+        "mean": 8,
+        "sd": 0
+      },
+      "revives": {
+        "mean": 6,
+        "sd": 0
+      },
+      "guardTriggers": {
+        "mean": 24,
+        "sd": 0
+      },
+      "guardAbsorbed": {
+        "mean": 6,
+        "sd": 0
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "power-shot",
+        "passiveLv6": "quick-reload"
+      },
+      "dps": {
+        "mean": 274.57033333333334,
+        "sd": 3.7813995278056622
+      },
+      "ttk": {
+        "mean": 0,
+        "sd": 0
+      },
+      "kpm": {
+        "mean": 6,
+        "sd": 0
+      },
+      "totalDamage": {
+        "mean": 32948.44,
+        "sd": 453.7679433366795
+      },
+      "petDamage": {
+        "mean": 395.53,
+        "sd": 46.80949796782701
+      },
+      "petDps": {
+        "mean": 3.2960833333333337,
+        "sd": 0.3900791497318917
+      },
+      "petShare": {
+        "mean": 0.01200570330433134,
+        "sd": 0.0014199464478289508
+      },
+      "basicDamage": {
+        "mean": 16169.97,
+        "sd": 267.16865291422204
+      },
+      "activeSkillDamage": {
+        "mean": 16382.94,
+        "sd": 392.5508074122381
+      },
+      "petAliveRate": {
+        "mean": 0.01988333333333332,
+        "sd": 0.00551798826062945
+      },
+      "zeroPetRate": {
+        "mean": 0.9701083333333334,
+        "sd": 0.00804212433930792
+      },
+      "deaths": {
+        "mean": 8,
+        "sd": 0
+      },
+      "revives": {
+        "mean": 6,
+        "sd": 0
+      },
+      "guardTriggers": {
+        "mean": 24,
+        "sd": 0
+      },
+      "guardAbsorbed": {
+        "mean": 6,
+        "sd": 0
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "bloody-hunt",
+        "passiveLv6": "hunting-instinct"
+      },
+      "dps": {
+        "mean": 270.6602500000001,
+        "sd": 3.4823953791017015
+      },
+      "ttk": {
+        "mean": 0,
+        "sd": 0
+      },
+      "kpm": {
+        "mean": 5.985,
+        "sd": 0.08529361054616
+      },
+      "totalDamage": {
+        "mean": 32479.23,
+        "sd": 417.88744549220434
+      },
+      "petDamage": {
+        "mean": 353.2,
+        "sd": 48.68202953862953
+      },
+      "petDps": {
+        "mean": 2.943333333333332,
+        "sd": 0.4056835794885797
+      },
+      "petShare": {
+        "mean": 0.010877646279180659,
+        "sd": 0.0015199899701312189
+      },
+      "basicDamage": {
+        "mean": 17050.22,
+        "sd": 196.1650111513264
+      },
+      "activeSkillDamage": {
+        "mean": 15075.81,
+        "sd": 397.62861302979695
+      },
+      "petAliveRate": {
+        "mean": 0.021149999999999988,
+        "sd": 0.006370265126176284
+      },
+      "zeroPetRate": {
+        "mean": 0.9689833333333339,
+        "sd": 0.008013512893162943
+      },
+      "deaths": {
+        "mean": 8,
+        "sd": 0
+      },
+      "revives": {
+        "mean": 6,
+        "sd": 0
+      },
+      "guardTriggers": {
+        "mean": 24,
+        "sd": 0
+      },
+      "guardAbsorbed": {
+        "mean": 6,
+        "sd": 0
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "beast-fury",
+        "passiveLv6": "hunting-instinct"
+      },
+      "dps": {
+        "mean": 270.4784166666667,
+        "sd": 3.379879208681542
+      },
+      "ttk": {
+        "mean": 0,
+        "sd": 0
+      },
+      "kpm": {
+        "mean": 5.985,
+        "sd": 0.08529361054616
+      },
+      "totalDamage": {
+        "mean": 32457.41,
+        "sd": 405.5855050417852
+      },
+      "petDamage": {
+        "mean": 346.59,
+        "sd": 44.95488738724632
+      },
+      "petDps": {
+        "mean": 2.8882499999999998,
+        "sd": 0.3746240615603862
+      },
+      "petShare": {
+        "mean": 0.010681381678956992,
+        "sd": 0.001408032422044774
+      },
+      "basicDamage": {
+        "mean": 17044.54,
+        "sd": 194.87536632422274
+      },
+      "activeSkillDamage": {
+        "mean": 15066.28,
+        "sd": 391.24682950792067
+      },
+      "petAliveRate": {
+        "mean": 0.02112083333333332,
+        "sd": 0.006364423415885105
+      },
+      "zeroPetRate": {
+        "mean": 0.969041666666667,
+        "sd": 0.007999457446880026
+      },
+      "deaths": {
+        "mean": 8,
+        "sd": 0
+      },
+      "revives": {
+        "mean": 6,
+        "sd": 0
+      },
+      "guardTriggers": {
+        "mean": 24,
+        "sd": 0
+      },
+      "guardAbsorbed": {
+        "mean": 6,
+        "sd": 0
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "piercing-shot",
+        "passiveLv6": "pack-summoning"
+      },
+      "dps": {
+        "mean": 270.09475000000015,
+        "sd": 4.41957336034826
+      },
+      "ttk": {
+        "mean": 0,
+        "sd": 0
+      },
+      "kpm": {
+        "mean": 5.905,
+        "sd": 0.19615045245933022
+      },
+      "totalDamage": {
+        "mean": 32411.37,
+        "sd": 530.3488032417911
+      },
+      "petDamage": {
+        "mean": 634.64,
+        "sd": 89.12828058478408
+      },
+      "petDps": {
+        "mean": 5.288666666666666,
+        "sd": 0.7427356715398675
+      },
+      "petShare": {
+        "mean": 0.01958570964230514,
+        "sd": 0.0027757891531322554
+      },
+      "basicDamage": {
+        "mean": 14451.96,
+        "sd": 263.4093362050784
+      },
+      "activeSkillDamage": {
+        "mean": 17324.77,
+        "sd": 463.82718452026927
+      },
+      "petAliveRate": {
+        "mean": 0.03258055555555554,
+        "sd": 0.008025450931525341
+      },
+      "zeroPetRate": {
+        "mean": 0.9475500000000001,
+        "sd": 0.010235301113738127
+      },
+      "deaths": {
+        "mean": 12,
+        "sd": 0
+      },
+      "revives": {
+        "mean": 9,
+        "sd": 0
+      },
+      "guardTriggers": {
+        "mean": 36,
+        "sd": 0
+      },
+      "guardAbsorbed": {
+        "mean": 9,
+        "sd": 0
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "piercing-shot",
+        "passiveLv6": "pack-leader"
+      },
+      "dps": {
+        "mean": 268.5659166666667,
+        "sd": 4.367125945153557
+      },
+      "ttk": {
+        "mean": 0,
+        "sd": 0
+      },
+      "kpm": {
+        "mean": 5.81,
+        "sd": 0.2426932219902321
+      },
+      "totalDamage": {
+        "mean": 32227.91,
+        "sd": 524.0551134184267
+      },
+      "petDamage": {
+        "mean": 358.68,
+        "sd": 53.69150398340505
+      },
+      "petDps": {
+        "mean": 2.9890000000000017,
+        "sd": 0.44742919986170876
+      },
+      "petShare": {
+        "mean": 0.011125197502532342,
+        "sd": 0.0016168256419305943
+      },
+      "basicDamage": {
+        "mean": 14442.47,
+        "sd": 274.07106578404074
+      },
+      "activeSkillDamage": {
+        "mean": 17426.76,
+        "sd": 420.91510117837305
+      },
+      "petAliveRate": {
+        "mean": 0.02175416666666666,
+        "sd": 0.006174627462896491
+      },
+      "zeroPetRate": {
+        "mean": 0.9678083333333336,
+        "sd": 0.0074978283893108325
+      },
+      "deaths": {
+        "mean": 8,
+        "sd": 0
+      },
+      "revives": {
+        "mean": 6,
+        "sd": 0
+      },
+      "guardTriggers": {
+        "mean": 24,
+        "sd": 0
+      },
+      "guardAbsorbed": {
+        "mean": 6,
+        "sd": 0
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "piercing-shot",
+        "passiveLv6": "wild-bond"
+      },
+      "dps": {
+        "mean": 268.4614166666667,
+        "sd": 4.43626495410898
+      },
+      "ttk": {
+        "mean": 0,
+        "sd": 0
+      },
+      "kpm": {
+        "mean": 5.81,
+        "sd": 0.2426932219902321
+      },
+      "totalDamage": {
+        "mean": 32215.37,
+        "sd": 532.3517944930778
+      },
+      "petDamage": {
+        "mean": 366.43,
+        "sd": 54.398392439482976
+      },
+      "petDps": {
+        "mean": 3.0535833333333318,
+        "sd": 0.4533199369956915
+      },
+      "petShare": {
+        "mean": 0.011369304308319532,
+        "sd": 0.0016321647513960634
+      },
+      "basicDamage": {
+        "mean": 14435.49,
+        "sd": 273.8595075946789
+      },
+      "activeSkillDamage": {
+        "mean": 17413.45,
+        "sd": 423.25959823729926
+      },
+      "petAliveRate": {
+        "mean": 0.021758333333333334,
+        "sd": 0.006067496509178137
+      },
+      "zeroPetRate": {
+        "mean": 0.9677416666666668,
+        "sd": 0.007309901010121662
+      },
+      "deaths": {
+        "mean": 8,
+        "sd": 0
+      },
+      "revives": {
+        "mean": 6,
+        "sd": 0
+      },
+      "guardTriggers": {
+        "mean": 24,
+        "sd": 0
+      },
+      "guardAbsorbed": {
+        "mean": 6,
+        "sd": 0
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "piercing-shot",
+        "passiveLv6": "quick-reload"
+      },
+      "dps": {
+        "mean": 268.07449999999994,
+        "sd": 4.849197215920269
+      },
+      "ttk": {
+        "mean": 0,
+        "sd": 0
+      },
+      "kpm": {
+        "mean": 5.8,
+        "sd": 0.24494897427831774
+      },
+      "totalDamage": {
+        "mean": 32168.94,
+        "sd": 581.9036659104322
+      },
+      "petDamage": {
+        "mean": 334.9,
+        "sd": 41.2483939081269
+      },
+      "petDps": {
+        "mean": 2.790833333333333,
+        "sd": 0.3437366159010575
+      },
+      "petShare": {
+        "mean": 0.010411130410261324,
+        "sd": 0.001260943625122894
+      },
+      "basicDamage": {
+        "mean": 14403.19,
+        "sd": 271.1627074285843
+      },
+      "activeSkillDamage": {
+        "mean": 17430.85,
+        "sd": 476.22942737718347
+      },
+      "petAliveRate": {
+        "mean": 0.02042083333333333,
+        "sd": 0.0050050304555627955
+      },
+      "zeroPetRate": {
+        "mean": 0.9688083333333332,
+        "sd": 0.0070002529716194275
+      },
+      "deaths": {
+        "mean": 8,
+        "sd": 0
+      },
+      "revives": {
+        "mean": 6,
+        "sd": 0
+      },
+      "guardTriggers": {
+        "mean": 24,
+        "sd": 0
+      },
+      "guardAbsorbed": {
+        "mean": 6,
+        "sd": 0
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "multi-shot",
+        "passiveLv6": "pack-summoning"
+      },
+      "dps": {
+        "mean": 267.7729166666667,
+        "sd": 5.432601864745229
+      },
+      "ttk": {
+        "mean": 0,
+        "sd": 0
+      },
+      "kpm": {
+        "mean": 5.755,
+        "sd": 0.24994999499899997
+      },
+      "totalDamage": {
+        "mean": 32132.75,
+        "sd": 651.9122237694274
+      },
+      "petDamage": {
+        "mean": 633.04,
+        "sd": 88.76000450653436
+      },
+      "petDps": {
+        "mean": 5.275333333333334,
+        "sd": 0.7396667042211198
+      },
+      "petShare": {
+        "mean": 0.019684213007485327,
+        "sd": 0.0026079440572707685
+      },
+      "basicDamage": {
+        "mean": 14428.62,
+        "sd": 254.2513630248617
+      },
+      "activeSkillDamage": {
+        "mean": 17071.09,
+        "sd": 571.8723125838495
+      },
+      "petAliveRate": {
+        "mean": 0.032811111111111096,
+        "sd": 0.00739309404148039
+      },
+      "zeroPetRate": {
+        "mean": 0.9456166666666665,
+        "sd": 0.009111668343393543
+      },
+      "deaths": {
+        "mean": 12,
+        "sd": 0
+      },
+      "revives": {
+        "mean": 9,
+        "sd": 0
+      },
+      "guardTriggers": {
+        "mean": 36,
+        "sd": 0
+      },
+      "guardAbsorbed": {
+        "mean": 9,
+        "sd": 0
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "multi-shot",
+        "passiveLv6": "wild-bond"
+      },
+      "dps": {
+        "mean": 264.9755,
+        "sd": 4.5348428583579405
+      },
+      "ttk": {
+        "mean": 0,
+        "sd": 0
+      },
+      "kpm": {
+        "mean": 5.62,
+        "sd": 0.21354156504062646
+      },
+      "totalDamage": {
+        "mean": 31797.06,
+        "sd": 544.1811430029526
+      },
+      "petDamage": {
+        "mean": 357.67,
+        "sd": 50.34978748713841
+      },
+      "petDps": {
+        "mean": 2.9805833333333336,
+        "sd": 0.41958156239282035
+      },
+      "petShare": {
+        "mean": 0.011250559110142111,
+        "sd": 0.0015888843611957847
+      },
+      "basicDamage": {
+        "mean": 14414.19,
+        "sd": 246.03246513417693
+      },
+      "activeSkillDamage": {
+        "mean": 17025.2,
+        "sd": 500.65766747349414
+      },
+      "petAliveRate": {
+        "mean": 0.021033333333333317,
+        "sd": 0.005694929518635174
+      },
+      "zeroPetRate": {
+        "mean": 0.9686833333333333,
+        "sd": 0.006723900157894473
+      },
+      "deaths": {
+        "mean": 8,
+        "sd": 0
+      },
+      "revives": {
+        "mean": 6,
+        "sd": 0
+      },
+      "guardTriggers": {
+        "mean": 24,
+        "sd": 0
+      },
+      "guardAbsorbed": {
+        "mean": 6,
+        "sd": 0
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "multi-shot",
+        "passiveLv6": "pack-leader"
+      },
+      "dps": {
+        "mean": 264.90958333333344,
+        "sd": 4.933664456089182
+      },
+      "ttk": {
+        "mean": 0,
+        "sd": 0
+      },
+      "kpm": {
+        "mean": 5.615,
+        "sd": 0.21041625412500847
+      },
+      "totalDamage": {
+        "mean": 31789.15,
+        "sd": 592.0397347307021
+      },
+      "petDamage": {
+        "mean": 347.39,
+        "sd": 46.55596524614219
+      },
+      "petDps": {
+        "mean": 2.8949166666666675,
+        "sd": 0.38796637705118503
+      },
+      "petShare": {
+        "mean": 0.010928731848898367,
+        "sd": 0.0014575359171284373
+      },
+      "basicDamage": {
+        "mean": 14417.33,
+        "sd": 253.79271285834827
+      },
+      "activeSkillDamage": {
+        "mean": 17024.43,
+        "sd": 513.098747903364
+      },
+      "petAliveRate": {
+        "mean": 0.02092083333333332,
+        "sd": 0.0053555186360530116
+      },
+      "zeroPetRate": {
+        "mean": 0.9686499999999999,
+        "sd": 0.006645570788962457
+      },
+      "deaths": {
+        "mean": 8,
+        "sd": 0
+      },
+      "revives": {
+        "mean": 6,
+        "sd": 0
+      },
+      "guardTriggers": {
+        "mean": 24,
+        "sd": 0
+      },
+      "guardAbsorbed": {
+        "mean": 6,
+        "sd": 0
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "multi-shot",
+        "passiveLv6": "quick-reload"
+      },
+      "dps": {
+        "mean": 264.6259166666666,
+        "sd": 4.199856957716274
+      },
+      "ttk": {
+        "mean": 0,
+        "sd": 0
+      },
+      "kpm": {
+        "mean": 5.61,
+        "sd": 0.20712315177207993
+      },
+      "totalDamage": {
+        "mean": 31755.11,
+        "sd": 503.9828349259526
+      },
+      "petDamage": {
+        "mean": 329.42,
+        "sd": 44.61618092127564
+      },
+      "petDps": {
+        "mean": 2.7451666666666665,
+        "sd": 0.371801507677297
+      },
+      "petShare": {
+        "mean": 0.010372741334199347,
+        "sd": 0.0013815823569365247
+      },
+      "basicDamage": {
+        "mean": 14450.23,
+        "sd": 238.99488927590062
+      },
+      "activeSkillDamage": {
+        "mean": 16975.46,
+        "sd": 458.0118430783204
+      },
+      "petAliveRate": {
+        "mean": 0.02010833333333333,
+        "sd": 0.005154764516660508
+      },
+      "zeroPetRate": {
+        "mean": 0.9700583333333331,
+        "sd": 0.006549231295011312
+      },
+      "deaths": {
+        "mean": 8,
+        "sd": 0
+      },
+      "revives": {
+        "mean": 6,
+        "sd": 0
+      },
+      "guardTriggers": {
+        "mean": 24,
+        "sd": 0
+      },
+      "guardAbsorbed": {
+        "mean": 6,
+        "sd": 0
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "beast-fury",
+        "passiveLv6": "precision-shot"
+      },
+      "dps": {
+        "mean": 264.05833333333334,
+        "sd": 5.901113830832653
+      },
+      "ttk": {
+        "mean": 0,
+        "sd": 0
+      },
+      "kpm": {
+        "mean": 5.745,
+        "sd": 0.24994999499899995
+      },
+      "totalDamage": {
+        "mean": 31687,
+        "sd": 708.1336596999186
+      },
+      "petDamage": {
+        "mean": 361.23,
+        "sd": 51.971502768344116
+      },
+      "petDps": {
+        "mean": 3.0102500000000005,
+        "sd": 0.4330958564028675
+      },
+      "petShare": {
+        "mean": 0.011399546024777205,
+        "sd": 0.0016175255388418
+      },
+      "basicDamage": {
+        "mean": 15307.46,
+        "sd": 336.3984369761547
+      },
+      "activeSkillDamage": {
+        "mean": 16018.31,
+        "sd": 611.4415703074171
+      },
+      "petAliveRate": {
+        "mean": 0.02088333333333333,
+        "sd": 0.005818516897705882
+      },
+      "zeroPetRate": {
+        "mean": 0.9692583333333331,
+        "sd": 0.00764389280551619
+      },
+      "deaths": {
+        "mean": 8,
+        "sd": 0
+      },
+      "revives": {
+        "mean": 6,
+        "sd": 0
+      },
+      "guardTriggers": {
+        "mean": 24,
+        "sd": 0
+      },
+      "guardAbsorbed": {
+        "mean": 6,
+        "sd": 0
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "bloody-hunt",
+        "passiveLv6": "precision-shot"
+      },
+      "dps": {
+        "mean": 263.95300000000003,
+        "sd": 5.851081514462851
+      },
+      "ttk": {
+        "mean": 0,
+        "sd": 0
+      },
+      "kpm": {
+        "mean": 5.745,
+        "sd": 0.24994999499899995
+      },
+      "totalDamage": {
+        "mean": 31674.36,
+        "sd": 702.1297817355421
+      },
+      "petDamage": {
+        "mean": 367,
+        "sd": 55.02453997990351
+      },
+      "petDps": {
+        "mean": 3.058333333333332,
+        "sd": 0.45853783316586255
+      },
+      "petShare": {
+        "mean": 0.011585837230369546,
+        "sd": 0.001711929016379617
+      },
+      "basicDamage": {
+        "mean": 15307.14,
+        "sd": 337.10087570340136
+      },
+      "activeSkillDamage": {
+        "mean": 16000.22,
+        "sd": 608.0499745909048
+      },
+      "petAliveRate": {
+        "mean": 0.02088333333333333,
+        "sd": 0.005847387830856137
+      },
+      "zeroPetRate": {
+        "mean": 0.9692916666666664,
+        "sd": 0.007657943406830723
+      },
+      "deaths": {
+        "mean": 8,
+        "sd": 0
+      },
+      "revives": {
+        "mean": 6,
+        "sd": 0
+      },
+      "guardTriggers": {
+        "mean": 24,
+        "sd": 0
+      },
+      "guardAbsorbed": {
+        "mean": 6,
+        "sd": 0
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "bloody-hunt",
+        "passiveLv6": "pack-summoning"
+      },
+      "dps": {
+        "mean": 251.65308333333337,
+        "sd": 4.6511095831174165
+      },
+      "ttk": {
+        "mean": 0,
+        "sd": 0
+      },
+      "kpm": {
+        "mean": 5.5,
+        "sd": 0.07071067811865475
+      },
+      "totalDamage": {
+        "mean": 30198.37,
+        "sd": 558.13314997409
+      },
+      "petDamage": {
+        "mean": 632.52,
+        "sd": 101.85248941483952
+      },
+      "petDps": {
+        "mean": 5.271,
+        "sd": 0.8487707451236627
+      },
+      "petShare": {
+        "mean": 0.020932463302970616,
+        "sd": 0.0032649450506677126
+      },
+      "basicDamage": {
+        "mean": 14456.25,
+        "sd": 280.53011870385683
+      },
+      "activeSkillDamage": {
+        "mean": 15109.6,
+        "sd": 440.72912315843166
+      },
+      "petAliveRate": {
+        "mean": 0.03290277777777776,
+        "sd": 0.00803804370509008
+      },
+      "zeroPetRate": {
+        "mean": 0.945616666666667,
+        "sd": 0.008874604842533053
+      },
+      "deaths": {
+        "mean": 12,
+        "sd": 0
+      },
+      "revives": {
+        "mean": 9,
+        "sd": 0
+      },
+      "guardTriggers": {
+        "mean": 36,
+        "sd": 0
+      },
+      "guardAbsorbed": {
+        "mean": 9,
+        "sd": 0
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "beast-fury",
+        "passiveLv6": "pack-summoning"
+      },
+      "dps": {
+        "mean": 251.52391666666665,
+        "sd": 4.581173681340964
+      },
+      "ttk": {
+        "mean": 0,
+        "sd": 0
+      },
+      "kpm": {
+        "mean": 5.495,
+        "sd": 0.08645808232895316
+      },
+      "totalDamage": {
+        "mean": 30182.87,
+        "sd": 549.7408417609156
+      },
+      "petDamage": {
+        "mean": 618.6,
+        "sd": 96.93760880071267
+      },
+      "petDps": {
+        "mean": 5.155,
+        "sd": 0.8078134066726051
+      },
+      "petShare": {
+        "mean": 0.020483616146294223,
+        "sd": 0.0031117820585150175
+      },
+      "basicDamage": {
+        "mean": 14459.89,
+        "sd": 270.56252124047046
+      },
+      "activeSkillDamage": {
+        "mean": 15104.38,
+        "sd": 449.1975017739969
+      },
+      "petAliveRate": {
+        "mean": 0.03292499999999999,
+        "sd": 0.008079987375463796
+      },
+      "zeroPetRate": {
+        "mean": 0.9456333333333338,
+        "sd": 0.009173573155779838
+      },
+      "deaths": {
+        "mean": 12,
+        "sd": 0
+      },
+      "revives": {
+        "mean": 9,
+        "sd": 0
+      },
+      "guardTriggers": {
+        "mean": 36,
+        "sd": 0
+      },
+      "guardAbsorbed": {
+        "mean": 9,
+        "sd": 0
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "beast-fury",
+        "passiveLv6": "pack-leader"
+      },
+      "dps": {
+        "mean": 249.3245,
+        "sd": 4.06739659091387
+      },
+      "ttk": {
+        "mean": 0,
+        "sd": 0
+      },
+      "kpm": {
+        "mean": 5.485,
+        "sd": 0.08529361054615996
+      },
+      "totalDamage": {
+        "mean": 29918.94,
+        "sd": 488.0875909096645
+      },
+      "petDamage": {
+        "mean": 341.72,
+        "sd": 38.45050844917399
+      },
+      "petDps": {
+        "mean": 2.847666666666667,
+        "sd": 0.3204209037431165
+      },
+      "petShare": {
+        "mean": 0.0114260368836816,
+        "sd": 0.0013140026219652828
+      },
+      "basicDamage": {
+        "mean": 14437.87,
+        "sd": 236.91769266983837
+      },
+      "activeSkillDamage": {
+        "mean": 15139.35,
+        "sd": 435.222825113757
+      },
+      "petAliveRate": {
+        "mean": 0.01990833333333332,
+        "sd": 0.004923223029682894
+      },
+      "zeroPetRate": {
+        "mean": 0.9704749999999999,
+        "sd": 0.007101696784728434
+      },
+      "deaths": {
+        "mean": 8,
+        "sd": 0
+      },
+      "revives": {
+        "mean": 6,
+        "sd": 0
+      },
+      "guardTriggers": {
+        "mean": 24,
+        "sd": 0
+      },
+      "guardAbsorbed": {
+        "mean": 6,
+        "sd": 0
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "bloody-hunt",
+        "passiveLv6": "wild-bond"
+      },
+      "dps": {
+        "mean": 249.22058333333322,
+        "sd": 4.060022826803646
+      },
+      "ttk": {
+        "mean": 0,
+        "sd": 0
+      },
+      "kpm": {
+        "mean": 5.48,
+        "sd": 0.09797958971132703
+      },
+      "totalDamage": {
+        "mean": 29906.47,
+        "sd": 487.20273921643746
+      },
+      "petDamage": {
+        "mean": 357.06,
+        "sd": 42.238328565415564
+      },
+      "petDps": {
+        "mean": 2.975499999999999,
+        "sd": 0.35198607137846305
+      },
+      "petShare": {
+        "mean": 0.011945057450142833,
+        "sd": 0.0014512877351017495
+      },
+      "basicDamage": {
+        "mean": 14426.92,
+        "sd": 227.5203146973914
+      },
+      "activeSkillDamage": {
+        "mean": 15122.49,
+        "sd": 436.906637509663
+      },
+      "petAliveRate": {
+        "mean": 0.020158333333333323,
+        "sd": 0.005199085122510603
+      },
+      "zeroPetRate": {
+        "mean": 0.9700416666666666,
+        "sd": 0.007304274813802911
+      },
+      "deaths": {
+        "mean": 8,
+        "sd": 0
+      },
+      "revives": {
+        "mean": 6,
+        "sd": 0
+      },
+      "guardTriggers": {
+        "mean": 24,
+        "sd": 0
+      },
+      "guardAbsorbed": {
+        "mean": 6,
+        "sd": 0
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "beast-fury",
+        "passiveLv6": "wild-bond"
+      },
+      "dps": {
+        "mean": 249.20125000000004,
+        "sd": 4.115424302243938
+      },
+      "ttk": {
+        "mean": 0,
+        "sd": 0
+      },
+      "kpm": {
+        "mean": 5.485,
+        "sd": 0.0852936105461599
+      },
+      "totalDamage": {
+        "mean": 29904.15,
+        "sd": 493.8509162692725
+      },
+      "petDamage": {
+        "mean": 349.56,
+        "sd": 39.76840957342901
+      },
+      "petDps": {
+        "mean": 2.9130000000000007,
+        "sd": 0.33140341311190835
+      },
+      "petShare": {
+        "mean": 0.011695702111577395,
+        "sd": 0.001376226620489597
+      },
+      "basicDamage": {
+        "mean": 14426.86,
+        "sd": 233.12344455245173
+      },
+      "activeSkillDamage": {
+        "mean": 15127.73,
+        "sd": 440.8998946472998
+      },
+      "petAliveRate": {
+        "mean": 0.020137499999999985,
+        "sd": 0.0051921598882888375
+      },
+      "zeroPetRate": {
+        "mean": 0.9700833333333333,
+        "sd": 0.0073015409332551125
+      },
+      "deaths": {
+        "mean": 8,
+        "sd": 0
+      },
+      "revives": {
+        "mean": 6,
+        "sd": 0
+      },
+      "guardTriggers": {
+        "mean": 24,
+        "sd": 0
+      },
+      "guardAbsorbed": {
+        "mean": 6,
+        "sd": 0
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "bloody-hunt",
+        "passiveLv6": "pack-leader"
+      },
+      "dps": {
+        "mean": 249.17050000000003,
+        "sd": 4.0973255877733505
+      },
+      "ttk": {
+        "mean": 0,
+        "sd": 0
+      },
+      "kpm": {
+        "mean": 5.485,
+        "sd": 0.08529361054615996
+      },
+      "totalDamage": {
+        "mean": 29900.46,
+        "sd": 491.6790705328019
+      },
+      "petDamage": {
+        "mean": 346.91,
+        "sd": 40.07021212821314
+      },
+      "petDps": {
+        "mean": 2.8909166666666675,
+        "sd": 0.33391843440177627
+      },
+      "petShare": {
+        "mean": 0.011606936108938481,
+        "sd": 0.0013678205115371682
+      },
+      "basicDamage": {
+        "mean": 14432.05,
+        "sd": 230.65855175995534
+      },
+      "activeSkillDamage": {
+        "mean": 15121.5,
+        "sd": 445.35788979201885
+      },
+      "petAliveRate": {
+        "mean": 0.019895833333333324,
+        "sd": 0.004914680036493843
+      },
+      "zeroPetRate": {
+        "mean": 0.9704999999999999,
+        "sd": 0.007071067811865478
+      },
+      "deaths": {
+        "mean": 8,
+        "sd": 0
+      },
+      "revives": {
+        "mean": 6,
+        "sd": 0
+      },
+      "guardTriggers": {
+        "mean": 24,
+        "sd": 0
+      },
+      "guardAbsorbed": {
+        "mean": 6,
+        "sd": 0
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "bloody-hunt",
+        "passiveLv6": "quick-reload"
+      },
+      "dps": {
+        "mean": 248.73841666666667,
+        "sd": 4.149280207825879
+      },
+      "ttk": {
+        "mean": 0,
+        "sd": 0
+      },
+      "kpm": {
+        "mean": 5.47,
+        "sd": 0.11874342087037928
+      },
+      "totalDamage": {
+        "mean": 29848.61,
+        "sd": 497.91362493910526
+      },
+      "petDamage": {
+        "mean": 332.27,
+        "sd": 35.34652882533163
+      },
+      "petDps": {
+        "mean": 2.7689166666666654,
+        "sd": 0.2945544068777636
+      },
+      "petShare": {
+        "mean": 0.011137442138877155,
+        "sd": 0.0012177824683657914
+      },
+      "basicDamage": {
+        "mean": 14397.09,
+        "sd": 242.5711893444892
+      },
+      "activeSkillDamage": {
+        "mean": 15119.25,
+        "sd": 426.9215940895939
+      },
+      "petAliveRate": {
+        "mean": 0.019358333333333314,
+        "sd": 0.004632096657502348
+      },
+      "zeroPetRate": {
+        "mean": 0.970866666666667,
+        "sd": 0.006892951311142258
+      },
+      "deaths": {
+        "mean": 8,
+        "sd": 0
+      },
+      "revives": {
+        "mean": 6,
+        "sd": 0
+      },
+      "guardTriggers": {
+        "mean": 24,
+        "sd": 0
+      },
+      "guardAbsorbed": {
+        "mean": 6,
+        "sd": 0
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "beast-fury",
+        "passiveLv6": "quick-reload"
+      },
+      "dps": {
+        "mean": 248.65191666666672,
+        "sd": 4.112472028780258
+      },
+      "ttk": {
+        "mean": 0,
+        "sd": 0
+      },
+      "kpm": {
+        "mean": 5.47,
+        "sd": 0.11874342087037928
+      },
+      "totalDamage": {
+        "mean": 29838.23,
+        "sd": 493.4966434536308
+      },
+      "petDamage": {
+        "mean": 327.64,
+        "sd": 33.67358608761472
+      },
+      "petDps": {
+        "mean": 2.7303333333333337,
+        "sd": 0.2806132173967894
+      },
+      "petShare": {
+        "mean": 0.010986154892035875,
+        "sd": 0.0011650304588262834
+      },
+      "basicDamage": {
+        "mean": 14394.47,
+        "sd": 242.60500633746207
+      },
+      "activeSkillDamage": {
+        "mean": 15116.12,
+        "sd": 426.3807753639931
+      },
+      "petAliveRate": {
+        "mean": 0.019412499999999985,
+        "sd": 0.004590560589707729
+      },
+      "zeroPetRate": {
+        "mean": 0.9707583333333336,
+        "sd": 0.006800832261160723
+      },
+      "deaths": {
+        "mean": 8,
+        "sd": 0
+      },
+      "revives": {
+        "mean": 6,
+        "sd": 0
+      },
+      "guardTriggers": {
+        "mean": 24,
+        "sd": 0
+      },
+      "guardAbsorbed": {
+        "mean": 6,
+        "sd": 0
+      }
+    }
+  ]
+}

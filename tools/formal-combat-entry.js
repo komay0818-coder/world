@@ -207,7 +207,6 @@ function formalSnapshot(member, duration, cycle, resourceMonitor, dotMonitor, pa
       cooldowns: { ...member.skillCooldowns }, enemyHps: [...battle.enemyHps],
       enemyRespawns: [...battle.enemyRespawns], enemySkillStates: JSON.parse(JSON.stringify(battle.enemySkillStates)),
       companions: JSON.parse(JSON.stringify(member.companions || [])),
-      petGuardUsesRemaining: member.petGuardUsesRemaining || 0,
       hunterState: {
         galeUntil: member.galeUntil || 0, galeHitCount: member.galeHitCount || 0,
         beastFuryUntil: member.beastFuryUntil || 0, bloodyHuntUntil: member.bloodyHuntUntil || 0,
