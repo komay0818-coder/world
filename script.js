@@ -1015,6 +1015,13 @@ function getProgress() {
     saved.equipmentAffixMigrationVersion = 'green-affix-v1';
     localStorage.setItem('stardust-progress', JSON.stringify(saved));
   }
+  if (saved.offhandAffixMigrationVersion !== 'unified-offhand-affixes-v1') {
+    saved.inventory = (Array.isArray(saved.inventory) ? saved.inventory : []).map((item) => EquipmentDropPolicy.migrateLegacyOffhand(item));
+    saved.equipment = Object.fromEntries(Object.entries({ ...emptyEquipment(), ...(saved.equipment || {}) })
+      .map(([slot, item]) => [slot, EquipmentDropPolicy.migrateLegacyOffhand(item)]));
+    saved.offhandAffixMigrationVersion = 'unified-offhand-affixes-v1';
+    localStorage.setItem('stardust-progress', JSON.stringify(saved));
+  }
   if (saved.chapterTwoCraftedBaseStatsMigrationVersion !== 'chapter2-crafted-base-stats-v1') {
     saved.inventory = (Array.isArray(saved.inventory) ? saved.inventory : []).map(CraftingPolicy.applyCraftedBaseStats);
     saved.equipment = Object.fromEntries(Object.entries(saved.equipment || {})
@@ -4258,7 +4265,7 @@ function rewardVictory(index) {
   const runeDrop = ChapterTwoRuneDropPolicy.grantRuneDrop(progress, currentMap.id, enemy);
   let equipmentDrop = null;
   try {
-    equipmentDrop = EquipmentDropPolicy.grantEquipmentDrop(progress, enemy, { chapter: currentMap.chapter, dropRateMultiplier: affixDropBonus.equipmentMultiplier });
+    equipmentDrop = EquipmentDropPolicy.grantEquipmentDrop(progress, enemy, { chapter: currentMap.chapter, mapId: currentMap.id, jobId: getActiveCharacter()?.job, dropRateMultiplier: affixDropBonus.equipmentMultiplier });
   } catch (error) {
     console.warn('[EquipmentDrop] 裝備掉落處理發生未預期錯誤，戰鬥獎勵將繼續結算。', error);
   }
@@ -4288,7 +4295,7 @@ function rewardVictory(index) {
   }
   let offhandDrop = null;
   if (currentMap.id === 'plains-depths' && Math.random() < EquipmentPolicy.getPlainsDepthsOffhandDropRate(enemy)) {
-    offhandDrop = EquipmentPolicy.createRandomOffhandDrop(Math.random(), Math.random(), `${Date.now()}-${Math.floor(Math.random() * 1000000)}`);
+    offhandDrop = EquipmentDropPolicy.createChapterOneOffhandDrop({ random: Math.random, instanceId: `${Date.now()}-${Math.floor(Math.random() * 1000000)}`, jobId: getActiveCharacter()?.job, obtainedFrom: enemy.id });
     progress.inventory.push(offhandDrop);
   }
   const accountDrops = [];
