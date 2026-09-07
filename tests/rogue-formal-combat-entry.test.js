@@ -71,6 +71,8 @@ assert.equal(venom.poison.maxStacks, 3);
 assert.ok(venom.poison.applications >= 3 && venom.poison.refreshes > 0);
 assert.ok(venom.bleed.damage > 0 && venom.bleed.refreshes > 0);
 assert.ok(venom.poison.timeline.length > 0 && venom.bleed.timeline.length > 0);
+assert.ok(venom.combat.dotEvents.some((event) => event.action === 'bonus-tick' && event.type === 'poison'));
+assert.ok(venom.combat.dotEvents.some((event) => event.action === 'bonus-tick' && ['bleed', 'rupture'].includes(event.type)));
 assert.deepEqual(runCombat({ ...venomConfig, entry: 'ui' }), venom, 'poison stacks, bleed refresh and tick timing must be UI/headless identical');
 
 assert.throws(() => runCombat({
