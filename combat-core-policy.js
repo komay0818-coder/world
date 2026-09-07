@@ -34,15 +34,17 @@
   function telemetry(member) {
     return member.combatTelemetry || (member.combatTelemetry = {
       totalDamage: 0, damageBySource: {}, skillCasts: {}, basicAttacks: 0,
+      criticalRolls: 0, criticalHits: 0, aoeDamage: 0,
       dotTicks: 0, resourceSpent: 0, resourceRecovered: 0, kills: 0, respawns: 0
     });
   }
 
-  function recordDamage(member, source, amount) {
+  function recordDamage(member, source, amount, details = {}) {
     if (!member || !(amount > 0)) return;
     const stats = telemetry(member), key = source || 'other';
     stats.totalDamage += amount;
     stats.damageBySource[key] = (stats.damageBySource[key] || 0) + amount;
+    if (details.aoe) stats.aoeDamage += amount;
   }
 
   function record(member, key, amount = 1) {
@@ -55,5 +57,12 @@
     stats.skillCasts[skillId] = (stats.skillCasts[skillId] || 0) + 1;
   }
 
-  return Object.freeze({ PLAYER_TICK_ORDER, runPlayerTick, telemetry, recordDamage, record, recordSkillCast });
+  function recordCritical(member, critical) {
+    if (!member) return;
+    const stats = telemetry(member);
+    stats.criticalRolls += 1;
+    if (critical) stats.criticalHits += 1;
+  }
+
+  return Object.freeze({ PLAYER_TICK_ORDER, runPlayerTick, telemetry, recordDamage, record, recordSkillCast, recordCritical });
 }));

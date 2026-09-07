@@ -4477,6 +4477,8 @@ function processEnemyRespawns() {
         showToast(`⚠ BOSS 出現：${getEnemyDefinition(index).name}`);
         logBattle(`⚠ BOSS【${getEnemyDefinition(index).name}】出現！`);
       }
+      const mainMember = getMainBattleMember();
+      if (mainMember) CombatCorePolicy.record(mainMember, 'respawns');
     } else {
       battle.enemyRespawns[index] = nextTimer;
     }
@@ -4706,7 +4708,7 @@ function applyDamageToMonster(index, baseDamage, profile, options = {}) {
     const mageStats=MageAdvancementPolicy.telemetry(attacker),sourceSkill=options.sourceSkill||profile.element||options.attackKind||'other',bonus=result.finalDamage/3;
     mageStats.shockedBonusDamage+=bonus;mageStats.shockedBonusBySkill[sourceSkill]=(mageStats.shockedBonusBySkill[sourceSkill]||0)+bonus;
   }
-  CombatCorePolicy.recordDamage(attacker, options.sourceSkill || options.attackKind || profile.element || 'other', result.finalDamage);
+  CombatCorePolicy.recordDamage(attacker, options.sourceSkill || options.attackKind || profile.element || 'other', result.finalDamage, { aoe: options.isAoe });
   const arcaneMarkExplosion = attacker
     && MageAdvancementPolicy.isAdvanced(attacker.progress, 'arcane-mage')
     && profile.damageType === 'magic'
@@ -4832,10 +4834,12 @@ function useAutoSkillForMember(member, now = Date.now()) {
     if (member.resourceType !== 'arrows' && member.resourceCurrent < cost) continue;
     if (skill.id === 'weapon-stance') {
       if (!WarriorAdvancementPolicy.applyWeaponStance(member, getSkillUpgradeLevel(progress, member.job, skill), now)) continue;
+      CombatCorePolicy.recordSkillCast(member, skill.id);
       member.skillCooldowns[skill.id] = now + skill.cooldown * 1000; member.globalSkillReadyAt = now + 1000; logBattle(`⚔ ${member.name}施放【武器架勢】。`, 'system'); return true;
     }
     if (skill.id === 'blood-rage') {
       WarriorAdvancementPolicy.applyBloodRage(member, getSkillUpgradeLevel(progress, member.job, skill), now);
+      CombatCorePolicy.recordSkillCast(member, skill.id);
       member.skillCooldowns[skill.id] = now + skill.cooldown * 1000; member.globalSkillReadyAt = now + 1000; logBattle(`🩸 ${member.name}施放【血怒】。`, 'system'); return true;
     }
     const livingTargets = aliveEnemyIndexesByAge();
@@ -4864,6 +4868,7 @@ function useAutoSkillForMember(member, now = Date.now()) {
     const shootingBonuses = HunterAdvancementPolicy.getShootingBonuses(member, skill.id, now);
     const resonanceBonuses = MageAdvancementPolicy.getResonanceBonuses(member, castElement, now);
     const critical = Math.random() < Math.min(.95, stats.crit + runtimeBonuses.crit + primaryRogueBonuses.crit + (skillEffect.skillCrit || 0) + resonanceBonuses.crit);
+    CombatCorePolicy.recordCritical(member, critical);
     let damagePower = Number(skillEffect.power) || Number(skill.power) || 1;
     const priestFaith = member.job === 'priest' ? PriestAdvancementPolicy.getFaithBonuses(member, now) : { magicDamage: 0, cooldownSpeed: 0 };
     if (skill.id === 'holy-smite' && skillEffect.executeThreshold && battle.enemyHps[targets[0]] / getEnemyDefinition(targets[0]).maxHp < skillEffect.executeThreshold) damagePower *= 1 + skillEffect.executeBonus;
@@ -4911,6 +4916,7 @@ function useAutoSkillForMember(member, now = Date.now()) {
         attacker: member,
         attackKind: 'skill',
         sourceSkill: skill.id,
+        isAoe: targets.length > 1,
         armorIgnore: (skillEffect.armorIgnore || 0) + (berserkerSlash?.armorIgnore || 0) + shootingBonuses.armorIgnore,
         conditionalDamageMultiplier,
         craftedEpicExecution,
@@ -5346,6 +5352,7 @@ function processPartyMemberAttacks(now = Date.now()) {
     const lethalExecution = RogueAdvancementPolicy.getBasicExecution(member, now);
     const hunterExecution = HunterAdvancementPolicy.getBasicExecution(member, now);
     const critical = specialBasicExecution.guaranteedCritical || (instinctTriggered && hunterInstinct.guaranteedCrit ? true : Math.random() < Math.min(.95, member.stats.crit + warriorRuntime.crit + rogueBonuses.crit + (desperate?.crit || 0)));
+    CombatCorePolicy.recordCritical(member, critical);
     const fatalSlashBonus = now < (member.fatalSlashUntil || 0) ? .50 : 0;
     const grandmasterBasicBonus = now < (member.weaponGrandmasterBasicUntil || 0) ? .20 : 0;
     const temporaryBasicBonus = (now < (member.skillHasteUntil || 0) ? member.skillBasicDamageBonus || 0 : 0) + (now < (member.galeUntil || 0) ? member.galeBasicDamage || 0 : 0) + (member.nextBasicDamageBonus || 0) + (member.nextHunterAttackBonus || 0) + (desperate?.attack || 0) + fatalSlashBonus + grandmasterBasicBonus + (lethalExecution?.damage || 0) + hunterExecution.sniper + hunterExecution.eagle;
@@ -5403,6 +5410,7 @@ function processPartyMemberAttacks(now = Date.now()) {
       const titanStrike = WarriorAdvancementPolicy.rollTitanStrike(member, battle.enemyHps[targetIndex] > 0, true, Math.random);
       if (titanStrike) {
         const titanCritical = Math.random() < Math.min(.95, member.stats.crit + titanStrike.critBonus);
+        CombatCorePolicy.recordCritical(member, titanCritical);
         applyDamageToMonster(targetIndex, member.stats.attack * titanStrike.power * (titanCritical ? member.stats.criticalDamageMultiplier : 1), profile, { attacker: member, attackKind: 'offhand', canParry: false });
       }
       if (battle.enemyHps[targetIndex] <= 0) WarriorAdvancementPolicy.resolveKill(member);
