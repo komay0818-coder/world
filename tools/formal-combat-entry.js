@@ -9,8 +9,13 @@ let formalNow = 0;
 let formalSeed = 1;
 let formalProgress = null;
 let formalEnemy = null;
+let formalTimers = [];
+let formalTimerSequence = 0;
 
 Date.now = () => formalNow;
+setTimeout = (callback, delay = 0) => { const id = ++formalTimerSequence; formalTimers.push({ id, at: formalNow + Math.max(0, Number(delay) || 0), callback }); return id; };
+clearTimeout = (id) => { formalTimers = formalTimers.filter((timer) => timer.id !== id); };
+function runFormalTimers() { for (;;) { const due = formalTimers.filter((timer) => timer.at <= formalNow).sort((a,b)=>a.at-b.at||a.id-b.id)[0]; if (!due) break; formalTimers = formalTimers.filter((timer) => timer.id !== due.id); due.callback(); } }
 
 function seedFormalCombat(seed) {
   formalSeed = seed >>> 0;
@@ -34,6 +39,7 @@ createEnemyAffixes = (types) => types.map(() => []);
 updateBattleUI = () => {};
 logBattle = () => {};
 showToast = () => {};
+openVillage = () => {};
 playPartyMemberCombatAnimation = () => {};
 playBattleSkillEffect = () => {};
 playMonsterAttackAnimation = () => {};
@@ -47,6 +53,7 @@ function formalSkillDefinitions(job, advancedClass) {
   if (job === 'assassin') return [...base, ...RogueAdvancementPolicy.getSkills(advancedClass)];
   if (job === 'hunter') return [...base, ...HunterAdvancementPolicy.getSkills(advancedClass)];
   if (job === 'mage') return [...base, ...MageAdvancementPolicy.getSkills(advancedClass)];
+  if (job === 'priest') return [...base, ...PriestAdvancementPolicy.getSkills(advancedClass)];
   return base;
 }
 
@@ -76,13 +83,14 @@ function buildFormalSkillLevels(job, advancedClass, requested) {
 
 function setupFormalCombat(config) {
   seedFormalCombat(config.seed);
+  formalTimers=[];formalTimerSequence=0;
   const character = { id: 'formal-' + config.job, name: 'Formal ' + config.job, job: config.job, race: config.race || 'human' };
   const formalEquipment = { ...emptyEquipment(), ...(config.equipment || {}) };
   if (config.job === 'hunter') HunterArrowPolicy.ensureStarterQuiver(formalEquipment);
   formalProgress = {
     level: config.level || 45,
     advancedClass: config.advancedClass || '',
-    gold: 0, potions: 0, manaPotions: 0, inventory: [],
+    gold: 0, potions: config.potions || 0, manaPotions: 0, inventory: config.potions ? [{ id:'healing-potion',kind:'consumable',quantity:config.potions }] : [],
     equipment: formalEquipment,
     skillLevels: buildFormalSkillLevels(config.job, config.advancedClass, config.skills || {})
   };
@@ -101,7 +109,14 @@ function setupFormalCombat(config) {
     parry: config.enemy.parry || 0, damageReduction: config.enemy.damageReduction || 0,
     xp: 0, gold: 0
   };
-  const count = config.mode === 'fixed-five' ? 5 : 1;
+  const partyMembers=[member];
+  for(const [offset,spec] of (config.party||[]).entries()){
+    const partyCharacter={id:'formal-party-'+offset,name:spec.name||'Formal ally '+(offset+1),job:spec.job,race:spec.race||'human'};
+    const partyEquipment={...emptyEquipment(),...(spec.equipment||{})};if(spec.job==='hunter')HunterArrowPolicy.ensureStarterQuiver(partyEquipment);
+    const partyProgress={level:spec.level||config.level||45,advancedClass:spec.advancedClass||'',gold:0,potions:0,manaPotions:0,inventory:[],equipment:partyEquipment,skillLevels:buildFormalSkillLevels(spec.job,spec.advancedClass,spec.skills||{})};
+    const ally=createBattlePartyMember({character:partyCharacter,progress:partyProgress},offset+1,character.id,0);if(spec.initialResource!==undefined)ally.resourceCurrent=Math.max(0,Math.min(ally.resourceMax,Number(spec.initialResource)||0));if(spec.currentHpRatio!==undefined)ally.currentHp=Math.max(1,Math.ceil(ally.maxHp*spec.currentHpRatio));partyMembers.push(ally);
+  }
+  const count = config.mode === 'fixed-five' || config.mode === 'party-four' ? 5 : 1;
   battle = {
     enemyTypes: Array(count).fill(formalEnemy.id), enemyLevels: Array(count).fill(formalEnemy.level),
     enemyHps: Array(count).fill(formalEnemy.maxHp), enemyRespawns: Array(count).fill(null),
@@ -112,7 +127,7 @@ function setupFormalCombat(config) {
     enemyAffixRegenAt: Array(count).fill(0), enemyBoarEnraged: Array(count).fill(false),
     enemyTrailSummoned: Array(count).fill(false), enemyAssassinDashUntil: Array(count).fill(0),
     enemySpiderNestPhase: Array(count).fill(1), enemyDepthsPhase: Array(count).fill(1),
-    partyMembers: [member], monsterMoveSpeed: 400, targetIndexes: [], damageTimers: [],
+    partyMembers, monsterMoveSpeed: 400, targetIndexes: [], damageTimers: [],
     rewardedEnemyIndexes: new Set(), roundLoot: {}, isDungeon: config.mode === 'boss',
     dungeonId: null, dungeonWave: 1, dungeonComplete: false, waveTransitioning: false,
     globalSkillReadyAt: 0, skillCooldowns: {}, lastStrongholdRegenAt: 0
@@ -121,11 +136,12 @@ function setupFormalCombat(config) {
     ensureHunterCompanions(member, 0);
     (config.petStates || []).forEach((state, index) => Object.assign(member.companions[index] || {}, state));
   }
+  for(const ally of partyMembers.filter(candidate=>candidate.job==='hunter'&&candidate!==member))ensureHunterCompanions(ally,0);
   fighting = true;
   return member;
 }
 
-function formalSnapshot(member, duration, cycle, resourceMonitor, dotMonitor) {
+function formalSnapshot(member, duration, cycle, resourceMonitor, dotMonitor, partyMonitor) {
   const combat = JSON.parse(JSON.stringify(CombatCorePolicy.telemetry(member)));
   const basicDamage = combat.damageBySource['basic-attack'] || 0;
   const skillDamage = {};
@@ -149,12 +165,12 @@ function formalSnapshot(member, duration, cycle, resourceMonitor, dotMonitor) {
   const specialDamage = Object.entries(combat.damageBySource).filter(([source]) => !classifiedSources.has(source)).reduce((sum, [, damage]) => sum + damage, 0);
   const naturalRecovery = combat.resourceEvents.filter((event) => event.type === 'natural').reduce((sum, event) => sum + event.amount, 0);
   const specialRecovery = combat.resourceRecovered - naturalRecovery;
-  const resource = ['arrows', 'energy'].includes(member.resourceType) ? {
+  const resource = ['arrows', 'energy', 'mana'].includes(member.resourceType) ? {
     type: member.resourceType, initial: resourceMonitor.initial, maximum: member.resourceMax,
     minimum: resourceMonitor.minimum, end: member.resourceCurrent, spent: combat.resourceSpent,
     recovered: combat.resourceRecovered, naturalRecovery, specialRecovery,
     blocked: combat.resourceBlocked, blockedBySkill: combat.resourceBlockedBySkill,
-    zeroDuration: resourceMonitor.zeroMs / 1000, curve: resourceMonitor.curve
+    zeroDuration: resourceMonitor.zeroMs / 1000, lowDuration: resourceMonitor.lowMs / 1000, curve: resourceMonitor.curve
   } : null;
   return {
     duration, ttk: battle.isDungeon ? duration : null, totalDamage: combat.totalDamage,
@@ -176,6 +192,11 @@ function formalSnapshot(member, duration, cycle, resourceMonitor, dotMonitor) {
     resource,
     arrows: member.resourceType === 'arrows' ? resource : null,
     energy: member.resourceType === 'energy' ? resource : null,
+    mana: member.resourceType === 'mana' ? resource : null,
+    healing: member.job==='priest'?JSON.parse(JSON.stringify(PriestAdvancementPolicy.telemetry(member))):null,
+    shield: member.job==='priest'?{generated:PriestAdvancementPolicy.telemetry(member).shieldGenerated,absorbed:PriestAdvancementPolicy.telemetry(member).shieldAbsorbed,expired:PriestAdvancementPolicy.telemetry(member).shieldExpired,remaining:(battle.partyMembers||[]).reduce((sum,ally)=>sum+(ally.priestShieldGrants||[]).filter(grant=>grant.owner===member).reduce((value,grant)=>value+grant.remaining,0),0),events:JSON.parse(JSON.stringify(PriestAdvancementPolicy.telemetry(member).shieldEvents))}:null,
+    faith: member.job==='priest'?{end:PriestAdvancementPolicy.getFaithStacks(member,formalNow),maximum:PriestAdvancementPolicy.FAITH_MAX_STACKS,average:PriestAdvancementPolicy.telemetry(member).faithSamples?PriestAdvancementPolicy.telemetry(member).faithStackTotal/PriestAdvancementPolicy.telemetry(member).faithSamples:0,fullSamples:PriestAdvancementPolicy.telemetry(member).faithFullSamples,events:JSON.parse(JSON.stringify(PriestAdvancementPolicy.telemetry(member).faithEvents))}:null,
+    party: partyMonitor?{minimumHpByMember:partyMonitor.minimumHpByMember,deaths:partyMonitor.deaths,revives:partyMonitor.revives,firstDeathAtMs:partyMonitor.firstDeathAtMs,healthCurve:partyMonitor.healthCurve,statusTimeline:partyMonitor.statusTimeline,final:(battle.partyMembers||[]).map(ally=>({id:ally.id,job:ally.job,hp:ally.currentHp,maxHp:ally.maxHp,alive:ally.alive,shield:ally.shield,resource:ally.resourceCurrent,damageTaken:CombatCorePolicy.telemetry(ally).damageTaken})),memberDamage:Object.fromEntries((battle.partyMembers||[]).map(ally=>[ally.id,CombatCorePolicy.telemetry(ally).totalDamage]))}:null,
     cycle, combat,
     final: {
       hp: member.currentHp, maxHp: member.maxHp, defense: member.stats.defense, resource: member.resourceCurrent, alive: member.alive,
@@ -192,6 +213,7 @@ function formalSnapshot(member, duration, cycle, resourceMonitor, dotMonitor) {
         lethalTechniqueUntil: member.lethalTechniqueUntil || 0, shadowDanceUntil: member.shadowDanceUntil || 0,
         plagueSpreadPending: Boolean(member.plagueSpreadPending), desperateDodgeUntil: member.desperateDodgeUntil || 0
       },
+      priestState: {faithStacks:member.faithStacks||0,faithUntil:member.faithUntil||0,lightValue:member.lightValue||0,sanctuaryUntil:member.sanctuaryUntil||0,sanctuaryNextTickAt:member.sanctuaryNextTickAt||0,sacredGuardianReadyAt:battle.sacredGuardianReadyAt||0},
       warriorState: {
         skillHasteUntil: member.skillHasteUntil || 0, bloodRageUntil: member.bloodRageUntil || 0,
         weaponStanceUntil: member.weaponStanceUntil || 0, unyieldingUntil: member.unyieldingUntil || 0,
@@ -205,8 +227,9 @@ function formalSnapshot(member, duration, cycle, resourceMonitor, dotMonitor) {
 function runFormalCombat(config) {
   const member = setupFormalCombat(config);
   const cycle = [];
-  const resourceMonitor = { initial: member.resourceCurrent, minimum: member.resourceCurrent, zeroMs: 0, curve: [{ atMs: 0, value: member.resourceCurrent }] };
+  const resourceMonitor = { initial: member.resourceCurrent, minimum: member.resourceCurrent, zeroMs: 0, lowMs:0, curve: [{ atMs: 0, value: member.resourceCurrent }] };
   const dotMonitor = { samples: 0, poisonStackTotal: 0, maxPoisonStacks: 0, timeline: [], lastSignature: '' };
+  const partyMonitor={minimumHpByMember:Object.fromEntries(battle.partyMembers.map(ally=>[ally.id,ally.currentHp])),deaths:0,revives:0,firstDeathAtMs:null,healthCurve:[],statusTimeline:[],alive:Object.fromEntries(battle.partyMembers.map(ally=>[ally.id,ally.alive])),lastSignature:'',lastStatusSignature:''};
   let resourceEventCursor = 0;
   const limitMs = (config.mode === 'boss' ? config.maxSeconds : config.seconds) * 1000;
   for (formalNow = 0; formalNow < limitMs && fighting && (config.mode !== 'boss' || battle.enemyHps[0] > 0); formalNow += 100) {
@@ -215,8 +238,10 @@ function runFormalCombat(config) {
     if (config.entry === 'ui') battleTick();
     else CombatCorePolicy.runPlayerTick(createBattleTickRuntime(), formalNow);
     enemyAttackTick();
+    runFormalTimers();
     resourceMonitor.minimum = Math.min(resourceMonitor.minimum, member.resourceCurrent);
-    if (['arrows', 'energy'].includes(member.resourceType) && member.resourceCurrent === 0) resourceMonitor.zeroMs += 100;
+    if (['arrows', 'energy', 'mana'].includes(member.resourceType) && member.resourceCurrent === 0) resourceMonitor.zeroMs += 100;
+    if(member.resourceType==='mana'&&member.resourceCurrent<=member.resourceMax*.25)resourceMonitor.lowMs+=100;
     const resourceEvents = CombatCorePolicy.telemetry(member).resourceEvents;
     while (resourceEventCursor < resourceEvents.length) {
       const event = resourceEvents[resourceEventCursor++];
@@ -237,25 +262,31 @@ function runFormalCombat(config) {
       dotMonitor.timeline.push({ atMs: formalNow, targets: dotState });
       dotMonitor.lastSignature = dotSignature;
     }
+    const partyState=battle.partyMembers.map(ally=>({id:ally.id,hp:ally.currentHp,alive:ally.alive,shield:ally.shield}));
+    for(const ally of battle.partyMembers){partyMonitor.minimumHpByMember[ally.id]=Math.min(partyMonitor.minimumHpByMember[ally.id],ally.currentHp);if(partyMonitor.alive[ally.id]&&!ally.alive){partyMonitor.deaths++;if(partyMonitor.firstDeathAtMs===null)partyMonitor.firstDeathAtMs=formalNow;}if(!partyMonitor.alive[ally.id]&&ally.alive)partyMonitor.revives++;partyMonitor.alive[ally.id]=ally.alive;}
+    const partySignature=JSON.stringify(partyState);if(partySignature!==partyMonitor.lastSignature){partyMonitor.healthCurve.push({atMs:formalNow,members:partyState});partyMonitor.lastSignature=partySignature;}
+    const statusState={allies:battle.partyMembers.map(ally=>({id:ally.id,sanctuary:formalNow<(ally.sanctuaryUntil||0),lightGrace:formalNow<(ally.lightGraceUntil||0),holyStormHaste:formalNow<(ally.holyStormHasteUntil||0)})),enemies:battle.enemySkillStates.map((state,index)=>({index,holyLightAttackDownUntil:state?.holyLightAttackDownUntil||0}))};const statusSignature=JSON.stringify(statusState);if(statusSignature!==partyMonitor.lastStatusSignature){partyMonitor.statusTimeline.push({atMs:formalNow,...statusState});partyMonitor.lastStatusSignature=statusSignature;}
     const after = CombatCorePolicy.telemetry(member).skillCasts;
     for (const [id, casts] of Object.entries(after)) {
       if (casts > (before[id] || 0)) cycle.push({ atMs: formalNow, skill: id, cooldownReadyAt: member.skillCooldowns[id] || formalNow });
     }
   }
   if (config.mode === 'boss' && battle.enemyHps[0] > 0) throw new Error('Boss did not die within maxSeconds');
-  return formalSnapshot(member, formalNow / 1000, cycle, resourceMonitor, dotMonitor);
+  return formalSnapshot(member, formalNow / 1000, cycle, resourceMonitor, dotMonitor, partyMonitor);
 }
 `);
 
 function normalizeConfig(input = {}) {
   const mode = input.mode || 'fixed-five';
-  if (!['fixed-five', 'boss'].includes(mode)) throw new Error(`Unsupported mode: ${mode}`);
+  if (!['fixed-five', 'boss', 'party-four'].includes(mode)) throw new Error(`Unsupported mode: ${mode}`);
   if (!input.job) throw new Error('job is required');
   return {
     job: input.job, advancedClass: input.advancedClass || '', race: input.race || 'human', level: input.level || 45,
     equipment: input.equipment || {}, skills: input.skills || {}, mode, seed: input.seed ?? 1,
     initialResource: input.initialResource ?? null,
     petStates: input.petStates || [],
+    party: input.party || [],
+    potions: Math.max(0, Number(input.potions) || 0),
     seconds: input.seconds || 60, maxSeconds: input.maxSeconds || 600, entry: input.entry || 'headless',
     enemy: { hp: mode === 'boss' ? 25000 : 1200, defense: 20, attack: 8, attackSpeed: 1, level: 45, ...(input.enemy || {}) }
   };

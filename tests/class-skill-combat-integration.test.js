@@ -19,7 +19,7 @@ assert.match(source, /blessing\.party[\s\S]*lightGraceCooldownSpeed/, 'Light Gra
 assert.match(source, /effect\.paralysis[\s\S]*state\.paralyzedUntil/, 'all configured chain lightning levels apply paralysis');
 assert.match(source, /effect\.shockedVulnerability[\s\S]*state\.shockedByMage/, 'shocked vulnerability has a per-mage refreshable window');
 assert.match(source, /getMageShockState\(index, attacker\)[\s\S]*\? 1\.5 : 1/, 'only the applying mage receives the universal 1.5 damage multiplier');
-assert.match(source, /damage \* \(sourceMastery\?\.resonance[\s\S]*sourceSkill: hasSourceBurn \? 'burn'/, 'burn delegates shocked vulnerability to the common damage path');
+assert.match(source, /damage\.total \* resonanceMultiplier[\s\S]*sourceSkill: hasSourceBurn \? 'burn'/, 'burn delegates shocked vulnerability to the common damage path');
 assert.doesNotMatch(source, /elementalDamageTakenMultiplier|enhancedParalysisMultiplier/, 'the removed elemental-only multiplier is not retained');
 
 console.log('class-skill-combat-integration: assertions passed');

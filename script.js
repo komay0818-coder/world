@@ -4841,7 +4841,8 @@ function useAutoSkillForMember(member, now = Date.now()) {
   for (const skill of unlocked.filter((entry) => ['light-fountain','guardian-sanctuary'].includes(entry.id))) {
     if ((member.skillCooldowns[skill.id] || 0) > now) continue;
     const effect = getSkillEffect(progress, member.job, skill), cost = getSkillResourceCost(member.job, skill);
-    if (member.resourceCurrent < cost) continue;
+    if (member.resourceCurrent < cost) { CombatCorePolicy.recordResourceBlock(member, skill.id, member.resourceCurrent); continue; }
+    CombatCorePolicy.clearResourceBlock(member, skill.id);
     const lowestRatio = Math.min(...livingAllies.map((ally) => ally.currentHp / ally.maxHp));
     if (skill.id === 'light-fountain' && lowestRatio > .85) continue;
     if (skill.id === 'guardian-sanctuary' && lowestRatio > .75) continue;
@@ -4852,8 +4853,8 @@ function useAutoSkillForMember(member, now = Date.now()) {
       const holyFaith = ClassSkillPolicy.getEffect('priest','holy-faith',Number(progress.skillLevels?.['priest:holy-faith'])||1);
       const prayer = PriestAdvancementPolicy.getLifePrayerBonus(member, ally);
       const amount = Math.ceil(stats.attack * effect.healPower * (1 + (holyFaith?.healing||0) + hpBonus + faith.healing + prayer));
-      PriestAdvancementPolicy.heal(member, ally, amount);
-      if (ratio < .4 && effect.lowHpShield) { ally.shield += ally.maxHp * effect.lowHpShield; ally.lightFountainShieldUntil = now + effect.shieldDuration * 1000; }
+      PriestAdvancementPolicy.heal(member, ally, amount, 'light-fountain');
+      if (ratio < .4 && effect.lowHpShield) { PriestAdvancementPolicy.grantShield(member, ally, ally.maxHp * effect.lowHpShield, 'light-fountain', now, effect.shieldDuration * 1000); ally.lightFountainShieldUntil = now + effect.shieldDuration * 1000; }
     });
     if (skill.id === 'guardian-sanctuary') {
       livingAllies.forEach((ally) => { ally.sanctuaryUntil=now+effect.duration*1000;ally.sanctuaryDamageReduction=effect.damageReduction; });
@@ -4861,7 +4862,7 @@ function useAutoSkillForMember(member, now = Date.now()) {
       if (effect.cleanseOnCast) livingAllies.forEach((ally) => { ally.bleed=null; });
     }
     PriestAdvancementPolicy.resolveLightEcho(member,livingAllies);
-    member.resourceCurrent-=cost; member.globalSkillReadyAt=now+1000; member.skillCooldowns[skill.id]=now+effect.cooldown*1000/stats.cooldownSpeed;
+    const resourceBeforeSupportCost=member.resourceCurrent;member.resourceCurrent-=cost;const supportSpent=Math.max(0,resourceBeforeSupportCost-member.resourceCurrent);CombatCorePolicy.record(member,'resourceSpent',supportSpent);CombatCorePolicy.recordEvent(member,'resourceEvents',{atMs:now,type:'spend',amount:supportSpent,current:member.resourceCurrent,skill:skill.id});CombatCorePolicy.recordSkillCast(member,skill.id,{atMs:now,targetIndexes:[],resourceBefore:resourceBeforeSupportCost,resourceAfter:member.resourceCurrent});member.globalSkillReadyAt=now+1000; member.skillCooldowns[skill.id]=now+effect.cooldown*1000/stats.cooldownSpeed;
     logBattle(`✦ ${member.name}施放【${skill.name}】。`, 'healing'); updatePartyMemberManaExhaustion(member); return true;
   }
   const attackSkills = RogueAdvancementPolicy.getAutoSkillPriority(progress, unlocked)
@@ -4877,10 +4878,10 @@ function useAutoSkillForMember(member, now = Date.now()) {
     }
     if (member.resourceType === 'arrows') CombatCorePolicy.clearResourceBlock(member, skill.id);
     if (member.resourceType !== 'arrows' && member.resourceCurrent < cost) {
-      if (member.resourceType === 'energy') CombatCorePolicy.recordResourceBlock(member, skill.id, member.resourceCurrent);
+      if (member.resourceType === 'energy' || member.resourceType === 'mana') CombatCorePolicy.recordResourceBlock(member, skill.id, member.resourceCurrent);
       continue;
     }
-    if (member.resourceType === 'energy') CombatCorePolicy.clearResourceBlock(member, skill.id);
+    if (member.resourceType === 'energy' || member.resourceType === 'mana') CombatCorePolicy.clearResourceBlock(member, skill.id);
     if (skill.id === 'weapon-stance') {
       if (!WarriorAdvancementPolicy.applyWeaponStance(member, getSkillUpgradeLevel(progress, member.job, skill), now)) continue;
       CombatCorePolicy.recordSkillCast(member, skill.id);
@@ -5102,8 +5103,8 @@ function useAutoSkillForMember(member, now = Date.now()) {
       member.pendingSkillCooldownReduction = reduction;
     }
     if (skill.id === 'holy-nova' && hits.length) {
-      member.currentHp = Math.min(member.maxHp, member.currentHp + member.maxHp * (skillEffect.selfHealPerTarget || 0) * hits.length);
-      if (skillEffect.shield && hits.length >= skillEffect.shieldAtTargets) member.shield += member.maxHp * skillEffect.shield;
+      PriestAdvancementPolicy.heal(member,member,member.maxHp*(skillEffect.selfHealPerTarget||0)*hits.length,'holy-nova');
+      if (skillEffect.shield && hits.length >= skillEffect.shieldAtTargets) PriestAdvancementPolicy.grantShield(member,member,member.maxHp*skillEffect.shield,'holy-nova',now);
     }
     if (member.job === 'priest' && member.level >= 3) {
       const faith = ClassSkillPolicy.getEffect('priest', 'holy-faith', Number(progress.skillLevels?.['priest:holy-faith']) || 1);
@@ -5116,7 +5117,7 @@ function useAutoSkillForMember(member, now = Date.now()) {
     const actualResourceSpent = Math.max(0, resourceBeforeSkillCost - member.resourceCurrent);
     CombatCorePolicy.recordSkillCast(member, skill.id, { atMs: now, targets: [...targets], damage: hits.reduce((sum, target) => sum + target.result.finalDamage, 0), critical });
     CombatCorePolicy.record(member, 'resourceSpent', actualResourceSpent);
-    if (member.resourceType === 'arrows' || member.resourceType === 'energy') CombatCorePolicy.recordEvent(member, 'resourceEvents', { atMs: now, type: 'spend', amount: actualResourceSpent, current: member.resourceCurrent, skill: skill.id });
+    if (member.resourceType === 'arrows' || member.resourceType === 'energy' || member.resourceType === 'mana') CombatCorePolicy.recordEvent(member, 'resourceEvents', { atMs: now, type: 'spend', amount: actualResourceSpent, current: member.resourceCurrent, skill: skill.id });
     if (skill.id === 'arcane-torrent') MageAdvancementPolicy.resolveArcaneTorrentMana(member,skillEffect,hits.length);
     const arcaneCharge = MageAdvancementPolicy.castArcaneCharge(member, skill.id, now);
     ChapterThreeCraftedEpicAbilityPolicy.completeSkillExecution(member, craftedEpicExecution, now);
@@ -5268,7 +5269,8 @@ function useAutoSkillForMember(member, now = Date.now()) {
   }
   const healSkill = unlocked.find((skill) => skill.id === 'heal' && (member.skillCooldowns[skill.id] || 0) <= now);
   const healTarget = (battle.partyMembers || []).filter((candidate) => candidate.alive).sort((a, b) => a.currentHp / a.maxHp - b.currentHp / b.maxHp)[0] || member;
-  if (!healSkill || member.resourceCurrent < getSkillManaCost(healSkill) || healTarget.currentHp / healTarget.maxHp > .7) return false;
+  if (!healSkill || healTarget.currentHp / healTarget.maxHp > .7) return false;
+  if (member.resourceCurrent < getSkillManaCost(healSkill)) { CombatCorePolicy.recordResourceBlock(member, healSkill.id, member.resourceCurrent); return false; }
   const cost = getSkillManaCost(healSkill);
   const healEffect = getSkillEffect(progress, member.job, healSkill);
   const grace = member.level >= 15 ? ClassSkillPolicy.getEffect('priest', 'divine-grace', Number(progress.skillLevels?.['priest:divine-grace']) || 1) : null;
@@ -5281,14 +5283,13 @@ function useAutoSkillForMember(member, now = Date.now()) {
   const missing = healTarget.maxHp - healTarget.currentHp;
   const actualHeal = Math.min(missing, heal);
   const healTargetAnchor = captureBattleAllyAnchor(healTarget);
-  healTarget.currentHp = Math.min(healTarget.maxHp, healTarget.currentHp + heal);
-  if(member.job==='priest'){const tracked=Math.min(missing,heal);PriestAdvancementPolicy.telemetry(member).effectiveHealing+=tracked;if(PriestAdvancementPolicy.isAdvanced(progress,'holy-priest')){const echo=PriestAdvancementPolicy.getEffect('light-echo',progress.skillLevels?.['priest:light-echo']);member.lightValue=(member.lightValue||0)+tracked*echo.effectiveHealingRatio;}PriestAdvancementPolicy.resolveLightEcho(member,battle.partyMembers||[]);}
+  if(member.job==='priest'){PriestAdvancementPolicy.heal(member,healTarget,heal,'heal');PriestAdvancementPolicy.resolveLightEcho(member,battle.partyMembers||[]);}else healTarget.currentHp = Math.min(healTarget.maxHp, healTarget.currentHp + heal);
   ChapterThreeEpicWeaponPolicy.createAfterglow(member, healTarget, actualHeal, now);
-  healTarget.shield += Math.max(0, heal - missing) * (healEffect.overhealShield || 0);
+  const overhealShield=Math.max(0, heal - missing) * (healEffect.overhealShield || 0);if(member.job==='priest')PriestAdvancementPolicy.grantShield(member,healTarget,overhealShield,'heal-overheal',now);else healTarget.shield+=overhealShield;
   if (healTargetAnchor && actualHeal > 0) playBattleSkillEffect('heal', healTargetAnchor, { heal: actualHeal });
   if (graceTriggered && grace.spread && actualHeal > 0) {
     (battle.partyMembers || []).filter((ally) => ally.alive && ally.id !== healTarget.id).slice(0, grace.maxAllies).forEach((ally) => {
-      ally.currentHp = Math.min(ally.maxHp, ally.currentHp + actualHeal * grace.spread);
+      if(member.job==='priest')PriestAdvancementPolicy.heal(member,ally,actualHeal*grace.spread,'divine-grace');else ally.currentHp = Math.min(ally.maxHp, ally.currentHp + actualHeal * grace.spread);
     });
   }
   if (actualHeal > 0 && member.level >= 20) {
@@ -5299,13 +5300,14 @@ function useAutoSkillForMember(member, now = Date.now()) {
   const resourceBeforeHealCost = member.resourceCurrent;
   member.resourceCurrent -= cost;
   const actualHealResourceSpent = Math.max(0, resourceBeforeHealCost - member.resourceCurrent);
+  CombatCorePolicy.record(member,'resourceSpent',actualHealResourceSpent);CombatCorePolicy.recordEvent(member,'resourceEvents',{atMs:now,type:'spend',amount:actualHealResourceSpent,current:member.resourceCurrent,skill:healSkill.id});CombatCorePolicy.recordSkillCast(member,healSkill.id,{atMs:now,targetIds:[healTarget.id],resourceBefore:resourceBeforeHealCost,resourceAfter:member.resourceCurrent});
   ChapterThreeSpecialEquipmentPolicy.resolveManaSurge(member, actualHealResourceSpent, Math.random);
   member.globalSkillReadyAt = now + 1000;
   member.skillCooldowns[healSkill.id] = now + (healEffect.cooldown || healSkill.cooldown) * skillCooldownMultiplier * 1000 / stats.cooldownSpeed;
   ChapterThreeEpicWeaponPolicy.resolveRuneCycle(member, actualHealResourceSpent, healSkill.id, now);
   if (healEffect.afterglow && actualHeal > 0) setTimeout(() => {
     if (!healTarget.alive) return;
-    healTarget.currentHp = Math.min(healTarget.maxHp, healTarget.currentHp + Math.ceil(actualHeal * healEffect.afterglow));
+    if(member.job==='priest')PriestAdvancementPolicy.heal(member,healTarget,Math.ceil(actualHeal*healEffect.afterglow),'afterglow');else healTarget.currentHp = Math.min(healTarget.maxHp, healTarget.currentHp + Math.ceil(actualHeal * healEffect.afterglow));
     if (fighting) updateBattleUI();
   }, 3000);
   logBattle(`✦ ${member.name}施放【${healSkill.name}】，為 ${healTarget.name}恢復 ${actualHeal} 生命。`);
@@ -5337,6 +5339,7 @@ function autoSkillTick() {
 
 function updatePartyMemberResource(member, now) {
   if (!member.alive) return;
+  PriestAdvancementPolicy.expireShields(member,now);
   if (usesManaResource(member.job)) {
     const resourceBeforeRecovery = member.resourceCurrent;
     const elapsed = ManaRegenPolicy.getElapsedSeconds(now, member.lastManaRegenAt);
@@ -5349,7 +5352,7 @@ function updatePartyMemberResource(member, now) {
       flatPerSecond: member.stats.manaRegenFlat,
       elapsedSeconds: elapsed
     }));
-    CombatCorePolicy.record(member, 'resourceRecovered', Math.max(0, member.resourceCurrent - resourceBeforeRecovery));
+    const actualRecovery=Math.max(0,member.resourceCurrent-resourceBeforeRecovery);CombatCorePolicy.record(member, 'resourceRecovered', actualRecovery);if(actualRecovery)CombatCorePolicy.recordEvent(member,'resourceEvents',{atMs:now,type:'natural',amount:actualRecovery,current:member.resourceCurrent});
     updatePartyMemberManaExhaustion(member);
     if (member.job === 'priest') {
       const faith=PriestAdvancementPolicy.getFaithBonuses(member,now), priestStats=PriestAdvancementPolicy.telemetry(member);
@@ -6579,7 +6582,9 @@ function enemyAttackTick() {
     if (guard.petDamage > 0) logBattle(`🐾 ${target.name}的戰寵群分攤 ${Math.round(guard.petDamage)} 點直接傷害。`, 'system');
     const absorbed = Math.min(target.shield || 0, damage);
     target.shield = Math.max(0, (target.shield || 0) - absorbed);
+    PriestAdvancementPolicy.recordShieldAbsorption(target,absorbed,now);
     damage -= absorbed;
+    CombatCorePolicy.record(target,'shieldAbsorbed',absorbed);CombatCorePolicy.record(target,'damageTaken',damage);
     const hpBeforeEnemyHit = target.currentHp;
     target.currentHp = Math.max(0, target.currentHp - damage);
     if (target.currentHp <= 0) {
@@ -6612,7 +6617,7 @@ function enemyAttackTick() {
     }
     if (target.currentHp > 0 && target.currentHp / target.maxHp < .3 && target.job === 'priest' && target.level >= 8 && now >= (target.holyProtectionReadyAt || 0)) {
       const protection = ClassSkillPolicy.getEffect('priest', 'holy-protection', Number(target.progress.skillLevels?.['priest:holy-protection']) || 1);
-      target.shield += target.maxHp * protection.shield;
+      PriestAdvancementPolicy.grantShield(target,target,target.maxHp * protection.shield,'holy-protection',now,6000);
       target.holyProtectionReadyAt = now + protection.cooldown * 1000;
       target.holyProtectionUntil = now + 6000;
       if (protection.cleanse) target.bleed = null;

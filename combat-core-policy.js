@@ -36,6 +36,7 @@
       totalDamage: 0, damageBySource: {}, skillCasts: {}, basicAttacks: 0,
       criticalRolls: 0, criticalHits: 0, aoeDamage: 0,
       dotTicks: 0, resourceSpent: 0, resourceRecovered: 0, resourceBlocked: 0,
+      damageTaken: 0, shieldAbsorbed: 0,
       resourceBlockedBySkill: {}, petAttacks: 0, petCriticalRolls: 0, petCriticalHits: 0,
       petKills: 0, extraShots: 0, extraShotKills: 0, kills: 0, respawns: 0,
       offhandAttacks: 0, offhandCriticalRolls: 0, offhandCriticalHits: 0,
