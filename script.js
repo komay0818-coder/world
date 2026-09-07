@@ -3466,10 +3466,21 @@ function applyDot(index, type, damage, duration, maxStacks = 1, options = {}) {
       existing.tickIntervalMs = options.tickIntervalMs;
       existing.nextTickAt = (options.now || Date.now()) + options.tickIntervalMs;
     }
+    if (options.source) {
+      const telemetry = CombatCorePolicy.telemetry(options.source);
+      telemetry.dotRefreshes[type] = (telemetry.dotRefreshes[type] || 0) + 1;
+      CombatCorePolicy.recordEvent(options.source, 'dotEvents', { atMs: options.now || Date.now(), type, action: 'refresh', targetIndex: index, stacks: sameType.length, remaining: existing.remaining, nextTickAt: existing.nextTickAt });
+    }
     return false;
   }
   dots.push({ type, damage, remaining: duration, source: options.source || null, defenseReduction: options.defenseReduction || 0, tickIntervalMs: options.tickIntervalMs || 0, nextTickAt: options.tickIntervalMs ? (options.now || Date.now()) + options.tickIntervalMs : 0 });
   battle.enemyDots[index] = dots;
+  if (options.source) {
+    const telemetry = CombatCorePolicy.telemetry(options.source), stacks = dots.filter((dot) => dot.type === type).length;
+    telemetry.dotApplications[type] = (telemetry.dotApplications[type] || 0) + 1;
+    telemetry.maxDotStacks[type] = Math.max(telemetry.maxDotStacks[type] || 0, stacks);
+    CombatCorePolicy.recordEvent(options.source, 'dotEvents', { atMs: options.now || Date.now(), type, action: 'apply', targetIndex: index, stacks, remaining: duration, nextTickAt: options.tickIntervalMs ? (options.now || Date.now()) + options.tickIntervalMs : 0 });
+  }
   return true;
 }
 
@@ -3522,19 +3533,34 @@ function processEnemyDots() {
       }
       if (source) multiplier += RogueAdvancementPolicy.getTargetBonuses(source, dots, getEnemySkillState(index), battle.enemyHps[index] / getEnemyDefinition(index).maxHp, 'dot', now).dotDamage;
       const key = dot.source || null;
-      damageBySource.set(key, (damageBySource.get(key) || 0) + dot.damage * tickCount * multiplier);
-      if (source) CombatCorePolicy.record(source, 'dotTicks', tickCount);
+      const sourceDamage = damageBySource.get(key) || { total: 0, byType: {} };
+      const tickDamage = dot.damage * tickCount * multiplier;
+      sourceDamage.total += tickDamage;
+      sourceDamage.byType[dot.type] = (sourceDamage.byType[dot.type] || 0) + tickDamage;
+      damageBySource.set(key, sourceDamage);
+      if (source) {
+        CombatCorePolicy.record(source, 'dotTicks', tickCount);
+        const telemetry = CombatCorePolicy.telemetry(source);
+        telemetry.dotTicksByType[dot.type] = (telemetry.dotTicksByType[dot.type] || 0) + tickCount;
+        CombatCorePolicy.recordEvent(source, 'dotEvents', { atMs: now, type: dot.type, action: 'tick', targetIndex: index, ticks: tickCount, rawDamage: tickDamage, remaining: dot.remaining });
+      }
     });
     battle.enemyDots[index] = dots.filter((dot) => dot.remaining > 0);
     damageBySource.forEach((damage, source) => {
-      if (damage <= 0) return;
+      if (damage.total <= 0) return;
       const sourceMastery = source?.job === 'mage' && source.level >= 15
         ? ClassSkillPolicy.getEffect('mage', 'elemental-mastery', Number(source.progress.skillLevels?.['mage:elemental-mastery']) || 1)
         : null;
       const hasSourceBurn = dots.some((dot) => dot.source === source && dot.type === 'burn');
-      applyDamageToMonster(index, damage * (sourceMastery?.resonance && hasSourceBurn ? 1.2 : 1), { damageType: 'periodic', attackRange: 'none', element: hasSourceBurn ? 'fire' : '' }, {
+      const resonanceMultiplier = sourceMastery?.resonance && hasSourceBurn ? 1.2 : 1;
+      applyDamageToMonster(index, damage.total * resonanceMultiplier, { damageType: 'periodic', attackRange: 'none', element: hasSourceBurn ? 'fire' : '' }, {
         attacker: source,
-        sourceSkill: hasSourceBurn ? 'burn' : dots.some((dot) => dot.source === source && String(dot.type).startsWith('pet-bleed:')) ? 'pet-bleed' : 'dot',
+        sourceSkill: hasSourceBurn ? 'burn' : 'dot',
+        damageBreakdown: Object.entries(damage.byType).reduce((parts, [type, amount]) => {
+          const sourceType = String(type).startsWith('pet-bleed:') ? 'pet-bleed' : type;
+          parts[sourceType] = (parts[sourceType] || 0) + amount * resonanceMultiplier;
+          return parts;
+        }, {}),
         canEvade: false,
         canParry: false,
         logDefense: false,
@@ -4468,6 +4494,7 @@ function processEnemyRespawns() {
       if (battle.enemyDepthsPhase) battle.enemyDepthsPhase[index] = 1;
       battle.enemyHps[index] = getEnemyDefinition(index).maxHp;
       battle.enemySpawnedAt[index] = Date.now();
+      const clearedDotTypes = (battle.enemyDots[index] || []).map((dot) => dot.type);
       battle.enemyDots[index] = [];
       applyPendingRoguePlagueSpread(index, battle.enemySpawnedAt[index]);
       if (battle.enemySkillStates) battle.enemySkillStates[index] = null;
@@ -4478,7 +4505,10 @@ function processEnemyRespawns() {
         logBattle(`⚠ BOSS【${getEnemyDefinition(index).name}】出現！`);
       }
       const mainMember = getMainBattleMember();
-      if (mainMember) CombatCorePolicy.record(mainMember, 'respawns');
+      if (mainMember) {
+        CombatCorePolicy.record(mainMember, 'respawns');
+        CombatCorePolicy.recordEvent(mainMember, 'dotEvents', { atMs: Date.now(), action: 'respawn-clear', targetIndex: index, clearedDotTypes, inheritedDotsCleared: true, postSpawnDotTypes: battle.enemyDots[index].map((dot) => dot.type), cleanSkillState: battle.enemySkillStates[index] === null });
+      }
     } else {
       battle.enemyRespawns[index] = nextTimer;
     }
@@ -4708,7 +4738,12 @@ function applyDamageToMonster(index, baseDamage, profile, options = {}) {
     const mageStats=MageAdvancementPolicy.telemetry(attacker),sourceSkill=options.sourceSkill||profile.element||options.attackKind||'other',bonus=result.finalDamage/3;
     mageStats.shockedBonusDamage+=bonus;mageStats.shockedBonusBySkill[sourceSkill]=(mageStats.shockedBonusBySkill[sourceSkill]||0)+bonus;
   }
-  CombatCorePolicy.recordDamage(attacker, options.sourceSkill || options.attackKind || profile.element || 'other', result.finalDamage, { aoe: options.isAoe });
+  const damageBreakdownEntries = Object.entries(options.damageBreakdown || {}).filter(([, amount]) => amount > 0);
+  const damageBreakdownTotal = damageBreakdownEntries.reduce((sum, [, amount]) => sum + amount, 0);
+  if (damageBreakdownTotal > 0) damageBreakdownEntries.forEach(([source, amount]) => {
+    CombatCorePolicy.recordDamage(attacker, source, result.finalDamage * amount / damageBreakdownTotal, { aoe: options.isAoe });
+  });
+  else CombatCorePolicy.recordDamage(attacker, options.sourceSkill || options.attackKind || profile.element || 'other', result.finalDamage, { aoe: options.isAoe });
   const arcaneMarkExplosion = attacker
     && MageAdvancementPolicy.isAdvanced(attacker.progress, 'arcane-mage')
     && profile.damageType === 'magic'
@@ -4729,7 +4764,13 @@ function applyDamageToMonster(index, baseDamage, profile, options = {}) {
     const hpRecovery = Math.ceil((attacker.maxHp || 0) * (attackerStats.killHealthRecoveryPercent || 0));
     const resourceRecovery = Math.ceil((attacker.resourceMax || 0) * (attackerStats.killResourceRecoveryPercent || 0));
     if (hpRecovery > 0) attacker.currentHp = Math.min(attacker.maxHp, attacker.currentHp + hpRecovery);
-    if (resourceRecovery > 0) attacker.resourceCurrent = Math.min(attacker.resourceMax, attacker.resourceCurrent + resourceRecovery);
+    if (resourceRecovery > 0) {
+      const resourceBeforeKillRecovery = attacker.resourceCurrent;
+      attacker.resourceCurrent = Math.min(attacker.resourceMax, attacker.resourceCurrent + resourceRecovery);
+      const actualRecovery = attacker.resourceCurrent - resourceBeforeKillRecovery;
+      CombatCorePolicy.record(attacker, 'resourceRecovered', actualRecovery);
+      if (actualRecovery) CombatCorePolicy.recordEvent(attacker, 'resourceEvents', { atMs: now, type: 'kill-recovery', amount: actualRecovery, current: attacker.resourceCurrent });
+    }
     MageAdvancementPolicy.resolveKill(attacker, now);
     if (attacker.job === 'assassin' && attacker.level >= 20 && attacker.currentHp / attacker.maxHp <= .3) {
       const desperate = ClassSkillPolicy.getEffect('assassin', 'desperate-counter', Number(progress.skillLevels?.['assassin:desperate-counter']) || 1);
@@ -4835,7 +4876,11 @@ function useAutoSkillForMember(member, now = Date.now()) {
       continue;
     }
     if (member.resourceType === 'arrows') CombatCorePolicy.clearResourceBlock(member, skill.id);
-    if (member.resourceType !== 'arrows' && member.resourceCurrent < cost) continue;
+    if (member.resourceType !== 'arrows' && member.resourceCurrent < cost) {
+      if (member.resourceType === 'energy') CombatCorePolicy.recordResourceBlock(member, skill.id, member.resourceCurrent);
+      continue;
+    }
+    if (member.resourceType === 'energy') CombatCorePolicy.clearResourceBlock(member, skill.id);
     if (skill.id === 'weapon-stance') {
       if (!WarriorAdvancementPolicy.applyWeaponStance(member, getSkillUpgradeLevel(progress, member.job, skill), now)) continue;
       CombatCorePolicy.recordSkillCast(member, skill.id);
@@ -4867,6 +4912,7 @@ function useAutoSkillForMember(member, now = Date.now()) {
     }
     if (skill.id === 'death-mark') {
       RogueAdvancementPolicy.markTarget(member, getEnemySkillState(targets[0]), getSkillUpgradeLevel(progress, member.job, skill), now);
+      CombatCorePolicy.recordSkillCast(member, skill.id, { atMs: now, targets: [targets[0]], damage: 0, critical: false });
       member.skillCooldowns[skill.id] = now + skill.cooldown * 1000; member.globalSkillReadyAt = now + 1000; logBattle(`☠ ${member.name}對【${getEnemyDefinition(targets[0]).name}】施加【死亡標記】。`, 'system'); return true;
     }
     const craftedEpicExecution = ChapterThreeCraftedEpicAbilityPolicy.beginSkillExecution(member, now, { eligible: skill.id !== 'companion' });
@@ -4976,7 +5022,11 @@ function useAutoSkillForMember(member, now = Date.now()) {
     if (skill.id === 'shadow-assassination' && critical && skillEffect.offhandOnCrit && hits.length && AssassinOffhandPolicy.isDagger(progress.equipment?.offhand)) {
       const mastery = ClassSkillPolicy.getEffect('assassin', 'dagger-mastery', Number(progress.skillLevels?.['assassin:dagger-mastery']) || 1);
       const strike = AssassinOffhandPolicy.calculateOffhandStrike({ ...stats, criticalDamageMultiplier: stats.criticalDamageMultiplier + primaryRogueBonuses.criticalDamage }, mastery, Math.random());
-      applyDamageToMonster(hits[0].index, strike.damage, profile, { attacker: member, attackKind: 'offhand', canParry: false });
+      const offhandResult = applyDamageToMonster(hits[0].index, strike.damage, profile, { attacker: member, attackKind: 'offhand', sourceSkill: 'offhand', canParry: false });
+      CombatCorePolicy.record(member, 'offhandAttacks');
+      CombatCorePolicy.record(member, 'offhandCriticalRolls');
+      if (strike.critical) CombatCorePolicy.record(member, 'offhandCriticalHits');
+      CombatCorePolicy.recordEvent(member, 'offhandEvents', { atMs: now, targetIndex: hits[0].index, trigger: 'shadow-assassination-lv6', damage: offhandResult.finalDamage, critical: strike.critical });
     }
     if (hits.length) triggerRuneFrenzy(member, critical, now);
     hits.forEach((target) => applyEnemySkillState(target.index, skillEffect, now, member));
@@ -5066,17 +5116,21 @@ function useAutoSkillForMember(member, now = Date.now()) {
     const actualResourceSpent = Math.max(0, resourceBeforeSkillCost - member.resourceCurrent);
     CombatCorePolicy.recordSkillCast(member, skill.id, { atMs: now, targets: [...targets], damage: hits.reduce((sum, target) => sum + target.result.finalDamage, 0), critical });
     CombatCorePolicy.record(member, 'resourceSpent', actualResourceSpent);
-    if (member.resourceType === 'arrows') CombatCorePolicy.recordEvent(member, 'resourceEvents', { atMs: now, type: 'spend', amount: actualResourceSpent, current: member.resourceCurrent, skill: skill.id });
+    if (member.resourceType === 'arrows' || member.resourceType === 'energy') CombatCorePolicy.recordEvent(member, 'resourceEvents', { atMs: now, type: 'spend', amount: actualResourceSpent, current: member.resourceCurrent, skill: skill.id });
     if (skill.id === 'arcane-torrent') MageAdvancementPolicy.resolveArcaneTorrentMana(member,skillEffect,hits.length);
     const arcaneCharge = MageAdvancementPolicy.castArcaneCharge(member, skill.id, now);
     ChapterThreeCraftedEpicAbilityPolicy.completeSkillExecution(member, craftedEpicExecution, now);
     if (skill.id !== 'companion') ChapterThreeSpecialEquipmentPolicy.resolveManaSurge(member, actualResourceSpent, Math.random);
+    const resourceBeforeCriticalRecovery = member.resourceCurrent;
     CriticalResourceRecoveryPolicy.resolveExecution(member, {
       attackKind: skill.id === 'companion' ? 'companion' : 'skill',
       critical,
       hadDirectHit: hits.length > 0,
       recoveryPercent: stats.criticalResourceRecoveryPercent
     });
+    const criticalResourceRecovery = Math.max(0, member.resourceCurrent - resourceBeforeCriticalRecovery);
+    CombatCorePolicy.record(member, 'resourceRecovered', criticalResourceRecovery);
+    if (criticalResourceRecovery) CombatCorePolicy.recordEvent(member, 'resourceEvents', { atMs: now, type: 'critical-recovery', amount: criticalResourceRecovery, current: member.resourceCurrent });
     const blinkCooldownMultiplier = member.blinkCooldownReduction ? 1 - member.blinkCooldownReduction : 1;
     const blessingCooldownSpeed = now < (member.lightGraceUntil || 0) ? 1 + (member.lightGraceCooldownSpeed || 0) : 1;
     member.skillCooldowns[skill.id] = arcaneCharge.noCooldown ? now : now + (skillEffect.cooldown || skill.cooldown) * blinkCooldownMultiplier * skillCooldownMultiplier * 1000 / (stats.cooldownSpeed * blessingCooldownSpeed * (1 + (priestFaith.cooldownSpeed || 0)));
@@ -5307,11 +5361,15 @@ function updatePartyMemberResource(member, now) {
       }
     }
   } else if (member.resourceType === 'energy') {
+    const resourceBeforeRecovery = member.resourceCurrent;
     const elapsed = AssassinEnergyPolicy.getElapsedSeconds(now, member.lastResourceUpdatedAt);
     member.lastResourceUpdatedAt = now;
     member.resourceCurrent = AssassinEnergyPolicy.getRegeneratedEnergy(member.resourceCurrent, elapsed);
     member.progress.energy = member.resourceCurrent;
     member.progress.energyUpdatedAt = now;
+    const actualRecovery = Math.max(0, member.resourceCurrent - resourceBeforeRecovery);
+    CombatCorePolicy.record(member, 'resourceRecovered', actualRecovery);
+    if (actualRecovery) CombatCorePolicy.recordEvent(member, 'resourceEvents', { atMs: now, type: 'natural', amount: actualRecovery, current: member.resourceCurrent });
   } else if (member.resourceType === 'arrows') {
     const resourceBeforeRecovery = member.resourceCurrent;
     const recovery = HunterArrowPolicy.recoverArrows(member.resourceCurrent, now - member.lastArrowRecoveryAt, member.progress.equipment);
@@ -5401,7 +5459,11 @@ function processPartyMemberAttacks(now = Date.now()) {
       }
       tryApplyThornCorrosion(member, targetIndex, 'basic', result.finalDamage, now);
       if (member.resourceType === 'rage') member.resourceCurrent = WarriorResourcePolicy.gainFromAttack(member.resourceCurrent);
+      const resourceBeforeCriticalRecovery = member.resourceCurrent;
       CriticalResourceRecoveryPolicy.resolveExecution(member, { attackKind: 'basic', critical, hadDirectHit: true, recoveryPercent: member.stats.criticalResourceRecoveryPercent });
+      const criticalResourceRecovery = Math.max(0, member.resourceCurrent - resourceBeforeCriticalRecovery);
+      CombatCorePolicy.record(member, 'resourceRecovered', criticalResourceRecovery);
+      if (criticalResourceRecovery) CombatCorePolicy.recordEvent(member, 'resourceEvents', { atMs: now, type: 'critical-recovery', amount: criticalResourceRecovery, current: member.resourceCurrent });
       logBattle(`⚔ ${member.name}對【${enemy.name}】造成 ${result.finalDamage} 傷害${critical ? '（暴擊）' : ''}${orcRage ? '（狂怒）' : ''}${instinctTriggered ? '（獵人本能）' : ''}`, 'damage-dealt', { aggregateKey: `member-${member.id}-${battle.enemyTypes[targetIndex]}`, damage: result.finalDamage, summary: `⚔ ${member.name}攻擊【${enemy.name}】` });
       const galeArrowPower = member.job === 'hunter' ? HunterAdvancementPolicy.resolveGaleBasicHit(member, true, now) : 0;
       if (galeArrowPower && battle.enemyHps[targetIndex] > 0) {
@@ -5429,7 +5491,14 @@ function processPartyMemberAttacks(now = Date.now()) {
         const danceProc = now < (member.shadowDanceUntil || 0) && Math.random() < (member.shadowDanceOffhandChance || 0);
         if ((masteryProc || danceProc) && AssassinOffhandPolicy.isDagger(member.progress.equipment?.offhand)) {
           const offhandStrike = AssassinOffhandPolicy.calculateOffhandStrike({ ...member.stats, criticalDamageMultiplier: member.stats.criticalDamageMultiplier + rogueBonuses.criticalDamage }, mastery, Math.random());
-          applyDamageToMonster(targetIndex, offhandStrike.damage, profile, { attacker: member, attackKind: 'offhand', canParry: false });
+          const offhandResult = applyDamageToMonster(targetIndex, offhandStrike.damage, profile, { attacker: member, attackKind: 'offhand', sourceSkill: 'offhand', canParry: false });
+          const triggers = [];
+          if (masteryProc) triggers.push(lethalExecution?.extraOffhandChance ? 'dagger-mastery-or-lethal-technique' : 'dagger-mastery');
+          if (danceProc) triggers.push('shadow-dance');
+          CombatCorePolicy.record(member, 'offhandAttacks');
+          CombatCorePolicy.record(member, 'offhandCriticalRolls');
+          if (offhandStrike.critical) CombatCorePolicy.record(member, 'offhandCriticalHits');
+          CombatCorePolicy.recordEvent(member, 'offhandEvents', { atMs: now, targetIndex, trigger: triggers.join('+'), damage: offhandResult.finalDamage, critical: offhandStrike.critical });
         }
       }
       const titanStrike = WarriorAdvancementPolicy.rollTitanStrike(member, battle.enemyHps[targetIndex] > 0, true, Math.random);

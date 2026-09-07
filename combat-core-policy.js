@@ -38,7 +38,9 @@
       dotTicks: 0, resourceSpent: 0, resourceRecovered: 0, resourceBlocked: 0,
       resourceBlockedBySkill: {}, petAttacks: 0, petCriticalRolls: 0, petCriticalHits: 0,
       petKills: 0, extraShots: 0, extraShotKills: 0, kills: 0, respawns: 0,
-      basicEvents: [], skillEvents: [], petEvents: [], extraShotEvents: [], resourceEvents: []
+      offhandAttacks: 0, offhandCriticalRolls: 0, offhandCriticalHits: 0,
+      dotApplications: {}, dotRefreshes: {}, dotTicksByType: {}, maxDotStacks: {},
+      basicEvents: [], skillEvents: [], petEvents: [], extraShotEvents: [], offhandEvents: [], dotEvents: [], resourceEvents: []
     });
   }
 
@@ -71,8 +73,8 @@
   function recordResourceBlock(member, skillId, resourceCurrent) {
     if (!member) return false;
     const blocks = member.combatResourceBlockState || (member.combatResourceBlockState = {});
-    if (blocks[skillId] === resourceCurrent) return false;
-    blocks[skillId] = resourceCurrent;
+    if (Object.prototype.hasOwnProperty.call(blocks, skillId)) return false;
+    blocks[skillId] = { resourceCurrent };
     const stats = telemetry(member);
     stats.resourceBlocked += 1;
     stats.resourceBlockedBySkill[skillId] = (stats.resourceBlockedBySkill[skillId] || 0) + 1;

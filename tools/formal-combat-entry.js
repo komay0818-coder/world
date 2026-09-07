@@ -44,6 +44,7 @@ saveProgress = () => {};
 function formalSkillDefinitions(job, advancedClass) {
   const base = ClassSkillPolicy.getSkills(job);
   if (job === 'warrior') return [...base, ...WarriorAdvancementPolicy.getSkills(advancedClass)];
+  if (job === 'assassin') return [...base, ...RogueAdvancementPolicy.getSkills(advancedClass)];
   if (job === 'hunter') return [...base, ...HunterAdvancementPolicy.getSkills(advancedClass)];
   if (job === 'mage') return [...base, ...MageAdvancementPolicy.getSkills(advancedClass)];
   return base;
@@ -85,6 +86,11 @@ function setupFormalCombat(config) {
     equipment: formalEquipment,
     skillLevels: buildFormalSkillLevels(config.job, config.advancedClass, config.skills || {})
   };
+  if (config.job === 'assassin') {
+    formalProgress.energy = config.initialResource ?? AssassinEnergyPolicy.MAX_ENERGY;
+    formalProgress.maxEnergy = AssassinEnergyPolicy.MAX_ENERGY;
+    formalProgress.energyUpdatedAt = 0;
+  }
   const member = createBattlePartyMember({ character, progress: formalProgress }, 0, character.id, 0);
   if (config.initialResource !== null && config.initialResource !== undefined) member.resourceCurrent = Math.max(0, Math.min(member.resourceMax, Number(config.initialResource) || 0));
   formalEnemy = {
@@ -119,7 +125,7 @@ function setupFormalCombat(config) {
   return member;
 }
 
-function formalSnapshot(member, duration, cycle, resourceMonitor) {
+function formalSnapshot(member, duration, cycle, resourceMonitor, dotMonitor) {
   const combat = JSON.parse(JSON.stringify(CombatCorePolicy.telemetry(member)));
   const basicDamage = combat.damageBySource['basic-attack'] || 0;
   const skillDamage = {};
@@ -129,11 +135,27 @@ function formalSnapshot(member, duration, cycle, resourceMonitor) {
   const petSources = ['pet-basic', 'pet-bite', 'beast-slam', 'pet-bleed'];
   const petDamage = petSources.reduce((sum, source) => sum + (combat.damageBySource[source] || 0), 0);
   const extraShotDamage = combat.damageBySource['extra-shot'] || 0;
-  const dotDamage = ['burn', 'dot', 'pet-bleed'].reduce((sum, source) => sum + (combat.damageBySource[source] || 0), 0);
+  const dotSources = ['burn', 'dot', 'pet-bleed', 'bleed', 'rupture', 'poison', 'bleed-entry', 'bleed-trigger', 'rupture-entry', 'poison-entry'];
+  const dotDamage = dotSources.reduce((sum, source) => sum + (combat.damageBySource[source] || 0), 0);
   const activeSkillIds = new Set(formalSkillDefinitions(member.job, member.progress.advancedClass).filter((skill) => skill.type === 'active').map((skill) => skill.id));
   const activeSkillDamage = Object.fromEntries(Object.entries(combat.damageBySource).filter(([source]) => activeSkillIds.has(source)));
   const activeSkillTotal = Object.values(activeSkillDamage).reduce((sum, damage) => sum + damage, 0);
-  const specialDamage = combat.totalDamage - basicDamage - petDamage - extraShotDamage - activeSkillTotal;
+  const offhandDamage = combat.damageBySource.offhand || 0;
+  const bleedTickDamage = (combat.damageBySource.bleed || 0) + (combat.damageBySource.rupture || 0);
+  const bleedSpecialDamage = (combat.damageBySource['bleed-entry'] || 0) + (combat.damageBySource['bleed-trigger'] || 0) + (combat.damageBySource['rupture-entry'] || 0);
+  const poisonTickDamage = combat.damageBySource.poison || 0;
+  const poisonEntryDamage = combat.damageBySource['poison-entry'] || 0;
+  const classifiedSources = new Set(['basic-attack', 'offhand', 'extra-shot', ...petSources, ...dotSources, ...activeSkillIds]);
+  const specialDamage = Object.entries(combat.damageBySource).filter(([source]) => !classifiedSources.has(source)).reduce((sum, [, damage]) => sum + damage, 0);
+  const naturalRecovery = combat.resourceEvents.filter((event) => event.type === 'natural').reduce((sum, event) => sum + event.amount, 0);
+  const specialRecovery = combat.resourceRecovered - naturalRecovery;
+  const resource = ['arrows', 'energy'].includes(member.resourceType) ? {
+    type: member.resourceType, initial: resourceMonitor.initial, maximum: member.resourceMax,
+    minimum: resourceMonitor.minimum, end: member.resourceCurrent, spent: combat.resourceSpent,
+    recovered: combat.resourceRecovered, naturalRecovery, specialRecovery,
+    blocked: combat.resourceBlocked, blockedBySkill: combat.resourceBlockedBySkill,
+    zeroDuration: resourceMonitor.zeroMs / 1000, curve: resourceMonitor.curve
+  } : null;
   return {
     duration, ttk: battle.isDungeon ? duration : null, totalDamage: combat.totalDamage,
     dps: combat.totalDamage / Math.max(.1, duration), killsPerMinute: battle.isDungeon ? null : combat.kills / Math.max(.1, duration) * 60,
@@ -144,15 +166,16 @@ function formalSnapshot(member, duration, cycle, resourceMonitor) {
     petAttacks: combat.petAttacks, petCriticalRate: combat.petCriticalRolls ? combat.petCriticalHits / combat.petCriticalRolls : null, petKills: combat.petKills,
     extraShotDamage, extraShotShare: combat.totalDamage ? extraShotDamage / combat.totalDamage : 0, extraShots: combat.extraShots,
     dotDamage, specialDamage,
+    offhandDamage, offhandDps: offhandDamage / Math.max(.1, duration), offhandShare: combat.totalDamage ? offhandDamage / combat.totalDamage : 0,
+    offhandAttacks: combat.offhandAttacks, offhandCriticalRate: combat.offhandCriticalRolls ? combat.offhandCriticalHits / combat.offhandCriticalRolls : null,
+    bleed: { damage: bleedTickDamage + bleedSpecialDamage, tickDamage: bleedTickDamage, specialDamage: bleedSpecialDamage, share: combat.totalDamage ? (bleedTickDamage + bleedSpecialDamage) / combat.totalDamage : 0, applications: (combat.dotApplications.bleed || 0) + (combat.dotApplications.rupture || 0), refreshes: (combat.dotRefreshes.bleed || 0) + (combat.dotRefreshes.rupture || 0), ticks: (combat.dotTicksByType.bleed || 0) + (combat.dotTicksByType.rupture || 0), timeline: dotMonitor.timeline.filter((event) => event.targets.some((target) => target.bleed || target.rupture)) },
+    poison: { damage: poisonTickDamage + poisonEntryDamage, tickDamage: poisonTickDamage, entryDamage: poisonEntryDamage, share: combat.totalDamage ? (poisonTickDamage + poisonEntryDamage) / combat.totalDamage : 0, applications: combat.dotApplications.poison || 0, refreshes: combat.dotRefreshes.poison || 0, ticks: combat.dotTicksByType.poison || 0, maxStacks: dotMonitor.maxPoisonStacks, averageStacks: dotMonitor.samples ? dotMonitor.poisonStackTotal / dotMonitor.samples : 0, timeline: dotMonitor.timeline.filter((event) => event.targets.some((target) => target.poison)) },
     skillCasts: combat.skillCasts,
     criticalRate: combat.criticalRolls ? combat.criticalHits / combat.criticalRolls : 0,
     aoeDamage: combat.aoeDamage, aoeShare: combat.totalDamage ? combat.aoeDamage / combat.totalDamage : 0,
-    arrows: member.resourceType === 'arrows' ? {
-      initial: resourceMonitor.initial, minimum: resourceMonitor.minimum, end: member.resourceCurrent,
-      spent: combat.resourceSpent, recovered: combat.resourceRecovered,
-      blocked: combat.resourceBlocked, blockedBySkill: combat.resourceBlockedBySkill,
-      zeroDuration: resourceMonitor.zeroMs / 1000, curve: resourceMonitor.curve
-    } : null,
+    resource,
+    arrows: member.resourceType === 'arrows' ? resource : null,
+    energy: member.resourceType === 'energy' ? resource : null,
     cycle, combat,
     final: {
       hp: member.currentHp, maxHp: member.maxHp, defense: member.stats.defense, resource: member.resourceCurrent, alive: member.alive,
@@ -164,6 +187,10 @@ function formalSnapshot(member, duration, cycle, resourceMonitor) {
         beastFuryUntil: member.beastFuryUntil || 0, bloodyHuntUntil: member.bloodyHuntUntil || 0,
         sniperBasicUntil: member.sniperBasicUntil || 0, eagleEyeUntil: member.eagleEyeUntil || 0,
         weaknessShotUntil: member.weaknessShotUntil || 0, nextHunterAttackBonus: member.nextHunterAttackBonus || 0
+      },
+      rogueState: {
+        lethalTechniqueUntil: member.lethalTechniqueUntil || 0, shadowDanceUntil: member.shadowDanceUntil || 0,
+        plagueSpreadPending: Boolean(member.plagueSpreadPending), desperateDodgeUntil: member.desperateDodgeUntil || 0
       },
       warriorState: {
         skillHasteUntil: member.skillHasteUntil || 0, bloodRageUntil: member.bloodRageUntil || 0,
@@ -179,6 +206,7 @@ function runFormalCombat(config) {
   const member = setupFormalCombat(config);
   const cycle = [];
   const resourceMonitor = { initial: member.resourceCurrent, minimum: member.resourceCurrent, zeroMs: 0, curve: [{ atMs: 0, value: member.resourceCurrent }] };
+  const dotMonitor = { samples: 0, poisonStackTotal: 0, maxPoisonStacks: 0, timeline: [], lastSignature: '' };
   let resourceEventCursor = 0;
   const limitMs = (config.mode === 'boss' ? config.maxSeconds : config.seconds) * 1000;
   for (formalNow = 0; formalNow < limitMs && fighting && (config.mode !== 'boss' || battle.enemyHps[0] > 0); formalNow += 100) {
@@ -188,12 +216,26 @@ function runFormalCombat(config) {
     else CombatCorePolicy.runPlayerTick(createBattleTickRuntime(), formalNow);
     enemyAttackTick();
     resourceMonitor.minimum = Math.min(resourceMonitor.minimum, member.resourceCurrent);
-    if (member.resourceType === 'arrows' && member.resourceCurrent === 0) resourceMonitor.zeroMs += 100;
+    if (['arrows', 'energy'].includes(member.resourceType) && member.resourceCurrent === 0) resourceMonitor.zeroMs += 100;
     const resourceEvents = CombatCorePolicy.telemetry(member).resourceEvents;
     while (resourceEventCursor < resourceEvents.length) {
       const event = resourceEvents[resourceEventCursor++];
       resourceMonitor.minimum = Math.min(resourceMonitor.minimum, event.current);
       resourceMonitor.curve.push({ atMs: event.atMs, value: event.current, type: event.type });
+    }
+    const dotState = battle.enemyDots.map((dots, targetIndex) => ({
+      targetIndex,
+      bleed: dots.filter((dot) => dot.type === 'bleed').length,
+      rupture: dots.filter((dot) => dot.type === 'rupture').length,
+      poison: RogueAdvancementPolicy.poisonStacks(dots)
+    }));
+    dotMonitor.samples += dotState.length;
+    dotMonitor.poisonStackTotal += dotState.reduce((sum, state) => sum + state.poison, 0);
+    dotMonitor.maxPoisonStacks = Math.max(dotMonitor.maxPoisonStacks, ...dotState.map((state) => state.poison));
+    const dotSignature = JSON.stringify(dotState);
+    if (dotSignature !== dotMonitor.lastSignature) {
+      dotMonitor.timeline.push({ atMs: formalNow, targets: dotState });
+      dotMonitor.lastSignature = dotSignature;
     }
     const after = CombatCorePolicy.telemetry(member).skillCasts;
     for (const [id, casts] of Object.entries(after)) {
@@ -201,7 +243,7 @@ function runFormalCombat(config) {
     }
   }
   if (config.mode === 'boss' && battle.enemyHps[0] > 0) throw new Error('Boss did not die within maxSeconds');
-  return formalSnapshot(member, formalNow / 1000, cycle, resourceMonitor);
+  return formalSnapshot(member, formalNow / 1000, cycle, resourceMonitor, dotMonitor);
 }
 `);
 
