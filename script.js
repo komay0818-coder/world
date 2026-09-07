@@ -3534,7 +3534,7 @@ function processEnemyDots() {
       const hasSourceBurn = dots.some((dot) => dot.source === source && dot.type === 'burn');
       applyDamageToMonster(index, damage * (sourceMastery?.resonance && hasSourceBurn ? 1.2 : 1), { damageType: 'periodic', attackRange: 'none', element: hasSourceBurn ? 'fire' : '' }, {
         attacker: source,
-        sourceSkill: hasSourceBurn ? 'burn' : 'dot',
+        sourceSkill: hasSourceBurn ? 'burn' : dots.some((dot) => dot.source === source && String(dot.type).startsWith('pet-bleed:')) ? 'pet-bleed' : 'dot',
         canEvade: false,
         canParry: false,
         logDefense: false,
@@ -4830,7 +4830,11 @@ function useAutoSkillForMember(member, now = Date.now()) {
     const stormElements = skill.id === 'elemental-storm' ? MageAdvancementPolicy.rollStormElements(skillEffect, Math.random, member) : [];
     const castElement = getMageSkillElement(skill.id, stormElements[0]);
     const cost = getSkillResourceCost(member.job, skill);
-    if (member.resourceType === 'arrows' && !HunterArrowPolicy.canUseSkill(member.resourceCurrent, skill.id, progress.equipment)) continue;
+    if (member.resourceType === 'arrows' && !HunterArrowPolicy.canUseSkill(member.resourceCurrent, skill.id, progress.equipment)) {
+      CombatCorePolicy.recordResourceBlock(member, skill.id, member.resourceCurrent);
+      continue;
+    }
+    if (member.resourceType === 'arrows') CombatCorePolicy.clearResourceBlock(member, skill.id);
     if (member.resourceType !== 'arrows' && member.resourceCurrent < cost) continue;
     if (skill.id === 'weapon-stance') {
       if (!WarriorAdvancementPolicy.applyWeaponStance(member, getSkillUpgradeLevel(progress, member.job, skill), now)) continue;
@@ -4850,7 +4854,12 @@ function useAutoSkillForMember(member, now = Date.now()) {
     if (skill.id === 'gale-rapid-fire' || skill.id === 'beast-fury' || skill.id === 'bloody-hunt') {
       if (skill.id === 'gale-rapid-fire') HunterAdvancementPolicy.applyGale(member, skillEffect, now);
       else HunterAdvancementPolicy.applyPetBuff(member, skill.id, skillEffect, now);
+      const resourceBeforeSkillCost = member.resourceCurrent;
       member.resourceCurrent = HunterArrowPolicy.spendArrows(member.resourceCurrent, skill.id, progress.equipment);
+      const actualResourceSpent = Math.max(0, resourceBeforeSkillCost - member.resourceCurrent);
+      CombatCorePolicy.recordSkillCast(member, skill.id, { atMs: now });
+      CombatCorePolicy.record(member, 'resourceSpent', actualResourceSpent);
+      CombatCorePolicy.recordEvent(member, 'resourceEvents', { atMs: now, type: 'spend', amount: actualResourceSpent, current: member.resourceCurrent, skill: skill.id });
       member.skillCooldowns[skill.id] = now + skill.cooldown * 1000;
       member.globalSkillReadyAt = now + 1000;
       logBattle(`➶ ${member.name}施放【${skill.name}】。`, 'system');
@@ -5055,8 +5064,9 @@ function useAutoSkillForMember(member, now = Date.now()) {
       ? HunterArrowPolicy.spendArrows(member.resourceCurrent, skill.id, progress.equipment)
       : Math.max(0, member.resourceCurrent - cost);
     const actualResourceSpent = Math.max(0, resourceBeforeSkillCost - member.resourceCurrent);
-    CombatCorePolicy.recordSkillCast(member, skill.id);
+    CombatCorePolicy.recordSkillCast(member, skill.id, { atMs: now, targets: [...targets], damage: hits.reduce((sum, target) => sum + target.result.finalDamage, 0), critical });
     CombatCorePolicy.record(member, 'resourceSpent', actualResourceSpent);
+    if (member.resourceType === 'arrows') CombatCorePolicy.recordEvent(member, 'resourceEvents', { atMs: now, type: 'spend', amount: actualResourceSpent, current: member.resourceCurrent, skill: skill.id });
     if (skill.id === 'arcane-torrent') MageAdvancementPolicy.resolveArcaneTorrentMana(member,skillEffect,hits.length);
     const arcaneCharge = MageAdvancementPolicy.castArcaneCharge(member, skill.id, now);
     ChapterThreeCraftedEpicAbilityPolicy.completeSkillExecution(member, craftedEpicExecution, now);
@@ -5303,9 +5313,13 @@ function updatePartyMemberResource(member, now) {
     member.progress.energy = member.resourceCurrent;
     member.progress.energyUpdatedAt = now;
   } else if (member.resourceType === 'arrows') {
+    const resourceBeforeRecovery = member.resourceCurrent;
     const recovery = HunterArrowPolicy.recoverArrows(member.resourceCurrent, now - member.lastArrowRecoveryAt, member.progress.equipment);
     member.resourceCurrent = recovery.arrows;
     member.lastArrowRecoveryAt = now - recovery.remainder;
+    const actualRecovery = Math.max(0, member.resourceCurrent - resourceBeforeRecovery);
+    CombatCorePolicy.record(member, 'resourceRecovered', actualRecovery);
+    if (actualRecovery) CombatCorePolicy.recordEvent(member, 'resourceEvents', { atMs: now, type: 'recover', amount: actualRecovery, current: member.resourceCurrent });
   }
   if (RunePolicy.hasWord(member.progress.equipment, 'meditation') && now >= (member.runeMeditationAt || 0)) {
     member.resourceCurrent = Math.min(member.resourceMax, member.resourceCurrent + member.resourceMax * .03);
@@ -5364,6 +5378,7 @@ function processPartyMemberAttacks(now = Date.now()) {
     const profile = getPlayerAttackProfile(member.character);
     const result = applyDamageToMonster(targetIndex, hit * getRuneOutgoingMultiplier(member, targetIndex), profile, { attacker: member, attackKind: 'basic', sourceSkill:'basic-attack', specialEquipmentMultiplier: specialBasicExecution.damageMultiplier });
     CombatCorePolicy.record(member, 'basicAttacks');
+    CombatCorePolicy.recordEvent(member, 'basicEvents', { atMs: now, targetIndex, damage: result.finalDamage, critical });
     playPartyMemberCombatAnimation(member, [targetIndex], { kind: 'basic' });
     ChapterThreeSpecialEquipmentPolicy.completeMainHandBasicAttack(member, specialBasicExecution, !result.evaded && result.finalDamage > 0, battle.enemyHps[targetIndex] > 0);
     RogueAdvancementPolicy.consumeBasic(member, lethalExecution, !result.evaded && result.finalDamage > 0);
@@ -5391,11 +5406,21 @@ function processPartyMemberAttacks(now = Date.now()) {
       const galeArrowPower = member.job === 'hunter' ? HunterAdvancementPolicy.resolveGaleBasicHit(member, true, now) : 0;
       if (galeArrowPower && battle.enemyHps[targetIndex] > 0) {
         const galeCritical = Math.random() < member.stats.crit;
-        applyDamageToMonster(targetIndex, member.stats.attack * galeArrowPower * (galeCritical ? member.stats.criticalDamageMultiplier : 1), profile, { attacker: member, attackKind: 'wind-arrow', canParry: false });
+        const galeKillsBefore = CombatCorePolicy.telemetry(member).kills;
+        const gale = applyDamageToMonster(targetIndex, member.stats.attack * galeArrowPower * (galeCritical ? member.stats.criticalDamageMultiplier : 1), profile, { attacker: member, attackKind: 'wind-arrow', sourceSkill: 'extra-shot', canParry: false });
+        CombatCorePolicy.record(member, 'extraShots');
+        if (CombatCorePolicy.telemetry(member).kills > galeKillsBefore) CombatCorePolicy.record(member, 'extraShotKills');
+        CombatCorePolicy.recordEvent(member, 'extraShotEvents', { atMs: now, targetIndex, damage: gale.finalDamage, critical: galeCritical });
       }
       if (member.job === 'hunter' && member.level >= 15) {
         const reload = ClassSkillPolicy.getEffect('hunter', 'quick-reload', Number(member.progress.skillLevels?.['hunter:quick-reload']) || 1);
-        if (reload.basicArrowRecoveryChance && Math.random() < reload.basicArrowRecoveryChance) member.resourceCurrent = Math.min(member.resourceMax, member.resourceCurrent + 1);
+        if (reload.basicArrowRecoveryChance && Math.random() < reload.basicArrowRecoveryChance) {
+          const resourceBeforeReload = member.resourceCurrent;
+          member.resourceCurrent = Math.min(member.resourceMax, member.resourceCurrent + 1);
+          const actualRecovery = member.resourceCurrent - resourceBeforeReload;
+          CombatCorePolicy.record(member, 'resourceRecovered', actualRecovery);
+          if (actualRecovery) CombatCorePolicy.recordEvent(member, 'resourceEvents', { atMs: now, type: 'quick-reload', amount: actualRecovery, current: member.resourceCurrent });
+        }
       }
       if (member.job === 'assassin' && battle.enemyHps[targetIndex] > 0) {
         const mastery = member.level >= 15 ? ClassSkillPolicy.getEffect('assassin', 'dagger-mastery', Number(member.progress.skillLevels?.['assassin:dagger-mastery']) || 1) : {};
@@ -5454,7 +5479,11 @@ function processHunterCompanionAttacks(now = Date.now()) {
     if (!member.alive) continue;
     const bond = member.job === 'hunter' && member.level >= 8 ? ClassSkillPolicy.getEffect('hunter', 'wild-bond', Number(member.progress.skillLevels?.['hunter:wild-bond']) || 1) : null;
     if (!bond) continue;
+    const deadBeforeUpdate = new Set((member.companions || []).filter((pet) => pet.alive === false).map((pet) => pet.id));
     HunterAdvancementPolicy.updatePetSurvival(member, now);
+    (member.companions || []).filter((pet) => deadBeforeUpdate.has(pet.id) && pet.alive !== false).forEach((pet) => {
+      CombatCorePolicy.recordEvent(member, 'petEvents', { atMs: now, petId: pet.id, kind: 'pet-revive', currentHp: pet.currentHp });
+    });
     const bonuses = HunterAdvancementPolicy.getPetBonuses(member, now);
     for (const pet of ensureHunterCompanions(member, now)) {
       if (pet.alive === false || pet.currentHp <= 0) continue;
@@ -5467,7 +5496,13 @@ function processHunterCompanionAttacks(now = Date.now()) {
       const bloody = now < (member.bloodyHuntUntil || 0) ? member.bloodyHuntEffect || {} : {};
       const bleedingMultiplier = bloody.bleedingBasicDamage && hasPetBleed ? 1 + bloody.bleedingBasicDamage : 1;
       const petAttack = member.stats.attack * bond.companionAttack * (1 + bonuses.damage);
-      const result = applyDamageToMonster(targetIndex, petAttack * bleedingMultiplier * (critical ? member.stats.criticalDamageMultiplier : 1), profile, { attacker: member, attackKind: 'companion', canParry: false });
+      const killsBefore = CombatCorePolicy.telemetry(member).kills;
+      const result = applyDamageToMonster(targetIndex, petAttack * bleedingMultiplier * (critical ? member.stats.criticalDamageMultiplier : 1), profile, { attacker: member, attackKind: 'companion', sourceSkill: 'pet-basic', canParry: false });
+      CombatCorePolicy.record(member, 'petAttacks');
+      CombatCorePolicy.record(member, 'petCriticalRolls');
+      if (critical) CombatCorePolicy.record(member, 'petCriticalHits');
+      if (CombatCorePolicy.telemetry(member).kills > killsBefore) CombatCorePolicy.record(member, 'petKills');
+      CombatCorePolicy.recordEvent(member, 'petEvents', { atMs: now, petId: pet.id, targetIndex, kind: 'pet-basic', damage: result.finalDamage, critical });
       const hit = !result.evaded && result.finalDamage > 0;
       if (hit) {
         playCompanionAttackAnimation([targetIndex]);
@@ -5479,13 +5514,23 @@ function processHunterCompanionAttacks(now = Date.now()) {
           pet.furyHitCount += 1;
           if (pet.furyHitCount % bonuses.biteEvery === 0 && battle.enemyHps[targetIndex] > 0) {
             const biteCritical = Math.random() < Math.min(.95, member.stats.crit + bonuses.crit);
-            applyDamageToMonster(targetIndex, petAttack * bonuses.bitePower * (biteCritical ? member.stats.criticalDamageMultiplier : 1), profile, { attacker: member, attackKind: 'pet-bite', canParry: false });
+            const biteKillsBefore = CombatCorePolicy.telemetry(member).kills;
+            const bite = applyDamageToMonster(targetIndex, petAttack * bonuses.bitePower * (biteCritical ? member.stats.criticalDamageMultiplier : 1), profile, { attacker: member, attackKind: 'pet-bite', sourceSkill: 'pet-bite', canParry: false });
+            CombatCorePolicy.record(member, 'petCriticalRolls');
+            if (biteCritical) CombatCorePolicy.record(member, 'petCriticalHits');
+            if (CombatCorePolicy.telemetry(member).kills > biteKillsBefore) CombatCorePolicy.record(member, 'petKills');
+            CombatCorePolicy.recordEvent(member, 'petEvents', { atMs: now, petId: pet.id, targetIndex, kind: 'pet-bite', damage: bite.finalDamage, critical: biteCritical });
           }
         }
         if (bond.beastSlam && pet.attackCount % 6 === 0 && battle.enemyHps[targetIndex] > 0) {
           const awakening = now < (pet.wildAwakeningUntil || 0) ? pet.wildAwakeningDamage || 0 : 0;
           const slamCritical = Math.random() < Math.min(.95, member.stats.crit + bonuses.crit);
-          const slam = applyDamageToMonster(targetIndex, petAttack * bond.beastSlam * (1 + awakening) * (slamCritical ? member.stats.criticalDamageMultiplier : 1), profile, { attacker: member, attackKind: 'beast-slam', canParry: false });
+          const slamKillsBefore = CombatCorePolicy.telemetry(member).kills;
+          const slam = applyDamageToMonster(targetIndex, petAttack * bond.beastSlam * (1 + awakening) * (slamCritical ? member.stats.criticalDamageMultiplier : 1), profile, { attacker: member, attackKind: 'beast-slam', sourceSkill: 'beast-slam', canParry: false });
+          CombatCorePolicy.record(member, 'petCriticalRolls');
+          if (slamCritical) CombatCorePolicy.record(member, 'petCriticalHits');
+          if (CombatCorePolicy.telemetry(member).kills > slamKillsBefore) CombatCorePolicy.record(member, 'petKills');
+          CombatCorePolicy.recordEvent(member, 'petEvents', { atMs: now, petId: pet.id, targetIndex, kind: 'beast-slam', damage: slam.finalDamage, critical: slamCritical });
           if (!slam.evaded && slam.finalDamage > 0 && awakening) { pet.wildAwakeningUntil = 0; pet.wildAwakeningDamage = 0; }
           if (!slam.evaded && slam.finalDamage > 0) member.nextHunterAttackBonus = bond.nextHunterAttack || 0;
         }
@@ -6456,7 +6501,11 @@ function enemyAttackTick() {
     if (parried && damage > 0) damage = Math.max(1, Math.ceil(damage * .5));
     ensureHunterCompanions(target, now);
     HunterAdvancementPolicy.updatePetSurvival(target, now);
+    const livingPetIdsBeforeGuard = new Set((target.companions || []).filter((pet) => pet.alive !== false).map((pet) => pet.id));
     const guard = HunterAdvancementPolicy.applyGuardDamage(target, damage, now);
+    (target.companions || []).filter((pet) => livingPetIdsBeforeGuard.has(pet.id) && pet.alive === false).forEach((pet) => {
+      CombatCorePolicy.recordEvent(target, 'petEvents', { atMs: now, petId: pet.id, kind: 'pet-death', reviveAt: pet.reviveAt });
+    });
     damage = guard.hunterDamage;
     if (guard.petDamage > 0) logBattle(`🐾 ${target.name}的戰寵群分攤 ${Math.round(guard.petDamage)} 點直接傷害。`, 'system');
     const absorbed = Math.min(target.shield || 0, damage);

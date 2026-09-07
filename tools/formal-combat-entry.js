@@ -44,6 +44,7 @@ saveProgress = () => {};
 function formalSkillDefinitions(job, advancedClass) {
   const base = ClassSkillPolicy.getSkills(job);
   if (job === 'warrior') return [...base, ...WarriorAdvancementPolicy.getSkills(advancedClass)];
+  if (job === 'hunter') return [...base, ...HunterAdvancementPolicy.getSkills(advancedClass)];
   if (job === 'mage') return [...base, ...MageAdvancementPolicy.getSkills(advancedClass)];
   return base;
 }
@@ -75,14 +76,17 @@ function buildFormalSkillLevels(job, advancedClass, requested) {
 function setupFormalCombat(config) {
   seedFormalCombat(config.seed);
   const character = { id: 'formal-' + config.job, name: 'Formal ' + config.job, job: config.job, race: config.race || 'human' };
+  const formalEquipment = { ...emptyEquipment(), ...(config.equipment || {}) };
+  if (config.job === 'hunter') HunterArrowPolicy.ensureStarterQuiver(formalEquipment);
   formalProgress = {
     level: config.level || 45,
     advancedClass: config.advancedClass || '',
     gold: 0, potions: 0, manaPotions: 0, inventory: [],
-    equipment: { ...emptyEquipment(), ...(config.equipment || {}) },
+    equipment: formalEquipment,
     skillLevels: buildFormalSkillLevels(config.job, config.advancedClass, config.skills || {})
   };
   const member = createBattlePartyMember({ character, progress: formalProgress }, 0, character.id, 0);
+  if (config.initialResource !== null && config.initialResource !== undefined) member.resourceCurrent = Math.max(0, Math.min(member.resourceMax, Number(config.initialResource) || 0));
   formalEnemy = {
     id: 'formal-enemy', name: 'Formal Enemy', maxHp: config.enemy.hp,
     defense: config.enemy.defense || 0, attack: config.enemy.attack || 0,
@@ -107,30 +111,60 @@ function setupFormalCombat(config) {
     dungeonId: null, dungeonWave: 1, dungeonComplete: false, waveTransitioning: false,
     globalSkillReadyAt: 0, skillCooldowns: {}, lastStrongholdRegenAt: 0
   };
+  if (member.job === 'hunter') {
+    ensureHunterCompanions(member, 0);
+    (config.petStates || []).forEach((state, index) => Object.assign(member.companions[index] || {}, state));
+  }
   fighting = true;
   return member;
 }
 
-function formalSnapshot(member, duration, cycle) {
+function formalSnapshot(member, duration, cycle, resourceMonitor) {
   const combat = JSON.parse(JSON.stringify(CombatCorePolicy.telemetry(member)));
   const basicDamage = combat.damageBySource['basic-attack'] || 0;
   const skillDamage = {};
   for (const [source, damage] of Object.entries(combat.damageBySource)) {
     if (source !== 'basic-attack') skillDamage[source] = damage;
   }
+  const petSources = ['pet-basic', 'pet-bite', 'beast-slam', 'pet-bleed'];
+  const petDamage = petSources.reduce((sum, source) => sum + (combat.damageBySource[source] || 0), 0);
+  const extraShotDamage = combat.damageBySource['extra-shot'] || 0;
+  const dotDamage = ['burn', 'dot', 'pet-bleed'].reduce((sum, source) => sum + (combat.damageBySource[source] || 0), 0);
+  const activeSkillIds = new Set(formalSkillDefinitions(member.job, member.progress.advancedClass).filter((skill) => skill.type === 'active').map((skill) => skill.id));
+  const activeSkillDamage = Object.fromEntries(Object.entries(combat.damageBySource).filter(([source]) => activeSkillIds.has(source)));
+  const activeSkillTotal = Object.values(activeSkillDamage).reduce((sum, damage) => sum + damage, 0);
+  const specialDamage = combat.totalDamage - basicDamage - petDamage - extraShotDamage - activeSkillTotal;
   return {
     duration, ttk: battle.isDungeon ? duration : null, totalDamage: combat.totalDamage,
     dps: combat.totalDamage / Math.max(.1, duration), killsPerMinute: battle.isDungeon ? null : combat.kills / Math.max(.1, duration) * 60,
     basicDamage, basicShare: combat.totalDamage ? basicDamage / combat.totalDamage : 0,
     skillDamage, skillShares: Object.fromEntries(Object.entries(skillDamage).map(([id, damage]) => [id, combat.totalDamage ? damage / combat.totalDamage : 0])),
+    activeSkillDamage, activeSkillTotal, activeSkillShare: combat.totalDamage ? activeSkillTotal / combat.totalDamage : 0,
+    petDamage, petDps: petDamage / Math.max(.1, duration), petShare: combat.totalDamage ? petDamage / combat.totalDamage : 0,
+    petAttacks: combat.petAttacks, petCriticalRate: combat.petCriticalRolls ? combat.petCriticalHits / combat.petCriticalRolls : null, petKills: combat.petKills,
+    extraShotDamage, extraShotShare: combat.totalDamage ? extraShotDamage / combat.totalDamage : 0, extraShots: combat.extraShots,
+    dotDamage, specialDamage,
     skillCasts: combat.skillCasts,
     criticalRate: combat.criticalRolls ? combat.criticalHits / combat.criticalRolls : 0,
     aoeDamage: combat.aoeDamage, aoeShare: combat.totalDamage ? combat.aoeDamage / combat.totalDamage : 0,
+    arrows: member.resourceType === 'arrows' ? {
+      initial: resourceMonitor.initial, minimum: resourceMonitor.minimum, end: member.resourceCurrent,
+      spent: combat.resourceSpent, recovered: combat.resourceRecovered,
+      blocked: combat.resourceBlocked, blockedBySkill: combat.resourceBlockedBySkill,
+      zeroDuration: resourceMonitor.zeroMs / 1000, curve: resourceMonitor.curve
+    } : null,
     cycle, combat,
     final: {
       hp: member.currentHp, maxHp: member.maxHp, defense: member.stats.defense, resource: member.resourceCurrent, alive: member.alive,
       cooldowns: { ...member.skillCooldowns }, enemyHps: [...battle.enemyHps],
       enemyRespawns: [...battle.enemyRespawns], enemySkillStates: JSON.parse(JSON.stringify(battle.enemySkillStates)),
+      companions: JSON.parse(JSON.stringify(member.companions || [])),
+      hunterState: {
+        galeUntil: member.galeUntil || 0, galeHitCount: member.galeHitCount || 0,
+        beastFuryUntil: member.beastFuryUntil || 0, bloodyHuntUntil: member.bloodyHuntUntil || 0,
+        sniperBasicUntil: member.sniperBasicUntil || 0, eagleEyeUntil: member.eagleEyeUntil || 0,
+        weaknessShotUntil: member.weaknessShotUntil || 0, nextHunterAttackBonus: member.nextHunterAttackBonus || 0
+      },
       warriorState: {
         skillHasteUntil: member.skillHasteUntil || 0, bloodRageUntil: member.bloodRageUntil || 0,
         weaponStanceUntil: member.weaponStanceUntil || 0, unyieldingUntil: member.unyieldingUntil || 0,
@@ -144,6 +178,8 @@ function formalSnapshot(member, duration, cycle) {
 function runFormalCombat(config) {
   const member = setupFormalCombat(config);
   const cycle = [];
+  const resourceMonitor = { initial: member.resourceCurrent, minimum: member.resourceCurrent, zeroMs: 0, curve: [{ atMs: 0, value: member.resourceCurrent }] };
+  let resourceEventCursor = 0;
   const limitMs = (config.mode === 'boss' ? config.maxSeconds : config.seconds) * 1000;
   for (formalNow = 0; formalNow < limitMs && fighting && (config.mode !== 'boss' || battle.enemyHps[0] > 0); formalNow += 100) {
     const before = { ...CombatCorePolicy.telemetry(member).skillCasts };
@@ -151,13 +187,21 @@ function runFormalCombat(config) {
     if (config.entry === 'ui') battleTick();
     else CombatCorePolicy.runPlayerTick(createBattleTickRuntime(), formalNow);
     enemyAttackTick();
+    resourceMonitor.minimum = Math.min(resourceMonitor.minimum, member.resourceCurrent);
+    if (member.resourceType === 'arrows' && member.resourceCurrent === 0) resourceMonitor.zeroMs += 100;
+    const resourceEvents = CombatCorePolicy.telemetry(member).resourceEvents;
+    while (resourceEventCursor < resourceEvents.length) {
+      const event = resourceEvents[resourceEventCursor++];
+      resourceMonitor.minimum = Math.min(resourceMonitor.minimum, event.current);
+      resourceMonitor.curve.push({ atMs: event.atMs, value: event.current, type: event.type });
+    }
     const after = CombatCorePolicy.telemetry(member).skillCasts;
     for (const [id, casts] of Object.entries(after)) {
       if (casts > (before[id] || 0)) cycle.push({ atMs: formalNow, skill: id, cooldownReadyAt: member.skillCooldowns[id] || formalNow });
     }
   }
   if (config.mode === 'boss' && battle.enemyHps[0] > 0) throw new Error('Boss did not die within maxSeconds');
-  return formalSnapshot(member, formalNow / 1000, cycle);
+  return formalSnapshot(member, formalNow / 1000, cycle, resourceMonitor);
 }
 `);
 
@@ -168,6 +212,8 @@ function normalizeConfig(input = {}) {
   return {
     job: input.job, advancedClass: input.advancedClass || '', race: input.race || 'human', level: input.level || 45,
     equipment: input.equipment || {}, skills: input.skills || {}, mode, seed: input.seed ?? 1,
+    initialResource: input.initialResource ?? null,
+    petStates: input.petStates || [],
     seconds: input.seconds || 60, maxSeconds: input.maxSeconds || 600, entry: input.entry || 'headless',
     enemy: { hp: mode === 'boss' ? 25000 : 1200, defense: 20, attack: 8, attackSpeed: 1, level: 45, ...(input.enemy || {}) }
   };

@@ -35,7 +35,10 @@
     return member.combatTelemetry || (member.combatTelemetry = {
       totalDamage: 0, damageBySource: {}, skillCasts: {}, basicAttacks: 0,
       criticalRolls: 0, criticalHits: 0, aoeDamage: 0,
-      dotTicks: 0, resourceSpent: 0, resourceRecovered: 0, kills: 0, respawns: 0
+      dotTicks: 0, resourceSpent: 0, resourceRecovered: 0, resourceBlocked: 0,
+      resourceBlockedBySkill: {}, petAttacks: 0, petCriticalRolls: 0, petCriticalHits: 0,
+      petKills: 0, extraShots: 0, extraShotKills: 0, kills: 0, respawns: 0,
+      basicEvents: [], skillEvents: [], petEvents: [], extraShotEvents: [], resourceEvents: []
     });
   }
 
@@ -52,9 +55,10 @@
     stats[key] = (stats[key] || 0) + amount;
   }
 
-  function recordSkillCast(member, skillId) {
+  function recordSkillCast(member, skillId, details = null) {
     const stats = telemetry(member);
     stats.skillCasts[skillId] = (stats.skillCasts[skillId] || 0) + 1;
+    if (details) stats.skillEvents.push({ skill: skillId, ...details });
   }
 
   function recordCritical(member, critical) {
@@ -64,5 +68,25 @@
     if (critical) stats.criticalHits += 1;
   }
 
-  return Object.freeze({ PLAYER_TICK_ORDER, runPlayerTick, telemetry, recordDamage, record, recordSkillCast, recordCritical });
+  function recordResourceBlock(member, skillId, resourceCurrent) {
+    if (!member) return false;
+    const blocks = member.combatResourceBlockState || (member.combatResourceBlockState = {});
+    if (blocks[skillId] === resourceCurrent) return false;
+    blocks[skillId] = resourceCurrent;
+    const stats = telemetry(member);
+    stats.resourceBlocked += 1;
+    stats.resourceBlockedBySkill[skillId] = (stats.resourceBlockedBySkill[skillId] || 0) + 1;
+    return true;
+  }
+
+  function clearResourceBlock(member, skillId) {
+    if (member?.combatResourceBlockState) delete member.combatResourceBlockState[skillId];
+  }
+
+  function recordEvent(member, type, details) {
+    if (!member || !Array.isArray(telemetry(member)[type])) return;
+    telemetry(member)[type].push(details);
+  }
+
+  return Object.freeze({ PLAYER_TICK_ORDER, runPlayerTick, telemetry, recordDamage, record, recordSkillCast, recordCritical, recordResourceBlock, clearResourceBlock, recordEvent });
 }));
