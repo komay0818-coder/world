@@ -11,6 +11,9 @@ Object.entries(policy.SKILLS).forEach(([job, skills]) => {
 assert.deepEqual(policy.getSkills('hunter').filter((skill) => skill.type === 'active').map((skill) => skill.id), ['power-shot', 'multi-shot', 'piercing-shot']);
 assert.equal(policy.getEffect('hunter', 'power-shot', 1).power, 1.6);
 assert.equal(policy.getEffect('hunter', 'piercing-shot', 6).singleTargetBonus, .25);
+assert.deepEqual([1,2,3,4,5,6].map((level) => policy.getEffect('hunter', 'wild-bond', level).companionAttack), [.20,.22,.24,.26,.28,.30]);
+assert.equal(policy.getEffect('hunter', 'wild-bond', 5).beastSlam, 1.8, 'beast slam is a separate skill multiplier');
+assert.equal(policy.getEffect('hunter', 'wild-bond', 6).beastSlam, 2.2, 'Lv6 changes the skill multiplier independently of pet basic attack');
 assert.equal(policy.getEffect('priest', 'heal', 6).afterglow, .2);
 for (let level = 1; level <= 6; level++) {
   const chain = policy.getEffect('mage', 'chain-lightning', level);

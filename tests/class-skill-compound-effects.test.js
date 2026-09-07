@@ -9,6 +9,8 @@ assert.match(source, /lightningResonanceMultiplier[\s\S]*paralyzedUntil/, 'light
 assert.match(source, /dot\.type === 'poison'[\s\S]*dot\.defenseReduction/, 'poison stacks reduce enemy defense');
 assert.match(source, /skill\.id === 'backstab'[\s\S]*bleedTrigger[\s\S]*applyDot\(target\.index, 'bleed'/, 'backstab applies and detonates bleed');
 assert.match(source, /pet\.attackCount[\s\S]*bond\.beastSlam[\s\S]*nextHunterAttackBonus/, 'each companion independently triggers wild bond beast slam and the hunter follow-up bonus');
+assert.match(source, /petAttack = member\.stats\.attack \* bond\.companionAttack[\s\S]*petAttack \* bonuses\.bitePower[\s\S]*petAttack \* bond\.beastSlam/, 'pet basic attack is the shared base for bite and beast slam');
+assert.match(source, /petAttack \* bloody\.bleedTick/, 'pet bleed follows the pet basic attack base without a second balance multiplier');
 assert.match(source, /maxCooldownReduction[\s\S]*pendingSkillCooldownReduction/, 'multi-shot kill cooldown reduction is capped and applied after scheduling');
 assert.match(source, /desperateEntryTriggered[\s\S]*desperateDodgeUntil/, 'desperate dodge burst triggers once per battle');
 assert.match(source, /desperate\?\.attack[\s\S]*desperate\?\.speed/, 'low-health assassin damage and speed are evaluated at runtime');

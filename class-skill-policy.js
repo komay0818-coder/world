@@ -49,9 +49,9 @@
         { power: 1.15, targets: 5, nextBasicPerTarget: .05, maxNextBasic: .2, killCooldownReduction: .5, maxCooldownReduction: 2, breakthrough: '每擊殺 1 名敵人，剩餘冷卻 -0.5 秒' }
       ], { arrowCost: 3, targets: 5 }),
       passive(8, 'wild-bond', '野性羈絆', [
-        { companionAttack: .25 }, { companionAttack: .3 }, { companionAttack: .3, companionSpeed: .1 },
-        { companionAttack: .35, companionSpeed: .1 }, { companionAttack: .4, beastSlam: 1.8 },
-        { companionAttack: .45, beastSlam: 2.2, nextHunterAttack: .25, breakthrough: '強化野獸猛擊並強化獵人下一次攻擊' }
+        { companionAttack: .20 }, { companionAttack: .22 }, { companionAttack: .24, companionSpeed: .1 },
+        { companionAttack: .26, companionSpeed: .1 }, { companionAttack: .28, beastSlam: 1.8 },
+        { companionAttack: .30, beastSlam: 2.2, nextHunterAttack: .25, breakthrough: '強化野獸猛擊並強化獵人下一次攻擊' }
       ]),
       active(10, 'piercing-shot', '穿透射擊', 9, [
         { power: 1.3, targets: 3 }, { power: 1.45, targets: 3 }, { power: 1.45, targets: 3, armorIgnore: .1 },

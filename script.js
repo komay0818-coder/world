@@ -5578,7 +5578,7 @@ function processHunterCompanionAttacks(now = Date.now()) {
     if (!member.alive) continue;
     const rawBond = member.job === 'hunter' && member.level >= 8 ? ClassSkillPolicy.getEffect('hunter', 'wild-bond', Number(member.progress.skillLevels?.['hunter:wild-bond']) || 1) : null;
     const wildBondScale=rawBond&&Number(member.progress.skillLevels?.['hunter:wild-bond'])>=6&&typeof getCombatSensitivityWildBondLv6Scale==='function'?Math.max(0,Number(getCombatSensitivityWildBondLv6Scale(member))||0):1;
-    const bond=rawBond&&wildBondScale!==1?{...rawBond,companionAttack:.4+(rawBond.companionAttack-.4)*wildBondScale,beastSlam:1.8+(rawBond.beastSlam-1.8)*wildBondScale,nextHunterAttack:(rawBond.nextHunterAttack||0)*wildBondScale}:rawBond;
+    const bond=rawBond&&wildBondScale!==1?{...rawBond,companionAttack:.28+(rawBond.companionAttack-.28)*wildBondScale,beastSlam:1.8+(rawBond.beastSlam-1.8)*wildBondScale,nextHunterAttack:(rawBond.nextHunterAttack||0)*wildBondScale}:rawBond;
     if (!bond) continue;
     const bonuses = HunterAdvancementPolicy.getPetBonuses(member, now);
     for (const pet of ensureHunterCompanions(member, now)) {
