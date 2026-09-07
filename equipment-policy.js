@@ -591,6 +591,10 @@
       image: 'assets/wooden-round-shield.png?v=20260815-user-image-v1',
       defense: 5,
       parry: .03,
+      offhandType: 'shield',
+      affixChapter: 1,
+      fixedAffixIds: Object.freeze(['max_hp_flat']),
+      allowedAffixIds: Object.freeze(['max_hp_flat', 'hp_regeneration_flat', 'critical_chance', 'cooldown_speed_percent']),
       allowedJobs: Object.freeze(['warrior']),
       quality: '普通'
     }),
@@ -603,6 +607,10 @@
       image: 'assets/hunter-quiver.png',
       maxArrows: 10,
       arrowRecoveryInterval: 1000,
+      offhandType: 'quiver',
+      affixChapter: 1,
+      fixedAffixIds: Object.freeze(['critical_chance']),
+      allowedAffixIds: Object.freeze(['max_hp_flat', 'hp_regeneration_flat', 'critical_chance', 'cooldown_speed_percent']),
       allowedJobs: Object.freeze(['hunter']),
       quality: '普通'
     }),
@@ -615,24 +623,13 @@
       image: 'assets/beginner-spellbook.png?v=20260815-user-image-v1',
       mana: 30,
       manaRegenFlat: 1,
+      offhandType: 'spellbook',
+      affixChapter: 1,
+      fixedAffixIds: Object.freeze(['mana_regeneration_percent']),
+      allowedAffixIds: Object.freeze(['max_hp_flat', 'hp_regeneration_flat', 'critical_chance', 'cooldown_speed_percent', 'mana_regeneration_percent']),
       allowedJobs: Object.freeze(['mage', 'priest']),
       quality: '普通'
     })
-  });
-
-  const OFFHAND_AFFIXES = Object.freeze({
-    woodenRoundShield: Object.freeze([
-      Object.freeze({ name: '堅固', text: '傷害減免 +3%', stat: 'damageReduction', value: .03 }),
-      Object.freeze({ name: '格擋', text: '格擋率 +3%', stat: 'parry', value: .03 })
-    ]),
-    roughQuiver: Object.freeze([
-      Object.freeze({ name: '擴充', text: '最大箭矢 +2', stat: 'maxArrows', value: 2 }),
-      Object.freeze({ name: '迅捷', text: '箭矢恢復速度 +10%', stat: 'arrowRecoverySpeedBonus', value: .10 })
-    ]),
-    beginnerSpellbook: Object.freeze([
-      Object.freeze({ name: '魔導', text: '魔法傷害 +5%', stat: 'magicDamageBonus', value: .05 }),
-      Object.freeze({ name: '湧泉', text: '每秒魔力恢復 +3', stat: 'manaRegenFlat', value: 3 })
-    ])
   });
 
   const ARMOR_CATEGORY_JOBS = Object.freeze({
@@ -688,25 +685,6 @@
     return Math.max(0, Number(baseDamage) || 0) * (1 + Math.max(0, Number(bonus) || 0));
   }
 
-  function createRandomOffhandDrop(itemRoll = Math.random(), affixRoll = Math.random(), uniqueId = Date.now()) {
-    const keys = Object.keys(OFFHAND_CATALOG);
-    const itemIndex = Math.min(keys.length - 1, Math.floor(Math.max(0, Math.min(.999999, Number(itemRoll) || 0)) * keys.length));
-    const key = keys[itemIndex];
-    const template = OFFHAND_CATALOG[key];
-    const affixes = OFFHAND_AFFIXES[key];
-    const affixIndex = Math.min(affixes.length - 1, Math.floor(Math.max(0, Math.min(.999999, Number(affixRoll) || 0)) * affixes.length));
-    const affix = affixes[affixIndex];
-    return {
-      ...template,
-      id: `${template.id}-${uniqueId}`,
-      baseItemId: template.id,
-      allowedJobs: [...template.allowedJobs],
-      quality: '優良',
-      [affix.stat]: (Number(template[affix.stat]) || 0) + affix.value,
-      affix: { ...affix }
-    };
-  }
-
   function removeLegacyEquipmentFromInventory(inventory) {
     return (Array.isArray(inventory) ? inventory : []).filter((item) => item?.kind !== 'equipment' || isPreservedEquipment(item));
   }
@@ -746,7 +724,6 @@
     WEAPON_CATALOG,
     ARMOR_CATALOG,
     OFFHAND_CATALOG,
-    OFFHAND_AFFIXES,
     ARMOR_CATEGORY_JOBS,
     getArmorCategory,
     isArmorCompatible,
@@ -755,7 +732,6 @@
     removeLegacyEquipmentFromInventory,
     getPlainsDepthsOffhandDropRate,
     applyMagicDamageBonus,
-    createRandomOffhandDrop,
     rollWeaponAttack,
     getAttacksPerSecond,
     isOneHandedWeapon,

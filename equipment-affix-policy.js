@@ -143,7 +143,9 @@
     const quality = normalizeQuality(context.quality || item?.quality || item?.rarity || QUALITY.uncommon);
     const chapter = normalizeChapter(context.chapter || item?.affixChapter);
     const group = getEquipmentGroup(item);
+    const allowedAffixIds = Array.isArray(item?.allowedAffixIds) ? item.allowedAffixIds : null;
     return Boolean(definition?.enabled
+      && (!allowedAffixIds || allowedAffixIds.includes(definition.id))
       && definition.unlockChapter <= chapter
       && (definition.maxChapter == null || chapter <= definition.maxChapter)
       && definition.qualities.includes(quality)

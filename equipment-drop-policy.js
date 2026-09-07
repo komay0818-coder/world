@@ -24,6 +24,9 @@
     chapterTwoTemplate('forest-piercing-longbow', '穿林長弓', 'weapon', { attackMin: 28, attackMax: 38, attackSpeed: .88 }, { weaponType: 'bow', image: 'assets/forest-piercing-longbow.png', imageStatus: 'ready', allowedJobs: ['hunter'] }),
     chapterTwoTemplate('ancient-wood-wand', '古木魔杖', 'weapon', { attackMin: 23, attackMax: 31, attackSpeed: 1.15, mana: 20 }, { weaponType: 'one-handed-wand', image: 'assets/ancient-wood-wand.png', imageStatus: 'ready', allowedJobs: ['mage', 'priest'] }),
     chapterTwoTemplate('spore-wand', '孢子魔杖', 'weapon', { attackMin: 26, attackMax: 35, attackSpeed: 1.00, mana: 26 }, { weaponType: 'one-handed-wand', image: 'assets/spore-wand.png', imageStatus: 'ready', allowedJobs: ['mage', 'priest'] }),
+    chapterTwoTemplate('black-iron-guard-round-shield', '黑鐵守衛圓盾', 'offhand', { defense: 10, parry: .04 }, { quality: 'uncommon', rarity: 'uncommon', series: '盾牌', offhandType: 'shield', image: 'assets/wooden-round-shield.png?v=20260815-user-image-v1', imageStatus: 'ready', allowedJobs: ['warrior'], fixedAffixIds: Object.freeze(['max_hp_flat']), allowedAffixIds: Object.freeze(['max_hp_flat', 'hp_regeneration_flat', 'critical_chance', 'cooldown_speed_percent', 'elite_damage_percent', 'boss_damage_percent', 'kill_health_recovery_percent', 'kill_resource_recovery_percent', 'poison_resistance_percent']) }),
+    chapterTwoTemplate('deep-forest-hunter-quiver', '深林獵手箭筒', 'offhand', { maxArrows: 11, arrowRecoveryInterval: 1000 / 1.2 }, { quality: 'uncommon', rarity: 'uncommon', series: '箭筒', offhandType: 'quiver', image: 'assets/hunter-quiver.png', imageStatus: 'ready', allowedJobs: ['hunter'], fixedAffixIds: Object.freeze(['critical_chance']), allowedAffixIds: Object.freeze(['max_hp_flat', 'hp_regeneration_flat', 'critical_chance', 'cooldown_speed_percent', 'elite_damage_percent', 'boss_damage_percent', 'kill_health_recovery_percent', 'kill_resource_recovery_percent', 'poison_resistance_percent']) }),
+    chapterTwoTemplate('spiritwood-spellbook', '靈森魔導書', 'offhand', { mana: 50, manaRegenFlat: 2 }, { quality: 'uncommon', rarity: 'uncommon', series: '魔導書', offhandType: 'spellbook', image: 'assets/beginner-spellbook.png?v=20260815-user-image-v1', imageStatus: 'ready', allowedJobs: ['mage', 'priest'], fixedAffixIds: Object.freeze(['mana_regeneration_percent']), allowedAffixIds: Object.freeze(['max_hp_flat', 'hp_regeneration_flat', 'critical_chance', 'cooldown_speed_percent', 'mana_regeneration_percent', 'elite_damage_percent', 'boss_damage_percent', 'kill_health_recovery_percent', 'kill_resource_recovery_percent', 'poison_resistance_percent']) }),
     chapterTwoTemplate('blackstone-corrupted-plate', '黑石腐晶戰甲', 'armor', { defense: 30, hp: 58, parry: .05 }, { armorType: 'heavy', image: 'assets/blackstone-corrupted-plate.png', imageStatus: 'ready', allowedJobs: ['warrior'] }),
     chapterTwoTemplate('blackstone-corrupted-helm', '黑石腐晶戰盔', 'head', { defense: 18, hp: 32, parry: .03 }, { armorType: 'heavy', image: 'assets/blackstone-corrupted-helm.png', imageStatus: 'ready', allowedJobs: ['warrior'] }),
     chapterTwoTemplate('deepwood-hunter-vest', '深林獵裝', 'armor', { defense: 23, hp: 38, dodge: .03 }, { armorType: 'light', image: 'assets/deepwood-hunter-vest.png', imageStatus: 'ready', allowedJobs: ['hunter', 'assassin'] }),
@@ -53,7 +56,8 @@
       'starter-recruit-iron-boots', 'leather-short-boots', 'apprentice-cloth-shoes'
     ]),
     black_forest_weapons: Object.freeze(CHAPTER_TWO_TEMPLATES.filter((item) => item.slot === 'weapon').map((item) => item.id)),
-    black_forest_armor: Object.freeze(CHAPTER_TWO_TEMPLATES.filter((item) => item.slot !== 'weapon').map((item) => item.id))
+    black_forest_armor: Object.freeze(CHAPTER_TWO_TEMPLATES.filter((item) => !['weapon', 'offhand'].includes(item.slot)).map((item) => item.id)),
+    late_chapter_two_offhands: Object.freeze(CHAPTER_TWO_TEMPLATES.filter((item) => item.slot === 'offhand').map((item) => item.id))
   });
 
   // Phase-one QA values. Replace this one table when production rates are decided.
@@ -84,6 +88,7 @@
   const TEMPLATE_INDEX = new Map([
     ...Object.values(EquipmentPolicy?.WEAPON_CATALOG || {}),
     ...Object.values(EquipmentPolicy?.ARMOR_CATALOG || {}),
+    ...Object.values(EquipmentPolicy?.OFFHAND_CATALOG || {}),
     ...CHAPTER_TWO_TEMPLATES
   ].map((template) => [template.id, template]));
 
@@ -260,6 +265,41 @@
     return null;
   }
 
+  function createChapterOneOffhandDrop(options = {}) {
+    const random = typeof options.random === 'function' ? options.random : Math.random;
+    const templates = Object.values(EquipmentPolicy?.OFFHAND_CATALOG || {});
+    if (!templates.length) return null;
+    const template = templates[Math.floor(clampRoll(random()) * templates.length)];
+    const instanceId = String(options.instanceId || createInstanceId(options.obtainedAt, random()));
+    return createEquipmentDropInstance(template, {
+      rarity: 'uncommon',
+      instanceId,
+      affixRandom,
+      chapter: 1,
+      jobId: options.jobId,
+      obtainedFrom: options.obtainedFrom || 'plains-depths',
+      obtainedAt: options.obtainedAt || Date.now()
+    });
+
+    function affixRandom() { return random(); }
+  }
+
+  function migrateLegacyOffhand(item, options = {}) {
+    if (!item || item.kind !== 'equipment' || !item.affix || Array.isArray(item.fixedAffixes)) return item;
+    const template = Object.values(EquipmentPolicy?.OFFHAND_CATALOG || {}).find((entry) => item.baseItemId === entry.id || item.id === entry.id || String(item.id || '').startsWith(`${entry.id}-`));
+    if (!template) return item;
+    const random = typeof options.random === 'function' ? options.random : Math.random;
+    return createEquipmentDropInstance(template, {
+      rarity: 'uncommon',
+      instanceId: item.instanceId || item.id,
+      affixRandom: random,
+      chapter: 1,
+      jobId: template.allowedJobs?.[0],
+      obtainedFrom: item.obtainedFrom,
+      obtainedAt: item.obtainedAt
+    });
+  }
+
   function grantEquipmentDrop(progress, enemy, options = {}) {
     const warningHandler = options.warningHandler || console.warn;
     if (!progress || typeof progress !== 'object') {
@@ -279,14 +319,17 @@
     const chapter = Math.max(1, Number(options.chapter || enemy.chapter || config.chapter) || 1);
     const rarity = rollChapterRarity(chapter, config.rarityWeights, random(), Boolean(enemy?.isBoss || config.specialDungeon), warningHandler);
     if (!rarity) return null;
-    const templates = getTemplatesFromPools(config.equipmentPools, warningHandler).filter((template) => chapter < 2 || Number(template.chapter) === chapter);
+    const mapId = String(options.mapId || enemy.mapId || '');
+    const poolIds = [...config.equipmentPools];
+    if (chapter === 2 && ['forest-altar', 'black-forest-depths'].includes(mapId)) poolIds.push('late_chapter_two_offhands');
+    const templates = getTemplatesFromPools(poolIds, warningHandler).filter((template) => chapter < 2 || Number(template.chapter) === chapter);
     if (!templates.length) {
       warn('指定的裝備池沒有任何合法模板，已略過本次掉落。', config.equipmentPools, warningHandler);
       return null;
     }
     const template = templates[Math.floor(clampRoll(random()) * templates.length)];
     const item = createUniqueInstance(template, progress.inventory, {
-      rarity,
+      rarity: template.slot === 'offhand' ? 'uncommon' : rarity,
       random,
       instanceIdFactory: options.instanceIdFactory,
       obtainedFrom: enemy.id || enemy.name || 'unknown-monster',
@@ -317,6 +360,8 @@
     getTemplatesFromPools,
     createInstanceId,
     createEquipmentDropInstance,
+    createChapterOneOffhandDrop,
+    migrateLegacyOffhand,
     grantEquipmentDrop
   };
 }));
