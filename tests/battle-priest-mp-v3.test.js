@@ -1,0 +1,2 @@
+const assert=require('node:assert/strict'),{output,rates}=require('../tools/battle-priest-mp-v3-test.js');
+assert.deepEqual(Object.values(rates),[0,.02,.025,.03]);for(const scenario of ['boss','five']){const r=output.results[scenario];assert.equal(r.baseline.mp.smite,0);assert.ok(r.p2.mp.smite>0);assert.ok(r.p2_5.mp.smiteGenerated>r.p2.mp.smiteGenerated);assert.ok(r.p3.mp.smiteGenerated>r.p2_5.mp.smiteGenerated);assert.equal(r.p3.mp.devotion,0);assert.ok(r.p3.combat.devotionHealing>0);}console.log('battle-priest-mp-v3: assertions passed');
