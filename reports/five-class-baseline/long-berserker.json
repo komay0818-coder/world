@@ -1,0 +1,46 @@
+{
+  "mode": "long-boss",
+  "id": "berserker",
+  "job": "warrior",
+  "config": {
+    "activeLv6": "charge",
+    "passiveLv6": "weapon-mastery"
+  },
+  "seeds": 100,
+  "ttk": {
+    "mean": 215.79900000000012,
+    "sd": 2.904668483665561
+  },
+  "dps": {
+    "mean": 278.50606098196914,
+    "sd": 3.8242662924676067
+  },
+  "resourceMinimum": {
+    "mean": 0,
+    "sd": 0
+  },
+  "resourceBlocked": {
+    "mean": 0,
+    "sd": 0
+  },
+  "resourceZeroDuration": {
+    "mean": 0,
+    "sd": 0
+  },
+  "damageBySource": {
+    "basic-attack": 31923.09,
+    "berserker-slash": 8643,
+    "offhand": 2074.96,
+    "heavy-strike": 9769.8,
+    "counter": 1452.05,
+    "charge": 4069.55,
+    "whirlwind": 2157.83
+  },
+  "skillCasts": {
+    "blood-rage": 15.83,
+    "berserker-slash": 30.22,
+    "heavy-strike": 40.49,
+    "charge": 18.84,
+    "whirlwind": 17.47
+  }
+}

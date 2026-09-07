@@ -1,0 +1,48 @@
+{
+  "mode": "long-boss",
+  "id": "holy-priest",
+  "job": "priest",
+  "config": {
+    "activeLv6": "holy-light",
+    "passiveLv6": "light-grace"
+  },
+  "seeds": 100,
+  "ttk": {
+    "mean": 409.8810000000002,
+    "sd": 2.920126538354126
+  },
+  "dps": {
+    "mean": 146.55157706280448,
+    "sd": 1.0477150990621464
+  },
+  "resourceMinimum": {
+    "mean": 44.031999999997396,
+    "sd": 5.684341886080802e-14
+  },
+  "resourceBlocked": {
+    "mean": 0,
+    "sd": 0
+  },
+  "resourceZeroDuration": {
+    "mean": 0,
+    "sd": 0
+  },
+  "resourceExhaustionDuration": {
+    "mean": 217.3509999999999,
+    "sd": 1.7070732263145558
+  },
+  "resourceExhaustionEpisodes": {
+    "mean": 7,
+    "sd": 0
+  },
+  "damageBySource": {
+    "holy-light": 11593.29,
+    "basic-attack": 44943.93,
+    "holy-nova": 3528.45
+  },
+  "skillCasts": {
+    "holy-light": 54.99,
+    "holy-nova": 36.54,
+    "light-fountain": 1.16
+  }
+}

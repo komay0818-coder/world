@@ -1,0 +1,5818 @@
+{
+  "job": "assassin",
+  "advancedClass": "venom",
+  "combinationCount": 30,
+  "seeds": 100,
+  "equipment": {
+    "chest": {
+      "id": "baseline-chest",
+      "slot": "chest",
+      "defense": 12
+    },
+    "weapon": {
+      "id": "baseline-weapon",
+      "slot": "weapon",
+      "attack": 15,
+      "attackMin": 13,
+      "attackMax": 17,
+      "criticalChance": 0.1,
+      "weaponType": "one-handed-dagger",
+      "series": "匕首"
+    },
+    "offhand": {
+      "id": "baseline-offhand-dagger",
+      "slot": "offhand",
+      "attack": 18,
+      "attackMin": 16,
+      "attackMax": 20,
+      "weaponType": "one-handed-dagger",
+      "series": "匕首"
+    }
+  },
+  "five": [
+    {
+      "config": {
+        "activeLv6": "backstab",
+        "passiveLv6": "evasion"
+      },
+      "mode": "five",
+      "dps": {
+        "mean": 313.5699166666667,
+        "sd": 5.080170586456719
+      },
+      "ttk": {
+        "mean": 0,
+        "sd": 0
+      },
+      "killsPerMinute": {
+        "mean": 6.95,
+        "sd": 0.1499999999999999
+      },
+      "totalDamage": {
+        "mean": 37628.39,
+        "sd": 609.6204703748062
+      },
+      "basicShare": {
+        "mean": 0.38130020721333435,
+        "sd": 0.007041637806369691
+      },
+      "activeSkillShare": {
+        "mean": 0.3656719292281967,
+        "sd": 0.0074485896430816845
+      },
+      "aoeShare": {
+        "mean": 0.010749657764897103,
+        "sd": 0.002169806957526284
+      },
+      "dotShare": {
+        "mean": 0.08176384934410189,
+        "sd": 0.005865082084190852
+      },
+      "extraShare": {
+        "mean": 0.17126401421436693,
+        "sd": 0.009699054219647556
+      },
+      "petShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceMinimum": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceBlocked": {
+        "mean": 18,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "poison-blade": 13,
+        "backstab": 25,
+        "blood-venom-rend": 15,
+        "corrosive-strike": 18,
+        "shadow-dance": 1
+      },
+      "damageBySource": {
+        "poison-blade": 1603.5,
+        "poison-entry": 506.08,
+        "basic-attack": 14344.8,
+        "backstab": 5501.38,
+        "blood-venom-rend": 2644.46,
+        "rupture-entry": 311.7,
+        "poison": 880.3598537327982,
+        "counter": 6394.4,
+        "corrosive-strike": 3605.26,
+        "bleed": 440.9460646992973,
+        "shadow-dance": 404.6,
+        "rupture": 843.0340815679041,
+        "offhand": 53.46,
+        "bleed-trigger": 94.41
+      },
+      "effectiveHealing": {
+        "mean": 0,
+        "sd": 0
+      },
+      "overhealing": {
+        "mean": 0,
+        "sd": 0
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "blood-venom-rend",
+        "passiveLv6": "evasion"
+      },
+      "mode": "five",
+      "dps": {
+        "mean": 311.2873333333333,
+        "sd": 5.682151450912858
+      },
+      "ttk": {
+        "mean": 0,
+        "sd": 0
+      },
+      "killsPerMinute": {
+        "mean": 6.925,
+        "sd": 0.17853571071357133
+      },
+      "totalDamage": {
+        "mean": 37354.48,
+        "sd": 681.8581741095431
+      },
+      "basicShare": {
+        "mean": 0.3866351277183607,
+        "sd": 0.007862350205443151
+      },
+      "activeSkillShare": {
+        "mean": 0.35413778493719805,
+        "sd": 0.0070157975121097485
+      },
+      "aoeShare": {
+        "mean": 0.010861747425170551,
+        "sd": 0.0022194423527136273
+      },
+      "dotShare": {
+        "mean": 0.08741577652674826,
+        "sd": 0.006669221314460854
+      },
+      "extraShare": {
+        "mean": 0.17181131081769266,
+        "sd": 0.010455020926262144
+      },
+      "petShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceMinimum": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceBlocked": {
+        "mean": 18,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "poison-blade": 13,
+        "backstab": 25,
+        "blood-venom-rend": 15,
+        "corrosive-strike": 18,
+        "shadow-dance": 1
+      },
+      "damageBySource": {
+        "poison-blade": 1594.25,
+        "poison-entry": 502.16,
+        "basic-attack": 14439.33,
+        "backstab": 4695.26,
+        "blood-venom-rend": 2890.09,
+        "rupture-entry": 349.68,
+        "poison": 912.6743032434118,
+        "counter": 6368,
+        "corrosive-strike": 3641.67,
+        "bleed": 462.364607768882,
+        "shadow-dance": 405.6,
+        "rupture": 1039.5010889877058,
+        "offhand": 53.9
+      },
+      "effectiveHealing": {
+        "mean": 0,
+        "sd": 0
+      },
+      "overhealing": {
+        "mean": 0,
+        "sd": 0
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "corrosive-strike",
+        "passiveLv6": "evasion"
+      },
+      "mode": "five",
+      "dps": {
+        "mean": 307.55575,
+        "sd": 6.187961508602359
+      },
+      "ttk": {
+        "mean": 0,
+        "sd": 0
+      },
+      "killsPerMinute": {
+        "mean": 6.815,
+        "sd": 0.24140215409146631
+      },
+      "totalDamage": {
+        "mean": 36906.69,
+        "sd": 742.5553810322838
+      },
+      "basicShare": {
+        "mean": 0.3889846374992739,
+        "sd": 0.007317150772556003
+      },
+      "activeSkillShare": {
+        "mean": 0.356284729459445,
+        "sd": 0.008755576208574487
+      },
+      "aoeShare": {
+        "mean": 0.010959410806426822,
+        "sd": 0.0022055128715252237
+      },
+      "dotShare": {
+        "mean": 0.08081968421412382,
+        "sd": 0.007492705892340174
+      },
+      "extraShare": {
+        "mean": 0.1739109488271573,
+        "sd": 0.009188255993476791
+      },
+      "petShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceMinimum": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceBlocked": {
+        "mean": 18,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "poison-blade": 13,
+        "backstab": 25,
+        "blood-venom-rend": 15,
+        "corrosive-strike": 18,
+        "shadow-dance": 1
+      },
+      "damageBySource": {
+        "poison-blade": 1599,
+        "poison-entry": 497.14,
+        "basic-attack": 14352.4,
+        "backstab": 4652.7,
+        "blood-venom-rend": 2617.45,
+        "rupture-entry": 292.86,
+        "poison": 915.2394526792472,
+        "counter": 6368.4,
+        "corrosive-strike": 3872.59,
+        "bleed": 448.2616840316813,
+        "shadow-dance": 404.6,
+        "rupture": 832.3688632890709,
+        "offhand": 53.68
+      },
+      "effectiveHealing": {
+        "mean": 0,
+        "sd": 0
+      },
+      "overhealing": {
+        "mean": 0,
+        "sd": 0
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "shadow-dance",
+        "passiveLv6": "evasion"
+      },
+      "mode": "five",
+      "dps": {
+        "mean": 306.6841666666666,
+        "sd": 5.975822525904789
+      },
+      "ttk": {
+        "mean": 0,
+        "sd": 0
+      },
+      "killsPerMinute": {
+        "mean": 6.82,
+        "sd": 0.24000000000000013
+      },
+      "totalDamage": {
+        "mean": 36802.1,
+        "sd": 717.0987031085751
+      },
+      "basicShare": {
+        "mean": 0.3898331874102577,
+        "sd": 0.007656595430867345
+      },
+      "activeSkillShare": {
+        "mean": 0.3535864451098088,
+        "sd": 0.0076799778755811164
+      },
+      "aoeShare": {
+        "mean": 0.014170010434653985,
+        "sd": 0.002788491821027724
+      },
+      "dotShare": {
+        "mean": 0.08169950462982285,
+        "sd": 0.006474553914544596
+      },
+      "extraShare": {
+        "mean": 0.1748808628501109,
+        "sd": 0.0101575655832549
+      },
+      "petShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceMinimum": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceBlocked": {
+        "mean": 18,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "poison-blade": 13,
+        "backstab": 25,
+        "blood-venom-rend": 15,
+        "corrosive-strike": 18,
+        "shadow-dance": 1
+      },
+      "damageBySource": {
+        "poison-blade": 1603,
+        "poison-entry": 505.32,
+        "basic-attack": 14343.18,
+        "backstab": 4638.07,
+        "blood-venom-rend": 2640.81,
+        "rupture-entry": 296.58,
+        "poison": 930.0661435477876,
+        "counter": 6324,
+        "corrosive-strike": 3606.92,
+        "bleed": 446.5921494287668,
+        "shadow-dance": 521.7,
+        "rupture": 830.141707023446,
+        "offhand": 115.72
+      },
+      "effectiveHealing": {
+        "mean": 0,
+        "sd": 0
+      },
+      "overhealing": {
+        "mean": 0,
+        "sd": 0
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "poison-blade",
+        "passiveLv6": "evasion"
+      },
+      "mode": "five",
+      "dps": {
+        "mean": 306.5895833333332,
+        "sd": 6.261406189130183
+      },
+      "ttk": {
+        "mean": 0,
+        "sd": 0
+      },
+      "killsPerMinute": {
+        "mean": 6.815,
+        "sd": 0.24140215409146631
+      },
+      "totalDamage": {
+        "mean": 36790.75,
+        "sd": 751.3687426956221
+      },
+      "basicShare": {
+        "mean": 0.3918683500617825,
+        "sd": 0.007948854350179493
+      },
+      "activeSkillShare": {
+        "mean": 0.35224270917981043,
+        "sd": 0.0074651569609184894
+      },
+      "aoeShare": {
+        "mean": 0.01102261256703811,
+        "sd": 0.002220329278242229
+      },
+      "dotShare": {
+        "mean": 0.08200628708845034,
+        "sd": 0.00770895096358528
+      },
+      "extraShare": {
+        "mean": 0.17388265366995667,
+        "sd": 0.009010766992166148
+      },
+      "petShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceMinimum": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceBlocked": {
+        "mean": 18,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "poison-blade": 13,
+        "backstab": 25,
+        "blood-venom-rend": 15,
+        "corrosive-strike": 18,
+        "shadow-dance": 1
+      },
+      "damageBySource": {
+        "poison-blade": 1597.56,
+        "poison-entry": 502.5,
+        "basic-attack": 14412.76,
+        "backstab": 4673.2,
+        "blood-venom-rend": 2646.02,
+        "rupture-entry": 294,
+        "poison": 923.6242712727296,
+        "counter": 6346.4,
+        "corrosive-strike": 3635.01,
+        "bleed": 462.88431145801945,
+        "shadow-dance": 405.6,
+        "rupture": 837.5114172692499,
+        "offhand": 53.68
+      },
+      "effectiveHealing": {
+        "mean": 0,
+        "sd": 0
+      },
+      "overhealing": {
+        "mean": 0,
+        "sd": 0
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "backstab",
+        "passiveLv6": "dagger-mastery"
+      },
+      "mode": "five",
+      "dps": {
+        "mean": 276.63725000000005,
+        "sd": 4.353423374355967
+      },
+      "ttk": {
+        "mean": 0,
+        "sd": 0
+      },
+      "killsPerMinute": {
+        "mean": 6.27,
+        "sd": 0.24919871588754222
+      },
+      "totalDamage": {
+        "mean": 33196.47,
+        "sd": 522.410804922716
+      },
+      "basicShare": {
+        "mean": 0.43211662967710524,
+        "sd": 0.006944118506544638
+      },
+      "activeSkillShare": {
+        "mean": 0.41341764247236207,
+        "sd": 0.008122038697454315
+      },
+      "aoeShare": {
+        "mean": 0.011875435993200434,
+        "sd": 0.0023481228293361625
+      },
+      "dotShare": {
+        "mean": 0.10586102574194253,
+        "sd": 0.007203918605590476
+      },
+      "extraShare": {
+        "mean": 0.048604702108590254,
+        "sd": 0.00752642966610962
+      },
+      "petShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceMinimum": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceBlocked": {
+        "mean": 18,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "poison-blade": 13,
+        "backstab": 25,
+        "blood-venom-rend": 15,
+        "corrosive-strike": 18,
+        "shadow-dance": 1
+      },
+      "damageBySource": {
+        "poison-blade": 1592,
+        "poison-entry": 509.52,
+        "basic-attack": 14343.12,
+        "backstab": 5480.45,
+        "blood-venom-rend": 2624.02,
+        "rupture-entry": 311.64,
+        "poison": 1298.753965130615,
+        "offhand": 1615.02,
+        "corrosive-strike": 3632.65,
+        "bleed": 443.4444774036877,
+        "shadow-dance": 394.4,
+        "rupture": 843.2715574656976,
+        "bleed-trigger": 108.18
+      },
+      "effectiveHealing": {
+        "mean": 0,
+        "sd": 0
+      },
+      "overhealing": {
+        "mean": 0,
+        "sd": 0
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "blood-venom-rend",
+        "passiveLv6": "dagger-mastery"
+      },
+      "mode": "five",
+      "dps": {
+        "mean": 273.7355000000001,
+        "sd": 5.908978058382386
+      },
+      "ttk": {
+        "mean": 0,
+        "sd": 0
+      },
+      "killsPerMinute": {
+        "mean": 6.2,
+        "sd": 0.24494897427831774
+      },
+      "totalDamage": {
+        "mean": 32848.26,
+        "sd": 709.0773670058862
+      },
+      "basicShare": {
+        "mean": 0.4400256635232828,
+        "sd": 0.00889542275024087
+      },
+      "activeSkillShare": {
+        "mean": 0.4011665195400507,
+        "sd": 0.009430587908537036
+      },
+      "aoeShare": {
+        "mean": 0.012036987506247147,
+        "sd": 0.0023964753752637362
+      },
+      "dotShare": {
+        "mean": 0.10859488145560992,
+        "sd": 0.00913766883304749
+      },
+      "extraShare": {
+        "mean": 0.0502129354810567,
+        "sd": 0.0081508195162098
+      },
+      "petShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceMinimum": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceBlocked": {
+        "mean": 18,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "poison-blade": 13,
+        "backstab": 25,
+        "blood-venom-rend": 15,
+        "corrosive-strike": 18,
+        "shadow-dance": 1
+      },
+      "damageBySource": {
+        "poison-blade": 1582.23,
+        "poison-entry": 501.1,
+        "basic-attack": 14450.06,
+        "backstab": 4682.3,
+        "blood-venom-rend": 2845.05,
+        "rupture-entry": 352.84,
+        "poison": 1278.6025676353365,
+        "offhand": 1651.98,
+        "corrosive-strike": 3669.78,
+        "bleed": 455.20996665826925,
+        "shadow-dance": 395.4,
+        "rupture": 983.707465706394
+      },
+      "effectiveHealing": {
+        "mean": 0,
+        "sd": 0
+      },
+      "overhealing": {
+        "mean": 0,
+        "sd": 0
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "corrosive-strike",
+        "passiveLv6": "dagger-mastery"
+      },
+      "mode": "five",
+      "dps": {
+        "mean": 270.7385833333334,
+        "sd": 5.906032068877641
+      },
+      "ttk": {
+        "mean": 0,
+        "sd": 0
+      },
+      "killsPerMinute": {
+        "mean": 6.1,
+        "sd": 0.19999999999999987
+      },
+      "totalDamage": {
+        "mean": 32488.63,
+        "sd": 708.723848265317
+      },
+      "basicShare": {
+        "mean": 0.4422804933575392,
+        "sd": 0.009406826251007833
+      },
+      "activeSkillShare": {
+        "mean": 0.4071338218125408,
+        "sd": 0.008807301019502669
+      },
+      "aoeShare": {
+        "mean": 0.012141783695777493,
+        "sd": 0.0024360288586072754
+      },
+      "dotShare": {
+        "mean": 0.10049670223234258,
+        "sd": 0.009346020455118651
+      },
+      "extraShare": {
+        "mean": 0.05008898259757784,
+        "sd": 0.007817503388444657
+      },
+      "petShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceMinimum": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceBlocked": {
+        "mean": 18,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "poison-blade": 13,
+        "backstab": 25,
+        "blood-venom-rend": 15,
+        "corrosive-strike": 18,
+        "shadow-dance": 1
+      },
+      "damageBySource": {
+        "poison-blade": 1607,
+        "poison-entry": 491.04,
+        "basic-attack": 14364.17,
+        "backstab": 4675.03,
+        "blood-venom-rend": 2640.81,
+        "rupture-entry": 306.84,
+        "poison": 1268.8818806899676,
+        "offhand": 1628.88,
+        "corrosive-strike": 3908.19,
+        "bleed": 403.0248084423093,
+        "shadow-dance": 394.4,
+        "rupture": 800.3633108677227
+      },
+      "effectiveHealing": {
+        "mean": 0,
+        "sd": 0
+      },
+      "overhealing": {
+        "mean": 0,
+        "sd": 0
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "poison-blade",
+        "passiveLv6": "dagger-mastery"
+      },
+      "mode": "five",
+      "dps": {
+        "mean": 269.96925000000005,
+        "sd": 5.766862195023296
+      },
+      "ttk": {
+        "mean": 0,
+        "sd": 0
+      },
+      "killsPerMinute": {
+        "mean": 6.06,
+        "sd": 0.16248076809271939
+      },
+      "totalDamage": {
+        "mean": 32396.31,
+        "sd": 692.0234634027954
+      },
+      "basicShare": {
+        "mean": 0.44688219346753116,
+        "sd": 0.00939372674899963
+      },
+      "activeSkillShare": {
+        "mean": 0.401447674651166,
+        "sd": 0.008621222544972286
+      },
+      "aoeShare": {
+        "mean": 0.0122014097287443,
+        "sd": 0.0024093568401857713
+      },
+      "dotShare": {
+        "mean": 0.10119721619231636,
+        "sd": 0.0088874490870991
+      },
+      "extraShare": {
+        "mean": 0.05047291568898667,
+        "sd": 0.007507708548620412
+      },
+      "petShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceMinimum": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceBlocked": {
+        "mean": 18,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "poison-blade": 13,
+        "backstab": 25,
+        "blood-venom-rend": 15,
+        "corrosive-strike": 18,
+        "shadow-dance": 1
+      },
+      "damageBySource": {
+        "poison-blade": 1596.27,
+        "poison-entry": 493.66,
+        "basic-attack": 14472.79,
+        "backstab": 4703.25,
+        "blood-venom-rend": 2663.61,
+        "rupture-entry": 307.38,
+        "poison": 1272.4877172421454,
+        "offhand": 1637.24,
+        "corrosive-strike": 3644.48,
+        "bleed": 408.61064849037024,
+        "shadow-dance": 395.4,
+        "rupture": 801.1316342674845
+      },
+      "effectiveHealing": {
+        "mean": 0,
+        "sd": 0
+      },
+      "overhealing": {
+        "mean": 0,
+        "sd": 0
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "shadow-dance",
+        "passiveLv6": "dagger-mastery"
+      },
+      "mode": "five",
+      "dps": {
+        "mean": 269.2560000000001,
+        "sd": 5.874618673203868
+      },
+      "ttk": {
+        "mean": 0,
+        "sd": 0
+      },
+      "killsPerMinute": {
+        "mean": 6.055,
+        "sd": 0.15644487847162028
+      },
+      "totalDamage": {
+        "mean": 32310.72,
+        "sd": 704.9542407844641
+      },
+      "basicShare": {
+        "mean": 0.44428561872554906,
+        "sd": 0.008892806804669239
+      },
+      "activeSkillShare": {
+        "mean": 0.4038094741632364,
+        "sd": 0.008990201576501664
+      },
+      "aoeShare": {
+        "mean": 0.015740223691261015,
+        "sd": 0.003039767214563922
+      },
+      "dotShare": {
+        "mean": 0.10088778958298537,
+        "sd": 0.009764417040659508
+      },
+      "extraShare": {
+        "mean": 0.05101711752822938,
+        "sd": 0.00821423122884617
+      },
+      "petShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceMinimum": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceBlocked": {
+        "mean": 18,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "poison-blade": 13,
+        "backstab": 25,
+        "blood-venom-rend": 15,
+        "corrosive-strike": 18,
+        "shadow-dance": 1
+      },
+      "damageBySource": {
+        "poison-blade": 1598,
+        "poison-entry": 495.16,
+        "basic-attack": 14350.88,
+        "backstab": 4662.71,
+        "blood-venom-rend": 2618.18,
+        "rupture-entry": 309,
+        "poison": 1257.2047652085835,
+        "offhand": 1650.22,
+        "corrosive-strike": 3656.72,
+        "bleed": 405.58287464615586,
+        "shadow-dance": 508.8,
+        "rupture": 798.2623601452608
+      },
+      "effectiveHealing": {
+        "mean": 0,
+        "sd": 0
+      },
+      "overhealing": {
+        "mean": 0,
+        "sd": 0
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "backstab",
+        "passiveLv6": "venom-mastery"
+      },
+      "mode": "five",
+      "dps": {
+        "mean": 262.14125,
+        "sd": 3.576925933248329
+      },
+      "ttk": {
+        "mean": 0,
+        "sd": 0
+      },
+      "killsPerMinute": {
+        "mean": 5.975,
+        "sd": 0.12990381056766592
+      },
+      "totalDamage": {
+        "mean": 31456.95,
+        "sd": 429.2311119897998
+      },
+      "basicShare": {
+        "mean": 0.45677588238512656,
+        "sd": 0.007617693491557205
+      },
+      "activeSkillShare": {
+        "mean": 0.43576191718564905,
+        "sd": 0.007674200344474197
+      },
+      "aoeShare": {
+        "mean": 0.012913634636612957,
+        "sd": 0.002616826089668116
+      },
+      "dotShare": {
+        "mean": 0.10578717952208117,
+        "sd": 0.00683865642843633
+      },
+      "extraShare": {
+        "mean": 0.001675020907143079,
+        "sd": 0.0014849671531182728
+      },
+      "petShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceMinimum": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceBlocked": {
+        "mean": 18,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "poison-blade": 13,
+        "backstab": 25,
+        "blood-venom-rend": 15,
+        "corrosive-strike": 18,
+        "shadow-dance": 1
+      },
+      "damageBySource": {
+        "poison-blade": 1587.5,
+        "poison-entry": 546.48,
+        "basic-attack": 14367.19,
+        "backstab": 5509.57,
+        "blood-venom-rend": 2624.75,
+        "rupture-entry": 303.48,
+        "poison": 1173.5521410022636,
+        "corrosive-strike": 3580.36,
+        "bleed": 469.87228847170235,
+        "shadow-dance": 406.3,
+        "rupture": 720.7055705260335,
+        "offhand": 52.8,
+        "bleed-trigger": 114.39
+      },
+      "effectiveHealing": {
+        "mean": 0,
+        "sd": 0
+      },
+      "overhealing": {
+        "mean": 0,
+        "sd": 0
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "backstab",
+        "passiveLv6": "deadly-strike"
+      },
+      "mode": "five",
+      "dps": {
+        "mean": 260.0802500000001,
+        "sd": 3.189800510786074
+      },
+      "ttk": {
+        "mean": 0,
+        "sd": 0
+      },
+      "killsPerMinute": {
+        "mean": 5.97,
+        "sd": 0.11874342087037931
+      },
+      "totalDamage": {
+        "mean": 31209.63,
+        "sd": 382.7760612943291
+      },
+      "basicShare": {
+        "mean": 0.46150310689239205,
+        "sd": 0.006006776636586281
+      },
+      "activeSkillShare": {
+        "mean": 0.43938230470782336,
+        "sd": 0.006963376635386919
+      },
+      "aoeShare": {
+        "mean": 0.01301540572078063,
+        "sd": 0.0026359290370521074
+      },
+      "dotShare": {
+        "mean": 0.09742742205578343,
+        "sd": 0.005300688142285221
+      },
+      "extraShare": {
+        "mean": 0.0016871663440012124,
+        "sd": 0.001491259773102532
+      },
+      "petShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceMinimum": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceBlocked": {
+        "mean": 18,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "poison-blade": 13,
+        "backstab": 25,
+        "blood-venom-rend": 15,
+        "corrosive-strike": 18,
+        "shadow-dance": 1
+      },
+      "damageBySource": {
+        "poison-blade": 1584,
+        "poison-entry": 474.06,
+        "basic-attack": 14402.71,
+        "backstab": 5509.57,
+        "blood-venom-rend": 2624.02,
+        "rupture-entry": 303,
+        "poison": 949.5248593132761,
+        "corrosive-strike": 3589.49,
+        "bleed": 476.56953582295836,
+        "shadow-dance": 406.3,
+        "rupture": 722.2956048637649,
+        "offhand": 52.8,
+        "bleed-trigger": 115.29
+      },
+      "effectiveHealing": {
+        "mean": 0,
+        "sd": 0
+      },
+      "overhealing": {
+        "mean": 0,
+        "sd": 0
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "backstab",
+        "passiveLv6": "desperate-counter"
+      },
+      "mode": "five",
+      "dps": {
+        "mean": 260.0802500000001,
+        "sd": 3.189800510786074
+      },
+      "ttk": {
+        "mean": 0,
+        "sd": 0
+      },
+      "killsPerMinute": {
+        "mean": 5.97,
+        "sd": 0.11874342087037931
+      },
+      "totalDamage": {
+        "mean": 31209.63,
+        "sd": 382.7760612943291
+      },
+      "basicShare": {
+        "mean": 0.46150310689239205,
+        "sd": 0.006006776636586281
+      },
+      "activeSkillShare": {
+        "mean": 0.43938230470782336,
+        "sd": 0.006963376635386919
+      },
+      "aoeShare": {
+        "mean": 0.01301540572078063,
+        "sd": 0.0026359290370521074
+      },
+      "dotShare": {
+        "mean": 0.09742742205578343,
+        "sd": 0.005300688142285221
+      },
+      "extraShare": {
+        "mean": 0.0016871663440012124,
+        "sd": 0.001491259773102532
+      },
+      "petShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceMinimum": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceBlocked": {
+        "mean": 18,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "poison-blade": 13,
+        "backstab": 25,
+        "blood-venom-rend": 15,
+        "corrosive-strike": 18,
+        "shadow-dance": 1
+      },
+      "damageBySource": {
+        "poison-blade": 1584,
+        "poison-entry": 474.06,
+        "basic-attack": 14402.71,
+        "backstab": 5509.57,
+        "blood-venom-rend": 2624.02,
+        "rupture-entry": 303,
+        "poison": 949.5248593132761,
+        "corrosive-strike": 3589.49,
+        "bleed": 476.56953582295836,
+        "shadow-dance": 406.3,
+        "rupture": 722.2956048637649,
+        "offhand": 52.8,
+        "bleed-trigger": 115.29
+      },
+      "effectiveHealing": {
+        "mean": 0,
+        "sd": 0
+      },
+      "overhealing": {
+        "mean": 0,
+        "sd": 0
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "blood-venom-rend",
+        "passiveLv6": "venom-mastery"
+      },
+      "mode": "five",
+      "dps": {
+        "mean": 259.8308333333332,
+        "sd": 3.337968131962914
+      },
+      "ttk": {
+        "mean": 0,
+        "sd": 0
+      },
+      "killsPerMinute": {
+        "mean": 5.915,
+        "sd": 0.18781639970992955
+      },
+      "totalDamage": {
+        "mean": 31179.7,
+        "sd": 400.55617583555
+      },
+      "basicShare": {
+        "mean": 0.4637840642237021,
+        "sd": 0.006258408708623875
+      },
+      "activeSkillShare": {
+        "mean": 0.422557904165745,
+        "sd": 0.007399047435300692
+      },
+      "aoeShare": {
+        "mean": 0.013054462804275597,
+        "sd": 0.0026082318601721877
+      },
+      "dotShare": {
+        "mean": 0.11212225333705586,
+        "sd": 0.007628386435378557
+      },
+      "extraShare": {
+        "mean": 0.0015357782734969653,
+        "sd": 0.0015386466844505187
+      },
+      "petShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceMinimum": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceBlocked": {
+        "mean": 18,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "poison-blade": 13,
+        "backstab": 25,
+        "blood-venom-rend": 15,
+        "corrosive-strike": 18,
+        "shadow-dance": 1
+      },
+      "damageBySource": {
+        "poison-blade": 1598.92,
+        "poison-entry": 557.57,
+        "basic-attack": 14459.85,
+        "backstab": 4685.46,
+        "blood-venom-rend": 2858.83,
+        "rupture-entry": 345.28,
+        "poison": 1204.5882539903223,
+        "corrosive-strike": 3624.91,
+        "bleed": 515.4220941142551,
+        "shadow-dance": 407.3,
+        "rupture": 873.6096518954228,
+        "offhand": 47.96
+      },
+      "effectiveHealing": {
+        "mean": 0,
+        "sd": 0
+      },
+      "overhealing": {
+        "mean": 0,
+        "sd": 0
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "corrosive-strike",
+        "passiveLv6": "venom-mastery"
+      },
+      "mode": "five",
+      "dps": {
+        "mean": 257.79325000000006,
+        "sd": 2.074369614753144
+      },
+      "ttk": {
+        "mean": 0,
+        "sd": 0
+      },
+      "killsPerMinute": {
+        "mean": 5.805,
+        "sd": 0.24387496796514413
+      },
+      "totalDamage": {
+        "mean": 30935.19,
+        "sd": 248.9243537703774
+      },
+      "basicShare": {
+        "mean": 0.4645666003730433,
+        "sd": 0.0058791984012738505
+      },
+      "activeSkillShare": {
+        "mean": 0.42550135772392883,
+        "sd": 0.007181306510666681
+      },
+      "aoeShare": {
+        "mean": 0.013130051620435648,
+        "sd": 0.0026573825809922524
+      },
+      "dotShare": {
+        "mean": 0.10838402193825787,
+        "sd": 0.006693702734619189
+      },
+      "extraShare": {
+        "mean": 0.0015480199647702544,
+        "sd": 0.001551543838892469
+      },
+      "petShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceMinimum": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceBlocked": {
+        "mean": 18,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "poison-blade": 13,
+        "backstab": 25,
+        "blood-venom-rend": 15,
+        "corrosive-strike": 18,
+        "shadow-dance": 1
+      },
+      "damageBySource": {
+        "poison-blade": 1601,
+        "poison-entry": 556.99,
+        "basic-attack": 14371.69,
+        "backstab": 4646.54,
+        "blood-venom-rend": 2633.51,
+        "rupture-entry": 303,
+        "poison": 1206.9386748657987,
+        "corrosive-strike": 3876.15,
+        "bleed": 524.2113438898303,
+        "shadow-dance": 406.3,
+        "rupture": 760.8999812443709,
+        "offhand": 47.96
+      },
+      "effectiveHealing": {
+        "mean": 0,
+        "sd": 0
+      },
+      "overhealing": {
+        "mean": 0,
+        "sd": 0
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "poison-blade",
+        "passiveLv6": "venom-mastery"
+      },
+      "mode": "five",
+      "dps": {
+        "mean": 257.6775,
+        "sd": 2.3078857869391096
+      },
+      "ttk": {
+        "mean": 0,
+        "sd": 0
+      },
+      "killsPerMinute": {
+        "mean": 5.86,
+        "sd": 0.22449944320643642
+      },
+      "totalDamage": {
+        "mean": 30921.3,
+        "sd": 276.9462944326932
+      },
+      "basicShare": {
+        "mean": 0.46605942373816284,
+        "sd": 0.006188402874088768
+      },
+      "activeSkillShare": {
+        "mean": 0.41890335878292845,
+        "sd": 0.008561081100399342
+      },
+      "aoeShare": {
+        "mean": 0.013169500833527359,
+        "sd": 0.002664344598219002
+      },
+      "dotShare": {
+        "mean": 0.11348946759490369,
+        "sd": 0.007536607385073925
+      },
+      "extraShare": {
+        "mean": 0.0015477498840052151,
+        "sd": 0.001550439599252768
+      },
+      "petShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceMinimum": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceBlocked": {
+        "mean": 18,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "poison-blade": 13,
+        "backstab": 25,
+        "blood-venom-rend": 15,
+        "corrosive-strike": 18,
+        "shadow-dance": 1
+      },
+      "damageBySource": {
+        "poison-blade": 1592.52,
+        "poison-entry": 605.93,
+        "basic-attack": 14411.26,
+        "backstab": 4649.39,
+        "blood-venom-rend": 2662.95,
+        "rupture-entry": 301.62,
+        "poison": 1288.7839446076268,
+        "corrosive-strike": 3641.75,
+        "bleed": 544.5173955718277,
+        "shadow-dance": 407.3,
+        "rupture": 767.3186598205452,
+        "offhand": 47.96
+      },
+      "effectiveHealing": {
+        "mean": 0,
+        "sd": 0
+      },
+      "overhealing": {
+        "mean": 0,
+        "sd": 0
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "shadow-dance",
+        "passiveLv6": "venom-mastery"
+      },
+      "mode": "five",
+      "dps": {
+        "mean": 257.57866666666666,
+        "sd": 2.241977462965328
+      },
+      "ttk": {
+        "mean": 0,
+        "sd": 0
+      },
+      "killsPerMinute": {
+        "mean": 5.845,
+        "sd": 0.2312466215969434
+      },
+      "totalDamage": {
+        "mean": 30909.44,
+        "sd": 269.03729555583925
+      },
+      "basicShare": {
+        "mean": 0.46500700988664606,
+        "sd": 0.006134833060834003
+      },
+      "activeSkillShare": {
+        "mean": 0.42089903705289194,
+        "sd": 0.006731487082400106
+      },
+      "aoeShare": {
+        "mean": 0.016942274779943506,
+        "sd": 0.003358512384633654
+      },
+      "dotShare": {
+        "mean": 0.1101815276871556,
+        "sd": 0.00612122550527092
+      },
+      "extraShare": {
+        "mean": 0.003912425373306544,
+        "sd": 0.0021481135493119064
+      },
+      "petShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceMinimum": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceBlocked": {
+        "mean": 18,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "poison-blade": 13,
+        "backstab": 25,
+        "blood-venom-rend": 15,
+        "corrosive-strike": 18,
+        "shadow-dance": 1
+      },
+      "damageBySource": {
+        "poison-blade": 1589.5,
+        "poison-entry": 566.35,
+        "basic-attack": 14372.68,
+        "backstab": 4641.15,
+        "blood-venom-rend": 2609.42,
+        "rupture-entry": 305.4,
+        "poison": 1257.370050700696,
+        "corrosive-strike": 3646.76,
+        "bleed": 504.7774484524152,
+        "shadow-dance": 523.85,
+        "rupture": 771.1825008468877,
+        "offhand": 121
+      },
+      "effectiveHealing": {
+        "mean": 0,
+        "sd": 0
+      },
+      "overhealing": {
+        "mean": 0,
+        "sd": 0
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "blood-venom-rend",
+        "passiveLv6": "deadly-strike"
+      },
+      "mode": "five",
+      "dps": {
+        "mean": 257.3188333333334,
+        "sd": 2.5690631723126867
+      },
+      "ttk": {
+        "mean": 0,
+        "sd": 0
+      },
+      "killsPerMinute": {
+        "mean": 5.87,
+        "sd": 0.21931712199461303
+      },
+      "totalDamage": {
+        "mean": 30878.26,
+        "sd": 308.28758067752256
+      },
+      "basicShare": {
+        "mean": 0.4680778623324678,
+        "sd": 0.005829586192470652
+      },
+      "activeSkillShare": {
+        "mean": 0.42630122905222195,
+        "sd": 0.006815160599062379
+      },
+      "aoeShare": {
+        "mean": 0.013185442954865985,
+        "sd": 0.0026547119922480087
+      },
+      "dotShare": {
+        "mean": 0.10407042083153167,
+        "sd": 0.005262560662648901
+      },
+      "extraShare": {
+        "mean": 0.0015504877837786537,
+        "sd": 0.0015553266025988492
+      },
+      "petShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceMinimum": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceBlocked": {
+        "mean": 18,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "poison-blade": 13,
+        "backstab": 25,
+        "blood-venom-rend": 15,
+        "corrosive-strike": 18,
+        "shadow-dance": 1
+      },
+      "damageBySource": {
+        "poison-blade": 1588.32,
+        "poison-entry": 482.34,
+        "basic-attack": 14453.57,
+        "backstab": 4666.05,
+        "blood-venom-rend": 2862.4,
+        "rupture-entry": 345.68,
+        "poison": 968.8206794946611,
+        "corrosive-strike": 3639.79,
+        "bleed": 530.7916909374893,
+        "shadow-dance": 407.3,
+        "rupture": 885.2376295678488,
+        "offhand": 47.96
+      },
+      "effectiveHealing": {
+        "mean": 0,
+        "sd": 0
+      },
+      "overhealing": {
+        "mean": 0,
+        "sd": 0
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "blood-venom-rend",
+        "passiveLv6": "desperate-counter"
+      },
+      "mode": "five",
+      "dps": {
+        "mean": 257.3188333333334,
+        "sd": 2.5690631723126867
+      },
+      "ttk": {
+        "mean": 0,
+        "sd": 0
+      },
+      "killsPerMinute": {
+        "mean": 5.87,
+        "sd": 0.21931712199461303
+      },
+      "totalDamage": {
+        "mean": 30878.26,
+        "sd": 308.28758067752256
+      },
+      "basicShare": {
+        "mean": 0.4680778623324678,
+        "sd": 0.005829586192470652
+      },
+      "activeSkillShare": {
+        "mean": 0.42630122905222195,
+        "sd": 0.006815160599062379
+      },
+      "aoeShare": {
+        "mean": 0.013185442954865985,
+        "sd": 0.0026547119922480087
+      },
+      "dotShare": {
+        "mean": 0.10407042083153167,
+        "sd": 0.005262560662648901
+      },
+      "extraShare": {
+        "mean": 0.0015504877837786537,
+        "sd": 0.0015553266025988492
+      },
+      "petShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceMinimum": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceBlocked": {
+        "mean": 18,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "poison-blade": 13,
+        "backstab": 25,
+        "blood-venom-rend": 15,
+        "corrosive-strike": 18,
+        "shadow-dance": 1
+      },
+      "damageBySource": {
+        "poison-blade": 1588.32,
+        "poison-entry": 482.34,
+        "basic-attack": 14453.57,
+        "backstab": 4666.05,
+        "blood-venom-rend": 2862.4,
+        "rupture-entry": 345.68,
+        "poison": 968.8206794946611,
+        "corrosive-strike": 3639.79,
+        "bleed": 530.7916909374893,
+        "shadow-dance": 407.3,
+        "rupture": 885.2376295678488,
+        "offhand": 47.96
+      },
+      "effectiveHealing": {
+        "mean": 0,
+        "sd": 0
+      },
+      "overhealing": {
+        "mean": 0,
+        "sd": 0
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "corrosive-strike",
+        "passiveLv6": "deadly-strike"
+      },
+      "mode": "five",
+      "dps": {
+        "mean": 255.60299999999995,
+        "sd": 2.5528474080698396
+      },
+      "ttk": {
+        "mean": 0,
+        "sd": 0
+      },
+      "killsPerMinute": {
+        "mean": 5.765,
+        "sd": 0.2495495942693555
+      },
+      "totalDamage": {
+        "mean": 30672.36,
+        "sd": 306.3416889683805
+      },
+      "basicShare": {
+        "mean": 0.46927650445674474,
+        "sd": 0.006074409297324343
+      },
+      "activeSkillShare": {
+        "mean": 0.4298045097994991,
+        "sd": 0.007647363022303474
+      },
+      "aoeShare": {
+        "mean": 0.013240071202053654,
+        "sd": 0.0026651890224138907
+      },
+      "dotShare": {
+        "mean": 0.09935986745068953,
+        "sd": 0.005719908270709062
+      },
+      "extraShare": {
+        "mean": 0.001559118293066966,
+        "sd": 0.0015617529086286732
+      },
+      "petShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceMinimum": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceBlocked": {
+        "mean": 18,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "poison-blade": 13,
+        "backstab": 25,
+        "blood-venom-rend": 15,
+        "corrosive-strike": 18,
+        "shadow-dance": 1
+      },
+      "damageBySource": {
+        "poison-blade": 1589.5,
+        "poison-entry": 482.54,
+        "basic-attack": 14393.77,
+        "backstab": 4642.69,
+        "blood-venom-rend": 2648.84,
+        "rupture-entry": 300.84,
+        "poison": 978.3275373475537,
+        "corrosive-strike": 3896.62,
+        "bleed": 527.7422029328096,
+        "shadow-dance": 406.3,
+        "rupture": 757.2302597196364,
+        "offhand": 47.96
+      },
+      "effectiveHealing": {
+        "mean": 0,
+        "sd": 0
+      },
+      "overhealing": {
+        "mean": 0,
+        "sd": 0
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "corrosive-strike",
+        "passiveLv6": "desperate-counter"
+      },
+      "mode": "five",
+      "dps": {
+        "mean": 255.60299999999995,
+        "sd": 2.5528474080698396
+      },
+      "ttk": {
+        "mean": 0,
+        "sd": 0
+      },
+      "killsPerMinute": {
+        "mean": 5.765,
+        "sd": 0.2495495942693555
+      },
+      "totalDamage": {
+        "mean": 30672.36,
+        "sd": 306.3416889683805
+      },
+      "basicShare": {
+        "mean": 0.46927650445674474,
+        "sd": 0.006074409297324343
+      },
+      "activeSkillShare": {
+        "mean": 0.4298045097994991,
+        "sd": 0.007647363022303474
+      },
+      "aoeShare": {
+        "mean": 0.013240071202053654,
+        "sd": 0.0026651890224138907
+      },
+      "dotShare": {
+        "mean": 0.09935986745068953,
+        "sd": 0.005719908270709062
+      },
+      "extraShare": {
+        "mean": 0.001559118293066966,
+        "sd": 0.0015617529086286732
+      },
+      "petShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceMinimum": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceBlocked": {
+        "mean": 18,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "poison-blade": 13,
+        "backstab": 25,
+        "blood-venom-rend": 15,
+        "corrosive-strike": 18,
+        "shadow-dance": 1
+      },
+      "damageBySource": {
+        "poison-blade": 1589.5,
+        "poison-entry": 482.54,
+        "basic-attack": 14393.77,
+        "backstab": 4642.69,
+        "blood-venom-rend": 2648.84,
+        "rupture-entry": 300.84,
+        "poison": 978.3275373475537,
+        "corrosive-strike": 3896.62,
+        "bleed": 527.7422029328096,
+        "shadow-dance": 406.3,
+        "rupture": 757.2302597196364,
+        "offhand": 47.96
+      },
+      "effectiveHealing": {
+        "mean": 0,
+        "sd": 0
+      },
+      "overhealing": {
+        "mean": 0,
+        "sd": 0
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "shadow-dance",
+        "passiveLv6": "deadly-strike"
+      },
+      "mode": "five",
+      "dps": {
+        "mean": 255.4616666666667,
+        "sd": 2.462333468706286
+      },
+      "ttk": {
+        "mean": 0,
+        "sd": 0
+      },
+      "killsPerMinute": {
+        "mean": 5.775,
+        "sd": 0.24874685927665513
+      },
+      "totalDamage": {
+        "mean": 30655.4,
+        "sd": 295.4800162447538
+      },
+      "basicShare": {
+        "mean": 0.4706182121000388,
+        "sd": 0.006068339895082791
+      },
+      "activeSkillShare": {
+        "mean": 0.42494299930682344,
+        "sd": 0.007079323147209636
+      },
+      "aoeShare": {
+        "mean": 0.01707808461528535,
+        "sd": 0.0033604356568196665
+      },
+      "dotShare": {
+        "mean": 0.10049392916818815,
+        "sd": 0.004945554639600375
+      },
+      "extraShare": {
+        "mean": 0.0039448594249494205,
+        "sd": 0.002164858975790042
+      },
+      "petShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceMinimum": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceBlocked": {
+        "mean": 18,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "poison-blade": 13,
+        "backstab": 25,
+        "blood-venom-rend": 15,
+        "corrosive-strike": 18,
+        "shadow-dance": 1
+      },
+      "damageBySource": {
+        "poison-blade": 1594.5,
+        "poison-entry": 480.28,
+        "basic-attack": 14426.63,
+        "backstab": 4645.77,
+        "blood-venom-rend": 2634.24,
+        "rupture-entry": 302.52,
+        "poison": 1015.6183916475024,
+        "corrosive-strike": 3629.33,
+        "bleed": 512.2918910439034,
+        "shadow-dance": 523.85,
+        "rupture": 769.3697173085934,
+        "offhand": 121
+      },
+      "effectiveHealing": {
+        "mean": 0,
+        "sd": 0
+      },
+      "overhealing": {
+        "mean": 0,
+        "sd": 0
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "shadow-dance",
+        "passiveLv6": "desperate-counter"
+      },
+      "mode": "five",
+      "dps": {
+        "mean": 255.4616666666667,
+        "sd": 2.462333468706286
+      },
+      "ttk": {
+        "mean": 0,
+        "sd": 0
+      },
+      "killsPerMinute": {
+        "mean": 5.775,
+        "sd": 0.24874685927665513
+      },
+      "totalDamage": {
+        "mean": 30655.4,
+        "sd": 295.4800162447538
+      },
+      "basicShare": {
+        "mean": 0.4706182121000388,
+        "sd": 0.006068339895082791
+      },
+      "activeSkillShare": {
+        "mean": 0.42494299930682344,
+        "sd": 0.007079323147209636
+      },
+      "aoeShare": {
+        "mean": 0.01707808461528535,
+        "sd": 0.0033604356568196665
+      },
+      "dotShare": {
+        "mean": 0.10049392916818815,
+        "sd": 0.004945554639600375
+      },
+      "extraShare": {
+        "mean": 0.0039448594249494205,
+        "sd": 0.002164858975790042
+      },
+      "petShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceMinimum": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceBlocked": {
+        "mean": 18,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "poison-blade": 13,
+        "backstab": 25,
+        "blood-venom-rend": 15,
+        "corrosive-strike": 18,
+        "shadow-dance": 1
+      },
+      "damageBySource": {
+        "poison-blade": 1594.5,
+        "poison-entry": 480.28,
+        "basic-attack": 14426.63,
+        "backstab": 4645.77,
+        "blood-venom-rend": 2634.24,
+        "rupture-entry": 302.52,
+        "poison": 1015.6183916475024,
+        "corrosive-strike": 3629.33,
+        "bleed": 512.2918910439034,
+        "shadow-dance": 523.85,
+        "rupture": 769.3697173085934,
+        "offhand": 121
+      },
+      "effectiveHealing": {
+        "mean": 0,
+        "sd": 0
+      },
+      "overhealing": {
+        "mean": 0,
+        "sd": 0
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "poison-blade",
+        "passiveLv6": "deadly-strike"
+      },
+      "mode": "five",
+      "dps": {
+        "mean": 254.67841666666655,
+        "sd": 3.0111669699359673
+      },
+      "ttk": {
+        "mean": 0,
+        "sd": 0
+      },
+      "killsPerMinute": {
+        "mean": 5.72,
+        "sd": 0.2481934729198173
+      },
+      "totalDamage": {
+        "mean": 30561.41,
+        "sd": 361.3400363923156
+      },
+      "basicShare": {
+        "mean": 0.47274794614467064,
+        "sd": 0.0070501391120463275
+      },
+      "activeSkillShare": {
+        "mean": 0.42325444718135613,
+        "sd": 0.007694977530227843
+      },
+      "aoeShare": {
+        "mean": 0.013319106212443498,
+        "sd": 0.002663860366997653
+      },
+      "dotShare": {
+        "mean": 0.10243061086171829,
+        "sd": 0.004661157226441266
+      },
+      "extraShare": {
+        "mean": 0.0015669958122551647,
+        "sd": 0.001569930572209829
+      },
+      "petShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceMinimum": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceBlocked": {
+        "mean": 18,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "poison-blade": 13,
+        "backstab": 25,
+        "blood-venom-rend": 15,
+        "corrosive-strike": 18,
+        "shadow-dance": 1
+      },
+      "damageBySource": {
+        "poison-blade": 1609.96,
+        "poison-entry": 506.9,
+        "basic-attack": 14447.28,
+        "backstab": 4648.68,
+        "blood-venom-rend": 2651.69,
+        "rupture-entry": 304.68,
+        "poison": 1005.0592363250336,
+        "corrosive-strike": 3618.77,
+        "bleed": 536.7693565462414,
+        "shadow-dance": 407.3,
+        "rupture": 776.3614071287251,
+        "offhand": 47.96
+      },
+      "effectiveHealing": {
+        "mean": 0,
+        "sd": 0
+      },
+      "overhealing": {
+        "mean": 0,
+        "sd": 0
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "poison-blade",
+        "passiveLv6": "desperate-counter"
+      },
+      "mode": "five",
+      "dps": {
+        "mean": 254.67841666666655,
+        "sd": 3.0111669699359673
+      },
+      "ttk": {
+        "mean": 0,
+        "sd": 0
+      },
+      "killsPerMinute": {
+        "mean": 5.72,
+        "sd": 0.2481934729198173
+      },
+      "totalDamage": {
+        "mean": 30561.41,
+        "sd": 361.3400363923156
+      },
+      "basicShare": {
+        "mean": 0.47274794614467064,
+        "sd": 0.0070501391120463275
+      },
+      "activeSkillShare": {
+        "mean": 0.42325444718135613,
+        "sd": 0.007694977530227843
+      },
+      "aoeShare": {
+        "mean": 0.013319106212443498,
+        "sd": 0.002663860366997653
+      },
+      "dotShare": {
+        "mean": 0.10243061086171829,
+        "sd": 0.004661157226441266
+      },
+      "extraShare": {
+        "mean": 0.0015669958122551647,
+        "sd": 0.001569930572209829
+      },
+      "petShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceMinimum": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceBlocked": {
+        "mean": 18,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "poison-blade": 13,
+        "backstab": 25,
+        "blood-venom-rend": 15,
+        "corrosive-strike": 18,
+        "shadow-dance": 1
+      },
+      "damageBySource": {
+        "poison-blade": 1609.96,
+        "poison-entry": 506.9,
+        "basic-attack": 14447.28,
+        "backstab": 4648.68,
+        "blood-venom-rend": 2651.69,
+        "rupture-entry": 304.68,
+        "poison": 1005.0592363250336,
+        "corrosive-strike": 3618.77,
+        "bleed": 536.7693565462414,
+        "shadow-dance": 407.3,
+        "rupture": 776.3614071287251,
+        "offhand": 47.96
+      },
+      "effectiveHealing": {
+        "mean": 0,
+        "sd": 0
+      },
+      "overhealing": {
+        "mean": 0,
+        "sd": 0
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "backstab",
+        "passiveLv6": "toxic-blood-symbiosis"
+      },
+      "mode": "five",
+      "dps": {
+        "mean": 251.6683333333334,
+        "sd": 3.0652988344441137
+      },
+      "ttk": {
+        "mean": 0,
+        "sd": 0
+      },
+      "killsPerMinute": {
+        "mean": 5.545,
+        "sd": 0.14309088021254185
+      },
+      "totalDamage": {
+        "mean": 30200.2,
+        "sd": 367.8358601332938
+      },
+      "basicShare": {
+        "mean": 0.4745771894432022,
+        "sd": 0.00648878219034903
+      },
+      "activeSkillShare": {
+        "mean": 0.45530137305202656,
+        "sd": 0.006768438664230368
+      },
+      "aoeShare": {
+        "mean": 0.013502449809685542,
+        "sd": 0.0027131416784236437
+      },
+      "dotShare": {
+        "mean": 0.06815715218302416,
+        "sd": 0.0048056151510644995
+      },
+      "extraShare": {
+        "mean": 0.0019642853217471884,
+        "sd": 0.0016380288597939766
+      },
+      "petShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceMinimum": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceBlocked": {
+        "mean": 18,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "poison-blade": 13,
+        "backstab": 25,
+        "blood-venom-rend": 15,
+        "corrosive-strike": 18,
+        "shadow-dance": 1
+      },
+      "damageBySource": {
+        "poison-blade": 1601,
+        "poison-entry": 497.71,
+        "basic-attack": 14332.11,
+        "backstab": 5473.17,
+        "blood-venom-rend": 2637.89,
+        "rupture-entry": 329.38,
+        "corrosive-strike": 3630.99,
+        "shadow-dance": 408,
+        "bleed-trigger": 117,
+        "rupture": 447.0395599686844,
+        "poison": 437.50340333308554,
+        "bleed": 229.00703669823008,
+        "offhand": 59.4
+      },
+      "effectiveHealing": {
+        "mean": 0,
+        "sd": 0
+      },
+      "overhealing": {
+        "mean": 0,
+        "sd": 0
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "blood-venom-rend",
+        "passiveLv6": "toxic-blood-symbiosis"
+      },
+      "mode": "five",
+      "dps": {
+        "mean": 247.3156666666667,
+        "sd": 2.9882845971114134
+      },
+      "ttk": {
+        "mean": 0,
+        "sd": 0
+      },
+      "killsPerMinute": {
+        "mean": 5.5,
+        "sd": 0
+      },
+      "totalDamage": {
+        "mean": 29677.88,
+        "sd": 358.59415165336964
+      },
+      "basicShare": {
+        "mean": 0.484623891505533,
+        "sd": 0.007144693195341584
+      },
+      "activeSkillShare": {
+        "mean": 0.44336300070208845,
+        "sd": 0.006917218534278531
+      },
+      "aoeShare": {
+        "mean": 0.01377610638966658,
+        "sd": 0.0027730460450691224
+      },
+      "dotShare": {
+        "mean": 0.07049108424629433,
+        "sd": 0.0050687872792498905
+      },
+      "extraShare": {
+        "mean": 0.001522023546084577,
+        "sd": 0.0015663424154734671
+      },
+      "petShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceMinimum": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceBlocked": {
+        "mean": 18,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "poison-blade": 13,
+        "backstab": 25,
+        "blood-venom-rend": 15,
+        "corrosive-strike": 18,
+        "shadow-dance": 1
+      },
+      "damageBySource": {
+        "poison-blade": 1590.27,
+        "poison-entry": 491.28,
+        "basic-attack": 14382.1,
+        "backstab": 4673.14,
+        "blood-venom-rend": 2857.26,
+        "rupture-entry": 375.5,
+        "corrosive-strike": 3628.87,
+        "shadow-dance": 409,
+        "rupture": 523.169390430397,
+        "poison": 476.7114221247605,
+        "bleed": 225.25918744484252,
+        "offhand": 45.32
+      },
+      "effectiveHealing": {
+        "mean": 0,
+        "sd": 0
+      },
+      "overhealing": {
+        "mean": 0,
+        "sd": 0
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "corrosive-strike",
+        "passiveLv6": "toxic-blood-symbiosis"
+      },
+      "mode": "five",
+      "dps": {
+        "mean": 245.46350000000012,
+        "sd": 2.853049971326981
+      },
+      "ttk": {
+        "mean": 0,
+        "sd": 0
+      },
+      "killsPerMinute": {
+        "mean": 5.5,
+        "sd": 0
+      },
+      "totalDamage": {
+        "mean": 29455.62,
+        "sd": 342.36599655923766
+      },
+      "basicShare": {
+        "mean": 0.48613332136011744,
+        "sd": 0.008030345501205693
+      },
+      "activeSkillShare": {
+        "mean": 0.4455404264136444,
+        "sd": 0.008196378909912925
+      },
+      "aoeShare": {
+        "mean": 0.013843570156658326,
+        "sd": 0.002780732296693741
+      },
+      "dotShare": {
+        "mean": 0.06679296701889885,
+        "sd": 0.004733007998888249
+      },
+      "extraShare": {
+        "mean": 0.001533285207339352,
+        "sd": 0.0015792547485139923
+      },
+      "petShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceMinimum": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceBlocked": {
+        "mean": 18,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "poison-blade": 13,
+        "backstab": 25,
+        "blood-venom-rend": 15,
+        "corrosive-strike": 18,
+        "shadow-dance": 1
+      },
+      "damageBySource": {
+        "poison-blade": 1587,
+        "poison-entry": 488.18,
+        "basic-attack": 14318.59,
+        "backstab": 4644.23,
+        "blood-venom-rend": 2623.29,
+        "rupture-entry": 330.9,
+        "corrosive-strike": 3861.91,
+        "shadow-dance": 408,
+        "rupture": 460.84477624308033,
+        "poison": 458.8726571426665,
+        "bleed": 228.48256661425316,
+        "offhand": 45.32
+      },
+      "effectiveHealing": {
+        "mean": 0,
+        "sd": 0
+      },
+      "overhealing": {
+        "mean": 0,
+        "sd": 0
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "shadow-dance",
+        "passiveLv6": "toxic-blood-symbiosis"
+      },
+      "mode": "five",
+      "dps": {
+        "mean": 245.23175,
+        "sd": 3.374214043258404
+      },
+      "ttk": {
+        "mean": 0,
+        "sd": 0
+      },
+      "killsPerMinute": {
+        "mean": 5.5,
+        "sd": 0
+      },
+      "totalDamage": {
+        "mean": 29427.81,
+        "sd": 404.90568519100844
+      },
+      "basicShare": {
+        "mean": 0.4875032671597838,
+        "sd": 0.0073873883035255
+      },
+      "activeSkillShare": {
+        "mean": 0.44178368618236485,
+        "sd": 0.007515120409004873
+      },
+      "aoeShare": {
+        "mean": 0.017863263646929303,
+        "sd": 0.0035101502740961655
+      },
+      "dotShare": {
+        "mean": 0.06667505844564003,
+        "sd": 0.004587067960525967
+      },
+      "extraShare": {
+        "mean": 0.004037988212211192,
+        "sd": 0.0020271971167771675
+      },
+      "petShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceMinimum": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceBlocked": {
+        "mean": 18,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "poison-blade": 13,
+        "backstab": 25,
+        "blood-venom-rend": 15,
+        "corrosive-strike": 18,
+        "shadow-dance": 1
+      },
+      "damageBySource": {
+        "poison-blade": 1596,
+        "poison-entry": 490.83,
+        "basic-attack": 14344.86,
+        "backstab": 4626.52,
+        "blood-venom-rend": 2641.54,
+        "rupture-entry": 336.2,
+        "corrosive-strike": 3611.9,
+        "shadow-dance": 526,
+        "rupture": 458.88120818461647,
+        "poison": 454.4393593753781,
+        "bleed": 221.61943244000548,
+        "offhand": 119.02
+      },
+      "effectiveHealing": {
+        "mean": 0,
+        "sd": 0
+      },
+      "overhealing": {
+        "mean": 0,
+        "sd": 0
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "poison-blade",
+        "passiveLv6": "toxic-blood-symbiosis"
+      },
+      "mode": "five",
+      "dps": {
+        "mean": 244.66175000000004,
+        "sd": 2.7829812888639163
+      },
+      "ttk": {
+        "mean": 0,
+        "sd": 0
+      },
+      "killsPerMinute": {
+        "mean": 5.5,
+        "sd": 0
+      },
+      "totalDamage": {
+        "mean": 29359.41,
+        "sd": 333.95775466367
+      },
+      "basicShare": {
+        "mean": 0.4901766170157555,
+        "sd": 0.007668615836374826
+      },
+      "activeSkillShare": {
+        "mean": 0.4409148703923694,
+        "sd": 0.00843320224841255
+      },
+      "aoeShare": {
+        "mean": 0.013924405983285128,
+        "sd": 0.0027975042815278415
+      },
+      "dotShare": {
+        "mean": 0.0673678693093237,
+        "sd": 0.004666068949722181
+      },
+      "extraShare": {
+        "mean": 0.001540643282551431,
+        "sd": 0.0015887733916410856
+      },
+      "petShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceMinimum": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceBlocked": {
+        "mean": 18,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "poison-blade": 13,
+        "backstab": 25,
+        "blood-venom-rend": 15,
+        "corrosive-strike": 18,
+        "shadow-dance": 1
+      },
+      "damageBySource": {
+        "poison-blade": 1578.7,
+        "poison-entry": 528.23,
+        "basic-attack": 14390.41,
+        "backstab": 4683.32,
+        "blood-venom-rend": 2625.86,
+        "rupture-entry": 332.24,
+        "corrosive-strike": 3648.97,
+        "shadow-dance": 409,
+        "rupture": 449.20735207143355,
+        "poison": 447.7303999540025,
+        "bleed": 220.42224797456373,
+        "offhand": 45.32
+      },
+      "effectiveHealing": {
+        "mean": 0,
+        "sd": 0
+      },
+      "overhealing": {
+        "mean": 0,
+        "sd": 0
+      }
+    }
+  ],
+  "boss": [
+    {
+      "config": {
+        "activeLv6": "backstab",
+        "passiveLv6": "dagger-mastery"
+      },
+      "mode": "boss",
+      "dps": {
+        "mean": 294.4207172379821,
+        "sd": 7.718205840895094
+      },
+      "ttk": {
+        "mean": 41.003000000000036,
+        "sd": 1.032807339245805
+      },
+      "killsPerMinute": {
+        "mean": 0,
+        "sd": 0
+      },
+      "totalDamage": {
+        "mean": 12064.27,
+        "sd": 53.19489731167832
+      },
+      "basicShare": {
+        "mean": 0.4118398519490566,
+        "sd": 0.01053575793494717
+      },
+      "activeSkillShare": {
+        "mean": 0.3928207819910235,
+        "sd": 0.013981688439062502
+      },
+      "aoeShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "dotShare": {
+        "mean": 0.1476576940818931,
+        "sd": 0.003853003039405959
+      },
+      "extraShare": {
+        "mean": 0.04768167197802668,
+        "sd": 0.01217105551463063
+      },
+      "petShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceMinimum": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceBlocked": {
+        "mean": 6.99,
+        "sd": 0.09949874371066199
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "poison-blade": 5,
+        "backstab": 8.8,
+        "blood-venom-rend": 5,
+        "corrosive-strike": 6.07,
+        "shadow-dance": 1
+      },
+      "damageBySource": {
+        "poison-blade": 629,
+        "poison-entry": 88.18,
+        "basic-attack": 4968.41,
+        "backstab": 1935.27,
+        "blood-venom-rend": 875.16,
+        "rupture-entry": 114,
+        "poison": 803.989128462697,
+        "corrosive-strike": 1217.87,
+        "bleed": 269.65503900752486,
+        "shadow-dance": 81.94,
+        "rupture": 444.2958325297783,
+        "offhand": 575.3,
+        "bleed-trigger": 61.2
+      },
+      "effectiveHealing": {
+        "mean": 0,
+        "sd": 0
+      },
+      "overhealing": {
+        "mean": 0,
+        "sd": 0
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "blood-venom-rend",
+        "passiveLv6": "dagger-mastery"
+      },
+      "mode": "boss",
+      "dps": {
+        "mean": 292.4922894421063,
+        "sd": 7.19458043203239
+      },
+      "ttk": {
+        "mean": 41.26600000000002,
+        "sd": 0.9897696701758445
+      },
+      "killsPerMinute": {
+        "mean": 0,
+        "sd": 0
+      },
+      "totalDamage": {
+        "mean": 12062.98,
+        "sd": 51.83762726051415
+      },
+      "basicShare": {
+        "mean": 0.41837207575257646,
+        "sd": 0.010936717691987665
+      },
+      "activeSkillShare": {
+        "mean": 0.3792713505867093,
+        "sd": 0.012584720038489311
+      },
+      "aoeShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "dotShare": {
+        "mean": 0.1523588674008426,
+        "sd": 0.003949760491676241
+      },
+      "extraShare": {
+        "mean": 0.04999770625987177,
+        "sd": 0.012531869925131882
+      },
+      "petShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceMinimum": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceBlocked": {
+        "mean": 6.99,
+        "sd": 0.09949874371066196
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "poison-blade": 5,
+        "backstab": 8.9,
+        "blood-venom-rend": 5,
+        "corrosive-strike": 6.09,
+        "shadow-dance": 1
+      },
+      "damageBySource": {
+        "poison-blade": 625.48,
+        "poison-entry": 88,
+        "basic-attack": 5046.74,
+        "backstab": 1691.75,
+        "blood-venom-rend": 943.45,
+        "rupture-entry": 132,
+        "poison": 808.6396972903789,
+        "corrosive-strike": 1231.74,
+        "bleed": 282.65852957356304,
+        "shadow-dance": 82.94,
+        "rupture": 526.5617731360592,
+        "offhand": 603.02
+      },
+      "effectiveHealing": {
+        "mean": 0,
+        "sd": 0
+      },
+      "overhealing": {
+        "mean": 0,
+        "sd": 0
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "backstab",
+        "passiveLv6": "evasion"
+      },
+      "mode": "boss",
+      "dps": {
+        "mean": 291.5284763575635,
+        "sd": 7.289798351054908
+      },
+      "ttk": {
+        "mean": 41.41800000000003,
+        "sd": 1.0050253728140408
+      },
+      "killsPerMinute": {
+        "mean": 0,
+        "sd": 0
+      },
+      "totalDamage": {
+        "mean": 12067.33,
+        "sd": 55.26138887143537
+      },
+      "basicShare": {
+        "mean": 0.4140691837454065,
+        "sd": 0.011842731502026914
+      },
+      "activeSkillShare": {
+        "mean": 0.3970579792444295,
+        "sd": 0.01401490800981367
+      },
+      "aoeShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "dotShare": {
+        "mean": 0.14840916901378884,
+        "sd": 0.0038818724869134273
+      },
+      "extraShare": {
+        "mean": 0.040463667996375186,
+        "sd": 0.009558366642231262
+      },
+      "petShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceMinimum": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceBlocked": {
+        "mean": 7,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "poison-blade": 5,
+        "backstab": 8.94,
+        "blood-venom-rend": 5.01,
+        "corrosive-strike": 6.15,
+        "shadow-dance": 1
+      },
+      "damageBySource": {
+        "poison-blade": 630,
+        "poison-entry": 88.54,
+        "basic-attack": 4996.52,
+        "backstab": 1973.63,
+        "blood-venom-rend": 876.63,
+        "rupture-entry": 114,
+        "poison": 807.7100093435779,
+        "corrosive-strike": 1228.74,
+        "bleed": 271.74503900752484,
+        "shadow-dance": 82.62,
+        "rupture": 446.4149516488974,
+        "offhand": 51.92,
+        "bleed-trigger": 62.46,
+        "counter": 436.4
+      },
+      "effectiveHealing": {
+        "mean": 0,
+        "sd": 0
+      },
+      "overhealing": {
+        "mean": 0,
+        "sd": 0
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "corrosive-strike",
+        "passiveLv6": "dagger-mastery"
+      },
+      "mode": "boss",
+      "dps": {
+        "mean": 289.781875379789,
+        "sd": 6.7014936917770465
+      },
+      "ttk": {
+        "mean": 41.690000000000026,
+        "sd": 0.9927235264664576
+      },
+      "killsPerMinute": {
+        "mean": 0,
+        "sd": 0
+      },
+      "totalDamage": {
+        "mean": 12074.52,
+        "sd": 63.692461092345916
+      },
+      "basicShare": {
+        "mean": 0.4190819222781919,
+        "sd": 0.011038715070362581
+      },
+      "activeSkillShare": {
+        "mean": 0.38077320999489495,
+        "sd": 0.01294647327010143
+      },
+      "aoeShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "dotShare": {
+        "mean": 0.1496162615153931,
+        "sd": 0.0037872761672682544
+      },
+      "extraShare": {
+        "mean": 0.050528606211520104,
+        "sd": 0.01250822442983531
+      },
+      "petShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceMinimum": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceBlocked": {
+        "mean": 7,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "poison-blade": 5,
+        "backstab": 8.95,
+        "blood-venom-rend": 5,
+        "corrosive-strike": 6.23,
+        "shadow-dance": 1
+      },
+      "damageBySource": {
+        "poison-blade": 624,
+        "poison-entry": 88.72,
+        "basic-attack": 5060.15,
+        "backstab": 1685.24,
+        "blood-venom-rend": 867.13,
+        "rupture-entry": 120,
+        "poison": 843.4701944522768,
+        "corrosive-strike": 1339.45,
+        "bleed": 286.1404999693289,
+        "shadow-dance": 81.94,
+        "rupture": 468.2193055783963,
+        "offhand": 610.06
+      },
+      "effectiveHealing": {
+        "mean": 0,
+        "sd": 0
+      },
+      "overhealing": {
+        "mean": 0,
+        "sd": 0
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "blood-venom-rend",
+        "passiveLv6": "evasion"
+      },
+      "mode": "boss",
+      "dps": {
+        "mean": 289.1888495983846,
+        "sd": 6.934499011206066
+      },
+      "ttk": {
+        "mean": 41.74700000000004,
+        "sd": 1.0042365259240476
+      },
+      "killsPerMinute": {
+        "mean": 0,
+        "sd": 0
+      },
+      "totalDamage": {
+        "mean": 12065.93,
+        "sd": 52.74964549643912
+      },
+      "basicShare": {
+        "mean": 0.42134226881998066,
+        "sd": 0.011649809250436008
+      },
+      "activeSkillShare": {
+        "mean": 0.38297180279257875,
+        "sd": 0.012378658409587311
+      },
+      "aoeShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "dotShare": {
+        "mean": 0.15365735852303086,
+        "sd": 0.00404663030710447
+      },
+      "extraShare": {
+        "mean": 0.04202856986440978,
+        "sd": 0.010188046545917024
+      },
+      "petShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceMinimum": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceBlocked": {
+        "mean": 7,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "poison-blade": 5,
+        "backstab": 8.98,
+        "blood-venom-rend": 5.04,
+        "corrosive-strike": 6.22,
+        "shadow-dance": 1
+      },
+      "damageBySource": {
+        "poison-blade": 634.66,
+        "poison-entry": 89.44,
+        "basic-attack": 5083.9,
+        "backstab": 1702.77,
+        "blood-venom-rend": 955.37,
+        "rupture-entry": 132,
+        "poison": 815.6851561361686,
+        "corrosive-strike": 1244.55,
+        "bleed": 285.65852957356304,
+        "shadow-dance": 83.62,
+        "rupture": 531.2163142902691,
+        "offhand": 53.46,
+        "counter": 453.6
+      },
+      "effectiveHealing": {
+        "mean": 0,
+        "sd": 0
+      },
+      "overhealing": {
+        "mean": 0,
+        "sd": 0
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "poison-blade",
+        "passiveLv6": "dagger-mastery"
+      },
+      "mode": "boss",
+      "dps": {
+        "mean": 287.9275380960407,
+        "sd": 6.287163717877846
+      },
+      "ttk": {
+        "mean": 41.90900000000002,
+        "sd": 0.9554156163680799
+      },
+      "killsPerMinute": {
+        "mean": 0,
+        "sd": 0
+      },
+      "totalDamage": {
+        "mean": 12060.85,
+        "sd": 51.04828596534853
+      },
+      "basicShare": {
+        "mean": 0.4253659232715434,
+        "sd": 0.011002101847185542
+      },
+      "activeSkillShare": {
+        "mean": 0.3787590007056425,
+        "sd": 0.012806843398271475
+      },
+      "aoeShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "dotShare": {
+        "mean": 0.14589365725900189,
+        "sd": 0.003760991103809408
+      },
+      "extraShare": {
+        "mean": 0.04998141876381219,
+        "sd": 0.011236244183127898
+      },
+      "petShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceMinimum": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceBlocked": {
+        "mean": 7,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "poison-blade": 5,
+        "backstab": 8.97,
+        "blood-venom-rend": 5.02,
+        "corrosive-strike": 6.31,
+        "shadow-dance": 1
+      },
+      "damageBySource": {
+        "poison-blade": 625.09,
+        "poison-entry": 89.08,
+        "basic-attack": 5130.3,
+        "backstab": 1702.43,
+        "blood-venom-rend": 883.67,
+        "rupture-entry": 114,
+        "poison": 818.4075418761105,
+        "corrosive-strike": 1274,
+        "bleed": 285.6250390075249,
+        "shadow-dance": 82.94,
+        "rupture": 452.50741911636493,
+        "offhand": 602.8
+      },
+      "effectiveHealing": {
+        "mean": 0,
+        "sd": 0
+      },
+      "overhealing": {
+        "mean": 0,
+        "sd": 0
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "shadow-dance",
+        "passiveLv6": "dagger-mastery"
+      },
+      "mode": "boss",
+      "dps": {
+        "mean": 286.6571821827824,
+        "sd": 6.205192926191229
+      },
+      "ttk": {
+        "mean": 42.12000000000003,
+        "sd": 0.9229301165310397
+      },
+      "killsPerMinute": {
+        "mean": 0,
+        "sd": 0
+      },
+      "totalDamage": {
+        "mean": 12068.4,
+        "sd": 54.256796809247774
+      },
+      "basicShare": {
+        "mean": 0.4235399287133413,
+        "sd": 0.010621316834723922
+      },
+      "activeSkillShare": {
+        "mean": 0.3799951439952804,
+        "sd": 0.012597154709671456
+      },
+      "aoeShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "dotShare": {
+        "mean": 0.14546943219193262,
+        "sd": 0.0037119024936802746
+      },
+      "extraShare": {
+        "mean": 0.0509954950994457,
+        "sd": 0.012816911180828927
+      },
+      "petShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceMinimum": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceBlocked": {
+        "mean": 7,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "poison-blade": 5,
+        "backstab": 8.99,
+        "blood-venom-rend": 5.04,
+        "corrosive-strike": 6.4,
+        "shadow-dance": 1
+      },
+      "damageBySource": {
+        "poison-blade": 621.5,
+        "poison-entry": 90.34,
+        "basic-attack": 5111.42,
+        "backstab": 1696.83,
+        "blood-venom-rend": 876.66,
+        "rupture-entry": 114,
+        "poison": 820.7330924266611,
+        "corrosive-strike": 1285.43,
+        "bleed": 276.6850390075249,
+        "shadow-dance": 105.63,
+        "rupture": 453.83186856581443,
+        "offhand": 615.34
+      },
+      "effectiveHealing": {
+        "mean": 0,
+        "sd": 0
+      },
+      "overhealing": {
+        "mean": 0,
+        "sd": 0
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "corrosive-strike",
+        "passiveLv6": "evasion"
+      },
+      "mode": "boss",
+      "dps": {
+        "mean": 286.5240064239462,
+        "sd": 6.221303965392265
+      },
+      "ttk": {
+        "mean": 42.14400000000003,
+        "sd": 0.9633607839226163
+      },
+      "killsPerMinute": {
+        "mean": 0,
+        "sd": 0
+      },
+      "totalDamage": {
+        "mean": 12069.41,
+        "sd": 59.69942964551672
+      },
+      "basicShare": {
+        "mean": 0.4220896905769437,
+        "sd": 0.010769790821684408
+      },
+      "activeSkillShare": {
+        "mean": 0.3847808820380034,
+        "sd": 0.011415465362286699
+      },
+      "aoeShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "dotShare": {
+        "mean": 0.15077676031277057,
+        "sd": 0.0037341923588851285
+      },
+      "extraShare": {
+        "mean": 0.0423526670722824,
+        "sd": 0.01049333899086692
+      },
+      "petShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceMinimum": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceBlocked": {
+        "mean": 7,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "poison-blade": 5,
+        "backstab": 8.99,
+        "blood-venom-rend": 5.06,
+        "corrosive-strike": 6.39,
+        "shadow-dance": 1
+      },
+      "damageBySource": {
+        "poison-blade": 633,
+        "poison-entry": 90.52,
+        "basic-attack": 5094.46,
+        "backstab": 1688.36,
+        "blood-venom-rend": 881.79,
+        "rupture-entry": 120.24,
+        "poison": 849.0515157735981,
+        "corrosive-strike": 1358.3,
+        "bleed": 288.61049996932894,
+        "shadow-dance": 82.62,
+        "rupture": 471.397984257075,
+        "offhand": 53.46,
+        "counter": 457.6
+      },
+      "effectiveHealing": {
+        "mean": 0,
+        "sd": 0
+      },
+      "overhealing": {
+        "mean": 0,
+        "sd": 0
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "poison-blade",
+        "passiveLv6": "evasion"
+      },
+      "mode": "boss",
+      "dps": {
+        "mean": 284.50795010582374,
+        "sd": 5.620377227805278
+      },
+      "ttk": {
+        "mean": 42.42700000000004,
+        "sd": 0.8555530375143314
+      },
+      "killsPerMinute": {
+        "mean": 0,
+        "sd": 0
+      },
+      "totalDamage": {
+        "mean": 12066.16,
+        "sd": 60.4270998807654
+      },
+      "basicShare": {
+        "mean": 0.42802750334548534,
+        "sd": 0.010449705338337457
+      },
+      "activeSkillShare": {
+        "mean": 0.3821987116795003,
+        "sd": 0.011091108300139027
+      },
+      "aoeShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "dotShare": {
+        "mean": 0.14761932307995707,
+        "sd": 0.003376960370439306
+      },
+      "extraShare": {
+        "mean": 0.04215446189505741,
+        "sd": 0.010287828751863012
+      },
+      "petShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceMinimum": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceBlocked": {
+        "mean": 7,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "poison-blade": 5,
+        "backstab": 9,
+        "blood-venom-rend": 5.09,
+        "corrosive-strike": 6.48,
+        "shadow-dance": 1
+      },
+      "damageBySource": {
+        "poison-blade": 634.26,
+        "poison-entry": 91.6,
+        "basic-attack": 5164.61,
+        "backstab": 1707.91,
+        "blood-venom-rend": 893.23,
+        "rupture-entry": 114.24,
+        "poison": 827.7097440783126,
+        "corrosive-strike": 1292.69,
+        "bleed": 289.8250390075249,
+        "shadow-dance": 83.62,
+        "rupture": 457.8052169141628,
+        "offhand": 53.46,
+        "counter": 455.2
+      },
+      "effectiveHealing": {
+        "mean": 0,
+        "sd": 0
+      },
+      "overhealing": {
+        "mean": 0,
+        "sd": 0
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "shadow-dance",
+        "passiveLv6": "evasion"
+      },
+      "mode": "boss",
+      "dps": {
+        "mean": 283.75359313216575,
+        "sd": 5.820870577907409
+      },
+      "ttk": {
+        "mean": 42.532000000000025,
+        "sd": 0.8680875531880402
+      },
+      "killsPerMinute": {
+        "mean": 0,
+        "sd": 0
+      },
+      "totalDamage": {
+        "mean": 12063.69,
+        "sd": 56.088268826912476
+      },
+      "basicShare": {
+        "mean": 0.425306931404954,
+        "sd": 0.01148958452759654
+      },
+      "activeSkillShare": {
+        "mean": 0.3829977795096,
+        "sd": 0.010321366624644257
+      },
+      "aoeShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "dotShare": {
+        "mean": 0.14724002741100436,
+        "sd": 0.003346997550942579
+      },
+      "extraShare": {
+        "mean": 0.044455261674442144,
+        "sd": 0.010790182372628514
+      },
+      "petShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceMinimum": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceBlocked": {
+        "mean": 7,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "poison-blade": 5,
+        "backstab": 8.99,
+        "blood-venom-rend": 5.14,
+        "corrosive-strike": 6.53,
+        "shadow-dance": 1
+      },
+      "damageBySource": {
+        "poison-blade": 629.5,
+        "poison-entry": 92.86,
+        "basic-attack": 5130.67,
+        "backstab": 1686.82,
+        "blood-venom-rend": 903.77,
+        "rupture-entry": 115.2,
+        "poison": 829.5701845187531,
+        "corrosive-strike": 1293.86,
+        "bleed": 279.72503900752486,
+        "shadow-dance": 106.49,
+        "rupture": 458.8647764737224,
+        "offhand": 65.56,
+        "counter": 470.8
+      },
+      "effectiveHealing": {
+        "mean": 0,
+        "sd": 0
+      },
+      "overhealing": {
+        "mean": 0,
+        "sd": 0
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "backstab",
+        "passiveLv6": "venom-mastery"
+      },
+      "mode": "boss",
+      "dps": {
+        "mean": 281.5026891371034,
+        "sd": 5.340723435265041
+      },
+      "ttk": {
+        "mean": 42.89000000000006,
+        "sd": 0.8407734534343957
+      },
+      "killsPerMinute": {
+        "mean": 0,
+        "sd": 0
+      },
+      "totalDamage": {
+        "mean": 12069.26,
+        "sd": 50.11918195661218
+      },
+      "basicShare": {
+        "mean": 0.4290300658270181,
+        "sd": 0.010068238582410785
+      },
+      "activeSkillShare": {
+        "mean": 0.4095008316363634,
+        "sd": 0.010155499171495672
+      },
+      "aoeShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "dotShare": {
+        "mean": 0.15760172083144275,
+        "sd": 0.0031124678876694512
+      },
+      "extraShare": {
+        "mean": 0.0038673817051759966,
+        "sd": 0.004453361537936823
+      },
+      "petShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceMinimum": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceBlocked": {
+        "mean": 7,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "poison-blade": 5,
+        "backstab": 9.02,
+        "blood-venom-rend": 5.23,
+        "corrosive-strike": 6.67,
+        "shadow-dance": 1
+      },
+      "damageBySource": {
+        "poison-blade": 628.5,
+        "poison-entry": 101.36,
+        "basic-attack": 5178.09,
+        "backstab": 1984.63,
+        "blood-venom-rend": 919.19,
+        "rupture-entry": 115.92,
+        "poison": 878.0021885354668,
+        "corrosive-strike": 1330.52,
+        "bleed": 282.90215981735145,
+        "shadow-dance": 79.56,
+        "rupture": 460.76565164718033,
+        "offhand": 46.64,
+        "bleed-trigger": 63.18
+      },
+      "effectiveHealing": {
+        "mean": 0,
+        "sd": 0
+      },
+      "overhealing": {
+        "mean": 0,
+        "sd": 0
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "backstab",
+        "passiveLv6": "deadly-strike"
+      },
+      "mode": "boss",
+      "dps": {
+        "mean": 280.4830941466195,
+        "sd": 5.059758217315017
+      },
+      "ttk": {
+        "mean": 43.05600000000006,
+        "sd": 0.7940176320460386
+      },
+      "killsPerMinute": {
+        "mean": 0,
+        "sd": 0
+      },
+      "totalDamage": {
+        "mean": 12072.6,
+        "sd": 57.97188973976956
+      },
+      "basicShare": {
+        "mean": 0.4303740224095041,
+        "sd": 0.010247266130514509
+      },
+      "activeSkillShare": {
+        "mean": 0.41182831981554263,
+        "sd": 0.01048197268702821
+      },
+      "aoeShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "dotShare": {
+        "mean": 0.15393325615911446,
+        "sd": 0.002826592349101467
+      },
+      "extraShare": {
+        "mean": 0.003864401615838727,
+        "sd": 0.0044481564089866935
+      },
+      "petShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceMinimum": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceBlocked": {
+        "mean": 7,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "poison-blade": 5,
+        "backstab": 9.03,
+        "blood-venom-rend": 5.29,
+        "corrosive-strike": 6.75,
+        "shadow-dance": 1
+      },
+      "damageBySource": {
+        "poison-blade": 628.5,
+        "poison-entry": 97.18,
+        "basic-attack": 5195.61,
+        "backstab": 1987.37,
+        "blood-venom-rend": 930.2,
+        "rupture-entry": 116.64,
+        "poison": 835.3863957299643,
+        "corrosive-strike": 1346.37,
+        "bleed": 284.09503900752486,
+        "shadow-dance": 79.56,
+        "rupture": 461.77856526251117,
+        "offhand": 46.64,
+        "bleed-trigger": 63.27
+      },
+      "effectiveHealing": {
+        "mean": 0,
+        "sd": 0
+      },
+      "overhealing": {
+        "mean": 0,
+        "sd": 0
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "backstab",
+        "passiveLv6": "desperate-counter"
+      },
+      "mode": "boss",
+      "dps": {
+        "mean": 280.4830941466195,
+        "sd": 5.059758217315017
+      },
+      "ttk": {
+        "mean": 43.05600000000006,
+        "sd": 0.7940176320460386
+      },
+      "killsPerMinute": {
+        "mean": 0,
+        "sd": 0
+      },
+      "totalDamage": {
+        "mean": 12072.6,
+        "sd": 57.97188973976956
+      },
+      "basicShare": {
+        "mean": 0.4303740224095041,
+        "sd": 0.010247266130514509
+      },
+      "activeSkillShare": {
+        "mean": 0.41182831981554263,
+        "sd": 0.01048197268702821
+      },
+      "aoeShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "dotShare": {
+        "mean": 0.15393325615911446,
+        "sd": 0.002826592349101467
+      },
+      "extraShare": {
+        "mean": 0.003864401615838727,
+        "sd": 0.0044481564089866935
+      },
+      "petShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceMinimum": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceBlocked": {
+        "mean": 7,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "poison-blade": 5,
+        "backstab": 9.03,
+        "blood-venom-rend": 5.29,
+        "corrosive-strike": 6.75,
+        "shadow-dance": 1
+      },
+      "damageBySource": {
+        "poison-blade": 628.5,
+        "poison-entry": 97.18,
+        "basic-attack": 5195.61,
+        "backstab": 1987.37,
+        "blood-venom-rend": 930.2,
+        "rupture-entry": 116.64,
+        "poison": 835.3863957299643,
+        "corrosive-strike": 1346.37,
+        "bleed": 284.09503900752486,
+        "shadow-dance": 79.56,
+        "rupture": 461.77856526251117,
+        "offhand": 46.64,
+        "bleed-trigger": 63.27
+      },
+      "effectiveHealing": {
+        "mean": 0,
+        "sd": 0
+      },
+      "overhealing": {
+        "mean": 0,
+        "sd": 0
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "blood-venom-rend",
+        "passiveLv6": "venom-mastery"
+      },
+      "mode": "boss",
+      "dps": {
+        "mean": 279.82827604252674,
+        "sd": 4.749354597379687
+      },
+      "ttk": {
+        "mean": 43.190000000000055,
+        "sd": 0.7257410006331462
+      },
+      "killsPerMinute": {
+        "mean": 0,
+        "sd": 0
+      },
+      "totalDamage": {
+        "mean": 12082.51,
+        "sd": 64.28102286056128
+      },
+      "basicShare": {
+        "mean": 0.43515626755829884,
+        "sd": 0.010601779966493982
+      },
+      "activeSkillShare": {
+        "mean": 0.39825222214845946,
+        "sd": 0.010783169583776862
+      },
+      "aoeShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "dotShare": {
+        "mean": 0.1626033438766441,
+        "sd": 0.002232798445368887
+      },
+      "extraShare": {
+        "mean": 0.003988166416597567,
+        "sd": 0.0043180029934518265
+      },
+      "petShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceMinimum": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceBlocked": {
+        "mean": 7,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "poison-blade": 5,
+        "backstab": 9.04,
+        "blood-venom-rend": 5.34,
+        "corrosive-strike": 6.85,
+        "shadow-dance": 1
+      },
+      "damageBySource": {
+        "poison-blade": 628.54,
+        "poison-entry": 103.64,
+        "basic-attack": 5257.69,
+        "backstab": 1686.01,
+        "blood-venom-rend": 1026.58,
+        "rupture-entry": 135.36,
+        "poison": 882.2977357363737,
+        "corrosive-strike": 1390.35,
+        "bleed": 297.80565038338966,
+        "shadow-dance": 80.56,
+        "rupture": 545.4966138802365,
+        "offhand": 48.18
+      },
+      "effectiveHealing": {
+        "mean": 0,
+        "sd": 0
+      },
+      "overhealing": {
+        "mean": 0,
+        "sd": 0
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "blood-venom-rend",
+        "passiveLv6": "deadly-strike"
+      },
+      "mode": "boss",
+      "dps": {
+        "mean": 278.93651491255747,
+        "sd": 4.919645567453969
+      },
+      "ttk": {
+        "mean": 43.33500000000007,
+        "sd": 0.7178265807282425
+      },
+      "killsPerMinute": {
+        "mean": 0,
+        "sd": 0
+      },
+      "totalDamage": {
+        "mean": 12084.37,
+        "sd": 68.59076541342864
+      },
+      "basicShare": {
+        "mean": 0.4361770730354147,
+        "sd": 0.011079217873181736
+      },
+      "activeSkillShare": {
+        "mean": 0.4011462265847412,
+        "sd": 0.01131535250130217
+      },
+      "aoeShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "dotShare": {
+        "mean": 0.15868921108226267,
+        "sd": 0.0021838135936108746
+      },
+      "extraShare": {
+        "mean": 0.003987489297581386,
+        "sd": 0.004313327771247618
+      },
+      "petShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceMinimum": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceBlocked": {
+        "mean": 7,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "poison-blade": 5,
+        "backstab": 9.06,
+        "blood-venom-rend": 5.43,
+        "corrosive-strike": 6.91,
+        "shadow-dance": 1
+      },
+      "damageBySource": {
+        "poison-blade": 628.54,
+        "poison-entry": 99.16,
+        "basic-attack": 5270.65,
+        "backstab": 1689.15,
+        "blood-venom-rend": 1044.18,
+        "rupture-entry": 136.2,
+        "poison": 837.7609271863105,
+        "corrosive-strike": 1405.53,
+        "bleed": 298.65852957356304,
+        "shadow-dance": 80.56,
+        "rupture": 545.8005432401275,
+        "offhand": 48.18
+      },
+      "effectiveHealing": {
+        "mean": 0,
+        "sd": 0
+      },
+      "overhealing": {
+        "mean": 0,
+        "sd": 0
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "blood-venom-rend",
+        "passiveLv6": "desperate-counter"
+      },
+      "mode": "boss",
+      "dps": {
+        "mean": 278.93651491255747,
+        "sd": 4.919645567453969
+      },
+      "ttk": {
+        "mean": 43.33500000000007,
+        "sd": 0.7178265807282425
+      },
+      "killsPerMinute": {
+        "mean": 0,
+        "sd": 0
+      },
+      "totalDamage": {
+        "mean": 12084.37,
+        "sd": 68.59076541342864
+      },
+      "basicShare": {
+        "mean": 0.4361770730354147,
+        "sd": 0.011079217873181736
+      },
+      "activeSkillShare": {
+        "mean": 0.4011462265847412,
+        "sd": 0.01131535250130217
+      },
+      "aoeShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "dotShare": {
+        "mean": 0.15868921108226267,
+        "sd": 0.0021838135936108746
+      },
+      "extraShare": {
+        "mean": 0.003987489297581386,
+        "sd": 0.004313327771247618
+      },
+      "petShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceMinimum": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceBlocked": {
+        "mean": 7,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "poison-blade": 5,
+        "backstab": 9.06,
+        "blood-venom-rend": 5.43,
+        "corrosive-strike": 6.91,
+        "shadow-dance": 1
+      },
+      "damageBySource": {
+        "poison-blade": 628.54,
+        "poison-entry": 99.16,
+        "basic-attack": 5270.65,
+        "backstab": 1689.15,
+        "blood-venom-rend": 1044.18,
+        "rupture-entry": 136.2,
+        "poison": 837.7609271863105,
+        "corrosive-strike": 1405.53,
+        "bleed": 298.65852957356304,
+        "shadow-dance": 80.56,
+        "rupture": 545.8005432401275,
+        "offhand": 48.18
+      },
+      "effectiveHealing": {
+        "mean": 0,
+        "sd": 0
+      },
+      "overhealing": {
+        "mean": 0,
+        "sd": 0
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "corrosive-strike",
+        "passiveLv6": "venom-mastery"
+      },
+      "mode": "boss",
+      "dps": {
+        "mean": 277.86063228180717,
+        "sd": 4.899688146378136
+      },
+      "ttk": {
+        "mean": 43.48900000000007,
+        "sd": 0.7100556316233251
+      },
+      "killsPerMinute": {
+        "mean": 0,
+        "sd": 0
+      },
+      "totalDamage": {
+        "mean": 12080.57,
+        "sd": 65.1104070022604
+      },
+      "basicShare": {
+        "mean": 0.4338545032682443,
+        "sd": 0.011064652964272819
+      },
+      "activeSkillShare": {
+        "mean": 0.4025666799079229,
+        "sd": 0.011085418372111128
+      },
+      "aoeShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "dotShare": {
+        "mean": 0.1595930106525799,
+        "sd": 0.0024419221779200975
+      },
+      "extraShare": {
+        "mean": 0.003985806171253183,
+        "sd": 0.0043087680155929975
+      },
+      "petShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceMinimum": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceBlocked": {
+        "mean": 7,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "poison-blade": 5,
+        "backstab": 9.11,
+        "blood-venom-rend": 5.52,
+        "corrosive-strike": 6.95,
+        "shadow-dance": 1
+      },
+      "damageBySource": {
+        "poison-blade": 627,
+        "poison-entry": 106.11,
+        "basic-attack": 5241.06,
+        "backstab": 1681.55,
+        "blood-venom-rend": 974.96,
+        "rupture-entry": 125.52,
+        "poison": 914.2236089957144,
+        "corrosive-strike": 1500.37,
+        "bleed": 299.5804319261955,
+        "shadow-dance": 79.56,
+        "rupture": 482.45595907808985,
+        "offhand": 48.18
+      },
+      "effectiveHealing": {
+        "mean": 0,
+        "sd": 0
+      },
+      "overhealing": {
+        "mean": 0,
+        "sd": 0
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "corrosive-strike",
+        "passiveLv6": "deadly-strike"
+      },
+      "mode": "boss",
+      "dps": {
+        "mean": 276.9289510679217,
+        "sd": 4.776793337220412
+      },
+      "ttk": {
+        "mean": 43.61800000000006,
+        "sd": 0.7207468348872582
+      },
+      "killsPerMinute": {
+        "mean": 0,
+        "sd": 0
+      },
+      "totalDamage": {
+        "mean": 12075.77,
+        "sd": 55.49898287356263
+      },
+      "basicShare": {
+        "mean": 0.4357009082669175,
+        "sd": 0.011396384406550431
+      },
+      "activeSkillShare": {
+        "mean": 0.4045257969091532,
+        "sd": 0.011678075716424248
+      },
+      "aoeShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "dotShare": {
+        "mean": 0.15578348812212098,
+        "sd": 0.0027296544278508036
+      },
+      "extraShare": {
+        "mean": 0.003989806701808466,
+        "sd": 0.0043125865455224364
+      },
+      "petShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceMinimum": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceBlocked": {
+        "mean": 7,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "poison-blade": 5,
+        "backstab": 9.14,
+        "blood-venom-rend": 5.58,
+        "corrosive-strike": 6.97,
+        "shadow-dance": 1
+      },
+      "damageBySource": {
+        "poison-blade": 627,
+        "poison-entry": 101.5,
+        "basic-attack": 5261.33,
+        "backstab": 1687.74,
+        "blood-venom-rend": 985.97,
+        "rupture-entry": 127.92,
+        "poison": 869.9908100678923,
+        "corrosive-strike": 1504.84,
+        "bleed": 300.0104999693289,
+        "shadow-dance": 79.56,
+        "rupture": 481.7286899627808,
+        "offhand": 48.18
+      },
+      "effectiveHealing": {
+        "mean": 0,
+        "sd": 0
+      },
+      "overhealing": {
+        "mean": 0,
+        "sd": 0
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "corrosive-strike",
+        "passiveLv6": "desperate-counter"
+      },
+      "mode": "boss",
+      "dps": {
+        "mean": 276.9289510679217,
+        "sd": 4.776793337220412
+      },
+      "ttk": {
+        "mean": 43.61800000000006,
+        "sd": 0.7207468348872582
+      },
+      "killsPerMinute": {
+        "mean": 0,
+        "sd": 0
+      },
+      "totalDamage": {
+        "mean": 12075.77,
+        "sd": 55.49898287356263
+      },
+      "basicShare": {
+        "mean": 0.4357009082669175,
+        "sd": 0.011396384406550431
+      },
+      "activeSkillShare": {
+        "mean": 0.4045257969091532,
+        "sd": 0.011678075716424248
+      },
+      "aoeShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "dotShare": {
+        "mean": 0.15578348812212098,
+        "sd": 0.0027296544278508036
+      },
+      "extraShare": {
+        "mean": 0.003989806701808466,
+        "sd": 0.0043125865455224364
+      },
+      "petShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceMinimum": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceBlocked": {
+        "mean": 7,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "poison-blade": 5,
+        "backstab": 9.14,
+        "blood-venom-rend": 5.58,
+        "corrosive-strike": 6.97,
+        "shadow-dance": 1
+      },
+      "damageBySource": {
+        "poison-blade": 627,
+        "poison-entry": 101.5,
+        "basic-attack": 5261.33,
+        "backstab": 1687.74,
+        "blood-venom-rend": 985.97,
+        "rupture-entry": 127.92,
+        "poison": 869.9908100678923,
+        "corrosive-strike": 1504.84,
+        "bleed": 300.0104999693289,
+        "shadow-dance": 79.56,
+        "rupture": 481.7286899627808,
+        "offhand": 48.18
+      },
+      "effectiveHealing": {
+        "mean": 0,
+        "sd": 0
+      },
+      "overhealing": {
+        "mean": 0,
+        "sd": 0
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "poison-blade",
+        "passiveLv6": "venom-mastery"
+      },
+      "mode": "boss",
+      "dps": {
+        "mean": 276.38913035914146,
+        "sd": 4.787530754318139
+      },
+      "ttk": {
+        "mean": 43.670000000000066,
+        "sd": 0.7465252842335626
+      },
+      "killsPerMinute": {
+        "mean": 0,
+        "sd": 0
+      },
+      "totalDamage": {
+        "mean": 12066.47,
+        "sd": 56.048096310222704
+      },
+      "basicShare": {
+        "mean": 0.43864022011496273,
+        "sd": 0.010104498567524668
+      },
+      "activeSkillShare": {
+        "mean": 0.4015685773422161,
+        "sd": 0.011034717179345866
+      },
+      "aoeShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "dotShare": {
+        "mean": 0.15580201157096388,
+        "sd": 0.0028268461377787915
+      },
+      "extraShare": {
+        "mean": 0.00398919097185732,
+        "sd": 0.004310206408948603
+      },
+      "petShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceMinimum": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceBlocked": {
+        "mean": 7,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "poison-blade": 5,
+        "backstab": 9.16,
+        "blood-venom-rend": 5.66,
+        "corrosive-strike": 6.96,
+        "shadow-dance": 1
+      },
+      "damageBySource": {
+        "poison-blade": 628.23,
+        "poison-entry": 108.01,
+        "basic-attack": 5292.77,
+        "backstab": 1706.85,
+        "blood-venom-rend": 1010.89,
+        "rupture-entry": 121.92,
+        "poison": 886.753668080494,
+        "corrosive-strike": 1419.06,
+        "bleed": 299.17215981735137,
+        "shadow-dance": 80.56,
+        "rupture": 464.0741721021531,
+        "offhand": 48.18
+      },
+      "effectiveHealing": {
+        "mean": 0,
+        "sd": 0
+      },
+      "overhealing": {
+        "mean": 0,
+        "sd": 0
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "shadow-dance",
+        "passiveLv6": "venom-mastery"
+      },
+      "mode": "boss",
+      "dps": {
+        "mean": 275.46800453476493,
+        "sd": 4.23738060954888
+      },
+      "ttk": {
+        "mean": 43.81400000000006,
+        "sd": 0.68396198724783
+      },
+      "killsPerMinute": {
+        "mean": 0,
+        "sd": 0
+      },
+      "totalDamage": {
+        "mean": 12066.57,
+        "sd": 52.50414364600189
+      },
+      "basicShare": {
+        "mean": 0.437561008653907,
+        "sd": 0.011055377924234137
+      },
+      "activeSkillShare": {
+        "mean": 0.4023172618973383,
+        "sd": 0.01097155579048922
+      },
+      "aoeShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "dotShare": {
+        "mean": 0.15527675099759553,
+        "sd": 0.003164174939705731
+      },
+      "extraShare": {
+        "mean": 0.00484497845115926,
+        "sd": 0.004465500112003579
+      },
+      "petShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceMinimum": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceBlocked": {
+        "mean": 7,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "poison-blade": 5,
+        "backstab": 9.2,
+        "blood-venom-rend": 5.7,
+        "corrosive-strike": 6.98,
+        "shadow-dance": 1
+      },
+      "damageBySource": {
+        "poison-blade": 628.5,
+        "poison-entry": 109.15,
+        "basic-attack": 5279.83,
+        "backstab": 1701.66,
+        "blood-venom-rend": 1007.99,
+        "rupture-entry": 124.32,
+        "poison": 887.620154144573,
+        "corrosive-strike": 1413.83,
+        "bleed": 289.36215981735137,
+        "shadow-dance": 102.62,
+        "rupture": 463.1676860380739,
+        "offhand": 58.52
+      },
+      "effectiveHealing": {
+        "mean": 0,
+        "sd": 0
+      },
+      "overhealing": {
+        "mean": 0,
+        "sd": 0
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "poison-blade",
+        "passiveLv6": "deadly-strike"
+      },
+      "mode": "boss",
+      "dps": {
+        "mean": 275.39436722323893,
+        "sd": 4.608127628802855
+      },
+      "ttk": {
+        "mean": 43.84300000000005,
+        "sd": 0.728869672849681
+      },
+      "killsPerMinute": {
+        "mean": 0,
+        "sd": 0
+      },
+      "totalDamage": {
+        "mean": 12070.87,
+        "sd": 52.89152200494896
+      },
+      "basicShare": {
+        "mean": 0.4406105888139413,
+        "sd": 0.01030548202617952
+      },
+      "activeSkillShare": {
+        "mean": 0.40335910215516885,
+        "sd": 0.011044195179042973
+      },
+      "aoeShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "dotShare": {
+        "mean": 0.15204292022554458,
+        "sd": 0.003198522257639159
+      },
+      "extraShare": {
+        "mean": 0.00398738880534532,
+        "sd": 0.004313061930800148
+      },
+      "petShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceMinimum": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceBlocked": {
+        "mean": 7,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "poison-blade": 5,
+        "backstab": 9.2,
+        "blood-venom-rend": 5.74,
+        "corrosive-strike": 6.96,
+        "shadow-dance": 1
+      },
+      "damageBySource": {
+        "poison-blade": 628.23,
+        "poison-entry": 103.84,
+        "basic-attack": 5318.46,
+        "backstab": 1715.44,
+        "blood-venom-rend": 1025.69,
+        "rupture-entry": 123.84,
+        "poison": 843.777056390625,
+        "corrosive-strike": 1419.06,
+        "bleed": 300.42503900752484,
+        "shadow-dance": 80.56,
+        "rupture": 463.3679046018505,
+        "offhand": 48.18
+      },
+      "effectiveHealing": {
+        "mean": 0,
+        "sd": 0
+      },
+      "overhealing": {
+        "mean": 0,
+        "sd": 0
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "poison-blade",
+        "passiveLv6": "desperate-counter"
+      },
+      "mode": "boss",
+      "dps": {
+        "mean": 275.39436722323893,
+        "sd": 4.608127628802855
+      },
+      "ttk": {
+        "mean": 43.84300000000005,
+        "sd": 0.728869672849681
+      },
+      "killsPerMinute": {
+        "mean": 0,
+        "sd": 0
+      },
+      "totalDamage": {
+        "mean": 12070.87,
+        "sd": 52.89152200494896
+      },
+      "basicShare": {
+        "mean": 0.4406105888139413,
+        "sd": 0.01030548202617952
+      },
+      "activeSkillShare": {
+        "mean": 0.40335910215516885,
+        "sd": 0.011044195179042973
+      },
+      "aoeShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "dotShare": {
+        "mean": 0.15204292022554458,
+        "sd": 0.003198522257639159
+      },
+      "extraShare": {
+        "mean": 0.00398738880534532,
+        "sd": 0.004313061930800148
+      },
+      "petShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceMinimum": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceBlocked": {
+        "mean": 7,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "poison-blade": 5,
+        "backstab": 9.2,
+        "blood-venom-rend": 5.74,
+        "corrosive-strike": 6.96,
+        "shadow-dance": 1
+      },
+      "damageBySource": {
+        "poison-blade": 628.23,
+        "poison-entry": 103.84,
+        "basic-attack": 5318.46,
+        "backstab": 1715.44,
+        "blood-venom-rend": 1025.69,
+        "rupture-entry": 123.84,
+        "poison": 843.777056390625,
+        "corrosive-strike": 1419.06,
+        "bleed": 300.42503900752484,
+        "shadow-dance": 80.56,
+        "rupture": 463.3679046018505,
+        "offhand": 48.18
+      },
+      "effectiveHealing": {
+        "mean": 0,
+        "sd": 0
+      },
+      "overhealing": {
+        "mean": 0,
+        "sd": 0
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "shadow-dance",
+        "passiveLv6": "deadly-strike"
+      },
+      "mode": "boss",
+      "dps": {
+        "mean": 274.5471199907148,
+        "sd": 4.23810570593111
+      },
+      "ttk": {
+        "mean": 43.97700000000006,
+        "sd": 0.6979763606312178
+      },
+      "killsPerMinute": {
+        "mean": 0,
+        "sd": 0
+      },
+      "totalDamage": {
+        "mean": 12070.92,
+        "sd": 54.32820262073834
+      },
+      "basicShare": {
+        "mean": 0.43895118523336263,
+        "sd": 0.011076896017083837
+      },
+      "activeSkillShare": {
+        "mean": 0.4046154668562694,
+        "sd": 0.011172340345428381
+      },
+      "aoeShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "dotShare": {
+        "mean": 0.1515865260029401,
+        "sd": 0.0029569833860555905
+      },
+      "extraShare": {
+        "mean": 0.004846821907427756,
+        "sd": 0.004471586327538469
+      },
+      "petShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceMinimum": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceBlocked": {
+        "mean": 7,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "poison-blade": 5,
+        "backstab": 9.28,
+        "blood-venom-rend": 5.77,
+        "corrosive-strike": 6.99,
+        "shadow-dance": 1
+      },
+      "damageBySource": {
+        "poison-blade": 628.5,
+        "poison-entry": 104.56,
+        "basic-attack": 5298.42,
+        "backstab": 1717.14,
+        "blood-venom-rend": 1020.47,
+        "rupture-entry": 126,
+        "poison": 844.2421665007352,
+        "corrosive-strike": 1415.5,
+        "bleed": 291.3150390075249,
+        "shadow-dance": 102.62,
+        "rupture": 463.6327944917404,
+        "offhand": 58.52
+      },
+      "effectiveHealing": {
+        "mean": 0,
+        "sd": 0
+      },
+      "overhealing": {
+        "mean": 0,
+        "sd": 0
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "shadow-dance",
+        "passiveLv6": "desperate-counter"
+      },
+      "mode": "boss",
+      "dps": {
+        "mean": 274.5471199907148,
+        "sd": 4.23810570593111
+      },
+      "ttk": {
+        "mean": 43.97700000000006,
+        "sd": 0.6979763606312178
+      },
+      "killsPerMinute": {
+        "mean": 0,
+        "sd": 0
+      },
+      "totalDamage": {
+        "mean": 12070.92,
+        "sd": 54.32820262073834
+      },
+      "basicShare": {
+        "mean": 0.43895118523336263,
+        "sd": 0.011076896017083837
+      },
+      "activeSkillShare": {
+        "mean": 0.4046154668562694,
+        "sd": 0.011172340345428381
+      },
+      "aoeShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "dotShare": {
+        "mean": 0.1515865260029401,
+        "sd": 0.0029569833860555905
+      },
+      "extraShare": {
+        "mean": 0.004846821907427756,
+        "sd": 0.004471586327538469
+      },
+      "petShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceMinimum": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceBlocked": {
+        "mean": 7,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "poison-blade": 5,
+        "backstab": 9.28,
+        "blood-venom-rend": 5.77,
+        "corrosive-strike": 6.99,
+        "shadow-dance": 1
+      },
+      "damageBySource": {
+        "poison-blade": 628.5,
+        "poison-entry": 104.56,
+        "basic-attack": 5298.42,
+        "backstab": 1717.14,
+        "blood-venom-rend": 1020.47,
+        "rupture-entry": 126,
+        "poison": 844.2421665007352,
+        "corrosive-strike": 1415.5,
+        "bleed": 291.3150390075249,
+        "shadow-dance": 102.62,
+        "rupture": 463.6327944917404,
+        "offhand": 58.52
+      },
+      "effectiveHealing": {
+        "mean": 0,
+        "sd": 0
+      },
+      "overhealing": {
+        "mean": 0,
+        "sd": 0
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "backstab",
+        "passiveLv6": "toxic-blood-symbiosis"
+      },
+      "mode": "boss",
+      "dps": {
+        "mean": 265.737635243186,
+        "sd": 5.518504389870286
+      },
+      "ttk": {
+        "mean": 45.41400000000005,
+        "sd": 0.9103867310105087
+      },
+      "killsPerMinute": {
+        "mean": 0,
+        "sd": 0
+      },
+      "totalDamage": {
+        "mean": 12063.29,
+        "sd": 51.333282575732476
+      },
+      "basicShare": {
+        "mean": 0.4552286434304068,
+        "sd": 0.011637468789822901
+      },
+      "activeSkillShare": {
+        "mean": 0.442801836323341,
+        "sd": 0.013654599768759617
+      },
+      "aoeShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "dotShare": {
+        "mean": 0.09693391509005261,
+        "sd": 0.007678445417066214
+      },
+      "extraShare": {
+        "mean": 0.00503560515619964,
+        "sd": 0.004183242774166789
+      },
+      "petShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceMinimum": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceBlocked": {
+        "mean": 7,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "poison-blade": 5.12,
+        "backstab": 9.89,
+        "blood-venom-rend": 6,
+        "corrosive-strike": 7,
+        "shadow-dance": 1
+      },
+      "damageBySource": {
+        "poison-blade": 646.5,
+        "poison-entry": 55.71,
+        "basic-attack": 5491.39,
+        "backstab": 2170.23,
+        "blood-venom-rend": 1044.06,
+        "rupture-entry": 155.06,
+        "corrosive-strike": 1398.08,
+        "shadow-dance": 82.96,
+        "offhand": 60.72,
+        "bleed-trigger": 80.01,
+        "rupture": 353.2930373729285,
+        "poison": 397.7814365587482,
+        "bleed": 127.49552606832346
+      },
+      "effectiveHealing": {
+        "mean": 0,
+        "sd": 0
+      },
+      "overhealing": {
+        "mean": 0,
+        "sd": 0
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "blood-venom-rend",
+        "passiveLv6": "toxic-blood-symbiosis"
+      },
+      "mode": "boss",
+      "dps": {
+        "mean": 261.8703385411664,
+        "sd": 5.484124248374356
+      },
+      "ttk": {
+        "mean": 46.07,
+        "sd": 0.9688653157173084
+      },
+      "killsPerMinute": {
+        "mean": 0,
+        "sd": 0
+      },
+      "totalDamage": {
+        "mean": 12059.13,
+        "sd": 41.84152363382574
+      },
+      "basicShare": {
+        "mean": 0.4648081483539497,
+        "sd": 0.011681690094077862
+      },
+      "activeSkillShare": {
+        "mean": 0.4326007694722672,
+        "sd": 0.013355179363963254
+      },
+      "aoeShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "dotShare": {
+        "mean": 0.09748213754786848,
+        "sd": 0.0084782339991639
+      },
+      "extraShare": {
+        "mean": 0.005108944625914423,
+        "sd": 0.004319480283506554
+      },
+      "petShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceMinimum": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceBlocked": {
+        "mean": 7.01,
+        "sd": 0.09949874371066199
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "poison-blade": 5.32,
+        "backstab": 9.97,
+        "blood-venom-rend": 6,
+        "corrosive-strike": 7.01,
+        "shadow-dance": 1
+      },
+      "damageBySource": {
+        "poison-blade": 666.15,
+        "poison-entry": 55.14,
+        "basic-attack": 5605.28,
+        "backstab": 1892.85,
+        "blood-venom-rend": 1163.19,
+        "rupture-entry": 179.9,
+        "corrosive-strike": 1410.61,
+        "shadow-dance": 83.96,
+        "offhand": 61.6,
+        "rupture": 406.3518816297329,
+        "poison": 406.6044351302634,
+        "bleed": 127.49368324000385
+      },
+      "effectiveHealing": {
+        "mean": 0,
+        "sd": 0
+      },
+      "overhealing": {
+        "mean": 0,
+        "sd": 0
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "corrosive-strike",
+        "passiveLv6": "toxic-blood-symbiosis"
+      },
+      "mode": "boss",
+      "dps": {
+        "mean": 258.7509156276943,
+        "sd": 5.506737778710541
+      },
+      "ttk": {
+        "mean": 46.62700000000004,
+        "sd": 0.9875074683261889
+      },
+      "killsPerMinute": {
+        "mean": 0,
+        "sd": 0
+      },
+      "totalDamage": {
+        "mean": 12059.43,
+        "sd": 43.669727500867225
+      },
+      "basicShare": {
+        "mean": 0.46638580576762523,
+        "sd": 0.011581307482720246
+      },
+      "activeSkillShare": {
+        "mean": 0.4331957070366127,
+        "sd": 0.013039454418680641
+      },
+      "aoeShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "dotShare": {
+        "mean": 0.09531289034304173,
+        "sd": 0.009022372192733058
+      },
+      "extraShare": {
+        "mean": 0.005105596852720506,
+        "sd": 0.004311976614803177
+      },
+      "petShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceMinimum": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceBlocked": {
+        "mean": 7.04,
+        "sd": 0.19595917942265417
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "poison-blade": 5.54,
+        "backstab": 10,
+        "blood-venom-rend": 6,
+        "corrosive-strike": 7.04,
+        "shadow-dance": 1
+      },
+      "damageBySource": {
+        "poison-blade": 690.5,
+        "poison-entry": 55.14,
+        "basic-attack": 5624.3,
+        "backstab": 1881.87,
+        "blood-venom-rend": 1067.42,
+        "rupture-entry": 164.86,
+        "corrosive-strike": 1501.35,
+        "shadow-dance": 82.96,
+        "offhand": 61.6,
+        "rupture": 373.17541281382773,
+        "poison": 420.34693302516234,
+        "bleed": 135.90765416100993
+      },
+      "effectiveHealing": {
+        "mean": 0,
+        "sd": 0
+      },
+      "overhealing": {
+        "mean": 0,
+        "sd": 0
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "poison-blade",
+        "passiveLv6": "toxic-blood-symbiosis"
+      },
+      "mode": "boss",
+      "dps": {
+        "mean": 257.52202431860917,
+        "sd": 5.674582152769537
+      },
+      "ttk": {
+        "mean": 46.82900000000005,
+        "sd": 1.0469283643115226
+      },
+      "killsPerMinute": {
+        "mean": 0,
+        "sd": 0
+      },
+      "totalDamage": {
+        "mean": 12053.64,
+        "sd": 42.641650999932025
+      },
+      "basicShare": {
+        "mean": 0.4719458058498771,
+        "sd": 0.012097067034527684
+      },
+      "activeSkillShare": {
+        "mean": 0.4318976739213219,
+        "sd": 0.013350736138279348
+      },
+      "aoeShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "dotShare": {
+        "mean": 0.09104547266184887,
+        "sd": 0.00842030980258891
+      },
+      "extraShare": {
+        "mean": 0.005111047566951731,
+        "sd": 0.004320899718617733
+      },
+      "petShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceMinimum": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceBlocked": {
+        "mean": 7.07,
+        "sd": 0.25514701644346155
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "poison-blade": 5.64,
+        "backstab": 9.99,
+        "blood-venom-rend": 6,
+        "corrosive-strike": 7.07,
+        "shadow-dance": 1
+      },
+      "damageBySource": {
+        "poison-blade": 710.87,
+        "poison-entry": 55.71,
+        "basic-attack": 5688.7,
+        "backstab": 1912.62,
+        "blood-venom-rend": 1068.53,
+        "rupture-entry": 155.84,
+        "corrosive-strike": 1429.97,
+        "shadow-dance": 83.96,
+        "offhand": 61.6,
+        "rupture": 355.458466736637,
+        "poison": 404.9475022728942,
+        "bleed": 125.4340309904691
+      },
+      "effectiveHealing": {
+        "mean": 0,
+        "sd": 0
+      },
+      "overhealing": {
+        "mean": 0,
+        "sd": 0
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "shadow-dance",
+        "passiveLv6": "toxic-blood-symbiosis"
+      },
+      "mode": "boss",
+      "dps": {
+        "mean": 255.32135140360796,
+        "sd": 5.4514177531541215
+      },
+      "ttk": {
+        "mean": 47.26700000000006,
+        "sd": 1.061607743001152
+      },
+      "killsPerMinute": {
+        "mean": 0,
+        "sd": 0
+      },
+      "totalDamage": {
+        "mean": 12062.59,
+        "sd": 49.88408463628454
+      },
+      "basicShare": {
+        "mean": 0.4715887358296268,
+        "sd": 0.01134746564904089
+      },
+      "activeSkillShare": {
+        "mean": 0.43085901871745497,
+        "sd": 0.012344101657549574
+      },
+      "aoeShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "dotShare": {
+        "mean": 0.0915678860930791,
+        "sd": 0.008559949074656459
+      },
+      "extraShare": {
+        "mean": 0.005984359359839103,
+        "sd": 0.004348825994308454
+      },
+      "petShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceMinimum": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceBlocked": {
+        "mean": 7.17,
+        "sd": 0.37563279941985916
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "poison-blade": 5.79,
+        "backstab": 10,
+        "blood-venom-rend": 6,
+        "corrosive-strike": 7.17,
+        "shadow-dance": 1
+      },
+      "damageBySource": {
+        "poison-blade": 721.5,
+        "poison-entry": 55.14,
+        "basic-attack": 5688.56,
+        "backstab": 1887.26,
+        "blood-venom-rend": 1060.12,
+        "rupture-entry": 155.92,
+        "corrosive-strike": 1421.49,
+        "shadow-dance": 106.92,
+        "offhand": 72.16,
+        "rupture": 357.9619935405473,
+        "poison": 404.9954207058623,
+        "bleed": 130.56258575359058
+      },
+      "effectiveHealing": {
+        "mean": 0,
+        "sd": 0
+      },
+      "overhealing": {
+        "mean": 0,
+        "sd": 0
+      }
+    }
+  ]
+}

@@ -1,0 +1,48 @@
+{
+  "mode": "long-boss",
+  "id": "assassination",
+  "job": "assassin",
+  "config": {
+    "activeLv6": "backstab",
+    "passiveLv6": "dagger-mastery"
+  },
+  "seeds": 100,
+  "ttk": {
+    "mean": 210.30299999999997,
+    "sd": 3.3861321592637226
+  },
+  "dps": {
+    "mean": 285.8403397376654,
+    "sd": 4.564131266379683
+  },
+  "resourceMinimum": {
+    "mean": 0,
+    "sd": 0
+  },
+  "resourceBlocked": {
+    "mean": 23.08,
+    "sd": 0.39191835884530807
+  },
+  "resourceZeroDuration": {
+    "mean": 0,
+    "sd": 0
+  },
+  "damageBySource": {
+    "basic-attack": 29511.22,
+    "backstab": 11262.22,
+    "shadow-assassination": 10187.73,
+    "shadow-dance": 95.21,
+    "bleed": 1164.833783783786,
+    "offhand": 3214.48,
+    "poison-blade": 3042.98,
+    "poison": 1226.896216216214,
+    "bleed-trigger": 392.13
+  },
+  "skillCasts": {
+    "death-mark": 30,
+    "backstab": 44.57,
+    "shadow-assassination": 29.94,
+    "shadow-dance": 1,
+    "poison-blade": 22.24
+  }
+}

@@ -1,0 +1,70 @@
+{
+  "mode": "party",
+  "id": "WHMBP",
+  "branches": [
+    "weapon-master",
+    "beastmaster",
+    "arcane-mage",
+    "battle-priest"
+  ],
+  "seeds": 100,
+  "teamDps": {
+    "mean": 1819.5460073759957,
+    "sd": 30.853269148042585
+  },
+  "killsPerMinute": {
+    "mean": 40.5943716604154,
+    "sd": 0.8197021166680076
+  },
+  "averageHpRatio": {
+    "mean": 0.6447357592087039,
+    "sd": 0.02708107848342491
+  },
+  "deathRate": 0.04,
+  "deaths": {
+    "mean": 0.04,
+    "sd": 0.19595917942265417
+  },
+  "firstDeathAt": {
+    "mean": 37.225,
+    "sd": 1.05208127062504
+  },
+  "effectiveHealing": {
+    "mean": 1208.6847000000002,
+    "sd": 27.230878592325972
+  },
+  "hps": {
+    "mean": 10.072372499999998,
+    "sd": 0.2269239882693831
+  },
+  "overhealing": {
+    "mean": 95.48400000000004,
+    "sd": 16.880286964385405
+  },
+  "shieldAbsorbed": {
+    "mean": 41.31904999999999,
+    "sd": 49.506254982047466
+  },
+  "revives": {
+    "mean": 0.04,
+    "sd": 0.19595917942265417
+  },
+  "buffCoverage": {
+    "mean": 0.9993054283368101,
+    "sd": 0.0012433050430527026
+  },
+  "controlCoverage": {
+    "mean": 0.810238629442295,
+    "sd": 0.0218394658478175
+  },
+  "debuffCoverage": {
+    "mean": 0.8745267237739378,
+    "sd": 0.02444022264118287
+  },
+  "memberDamage": {
+    "formal-warrior": 11728.23,
+    "formal-party-0": 19070.28,
+    "formal-party-1": 24279.79,
+    "formal-party-2": 9625.16
+  }
+}

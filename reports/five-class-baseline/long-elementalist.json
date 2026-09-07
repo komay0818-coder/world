@@ -1,0 +1,54 @@
+{
+  "mode": "long-boss",
+  "id": "elementalist",
+  "job": "mage",
+  "config": {
+    "activeLv6": "chain-lightning",
+    "passiveLv6": "elemental-mastery"
+  },
+  "seeds": 100,
+  "ttk": {
+    "mean": 252.98399999999998,
+    "sd": 7.8319310517904865
+  },
+  "dps": {
+    "mean": 237.64655499244185,
+    "sd": 7.614801820809484
+  },
+  "resourceMinimum": {
+    "mean": 58.566059999997506,
+    "sd": 1.1226988449272073
+  },
+  "resourceBlocked": {
+    "mean": 0,
+    "sd": 0
+  },
+  "resourceZeroDuration": {
+    "mean": 0,
+    "sd": 0
+  },
+  "resourceExhaustionDuration": {
+    "mean": 180.35199999999998,
+    "sd": 7.4979394502756564
+  },
+  "resourceExhaustionEpisodes": {
+    "mean": 6,
+    "sd": 0
+  },
+  "damageBySource": {
+    "fireball": 7419.67,
+    "burn": 12734.6,
+    "basic-attack": 30290.52,
+    "blizzard": 1816.44,
+    "chain-lightning": 1781.94,
+    "elemental-burst": 3701.46,
+    "elemental-storm": 2316.57
+  },
+  "skillCasts": {
+    "fireball": 24.01,
+    "blizzard": 15.16,
+    "chain-lightning": 9.1,
+    "elemental-burst": 8.44,
+    "elemental-storm": 8
+  }
+}

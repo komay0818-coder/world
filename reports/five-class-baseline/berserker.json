@@ -1,0 +1,5496 @@
+{
+  "job": "warrior",
+  "advancedClass": "berserker",
+  "combinationCount": 30,
+  "seeds": 100,
+  "equipment": {
+    "chest": {
+      "id": "baseline-chest",
+      "slot": "chest",
+      "defense": 12
+    },
+    "weapon": {
+      "id": "baseline-weapon",
+      "slot": "weapon",
+      "attack": 16,
+      "attackMin": 14,
+      "attackMax": 18,
+      "criticalChance": 0.1,
+      "weaponType": "two-handed-axe",
+      "series": "雙手斧"
+    },
+    "offhand": {
+      "id": "baseline-offhand-axe",
+      "slot": "offhand",
+      "attack": 16,
+      "attackMin": 14,
+      "attackMax": 18,
+      "weaponType": "two-handed-axe",
+      "series": "雙手斧"
+    }
+  },
+  "five": [
+    {
+      "config": {
+        "activeLv6": "whirlwind",
+        "passiveLv6": "parry"
+      },
+      "mode": "five",
+      "dps": {
+        "mean": 410.9284074668807,
+        "sd": 10.792334934484076
+      },
+      "ttk": {
+        "mean": 0,
+        "sd": 0
+      },
+      "killsPerMinute": {
+        "mean": 8.867841589550617,
+        "sd": 0.2867182133874752
+      },
+      "totalDamage": {
+        "mean": 47043.64,
+        "sd": 1283.2506888367527
+      },
+      "basicShare": {
+        "mean": 0.3146064190210724,
+        "sd": 0.008707013389704806
+      },
+      "activeSkillShare": {
+        "mean": 0.5142230331993444,
+        "sd": 0.013562832125473722
+      },
+      "aoeShare": {
+        "mean": 0.24935128554076932,
+        "sd": 0.010018414391981756
+      },
+      "dotShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "extraShare": {
+        "mean": 0.17117054777958338,
+        "sd": 0.01996383333543028
+      },
+      "petShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceMinimum": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceBlocked": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "blood-rage": 8,
+        "berserker-slash": 14.02,
+        "heavy-strike": 28.26,
+        "charge": 12,
+        "whirlwind": 15
+      },
+      "damageBySource": {
+        "basic-attack": 14790.59,
+        "berserker-slash": 3778.29,
+        "counter": 7139.71,
+        "heavy-strike": 6500.21,
+        "charge": 2176.88,
+        "whirlwind": 11723.99,
+        "offhand": 933.97
+      },
+      "effectiveHealing": {
+        "mean": 0,
+        "sd": 0
+      },
+      "overhealing": {
+        "mean": 0,
+        "sd": 0
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "whirlwind",
+        "passiveLv6": "weapon-mastery"
+      },
+      "mode": "five",
+      "dps": {
+        "mean": 404.9972191633089,
+        "sd": 8.186872318491362
+      },
+      "ttk": {
+        "mean": 0,
+        "sd": 0
+      },
+      "killsPerMinute": {
+        "mean": 8.723293140797335,
+        "sd": 0.26493954401874814
+      },
+      "totalDamage": {
+        "mean": 46351.01,
+        "sd": 993.0484529467835
+      },
+      "basicShare": {
+        "mean": 0.33390054530754093,
+        "sd": 0.008504449452983804
+      },
+      "activeSkillShare": {
+        "mean": 0.5486035041891977,
+        "sd": 0.01211701949040697
+      },
+      "aoeShare": {
+        "mean": 0.26803668961190424,
+        "sd": 0.011640149751191545
+      },
+      "dotShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "extraShare": {
+        "mean": 0.11749595050326134,
+        "sd": 0.01377262082203474
+      },
+      "petShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceMinimum": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceBlocked": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "blood-rage": 8,
+        "berserker-slash": 14.04,
+        "heavy-strike": 28.22,
+        "charge": 12,
+        "whirlwind": 15
+      },
+      "damageBySource": {
+        "basic-attack": 15471.23,
+        "berserker-slash": 3956.77,
+        "heavy-strike": 6735.97,
+        "charge": 2309.43,
+        "whirlwind": 12425.17,
+        "counter": 4502.65,
+        "offhand": 949.79
+      },
+      "effectiveHealing": {
+        "mean": 0,
+        "sd": 0
+      },
+      "overhealing": {
+        "mean": 0,
+        "sd": 0
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "charge",
+        "passiveLv6": "parry"
+      },
+      "mode": "five",
+      "dps": {
+        "mean": 404.69987972349537,
+        "sd": 9.476643955756712
+      },
+      "ttk": {
+        "mean": 0,
+        "sd": 0
+      },
+      "killsPerMinute": {
+        "mean": 8.770185754197675,
+        "sd": 0.2591406303200361
+      },
+      "totalDamage": {
+        "mean": 46320.13,
+        "sd": 1122.089191241053
+      },
+      "basicShare": {
+        "mean": 0.3602768180522682,
+        "sd": 0.009546130250122
+      },
+      "activeSkillShare": {
+        "mean": 0.4635131090686382,
+        "sd": 0.010259016512914311
+      },
+      "aoeShare": {
+        "mean": 0.19008002375269165,
+        "sd": 0.0074139898719595716
+      },
+      "dotShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "extraShare": {
+        "mean": 0.1762100728790936,
+        "sd": 0.016425756792248364
+      },
+      "petShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceMinimum": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceBlocked": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "blood-rage": 8,
+        "berserker-slash": 14.03,
+        "heavy-strike": 28.22,
+        "charge": 12,
+        "whirlwind": 15
+      },
+      "damageBySource": {
+        "basic-attack": 16678.86,
+        "berserker-slash": 3770.12,
+        "counter": 7203.11,
+        "heavy-strike": 6445.83,
+        "charge": 2444.99,
+        "whirlwind": 8803.36,
+        "offhand": 973.86
+      },
+      "effectiveHealing": {
+        "mean": 0,
+        "sd": 0
+      },
+      "overhealing": {
+        "mean": 0,
+        "sd": 0
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "whirlwind",
+        "passiveLv6": "titans-grip"
+      },
+      "mode": "five",
+      "dps": {
+        "mean": 397.69527469442255,
+        "sd": 7.983178035939628
+      },
+      "ttk": {
+        "mean": 0,
+        "sd": 0
+      },
+      "killsPerMinute": {
+        "mean": 8.607655564619552,
+        "sd": 0.2644543703093843
+      },
+      "totalDamage": {
+        "mean": 45489.19,
+        "sd": 940.8315225905225
+      },
+      "basicShare": {
+        "mean": 0.3253367198435473,
+        "sd": 0.007324147176054848
+      },
+      "activeSkillShare": {
+        "mean": 0.5302234795076466,
+        "sd": 0.010346274601045344
+      },
+      "aoeShare": {
+        "mean": 0.2577149733592331,
+        "sd": 0.01042060644702526
+      },
+      "dotShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "extraShare": {
+        "mean": 0.1444398006488065,
+        "sd": 0.012850219987177487
+      },
+      "petShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceMinimum": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceBlocked": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "blood-rage": 8,
+        "berserker-slash": 14.02,
+        "heavy-strike": 28.15,
+        "charge": 12,
+        "whirlwind": 15
+      },
+      "damageBySource": {
+        "basic-attack": 14793.79,
+        "berserker-slash": 3768.85,
+        "heavy-strike": 6430.7,
+        "charge": 2194.06,
+        "whirlwind": 11722.94,
+        "counter": 4416.22,
+        "offhand": 2162.63
+      },
+      "effectiveHealing": {
+        "mean": 0,
+        "sd": 0
+      },
+      "overhealing": {
+        "mean": 0,
+        "sd": 0
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "charge",
+        "passiveLv6": "weapon-mastery"
+      },
+      "mode": "five",
+      "dps": {
+        "mean": 396.56168921489626,
+        "sd": 8.47361766469337
+      },
+      "ttk": {
+        "mean": 0,
+        "sd": 0
+      },
+      "killsPerMinute": {
+        "mean": 8.637433113103453,
+        "sd": 0.2600513743208834
+      },
+      "totalDamage": {
+        "mean": 45479.66,
+        "sd": 1024.3215434618176
+      },
+      "basicShare": {
+        "mean": 0.3836853330816809,
+        "sd": 0.008478362143026929
+      },
+      "activeSkillShare": {
+        "mean": 0.495694958369547,
+        "sd": 0.01098794833985458
+      },
+      "aoeShare": {
+        "mean": 0.2043890630847139,
+        "sd": 0.008061019504319433
+      },
+      "dotShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "extraShare": {
+        "mean": 0.12061970854877177,
+        "sd": 0.014189605017897145
+      },
+      "petShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceMinimum": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceBlocked": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "blood-rage": 8,
+        "berserker-slash": 14.03,
+        "heavy-strike": 28.23,
+        "charge": 12,
+        "whirlwind": 15
+      },
+      "damageBySource": {
+        "basic-attack": 17443.19,
+        "berserker-slash": 3948.39,
+        "heavy-strike": 6760.38,
+        "charge": 2537.86,
+        "whirlwind": 9295.11,
+        "counter": 4516.71,
+        "offhand": 978.02
+      },
+      "effectiveHealing": {
+        "mean": 0,
+        "sd": 0
+      },
+      "overhealing": {
+        "mean": 0,
+        "sd": 0
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "whirlwind",
+        "passiveLv6": "berserker-blood"
+      },
+      "mode": "five",
+      "dps": {
+        "mean": 393.54294208987477,
+        "sd": 8.06383435254921
+      },
+      "ttk": {
+        "mean": 0,
+        "sd": 0
+      },
+      "killsPerMinute": {
+        "mean": 8.45144994273821,
+        "sd": 0.2334688494025427
+      },
+      "totalDamage": {
+        "mean": 44926.58,
+        "sd": 931.6083101819133
+      },
+      "basicShare": {
+        "mean": 0.33272167938284086,
+        "sd": 0.0073219413806090575
+      },
+      "activeSkillShare": {
+        "mean": 0.5454461290246915,
+        "sd": 0.01088393625592643
+      },
+      "aoeShare": {
+        "mean": 0.26603611617095996,
+        "sd": 0.009596735350613292
+      },
+      "dotShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "extraShare": {
+        "mean": 0.12183219159246789,
+        "sd": 0.013608363325257642
+      },
+      "petShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceMinimum": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceBlocked": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "blood-rage": 8,
+        "berserker-slash": 14,
+        "heavy-strike": 28.07,
+        "charge": 12,
+        "whirlwind": 15
+      },
+      "damageBySource": {
+        "basic-attack": 14942.79,
+        "berserker-slash": 3795.89,
+        "heavy-strike": 6526.76,
+        "charge": 2227.28,
+        "whirlwind": 11952.39,
+        "counter": 4521.46,
+        "offhand": 960.01
+      },
+      "effectiveHealing": {
+        "mean": 0,
+        "sd": 0
+      },
+      "overhealing": {
+        "mean": 0,
+        "sd": 0
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "charge",
+        "passiveLv6": "titans-grip"
+      },
+      "mode": "five",
+      "dps": {
+        "mean": 391.7432803199353,
+        "sd": 7.420817053360171
+      },
+      "ttk": {
+        "mean": 0,
+        "sd": 0
+      },
+      "killsPerMinute": {
+        "mean": 8.532235314347549,
+        "sd": 0.24645096017016827
+      },
+      "totalDamage": {
+        "mean": 44847.74,
+        "sd": 829.0989762386638
+      },
+      "basicShare": {
+        "mean": 0.37223875888293384,
+        "sd": 0.007252038808677433
+      },
+      "activeSkillShare": {
+        "mean": 0.47881273555791654,
+        "sd": 0.010443079371750534
+      },
+      "aoeShare": {
+        "mean": 0.19612405709431385,
+        "sd": 0.007773279227301117
+      },
+      "dotShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "extraShare": {
+        "mean": 0.14894850555914918,
+        "sd": 0.013960407922238944
+      },
+      "petShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceMinimum": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceBlocked": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "blood-rage": 8,
+        "berserker-slash": 14.03,
+        "heavy-strike": 28.19,
+        "charge": 12,
+        "whirlwind": 15
+      },
+      "damageBySource": {
+        "basic-attack": 16690.19,
+        "berserker-slash": 3782.4,
+        "heavy-strike": 6468.29,
+        "charge": 2423.64,
+        "whirlwind": 8794.98,
+        "counter": 4441.3,
+        "offhand": 2246.94
+      },
+      "effectiveHealing": {
+        "mean": 0,
+        "sd": 0
+      },
+      "overhealing": {
+        "mean": 0,
+        "sd": 0
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "heavy-strike",
+        "passiveLv6": "parry"
+      },
+      "mode": "five",
+      "dps": {
+        "mean": 391.60364348860537,
+        "sd": 9.523372653357828
+      },
+      "ttk": {
+        "mean": 0,
+        "sd": 0
+      },
+      "killsPerMinute": {
+        "mean": 8.45161280801305,
+        "sd": 0.2585606143914931
+      },
+      "totalDamage": {
+        "mean": 44758.76,
+        "sd": 1088.3057118291715
+      },
+      "basicShare": {
+        "mean": 0.33030885428316314,
+        "sd": 0.008580052829145623
+      },
+      "activeSkillShare": {
+        "mean": 0.48753304038048806,
+        "sd": 0.012707585380427254
+      },
+      "aoeShare": {
+        "mean": 0.19514754813850604,
+        "sd": 0.008077626073334822
+      },
+      "dotShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "extraShare": {
+        "mean": 0.1821581053363487,
+        "sd": 0.018753108303405912
+      },
+      "petShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceMinimum": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceBlocked": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "blood-rage": 8,
+        "berserker-slash": 14,
+        "heavy-strike": 28.1,
+        "charge": 12,
+        "whirlwind": 15
+      },
+      "damageBySource": {
+        "basic-attack": 14776.38,
+        "berserker-slash": 3747.54,
+        "counter": 7234.28,
+        "heavy-strike": 7140.2,
+        "charge": 2193.51,
+        "whirlwind": 8731.41,
+        "offhand": 935.44
+      },
+      "effectiveHealing": {
+        "mean": 0,
+        "sd": 0
+      },
+      "overhealing": {
+        "mean": 0,
+        "sd": 0
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "berserker-slash",
+        "passiveLv6": "parry"
+      },
+      "mode": "five",
+      "dps": {
+        "mean": 388.5268025746006,
+        "sd": 10.051169487632801
+      },
+      "ttk": {
+        "mean": 0,
+        "sd": 0
+      },
+      "killsPerMinute": {
+        "mean": 8.379138445022779,
+        "sd": 0.2728252911491818
+      },
+      "totalDamage": {
+        "mean": 44457.35,
+        "sd": 1154.1518910004868
+      },
+      "basicShare": {
+        "mean": 0.33228507788174555,
+        "sd": 0.008061788687669255
+      },
+      "activeSkillShare": {
+        "mean": 0.4842209046142362,
+        "sd": 0.011800544794106218
+      },
+      "aoeShare": {
+        "mean": 0.19801501491181706,
+        "sd": 0.008568749199379468
+      },
+      "dotShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "extraShare": {
+        "mean": 0.1834940175040182,
+        "sd": 0.017120369558075343
+      },
+      "petShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceMinimum": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceBlocked": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "blood-rage": 8,
+        "berserker-slash": 14,
+        "heavy-strike": 28.2,
+        "charge": 12,
+        "whirlwind": 15
+      },
+      "damageBySource": {
+        "basic-attack": 14764.33,
+        "berserker-slash": 4088.91,
+        "counter": 7248.24,
+        "heavy-strike": 6433.39,
+        "charge": 2195.89,
+        "whirlwind": 8800.9,
+        "offhand": 925.69
+      },
+      "effectiveHealing": {
+        "mean": 0,
+        "sd": 0
+      },
+      "overhealing": {
+        "mean": 0,
+        "sd": 0
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "charge",
+        "passiveLv6": "berserker-blood"
+      },
+      "mode": "five",
+      "dps": {
+        "mean": 387.68474654923006,
+        "sd": 7.384502811238997
+      },
+      "ttk": {
+        "mean": 0,
+        "sd": 0
+      },
+      "killsPerMinute": {
+        "mean": 8.432366882243297,
+        "sd": 0.16819045339448374
+      },
+      "totalDamage": {
+        "mean": 44357.8,
+        "sd": 821.4149864715155
+      },
+      "basicShare": {
+        "mean": 0.3831665961453097,
+        "sd": 0.007638673193188916
+      },
+      "activeSkillShare": {
+        "mean": 0.4921598033636803,
+        "sd": 0.010384296873931779
+      },
+      "aoeShare": {
+        "mean": 0.20226481921043762,
+        "sd": 0.007946577561918295
+      },
+      "dotShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "extraShare": {
+        "mean": 0.12467360049101008,
+        "sd": 0.013039268836271625
+      },
+      "petShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceMinimum": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceBlocked": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "blood-rage": 8,
+        "berserker-slash": 14.02,
+        "heavy-strike": 28.18,
+        "charge": 12,
+        "whirlwind": 15
+      },
+      "damageBySource": {
+        "basic-attack": 16992.24,
+        "berserker-slash": 3798.59,
+        "heavy-strike": 6590.03,
+        "charge": 2469.23,
+        "whirlwind": 8970.93,
+        "counter": 4526.41,
+        "offhand": 1010.37
+      },
+      "effectiveHealing": {
+        "mean": 0,
+        "sd": 0
+      },
+      "overhealing": {
+        "mean": 0,
+        "sd": 0
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "whirlwind",
+        "passiveLv6": "iron-will"
+      },
+      "mode": "five",
+      "dps": {
+        "mean": 387.23696241378076,
+        "sd": 7.720059017421077
+      },
+      "ttk": {
+        "mean": 0,
+        "sd": 0
+      },
+      "killsPerMinute": {
+        "mean": 8.357252317450698,
+        "sd": 0.21625905891158498
+      },
+      "totalDamage": {
+        "mean": 44232.39,
+        "sd": 877.9225010785404
+      },
+      "basicShare": {
+        "mean": 0.3331547812537991,
+        "sd": 0.007229625187470649
+      },
+      "activeSkillShare": {
+        "mean": 0.5458259401184139,
+        "sd": 0.009568280621391983
+      },
+      "aoeShare": {
+        "mean": 0.2656330307440397,
+        "sd": 0.009417652808637681
+      },
+      "dotShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "extraShare": {
+        "mean": 0.12101927862778687,
+        "sd": 0.012934155244248001
+      },
+      "petShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceMinimum": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceBlocked": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "blood-rage": 8,
+        "berserker-slash": 14,
+        "heavy-strike": 28.1,
+        "charge": 12,
+        "whirlwind": 15
+      },
+      "damageBySource": {
+        "basic-attack": 14731.43,
+        "berserker-slash": 3771.15,
+        "heavy-strike": 6424.67,
+        "charge": 2195,
+        "whirlwind": 11749.59,
+        "counter": 4438.83,
+        "offhand": 921.72
+      },
+      "effectiveHealing": {
+        "mean": 0,
+        "sd": 0
+      },
+      "overhealing": {
+        "mean": 0,
+        "sd": 0
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "whirlwind",
+        "passiveLv6": "robust-body"
+      },
+      "mode": "five",
+      "dps": {
+        "mean": 386.9714241214912,
+        "sd": 7.643175055064141
+      },
+      "ttk": {
+        "mean": 0,
+        "sd": 0
+      },
+      "killsPerMinute": {
+        "mean": 8.373995681688532,
+        "sd": 0.2225873192496074
+      },
+      "totalDamage": {
+        "mean": 45026.7,
+        "sd": 886.6770494379563
+      },
+      "basicShare": {
+        "mean": 0.33233813873432033,
+        "sd": 0.007457817284185546
+      },
+      "activeSkillShare": {
+        "mean": 0.5463160888011899,
+        "sd": 0.009119047049744677
+      },
+      "aoeShare": {
+        "mean": 0.26134698462719574,
+        "sd": 0.009231222233781047
+      },
+      "dotShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "extraShare": {
+        "mean": 0.12134577246448988,
+        "sd": 0.012473917583385351
+      },
+      "petShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceMinimum": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceBlocked": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "blood-rage": 8,
+        "berserker-slash": 14.68,
+        "heavy-strike": 28.97,
+        "charge": 12.19,
+        "whirlwind": 15
+      },
+      "damageBySource": {
+        "basic-attack": 14958.98,
+        "berserker-slash": 3975.77,
+        "heavy-strike": 6628.22,
+        "charge": 2225.34,
+        "whirlwind": 11767.56,
+        "counter": 4528.44,
+        "offhand": 942.39
+      },
+      "effectiveHealing": {
+        "mean": 0,
+        "sd": 0
+      },
+      "overhealing": {
+        "mean": 0,
+        "sd": 0
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "heavy-strike",
+        "passiveLv6": "weapon-mastery"
+      },
+      "mode": "five",
+      "dps": {
+        "mean": 383.31513420788497,
+        "sd": 8.349829639297294
+      },
+      "ttk": {
+        "mean": 0,
+        "sd": 0
+      },
+      "killsPerMinute": {
+        "mean": 8.297229468408169,
+        "sd": 0.23454592434157226
+      },
+      "totalDamage": {
+        "mean": 43767.39,
+        "sd": 956.6599907490644
+      },
+      "basicShare": {
+        "mean": 0.3526097312426744,
+        "sd": 0.008314785362159835
+      },
+      "activeSkillShare": {
+        "mean": 0.5216974954476931,
+        "sd": 0.012499808910573312
+      },
+      "aoeShare": {
+        "mean": 0.2088472306619648,
+        "sd": 0.009625881397263409
+      },
+      "dotShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "extraShare": {
+        "mean": 0.12569277330963285,
+        "sd": 0.014381179318097556
+      },
+      "petShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceMinimum": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceBlocked": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "blood-rage": 8,
+        "berserker-slash": 14.01,
+        "heavy-strike": 28.11,
+        "charge": 12,
+        "whirlwind": 15
+      },
+      "damageBySource": {
+        "basic-attack": 15427.17,
+        "berserker-slash": 3911.29,
+        "heavy-strike": 7481.75,
+        "charge": 2296.4,
+        "whirlwind": 9140.49,
+        "counter": 4568.02,
+        "offhand": 942.27
+      },
+      "effectiveHealing": {
+        "mean": 0,
+        "sd": 0
+      },
+      "overhealing": {
+        "mean": 0,
+        "sd": 0
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "charge",
+        "passiveLv6": "iron-will"
+      },
+      "mode": "five",
+      "dps": {
+        "mean": 380.75446377213416,
+        "sd": 7.578129433900481
+      },
+      "ttk": {
+        "mean": 0,
+        "sd": 0
+      },
+      "killsPerMinute": {
+        "mean": 8.265970855099399,
+        "sd": 0.23430916459476178
+      },
+      "totalDamage": {
+        "mean": 43584.4,
+        "sd": 840.0152022433878
+      },
+      "basicShare": {
+        "mean": 0.3837851184750384,
+        "sd": 0.008548880850439243
+      },
+      "activeSkillShare": {
+        "mean": 0.4913856211516915,
+        "sd": 0.009862885123991477
+      },
+      "aoeShare": {
+        "mean": 0.20201187745398894,
+        "sd": 0.008305014916181186
+      },
+      "dotShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "extraShare": {
+        "mean": 0.12482926037326995,
+        "sd": 0.013674831357662377
+      },
+      "petShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceMinimum": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceBlocked": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "blood-rage": 8,
+        "berserker-slash": 14.06,
+        "heavy-strike": 28.23,
+        "charge": 12,
+        "whirlwind": 15
+      },
+      "damageBySource": {
+        "basic-attack": 16721.3,
+        "berserker-slash": 3750.1,
+        "heavy-strike": 6435.33,
+        "charge": 2425.06,
+        "whirlwind": 8803.83,
+        "counter": 4494.29,
+        "offhand": 954.49
+      },
+      "effectiveHealing": {
+        "mean": 0,
+        "sd": 0
+      },
+      "overhealing": {
+        "mean": 0,
+        "sd": 0
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "blood-rage",
+        "passiveLv6": "parry"
+      },
+      "mode": "five",
+      "dps": {
+        "mean": 380.2614166666667,
+        "sd": 10.048220728000114
+      },
+      "ttk": {
+        "mean": 0,
+        "sd": 0
+      },
+      "killsPerMinute": {
+        "mean": 8.32,
+        "sd": 0.29597297173897474
+      },
+      "totalDamage": {
+        "mean": 45631.37,
+        "sd": 1205.7864873600133
+      },
+      "basicShare": {
+        "mean": 0.3362816075928164,
+        "sd": 0.009872842132619571
+      },
+      "activeSkillShare": {
+        "mean": 0.47809876338519175,
+        "sd": 0.012157844508726845
+      },
+      "aoeShare": {
+        "mean": 0.19184570192245964,
+        "sd": 0.007703079635545399
+      },
+      "dotShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "extraShare": {
+        "mean": 0.1856196290219917,
+        "sd": 0.01898798688446452
+      },
+      "petShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceMinimum": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceBlocked": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "blood-rage": 8,
+        "berserker-slash": 15,
+        "heavy-strike": 30,
+        "charge": 13,
+        "whirlwind": 15
+      },
+      "damageBySource": {
+        "basic-attack": 15334.36,
+        "berserker-slash": 3893.52,
+        "counter": 7540.98,
+        "heavy-strike": 6806.38,
+        "charge": 2354.59,
+        "whirlwind": 8754.08,
+        "offhand": 947.46
+      },
+      "effectiveHealing": {
+        "mean": 0,
+        "sd": 0
+      },
+      "overhealing": {
+        "mean": 0,
+        "sd": 0
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "charge",
+        "passiveLv6": "robust-body"
+      },
+      "mode": "five",
+      "dps": {
+        "mean": 379.92737032266183,
+        "sd": 7.589920364213936
+      },
+      "ttk": {
+        "mean": 0,
+        "sd": 0
+      },
+      "killsPerMinute": {
+        "mean": 8.268350992861228,
+        "sd": 0.16586029018467716
+      },
+      "totalDamage": {
+        "mean": 44275.43,
+        "sd": 856.1915119294282
+      },
+      "basicShare": {
+        "mean": 0.38269225040222066,
+        "sd": 0.008508053826488891
+      },
+      "activeSkillShare": {
+        "mean": 0.49282828139618173,
+        "sd": 0.009750849183363676
+      },
+      "aoeShare": {
+        "mean": 0.19840755166350213,
+        "sd": 0.008094304281908922
+      },
+      "dotShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "extraShare": {
+        "mean": 0.12447946820159757,
+        "sd": 0.01357273288800535
+      },
+      "petShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceMinimum": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceBlocked": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "blood-rage": 8,
+        "berserker-slash": 14.78,
+        "heavy-strike": 28.99,
+        "charge": 12.26,
+        "whirlwind": 15
+      },
+      "damageBySource": {
+        "basic-attack": 16938.31,
+        "berserker-slash": 3967.29,
+        "heavy-strike": 6592.23,
+        "charge": 2474,
+        "whirlwind": 8784.13,
+        "counter": 4534.44,
+        "offhand": 985.03
+      },
+      "effectiveHealing": {
+        "mean": 0,
+        "sd": 0
+      },
+      "overhealing": {
+        "mean": 0,
+        "sd": 0
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "berserker-slash",
+        "passiveLv6": "weapon-mastery"
+      },
+      "mode": "five",
+      "dps": {
+        "mean": 378.9233732748757,
+        "sd": 7.741649926330652
+      },
+      "ttk": {
+        "mean": 0,
+        "sd": 0
+      },
+      "killsPerMinute": {
+        "mean": 8.187547750966752,
+        "sd": 0.25734289733631155
+      },
+      "totalDamage": {
+        "mean": 43262.63,
+        "sd": 884.7409299337294
+      },
+      "basicShare": {
+        "mean": 0.35643932479307106,
+        "sd": 0.00872212855707329
+      },
+      "activeSkillShare": {
+        "mean": 0.5175352044770647,
+        "sd": 0.011393936849592532
+      },
+      "aoeShare": {
+        "mean": 0.2106852670196251,
+        "sd": 0.009728047886695472
+      },
+      "dotShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "extraShare": {
+        "mean": 0.12602547072986398,
+        "sd": 0.014262661333617295
+      },
+      "petShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceMinimum": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceBlocked": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "blood-rage": 8,
+        "berserker-slash": 14.01,
+        "heavy-strike": 28.11,
+        "charge": 12,
+        "whirlwind": 15
+      },
+      "damageBySource": {
+        "basic-attack": 15415.01,
+        "berserker-slash": 4222.8,
+        "heavy-strike": 6753.99,
+        "charge": 2296.06,
+        "whirlwind": 9116.28,
+        "counter": 4525.03,
+        "offhand": 933.46
+      },
+      "effectiveHealing": {
+        "mean": 0,
+        "sd": 0
+      },
+      "overhealing": {
+        "mean": 0,
+        "sd": 0
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "heavy-strike",
+        "passiveLv6": "titans-grip"
+      },
+      "mode": "five",
+      "dps": {
+        "mean": 377.45527730125383,
+        "sd": 8.46985131506633
+      },
+      "ttk": {
+        "mean": 0,
+        "sd": 0
+      },
+      "killsPerMinute": {
+        "mean": 8.17147591433028,
+        "sd": 0.2691040566603925
+      },
+      "totalDamage": {
+        "mean": 43152.08,
+        "sd": 963.479845974995
+      },
+      "basicShare": {
+        "mean": 0.3419970174325291,
+        "sd": 0.00770922806718144
+      },
+      "activeSkillShare": {
+        "mean": 0.5048917947560997,
+        "sd": 0.009906297487074606
+      },
+      "aoeShare": {
+        "mean": 0.20149774155482814,
+        "sd": 0.007051911014758089
+      },
+      "dotShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "extraShare": {
+        "mean": 0.15311118781137165,
+        "sd": 0.014342910286917766
+      },
+      "petShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceMinimum": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceBlocked": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "blood-rage": 8,
+        "berserker-slash": 14,
+        "heavy-strike": 28.12,
+        "charge": 12,
+        "whirlwind": 15
+      },
+      "damageBySource": {
+        "basic-attack": 14751.84,
+        "berserker-slash": 3751.29,
+        "heavy-strike": 7132.44,
+        "charge": 2203.98,
+        "whirlwind": 8694.92,
+        "counter": 4424.89,
+        "offhand": 2192.72
+      },
+      "effectiveHealing": {
+        "mean": 0,
+        "sd": 0
+      },
+      "overhealing": {
+        "mean": 0,
+        "sd": 0
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "berserker-slash",
+        "passiveLv6": "titans-grip"
+      },
+      "mode": "five",
+      "dps": {
+        "mean": 373.6686571509155,
+        "sd": 7.355245473827915
+      },
+      "ttk": {
+        "mean": 0,
+        "sd": 0
+      },
+      "killsPerMinute": {
+        "mean": 8.10755489388387,
+        "sd": 0.26294658760699186
+      },
+      "totalDamage": {
+        "mean": 42752.74,
+        "sd": 858.8275335595615
+      },
+      "basicShare": {
+        "mean": 0.3459623664298394,
+        "sd": 0.007266333039885175
+      },
+      "activeSkillShare": {
+        "mean": 0.5002206467635756,
+        "sd": 0.010515311270350674
+      },
+      "aoeShare": {
+        "mean": 0.20353662926902497,
+        "sd": 0.008030638511171995
+      },
+      "dotShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "extraShare": {
+        "mean": 0.153816986806585,
+        "sd": 0.014241216720757807
+      },
+      "petShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceMinimum": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceBlocked": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "blood-rage": 8,
+        "berserker-slash": 14.02,
+        "heavy-strike": 28.21,
+        "charge": 12,
+        "whirlwind": 15
+      },
+      "damageBySource": {
+        "basic-attack": 14786.37,
+        "berserker-slash": 4064.3,
+        "heavy-strike": 6427.3,
+        "charge": 2189.34,
+        "whirlwind": 8700.79,
+        "counter": 4385.15,
+        "offhand": 2199.49
+      },
+      "effectiveHealing": {
+        "mean": 0,
+        "sd": 0
+      },
+      "overhealing": {
+        "mean": 0,
+        "sd": 0
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "heavy-strike",
+        "passiveLv6": "berserker-blood"
+      },
+      "mode": "five",
+      "dps": {
+        "mean": 372.8021900804002,
+        "sd": 7.253567195213404
+      },
+      "ttk": {
+        "mean": 0,
+        "sd": 0
+      },
+      "killsPerMinute": {
+        "mean": 8.057026594374468,
+        "sd": 0.2528378296048445
+      },
+      "totalDamage": {
+        "mean": 42586.73,
+        "sd": 857.0489233993588
+      },
+      "basicShare": {
+        "mean": 0.3521225295322548,
+        "sd": 0.007663811212431395
+      },
+      "activeSkillShare": {
+        "mean": 0.5207608549164608,
+        "sd": 0.009684197403702135
+      },
+      "aoeShare": {
+        "mean": 0.20856291653749032,
+        "sd": 0.008198613834132541
+      },
+      "dotShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "extraShare": {
+        "mean": 0.12711661555128415,
+        "sd": 0.013060109319071794
+      },
+      "petShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceMinimum": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceBlocked": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "blood-rage": 8,
+        "berserker-slash": 14,
+        "heavy-strike": 28.15,
+        "charge": 12,
+        "whirlwind": 15
+      },
+      "damageBySource": {
+        "basic-attack": 14990.85,
+        "berserker-slash": 3810,
+        "heavy-strike": 7251.95,
+        "charge": 2231.76,
+        "whirlwind": 8881.58,
+        "counter": 4462.4,
+        "offhand": 958.19
+      },
+      "effectiveHealing": {
+        "mean": 0,
+        "sd": 0
+      },
+      "overhealing": {
+        "mean": 0,
+        "sd": 0
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "blood-rage",
+        "passiveLv6": "weapon-mastery"
+      },
+      "mode": "five",
+      "dps": {
+        "mean": 371.67366666666663,
+        "sd": 8.128879306385214
+      },
+      "ttk": {
+        "mean": 0,
+        "sd": 0
+      },
+      "killsPerMinute": {
+        "mean": 8.135,
+        "sd": 0.2535251466817447
+      },
+      "totalDamage": {
+        "mean": 44600.84,
+        "sd": 975.4655167662257
+      },
+      "basicShare": {
+        "mean": 0.359450889328259,
+        "sd": 0.008904696348220812
+      },
+      "activeSkillShare": {
+        "mean": 0.5113285463782788,
+        "sd": 0.012342450710302523
+      },
+      "aoeShare": {
+        "mean": 0.2033531927292249,
+        "sd": 0.009039828566575439
+      },
+      "dotShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "extraShare": {
+        "mean": 0.12922056429346201,
+        "sd": 0.016160922567534756
+      },
+      "petShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceMinimum": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceBlocked": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "blood-rage": 8,
+        "berserker-slash": 15,
+        "heavy-strike": 30,
+        "charge": 13,
+        "whirlwind": 15
+      },
+      "damageBySource": {
+        "basic-attack": 16025.27,
+        "berserker-slash": 4110.18,
+        "heavy-strike": 7141.37,
+        "charge": 2480.9,
+        "whirlwind": 9069.04,
+        "counter": 4737.85,
+        "offhand": 1036.23
+      },
+      "effectiveHealing": {
+        "mean": 0,
+        "sd": 0
+      },
+      "overhealing": {
+        "mean": 0,
+        "sd": 0
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "berserker-slash",
+        "passiveLv6": "berserker-blood"
+      },
+      "mode": "five",
+      "dps": {
+        "mean": 369.8287537841398,
+        "sd": 7.773610259696706
+      },
+      "ttk": {
+        "mean": 0,
+        "sd": 0
+      },
+      "killsPerMinute": {
+        "mean": 7.943410402779803,
+        "sd": 0.22213425729940148
+      },
+      "totalDamage": {
+        "mean": 42237.32,
+        "sd": 915.7410428718372
+      },
+      "basicShare": {
+        "mean": 0.3549982846644815,
+        "sd": 0.007573253797641045
+      },
+      "activeSkillShare": {
+        "mean": 0.5173278934558837,
+        "sd": 0.010925278427664747
+      },
+      "aoeShare": {
+        "mean": 0.21104385984742915,
+        "sd": 0.008662188384008519
+      },
+      "dotShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "extraShare": {
+        "mean": 0.12767382187963516,
+        "sd": 0.01366197988967923
+      },
+      "petShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceMinimum": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceBlocked": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "blood-rage": 8,
+        "berserker-slash": 14.02,
+        "heavy-strike": 28.14,
+        "charge": 12,
+        "whirlwind": 15
+      },
+      "damageBySource": {
+        "basic-attack": 14988.8,
+        "berserker-slash": 4154.73,
+        "heavy-strike": 6542.47,
+        "charge": 2237.32,
+        "whirlwind": 8913.32,
+        "counter": 4482.89,
+        "offhand": 917.79
+      },
+      "effectiveHealing": {
+        "mean": 0,
+        "sd": 0
+      },
+      "overhealing": {
+        "mean": 0,
+        "sd": 0
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "heavy-strike",
+        "passiveLv6": "iron-will"
+      },
+      "mode": "five",
+      "dps": {
+        "mean": 367.24266068468745,
+        "sd": 7.735538573807369
+      },
+      "ttk": {
+        "mean": 0,
+        "sd": 0
+      },
+      "killsPerMinute": {
+        "mean": 7.9050510527026745,
+        "sd": 0.18810123533931483
+      },
+      "totalDamage": {
+        "mean": 41949.73,
+        "sd": 931.9465312452213
+      },
+      "basicShare": {
+        "mean": 0.3520122092241869,
+        "sd": 0.007248859913267697
+      },
+      "activeSkillShare": {
+        "mean": 0.5204369607282865,
+        "sd": 0.010003145362063422
+      },
+      "aoeShare": {
+        "mean": 0.20794508504619424,
+        "sd": 0.007880273106485676
+      },
+      "dotShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "extraShare": {
+        "mean": 0.12755083004752676,
+        "sd": 0.014034330994584598
+      },
+      "petShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceMinimum": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceBlocked": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "blood-rage": 8,
+        "berserker-slash": 14.01,
+        "heavy-strike": 28.07,
+        "charge": 12,
+        "whirlwind": 15
+      },
+      "damageBySource": {
+        "basic-attack": 14761.63,
+        "berserker-slash": 3785.02,
+        "heavy-strike": 7130.78,
+        "charge": 2189.59,
+        "whirlwind": 8722.86,
+        "counter": 4395.48,
+        "offhand": 964.37
+      },
+      "effectiveHealing": {
+        "mean": 0,
+        "sd": 0
+      },
+      "overhealing": {
+        "mean": 0,
+        "sd": 0
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "blood-rage",
+        "passiveLv6": "titans-grip"
+      },
+      "mode": "five",
+      "dps": {
+        "mean": 367.2107499999999,
+        "sd": 7.125238133934739
+      },
+      "ttk": {
+        "mean": 0,
+        "sd": 0
+      },
+      "killsPerMinute": {
+        "mean": 8.055,
+        "sd": 0.22242976419535238
+      },
+      "totalDamage": {
+        "mean": 44065.29,
+        "sd": 855.0285760721684
+      },
+      "basicShare": {
+        "mean": 0.3484191026843837,
+        "sd": 0.0074665870548384925
+      },
+      "activeSkillShare": {
+        "mean": 0.4968724363187244,
+        "sd": 0.010649683744870513
+      },
+      "aoeShare": {
+        "mean": 0.19851376474387256,
+        "sd": 0.007774478929831612
+      },
+      "dotShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "extraShare": {
+        "mean": 0.15470846099689203,
+        "sd": 0.014204478769715086
+      },
+      "petShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceMinimum": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceBlocked": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "blood-rage": 8,
+        "berserker-slash": 15,
+        "heavy-strike": 30,
+        "charge": 13,
+        "whirlwind": 15
+      },
+      "damageBySource": {
+        "basic-attack": 15348.43,
+        "berserker-slash": 3944.2,
+        "heavy-strike": 6833.55,
+        "charge": 2367.29,
+        "whirlwind": 8746.46,
+        "counter": 4526.58,
+        "offhand": 2298.78
+      },
+      "effectiveHealing": {
+        "mean": 0,
+        "sd": 0
+      },
+      "overhealing": {
+        "mean": 0,
+        "sd": 0
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "heavy-strike",
+        "passiveLv6": "robust-body"
+      },
+      "mode": "five",
+      "dps": {
+        "mean": 366.8183015616967,
+        "sd": 8.125791011488268
+      },
+      "ttk": {
+        "mean": 0,
+        "sd": 0
+      },
+      "killsPerMinute": {
+        "mean": 7.941662259037241,
+        "sd": 0.27184647599080475
+      },
+      "totalDamage": {
+        "mean": 42676.8,
+        "sd": 1027.8843806576695
+      },
+      "basicShare": {
+        "mean": 0.3511344363792759,
+        "sd": 0.00737643265849035
+      },
+      "activeSkillShare": {
+        "mean": 0.5218426190562621,
+        "sd": 0.01036814342489567
+      },
+      "aoeShare": {
+        "mean": 0.20440874193489939,
+        "sd": 0.007699883439511982
+      },
+      "dotShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "extraShare": {
+        "mean": 0.1270229445644625,
+        "sd": 0.014136474584625242
+      },
+      "petShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceMinimum": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceBlocked": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "blood-rage": 8,
+        "berserker-slash": 14.72,
+        "heavy-strike": 28.96,
+        "charge": 12.13,
+        "whirlwind": 15
+      },
+      "damageBySource": {
+        "basic-attack": 14979.42,
+        "berserker-slash": 3999.65,
+        "heavy-strike": 7327.06,
+        "charge": 2217.26,
+        "whirlwind": 8722.45,
+        "counter": 4477.08,
+        "offhand": 953.88
+      },
+      "effectiveHealing": {
+        "mean": 0,
+        "sd": 0
+      },
+      "overhealing": {
+        "mean": 0,
+        "sd": 0
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "berserker-slash",
+        "passiveLv6": "iron-will"
+      },
+      "mode": "five",
+      "dps": {
+        "mean": 363.99443134215244,
+        "sd": 7.7108872768859555
+      },
+      "ttk": {
+        "mean": 0,
+        "sd": 0
+      },
+      "killsPerMinute": {
+        "mean": 7.854087050280805,
+        "sd": 0.2282669354882614
+      },
+      "totalDamage": {
+        "mean": 41598.29,
+        "sd": 892.0592726383152
+      },
+      "basicShare": {
+        "mean": 0.35522487379692924,
+        "sd": 0.00799358951426837
+      },
+      "activeSkillShare": {
+        "mean": 0.5168666149144459,
+        "sd": 0.010737282496695928
+      },
+      "aoeShare": {
+        "mean": 0.21060638136212048,
+        "sd": 0.008185760526774218
+      },
+      "dotShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "extraShare": {
+        "mean": 0.12790851128862527,
+        "sd": 0.013981108161338242
+      },
+      "petShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceMinimum": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceBlocked": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "blood-rage": 8,
+        "berserker-slash": 14.02,
+        "heavy-strike": 28.17,
+        "charge": 12,
+        "whirlwind": 15
+      },
+      "damageBySource": {
+        "basic-attack": 14771.32,
+        "berserker-slash": 4088.45,
+        "heavy-strike": 6456.26,
+        "charge": 2192.42,
+        "whirlwind": 8760.82,
+        "counter": 4424.28,
+        "offhand": 904.74
+      },
+      "effectiveHealing": {
+        "mean": 0,
+        "sd": 0
+      },
+      "overhealing": {
+        "mean": 0,
+        "sd": 0
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "berserker-slash",
+        "passiveLv6": "robust-body"
+      },
+      "mode": "five",
+      "dps": {
+        "mean": 363.31801548927984,
+        "sd": 7.56968583788263
+      },
+      "ttk": {
+        "mean": 0,
+        "sd": 0
+      },
+      "killsPerMinute": {
+        "mean": 7.858989166090223,
+        "sd": 0.23186161514548664
+      },
+      "totalDamage": {
+        "mean": 42271.43,
+        "sd": 920.4529238912768
+      },
+      "basicShare": {
+        "mean": 0.35443251796435404,
+        "sd": 0.007906389273944877
+      },
+      "activeSkillShare": {
+        "mean": 0.5182378681480061,
+        "sd": 0.011222554644219446
+      },
+      "aoeShare": {
+        "mean": 0.2071336269907268,
+        "sd": 0.008110022464822546
+      },
+      "dotShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "extraShare": {
+        "mean": 0.12732961388763983,
+        "sd": 0.013942624070932878
+      },
+      "petShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceMinimum": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceBlocked": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "blood-rage": 8,
+        "berserker-slash": 14.7,
+        "heavy-strike": 28.93,
+        "charge": 12.19,
+        "whirlwind": 15
+      },
+      "damageBySource": {
+        "basic-attack": 14976.76,
+        "berserker-slash": 4299.92,
+        "heavy-strike": 6618.7,
+        "charge": 2230.02,
+        "whirlwind": 8755.47,
+        "counter": 4473.4,
+        "offhand": 917.16
+      },
+      "effectiveHealing": {
+        "mean": 0,
+        "sd": 0
+      },
+      "overhealing": {
+        "mean": 0,
+        "sd": 0
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "blood-rage",
+        "passiveLv6": "berserker-blood"
+      },
+      "mode": "five",
+      "dps": {
+        "mean": 360.3224999999999,
+        "sd": 7.734845263481357
+      },
+      "ttk": {
+        "mean": 0,
+        "sd": 0
+      },
+      "killsPerMinute": {
+        "mean": 7.9,
+        "sd": 0.23452078799117135
+      },
+      "totalDamage": {
+        "mean": 43238.7,
+        "sd": 928.1814316177629
+      },
+      "basicShare": {
+        "mean": 0.3601029396061184,
+        "sd": 0.007799344440738231
+      },
+      "activeSkillShare": {
+        "mean": 0.5113505292510141,
+        "sd": 0.00958686775406984
+      },
+      "aoeShare": {
+        "mean": 0.20274772446719208,
+        "sd": 0.007065718041822151
+      },
+      "dotShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "extraShare": {
+        "mean": 0.12854653114286735,
+        "sd": 0.013373241468766572
+      },
+      "petShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceMinimum": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceBlocked": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "blood-rage": 8,
+        "berserker-slash": 15,
+        "heavy-strike": 30,
+        "charge": 13,
+        "whirlwind": 15
+      },
+      "damageBySource": {
+        "basic-attack": 15564.8,
+        "berserker-slash": 4003.33,
+        "heavy-strike": 6943.61,
+        "charge": 2394,
+        "whirlwind": 8765.82,
+        "counter": 4587.12,
+        "offhand": 980.02
+      },
+      "effectiveHealing": {
+        "mean": 0,
+        "sd": 0
+      },
+      "overhealing": {
+        "mean": 0,
+        "sd": 0
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "blood-rage",
+        "passiveLv6": "iron-will"
+      },
+      "mode": "five",
+      "dps": {
+        "mean": 356.9144166666667,
+        "sd": 7.902515058072055
+      },
+      "ttk": {
+        "mean": 0,
+        "sd": 0
+      },
+      "killsPerMinute": {
+        "mean": 7.83,
+        "sd": 0.2471841418861657
+      },
+      "totalDamage": {
+        "mean": 42829.73,
+        "sd": 948.3018069686465
+      },
+      "basicShare": {
+        "mean": 0.3594398735020901,
+        "sd": 0.008267351061596184
+      },
+      "activeSkillShare": {
+        "mean": 0.5090653775454962,
+        "sd": 0.01068994363449375
+      },
+      "aoeShare": {
+        "mean": 0.20268580576304696,
+        "sd": 0.008444845750476807
+      },
+      "dotShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "extraShare": {
+        "mean": 0.13149474895241361,
+        "sd": 0.014601487249179715
+      },
+      "petShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceMinimum": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceBlocked": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "blood-rage": 8,
+        "berserker-slash": 15,
+        "heavy-strike": 30,
+        "charge": 13,
+        "whirlwind": 15
+      },
+      "damageBySource": {
+        "basic-attack": 15388.45,
+        "berserker-slash": 3922.14,
+        "heavy-strike": 6828.35,
+        "charge": 2368.77,
+        "whirlwind": 8679.71,
+        "counter": 4633.87,
+        "offhand": 1008.44
+      },
+      "effectiveHealing": {
+        "mean": 0,
+        "sd": 0
+      },
+      "overhealing": {
+        "mean": 0,
+        "sd": 0
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "blood-rage",
+        "passiveLv6": "robust-body"
+      },
+      "mode": "five",
+      "dps": {
+        "mean": 356.43008333333324,
+        "sd": 7.925511278197345
+      },
+      "ttk": {
+        "mean": 0,
+        "sd": 0
+      },
+      "killsPerMinute": {
+        "mean": 7.825,
+        "sd": 0.2487468592766549
+      },
+      "totalDamage": {
+        "mean": 42771.61,
+        "sd": 951.0613533836814
+      },
+      "basicShare": {
+        "mean": 0.3593838313908881,
+        "sd": 0.007964449702406213
+      },
+      "activeSkillShare": {
+        "mean": 0.5090634052822641,
+        "sd": 0.010505529870668264
+      },
+      "aoeShare": {
+        "mean": 0.20256210851275608,
+        "sd": 0.008280350670919805
+      },
+      "dotShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "extraShare": {
+        "mean": 0.1315527633268476,
+        "sd": 0.014287985162829456
+      },
+      "petShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceMinimum": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceBlocked": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "blood-rage": 8,
+        "berserker-slash": 15,
+        "heavy-strike": 30,
+        "charge": 13,
+        "whirlwind": 15
+      },
+      "damageBySource": {
+        "basic-attack": 15365.18,
+        "berserker-slash": 3911.75,
+        "heavy-strike": 6829.62,
+        "charge": 2365.01,
+        "whirlwind": 8663.16,
+        "counter": 4638.06,
+        "offhand": 998.83
+      },
+      "effectiveHealing": {
+        "mean": 0,
+        "sd": 0
+      },
+      "overhealing": {
+        "mean": 0,
+        "sd": 0
+      }
+    }
+  ],
+  "boss": [
+    {
+      "config": {
+        "activeLv6": "charge",
+        "passiveLv6": "weapon-mastery"
+      },
+      "mode": "boss",
+      "dps": {
+        "mean": 252.16304463349,
+        "sd": 7.015670753640024
+      },
+      "ttk": {
+        "mean": 47.90700000000002,
+        "sd": 1.345752949095784
+      },
+      "killsPerMinute": {
+        "mean": 0,
+        "sd": 0
+      },
+      "totalDamage": {
+        "mean": 12071.05,
+        "sd": 53.72399370858424
+      },
+      "basicShare": {
+        "mean": 0.5433481574604481,
+        "sd": 0.017505216884339755
+      },
+      "activeSkillShare": {
+        "mean": 0.399438493173449,
+        "sd": 0.01673009859615645
+      },
+      "aoeShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "dotShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "extraShare": {
+        "mean": 0.057213349366102714,
+        "sd": 0.01652489101259706
+      },
+      "petShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceMinimum": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceBlocked": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "blood-rage": 4,
+        "berserker-slash": 7,
+        "heavy-strike": 9.32,
+        "charge": 4.14,
+        "whirlwind": 3.22
+      },
+      "damageBySource": {
+        "basic-attack": 6558.78,
+        "berserker-slash": 1562.7,
+        "heavy-strike": 2073.3,
+        "charge": 834.5,
+        "offhand": 375.33,
+        "whirlwind": 351.25,
+        "counter": 315.19
+      },
+      "effectiveHealing": {
+        "mean": 0,
+        "sd": 0
+      },
+      "overhealing": {
+        "mean": 0,
+        "sd": 0
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "charge",
+        "passiveLv6": "titans-grip"
+      },
+      "mode": "boss",
+      "dps": {
+        "mean": 250.15736873997858,
+        "sd": 7.437841390201481
+      },
+      "ttk": {
+        "mean": 48.324,
+        "sd": 1.4156355463183314
+      },
+      "killsPerMinute": {
+        "mean": 0,
+        "sd": 0
+      },
+      "totalDamage": {
+        "mean": 12078.22,
+        "sd": 57.7258313062705
+      },
+      "basicShare": {
+        "mean": 0.5260548557545782,
+        "sd": 0.01723382899719133
+      },
+      "activeSkillShare": {
+        "mean": 0.3841967188212635,
+        "sd": 0.013516536369108106
+      },
+      "aoeShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "dotShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "extraShare": {
+        "mean": 0.08974842542415852,
+        "sd": 0.01997481278555191
+      },
+      "petShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceMinimum": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceBlocked": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "blood-rage": 4,
+        "berserker-slash": 7,
+        "heavy-strike": 9.49,
+        "charge": 4.16,
+        "whirlwind": 3.27
+      },
+      "damageBySource": {
+        "basic-attack": 6353.66,
+        "berserker-slash": 1485.66,
+        "heavy-strike": 1998.45,
+        "charge": 810.89,
+        "offhand": 790.04,
+        "whirlwind": 345.54,
+        "counter": 293.98
+      },
+      "effectiveHealing": {
+        "mean": 0,
+        "sd": 0
+      },
+      "overhealing": {
+        "mean": 0,
+        "sd": 0
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "charge",
+        "passiveLv6": "parry"
+      },
+      "mode": "boss",
+      "dps": {
+        "mean": 245.9126836074819,
+        "sd": 7.504370167457513
+      },
+      "ttk": {
+        "mean": 49.158999999999985,
+        "sd": 1.4823693871636718
+      },
+      "killsPerMinute": {
+        "mean": 0,
+        "sd": 0
+      },
+      "totalDamage": {
+        "mean": 12077.85,
+        "sd": 58.44217227311115
+      },
+      "basicShare": {
+        "mean": 0.5352750274766491,
+        "sd": 0.01831407936987531
+      },
+      "activeSkillShare": {
+        "mean": 0.3905102863583707,
+        "sd": 0.014197847637896163
+      },
+      "aoeShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "dotShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "extraShare": {
+        "mean": 0.07421468616498013,
+        "sd": 0.02110783401537736
+      },
+      "petShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceMinimum": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceBlocked": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "blood-rage": 4,
+        "berserker-slash": 7.05,
+        "heavy-strike": 9.54,
+        "charge": 4.28,
+        "whirlwind": 3.41
+      },
+      "damageBySource": {
+        "basic-attack": 6464.81,
+        "berserker-slash": 1503.31,
+        "heavy-strike": 2024.59,
+        "charge": 830.77,
+        "offhand": 375.24,
+        "whirlwind": 357.98,
+        "counter": 521.15
+      },
+      "effectiveHealing": {
+        "mean": 0,
+        "sd": 0
+      },
+      "overhealing": {
+        "mean": 0,
+        "sd": 0
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "heavy-strike",
+        "passiveLv6": "weapon-mastery"
+      },
+      "mode": "boss",
+      "dps": {
+        "mean": 242.43943111376916,
+        "sd": 7.09195854176481
+      },
+      "ttk": {
+        "mean": 49.85699999999999,
+        "sd": 1.475754383357881
+      },
+      "killsPerMinute": {
+        "mean": 0,
+        "sd": 0
+      },
+      "totalDamage": {
+        "mean": 12076.98,
+        "sd": 59.33261834775203
+      },
+      "basicShare": {
+        "mean": 0.5218882187899102,
+        "sd": 0.015134515805873366
+      },
+      "activeSkillShare": {
+        "mean": 0.41871486131750724,
+        "sd": 0.014603414687124151
+      },
+      "aoeShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "dotShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "extraShare": {
+        "mean": 0.05939691989258253,
+        "sd": 0.01588367167904523
+      },
+      "petShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceMinimum": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceBlocked": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "blood-rage": 4,
+        "berserker-slash": 7.06,
+        "heavy-strike": 9.54,
+        "charge": 4.12,
+        "whirlwind": 3.51
+      },
+      "damageBySource": {
+        "basic-attack": 6302.88,
+        "berserker-slash": 1576.01,
+        "heavy-strike": 2329.15,
+        "charge": 754.5,
+        "offhand": 406.34,
+        "counter": 310.81,
+        "whirlwind": 397.29
+      },
+      "effectiveHealing": {
+        "mean": 0,
+        "sd": 0
+      },
+      "overhealing": {
+        "mean": 0,
+        "sd": 0
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "charge",
+        "passiveLv6": "berserker-blood"
+      },
+      "mode": "boss",
+      "dps": {
+        "mean": 242.22051669593634,
+        "sd": 6.4942633966432695
+      },
+      "ttk": {
+        "mean": 49.885,
+        "sd": 1.3322443469574192
+      },
+      "killsPerMinute": {
+        "mean": 0,
+        "sd": 0
+      },
+      "totalDamage": {
+        "mean": 12074.68,
+        "sd": 58.8154537515439
+      },
+      "basicShare": {
+        "mean": 0.5459319435576677,
+        "sd": 0.015245686474084148
+      },
+      "activeSkillShare": {
+        "mean": 0.39648679677399334,
+        "sd": 0.014122503880744213
+      },
+      "aoeShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "dotShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "extraShare": {
+        "mean": 0.057581259668338845,
+        "sd": 0.016434681741191406
+      },
+      "petShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceMinimum": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceBlocked": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "blood-rage": 4,
+        "berserker-slash": 7.1,
+        "heavy-strike": 9.63,
+        "charge": 4.3,
+        "whirlwind": 3.53
+      },
+      "damageBySource": {
+        "basic-attack": 6591.94,
+        "berserker-slash": 1514.95,
+        "heavy-strike": 2065.32,
+        "charge": 834.46,
+        "offhand": 375.93,
+        "whirlwind": 372.82,
+        "counter": 319.26
+      },
+      "effectiveHealing": {
+        "mean": 0,
+        "sd": 0
+      },
+      "overhealing": {
+        "mean": 0,
+        "sd": 0
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "charge",
+        "passiveLv6": "iron-will"
+      },
+      "mode": "boss",
+      "dps": {
+        "mean": 241.5216760845446,
+        "sd": 6.543226023553406
+      },
+      "ttk": {
+        "mean": 49.97400000000002,
+        "sd": 1.3217125254759448
+      },
+      "killsPerMinute": {
+        "mean": 0,
+        "sd": 0
+      },
+      "totalDamage": {
+        "mean": 12061.29,
+        "sd": 53.392564089019
+      },
+      "basicShare": {
+        "mean": 0.5464267750135319,
+        "sd": 0.01512636466643888
+      },
+      "activeSkillShare": {
+        "mean": 0.3959300601996649,
+        "sd": 0.014211493717050105
+      },
+      "aoeShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "dotShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "extraShare": {
+        "mean": 0.057643164786803654,
+        "sd": 0.01640225360277745
+      },
+      "petShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceMinimum": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceBlocked": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "blood-rage": 4,
+        "berserker-slash": 7.1,
+        "heavy-strike": 9.63,
+        "charge": 4.3,
+        "whirlwind": 3.54
+      },
+      "damageBySource": {
+        "basic-attack": 6590.54,
+        "berserker-slash": 1510.97,
+        "heavy-strike": 2059.2,
+        "charge": 832.66,
+        "offhand": 376.45,
+        "whirlwind": 372.63,
+        "counter": 318.84
+      },
+      "effectiveHealing": {
+        "mean": 0,
+        "sd": 0
+      },
+      "overhealing": {
+        "mean": 0,
+        "sd": 0
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "charge",
+        "passiveLv6": "robust-body"
+      },
+      "mode": "boss",
+      "dps": {
+        "mean": 241.40531594045257,
+        "sd": 6.547141221504281
+      },
+      "ttk": {
+        "mean": 50.00800000000002,
+        "sd": 1.3295623340031866
+      },
+      "killsPerMinute": {
+        "mean": 0,
+        "sd": 0
+      },
+      "totalDamage": {
+        "mean": 12063.63,
+        "sd": 53.65047157295077
+      },
+      "basicShare": {
+        "mean": 0.5465867285465054,
+        "sd": 0.01500968889736742
+      },
+      "activeSkillShare": {
+        "mean": 0.39580826138928893,
+        "sd": 0.014169945916301625
+      },
+      "aoeShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "dotShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "extraShare": {
+        "mean": 0.05760501006420597,
+        "sd": 0.01640756302365022
+      },
+      "petShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceMinimum": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceBlocked": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "blood-rage": 4,
+        "berserker-slash": 7.11,
+        "heavy-strike": 9.63,
+        "charge": 4.3,
+        "whirlwind": 3.54
+      },
+      "damageBySource": {
+        "basic-attack": 6593.73,
+        "berserker-slash": 1511.83,
+        "heavy-strike": 2058.47,
+        "charge": 832.2,
+        "offhand": 376.22,
+        "whirlwind": 372.51,
+        "counter": 318.67
+      },
+      "effectiveHealing": {
+        "mean": 0,
+        "sd": 0
+      },
+      "overhealing": {
+        "mean": 0,
+        "sd": 0
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "blood-rage",
+        "passiveLv6": "weapon-mastery"
+      },
+      "mode": "boss",
+      "dps": {
+        "mean": 239.91804144869133,
+        "sd": 6.971718240844273
+      },
+      "ttk": {
+        "mean": 50.350000000000016,
+        "sd": 1.4725827650763816
+      },
+      "killsPerMinute": {
+        "mean": 0,
+        "sd": 0
+      },
+      "totalDamage": {
+        "mean": 12069.73,
+        "sd": 51.95706977880875
+      },
+      "basicShare": {
+        "mean": 0.5317256691003951,
+        "sd": 0.014167748237575556
+      },
+      "activeSkillShare": {
+        "mean": 0.40743969114258927,
+        "sd": 0.014547872454601382
+      },
+      "aoeShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "dotShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "extraShare": {
+        "mean": 0.06083463975701598,
+        "sd": 0.016269405007304574
+      },
+      "petShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceMinimum": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceBlocked": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "blood-rage": 4,
+        "berserker-slash": 7.11,
+        "heavy-strike": 9.59,
+        "charge": 4.16,
+        "whirlwind": 3.59
+      },
+      "damageBySource": {
+        "basic-attack": 6417.75,
+        "berserker-slash": 1601.4,
+        "heavy-strike": 2135.36,
+        "charge": 770.72,
+        "offhand": 420.06,
+        "counter": 314.11,
+        "whirlwind": 410.33
+      },
+      "effectiveHealing": {
+        "mean": 0,
+        "sd": 0
+      },
+      "overhealing": {
+        "mean": 0,
+        "sd": 0
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "berserker-slash",
+        "passiveLv6": "weapon-mastery"
+      },
+      "mode": "boss",
+      "dps": {
+        "mean": 239.85658235074152,
+        "sd": 6.912142303317841
+      },
+      "ttk": {
+        "mean": 50.365000000000016,
+        "sd": 1.46726786920453
+      },
+      "killsPerMinute": {
+        "mean": 0,
+        "sd": 0
+      },
+      "totalDamage": {
+        "mean": 12070.36,
+        "sd": 53.438847292957234
+      },
+      "basicShare": {
+        "mean": 0.5279503484130998,
+        "sd": 0.014189618222948562
+      },
+      "activeSkillShare": {
+        "mean": 0.41198557008584386,
+        "sd": 0.01473395155362839
+      },
+      "aoeShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "dotShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "extraShare": {
+        "mean": 0.06006408150105643,
+        "sd": 0.016068770923301185
+      },
+      "petShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceMinimum": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceBlocked": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "blood-rage": 4,
+        "berserker-slash": 7.12,
+        "heavy-strike": 9.59,
+        "charge": 4.16,
+        "whirlwind": 3.59
+      },
+      "damageBySource": {
+        "basic-attack": 6372.53,
+        "berserker-slash": 1689.66,
+        "heavy-strike": 2113.37,
+        "charge": 762.83,
+        "offhand": 413.06,
+        "counter": 311.82,
+        "whirlwind": 407.09
+      },
+      "effectiveHealing": {
+        "mean": 0,
+        "sd": 0
+      },
+      "overhealing": {
+        "mean": 0,
+        "sd": 0
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "heavy-strike",
+        "passiveLv6": "titans-grip"
+      },
+      "mode": "boss",
+      "dps": {
+        "mean": 239.85462566779952,
+        "sd": 6.157895011788065
+      },
+      "ttk": {
+        "mean": 50.38399999999999,
+        "sd": 1.3541580409981695
+      },
+      "killsPerMinute": {
+        "mean": 0,
+        "sd": 0
+      },
+      "totalDamage": {
+        "mean": 12076.64,
+        "sd": 60.16685466267952
+      },
+      "basicShare": {
+        "mean": 0.5050647251004048,
+        "sd": 0.014195779874740662
+      },
+      "activeSkillShare": {
+        "mean": 0.40577009869791714,
+        "sd": 0.01609085272276013
+      },
+      "aoeShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "dotShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "extraShare": {
+        "mean": 0.08916517620167826,
+        "sd": 0.02167279145462879
+      },
+      "petShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceMinimum": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceBlocked": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "blood-rage": 4,
+        "berserker-slash": 7.17,
+        "heavy-strike": 9.62,
+        "charge": 4.23,
+        "whirlwind": 3.51
+      },
+      "damageBySource": {
+        "basic-attack": 6099.56,
+        "berserker-slash": 1519.72,
+        "heavy-strike": 2254.36,
+        "charge": 742.88,
+        "offhand": 765.77,
+        "counter": 310.74,
+        "whirlwind": 383.61
+      },
+      "effectiveHealing": {
+        "mean": 0,
+        "sd": 0
+      },
+      "overhealing": {
+        "mean": 0,
+        "sd": 0
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "whirlwind",
+        "passiveLv6": "weapon-mastery"
+      },
+      "mode": "boss",
+      "dps": {
+        "mean": 239.03133922146196,
+        "sd": 6.792024625538954
+      },
+      "ttk": {
+        "mean": 50.592,
+        "sd": 1.4477347823410192
+      },
+      "killsPerMinute": {
+        "mean": 0,
+        "sd": 0
+      },
+      "totalDamage": {
+        "mean": 12083.37,
+        "sd": 55.469929691680704
+      },
+      "basicShare": {
+        "mean": 0.5293757250018181,
+        "sd": 0.014097783624043025
+      },
+      "activeSkillShare": {
+        "mean": 0.41018793494742184,
+        "sd": 0.014092117059356046
+      },
+      "aoeShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "dotShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "extraShare": {
+        "mean": 0.060436340050760026,
+        "sd": 0.01645790477102215
+      },
+      "petShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceMinimum": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceBlocked": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "blood-rage": 4,
+        "berserker-slash": 7.18,
+        "heavy-strike": 9.62,
+        "charge": 4.19,
+        "whirlwind": 3.64
+      },
+      "damageBySource": {
+        "basic-attack": 6396.55,
+        "berserker-slash": 1600.2,
+        "heavy-strike": 2120.18,
+        "charge": 767.99,
+        "offhand": 414.4,
+        "counter": 315.86,
+        "whirlwind": 468.19
+      },
+      "effectiveHealing": {
+        "mean": 0,
+        "sd": 0
+      },
+      "overhealing": {
+        "mean": 0,
+        "sd": 0
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "blood-rage",
+        "passiveLv6": "titans-grip"
+      },
+      "mode": "boss",
+      "dps": {
+        "mean": 237.83558836197685,
+        "sd": 6.121313639833212
+      },
+      "ttk": {
+        "mean": 50.81699999999997,
+        "sd": 1.3031542502712414
+      },
+      "killsPerMinute": {
+        "mean": 0,
+        "sd": 0
+      },
+      "totalDamage": {
+        "mean": 12078.28,
+        "sd": 64.55556986039237
+      },
+      "basicShare": {
+        "mean": 0.5133054536954285,
+        "sd": 0.014515081401498415
+      },
+      "activeSkillShare": {
+        "mean": 0.39573586830099117,
+        "sd": 0.01614030583010675
+      },
+      "aoeShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "dotShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "extraShare": {
+        "mean": 0.09095867800358044,
+        "sd": 0.021723900226919588
+      },
+      "petShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceMinimum": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceBlocked": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "blood-rage": 4,
+        "berserker-slash": 7.28,
+        "heavy-strike": 9.71,
+        "charge": 4.24,
+        "whirlwind": 3.58
+      },
+      "damageBySource": {
+        "basic-attack": 6199.66,
+        "berserker-slash": 1558.83,
+        "heavy-strike": 2071.74,
+        "charge": 753.16,
+        "offhand": 782.92,
+        "counter": 315.61,
+        "whirlwind": 396.36
+      },
+      "effectiveHealing": {
+        "mean": 0,
+        "sd": 0
+      },
+      "overhealing": {
+        "mean": 0,
+        "sd": 0
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "berserker-slash",
+        "passiveLv6": "titans-grip"
+      },
+      "mode": "boss",
+      "dps": {
+        "mean": 237.8432754195637,
+        "sd": 6.0335968454728794
+      },
+      "ttk": {
+        "mean": 50.82299999999997,
+        "sd": 1.3017568897455474
+      },
+      "killsPerMinute": {
+        "mean": 0,
+        "sd": 0
+      },
+      "totalDamage": {
+        "mean": 12080.23,
+        "sd": 66.39666482587812
+      },
+      "basicShare": {
+        "mean": 0.5091282495023343,
+        "sd": 0.014292461326105092
+      },
+      "activeSkillShare": {
+        "mean": 0.40069344389970724,
+        "sd": 0.0161567761892069
+      },
+      "aoeShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "dotShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "extraShare": {
+        "mean": 0.09017830659795845,
+        "sd": 0.021601272109551796
+      },
+      "petShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceMinimum": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceBlocked": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "blood-rage": 4,
+        "berserker-slash": 7.28,
+        "heavy-strike": 9.72,
+        "charge": 4.24,
+        "whirlwind": 3.59
+      },
+      "damageBySource": {
+        "basic-attack": 6150.21,
+        "berserker-slash": 1648.39,
+        "heavy-strike": 2053.41,
+        "charge": 744.64,
+        "offhand": 775.87,
+        "counter": 313.38,
+        "whirlwind": 394.33
+      },
+      "effectiveHealing": {
+        "mean": 0,
+        "sd": 0
+      },
+      "overhealing": {
+        "mean": 0,
+        "sd": 0
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "whirlwind",
+        "passiveLv6": "titans-grip"
+      },
+      "mode": "boss",
+      "dps": {
+        "mean": 237.0320984529331,
+        "sd": 6.143454965872796
+      },
+      "ttk": {
+        "mean": 51.01299999999996,
+        "sd": 1.3242095755581895
+      },
+      "killsPerMinute": {
+        "mean": 0,
+        "sd": 0
+      },
+      "totalDamage": {
+        "mean": 12083.76,
+        "sd": 64.931828866897
+      },
+      "basicShare": {
+        "mean": 0.5110631321380009,
+        "sd": 0.01489882335766636
+      },
+      "activeSkillShare": {
+        "mean": 0.39863118587678464,
+        "sd": 0.015959007499838744
+      },
+      "aoeShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "dotShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "extraShare": {
+        "mean": 0.09030568198521456,
+        "sd": 0.021596753120895727
+      },
+      "petShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceMinimum": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceBlocked": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "blood-rage": 4,
+        "berserker-slash": 7.32,
+        "heavy-strike": 9.77,
+        "charge": 4.28,
+        "whirlwind": 3.6
+      },
+      "damageBySource": {
+        "basic-attack": 6175.31,
+        "berserker-slash": 1553.2,
+        "heavy-strike": 2064.8,
+        "charge": 753.42,
+        "offhand": 776.84,
+        "counter": 314.36,
+        "whirlwind": 445.83
+      },
+      "effectiveHealing": {
+        "mean": 0,
+        "sd": 0
+      },
+      "overhealing": {
+        "mean": 0,
+        "sd": 0
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "heavy-strike",
+        "passiveLv6": "parry"
+      },
+      "mode": "boss",
+      "dps": {
+        "mean": 236.63181177969923,
+        "sd": 6.529167108935541
+      },
+      "ttk": {
+        "mean": 51.09399999999998,
+        "sd": 1.3954081840092525
+      },
+      "killsPerMinute": {
+        "mean": 0,
+        "sd": 0
+      },
+      "totalDamage": {
+        "mean": 12081.57,
+        "sd": 70.5657501908681
+      },
+      "basicShare": {
+        "mean": 0.511513495314292,
+        "sd": 0.013036268426570703
+      },
+      "activeSkillShare": {
+        "mean": 0.4116518003070642,
+        "sd": 0.014641410749607155
+      },
+      "aoeShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "dotShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "extraShare": {
+        "mean": 0.07683470437864352,
+        "sd": 0.019155604265529917
+      },
+      "petShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceMinimum": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceBlocked": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "blood-rage": 4,
+        "berserker-slash": 7.33,
+        "heavy-strike": 9.73,
+        "charge": 4.18,
+        "whirlwind": 3.7
+      },
+      "damageBySource": {
+        "basic-attack": 6179.69,
+        "berserker-slash": 1553.47,
+        "heavy-strike": 2283.46,
+        "charge": 735.09,
+        "offhand": 385.03,
+        "counter": 543.2,
+        "whirlwind": 401.63
+      },
+      "effectiveHealing": {
+        "mean": 0,
+        "sd": 0
+      },
+      "overhealing": {
+        "mean": 0,
+        "sd": 0
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "berserker-slash",
+        "passiveLv6": "parry"
+      },
+      "mode": "boss",
+      "dps": {
+        "mean": 234.4059176688504,
+        "sd": 6.7822336443750775
+      },
+      "ttk": {
+        "mean": 51.55399999999997,
+        "sd": 1.4622872494828092
+      },
+      "killsPerMinute": {
+        "mean": 0,
+        "sd": 0
+      },
+      "totalDamage": {
+        "mean": 12074.8,
+        "sd": 62.64535098472988
+      },
+      "basicShare": {
+        "mean": 0.5162226029050206,
+        "sd": 0.013273264940825778
+      },
+      "activeSkillShare": {
+        "mean": 0.4063049540127156,
+        "sd": 0.014730992401765628
+      },
+      "aoeShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "dotShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "extraShare": {
+        "mean": 0.07747244308226352,
+        "sd": 0.019467678544648596
+      },
+      "petShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceMinimum": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceBlocked": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "blood-rage": 4,
+        "berserker-slash": 7.44,
+        "heavy-strike": 9.82,
+        "charge": 4.22,
+        "whirlwind": 3.72
+      },
+      "damageBySource": {
+        "basic-attack": 6233.14,
+        "berserker-slash": 1683.28,
+        "heavy-strike": 2077.23,
+        "charge": 741.86,
+        "offhand": 389.28,
+        "counter": 546.12,
+        "whirlwind": 403.89
+      },
+      "effectiveHealing": {
+        "mean": 0,
+        "sd": 0
+      },
+      "overhealing": {
+        "mean": 0,
+        "sd": 0
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "blood-rage",
+        "passiveLv6": "parry"
+      },
+      "mode": "boss",
+      "dps": {
+        "mean": 234.42868422486654,
+        "sd": 6.934653240041444
+      },
+      "ttk": {
+        "mean": 51.56999999999997,
+        "sd": 1.4991664350564948
+      },
+      "killsPerMinute": {
+        "mean": 0,
+        "sd": 0
+      },
+      "totalDamage": {
+        "mean": 12079.24,
+        "sd": 60.58797240377003
+      },
+      "basicShare": {
+        "mean": 0.5203812926505252,
+        "sd": 0.0136982034688678
+      },
+      "activeSkillShare": {
+        "mean": 0.40122641422543415,
+        "sd": 0.014561809187158027
+      },
+      "aoeShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "dotShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "extraShare": {
+        "mean": 0.07839229312404057,
+        "sd": 0.019651387717758748
+      },
+      "petShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceMinimum": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceBlocked": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "blood-rage": 4,
+        "berserker-slash": 7.44,
+        "heavy-strike": 9.82,
+        "charge": 4.22,
+        "whirlwind": 3.72
+      },
+      "damageBySource": {
+        "basic-attack": 6285.68,
+        "berserker-slash": 1591.53,
+        "heavy-strike": 2097.56,
+        "charge": 750.39,
+        "offhand": 394.45,
+        "counter": 552.4,
+        "whirlwind": 407.23
+      },
+      "effectiveHealing": {
+        "mean": 0,
+        "sd": 0
+      },
+      "overhealing": {
+        "mean": 0,
+        "sd": 0
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "whirlwind",
+        "passiveLv6": "parry"
+      },
+      "mode": "boss",
+      "dps": {
+        "mean": 233.36753962064205,
+        "sd": 6.7183472902067
+      },
+      "ttk": {
+        "mean": 51.82899999999997,
+        "sd": 1.4688972053891316
+      },
+      "killsPerMinute": {
+        "mean": 0,
+        "sd": 0
+      },
+      "totalDamage": {
+        "mean": 12085.46,
+        "sd": 53.77274774455924
+      },
+      "basicShare": {
+        "mean": 0.5184022364016979,
+        "sd": 0.012715011611775542
+      },
+      "activeSkillShare": {
+        "mean": 0.40403573618365113,
+        "sd": 0.01511936772071721
+      },
+      "aoeShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "dotShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "extraShare": {
+        "mean": 0.07756202741465072,
+        "sd": 0.019419956608448564
+      },
+      "petShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceMinimum": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceBlocked": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "blood-rage": 4,
+        "berserker-slash": 7.5,
+        "heavy-strike": 9.84,
+        "charge": 4.3,
+        "whirlwind": 3.73
+      },
+      "damageBySource": {
+        "basic-attack": 6264.99,
+        "berserker-slash": 1588.81,
+        "heavy-strike": 2081.61,
+        "charge": 756.07,
+        "offhand": 391.2,
+        "counter": 546.12,
+        "whirlwind": 456.66
+      },
+      "effectiveHealing": {
+        "mean": 0,
+        "sd": 0
+      },
+      "overhealing": {
+        "mean": 0,
+        "sd": 0
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "heavy-strike",
+        "passiveLv6": "berserker-blood"
+      },
+      "mode": "boss",
+      "dps": {
+        "mean": 233.0620099403099,
+        "sd": 6.0031345344038884
+      },
+      "ttk": {
+        "mean": 51.859999999999985,
+        "sd": 1.3231024147812591
+      },
+      "killsPerMinute": {
+        "mean": 0,
+        "sd": 0
+      },
+      "totalDamage": {
+        "mean": 12078.85,
+        "sd": 68.87849809628548
+      },
+      "basicShare": {
+        "mean": 0.5197503903080292,
+        "sd": 0.012329292520170327
+      },
+      "activeSkillShare": {
+        "mean": 0.4202034094370074,
+        "sd": 0.015293934644479727
+      },
+      "aoeShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "dotShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "extraShare": {
+        "mean": 0.060046200254963315,
+        "sd": 0.016409654183660718
+      },
+      "petShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceMinimum": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceBlocked": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "blood-rage": 4,
+        "berserker-slash": 7.51,
+        "heavy-strike": 9.9,
+        "charge": 4.27,
+        "whirlwind": 3.67
+      },
+      "damageBySource": {
+        "basic-attack": 6277.83,
+        "berserker-slash": 1596.51,
+        "heavy-strike": 2325.68,
+        "charge": 752.9,
+        "offhand": 408.54,
+        "counter": 316.53,
+        "whirlwind": 400.86
+      },
+      "effectiveHealing": {
+        "mean": 0,
+        "sd": 0
+      },
+      "overhealing": {
+        "mean": 0,
+        "sd": 0
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "heavy-strike",
+        "passiveLv6": "iron-will"
+      },
+      "mode": "boss",
+      "dps": {
+        "mean": 232.39265327524043,
+        "sd": 6.091107083950246
+      },
+      "ttk": {
+        "mean": 52.00999999999999,
+        "sd": 1.3442841961430632
+      },
+      "killsPerMinute": {
+        "mean": 0,
+        "sd": 0
+      },
+      "totalDamage": {
+        "mean": 12078.7,
+        "sd": 59.37971033947541
+      },
+      "basicShare": {
+        "mean": 0.5200098592933771,
+        "sd": 0.012100694367366332
+      },
+      "activeSkillShare": {
+        "mean": 0.41970478930045624,
+        "sd": 0.015225236532252254
+      },
+      "aoeShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "dotShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "extraShare": {
+        "mean": 0.060285351406166636,
+        "sd": 0.016539125669063612
+      },
+      "petShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceMinimum": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceBlocked": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "blood-rage": 4,
+        "berserker-slash": 7.54,
+        "heavy-strike": 9.9,
+        "charge": 4.29,
+        "whirlwind": 3.68
+      },
+      "damageBySource": {
+        "basic-attack": 6280.82,
+        "berserker-slash": 1597.16,
+        "heavy-strike": 2318.86,
+        "charge": 753.4,
+        "offhand": 411.87,
+        "counter": 316.21,
+        "whirlwind": 400.38
+      },
+      "effectiveHealing": {
+        "mean": 0,
+        "sd": 0
+      },
+      "overhealing": {
+        "mean": 0,
+        "sd": 0
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "heavy-strike",
+        "passiveLv6": "robust-body"
+      },
+      "mode": "boss",
+      "dps": {
+        "mean": 232.32158322799197,
+        "sd": 6.098917001728669
+      },
+      "ttk": {
+        "mean": 52.03299999999999,
+        "sd": 1.3421665321412242
+      },
+      "killsPerMinute": {
+        "mean": 0,
+        "sd": 0
+      },
+      "totalDamage": {
+        "mean": 12080.36,
+        "sd": 62.01314699319817
+      },
+      "basicShare": {
+        "mean": 0.5199071113482837,
+        "sd": 0.012226198309431021
+      },
+      "activeSkillShare": {
+        "mean": 0.4198476463996239,
+        "sd": 0.015060936213294152
+      },
+      "aoeShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "dotShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "extraShare": {
+        "mean": 0.06024524225209246,
+        "sd": 0.01650297733397801
+      },
+      "petShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceMinimum": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceBlocked": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "blood-rage": 4,
+        "berserker-slash": 7.54,
+        "heavy-strike": 9.91,
+        "charge": 4.3,
+        "whirlwind": 3.68
+      },
+      "damageBySource": {
+        "basic-attack": 6280.41,
+        "berserker-slash": 1596.2,
+        "heavy-strike": 2320.6,
+        "charge": 755.29,
+        "offhand": 411.57,
+        "counter": 316.16,
+        "whirlwind": 400.13
+      },
+      "effectiveHealing": {
+        "mean": 0,
+        "sd": 0
+      },
+      "overhealing": {
+        "mean": 0,
+        "sd": 0
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "blood-rage",
+        "passiveLv6": "berserker-blood"
+      },
+      "mode": "boss",
+      "dps": {
+        "mean": 230.91081231052277,
+        "sd": 6.226814728312278
+      },
+      "ttk": {
+        "mean": 52.30999999999997,
+        "sd": 1.404457190518814
+      },
+      "killsPerMinute": {
+        "mean": 0,
+        "sd": 0
+      },
+      "totalDamage": {
+        "mean": 12070.33,
+        "sd": 53.70252414924275
+      },
+      "basicShare": {
+        "mean": 0.5285897294731241,
+        "sd": 0.012449255175971879
+      },
+      "activeSkillShare": {
+        "mean": 0.40996079431225757,
+        "sd": 0.014369203905800678
+      },
+      "aoeShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "dotShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "extraShare": {
+        "mean": 0.0614494762146183,
+        "sd": 0.016789532060499834
+      },
+      "petShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceMinimum": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceBlocked": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "blood-rage": 4,
+        "berserker-slash": 7.6,
+        "heavy-strike": 9.98,
+        "charge": 4.37,
+        "whirlwind": 3.71
+      },
+      "damageBySource": {
+        "basic-attack": 6380.09,
+        "berserker-slash": 1627.49,
+        "heavy-strike": 2134.75,
+        "charge": 777.59,
+        "offhand": 419.5,
+        "counter": 322.24,
+        "whirlwind": 408.67
+      },
+      "effectiveHealing": {
+        "mean": 0,
+        "sd": 0
+      },
+      "overhealing": {
+        "mean": 0,
+        "sd": 0
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "berserker-slash",
+        "passiveLv6": "berserker-blood"
+      },
+      "mode": "boss",
+      "dps": {
+        "mean": 230.90553340500915,
+        "sd": 6.183360610248145
+      },
+      "ttk": {
+        "mean": 52.32299999999996,
+        "sd": 1.4001324937305042
+      },
+      "killsPerMinute": {
+        "mean": 0,
+        "sd": 0
+      },
+      "totalDamage": {
+        "mean": 12073.14,
+        "sd": 53.84812345848276
+      },
+      "basicShare": {
+        "mean": 0.5239849946336774,
+        "sd": 0.012419183530819066
+      },
+      "activeSkillShare": {
+        "mean": 0.41525349493487856,
+        "sd": 0.014159691155956
+      },
+      "aoeShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "dotShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "extraShare": {
+        "mean": 0.0607615104314441,
+        "sd": 0.01657965255594415
+      },
+      "petShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceMinimum": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceBlocked": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "blood-rage": 4,
+        "berserker-slash": 7.61,
+        "heavy-strike": 9.99,
+        "charge": 4.37,
+        "whirlwind": 3.71
+      },
+      "damageBySource": {
+        "basic-attack": 6325.99,
+        "berserker-slash": 1723.31,
+        "heavy-strike": 2115.82,
+        "charge": 769.01,
+        "offhand": 414.54,
+        "counter": 319.05,
+        "whirlwind": 405.42
+      },
+      "effectiveHealing": {
+        "mean": 0,
+        "sd": 0
+      },
+      "overhealing": {
+        "mean": 0,
+        "sd": 0
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "berserker-slash",
+        "passiveLv6": "iron-will"
+      },
+      "mode": "boss",
+      "dps": {
+        "mean": 230.27594808973615,
+        "sd": 6.205329352077132
+      },
+      "ttk": {
+        "mean": 52.44999999999996,
+        "sd": 1.4191899097724725
+      },
+      "killsPerMinute": {
+        "mean": 0,
+        "sd": 0
+      },
+      "totalDamage": {
+        "mean": 12069.28,
+        "sd": 49.322627667227955
+      },
+      "basicShare": {
+        "mean": 0.5241898129944712,
+        "sd": 0.012623409394797135
+      },
+      "activeSkillShare": {
+        "mean": 0.41478060179555354,
+        "sd": 0.01439529551547376
+      },
+      "aoeShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "dotShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "extraShare": {
+        "mean": 0.06102958520997508,
+        "sd": 0.01678669793694848
+      },
+      "petShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceMinimum": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceBlocked": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "blood-rage": 4.01,
+        "berserker-slash": 7.63,
+        "heavy-strike": 10.01,
+        "charge": 4.38,
+        "whirlwind": 3.71
+      },
+      "damageBySource": {
+        "basic-attack": 6326.46,
+        "berserker-slash": 1721.89,
+        "heavy-strike": 2112.72,
+        "charge": 767.82,
+        "offhand": 415.13,
+        "counter": 321.49,
+        "whirlwind": 403.77
+      },
+      "effectiveHealing": {
+        "mean": 0,
+        "sd": 0
+      },
+      "overhealing": {
+        "mean": 0,
+        "sd": 0
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "blood-rage",
+        "passiveLv6": "iron-will"
+      },
+      "mode": "boss",
+      "dps": {
+        "mean": 230.19975554556086,
+        "sd": 6.3350491534748805
+      },
+      "ttk": {
+        "mean": 52.46799999999997,
+        "sd": 1.4423508588412182
+      },
+      "killsPerMinute": {
+        "mean": 0,
+        "sd": 0
+      },
+      "totalDamage": {
+        "mean": 12069.09,
+        "sd": 48.29660340023926
+      },
+      "basicShare": {
+        "mean": 0.5285821380538601,
+        "sd": 0.012801501805304302
+      },
+      "activeSkillShare": {
+        "mean": 0.40980036595098285,
+        "sd": 0.014306495917719701
+      },
+      "aoeShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "dotShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "extraShare": {
+        "mean": 0.061617495995157014,
+        "sd": 0.016958644214656867
+      },
+      "petShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceMinimum": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceBlocked": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "blood-rage": 4.01,
+        "berserker-slash": 7.63,
+        "heavy-strike": 10.01,
+        "charge": 4.39,
+        "whirlwind": 3.71
+      },
+      "damageBySource": {
+        "basic-attack": 6379.4,
+        "berserker-slash": 1627.83,
+        "heavy-strike": 2133.29,
+        "charge": 777.82,
+        "offhand": 419.81,
+        "counter": 323.92,
+        "whirlwind": 407.02
+      },
+      "effectiveHealing": {
+        "mean": 0,
+        "sd": 0
+      },
+      "overhealing": {
+        "mean": 0,
+        "sd": 0
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "berserker-slash",
+        "passiveLv6": "robust-body"
+      },
+      "mode": "boss",
+      "dps": {
+        "mean": 230.12740404687486,
+        "sd": 6.121807487592071
+      },
+      "ttk": {
+        "mean": 52.47399999999996,
+        "sd": 1.3998299896773179
+      },
+      "killsPerMinute": {
+        "mean": 0,
+        "sd": 0
+      },
+      "totalDamage": {
+        "mean": 12067.24,
+        "sd": 46.87837881155873
+      },
+      "basicShare": {
+        "mean": 0.5243196259965025,
+        "sd": 0.012512076260568872
+      },
+      "activeSkillShare": {
+        "mean": 0.4146731952450729,
+        "sd": 0.014455569631937322
+      },
+      "aoeShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "dotShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "extraShare": {
+        "mean": 0.06100717875842456,
+        "sd": 0.016743653332946088
+      },
+      "petShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceMinimum": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceBlocked": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "blood-rage": 4.01,
+        "berserker-slash": 7.63,
+        "heavy-strike": 10.01,
+        "charge": 4.38,
+        "whirlwind": 3.71
+      },
+      "damageBySource": {
+        "basic-attack": 6326.95,
+        "berserker-slash": 1720.93,
+        "heavy-strike": 2112.09,
+        "charge": 767.48,
+        "offhand": 414.83,
+        "counter": 321.44,
+        "whirlwind": 403.52
+      },
+      "effectiveHealing": {
+        "mean": 0,
+        "sd": 0
+      },
+      "overhealing": {
+        "mean": 0,
+        "sd": 0
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "blood-rage",
+        "passiveLv6": "robust-body"
+      },
+      "mode": "boss",
+      "dps": {
+        "mean": 230.0512442843168,
+        "sd": 6.285732166907115
+      },
+      "ttk": {
+        "mean": 52.49899999999997,
+        "sd": 1.4295800082541725
+      },
+      "killsPerMinute": {
+        "mean": 0,
+        "sd": 0
+      },
+      "totalDamage": {
+        "mean": 12068.57,
+        "sd": 45.352674673055404
+      },
+      "basicShare": {
+        "mean": 0.528777567415872,
+        "sd": 0.012708935466208219
+      },
+      "activeSkillShare": {
+        "mean": 0.4096327847639739,
+        "sd": 0.014339954759325934
+      },
+      "aoeShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "dotShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "extraShare": {
+        "mean": 0.06158964782015385,
+        "sd": 0.01692035185601898
+      },
+      "petShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceMinimum": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceBlocked": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "blood-rage": 4.01,
+        "berserker-slash": 7.63,
+        "heavy-strike": 10.01,
+        "charge": 4.39,
+        "whirlwind": 3.71
+      },
+      "damageBySource": {
+        "basic-attack": 6381.48,
+        "berserker-slash": 1626.87,
+        "heavy-strike": 2132.64,
+        "charge": 777.46,
+        "offhand": 419.52,
+        "counter": 323.87,
+        "whirlwind": 406.73
+      },
+      "effectiveHealing": {
+        "mean": 0,
+        "sd": 0
+      },
+      "overhealing": {
+        "mean": 0,
+        "sd": 0
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "whirlwind",
+        "passiveLv6": "berserker-blood"
+      },
+      "mode": "boss",
+      "dps": {
+        "mean": 229.81492674718854,
+        "sd": 6.2598558830657955
+      },
+      "ttk": {
+        "mean": 52.54999999999998,
+        "sd": 1.4371847480404183
+      },
+      "killsPerMinute": {
+        "mean": 0,
+        "sd": 0
+      },
+      "totalDamage": {
+        "mean": 12067.87,
+        "sd": 44.3771686794009
+      },
+      "basicShare": {
+        "mean": 0.5265865241577345,
+        "sd": 0.012604868812444867
+      },
+      "activeSkillShare": {
+        "mean": 0.4122127525090471,
+        "sd": 0.014214480031718414
+      },
+      "aoeShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "dotShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "extraShare": {
+        "mean": 0.06120072333321845,
+        "sd": 0.016775148591898926
+      },
+      "petShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceMinimum": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceBlocked": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "blood-rage": 4.01,
+        "berserker-slash": 7.64,
+        "heavy-strike": 10.02,
+        "charge": 4.39,
+        "whirlwind": 3.72
+      },
+      "damageBySource": {
+        "basic-attack": 6354.62,
+        "berserker-slash": 1620.95,
+        "heavy-strike": 2121.46,
+        "charge": 772.03,
+        "offhand": 415.92,
+        "counter": 322.69,
+        "whirlwind": 460.2
+      },
+      "effectiveHealing": {
+        "mean": 0,
+        "sd": 0
+      },
+      "overhealing": {
+        "mean": 0,
+        "sd": 0
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "whirlwind",
+        "passiveLv6": "iron-will"
+      },
+      "mode": "boss",
+      "dps": {
+        "mean": 229.2507646502414,
+        "sd": 6.3031286002912426
+      },
+      "ttk": {
+        "mean": 52.62399999999999,
+        "sd": 1.440772015275144
+      },
+      "killsPerMinute": {
+        "mean": 0,
+        "sd": 0
+      },
+      "totalDamage": {
+        "mean": 12055.11,
+        "sd": 47.34783944384366
+      },
+      "basicShare": {
+        "mean": 0.5265665351439339,
+        "sd": 0.012622791175436444
+      },
+      "activeSkillShare": {
+        "mean": 0.4121253223889145,
+        "sd": 0.014502163186260323
+      },
+      "aoeShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "dotShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "extraShare": {
+        "mean": 0.06130814246715131,
+        "sd": 0.016816918418783276
+      },
+      "petShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceMinimum": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceBlocked": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "blood-rage": 4.01,
+        "berserker-slash": 7.66,
+        "heavy-strike": 10.04,
+        "charge": 4.41,
+        "whirlwind": 3.72
+      },
+      "damageBySource": {
+        "basic-attack": 6347.71,
+        "berserker-slash": 1619.48,
+        "heavy-strike": 2118.63,
+        "charge": 773.03,
+        "offhand": 416.78,
+        "counter": 322.32,
+        "whirlwind": 457.16
+      },
+      "effectiveHealing": {
+        "mean": 0,
+        "sd": 0
+      },
+      "overhealing": {
+        "mean": 0,
+        "sd": 0
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "whirlwind",
+        "passiveLv6": "robust-body"
+      },
+      "mode": "boss",
+      "dps": {
+        "mean": 229.13740386897064,
+        "sd": 6.264499400402758
+      },
+      "ttk": {
+        "mean": 52.64699999999999,
+        "sd": 1.428247527566563
+      },
+      "killsPerMinute": {
+        "mean": 0,
+        "sd": 0
+      },
+      "totalDamage": {
+        "mean": 12054.55,
+        "sd": 48.041518502228904
+      },
+      "basicShare": {
+        "mean": 0.5266002939335978,
+        "sd": 0.012636263709578446
+      },
+      "activeSkillShare": {
+        "mean": 0.4121150458495788,
+        "sd": 0.01453714190013288
+      },
+      "aoeShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "dotShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "extraShare": {
+        "mean": 0.06128466021682346,
+        "sd": 0.016811585614175856
+      },
+      "petShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceMinimum": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceBlocked": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "blood-rage": 4.01,
+        "berserker-slash": 7.67,
+        "heavy-strike": 10.04,
+        "charge": 4.41,
+        "whirlwind": 3.72
+      },
+      "damageBySource": {
+        "basic-attack": 6347.86,
+        "berserker-slash": 1620.38,
+        "heavy-strike": 2118,
+        "charge": 772.69,
+        "offhand": 416.48,
+        "counter": 322.27,
+        "whirlwind": 456.87
+      },
+      "effectiveHealing": {
+        "mean": 0,
+        "sd": 0
+      },
+      "overhealing": {
+        "mean": 0,
+        "sd": 0
+      }
+    }
+  ]
+}

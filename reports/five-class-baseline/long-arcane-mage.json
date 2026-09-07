@@ -1,0 +1,55 @@
+{
+  "mode": "long-boss",
+  "id": "arcane-mage",
+  "job": "mage",
+  "config": {
+    "activeLv6": "chain-lightning",
+    "passiveLv6": "elemental-mastery"
+  },
+  "seeds": 100,
+  "ttk": {
+    "mean": 251.24700000000004,
+    "sd": 5.297498560641618
+  },
+  "dps": {
+    "mean": 239.21434601955346,
+    "sd": 4.953895230198263
+  },
+  "resourceMinimum": {
+    "mean": 55.10400000000473,
+    "sd": 8.526512829121202e-14
+  },
+  "resourceBlocked": {
+    "mean": 0,
+    "sd": 0
+  },
+  "resourceZeroDuration": {
+    "mean": 0,
+    "sd": 0
+  },
+  "resourceExhaustionDuration": {
+    "mean": 169.806,
+    "sd": 4.918573370399185
+  },
+  "resourceExhaustionEpisodes": {
+    "mean": 5.77,
+    "sd": 0.4208325082500167
+  },
+  "damageBySource": {
+    "fireball": 6526.98,
+    "burn": 10619.63,
+    "basic-attack": 31081.09,
+    "blizzard": 1681.1,
+    "chain-lightning": 2518.63,
+    "arcane-missile": 4993.53,
+    "arcane-mark-explosion": 905.83,
+    "arcane-torrent": 1748.88
+  },
+  "skillCasts": {
+    "fireball": 23.98,
+    "blizzard": 14.98,
+    "chain-lightning": 13.77,
+    "arcane-missile": 23.82,
+    "arcane-torrent": 7.99
+  }
+}

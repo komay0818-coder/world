@@ -170,7 +170,7 @@ function formalSnapshot(member, duration, cycle, resourceMonitor, dotMonitor, pa
     minimum: resourceMonitor.minimum, end: member.resourceCurrent, spent: combat.resourceSpent,
     recovered: combat.resourceRecovered, naturalRecovery, specialRecovery,
     blocked: combat.resourceBlocked, blockedBySkill: combat.resourceBlockedBySkill,
-    zeroDuration: resourceMonitor.zeroMs / 1000, lowDuration: resourceMonitor.lowMs / 1000, curve: resourceMonitor.curve
+    zeroDuration: resourceMonitor.zeroMs / 1000, lowDuration: resourceMonitor.lowMs / 1000, exhaustionDuration: resourceMonitor.exhaustedMs / 1000, exhaustionEpisodes: resourceMonitor.exhaustionEpisodes, curve: resourceMonitor.curve
   } : null;
   return {
     duration, ttk: battle.isDungeon ? duration : null, totalDamage: combat.totalDamage,
@@ -196,7 +196,7 @@ function formalSnapshot(member, duration, cycle, resourceMonitor, dotMonitor, pa
     healing: member.job==='priest'?JSON.parse(JSON.stringify(PriestAdvancementPolicy.telemetry(member))):null,
     shield: member.job==='priest'?{generated:PriestAdvancementPolicy.telemetry(member).shieldGenerated,absorbed:PriestAdvancementPolicy.telemetry(member).shieldAbsorbed,expired:PriestAdvancementPolicy.telemetry(member).shieldExpired,remaining:(battle.partyMembers||[]).reduce((sum,ally)=>sum+(ally.priestShieldGrants||[]).filter(grant=>grant.owner===member).reduce((value,grant)=>value+grant.remaining,0),0),events:JSON.parse(JSON.stringify(PriestAdvancementPolicy.telemetry(member).shieldEvents))}:null,
     faith: member.job==='priest'?{end:PriestAdvancementPolicy.getFaithStacks(member,formalNow),maximum:PriestAdvancementPolicy.FAITH_MAX_STACKS,average:PriestAdvancementPolicy.telemetry(member).faithSamples?PriestAdvancementPolicy.telemetry(member).faithStackTotal/PriestAdvancementPolicy.telemetry(member).faithSamples:0,fullSamples:PriestAdvancementPolicy.telemetry(member).faithFullSamples,events:JSON.parse(JSON.stringify(PriestAdvancementPolicy.telemetry(member).faithEvents))}:null,
-    party: partyMonitor?{minimumHpByMember:partyMonitor.minimumHpByMember,deaths:partyMonitor.deaths,revives:partyMonitor.revives,firstDeathAtMs:partyMonitor.firstDeathAtMs,healthCurve:partyMonitor.healthCurve,statusTimeline:partyMonitor.statusTimeline,final:(battle.partyMembers||[]).map(ally=>({id:ally.id,job:ally.job,hp:ally.currentHp,maxHp:ally.maxHp,alive:ally.alive,shield:ally.shield,resource:ally.resourceCurrent,damageTaken:CombatCorePolicy.telemetry(ally).damageTaken})),memberDamage:Object.fromEntries((battle.partyMembers||[]).map(ally=>[ally.id,CombatCorePolicy.telemetry(ally).totalDamage]))}:null,
+    party: partyMonitor?{minimumHpByMember:partyMonitor.minimumHpByMember,averageHpRatioByMember:Object.fromEntries((battle.partyMembers||[]).map(ally=>[ally.id,partyMonitor.samples?partyMonitor.hpRatioTotal[ally.id]/partyMonitor.samples:0])),averageHpRatio:partyMonitor.samples?Object.values(partyMonitor.hpRatioTotal).reduce((sum,value)=>sum+value,0)/(partyMonitor.samples*(battle.partyMembers||[]).length):0,deaths:partyMonitor.deaths,revives:partyMonitor.revives,firstDeathAtMs:partyMonitor.firstDeathAtMs,healthCurve:partyMonitor.healthCurve,statusTimeline:partyMonitor.statusTimeline,final:(battle.partyMembers||[]).map(ally=>({id:ally.id,job:ally.job,hp:ally.currentHp,maxHp:ally.maxHp,alive:ally.alive,shield:ally.shield,resource:ally.resourceCurrent,damageTaken:CombatCorePolicy.telemetry(ally).damageTaken})),memberDamage:Object.fromEntries((battle.partyMembers||[]).map(ally=>[ally.id,CombatCorePolicy.telemetry(ally).totalDamage])),totalDamage:(battle.partyMembers||[]).reduce((sum,ally)=>sum+CombatCorePolicy.telemetry(ally).totalDamage,0),kills:(battle.partyMembers||[]).reduce((sum,ally)=>sum+CombatCorePolicy.telemetry(ally).kills,0),support:Object.fromEntries((battle.partyMembers||[]).filter(ally=>ally.job==='priest').map(ally=>[ally.id,JSON.parse(JSON.stringify(PriestAdvancementPolicy.telemetry(ally)))]))}:null,
     cycle, combat,
     final: {
       hp: member.currentHp, maxHp: member.maxHp, defense: member.stats.defense, resource: member.resourceCurrent, alive: member.alive,
@@ -227,9 +227,9 @@ function formalSnapshot(member, duration, cycle, resourceMonitor, dotMonitor, pa
 function runFormalCombat(config) {
   const member = setupFormalCombat(config);
   const cycle = [];
-  const resourceMonitor = { initial: member.resourceCurrent, minimum: member.resourceCurrent, zeroMs: 0, lowMs:0, curve: [{ atMs: 0, value: member.resourceCurrent }] };
+  const resourceMonitor = { initial: member.resourceCurrent, minimum: member.resourceCurrent, zeroMs: 0, lowMs:0, exhaustedMs:0, exhaustionEpisodes:0, wasExhausted:Boolean(member.manaExhausted), curve: [{ atMs: 0, value: member.resourceCurrent }] };
   const dotMonitor = { samples: 0, poisonStackTotal: 0, maxPoisonStacks: 0, timeline: [], lastSignature: '' };
-  const partyMonitor={minimumHpByMember:Object.fromEntries(battle.partyMembers.map(ally=>[ally.id,ally.currentHp])),deaths:0,revives:0,firstDeathAtMs:null,healthCurve:[],statusTimeline:[],alive:Object.fromEntries(battle.partyMembers.map(ally=>[ally.id,ally.alive])),lastSignature:'',lastStatusSignature:''};
+  const partyMonitor={minimumHpByMember:Object.fromEntries(battle.partyMembers.map(ally=>[ally.id,ally.currentHp])),hpRatioTotal:Object.fromEntries(battle.partyMembers.map(ally=>[ally.id,0])),samples:0,deaths:0,revives:0,firstDeathAtMs:null,healthCurve:[],statusTimeline:[],alive:Object.fromEntries(battle.partyMembers.map(ally=>[ally.id,ally.alive])),lastSignature:'',lastStatusSignature:''};
   let resourceEventCursor = 0;
   const limitMs = (config.mode === 'boss' ? config.maxSeconds : config.seconds) * 1000;
   for (formalNow = 0; formalNow < limitMs && fighting && (config.mode !== 'boss' || battle.enemyHps[0] > 0); formalNow += 100) {
@@ -242,6 +242,7 @@ function runFormalCombat(config) {
     resourceMonitor.minimum = Math.min(resourceMonitor.minimum, member.resourceCurrent);
     if (['arrows', 'energy', 'mana'].includes(member.resourceType) && member.resourceCurrent === 0) resourceMonitor.zeroMs += 100;
     if(member.resourceType==='mana'&&member.resourceCurrent<=member.resourceMax*.25)resourceMonitor.lowMs+=100;
+    if(member.resourceType==='mana'&&member.manaExhausted)resourceMonitor.exhaustedMs+=100;if(!resourceMonitor.wasExhausted&&member.manaExhausted)resourceMonitor.exhaustionEpisodes++;resourceMonitor.wasExhausted=Boolean(member.manaExhausted);
     const resourceEvents = CombatCorePolicy.telemetry(member).resourceEvents;
     while (resourceEventCursor < resourceEvents.length) {
       const event = resourceEvents[resourceEventCursor++];
@@ -263,9 +264,9 @@ function runFormalCombat(config) {
       dotMonitor.lastSignature = dotSignature;
     }
     const partyState=battle.partyMembers.map(ally=>({id:ally.id,hp:ally.currentHp,alive:ally.alive,shield:ally.shield}));
-    for(const ally of battle.partyMembers){partyMonitor.minimumHpByMember[ally.id]=Math.min(partyMonitor.minimumHpByMember[ally.id],ally.currentHp);if(partyMonitor.alive[ally.id]&&!ally.alive){partyMonitor.deaths++;if(partyMonitor.firstDeathAtMs===null)partyMonitor.firstDeathAtMs=formalNow;}if(!partyMonitor.alive[ally.id]&&ally.alive)partyMonitor.revives++;partyMonitor.alive[ally.id]=ally.alive;}
+    partyMonitor.samples++;for(const ally of battle.partyMembers){partyMonitor.minimumHpByMember[ally.id]=Math.min(partyMonitor.minimumHpByMember[ally.id],ally.currentHp);partyMonitor.hpRatioTotal[ally.id]+=ally.maxHp?ally.currentHp/ally.maxHp:0;if(partyMonitor.alive[ally.id]&&!ally.alive){partyMonitor.deaths++;if(partyMonitor.firstDeathAtMs===null)partyMonitor.firstDeathAtMs=formalNow;}if(!partyMonitor.alive[ally.id]&&ally.alive)partyMonitor.revives++;partyMonitor.alive[ally.id]=ally.alive;}
     const partySignature=JSON.stringify(partyState);if(partySignature!==partyMonitor.lastSignature){partyMonitor.healthCurve.push({atMs:formalNow,members:partyState});partyMonitor.lastSignature=partySignature;}
-    const statusState={allies:battle.partyMembers.map(ally=>({id:ally.id,sanctuary:formalNow<(ally.sanctuaryUntil||0),lightGrace:formalNow<(ally.lightGraceUntil||0),holyStormHaste:formalNow<(ally.holyStormHasteUntil||0)})),enemies:battle.enemySkillStates.map((state,index)=>({index,holyLightAttackDownUntil:state?.holyLightAttackDownUntil||0}))};const statusSignature=JSON.stringify(statusState);if(statusSignature!==partyMonitor.lastStatusSignature){partyMonitor.statusTimeline.push({atMs:formalNow,...statusState});partyMonitor.lastStatusSignature=statusSignature;}
+    const statusState={allies:battle.partyMembers.map(ally=>({id:ally.id,sanctuary:formalNow<(ally.sanctuaryUntil||0),lightGrace:formalNow<(ally.lightGraceUntil||0),holyStormHaste:formalNow<(ally.holyStormHasteUntil||0),buffed:Object.entries(ally).some(([key,value])=>key.endsWith('Until')&&!key.startsWith('visual')&&Number(value)>formalNow)})),enemies:battle.enemySkillStates.map((state,index)=>({index,holyLightAttackDownUntil:state?.holyLightAttackDownUntil||0,controlled:['stunnedUntil','frozenUntil','paralyzedUntil','slowedUntil'].some(key=>Number(state?.[key])>formalNow),debuffed:Object.entries(state||{}).some(([key,value])=>key.endsWith('Until')&&!key.startsWith('visual')&&Number(value)>formalNow)}))};const statusSignature=JSON.stringify(statusState);if(statusSignature!==partyMonitor.lastStatusSignature){partyMonitor.statusTimeline.push({atMs:formalNow,...statusState});partyMonitor.lastStatusSignature=statusSignature;}
     const after = CombatCorePolicy.telemetry(member).skillCasts;
     for (const [id, casts] of Object.entries(after)) {
       if (casts > (before[id] || 0)) cycle.push({ atMs: formalNow, skill: id, cooldownReadyAt: member.skillCooldowns[id] || formalNow });

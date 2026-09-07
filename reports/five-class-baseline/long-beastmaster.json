@@ -1,0 +1,46 @@
+{
+  "mode": "long-boss",
+  "id": "beastmaster",
+  "job": "hunter",
+  "config": {
+    "activeLv6": "power-shot",
+    "passiveLv6": "wild-bond"
+  },
+  "seeds": 100,
+  "ttk": {
+    "mean": 113.67700000000005,
+    "sd": 1.046981852755815
+  },
+  "dps": {
+    "mean": 528.2821754281329,
+    "sd": 4.754175024413424
+  },
+  "resourceMinimum": {
+    "mean": 3,
+    "sd": 0
+  },
+  "resourceBlocked": {
+    "mean": 0,
+    "sd": 0
+  },
+  "resourceZeroDuration": {
+    "mean": 0,
+    "sd": 0
+  },
+  "damageBySource": {
+    "power-shot": 5935.19,
+    "basic-attack": 16249,
+    "pet-basic": 24854.71,
+    "multi-shot": 1464.84,
+    "piercing-shot": 2016,
+    "beast-slam": 8977.47,
+    "pet-bleed": 551.36
+  },
+  "skillCasts": {
+    "power-shot": 28.99,
+    "multi-shot": 14.66,
+    "piercing-shot": 12,
+    "beast-fury": 7.3,
+    "bloody-hunt": 10.12
+  }
+}

@@ -1,0 +1,46 @@
+{
+  "mode": "long-boss",
+  "id": "weapon-master",
+  "job": "warrior",
+  "config": {
+    "activeLv6": "charge",
+    "passiveLv6": "weapon-mastery"
+  },
+  "seeds": 100,
+  "ttk": {
+    "mean": 253.518,
+    "sd": 3.9157982583376274
+  },
+  "dps": {
+    "mean": 237.03566654921326,
+    "sd": 3.646182118215777
+  },
+  "resourceMinimum": {
+    "mean": 0,
+    "sd": 0
+  },
+  "resourceBlocked": {
+    "mean": 0,
+    "sd": 0
+  },
+  "resourceZeroDuration": {
+    "mean": 0,
+    "sd": 0
+  },
+  "damageBySource": {
+    "fatal-slash": 9613.7,
+    "basic-attack": 31395.74,
+    "counter": 1458,
+    "shield-counter": 1487.08,
+    "heavy-strike": 9960.4,
+    "charge": 4070.28,
+    "whirlwind": 2093.36
+  },
+  "skillCasts": {
+    "fatal-slash": 41.58,
+    "weapon-stance": 18.07,
+    "heavy-strike": 47.4,
+    "charge": 21.55,
+    "whirlwind": 19.16
+  }
+}

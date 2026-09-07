@@ -1,0 +1,5557 @@
+{
+  "job": "mage",
+  "advancedClass": "arcane-mage",
+  "combinationCount": 30,
+  "seeds": 100,
+  "equipment": {
+    "chest": {
+      "id": "baseline-chest",
+      "slot": "chest",
+      "defense": 12
+    },
+    "weapon": {
+      "id": "baseline-weapon",
+      "slot": "weapon",
+      "attack": 24,
+      "attackMin": 22,
+      "attackMax": 26,
+      "criticalChance": 0.1,
+      "weaponType": "two-handed-staff",
+      "magicPower": 0
+    },
+    "offhand": {
+      "id": "baseline-focus",
+      "slot": "offhand"
+    }
+  },
+  "five": [
+    {
+      "config": {
+        "activeLv6": "chain-lightning",
+        "passiveLv6": "mana-drain"
+      },
+      "mode": "five",
+      "dps": {
+        "mean": 495.13258333333346,
+        "sd": 16.592859663078304
+      },
+      "ttk": {
+        "mean": 0,
+        "sd": 0
+      },
+      "killsPerMinute": {
+        "mean": 10.98,
+        "sd": 0.4296510211788169
+      },
+      "totalDamage": {
+        "mean": 59415.91,
+        "sd": 1991.1431595693969
+      },
+      "basicShare": {
+        "mean": 0.2812548306058943,
+        "sd": 0.007916513993427996
+      },
+      "activeSkillShare": {
+        "mean": 0.6054200474766916,
+        "sd": 0.012507707898440808
+      },
+      "aoeShare": {
+        "mean": 0.4330923005552855,
+        "sd": 0.013729433011122531
+      },
+      "dotShare": {
+        "mean": 0.10074124489718109,
+        "sd": 0.01330453583052692
+      },
+      "extraShare": {
+        "mean": 0.012583877020232965,
+        "sd": 0.0004980067569151737
+      },
+      "petShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceMinimum": {
+        "mean": 56.46604600000361,
+        "sd": 11.389293198679258
+      },
+      "resourceBlocked": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 25.138000000000012,
+        "sd": 3.5770037741103935
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "fireball": 21.83,
+        "blizzard": 13.16,
+        "chain-lightning": 10.6,
+        "arcane-missile": 21.19,
+        "arcane-torrent": 8.15
+      },
+      "damageBySource": {
+        "fireball": 6014.85,
+        "burn": 5995.78,
+        "basic-attack": 16697.95,
+        "blizzard": 8061,
+        "chain-lightning": 10305.67,
+        "arcane-missile": 4220.32,
+        "arcane-mark-explosion": 747.06,
+        "arcane-torrent": 7373.28
+      },
+      "effectiveHealing": {
+        "mean": 0,
+        "sd": 0
+      },
+      "overhealing": {
+        "mean": 0,
+        "sd": 0
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "chain-lightning",
+        "passiveLv6": "elemental-mastery"
+      },
+      "mode": "five",
+      "dps": {
+        "mean": 486.23983333333354,
+        "sd": 14.11648615488681
+      },
+      "ttk": {
+        "mean": 0,
+        "sd": 0
+      },
+      "killsPerMinute": {
+        "mean": 10.89,
+        "sd": 0.3910242959203433
+      },
+      "totalDamage": {
+        "mean": 58348.78,
+        "sd": 1693.9783385864177
+      },
+      "basicShare": {
+        "mean": 0.28801732908496,
+        "sd": 0.007928027160417553
+      },
+      "activeSkillShare": {
+        "mean": 0.5835952738576922,
+        "sd": 0.0141776975149278
+      },
+      "aoeShare": {
+        "mean": 0.41268446930068686,
+        "sd": 0.01495564913487435
+      },
+      "dotShare": {
+        "mean": 0.11591998105676764,
+        "sd": 0.015036038047276755
+      },
+      "extraShare": {
+        "mean": 0.012467416000580456,
+        "sd": 0.0005369942757445286
+      },
+      "petShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceMinimum": {
+        "mean": 18.10458000000818,
+        "sd": 12.077088325569186
+      },
+      "resourceBlocked": {
+        "mean": 0.04,
+        "sd": 0.19595917942265423
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 38.22,
+        "sd": 2.2284523777725203
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "fireball": 20.38,
+        "blizzard": 11.95,
+        "chain-lightning": 9.78,
+        "arcane-missile": 20.12,
+        "arcane-torrent": 7.48
+      },
+      "damageBySource": {
+        "fireball": 5781.88,
+        "burn": 6772.37,
+        "basic-attack": 16795.63,
+        "blizzard": 7325.04,
+        "chain-lightning": 9757.95,
+        "arcane-missile": 4186.78,
+        "arcane-mark-explosion": 727.17,
+        "arcane-torrent": 7001.96
+      },
+      "effectiveHealing": {
+        "mean": 0,
+        "sd": 0
+      },
+      "overhealing": {
+        "mean": 0,
+        "sd": 0
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "chain-lightning",
+        "passiveLv6": "mana-amplification"
+      },
+      "mode": "five",
+      "dps": {
+        "mean": 476.0555833333333,
+        "sd": 16.55762723100243
+      },
+      "ttk": {
+        "mean": 0,
+        "sd": 0
+      },
+      "killsPerMinute": {
+        "mean": 10.61,
+        "sd": 0.43920382511995526
+      },
+      "totalDamage": {
+        "mean": 57126.67,
+        "sd": 1986.9152677202924
+      },
+      "basicShare": {
+        "mean": 0.2944036433836201,
+        "sd": 0.009102875044807404
+      },
+      "activeSkillShare": {
+        "mean": 0.5970538570340562,
+        "sd": 0.013418229800178753
+      },
+      "aoeShare": {
+        "mean": 0.42326234150437136,
+        "sd": 0.015065027262950803
+      },
+      "dotShare": {
+        "mean": 0.09586545692735766,
+        "sd": 0.012840262842695542
+      },
+      "extraShare": {
+        "mean": 0.012677042654965892,
+        "sd": 0.0005216886051828504
+      },
+      "petShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceMinimum": {
+        "mean": 19.554000000008,
+        "sd": 12.601394173661859
+      },
+      "resourceBlocked": {
+        "mean": 0.03,
+        "sd": 0.17058722109231972
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 38.890000000000015,
+        "sd": 2.4662319436743982
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "fireball": 20.22,
+        "blizzard": 11.99,
+        "chain-lightning": 9.53,
+        "arcane-missile": 19.81,
+        "arcane-torrent": 7.27
+      },
+      "damageBySource": {
+        "fireball": 5800.35,
+        "burn": 5480.32,
+        "basic-attack": 16804.27,
+        "blizzard": 7479.35,
+        "chain-lightning": 9717.35,
+        "arcane-missile": 4121.64,
+        "arcane-mark-explosion": 723.95,
+        "arcane-torrent": 6999.44
+      },
+      "effectiveHealing": {
+        "mean": 0,
+        "sd": 0
+      },
+      "overhealing": {
+        "mean": 0,
+        "sd": 0
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "chain-lightning",
+        "passiveLv6": "arcane-charge"
+      },
+      "mode": "five",
+      "dps": {
+        "mean": 471.0343333333331,
+        "sd": 13.719659671435
+      },
+      "ttk": {
+        "mean": 0,
+        "sd": 0
+      },
+      "killsPerMinute": {
+        "mean": 10.58,
+        "sd": 0.2976575213227444
+      },
+      "totalDamage": {
+        "mean": 56524.12,
+        "sd": 1646.3591605722002
+      },
+      "basicShare": {
+        "mean": 0.2864482756800167,
+        "sd": 0.007877641960797542
+      },
+      "activeSkillShare": {
+        "mean": 0.6136126461838285,
+        "sd": 0.010442966725998835
+      },
+      "aoeShare": {
+        "mean": 0.45027433260684036,
+        "sd": 0.011657753910519573
+      },
+      "dotShare": {
+        "mean": 0.08707408993113926,
+        "sd": 0.01055310319599788
+      },
+      "extraShare": {
+        "mean": 0.012864988205015608,
+        "sd": 0.0005658309982607739
+      },
+      "petShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceMinimum": {
+        "mean": 26.705400000008154,
+        "sd": 14.599885842019443
+      },
+      "resourceBlocked": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 36.479,
+        "sd": 2.4100329873261064
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "fireball": 18.67,
+        "blizzard": 11.96,
+        "chain-lightning": 10.56,
+        "arcane-missile": 19.85,
+        "arcane-torrent": 8.05
+      },
+      "damageBySource": {
+        "fireball": 5256.73,
+        "burn": 4927.12,
+        "basic-attack": 16181.63,
+        "blizzard": 7064.81,
+        "chain-lightning": 11095.36,
+        "arcane-missile": 3972.49,
+        "arcane-mark-explosion": 727.21,
+        "arcane-torrent": 7298.77
+      },
+      "effectiveHealing": {
+        "mean": 0,
+        "sd": 0
+      },
+      "overhealing": {
+        "mean": 0,
+        "sd": 0
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "chain-lightning",
+        "passiveLv6": "mana-shield"
+      },
+      "mode": "five",
+      "dps": {
+        "mean": 454.7615833333335,
+        "sd": 12.928072807686119
+      },
+      "ttk": {
+        "mean": 0,
+        "sd": 0
+      },
+      "killsPerMinute": {
+        "mean": 10.165,
+        "sd": 0.3468068626771966
+      },
+      "totalDamage": {
+        "mean": 54571.39,
+        "sd": 1551.3687369223348
+      },
+      "basicShare": {
+        "mean": 0.2972069129775883,
+        "sd": 0.00785735096902656
+      },
+      "activeSkillShare": {
+        "mean": 0.5886547503768327,
+        "sd": 0.011035374779927335
+      },
+      "aoeShare": {
+        "mean": 0.4151367039569198,
+        "sd": 0.011851579300907902
+      },
+      "dotShare": {
+        "mean": 0.10160238018162236,
+        "sd": 0.012001137287652753
+      },
+      "extraShare": {
+        "mean": 0.012535956463956744,
+        "sd": 0.00042149265769015725
+      },
+      "petShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceMinimum": {
+        "mean": 22.798520000007738,
+        "sd": 10.306237500154872
+      },
+      "resourceBlocked": {
+        "mean": 0.03,
+        "sd": 0.1705872210923198
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 40.103999999999985,
+        "sd": 1.8015504433681555
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "fireball": 20.15,
+        "blizzard": 11.98,
+        "chain-lightning": 9.13,
+        "arcane-missile": 19.4,
+        "arcane-torrent": 7.15
+      },
+      "damageBySource": {
+        "fireball": 5565.29,
+        "burn": 5550.21,
+        "basic-attack": 16209.04,
+        "blizzard": 7206.16,
+        "chain-lightning": 8908.29,
+        "arcane-missile": 3902.32,
+        "arcane-mark-explosion": 683.88,
+        "arcane-torrent": 6546.2
+      },
+      "effectiveHealing": {
+        "mean": 0,
+        "sd": 0
+      },
+      "overhealing": {
+        "mean": 0,
+        "sd": 0
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "chain-lightning",
+        "passiveLv6": "blink"
+      },
+      "mode": "five",
+      "dps": {
+        "mean": 450.9460833333334,
+        "sd": 20.115886944810295
+      },
+      "ttk": {
+        "mean": 0,
+        "sd": 0
+      },
+      "killsPerMinute": {
+        "mean": 10.1,
+        "sd": 0.49497474683058357
+      },
+      "totalDamage": {
+        "mean": 54113.53,
+        "sd": 2413.9064333772335
+      },
+      "basicShare": {
+        "mean": 0.299600391116284,
+        "sd": 0.010953663216737408
+      },
+      "activeSkillShare": {
+        "mean": 0.588191075894438,
+        "sd": 0.013225430542927005
+      },
+      "aoeShare": {
+        "mean": 0.41613792561956076,
+        "sd": 0.016476372040120927
+      },
+      "dotShare": {
+        "mean": 0.09963961825465807,
+        "sd": 0.013856480357872483
+      },
+      "extraShare": {
+        "mean": 0.012568914734620129,
+        "sd": 0.0007104829193365018
+      },
+      "petShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceMinimum": {
+        "mean": 25.551660000007534,
+        "sd": 18.05693545661595
+      },
+      "resourceBlocked": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 42.33999999999998,
+        "sd": 3.0474579570520732
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "fireball": 19.9,
+        "blizzard": 11.84,
+        "chain-lightning": 9.65,
+        "arcane-missile": 18.55,
+        "arcane-torrent": 6.65
+      },
+      "damageBySource": {
+        "fireball": 5513.66,
+        "burn": 5402.46,
+        "basic-attack": 16188.84,
+        "blizzard": 6837.14,
+        "chain-lightning": 9454.95,
+        "arcane-missile": 3791.07,
+        "arcane-mark-explosion": 679.51,
+        "arcane-torrent": 6245.9
+      },
+      "effectiveHealing": {
+        "mean": 0,
+        "sd": 0
+      },
+      "overhealing": {
+        "mean": 0,
+        "sd": 0
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "arcane-torrent",
+        "passiveLv6": "mana-drain"
+      },
+      "mode": "five",
+      "dps": {
+        "mean": 438.54650000000015,
+        "sd": 14.599776357685904
+      },
+      "ttk": {
+        "mean": 0,
+        "sd": 0
+      },
+      "killsPerMinute": {
+        "mean": 9.62,
+        "sd": 0.33256578296631806
+      },
+      "totalDamage": {
+        "mean": 52625.58,
+        "sd": 1751.9731629223095
+      },
+      "basicShare": {
+        "mean": 0.27109897775212116,
+        "sd": 0.0076874123439104715
+      },
+      "activeSkillShare": {
+        "mean": 0.6086199318078909,
+        "sd": 0.008219704079442064
+      },
+      "aoeShare": {
+        "mean": 0.4390406287878706,
+        "sd": 0.008835085164456167
+      },
+      "dotShare": {
+        "mean": 0.10675942964688961,
+        "sd": 0.006252456656815694
+      },
+      "extraShare": {
+        "mean": 0.013521660793098918,
+        "sd": 0.0006076070817087423
+      },
+      "petShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceMinimum": {
+        "mean": 62.79483000000414,
+        "sd": 6.936428241933978
+      },
+      "resourceBlocked": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 25.967999999999996,
+        "sd": 6.261547412581015
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "fireball": 22.88,
+        "blizzard": 13.51,
+        "chain-lightning": 11.12,
+        "arcane-missile": 22.15,
+        "arcane-torrent": 8.51
+      },
+      "damageBySource": {
+        "fireball": 5187.14,
+        "burn": 5621.12,
+        "basic-attack": 14255.12,
+        "blizzard": 6863.92,
+        "chain-lightning": 9150.68,
+        "arcane-missile": 3736.98,
+        "arcane-mark-explosion": 711.22,
+        "arcane-torrent": 7099.4
+      },
+      "effectiveHealing": {
+        "mean": 0,
+        "sd": 0
+      },
+      "overhealing": {
+        "mean": 0,
+        "sd": 0
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "fireball",
+        "passiveLv6": "mana-drain"
+      },
+      "mode": "five",
+      "dps": {
+        "mean": 437.70841666666666,
+        "sd": 8.699020897571687
+      },
+      "ttk": {
+        "mean": 0,
+        "sd": 0
+      },
+      "killsPerMinute": {
+        "mean": 9.685,
+        "sd": 0.2885740806101616
+      },
+      "totalDamage": {
+        "mean": 52525.01,
+        "sd": 1043.8825077086024
+      },
+      "basicShare": {
+        "mean": 0.26749840212768444,
+        "sd": 0.0055023689712087355
+      },
+      "activeSkillShare": {
+        "mean": 0.5606281700235957,
+        "sd": 0.008112813117062606
+      },
+      "aoeShare": {
+        "mean": 0.39364301949996666,
+        "sd": 0.010871388330718854
+      },
+      "dotShare": {
+        "mean": 0.06046592458206487,
+        "sd": 0.004891892656217128
+      },
+      "extraShare": {
+        "mean": 0.111407503266655,
+        "sd": 0.002714761555599004
+      },
+      "petShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceMinimum": {
+        "mean": 32.20642800000401,
+        "sd": 17.840238091236554
+      },
+      "resourceBlocked": {
+        "mean": 0.02,
+        "sd": 0.13999999999999985
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 30.570999999999998,
+        "sd": 3.179537544989836
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "fireball": 21.05,
+        "blizzard": 12.89,
+        "chain-lightning": 10.05,
+        "arcane-missile": 20.79,
+        "arcane-torrent": 7.52
+      },
+      "damageBySource": {
+        "fireball": 5264.43,
+        "skill": 5178.3,
+        "burn": 3177.09,
+        "basic-attack": 14046.2,
+        "blizzard": 6441.13,
+        "chain-lightning": 8336.02,
+        "arcane-missile": 3504.68,
+        "arcane-mark-explosion": 671.64,
+        "arcane-torrent": 5905.52
+      },
+      "effectiveHealing": {
+        "mean": 0,
+        "sd": 0
+      },
+      "overhealing": {
+        "mean": 0,
+        "sd": 0
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "fireball",
+        "passiveLv6": "elemental-mastery"
+      },
+      "mode": "five",
+      "dps": {
+        "mean": 425.5565833333332,
+        "sd": 7.960236534645185
+      },
+      "ttk": {
+        "mean": 0,
+        "sd": 0
+      },
+      "killsPerMinute": {
+        "mean": 9.49,
+        "sd": 0.2343074902771996
+      },
+      "totalDamage": {
+        "mean": 51066.79,
+        "sd": 955.2283841574223
+      },
+      "basicShare": {
+        "mean": 0.27963752013446264,
+        "sd": 0.006603084270859936
+      },
+      "activeSkillShare": {
+        "mean": 0.5397724084330533,
+        "sd": 0.0072232147622636
+      },
+      "aoeShare": {
+        "mean": 0.3764799123050966,
+        "sd": 0.008201342007563051
+      },
+      "dotShare": {
+        "mean": 0.07167374723094419,
+        "sd": 0.005420915034118361
+      },
+      "extraShare": {
+        "mean": 0.10891632420153967,
+        "sd": 0.0022621025602495167
+      },
+      "petShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceMinimum": {
+        "mean": 23.30438000000751,
+        "sd": 8.018825533430688
+      },
+      "resourceBlocked": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 41.537000000000006,
+        "sd": 1.8558908911894583
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "fireball": 19.39,
+        "blizzard": 12,
+        "chain-lightning": 9,
+        "arcane-missile": 19,
+        "arcane-torrent": 7
+      },
+      "damageBySource": {
+        "fireball": 5003.73,
+        "skill": 4936.08,
+        "burn": 3662.49,
+        "basic-attack": 14276.08,
+        "blizzard": 6073.02,
+        "chain-lightning": 7590.76,
+        "arcane-missile": 3335.96,
+        "arcane-mark-explosion": 626.35,
+        "arcane-torrent": 5562.32
+      },
+      "effectiveHealing": {
+        "mean": 0,
+        "sd": 0
+      },
+      "overhealing": {
+        "mean": 0,
+        "sd": 0
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "fireball",
+        "passiveLv6": "mana-amplification"
+      },
+      "mode": "five",
+      "dps": {
+        "mean": 422.78541666666695,
+        "sd": 9.355252340485885
+      },
+      "ttk": {
+        "mean": 0,
+        "sd": 0
+      },
+      "killsPerMinute": {
+        "mean": 9.44,
+        "sd": 0.2672077843177481
+      },
+      "totalDamage": {
+        "mean": 50734.25,
+        "sd": 1122.6302808583064
+      },
+      "basicShare": {
+        "mean": 0.2834666441080563,
+        "sd": 0.007183078663053167
+      },
+      "activeSkillShare": {
+        "mean": 0.5500466703542731,
+        "sd": 0.008619973956207108
+      },
+      "aoeShare": {
+        "mean": 0.38631017114588195,
+        "sd": 0.010654961055056849
+      },
+      "dotShare": {
+        "mean": 0.05881630965847751,
+        "sd": 0.004954777577223343
+      },
+      "extraShare": {
+        "mean": 0.10767037587919295,
+        "sd": 0.0016779390537854835
+      },
+      "petShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceMinimum": {
+        "mean": 22.644820000007503,
+        "sd": 8.472517227341584
+      },
+      "resourceBlocked": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 41.291000000000004,
+        "sd": 2.0674184385363303
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "fireball": 19.19,
+        "blizzard": 11.99,
+        "chain-lightning": 9,
+        "arcane-missile": 18.98,
+        "arcane-torrent": 6.99
+      },
+      "damageBySource": {
+        "fireball": 4971.3,
+        "skill": 4835.88,
+        "burn": 2984.7,
+        "basic-attack": 14375.62,
+        "blizzard": 6170.46,
+        "chain-lightning": 7714.04,
+        "arcane-missile": 3334.65,
+        "arcane-mark-explosion": 625.96,
+        "arcane-torrent": 5721.64
+      },
+      "effectiveHealing": {
+        "mean": 0,
+        "sd": 0
+      },
+      "overhealing": {
+        "mean": 0,
+        "sd": 0
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "arcane-torrent",
+        "passiveLv6": "elemental-mastery"
+      },
+      "mode": "five",
+      "dps": {
+        "mean": 420.0347499999999,
+        "sd": 10.644380106618078
+      },
+      "ttk": {
+        "mean": 0,
+        "sd": 0
+      },
+      "killsPerMinute": {
+        "mean": 9.25,
+        "sd": 0.2872281323269014
+      },
+      "totalDamage": {
+        "mean": 50404.17,
+        "sd": 1277.3256127941693
+      },
+      "basicShare": {
+        "mean": 0.2856932942752087,
+        "sd": 0.007202889959704572
+      },
+      "activeSkillShare": {
+        "mean": 0.5710781704839138,
+        "sd": 0.009096924543481148
+      },
+      "aoeShare": {
+        "mean": 0.4067334013088672,
+        "sd": 0.011058122220383384
+      },
+      "dotShare": {
+        "mean": 0.13011639700442545,
+        "sd": 0.00976845146030591
+      },
+      "extraShare": {
+        "mean": 0.01311213823645218,
+        "sd": 0.000539673857886733
+      },
+      "petShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceMinimum": {
+        "mean": 34.69822000000801,
+        "sd": 17.081828581027285
+      },
+      "resourceBlocked": {
+        "mean": 0.01,
+        "sd": 0.09949874371066196
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 34.55999999999999,
+        "sd": 3.017349830563237
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "fireball": 20.7,
+        "blizzard": 11.6,
+        "chain-lightning": 9.95,
+        "arcane-missile": 19.79,
+        "arcane-torrent": 7.21
+      },
+      "damageBySource": {
+        "fireball": 4826.17,
+        "burn": 6562.13,
+        "basic-attack": 14393.22,
+        "blizzard": 5890.07,
+        "chain-lightning": 8421.62,
+        "arcane-missile": 3455.42,
+        "arcane-mark-explosion": 660.66,
+        "arcane-torrent": 6194.88
+      },
+      "effectiveHealing": {
+        "mean": 0,
+        "sd": 0
+      },
+      "overhealing": {
+        "mean": 0,
+        "sd": 0
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "blizzard",
+        "passiveLv6": "mana-drain"
+      },
+      "mode": "five",
+      "dps": {
+        "mean": 416.9380833333331,
+        "sd": 12.337392814743225
+      },
+      "ttk": {
+        "mean": 0,
+        "sd": 0
+      },
+      "killsPerMinute": {
+        "mean": 9.185,
+        "sd": 0.35815499438092496
+      },
+      "totalDamage": {
+        "mean": 50032.57,
+        "sd": 1480.4871377691873
+      },
+      "basicShare": {
+        "mean": 0.2821156779725198,
+        "sd": 0.00789547432537081
+      },
+      "activeSkillShare": {
+        "mean": 0.5992036510529418,
+        "sd": 0.008566791371978631
+      },
+      "aoeShare": {
+        "mean": 0.43178586541991903,
+        "sd": 0.010430397710209581
+      },
+      "dotShare": {
+        "mean": 0.10513036327823427,
+        "sd": 0.0069306330203096
+      },
+      "extraShare": {
+        "mean": 0.013550307696304087,
+        "sd": 0.0005520673188990097
+      },
+      "petShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceMinimum": {
+        "mean": 25.641976000004014,
+        "sd": 15.129143484368939
+      },
+      "resourceBlocked": {
+        "mean": 0.02,
+        "sd": 0.13999999999999996
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 34.685999999999986,
+        "sd": 2.7938868982118796
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "fireball": 21.46,
+        "blizzard": 12.91,
+        "chain-lightning": 10.22,
+        "arcane-missile": 20.79,
+        "arcane-torrent": 7.51
+      },
+      "damageBySource": {
+        "fireball": 4861.36,
+        "burn": 5263.8,
+        "basic-attack": 14104.84,
+        "blizzard": 7222.78,
+        "chain-lightning": 8455.37,
+        "arcane-missile": 3514.18,
+        "arcane-mark-explosion": 677.64,
+        "arcane-torrent": 5932.6
+      },
+      "effectiveHealing": {
+        "mean": 0,
+        "sd": 0
+      },
+      "overhealing": {
+        "mean": 0,
+        "sd": 0
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "arcane-torrent",
+        "passiveLv6": "mana-amplification"
+      },
+      "mode": "five",
+      "dps": {
+        "mean": 412.6399166666668,
+        "sd": 10.513810910139421
+      },
+      "ttk": {
+        "mean": 0,
+        "sd": 0
+      },
+      "killsPerMinute": {
+        "mean": 9.05,
+        "sd": 0.29580398915498085
+      },
+      "totalDamage": {
+        "mean": 49516.79,
+        "sd": 1261.6573092167303
+      },
+      "basicShare": {
+        "mean": 0.291185309762352,
+        "sd": 0.008550749092164394
+      },
+      "activeSkillShare": {
+        "mean": 0.5914298255364516,
+        "sd": 0.009169646711161725
+      },
+      "aoeShare": {
+        "mean": 0.42360927223284117,
+        "sd": 0.012133147748345754
+      },
+      "dotShare": {
+        "mean": 0.10384374288914039,
+        "sd": 0.00741037566957065
+      },
+      "extraShare": {
+        "mean": 0.013541121812055867,
+        "sd": 0.0006026620811681262
+      },
+      "petShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceMinimum": {
+        "mean": 33.72012000000774,
+        "sd": 17.171064469787552
+      },
+      "resourceBlocked": {
+        "mean": 0.01,
+        "sd": 0.09949874371066199
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 34.904,
+        "sd": 2.9954605655892044
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "fireball": 20.52,
+        "blizzard": 11.72,
+        "chain-lightning": 9.87,
+        "arcane-missile": 19.94,
+        "arcane-torrent": 7.42
+      },
+      "damageBySource": {
+        "fireball": 4814.41,
+        "burn": 5145.26,
+        "basic-attack": 14411.08,
+        "blizzard": 6105.97,
+        "chain-lightning": 8437.22,
+        "arcane-missile": 3492.62,
+        "arcane-mark-explosion": 670.25,
+        "arcane-torrent": 6439.98
+      },
+      "effectiveHealing": {
+        "mean": 0,
+        "sd": 0
+      },
+      "overhealing": {
+        "mean": 0,
+        "sd": 0
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "fireball",
+        "passiveLv6": "arcane-charge"
+      },
+      "mode": "five",
+      "dps": {
+        "mean": 408.3749166666667,
+        "sd": 6.8400774133655355
+      },
+      "ttk": {
+        "mean": 0,
+        "sd": 0
+      },
+      "killsPerMinute": {
+        "mean": 9.115,
+        "sd": 0.22197972880423145
+      },
+      "totalDamage": {
+        "mean": 49004.99,
+        "sd": 820.8092896038643
+      },
+      "basicShare": {
+        "mean": 0.2811153057105231,
+        "sd": 0.006072270507013553
+      },
+      "activeSkillShare": {
+        "mean": 0.5715494523924162,
+        "sd": 0.009314637011796453
+      },
+      "aoeShare": {
+        "mean": 0.4187116469551986,
+        "sd": 0.010316286367132468
+      },
+      "dotShare": {
+        "mean": 0.04953185046087376,
+        "sd": 0.005030158298637217
+      },
+      "extraShare": {
+        "mean": 0.09780339143618684,
+        "sd": 0.0013437135552565494
+      },
+      "petShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceMinimum": {
+        "mean": 45.418120000007754,
+        "sd": 10.324449822900974
+      },
+      "resourceBlocked": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 36.09100000000001,
+        "sd": 1.930341679599754
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "fireball": 17.03,
+        "blizzard": 11.77,
+        "chain-lightning": 10,
+        "arcane-missile": 18.98,
+        "arcane-torrent": 8
+      },
+      "damageBySource": {
+        "fireball": 4288.05,
+        "skill": 4189.38,
+        "burn": 2426.3,
+        "basic-attack": 13772.76,
+        "blizzard": 5902.17,
+        "chain-lightning": 8404.55,
+        "arcane-missile": 3201.23,
+        "arcane-mark-explosion": 602.6,
+        "arcane-torrent": 6217.95
+      },
+      "effectiveHealing": {
+        "mean": 0,
+        "sd": 0
+      },
+      "overhealing": {
+        "mean": 0,
+        "sd": 0
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "arcane-torrent",
+        "passiveLv6": "arcane-charge"
+      },
+      "mode": "five",
+      "dps": {
+        "mean": 408.07808333333344,
+        "sd": 5.881585629813893
+      },
+      "ttk": {
+        "mean": 0,
+        "sd": 0
+      },
+      "killsPerMinute": {
+        "mean": 9,
+        "sd": 0.21213203435596426
+      },
+      "totalDamage": {
+        "mean": 48969.37,
+        "sd": 705.7902755776678
+      },
+      "basicShare": {
+        "mean": 0.2857706956132152,
+        "sd": 0.005786753619264041
+      },
+      "activeSkillShare": {
+        "mean": 0.6025456556102563,
+        "sd": 0.008880697059359526
+      },
+      "aoeShare": {
+        "mean": 0.44115437175322647,
+        "sd": 0.009844254121982797
+      },
+      "dotShare": {
+        "mean": 0.09821833182855425,
+        "sd": 0.007515204790659399
+      },
+      "extraShare": {
+        "mean": 0.013465316947974204,
+        "sd": 0.0005764671576642538
+      },
+      "petShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceMinimum": {
+        "mean": 30.394480000008194,
+        "sd": 24.696420968423794
+      },
+      "resourceBlocked": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 32.242000000000004,
+        "sd": 4.114369453512895
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "fireball": 19.87,
+        "blizzard": 12.01,
+        "chain-lightning": 10.71,
+        "arcane-missile": 20.07,
+        "arcane-torrent": 8
+      },
+      "damageBySource": {
+        "fireball": 4508.89,
+        "burn": 4809.28,
+        "basic-attack": 13991.62,
+        "blizzard": 6063.43,
+        "chain-lightning": 8908.9,
+        "arcane-missile": 3394.45,
+        "arcane-mark-explosion": 659.25,
+        "arcane-torrent": 6633.55
+      },
+      "effectiveHealing": {
+        "mean": 0,
+        "sd": 0
+      },
+      "overhealing": {
+        "mean": 0,
+        "sd": 0
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "fireball",
+        "passiveLv6": "mana-shield"
+      },
+      "mode": "five",
+      "dps": {
+        "mean": 406.3918333333332,
+        "sd": 9.17351478896357
+      },
+      "ttk": {
+        "mean": 0,
+        "sd": 0
+      },
+      "killsPerMinute": {
+        "mean": 9.02,
+        "sd": 0.244131112314674
+      },
+      "totalDamage": {
+        "mean": 48767.02,
+        "sd": 1100.8217746756284
+      },
+      "basicShare": {
+        "mean": 0.28504362522110704,
+        "sd": 0.006082858932859013
+      },
+      "activeSkillShare": {
+        "mean": 0.5486080817704262,
+        "sd": 0.007320747267138899
+      },
+      "aoeShare": {
+        "mean": 0.38663633813547166,
+        "sd": 0.00900830476038123
+      },
+      "dotShare": {
+        "mean": 0.05844873131172967,
+        "sd": 0.005429532185344745
+      },
+      "extraShare": {
+        "mean": 0.10789956169673738,
+        "sd": 0.001651542361641002
+      },
+      "petShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceMinimum": {
+        "mean": 21.363200000007478,
+        "sd": 11.763146157384922
+      },
+      "resourceBlocked": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 42.512000000000015,
+        "sd": 2.0566613722244123
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "fireball": 18.91,
+        "blizzard": 11.91,
+        "chain-lightning": 9,
+        "arcane-missile": 18.72,
+        "arcane-torrent": 6.91
+      },
+      "damageBySource": {
+        "fireball": 4743.93,
+        "skill": 4651.86,
+        "burn": 2852.34,
+        "basic-attack": 13895.88,
+        "blizzard": 5944.96,
+        "chain-lightning": 7493.64,
+        "arcane-missile": 3154.21,
+        "arcane-mark-explosion": 608.59,
+        "arcane-torrent": 5421.61
+      },
+      "effectiveHealing": {
+        "mean": 0,
+        "sd": 0
+      },
+      "overhealing": {
+        "mean": 0,
+        "sd": 0
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "blizzard",
+        "passiveLv6": "elemental-mastery"
+      },
+      "mode": "five",
+      "dps": {
+        "mean": 404.4907499999999,
+        "sd": 11.468609930722012
+      },
+      "ttk": {
+        "mean": 0,
+        "sd": 0
+      },
+      "killsPerMinute": {
+        "mean": 8.94,
+        "sd": 0.3023243291566199
+      },
+      "totalDamage": {
+        "mean": 48538.89,
+        "sd": 1376.2331916866412
+      },
+      "basicShare": {
+        "mean": 0.2946220269446778,
+        "sd": 0.009158051674629412
+      },
+      "activeSkillShare": {
+        "mean": 0.5681191645538174,
+        "sd": 0.01039913394550388
+      },
+      "aoeShare": {
+        "mean": 0.4090828507267825,
+        "sd": 0.011409560105967182
+      },
+      "dotShare": {
+        "mean": 0.12456015943945731,
+        "sd": 0.009456587930302645
+      },
+      "extraShare": {
+        "mean": 0.012698649062047478,
+        "sd": 0.00043513896627321846
+      },
+      "petShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceMinimum": {
+        "mean": 35.815500000007475,
+        "sd": 12.670971496692744
+      },
+      "resourceBlocked": {
+        "mean": 0.01,
+        "sd": 0.09949874371066195
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 41.449000000000005,
+        "sd": 2.4417819312952584
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "fireball": 18.99,
+        "blizzard": 11.91,
+        "chain-lightning": 9.01,
+        "arcane-missile": 18.78,
+        "arcane-torrent": 6.93
+      },
+      "damageBySource": {
+        "fireball": 4443.49,
+        "burn": 6051.73,
+        "basic-attack": 14289.56,
+        "blizzard": 6699.08,
+        "chain-lightning": 7640.41,
+        "arcane-missile": 3275.6,
+        "arcane-mark-explosion": 615.95,
+        "arcane-torrent": 5523.07
+      },
+      "effectiveHealing": {
+        "mean": 0,
+        "sd": 0
+      },
+      "overhealing": {
+        "mean": 0,
+        "sd": 0
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "arcane-missile",
+        "passiveLv6": "mana-drain"
+      },
+      "mode": "five",
+      "dps": {
+        "mean": 404.4015833333334,
+        "sd": 9.110804002742507
+      },
+      "ttk": {
+        "mean": 0,
+        "sd": 0
+      },
+      "killsPerMinute": {
+        "mean": 8.92,
+        "sd": 0.24207436873820432
+      },
+      "totalDamage": {
+        "mean": 48528.19,
+        "sd": 1093.2964803291009
+      },
+      "basicShare": {
+        "mean": 0.2898221439708611,
+        "sd": 0.006730916386007297
+      },
+      "activeSkillShare": {
+        "mean": 0.5881994454984274,
+        "sd": 0.007702398847589189
+      },
+      "aoeShare": {
+        "mean": 0.4164312507007346,
+        "sd": 0.009061477388621961
+      },
+      "dotShare": {
+        "mean": 0.10506759066051381,
+        "sd": 0.006374824814978324
+      },
+      "extraShare": {
+        "mean": 0.016910819870197748,
+        "sd": 0.0008755354050985954
+      },
+      "petShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceMinimum": {
+        "mean": 25.498688000004005,
+        "sd": 17.849884533079024
+      },
+      "resourceBlocked": {
+        "mean": 0.02,
+        "sd": 0.13999999999999987
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 33.354000000000006,
+        "sd": 3.8733298336186137
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "fireball": 20.91,
+        "blizzard": 12.62,
+        "chain-lightning": 9.96,
+        "arcane-missile": 20.17,
+        "arcane-torrent": 7.17
+      },
+      "damageBySource": {
+        "fireball": 4743.51,
+        "burn": 5101.04,
+        "basic-attack": 14059.08,
+        "blizzard": 6359.48,
+        "chain-lightning": 8251.32,
+        "arcane-missile": 3590.75,
+        "arcane-mark-explosion": 820.41,
+        "arcane-torrent": 5602.6
+      },
+      "effectiveHealing": {
+        "mean": 0,
+        "sd": 0
+      },
+      "overhealing": {
+        "mean": 0,
+        "sd": 0
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "arcane-missile",
+        "passiveLv6": "elemental-mastery"
+      },
+      "mode": "five",
+      "dps": {
+        "mean": 400.33325,
+        "sd": 10.45889510410211
+      },
+      "ttk": {
+        "mean": 0,
+        "sd": 0
+      },
+      "killsPerMinute": {
+        "mean": 8.845,
+        "sd": 0.2710627233685962
+      },
+      "totalDamage": {
+        "mean": 48039.99,
+        "sd": 1255.0674124922532
+      },
+      "basicShare": {
+        "mean": 0.29723115860619514,
+        "sd": 0.007939603782939758
+      },
+      "activeSkillShare": {
+        "mean": 0.56287793056174,
+        "sd": 0.00850559621769677
+      },
+      "aoeShare": {
+        "mean": 0.3991141259242802,
+        "sd": 0.009984611345667393
+      },
+      "dotShare": {
+        "mean": 0.12399681959696532,
+        "sd": 0.009589621555944998
+      },
+      "extraShare": {
+        "mean": 0.01589409123509974,
+        "sd": 0.0006716641461986583
+      },
+      "petShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceMinimum": {
+        "mean": 23.09850000000749,
+        "sd": 11.581630815649394
+      },
+      "resourceBlocked": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 42.316,
+        "sd": 2.1321688488485147
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "fireball": 18.89,
+        "blizzard": 11.87,
+        "chain-lightning": 9,
+        "arcane-missile": 18.68,
+        "arcane-torrent": 6.88
+      },
+      "damageBySource": {
+        "fireball": 4410.55,
+        "burn": 5962.18,
+        "basic-attack": 14271.48,
+        "blizzard": 6009.68,
+        "chain-lightning": 7641.58,
+        "arcane-missile": 3456.96,
+        "arcane-mark-explosion": 763.13,
+        "arcane-torrent": 5524.43
+      },
+      "effectiveHealing": {
+        "mean": 0,
+        "sd": 0
+      },
+      "overhealing": {
+        "mean": 0,
+        "sd": 0
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "arcane-torrent",
+        "passiveLv6": "mana-shield"
+      },
+      "mode": "five",
+      "dps": {
+        "mean": 399.3512499999999,
+        "sd": 8.526462433620665
+      },
+      "ttk": {
+        "mean": 0,
+        "sd": 0
+      },
+      "killsPerMinute": {
+        "mean": 8.79,
+        "sd": 0.24677925358506114
+      },
+      "totalDamage": {
+        "mean": 47922.15,
+        "sd": 1023.1754920344799
+      },
+      "basicShare": {
+        "mean": 0.29313770473242173,
+        "sd": 0.006621390718677638
+      },
+      "activeSkillShare": {
+        "mean": 0.5888366635681733,
+        "sd": 0.007394329716621605
+      },
+      "aoeShare": {
+        "mean": 0.42143560492703086,
+        "sd": 0.010366916786739457
+      },
+      "dotShare": {
+        "mean": 0.10471188213035615,
+        "sd": 0.006769778744652608
+      },
+      "extraShare": {
+        "mean": 0.01331374956904874,
+        "sd": 0.0004680664900166727
+      },
+      "petShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceMinimum": {
+        "mean": 36.540460000007585,
+        "sd": 16.976503335740254
+      },
+      "resourceBlocked": {
+        "mean": 0.01,
+        "sd": 0.09949874371066196
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 35.543000000000006,
+        "sd": 2.8824036844272873
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "fireball": 20.38,
+        "blizzard": 11.79,
+        "chain-lightning": 9.56,
+        "arcane-missile": 20.13,
+        "arcane-torrent": 7.61
+      },
+      "damageBySource": {
+        "fireball": 4624.66,
+        "burn": 5020.46,
+        "basic-attack": 14042.61,
+        "blizzard": 5964.73,
+        "chain-lightning": 7954.87,
+        "arcane-missile": 3395.07,
+        "arcane-mark-explosion": 638.09,
+        "arcane-torrent": 6281.66
+      },
+      "effectiveHealing": {
+        "mean": 0,
+        "sd": 0
+      },
+      "overhealing": {
+        "mean": 0,
+        "sd": 0
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "fireball",
+        "passiveLv6": "blink"
+      },
+      "mode": "five",
+      "dps": {
+        "mean": 398.0489166666668,
+        "sd": 16.08547087069398
+      },
+      "ttk": {
+        "mean": 0,
+        "sd": 0
+      },
+      "killsPerMinute": {
+        "mean": 8.93,
+        "sd": 0.38091993909481775
+      },
+      "totalDamage": {
+        "mean": 47765.87,
+        "sd": 1930.2565044832775
+      },
+      "basicShare": {
+        "mean": 0.2893434998909746,
+        "sd": 0.011510223217766328
+      },
+      "activeSkillShare": {
+        "mean": 0.5422287601547372,
+        "sd": 0.013089608689484559
+      },
+      "aoeShare": {
+        "mean": 0.3805306814621274,
+        "sd": 0.016328052757315258
+      },
+      "dotShare": {
+        "mean": 0.05823579803327347,
+        "sd": 0.006401660008313266
+      },
+      "extraShare": {
+        "mean": 0.11019194192101472,
+        "sd": 0.0027141167739341675
+      },
+      "petShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceMinimum": {
+        "mean": 38.44862000000719,
+        "sd": 20.407975938235385
+      },
+      "resourceBlocked": {
+        "mean": 0.02,
+        "sd": 0.1989974874213239
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 41.56099999999999,
+        "sd": 5.096506548607586
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "fireball": 19.07,
+        "blizzard": 11.48,
+        "chain-lightning": 8.94,
+        "arcane-missile": 17.61,
+        "arcane-torrent": 6.28
+      },
+      "damageBySource": {
+        "fireball": 4755.61,
+        "skill": 4691.22,
+        "burn": 2782.19,
+        "basic-attack": 13800.43,
+        "blizzard": 5757.96,
+        "chain-lightning": 7490.56,
+        "arcane-missile": 2965.85,
+        "arcane-mark-explosion": 571.67,
+        "arcane-torrent": 4950.38
+      },
+      "effectiveHealing": {
+        "mean": 0,
+        "sd": 0
+      },
+      "overhealing": {
+        "mean": 0,
+        "sd": 0
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "arcane-torrent",
+        "passiveLv6": "blink"
+      },
+      "mode": "five",
+      "dps": {
+        "mean": 397.08583333333314,
+        "sd": 15.379698130435893
+      },
+      "ttk": {
+        "mean": 0,
+        "sd": 0
+      },
+      "killsPerMinute": {
+        "mean": 8.78,
+        "sd": 0.3558089374931442
+      },
+      "totalDamage": {
+        "mean": 47650.3,
+        "sd": 1845.5637756523076
+      },
+      "basicShare": {
+        "mean": 0.29247827153453054,
+        "sd": 0.010368202184058335
+      },
+      "activeSkillShare": {
+        "mean": 0.5871752005925899,
+        "sd": 0.011817771687916465
+      },
+      "aoeShare": {
+        "mean": 0.4225504297866388,
+        "sd": 0.014096513454917026
+      },
+      "dotShare": {
+        "mean": 0.10753592419682383,
+        "sd": 0.007696176091550302
+      },
+      "extraShare": {
+        "mean": 0.012810603676055791,
+        "sd": 0.0007676355605934403
+      },
+      "petShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceMinimum": {
+        "mean": 26.893320000007392,
+        "sd": 19.107424366920792
+      },
+      "resourceBlocked": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 38.769,
+        "sd": 4.900912057974516
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "fireball": 20.45,
+        "blizzard": 12.31,
+        "chain-lightning": 9.89,
+        "arcane-missile": 19.05,
+        "arcane-torrent": 6.82
+      },
+      "damageBySource": {
+        "fireball": 4631.87,
+        "burn": 5125.89,
+        "basic-attack": 13919.15,
+        "blizzard": 6168.88,
+        "chain-lightning": 8264.41,
+        "arcane-missile": 3211.77,
+        "arcane-mark-explosion": 610.31,
+        "arcane-torrent": 5718.02
+      },
+      "effectiveHealing": {
+        "mean": 0,
+        "sd": 0
+      },
+      "overhealing": {
+        "mean": 0,
+        "sd": 0
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "blizzard",
+        "passiveLv6": "arcane-charge"
+      },
+      "mode": "five",
+      "dps": {
+        "mean": 389.54933333333327,
+        "sd": 8.093670767951952
+      },
+      "ttk": {
+        "mean": 0,
+        "sd": 0
+      },
+      "killsPerMinute": {
+        "mean": 8.665,
+        "sd": 0.24550967394381817
+      },
+      "totalDamage": {
+        "mean": 46745.92,
+        "sd": 971.2404921542347
+      },
+      "basicShare": {
+        "mean": 0.29549871621466667,
+        "sd": 0.006658502868557461
+      },
+      "activeSkillShare": {
+        "mean": 0.600574542244047,
+        "sd": 0.008836039398889006
+      },
+      "aoeShare": {
+        "mean": 0.4513126265712,
+        "sd": 0.010225312784468055
+      },
+      "dotShare": {
+        "mean": 0.09124127418414649,
+        "sd": 0.006238750923288966
+      },
+      "extraShare": {
+        "mean": 0.012685467357139997,
+        "sd": 0.0005130150868126522
+      },
+      "petShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceMinimum": {
+        "mean": 58.48108000000755,
+        "sd": 11.63363124194678
+      },
+      "resourceBlocked": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 36.17999999999999,
+        "sd": 3.6224853346839097
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "fireball": 17.04,
+        "blizzard": 11.67,
+        "chain-lightning": 10,
+        "arcane-missile": 18.42,
+        "arcane-torrent": 8
+      },
+      "damageBySource": {
+        "fireball": 3870.6,
+        "burn": 4266.19,
+        "basic-attack": 13808.89,
+        "blizzard": 6526.65,
+        "chain-lightning": 8289.05,
+        "arcane-missile": 3106.27,
+        "arcane-mark-explosion": 592.87,
+        "arcane-torrent": 6285.4
+      },
+      "effectiveHealing": {
+        "mean": 0,
+        "sd": 0
+      },
+      "overhealing": {
+        "mean": 0,
+        "sd": 0
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "blizzard",
+        "passiveLv6": "mana-amplification"
+      },
+      "mode": "five",
+      "dps": {
+        "mean": 389.01925000000006,
+        "sd": 15.29320976296888
+      },
+      "ttk": {
+        "mean": 0,
+        "sd": 0
+      },
+      "killsPerMinute": {
+        "mean": 8.63,
+        "sd": 0.39127995093027684
+      },
+      "totalDamage": {
+        "mean": 46682.31,
+        "sd": 1835.1851715562655
+      },
+      "basicShare": {
+        "mean": 0.30799601023664375,
+        "sd": 0.010946853835780148
+      },
+      "activeSkillShare": {
+        "mean": 0.5782987703461149,
+        "sd": 0.011440432715092331
+      },
+      "aoeShare": {
+        "mean": 0.41736625915280584,
+        "sd": 0.013327110982849447
+      },
+      "dotShare": {
+        "mean": 0.10033835834927522,
+        "sd": 0.007337700229914807
+      },
+      "extraShare": {
+        "mean": 0.013366861067966078,
+        "sd": 0.0006225439761297003
+      },
+      "petShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceMinimum": {
+        "mean": 47.50644000000748,
+        "sd": 12.264194608958231
+      },
+      "resourceBlocked": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 39.215000000000025,
+        "sd": 3.0531090710945783
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "fireball": 18.52,
+        "blizzard": 11.51,
+        "chain-lightning": 8.99,
+        "arcane-missile": 18.23,
+        "arcane-torrent": 6.51
+      },
+      "damageBySource": {
+        "fireball": 4322.16,
+        "burn": 4688.88,
+        "basic-attack": 14360.63,
+        "blizzard": 6605.74,
+        "chain-lightning": 7613.82,
+        "arcane-missile": 3187.74,
+        "arcane-mark-explosion": 623.04,
+        "arcane-torrent": 5280.3
+      },
+      "effectiveHealing": {
+        "mean": 0,
+        "sd": 0
+      },
+      "overhealing": {
+        "mean": 0,
+        "sd": 0
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "arcane-missile",
+        "passiveLv6": "mana-amplification"
+      },
+      "mode": "five",
+      "dps": {
+        "mean": 386.2704166666666,
+        "sd": 15.229049150253388
+      },
+      "ttk": {
+        "mean": 0,
+        "sd": 0
+      },
+      "killsPerMinute": {
+        "mean": 8.52,
+        "sd": 0.35298725189445607
+      },
+      "totalDamage": {
+        "mean": 46352.45,
+        "sd": 1827.4858980304057
+      },
+      "basicShare": {
+        "mean": 0.308844717167205,
+        "sd": 0.012218855286620148
+      },
+      "activeSkillShare": {
+        "mean": 0.5742509050447162,
+        "sd": 0.012623272140120906
+      },
+      "aoeShare": {
+        "mean": 0.40788062444031103,
+        "sd": 0.014690813318401184
+      },
+      "dotShare": {
+        "mean": 0.10066603778049789,
+        "sd": 0.006940048894080791
+      },
+      "extraShare": {
+        "mean": 0.016238340007581023,
+        "sd": 0.0008665892816728247
+      },
+      "petShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceMinimum": {
+        "mean": 33.07338000000747,
+        "sd": 14.781398872082429
+      },
+      "resourceBlocked": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 41.019000000000005,
+        "sd": 2.914916636886894
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "fireball": 18.47,
+        "blizzard": 11.46,
+        "chain-lightning": 8.98,
+        "arcane-missile": 18.26,
+        "arcane-torrent": 6.47
+      },
+      "damageBySource": {
+        "fireball": 4328.01,
+        "burn": 4670.39,
+        "basic-attack": 14296.45,
+        "blizzard": 5960.91,
+        "chain-lightning": 7750.8,
+        "arcane-missile": 3379.93,
+        "arcane-mark-explosion": 751.52,
+        "arcane-torrent": 5214.44
+      },
+      "effectiveHealing": {
+        "mean": 0,
+        "sd": 0
+      },
+      "overhealing": {
+        "mean": 0,
+        "sd": 0
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "arcane-missile",
+        "passiveLv6": "arcane-charge"
+      },
+      "mode": "five",
+      "dps": {
+        "mean": 384.69274999999993,
+        "sd": 7.619049377036628
+      },
+      "ttk": {
+        "mean": 0,
+        "sd": 0
+      },
+      "killsPerMinute": {
+        "mean": 8.495,
+        "sd": 0.20609463845524936
+      },
+      "totalDamage": {
+        "mean": 46163.13,
+        "sd": 914.2859252443951
+      },
+      "basicShare": {
+        "mean": 0.29872585460021084,
+        "sd": 0.006759799180524413
+      },
+      "activeSkillShare": {
+        "mean": 0.59569153997736,
+        "sd": 0.008694463309702785
+      },
+      "aoeShare": {
+        "mean": 0.44165274949037664,
+        "sd": 0.01036071151503251
+      },
+      "dotShare": {
+        "mean": 0.08963831444893156,
+        "sd": 0.0068235012901785574
+      },
+      "extraShare": {
+        "mean": 0.01594429097349757,
+        "sd": 0.0007184904549076078
+      },
+      "petShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceMinimum": {
+        "mean": 43.268100000007564,
+        "sd": 15.311021918539588
+      },
+      "resourceBlocked": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 38.837999999999994,
+        "sd": 2.6684369956961693
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "fireball": 17.02,
+        "blizzard": 11.65,
+        "chain-lightning": 10,
+        "arcane-missile": 18.22,
+        "arcane-torrent": 8
+      },
+      "damageBySource": {
+        "fireball": 3860.38,
+        "burn": 4139.31,
+        "basic-attack": 13785.67,
+        "blizzard": 5894.26,
+        "chain-lightning": 8308.3,
+        "arcane-missile": 3249.74,
+        "arcane-mark-explosion": 735.92,
+        "arcane-torrent": 6189.55
+      },
+      "effectiveHealing": {
+        "mean": 0,
+        "sd": 0
+      },
+      "overhealing": {
+        "mean": 0,
+        "sd": 0
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "blizzard",
+        "passiveLv6": "mana-shield"
+      },
+      "mode": "five",
+      "dps": {
+        "mean": 371.57674999999995,
+        "sd": 12.42317241729029
+      },
+      "ttk": {
+        "mean": 0,
+        "sd": 0
+      },
+      "killsPerMinute": {
+        "mean": 8.145,
+        "sd": 0.31855140872392945
+      },
+      "totalDamage": {
+        "mean": 44589.21,
+        "sd": 1490.7806900748344
+      },
+      "basicShare": {
+        "mean": 0.31029750055494587,
+        "sd": 0.009251100705837121
+      },
+      "activeSkillShare": {
+        "mean": 0.5744501562085716,
+        "sd": 0.008683505691746269
+      },
+      "aoeShare": {
+        "mean": 0.4137485598185064,
+        "sd": 0.011043134085819875
+      },
+      "dotShare": {
+        "mean": 0.1016784135400309,
+        "sd": 0.006955314349134937
+      },
+      "extraShare": {
+        "mean": 0.013573929696451721,
+        "sd": 0.0005508696112240131
+      },
+      "petShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceMinimum": {
+        "mean": 51.502200000007434,
+        "sd": 9.473003470916705
+      },
+      "resourceBlocked": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 38.21800000000002,
+        "sd": 2.7092205521145747
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "fireball": 18.16,
+        "blizzard": 11.16,
+        "chain-lightning": 8.91,
+        "arcane-missile": 18.06,
+        "arcane-torrent": 6.16
+      },
+      "damageBySource": {
+        "fireball": 4112.44,
+        "burn": 4538.4,
+        "basic-attack": 13823.96,
+        "blizzard": 6230.74,
+        "chain-lightning": 7378.91,
+        "arcane-missile": 3049.54,
+        "arcane-mark-explosion": 604.67,
+        "arcane-torrent": 4850.55
+      },
+      "effectiveHealing": {
+        "mean": 0,
+        "sd": 0
+      },
+      "overhealing": {
+        "mean": 0,
+        "sd": 0
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "blizzard",
+        "passiveLv6": "blink"
+      },
+      "mode": "five",
+      "dps": {
+        "mean": 370.0874999999999,
+        "sd": 14.95009074201372
+      },
+      "ttk": {
+        "mean": 0,
+        "sd": 0
+      },
+      "killsPerMinute": {
+        "mean": 8.22,
+        "sd": 0.36276714294434126
+      },
+      "totalDamage": {
+        "mean": 44410.5,
+        "sd": 1794.0108890416468
+      },
+      "basicShare": {
+        "mean": 0.3103195418704182,
+        "sd": 0.011152959757414151
+      },
+      "activeSkillShare": {
+        "mean": 0.5725321587342819,
+        "sd": 0.012325470053372844
+      },
+      "aoeShare": {
+        "mean": 0.41151420163740665,
+        "sd": 0.014624003530911811
+      },
+      "dotShare": {
+        "mean": 0.10475518290726207,
+        "sd": 0.007184629959534192
+      },
+      "extraShare": {
+        "mean": 0.012393116488037504,
+        "sd": 0.0006273560911764773
+      },
+      "petShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceMinimum": {
+        "mean": 53.83200000000705,
+        "sd": 13.702062586340665
+      },
+      "resourceBlocked": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 39.284000000000006,
+        "sd": 5.6841308922297005
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "fireball": 18.68,
+        "blizzard": 11.21,
+        "chain-lightning": 8.72,
+        "arcane-missile": 17.24,
+        "arcane-torrent": 6.11
+      },
+      "damageBySource": {
+        "fireball": 4241.48,
+        "burn": 4654.31,
+        "basic-attack": 13763.34,
+        "blizzard": 6258.12,
+        "chain-lightning": 7285.74,
+        "arcane-missile": 2907.56,
+        "arcane-mark-explosion": 550.07,
+        "arcane-torrent": 4749.88
+      },
+      "effectiveHealing": {
+        "mean": 0,
+        "sd": 0
+      },
+      "overhealing": {
+        "mean": 0,
+        "sd": 0
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "arcane-missile",
+        "passiveLv6": "mana-shield"
+      },
+      "mode": "five",
+      "dps": {
+        "mean": 368.4994999999999,
+        "sd": 13.6478256723675
+      },
+      "ttk": {
+        "mean": 0,
+        "sd": 0
+      },
+      "killsPerMinute": {
+        "mean": 8.07,
+        "sd": 0.32419130154894643
+      },
+      "totalDamage": {
+        "mean": 44219.94,
+        "sd": 1637.7390806840995
+      },
+      "basicShare": {
+        "mean": 0.3135699268403359,
+        "sd": 0.009383874012110664
+      },
+      "activeSkillShare": {
+        "mean": 0.5686797274574985,
+        "sd": 0.009147064944317548
+      },
+      "aoeShare": {
+        "mean": 0.40240843994646097,
+        "sd": 0.01195049363638412
+      },
+      "dotShare": {
+        "mean": 0.1008670701351661,
+        "sd": 0.008013574380780186
+      },
+      "extraShare": {
+        "mean": 0.016883275566999645,
+        "sd": 0.0008120482557902164
+      },
+      "petShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceMinimum": {
+        "mean": 37.34196000000743,
+        "sd": 12.111977044165805
+      },
+      "resourceBlocked": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 40.772000000000006,
+        "sd": 2.4958397384447584
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "fireball": 18.17,
+        "blizzard": 11.17,
+        "chain-lightning": 8.83,
+        "arcane-missile": 18.06,
+        "arcane-torrent": 6.17
+      },
+      "damageBySource": {
+        "fireball": 4131.83,
+        "burn": 4466.57,
+        "basic-attack": 13852.22,
+        "blizzard": 5627.33,
+        "chain-lightning": 7354.27,
+        "arcane-missile": 3215.94,
+        "arcane-mark-explosion": 745.98,
+        "arcane-torrent": 4825.8
+      },
+      "effectiveHealing": {
+        "mean": 0,
+        "sd": 0
+      },
+      "overhealing": {
+        "mean": 0,
+        "sd": 0
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "arcane-missile",
+        "passiveLv6": "blink"
+      },
+      "mode": "five",
+      "dps": {
+        "mean": 365.9200833333332,
+        "sd": 15.560608256061556
+      },
+      "ttk": {
+        "mean": 0,
+        "sd": 0
+      },
+      "killsPerMinute": {
+        "mean": 8.095,
+        "sd": 0.3853245385386189
+      },
+      "totalDamage": {
+        "mean": 43910.41,
+        "sd": 1867.2729907273867
+      },
+      "basicShare": {
+        "mean": 0.3152008554139283,
+        "sd": 0.012172657685452773
+      },
+      "activeSkillShare": {
+        "mean": 0.5632995657499994,
+        "sd": 0.013712829224191895
+      },
+      "aoeShare": {
+        "mean": 0.3983126128681257,
+        "sd": 0.01680641066208548
+      },
+      "dotShare": {
+        "mean": 0.10627582631040208,
+        "sd": 0.008582276974337664
+      },
+      "extraShare": {
+        "mean": 0.015223752525670304,
+        "sd": 0.0009049976244069241
+      },
+      "petShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceMinimum": {
+        "mean": 47.830480000007064,
+        "sd": 17.648702678939202
+      },
+      "resourceBlocked": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 40.724999999999994,
+        "sd": 5.072127265753492
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "fireball": 18.5,
+        "blizzard": 11.12,
+        "chain-lightning": 8.7,
+        "arcane-missile": 17.11,
+        "arcane-torrent": 6.01
+      },
+      "damageBySource": {
+        "fireball": 4196.42,
+        "burn": 4669.46,
+        "basic-attack": 13819.76,
+        "blizzard": 5610.03,
+        "chain-lightning": 7276.5,
+        "arcane-missile": 3044.6,
+        "arcane-mark-explosion": 668.24,
+        "arcane-torrent": 4625.4
+      },
+      "effectiveHealing": {
+        "mean": 0,
+        "sd": 0
+      },
+      "overhealing": {
+        "mean": 0,
+        "sd": 0
+      }
+    }
+  ],
+  "boss": [
+    {
+      "config": {
+        "activeLv6": "chain-lightning",
+        "passiveLv6": "elemental-mastery"
+      },
+      "mode": "boss",
+      "dps": {
+        "mean": 527.9457957458461,
+        "sd": 20.040200032504647
+      },
+      "ttk": {
+        "mean": 22.895,
+        "sd": 0.8871724747759021
+      },
+      "killsPerMinute": {
+        "mean": 0,
+        "sd": 0
+      },
+      "totalDamage": {
+        "mean": 12069.72,
+        "sd": 54.906662619394375
+      },
+      "basicShare": {
+        "mean": 0.3111330636287664,
+        "sd": 0.014057148573356337
+      },
+      "activeSkillShare": {
+        "mean": 0.40452682407874346,
+        "sd": 0.009529814803392945
+      },
+      "aoeShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "dotShare": {
+        "mean": 0.26433532788717007,
+        "sd": 0.010780051738620016
+      },
+      "extraShare": {
+        "mean": 0.02000478440532029,
+        "sd": 0.0010579472930743875
+      },
+      "petShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceMinimum": {
+        "mean": 177.43984000000478,
+        "sd": 9.664983698610154
+      },
+      "resourceBlocked": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "fireball": 6.92,
+        "blizzard": 3.99,
+        "chain-lightning": 3.02,
+        "arcane-missile": 6.12,
+        "arcane-torrent": 2.31
+      },
+      "damageBySource": {
+        "fireball": 2037.82,
+        "burn": 3190.38,
+        "basic-attack": 3755.37,
+        "blizzard": 512.42,
+        "chain-lightning": 544.89,
+        "arcane-missile": 1327.3,
+        "arcane-mark-explosion": 241.45,
+        "arcane-torrent": 460.09
+      },
+      "effectiveHealing": {
+        "mean": 0,
+        "sd": 0
+      },
+      "overhealing": {
+        "mean": 0,
+        "sd": 0
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "chain-lightning",
+        "passiveLv6": "mana-amplification"
+      },
+      "mode": "boss",
+      "dps": {
+        "mean": 492.5356607170529,
+        "sd": 25.094974634190084
+      },
+      "ttk": {
+        "mean": 24.59100000000002,
+        "sd": 1.2681557475326124
+      },
+      "killsPerMinute": {
+        "mean": 0,
+        "sd": 0
+      },
+      "totalDamage": {
+        "mean": 12080.32,
+        "sd": 63.02489666790415
+      },
+      "basicShare": {
+        "mean": 0.33067520788638377,
+        "sd": 0.016078552899592962
+      },
+      "activeSkillShare": {
+        "mean": 0.42759811222936794,
+        "sd": 0.008916942606459838
+      },
+      "aoeShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "dotShare": {
+        "mean": 0.22045899575010452,
+        "sd": 0.014424888394548108
+      },
+      "extraShare": {
+        "mean": 0.021267684134143858,
+        "sd": 0.001416300943916107
+      },
+      "petShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceMinimum": {
+        "mean": 162.16312000000482,
+        "sd": 12.136553053713406
+      },
+      "resourceBlocked": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "fireball": 7.03,
+        "blizzard": 4,
+        "chain-lightning": 3.38,
+        "arcane-missile": 6.7,
+        "arcane-torrent": 2.83
+      },
+      "damageBySource": {
+        "fireball": 2068.14,
+        "burn": 2662.84,
+        "basic-attack": 3994.88,
+        "blizzard": 518.57,
+        "chain-lightning": 623.46,
+        "arcane-missile": 1421.94,
+        "arcane-mark-explosion": 256.95,
+        "arcane-torrent": 533.54
+      },
+      "effectiveHealing": {
+        "mean": 0,
+        "sd": 0
+      },
+      "overhealing": {
+        "mean": 0,
+        "sd": 0
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "chain-lightning",
+        "passiveLv6": "arcane-charge"
+      },
+      "mode": "boss",
+      "dps": {
+        "mean": 487.46369769600045,
+        "sd": 10.348642117930465
+      },
+      "ttk": {
+        "mean": 24.808000000000007,
+        "sd": 0.47930783427772217
+      },
+      "killsPerMinute": {
+        "mean": 0,
+        "sd": 0
+      },
+      "totalDamage": {
+        "mean": 12088.35,
+        "sd": 88.53681437684551
+      },
+      "basicShare": {
+        "mean": 0.330938112017834,
+        "sd": 0.010395774443554646
+      },
+      "activeSkillShare": {
+        "mean": 0.43965719320369145,
+        "sd": 0.009876226565464878
+      },
+      "aoeShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "dotShare": {
+        "mean": 0.20860417844860513,
+        "sd": 0.00921602996254775
+      },
+      "extraShare": {
+        "mean": 0.020800516329869526,
+        "sd": 0.0010879928428883256
+      },
+      "petShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceMinimum": {
+        "mean": 142.12860000000478,
+        "sd": 6.835010610086869
+      },
+      "resourceBlocked": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "fireball": 6.93,
+        "blizzard": 4,
+        "chain-lightning": 4,
+        "arcane-missile": 7.08,
+        "arcane-torrent": 3
+      },
+      "damageBySource": {
+        "fireball": 2048.57,
+        "burn": 2521.6,
+        "basic-attack": 4000.34,
+        "blizzard": 500.57,
+        "chain-lightning": 787.2,
+        "arcane-missile": 1439.19,
+        "arcane-mark-explosion": 251.43,
+        "arcane-torrent": 539.45
+      },
+      "effectiveHealing": {
+        "mean": 0,
+        "sd": 0
+      },
+      "overhealing": {
+        "mean": 0,
+        "sd": 0
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "chain-lightning",
+        "passiveLv6": "blink"
+      },
+      "mode": "boss",
+      "dps": {
+        "mean": 475.47100904114035,
+        "sd": 18.349664524642932
+      },
+      "ttk": {
+        "mean": 25.476000000000013,
+        "sd": 0.9949994974873102
+      },
+      "killsPerMinute": {
+        "mean": 0,
+        "sd": 0
+      },
+      "totalDamage": {
+        "mean": 12095.13,
+        "sd": 81.83699102484158
+      },
+      "basicShare": {
+        "mean": 0.3306588503609201,
+        "sd": 0.01371162931152464
+      },
+      "activeSkillShare": {
+        "mean": 0.42990847115904257,
+        "sd": 0.009835036030596536
+      },
+      "aoeShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "dotShare": {
+        "mean": 0.21760699145670606,
+        "sd": 0.014408406963244932
+      },
+      "extraShare": {
+        "mean": 0.02182568702333153,
+        "sd": 0.0019808305954815758
+      },
+      "petShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceMinimum": {
+        "mean": 149.86556000000476,
+        "sd": 14.495354990009751
+      },
+      "resourceBlocked": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 0.006999999999999999,
+        "sd": 0.05148786264742397
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "fireball": 7.27,
+        "blizzard": 4.2,
+        "chain-lightning": 3.62,
+        "arcane-missile": 6.91,
+        "arcane-torrent": 2.91
+      },
+      "damageBySource": {
+        "fireball": 2068.27,
+        "burn": 2631.52,
+        "basic-attack": 3999.51,
+        "blizzard": 509.28,
+        "chain-lightning": 653.54,
+        "arcane-missile": 1435.07,
+        "arcane-mark-explosion": 264.01,
+        "arcane-torrent": 533.93
+      },
+      "effectiveHealing": {
+        "mean": 0,
+        "sd": 0
+      },
+      "overhealing": {
+        "mean": 0,
+        "sd": 0
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "chain-lightning",
+        "passiveLv6": "mana-shield"
+      },
+      "mode": "boss",
+      "dps": {
+        "mean": 474.73169617141536,
+        "sd": 16.990377473612337
+      },
+      "ttk": {
+        "mean": 25.545000000000037,
+        "sd": 0.9368431031928447
+      },
+      "killsPerMinute": {
+        "mean": 0,
+        "sd": 0
+      },
+      "totalDamage": {
+        "mean": 12111.37,
+        "sd": 82.6277985910311
+      },
+      "basicShare": {
+        "mean": 0.33164789065321365,
+        "sd": 0.012994787116504938
+      },
+      "activeSkillShare": {
+        "mean": 0.43045569118689814,
+        "sd": 0.008629135986073486
+      },
+      "aoeShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "dotShare": {
+        "mean": 0.2162822343894208,
+        "sd": 0.01402767342104991
+      },
+      "extraShare": {
+        "mean": 0.021614183770467452,
+        "sd": 0.0012490040590924503
+      },
+      "petShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceMinimum": {
+        "mean": 152.19796000000488,
+        "sd": 11.015204379329507
+      },
+      "resourceBlocked": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "fireball": 7.35,
+        "blizzard": 4,
+        "chain-lightning": 3.7,
+        "arcane-missile": 6.92,
+        "arcane-torrent": 2.99
+      },
+      "damageBySource": {
+        "fireball": 2091.77,
+        "burn": 2619.02,
+        "basic-attack": 4016.92,
+        "blizzard": 503.33,
+        "chain-lightning": 663.38,
+        "arcane-missile": 1411.46,
+        "arcane-mark-explosion": 261.8,
+        "arcane-torrent": 543.69
+      },
+      "effectiveHealing": {
+        "mean": 0,
+        "sd": 0
+      },
+      "overhealing": {
+        "mean": 0,
+        "sd": 0
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "chain-lightning",
+        "passiveLv6": "mana-drain"
+      },
+      "mode": "boss",
+      "dps": {
+        "mean": 474.73169617141536,
+        "sd": 16.990377473612337
+      },
+      "ttk": {
+        "mean": 25.545000000000037,
+        "sd": 0.9368431031928447
+      },
+      "killsPerMinute": {
+        "mean": 0,
+        "sd": 0
+      },
+      "totalDamage": {
+        "mean": 12111.37,
+        "sd": 82.6277985910311
+      },
+      "basicShare": {
+        "mean": 0.33164789065321365,
+        "sd": 0.012994787116504938
+      },
+      "activeSkillShare": {
+        "mean": 0.43045569118689814,
+        "sd": 0.008629135986073486
+      },
+      "aoeShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "dotShare": {
+        "mean": 0.2162822343894208,
+        "sd": 0.01402767342104991
+      },
+      "extraShare": {
+        "mean": 0.021614183770467452,
+        "sd": 0.0012490040590924503
+      },
+      "petShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceMinimum": {
+        "mean": 152.19796000000488,
+        "sd": 11.015204379329507
+      },
+      "resourceBlocked": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "fireball": 7.35,
+        "blizzard": 4,
+        "chain-lightning": 3.7,
+        "arcane-missile": 6.92,
+        "arcane-torrent": 2.99
+      },
+      "damageBySource": {
+        "fireball": 2091.77,
+        "burn": 2619.02,
+        "basic-attack": 4016.92,
+        "blizzard": 503.33,
+        "chain-lightning": 663.38,
+        "arcane-missile": 1411.46,
+        "arcane-mark-explosion": 261.8,
+        "arcane-torrent": 543.69
+      },
+      "effectiveHealing": {
+        "mean": 0,
+        "sd": 0
+      },
+      "overhealing": {
+        "mean": 0,
+        "sd": 0
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "arcane-missile",
+        "passiveLv6": "elemental-mastery"
+      },
+      "mode": "boss",
+      "dps": {
+        "mean": 432.9055584720323,
+        "sd": 15.451583587579394
+      },
+      "ttk": {
+        "mean": 27.932000000000013,
+        "sd": 1.0523193431653717
+      },
+      "killsPerMinute": {
+        "mean": 0,
+        "sd": 0
+      },
+      "totalDamage": {
+        "mean": 12075.78,
+        "sd": 54.84206050104244
+      },
+      "basicShare": {
+        "mean": 0.3078520992665203,
+        "sd": 0.01410662577292843
+      },
+      "activeSkillShare": {
+        "mean": 0.41187618793135905,
+        "sd": 0.00858536894244922
+      },
+      "aoeShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "dotShare": {
+        "mean": 0.25979644474905195,
+        "sd": 0.012644784445279457
+      },
+      "extraShare": {
+        "mean": 0.020475268053068617,
+        "sd": 0.0011513300107706646
+      },
+      "petShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceMinimum": {
+        "mean": 113.99164000000467,
+        "sd": 15.27452844543489
+      },
+      "resourceBlocked": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 0.7819999999999999,
+        "sd": 0.8676842743763428
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "fireball": 8.12,
+        "blizzard": 4.66,
+        "chain-lightning": 4,
+        "arcane-missile": 7.4,
+        "arcane-torrent": 3
+      },
+      "damageBySource": {
+        "fireball": 1965.33,
+        "burn": 3137.04,
+        "basic-attack": 3717.69,
+        "blizzard": 480.01,
+        "chain-lightning": 681.85,
+        "arcane-missile": 1360.34,
+        "arcane-mark-explosion": 247.27,
+        "arcane-torrent": 486.25
+      },
+      "effectiveHealing": {
+        "mean": 0,
+        "sd": 0
+      },
+      "overhealing": {
+        "mean": 0,
+        "sd": 0
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "arcane-torrent",
+        "passiveLv6": "elemental-mastery"
+      },
+      "mode": "boss",
+      "dps": {
+        "mean": 431.5678040321343,
+        "sd": 15.711562993215994
+      },
+      "ttk": {
+        "mean": 28.006000000000014,
+        "sd": 1.0702168004661485
+      },
+      "killsPerMinute": {
+        "mean": 0,
+        "sd": 0
+      },
+      "totalDamage": {
+        "mean": 12069.8,
+        "sd": 56.4731794748622
+      },
+      "basicShare": {
+        "mean": 0.30866509907720163,
+        "sd": 0.01401112793739933
+      },
+      "activeSkillShare": {
+        "mean": 0.4104181885548034,
+        "sd": 0.008796982435127719
+      },
+      "aoeShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "dotShare": {
+        "mean": 0.2603749333220903,
+        "sd": 0.012892194557330209
+      },
+      "extraShare": {
+        "mean": 0.02054177904590483,
+        "sd": 0.001214864877535837
+      },
+      "petShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceMinimum": {
+        "mean": 119.31724000000494,
+        "sd": 14.917616986047083
+      },
+      "resourceBlocked": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 0.8469999999999996,
+        "sd": 0.8959302428202767
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "fireball": 8.14,
+        "blizzard": 4.67,
+        "chain-lightning": 4,
+        "arcane-missile": 7.47,
+        "arcane-torrent": 3
+      },
+      "damageBySource": {
+        "fireball": 1969.43,
+        "burn": 3142.45,
+        "basic-attack": 3725.61,
+        "blizzard": 480.94,
+        "chain-lightning": 681.85,
+        "arcane-missile": 1300.85,
+        "arcane-mark-explosion": 247.95,
+        "arcane-torrent": 520.72
+      },
+      "effectiveHealing": {
+        "mean": 0,
+        "sd": 0
+      },
+      "overhealing": {
+        "mean": 0,
+        "sd": 0
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "blizzard",
+        "passiveLv6": "elemental-mastery"
+      },
+      "mode": "boss",
+      "dps": {
+        "mean": 430.671374311163,
+        "sd": 15.852186678497018
+      },
+      "ttk": {
+        "mean": 28.095000000000017,
+        "sd": 1.0989426736641
+      },
+      "killsPerMinute": {
+        "mean": 0,
+        "sd": 0
+      },
+      "totalDamage": {
+        "mean": 12082.46,
+        "sd": 67.47420544178348
+      },
+      "basicShare": {
+        "mean": 0.3078991731898249,
+        "sd": 0.01261720694502191
+      },
+      "activeSkillShare": {
+        "mean": 0.413094595222822,
+        "sd": 0.009243692007966419
+      },
+      "aoeShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "dotShare": {
+        "mean": 0.2585308076143824,
+        "sd": 0.013008312784691157
+      },
+      "extraShare": {
+        "mean": 0.020475423972970398,
+        "sd": 0.0010584941884200418
+      },
+      "petShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceMinimum": {
+        "mean": 112.28396000000468,
+        "sd": 14.986868999173904
+      },
+      "resourceBlocked": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 0.9179999999999994,
+        "sd": 0.9403595057210835
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "fireball": 8.2,
+        "blizzard": 4.72,
+        "chain-lightning": 4,
+        "arcane-missile": 7.48,
+        "arcane-torrent": 3
+      },
+      "damageBySource": {
+        "fireball": 1976.48,
+        "burn": 3123.42,
+        "basic-attack": 3720.19,
+        "blizzard": 543.65,
+        "chain-lightning": 690.7,
+        "arcane-missile": 1309.24,
+        "arcane-mark-explosion": 247.41,
+        "arcane-torrent": 471.37
+      },
+      "effectiveHealing": {
+        "mean": 0,
+        "sd": 0
+      },
+      "overhealing": {
+        "mean": 0,
+        "sd": 0
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "arcane-missile",
+        "passiveLv6": "mana-amplification"
+      },
+      "mode": "boss",
+      "dps": {
+        "mean": 409.32237817813706,
+        "sd": 14.285442146773041
+      },
+      "ttk": {
+        "mean": 29.533000000000015,
+        "sd": 0.9711905065433871
+      },
+      "killsPerMinute": {
+        "mean": 0,
+        "sd": 0
+      },
+      "totalDamage": {
+        "mean": 12074.81,
+        "sd": 64.56031211200889
+      },
+      "basicShare": {
+        "mean": 0.323727842235245,
+        "sd": 0.012468394653124043
+      },
+      "activeSkillShare": {
+        "mean": 0.43657509102508507,
+        "sd": 0.00874796110645185
+      },
+      "aoeShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "dotShare": {
+        "mean": 0.21726078136203986,
+        "sd": 0.010815879718312195
+      },
+      "extraShare": {
+        "mean": 0.02243628537763027,
+        "sd": 0.001285650283007798
+      },
+      "petShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceMinimum": {
+        "mean": 93.18504000000479,
+        "sd": 12.074877312768027
+      },
+      "resourceBlocked": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 2.2389999999999994,
+        "sd": 0.9468785560989329
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "fireball": 8.74,
+        "blizzard": 4.97,
+        "chain-lightning": 4,
+        "arcane-missile": 7.93,
+        "arcane-torrent": 3
+      },
+      "damageBySource": {
+        "fireball": 2116.67,
+        "burn": 2623.41,
+        "basic-attack": 3908.84,
+        "blizzard": 514.49,
+        "chain-lightning": 694.5,
+        "arcane-missile": 1462.24,
+        "arcane-mark-explosion": 270.9,
+        "arcane-torrent": 483.76
+      },
+      "effectiveHealing": {
+        "mean": 0,
+        "sd": 0
+      },
+      "overhealing": {
+        "mean": 0,
+        "sd": 0
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "arcane-torrent",
+        "passiveLv6": "mana-amplification"
+      },
+      "mode": "boss",
+      "dps": {
+        "mean": 408.13069149374496,
+        "sd": 14.193827382047653
+      },
+      "ttk": {
+        "mean": 29.595000000000017,
+        "sd": 0.9763580285940194
+      },
+      "killsPerMinute": {
+        "mean": 0,
+        "sd": 0
+      },
+      "totalDamage": {
+        "mean": 12064.9,
+        "sd": 56.85094546267459
+      },
+      "basicShare": {
+        "mean": 0.32474453894633626,
+        "sd": 0.012607286095518203
+      },
+      "activeSkillShare": {
+        "mean": 0.43422499360682343,
+        "sd": 0.00883905865312349
+      },
+      "aoeShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "dotShare": {
+        "mean": 0.21854716214241146,
+        "sd": 0.0103462933954524
+      },
+      "extraShare": {
+        "mean": 0.022483305304428644,
+        "sd": 0.001264679763592114
+      },
+      "petShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceMinimum": {
+        "mean": 98.4439000000049,
+        "sd": 11.920794427805559
+      },
+      "resourceBlocked": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 2.2989999999999986,
+        "sd": 0.9574439931400689
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "fireball": 8.75,
+        "blizzard": 4.98,
+        "chain-lightning": 4,
+        "arcane-missile": 7.96,
+        "arcane-torrent": 3
+      },
+      "damageBySource": {
+        "fireball": 2118.75,
+        "burn": 2636.7,
+        "basic-attack": 3917.96,
+        "blizzard": 515.43,
+        "chain-lightning": 694.5,
+        "arcane-missile": 1393.43,
+        "arcane-mark-explosion": 271.25,
+        "arcane-torrent": 516.88
+      },
+      "effectiveHealing": {
+        "mean": 0,
+        "sd": 0
+      },
+      "overhealing": {
+        "mean": 0,
+        "sd": 0
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "blizzard",
+        "passiveLv6": "mana-amplification"
+      },
+      "mode": "boss",
+      "dps": {
+        "mean": 405.7891737664855,
+        "sd": 10.673591878304482
+      },
+      "ttk": {
+        "mean": 29.76200000000002,
+        "sd": 0.7292160173775674
+      },
+      "killsPerMinute": {
+        "mean": 0,
+        "sd": 0
+      },
+      "totalDamage": {
+        "mean": 12069.51,
+        "sd": 69.88883959546045
+      },
+      "basicShare": {
+        "mean": 0.3261188012207982,
+        "sd": 0.011147883658912444
+      },
+      "activeSkillShare": {
+        "mean": 0.43567121921124996,
+        "sd": 0.009436204155128856
+      },
+      "aoeShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "dotShare": {
+        "mean": 0.21547461685864558,
+        "sd": 0.009266399637858351
+      },
+      "extraShare": {
+        "mean": 0.02273536270930605,
+        "sd": 0.0010641640256366118
+      },
+      "petShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceMinimum": {
+        "mean": 90.33172000000486,
+        "sd": 9.928418141959979
+      },
+      "resourceBlocked": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 2.4729999999999994,
+        "sd": 0.68481457344306
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "fireball": 8.84,
+        "blizzard": 4.98,
+        "chain-lightning": 4,
+        "arcane-missile": 8.04,
+        "arcane-torrent": 3
+      },
+      "damageBySource": {
+        "fireball": 2119.97,
+        "burn": 2600.63,
+        "basic-attack": 3935.97,
+        "blizzard": 572.73,
+        "chain-lightning": 686.04,
+        "arcane-missile": 1403.93,
+        "arcane-mark-explosion": 274.4,
+        "arcane-torrent": 475.84
+      },
+      "effectiveHealing": {
+        "mean": 0,
+        "sd": 0
+      },
+      "overhealing": {
+        "mean": 0,
+        "sd": 0
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "arcane-missile",
+        "passiveLv6": "mana-shield"
+      },
+      "mode": "boss",
+      "dps": {
+        "mean": 396.2584347360187,
+        "sd": 11.420785931148508
+      },
+      "ttk": {
+        "mean": 30.47700000000001,
+        "sd": 0.8755404045502416
+      },
+      "killsPerMinute": {
+        "mean": 0,
+        "sd": 0
+      },
+      "totalDamage": {
+        "mean": 12066.91,
+        "sd": 52.80740383696213
+      },
+      "basicShare": {
+        "mean": 0.3251432105334318,
+        "sd": 0.010972171913343898
+      },
+      "activeSkillShare": {
+        "mean": 0.43141194018431805,
+        "sd": 0.009003645675119146
+      },
+      "aoeShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "dotShare": {
+        "mean": 0.22104424218798913,
+        "sd": 0.006774253584646638
+      },
+      "extraShare": {
+        "mean": 0.02240060709426131,
+        "sd": 0.0006243099603321645
+      },
+      "petShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceMinimum": {
+        "mean": 85.13606000000487,
+        "sd": 6.922496800750434
+      },
+      "resourceBlocked": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 3.177000000000001,
+        "sd": 0.8755404045502408
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "fireball": 8.95,
+        "blizzard": 5,
+        "chain-lightning": 4,
+        "arcane-missile": 8.31,
+        "arcane-torrent": 3
+      },
+      "damageBySource": {
+        "fireball": 2082.61,
+        "burn": 2667.32,
+        "basic-attack": 3923.33,
+        "blizzard": 503.18,
+        "chain-lightning": 673.75,
+        "arcane-missile": 1477.5,
+        "arcane-mark-explosion": 270.3,
+        "arcane-torrent": 468.92
+      },
+      "effectiveHealing": {
+        "mean": 0,
+        "sd": 0
+      },
+      "overhealing": {
+        "mean": 0,
+        "sd": 0
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "arcane-missile",
+        "passiveLv6": "mana-drain"
+      },
+      "mode": "boss",
+      "dps": {
+        "mean": 396.2584347360187,
+        "sd": 11.420785931148508
+      },
+      "ttk": {
+        "mean": 30.47700000000001,
+        "sd": 0.8755404045502416
+      },
+      "killsPerMinute": {
+        "mean": 0,
+        "sd": 0
+      },
+      "totalDamage": {
+        "mean": 12066.91,
+        "sd": 52.80740383696213
+      },
+      "basicShare": {
+        "mean": 0.3251432105334318,
+        "sd": 0.010972171913343898
+      },
+      "activeSkillShare": {
+        "mean": 0.43141194018431805,
+        "sd": 0.009003645675119146
+      },
+      "aoeShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "dotShare": {
+        "mean": 0.22104424218798913,
+        "sd": 0.006774253584646638
+      },
+      "extraShare": {
+        "mean": 0.02240060709426131,
+        "sd": 0.0006243099603321645
+      },
+      "petShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceMinimum": {
+        "mean": 85.13606000000487,
+        "sd": 6.922496800750434
+      },
+      "resourceBlocked": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 3.177000000000001,
+        "sd": 0.8755404045502408
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "fireball": 8.95,
+        "blizzard": 5,
+        "chain-lightning": 4,
+        "arcane-missile": 8.31,
+        "arcane-torrent": 3
+      },
+      "damageBySource": {
+        "fireball": 2082.61,
+        "burn": 2667.32,
+        "basic-attack": 3923.33,
+        "blizzard": 503.18,
+        "chain-lightning": 673.75,
+        "arcane-missile": 1477.5,
+        "arcane-mark-explosion": 270.3,
+        "arcane-torrent": 468.92
+      },
+      "effectiveHealing": {
+        "mean": 0,
+        "sd": 0
+      },
+      "overhealing": {
+        "mean": 0,
+        "sd": 0
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "arcane-torrent",
+        "passiveLv6": "mana-shield"
+      },
+      "mode": "boss",
+      "dps": {
+        "mean": 395.5000759603172,
+        "sd": 9.934368656907619
+      },
+      "ttk": {
+        "mean": 30.544000000000015,
+        "sd": 0.7708852054618768
+      },
+      "killsPerMinute": {
+        "mean": 0,
+        "sd": 0
+      },
+      "totalDamage": {
+        "mean": 12072.66,
+        "sd": 59.27920714719454
+      },
+      "basicShare": {
+        "mean": 0.32558911394894463,
+        "sd": 0.01105027330982059
+      },
+      "activeSkillShare": {
+        "mean": 0.430063687734734,
+        "sd": 0.009196382919204646
+      },
+      "aoeShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "dotShare": {
+        "mean": 0.22167644766405104,
+        "sd": 0.0071715307943426765
+      },
+      "extraShare": {
+        "mean": 0.022670750652270297,
+        "sd": 0.000906509860442886
+      },
+      "petShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceMinimum": {
+        "mean": 89.94300000000494,
+        "sd": 7.964707364366884
+      },
+      "resourceBlocked": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 3.2440000000000024,
+        "sd": 0.7708852054618764
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "fireball": 8.97,
+        "blizzard": 5,
+        "chain-lightning": 4,
+        "arcane-missile": 8.38,
+        "arcane-torrent": 3.08
+      },
+      "damageBySource": {
+        "fireball": 2087.73,
+        "burn": 2676.14,
+        "basic-attack": 3930.68,
+        "blizzard": 503.18,
+        "chain-lightning": 673.75,
+        "arcane-missile": 1412.35,
+        "arcane-mark-explosion": 273.7,
+        "arcane-torrent": 515.13
+      },
+      "effectiveHealing": {
+        "mean": 0,
+        "sd": 0
+      },
+      "overhealing": {
+        "mean": 0,
+        "sd": 0
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "arcane-torrent",
+        "passiveLv6": "mana-drain"
+      },
+      "mode": "boss",
+      "dps": {
+        "mean": 395.5000759603172,
+        "sd": 9.934368656907619
+      },
+      "ttk": {
+        "mean": 30.544000000000015,
+        "sd": 0.7708852054618768
+      },
+      "killsPerMinute": {
+        "mean": 0,
+        "sd": 0
+      },
+      "totalDamage": {
+        "mean": 12072.66,
+        "sd": 59.27920714719454
+      },
+      "basicShare": {
+        "mean": 0.32558911394894463,
+        "sd": 0.01105027330982059
+      },
+      "activeSkillShare": {
+        "mean": 0.430063687734734,
+        "sd": 0.009196382919204646
+      },
+      "aoeShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "dotShare": {
+        "mean": 0.22167644766405104,
+        "sd": 0.0071715307943426765
+      },
+      "extraShare": {
+        "mean": 0.022670750652270297,
+        "sd": 0.000906509860442886
+      },
+      "petShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceMinimum": {
+        "mean": 89.94300000000494,
+        "sd": 7.964707364366884
+      },
+      "resourceBlocked": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 3.2440000000000024,
+        "sd": 0.7708852054618764
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "fireball": 8.97,
+        "blizzard": 5,
+        "chain-lightning": 4,
+        "arcane-missile": 8.38,
+        "arcane-torrent": 3.08
+      },
+      "damageBySource": {
+        "fireball": 2087.73,
+        "burn": 2676.14,
+        "basic-attack": 3930.68,
+        "blizzard": 503.18,
+        "chain-lightning": 673.75,
+        "arcane-missile": 1412.35,
+        "arcane-mark-explosion": 273.7,
+        "arcane-torrent": 515.13
+      },
+      "effectiveHealing": {
+        "mean": 0,
+        "sd": 0
+      },
+      "overhealing": {
+        "mean": 0,
+        "sd": 0
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "blizzard",
+        "passiveLv6": "mana-shield"
+      },
+      "mode": "boss",
+      "dps": {
+        "mean": 394.4137625747601,
+        "sd": 10.277049061655932
+      },
+      "ttk": {
+        "mean": 30.588999999999995,
+        "sd": 0.8340137888548369
+      },
+      "killsPerMinute": {
+        "mean": 0,
+        "sd": 0
+      },
+      "totalDamage": {
+        "mean": 12056.23,
+        "sd": 41.927521987353366
+      },
+      "basicShare": {
+        "mean": 0.3270590069622458,
+        "sd": 0.010210186055246269
+      },
+      "activeSkillShare": {
+        "mean": 0.4289365548447096,
+        "sd": 0.007885111446185606
+      },
+      "aoeShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "dotShare": {
+        "mean": 0.2214996569156285,
+        "sd": 0.007375884193123485
+      },
+      "extraShare": {
+        "mean": 0.022504781277416355,
+        "sd": 0.0004006470819468976
+      },
+      "petShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceMinimum": {
+        "mean": 82.92142000000487,
+        "sd": 6.084296667947739
+      },
+      "resourceBlocked": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 3.2880000000000007,
+        "sd": 0.8371714280838779
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "fireball": 8.98,
+        "blizzard": 5,
+        "chain-lightning": 4,
+        "arcane-missile": 8.38,
+        "arcane-torrent": 3
+      },
+      "damageBySource": {
+        "fireball": 2074.48,
+        "burn": 2670.43,
+        "basic-attack": 3943.11,
+        "blizzard": 559.37,
+        "chain-lightning": 666.82,
+        "arcane-missile": 1408.17,
+        "arcane-mark-explosion": 271.32,
+        "arcane-torrent": 462.53
+      },
+      "effectiveHealing": {
+        "mean": 0,
+        "sd": 0
+      },
+      "overhealing": {
+        "mean": 0,
+        "sd": 0
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "blizzard",
+        "passiveLv6": "mana-drain"
+      },
+      "mode": "boss",
+      "dps": {
+        "mean": 394.4137625747601,
+        "sd": 10.277049061655932
+      },
+      "ttk": {
+        "mean": 30.588999999999995,
+        "sd": 0.8340137888548369
+      },
+      "killsPerMinute": {
+        "mean": 0,
+        "sd": 0
+      },
+      "totalDamage": {
+        "mean": 12056.23,
+        "sd": 41.927521987353366
+      },
+      "basicShare": {
+        "mean": 0.3270590069622458,
+        "sd": 0.010210186055246269
+      },
+      "activeSkillShare": {
+        "mean": 0.4289365548447096,
+        "sd": 0.007885111446185606
+      },
+      "aoeShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "dotShare": {
+        "mean": 0.2214996569156285,
+        "sd": 0.007375884193123485
+      },
+      "extraShare": {
+        "mean": 0.022504781277416355,
+        "sd": 0.0004006470819468976
+      },
+      "petShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceMinimum": {
+        "mean": 82.92142000000487,
+        "sd": 6.084296667947739
+      },
+      "resourceBlocked": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 3.2880000000000007,
+        "sd": 0.8371714280838779
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "fireball": 8.98,
+        "blizzard": 5,
+        "chain-lightning": 4,
+        "arcane-missile": 8.38,
+        "arcane-torrent": 3
+      },
+      "damageBySource": {
+        "fireball": 2074.48,
+        "burn": 2670.43,
+        "basic-attack": 3943.11,
+        "blizzard": 559.37,
+        "chain-lightning": 666.82,
+        "arcane-missile": 1408.17,
+        "arcane-mark-explosion": 271.32,
+        "arcane-torrent": 462.53
+      },
+      "effectiveHealing": {
+        "mean": 0,
+        "sd": 0
+      },
+      "overhealing": {
+        "mean": 0,
+        "sd": 0
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "arcane-missile",
+        "passiveLv6": "blink"
+      },
+      "mode": "boss",
+      "dps": {
+        "mean": 393.76780733688656,
+        "sd": 12.084373224708148
+      },
+      "ttk": {
+        "mean": 30.671000000000003,
+        "sd": 0.9492412759672852
+      },
+      "killsPerMinute": {
+        "mean": 0,
+        "sd": 0
+      },
+      "totalDamage": {
+        "mean": 12065.96,
+        "sd": 58.81495048029878
+      },
+      "basicShare": {
+        "mean": 0.3260603062632355,
+        "sd": 0.010232200042966478
+      },
+      "activeSkillShare": {
+        "mean": 0.43341259941412824,
+        "sd": 0.007882912183621008
+      },
+      "aoeShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "dotShare": {
+        "mean": 0.21798339083328575,
+        "sd": 0.009139375822318918
+      },
+      "extraShare": {
+        "mean": 0.022543703489350725,
+        "sd": 0.001274211823821031
+      },
+      "petShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceMinimum": {
+        "mean": 82.53854000000474,
+        "sd": 9.504269019151353
+      },
+      "resourceBlocked": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 3.525,
+        "sd": 1.023364548926725
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "fireball": 8.89,
+        "blizzard": 5.11,
+        "chain-lightning": 4.02,
+        "arcane-missile": 8.3,
+        "arcane-torrent": 3.13
+      },
+      "damageBySource": {
+        "fireball": 2066.23,
+        "burn": 2630.22,
+        "basic-attack": 3934.04,
+        "blizzard": 517.09,
+        "chain-lightning": 679.91,
+        "arcane-missile": 1476.7,
+        "arcane-mark-explosion": 272,
+        "arcane-torrent": 489.77
+      },
+      "effectiveHealing": {
+        "mean": 0,
+        "sd": 0
+      },
+      "overhealing": {
+        "mean": 0,
+        "sd": 0
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "arcane-torrent",
+        "passiveLv6": "blink"
+      },
+      "mode": "boss",
+      "dps": {
+        "mean": 392.95658994503725,
+        "sd": 10.934649109883072
+      },
+      "ttk": {
+        "mean": 30.739999999999995,
+        "sd": 0.845931439302264
+      },
+      "killsPerMinute": {
+        "mean": 0,
+        "sd": 0
+      },
+      "totalDamage": {
+        "mean": 12070.37,
+        "sd": 53.65345375649176
+      },
+      "basicShare": {
+        "mean": 0.3267907754677298,
+        "sd": 0.01050658441556176
+      },
+      "activeSkillShare": {
+        "mean": 0.43169593699421344,
+        "sd": 0.008270748572024422
+      },
+      "aoeShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "dotShare": {
+        "mean": 0.2188098855649381,
+        "sd": 0.008931680232973216
+      },
+      "extraShare": {
+        "mean": 0.022703401973118455,
+        "sd": 0.0014213976018883348
+      },
+      "petShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceMinimum": {
+        "mean": 87.79220000000485,
+        "sd": 9.89006176522675
+      },
+      "resourceBlocked": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 3.394,
+        "sd": 0.8725617456661737
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "fireball": 8.92,
+        "blizzard": 5.11,
+        "chain-lightning": 4.04,
+        "arcane-missile": 8.36,
+        "arcane-torrent": 3.16
+      },
+      "damageBySource": {
+        "fireball": 2072.38,
+        "burn": 2641.11,
+        "basic-attack": 3944.35,
+        "blizzard": 517.09,
+        "chain-lightning": 682.99,
+        "arcane-missile": 1409.42,
+        "arcane-mark-explosion": 274.04,
+        "arcane-torrent": 528.99
+      },
+      "effectiveHealing": {
+        "mean": 0,
+        "sd": 0
+      },
+      "overhealing": {
+        "mean": 0,
+        "sd": 0
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "blizzard",
+        "passiveLv6": "blink"
+      },
+      "mode": "boss",
+      "dps": {
+        "mean": 390.6806191312884,
+        "sd": 15.17179973080392
+      },
+      "ttk": {
+        "mean": 30.92199999999998,
+        "sd": 1.3576140836040265
+      },
+      "killsPerMinute": {
+        "mean": 0,
+        "sd": 0
+      },
+      "totalDamage": {
+        "mean": 12060.4,
+        "sd": 55.85713920350735
+      },
+      "basicShare": {
+        "mean": 0.32867507689940006,
+        "sd": 0.012856089060063658
+      },
+      "activeSkillShare": {
+        "mean": 0.4304065247884396,
+        "sd": 0.00927960481215196
+      },
+      "aoeShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "dotShare": {
+        "mean": 0.21819441591293243,
+        "sd": 0.009551830514954595
+      },
+      "extraShare": {
+        "mean": 0.022723982399228116,
+        "sd": 0.0011436645540551507
+      },
+      "petShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceMinimum": {
+        "mean": 79.75608000000474,
+        "sd": 8.796340675167146
+      },
+      "resourceBlocked": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 3.8230000000000013,
+        "sd": 1.349285366406974
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "fireball": 8.91,
+        "blizzard": 5.17,
+        "chain-lightning": 4.04,
+        "arcane-missile": 8.31,
+        "arcane-torrent": 3.12
+      },
+      "damageBySource": {
+        "fireball": 2060.13,
+        "burn": 2631.51,
+        "basic-attack": 3963.8,
+        "blizzard": 581.98,
+        "chain-lightning": 671.44,
+        "arcane-missile": 1401.24,
+        "arcane-mark-explosion": 274.04,
+        "arcane-torrent": 476.26
+      },
+      "effectiveHealing": {
+        "mean": 0,
+        "sd": 0
+      },
+      "overhealing": {
+        "mean": 0,
+        "sd": 0
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "fireball",
+        "passiveLv6": "elemental-mastery"
+      },
+      "mode": "boss",
+      "dps": {
+        "mean": 389.6429628411155,
+        "sd": 18.384830886648626
+      },
+      "ttk": {
+        "mean": 31.02900000000001,
+        "sd": 1.5257322832004308
+      },
+      "killsPerMinute": {
+        "mean": 0,
+        "sd": 0
+      },
+      "totalDamage": {
+        "mean": 12062.33,
+        "sd": 42.89430148632799
+      },
+      "basicShare": {
+        "mean": 0.34407065364930467,
+        "sd": 0.01526008606793821
+      },
+      "activeSkillShare": {
+        "mean": 0.45923776622787765,
+        "sd": 0.009561729665537103
+      },
+      "aoeShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "dotShare": {
+        "mean": 0.17386837647545397,
+        "sd": 0.009209586607250755
+      },
+      "extraShare": {
+        "mean": 0.022823203647363472,
+        "sd": 0.0009445274214428689
+      },
+      "petShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceMinimum": {
+        "mean": 81.79506000000481,
+        "sd": 8.717137848881356
+      },
+      "resourceBlocked": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 3.728000000000002,
+        "sd": 1.5281413547182074
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "fireball": 8.96,
+        "blizzard": 5,
+        "chain-lightning": 4,
+        "arcane-missile": 8.48,
+        "arcane-torrent": 3
+      },
+      "damageBySource": {
+        "fireball": 2377.45,
+        "burn": 2097.32,
+        "basic-attack": 4150.25,
+        "blizzard": 510.64,
+        "chain-lightning": 676.84,
+        "arcane-missile": 1486.99,
+        "arcane-mark-explosion": 275.3,
+        "arcane-torrent": 487.54
+      },
+      "effectiveHealing": {
+        "mean": 0,
+        "sd": 0
+      },
+      "overhealing": {
+        "mean": 0,
+        "sd": 0
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "blizzard",
+        "passiveLv6": "arcane-charge"
+      },
+      "mode": "boss",
+      "dps": {
+        "mean": 370.76336455070117,
+        "sd": 20.468689533636706
+      },
+      "ttk": {
+        "mean": 32.642,
+        "sd": 1.823193900823496
+      },
+      "killsPerMinute": {
+        "mean": 0,
+        "sd": 0
+      },
+      "totalDamage": {
+        "mean": 12065.3,
+        "sd": 44.28667971297915
+      },
+      "basicShare": {
+        "mean": 0.3423792550900396,
+        "sd": 0.016696138600872098
+      },
+      "activeSkillShare": {
+        "mean": 0.43303488736220935,
+        "sd": 0.009343454803177569
+      },
+      "aoeShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "dotShare": {
+        "mean": 0.20485960130811381,
+        "sd": 0.010889566544394833
+      },
+      "extraShare": {
+        "mean": 0.019726256239637155,
+        "sd": 0.00007224380695681439
+      },
+      "petShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceMinimum": {
+        "mean": 71.38300000000443,
+        "sd": 9.751879562422825
+      },
+      "resourceBlocked": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 3.942000000000001,
+        "sd": 1.8231939008234972
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "fireball": 8,
+        "blizzard": 5,
+        "chain-lightning": 4.97,
+        "arcane-missile": 8.82,
+        "arcane-torrent": 3
+      },
+      "damageBySource": {
+        "fireball": 1869.5,
+        "burn": 2471.75,
+        "basic-attack": 4130.83,
+        "blizzard": 566.51,
+        "chain-lightning": 830.83,
+        "arcane-missile": 1499.61,
+        "arcane-mark-explosion": 238,
+        "arcane-torrent": 458.27
+      },
+      "effectiveHealing": {
+        "mean": 0,
+        "sd": 0
+      },
+      "overhealing": {
+        "mean": 0,
+        "sd": 0
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "arcane-missile",
+        "passiveLv6": "arcane-charge"
+      },
+      "mode": "boss",
+      "dps": {
+        "mean": 368.4563688675813,
+        "sd": 22.647212139348614
+      },
+      "ttk": {
+        "mean": 32.86800000000002,
+        "sd": 2.0592658886117645
+      },
+      "killsPerMinute": {
+        "mean": 0,
+        "sd": 0
+      },
+      "totalDamage": {
+        "mean": 12063.97,
+        "sd": 40.37510495342397
+      },
+      "basicShare": {
+        "mean": 0.346340280024402,
+        "sd": 0.017551931767112682
+      },
+      "activeSkillShare": {
+        "mean": 0.4309483560873469,
+        "sd": 0.008784271566142074
+      },
+      "aoeShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "dotShare": {
+        "mean": 0.20298297746147792,
+        "sd": 0.01166000616884731
+      },
+      "extraShare": {
+        "mean": 0.019728386426772947,
+        "sd": 0.000065932162630722
+      },
+      "petShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceMinimum": {
+        "mean": 72.44540000000444,
+        "sd": 11.599834500543528
+      },
+      "resourceBlocked": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 4.171000000000003,
+        "sd": 2.0536939888892904
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "fireball": 8,
+        "blizzard": 4.99,
+        "chain-lightning": 4.95,
+        "arcane-missile": 8.82,
+        "arcane-torrent": 3
+      },
+      "damageBySource": {
+        "fireball": 1852.16,
+        "burn": 2448.8,
+        "basic-attack": 4178.22,
+        "blizzard": 500.41,
+        "chain-lightning": 813.89,
+        "arcane-missile": 1569.96,
+        "arcane-mark-explosion": 238,
+        "arcane-torrent": 462.53
+      },
+      "effectiveHealing": {
+        "mean": 0,
+        "sd": 0
+      },
+      "overhealing": {
+        "mean": 0,
+        "sd": 0
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "arcane-torrent",
+        "passiveLv6": "arcane-charge"
+      },
+      "mode": "boss",
+      "dps": {
+        "mean": 364.7955776749313,
+        "sd": 23.90993354081368
+      },
+      "ttk": {
+        "mean": 33.21300000000001,
+        "sd": 2.215791280784361
+      },
+      "killsPerMinute": {
+        "mean": 0,
+        "sd": 0
+      },
+      "totalDamage": {
+        "mean": 12063.25,
+        "sd": 43.96916533208243
+      },
+      "basicShare": {
+        "mean": 0.34955199625579064,
+        "sd": 0.018884365923397418
+      },
+      "activeSkillShare": {
+        "mean": 0.4277268765417713,
+        "sd": 0.009762184411906226
+      },
+      "aoeShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "dotShare": {
+        "mean": 0.20299152275608962,
+        "sd": 0.01158388950422101
+      },
+      "extraShare": {
+        "mean": 0.01972960444634827,
+        "sd": 0.00007166132346570082
+      },
+      "petShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceMinimum": {
+        "mean": 77.08860000000459,
+        "sd": 10.460468538263472
+      },
+      "resourceBlocked": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 4.011000000000001,
+        "sd": 2.2146284112690333
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "fireball": 8,
+        "blizzard": 5,
+        "chain-lightning": 4.97,
+        "arcane-missile": 8.85,
+        "arcane-torrent": 3
+      },
+      "damageBySource": {
+        "fireball": 1852.16,
+        "burn": 2448.8,
+        "basic-attack": 4216.63,
+        "blizzard": 501.34,
+        "chain-lightning": 818.51,
+        "arcane-missile": 1492.7,
+        "arcane-mark-explosion": 238,
+        "arcane-torrent": 495.11
+      },
+      "effectiveHealing": {
+        "mean": 0,
+        "sd": 0
+      },
+      "overhealing": {
+        "mean": 0,
+        "sd": 0
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "fireball",
+        "passiveLv6": "mana-amplification"
+      },
+      "mode": "boss",
+      "dps": {
+        "mean": 361.34910768584666,
+        "sd": 24.28700945093806
+      },
+      "ttk": {
+        "mean": 33.545,
+        "sd": 2.2723721086124953
+      },
+      "killsPerMinute": {
+        "mean": 0,
+        "sd": 0
+      },
+      "totalDamage": {
+        "mean": 12066.53,
+        "sd": 49.145794326676615
+      },
+      "basicShare": {
+        "mean": 0.36599128245289864,
+        "sd": 0.020313628029088062
+      },
+      "activeSkillShare": {
+        "mean": 0.46735447261675467,
+        "sd": 0.014262898379571686
+      },
+      "aoeShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "dotShare": {
+        "mean": 0.14344918098207687,
+        "sd": 0.007949421571752007
+      },
+      "extraShare": {
+        "mean": 0.023205063948269787,
+        "sd": 0.00009361118575304719
+      },
+      "petShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceMinimum": {
+        "mean": 74.68220000000476,
+        "sd": 5.818069332691042
+      },
+      "resourceBlocked": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 6.243999999999999,
+        "sd": 2.2698599075713894
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "fireball": 9,
+        "blizzard": 5,
+        "chain-lightning": 4,
+        "arcane-missile": 8.9,
+        "arcane-torrent": 3
+      },
+      "damageBySource": {
+        "fireball": 2388.24,
+        "burn": 1730.97,
+        "basic-attack": 4416.09,
+        "blizzard": 509.9,
+        "chain-lightning": 695.44,
+        "arcane-missile": 1570.05,
+        "arcane-mark-explosion": 280,
+        "arcane-torrent": 475.84
+      },
+      "effectiveHealing": {
+        "mean": 0,
+        "sd": 0
+      },
+      "overhealing": {
+        "mean": 0,
+        "sd": 0
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "fireball",
+        "passiveLv6": "blink"
+      },
+      "mode": "boss",
+      "dps": {
+        "mean": 327.6875282460139,
+        "sd": 24.22755338644134
+      },
+      "ttk": {
+        "mean": 37.01000000000001,
+        "sd": 2.7246467660964795
+      },
+      "killsPerMinute": {
+        "mean": 0,
+        "sd": 0
+      },
+      "totalDamage": {
+        "mean": 12062.09,
+        "sd": 35.29733559349771
+      },
+      "basicShare": {
+        "mean": 0.3833403828010049,
+        "sd": 0.022816496236433278
+      },
+      "activeSkillShare": {
+        "mean": 0.45442922169654176,
+        "sd": 0.015082428101880183
+      },
+      "aoeShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "dotShare": {
+        "mean": 0.13931364358585901,
+        "sd": 0.008869173572934113
+      },
+      "extraShare": {
+        "mean": 0.0229167519165944,
+        "sd": 0.0011767063194118533
+      },
+      "petShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceMinimum": {
+        "mean": 68.7945600000047,
+        "sd": 4.697676226220791
+      },
+      "resourceBlocked": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 9.745999999999995,
+        "sd": 2.513778828775515
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "fireball": 8.98,
+        "blizzard": 5.34,
+        "chain-lightning": 4.05,
+        "arcane-missile": 8.66,
+        "arcane-torrent": 3.15
+      },
+      "damageBySource": {
+        "fireball": 2312.86,
+        "burn": 1680.4,
+        "basic-attack": 4623.95,
+        "blizzard": 535.26,
+        "chain-lightning": 682.22,
+        "arcane-missile": 1464.01,
+        "arcane-mark-explosion": 276.42,
+        "arcane-torrent": 486.97
+      },
+      "effectiveHealing": {
+        "mean": 0,
+        "sd": 0
+      },
+      "overhealing": {
+        "mean": 0,
+        "sd": 0
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "fireball",
+        "passiveLv6": "mana-shield"
+      },
+      "mode": "boss",
+      "dps": {
+        "mean": 326.54079110931804,
+        "sd": 22.09533409954378
+      },
+      "ttk": {
+        "mean": 37.074,
+        "sd": 2.421595341918215
+      },
+      "killsPerMinute": {
+        "mean": 0,
+        "sd": 0
+      },
+      "totalDamage": {
+        "mean": 12052.97,
+        "sd": 37.11965921179774
+      },
+      "basicShare": {
+        "mean": 0.385380529063423,
+        "sd": 0.019633805991146416
+      },
+      "activeSkillShare": {
+        "mean": 0.45318717339931713,
+        "sd": 0.012996108372780835
+      },
+      "aoeShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "dotShare": {
+        "mean": 0.13886503195017938,
+        "sd": 0.007695353330581656
+      },
+      "extraShare": {
+        "mean": 0.022567265587080776,
+        "sd": 0.0000693733826332455
+      },
+      "petShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceMinimum": {
+        "mean": 71.94732000000467,
+        "sd": 1.7592400000000006
+      },
+      "resourceBlocked": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 9.730999999999996,
+        "sd": 2.3566372228240806
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "fireball": 9,
+        "blizzard": 5,
+        "chain-lightning": 4,
+        "arcane-missile": 8.98,
+        "arcane-torrent": 3
+      },
+      "damageBySource": {
+        "fireball": 2305.08,
+        "burn": 1673.69,
+        "basic-attack": 4645.09,
+        "blizzard": 497.2,
+        "chain-lightning": 674.52,
+        "arcane-missile": 1522.86,
+        "arcane-mark-explosion": 272,
+        "arcane-torrent": 462.53
+      },
+      "effectiveHealing": {
+        "mean": 0,
+        "sd": 0
+      },
+      "overhealing": {
+        "mean": 0,
+        "sd": 0
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "fireball",
+        "passiveLv6": "mana-drain"
+      },
+      "mode": "boss",
+      "dps": {
+        "mean": 326.54079110931804,
+        "sd": 22.09533409954378
+      },
+      "ttk": {
+        "mean": 37.074,
+        "sd": 2.421595341918215
+      },
+      "killsPerMinute": {
+        "mean": 0,
+        "sd": 0
+      },
+      "totalDamage": {
+        "mean": 12052.97,
+        "sd": 37.11965921179774
+      },
+      "basicShare": {
+        "mean": 0.385380529063423,
+        "sd": 0.019633805991146416
+      },
+      "activeSkillShare": {
+        "mean": 0.45318717339931713,
+        "sd": 0.012996108372780835
+      },
+      "aoeShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "dotShare": {
+        "mean": 0.13886503195017938,
+        "sd": 0.007695353330581656
+      },
+      "extraShare": {
+        "mean": 0.022567265587080776,
+        "sd": 0.0000693733826332455
+      },
+      "petShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceMinimum": {
+        "mean": 71.94732000000467,
+        "sd": 1.7592400000000006
+      },
+      "resourceBlocked": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 9.730999999999996,
+        "sd": 2.3566372228240806
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "fireball": 9,
+        "blizzard": 5,
+        "chain-lightning": 4,
+        "arcane-missile": 8.98,
+        "arcane-torrent": 3
+      },
+      "damageBySource": {
+        "fireball": 2305.08,
+        "burn": 1673.69,
+        "basic-attack": 4645.09,
+        "blizzard": 497.2,
+        "chain-lightning": 674.52,
+        "arcane-missile": 1522.86,
+        "arcane-mark-explosion": 272,
+        "arcane-torrent": 462.53
+      },
+      "effectiveHealing": {
+        "mean": 0,
+        "sd": 0
+      },
+      "overhealing": {
+        "mean": 0,
+        "sd": 0
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "fireball",
+        "passiveLv6": "arcane-charge"
+      },
+      "mode": "boss",
+      "dps": {
+        "mean": 298.1984979462432,
+        "sd": 19.396101331525387
+      },
+      "ttk": {
+        "mean": 40.59800000000001,
+        "sd": 2.604840878057621
+      },
+      "killsPerMinute": {
+        "mean": 0,
+        "sd": 0
+      },
+      "totalDamage": {
+        "mean": 12055.98,
+        "sd": 38.969213489625375
+      },
+      "basicShare": {
+        "mean": 0.4103487047750074,
+        "sd": 0.019607467108986053
+      },
+      "activeSkillShare": {
+        "mean": 0.44557133764289353,
+        "sd": 0.013056410547068279
+      },
+      "aoeShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "dotShare": {
+        "mean": 0.12433851116559054,
+        "sd": 0.007477518015565554
+      },
+      "extraShare": {
+        "mean": 0.019741446416508678,
+        "sd": 0.0000637217029844733
+      },
+      "petShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceMinimum": {
+        "mean": 65.6720000000044,
+        "sd": 1.1368683772161603e-13
+      },
+      "resourceBlocked": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 11.588000000000005,
+        "sd": 2.2068203370460413
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "fireball": 8,
+        "blizzard": 5,
+        "chain-lightning": 5,
+        "arcane-missile": 9,
+        "arcane-torrent": 3
+      },
+      "damageBySource": {
+        "fireball": 2062.4,
+        "burn": 1499,
+        "basic-attack": 4947.24,
+        "blizzard": 495.82,
+        "chain-lightning": 832.37,
+        "arcane-missile": 1519.33,
+        "arcane-mark-explosion": 238,
+        "arcane-torrent": 461.82
+      },
+      "effectiveHealing": {
+        "mean": 0,
+        "sd": 0
+      },
+      "overhealing": {
+        "mean": 0,
+        "sd": 0
+      }
+    }
+  ]
+}

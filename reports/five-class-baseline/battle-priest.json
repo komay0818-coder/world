@@ -1,0 +1,5311 @@
+{
+  "job": "priest",
+  "advancedClass": "battle-priest",
+  "combinationCount": 30,
+  "seeds": 100,
+  "equipment": {
+    "chest": {
+      "id": "baseline-chest",
+      "slot": "chest",
+      "defense": 12
+    },
+    "weapon": {
+      "id": "baseline-weapon",
+      "slot": "weapon",
+      "attack": 24,
+      "attackMin": 22,
+      "attackMax": 26,
+      "criticalChance": 0.1,
+      "weaponType": "two-handed-staff",
+      "magicPower": 0
+    },
+    "offhand": {
+      "id": "baseline-focus",
+      "slot": "offhand"
+    }
+  },
+  "five": [
+    {
+      "config": {
+        "activeLv6": "holy-light",
+        "passiveLv6": "holy-faith"
+      },
+      "mode": "five",
+      "dps": {
+        "mean": 200.90100000000007,
+        "sd": 3.1507973593996814
+      },
+      "ttk": {
+        "mean": 0,
+        "sd": 0
+      },
+      "killsPerMinute": {
+        "mean": 4.105,
+        "sd": 0.20365411854416296
+      },
+      "totalDamage": {
+        "mean": 24108.12,
+        "sd": 378.0956831279617
+      },
+      "basicShare": {
+        "mean": 0.4815906371618295,
+        "sd": 0.009054084232676654
+      },
+      "activeSkillShare": {
+        "mean": 0.5184093628381706,
+        "sd": 0.009054084232676654
+      },
+      "aoeShare": {
+        "mean": 0.30803733185363663,
+        "sd": 0.01002038450181521
+      },
+      "dotShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "extraShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "petShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceMinimum": {
+        "mean": 55.101999999999215,
+        "sd": 2.1316282072803006e-14
+      },
+      "resourceBlocked": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 44.40000000000003,
+        "sd": 2.842170943040401e-14
+      },
+      "faithAverage": {
+        "mean": 1.4249999999999994,
+        "sd": 6.661338147750939e-16
+      },
+      "skillCasts": {
+        "holy-light": 13,
+        "holy-nova": 9,
+        "holy-smite": 7,
+        "holy-storm": 5
+      },
+      "damageBySource": {
+        "holy-light": 3159.79,
+        "basic-attack": 11608.44,
+        "holy-nova": 4713.22,
+        "holy-smite": 1911.97,
+        "holy-storm": 2714.7
+      },
+      "effectiveHealing": {
+        "mean": 493.6,
+        "sd": 4.569463863518355
+      },
+      "overhealing": {
+        "mean": 994.438,
+        "sd": 31.710093219667446
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "holy-storm",
+        "passiveLv6": "holy-faith"
+      },
+      "mode": "five",
+      "dps": {
+        "mean": 197.55541666666653,
+        "sd": 3.0957415587563366
+      },
+      "ttk": {
+        "mean": 0,
+        "sd": 0
+      },
+      "killsPerMinute": {
+        "mean": 4.01,
+        "sd": 0.06999999999999999
+      },
+      "totalDamage": {
+        "mean": 23706.65,
+        "sd": 371.48898705076044
+      },
+      "basicShare": {
+        "mean": 0.4839533567167658,
+        "sd": 0.008204114579114734
+      },
+      "activeSkillShare": {
+        "mean": 0.516046643283234,
+        "sd": 0.00820411457911473
+      },
+      "aoeShare": {
+        "mean": 0.3202650344632726,
+        "sd": 0.008771208016930862
+      },
+      "dotShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "extraShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "petShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceMinimum": {
+        "mean": 55.101999999999215,
+        "sd": 2.1316282072803006e-14
+      },
+      "resourceBlocked": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 44.40000000000003,
+        "sd": 2.842170943040401e-14
+      },
+      "faithAverage": {
+        "mean": 1.4249999999999994,
+        "sd": 6.661338147750939e-16
+      },
+      "skillCasts": {
+        "holy-light": 13,
+        "holy-nova": 9,
+        "holy-smite": 7,
+        "holy-storm": 5
+      },
+      "damageBySource": {
+        "holy-light": 2876.32,
+        "basic-attack": 11471.22,
+        "holy-nova": 4670.6,
+        "holy-smite": 1765.26,
+        "holy-storm": 2923.25
+      },
+      "effectiveHealing": {
+        "mean": 493.63,
+        "sd": 4.241827436376926
+      },
+      "overhealing": {
+        "mean": 980.8463,
+        "sd": 31.980203146790675
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "holy-nova",
+        "passiveLv6": "holy-faith"
+      },
+      "mode": "five",
+      "dps": {
+        "mean": 196.28508333333338,
+        "sd": 3.4862064098306687
+      },
+      "ttk": {
+        "mean": 0,
+        "sd": 0
+      },
+      "killsPerMinute": {
+        "mean": 4.01,
+        "sd": 0.06999999999999995
+      },
+      "totalDamage": {
+        "mean": 23554.21,
+        "sd": 418.3447691796804
+      },
+      "basicShare": {
+        "mean": 0.4743838942250549,
+        "sd": 0.007978513465535554
+      },
+      "activeSkillShare": {
+        "mean": 0.5256161057749451,
+        "sd": 0.007978513465535558
+      },
+      "aoeShare": {
+        "mean": 0.3302007709351374,
+        "sd": 0.009308666189538354
+      },
+      "dotShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "extraShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "petShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceMinimum": {
+        "mean": 55.101999999999215,
+        "sd": 2.1316282072803006e-14
+      },
+      "resourceBlocked": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 44.40000000000003,
+        "sd": 2.842170943040401e-14
+      },
+      "faithAverage": {
+        "mean": 1.4249999999999994,
+        "sd": 6.661338147750939e-16
+      },
+      "skillCasts": {
+        "holy-light": 13,
+        "holy-nova": 9,
+        "holy-smite": 7,
+        "holy-storm": 5
+      },
+      "damageBySource": {
+        "holy-light": 2857.78,
+        "basic-attack": 11172.02,
+        "holy-nova": 5120.25,
+        "holy-smite": 1744.91,
+        "holy-storm": 2659.25
+      },
+      "effectiveHealing": {
+        "mean": 0.03,
+        "sd": 0.2984962311319856
+      },
+      "overhealing": {
+        "mean": 1611.7595000000001,
+        "sd": 31.16785948296742
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "holy-smite",
+        "passiveLv6": "holy-faith"
+      },
+      "mode": "five",
+      "dps": {
+        "mean": 194.76316666666673,
+        "sd": 3.403905065427714
+      },
+      "ttk": {
+        "mean": 0,
+        "sd": 0
+      },
+      "killsPerMinute": {
+        "mean": 4.005,
+        "sd": 0.04974937185533098
+      },
+      "totalDamage": {
+        "mean": 23371.58,
+        "sd": 408.4686078513256
+      },
+      "basicShare": {
+        "mean": 0.47830702953008525,
+        "sd": 0.007015752739370301
+      },
+      "activeSkillShare": {
+        "mean": 0.5216929704699147,
+        "sd": 0.007015752739370294
+      },
+      "aoeShare": {
+        "mean": 0.31291904641701807,
+        "sd": 0.009783506990468935
+      },
+      "dotShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "extraShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "petShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceMinimum": {
+        "mean": 55.101999999999215,
+        "sd": 2.1316282072803006e-14
+      },
+      "resourceBlocked": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 44.40000000000003,
+        "sd": 2.842170943040401e-14
+      },
+      "faithAverage": {
+        "mean": 1.4249999999999994,
+        "sd": 6.661338147750939e-16
+      },
+      "skillCasts": {
+        "holy-light": 13,
+        "holy-nova": 9,
+        "holy-smite": 7,
+        "holy-storm": 5
+      },
+      "damageBySource": {
+        "holy-light": 2865.59,
+        "basic-attack": 11177.3,
+        "holy-nova": 4634.3,
+        "holy-smite": 2013.09,
+        "holy-storm": 2681.3
+      },
+      "effectiveHealing": {
+        "mean": 493.73,
+        "sd": 5.128069812317297
+      },
+      "overhealing": {
+        "mean": 1047.0650999999998,
+        "sd": 30.799351372878
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "holy-light",
+        "passiveLv6": "light-grace"
+      },
+      "mode": "five",
+      "dps": {
+        "mean": 193.46408333333338,
+        "sd": 3.6652985506337394
+      },
+      "ttk": {
+        "mean": 0,
+        "sd": 0
+      },
+      "killsPerMinute": {
+        "mean": 4.01,
+        "sd": 0.06999999999999997
+      },
+      "totalDamage": {
+        "mean": 23215.69,
+        "sd": 439.8358260760485
+      },
+      "basicShare": {
+        "mean": 0.5425800687001336,
+        "sd": 0.008249291054511396
+      },
+      "activeSkillShare": {
+        "mean": 0.4574199312998663,
+        "sd": 0.008249291054511396
+      },
+      "aoeShare": {
+        "mean": 0.27033986646020197,
+        "sd": 0.008099807357911467
+      },
+      "dotShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "extraShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "petShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceMinimum": {
+        "mean": 55.101999999999215,
+        "sd": 2.1316282072803006e-14
+      },
+      "resourceBlocked": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 44.40000000000003,
+        "sd": 2.842170943040401e-14
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "holy-light": 13,
+        "holy-nova": 9,
+        "holy-smite": 7,
+        "holy-storm": 5
+      },
+      "damageBySource": {
+        "holy-light": 2725.69,
+        "basic-attack": 12594.14,
+        "holy-nova": 4051.21,
+        "holy-smite": 1617.38,
+        "holy-storm": 2227.27
+      },
+      "effectiveHealing": {
+        "mean": 496.2,
+        "sd": 4.703190406521949
+      },
+      "overhealing": {
+        "mean": 826.3564999999994,
+        "sd": 32.28572512349689
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "heal",
+        "passiveLv6": "holy-faith"
+      },
+      "mode": "five",
+      "dps": {
+        "mean": 192.4301666666665,
+        "sd": 3.6339374077346642
+      },
+      "ttk": {
+        "mean": 0,
+        "sd": 0
+      },
+      "killsPerMinute": {
+        "mean": 4.005,
+        "sd": 0.04974937185533098
+      },
+      "totalDamage": {
+        "mean": 23091.62,
+        "sd": 436.07248892815977
+      },
+      "basicShare": {
+        "mean": 0.48363181841565384,
+        "sd": 0.008479897504101571
+      },
+      "activeSkillShare": {
+        "mean": 0.5163681815843462,
+        "sd": 0.008479897504101577
+      },
+      "aoeShare": {
+        "mean": 0.316871308861867,
+        "sd": 0.009913472019197936
+      },
+      "dotShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "extraShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "petShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceMinimum": {
+        "mean": 55.101999999999215,
+        "sd": 2.1316282072803006e-14
+      },
+      "resourceBlocked": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 44.40000000000003,
+        "sd": 2.842170943040401e-14
+      },
+      "faithAverage": {
+        "mean": 1.4249999999999994,
+        "sd": 6.661338147750939e-16
+      },
+      "skillCasts": {
+        "holy-light": 13,
+        "holy-nova": 9,
+        "holy-smite": 7,
+        "holy-storm": 5
+      },
+      "damageBySource": {
+        "holy-light": 2859.11,
+        "basic-attack": 11165.42,
+        "holy-nova": 4658.1,
+        "holy-smite": 1747.29,
+        "holy-storm": 2661.7
+      },
+      "effectiveHealing": {
+        "mean": 494.11,
+        "sd": 4.921168560413274
+      },
+      "overhealing": {
+        "mean": 935.7648000000004,
+        "sd": 33.69496877814252
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "holy-nova",
+        "passiveLv6": "light-grace"
+      },
+      "mode": "five",
+      "dps": {
+        "mean": 188.91333333333333,
+        "sd": 2.982727592135911
+      },
+      "ttk": {
+        "mean": 0,
+        "sd": 0
+      },
+      "killsPerMinute": {
+        "mean": 4,
+        "sd": 0
+      },
+      "totalDamage": {
+        "mean": 22669.6,
+        "sd": 357.92731105630924
+      },
+      "basicShare": {
+        "mean": 0.5343596007424491,
+        "sd": 0.008563394179932167
+      },
+      "activeSkillShare": {
+        "mean": 0.46564039925755074,
+        "sd": 0.008563394179932167
+      },
+      "aoeShare": {
+        "mean": 0.29080060908206506,
+        "sd": 0.008681983318538635
+      },
+      "dotShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "extraShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "petShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceMinimum": {
+        "mean": 55.101999999999215,
+        "sd": 2.1316282072803006e-14
+      },
+      "resourceBlocked": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 44.40000000000003,
+        "sd": 2.842170943040401e-14
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "holy-light": 13,
+        "holy-nova": 9,
+        "holy-smite": 7,
+        "holy-storm": 5
+      },
+      "damageBySource": {
+        "holy-light": 2468.05,
+        "basic-attack": 12112.03,
+        "holy-nova": 4393.29,
+        "holy-smite": 1495.76,
+        "holy-storm": 2200.47
+      },
+      "effectiveHealing": {
+        "mean": 0.1,
+        "sd": 0.3872983346207415
+      },
+      "overhealing": {
+        "mean": 1453.9336999999987,
+        "sd": 30.82613526392822
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "holy-storm",
+        "passiveLv6": "light-grace"
+      },
+      "mode": "five",
+      "dps": {
+        "mean": 187.39600000000002,
+        "sd": 3.303992424998042
+      },
+      "ttk": {
+        "mean": 0,
+        "sd": 0
+      },
+      "killsPerMinute": {
+        "mean": 4,
+        "sd": 0
+      },
+      "totalDamage": {
+        "mean": 22487.52,
+        "sd": 396.4790909997651
+      },
+      "basicShare": {
+        "mean": 0.5382526494473577,
+        "sd": 0.008621068809228574
+      },
+      "activeSkillShare": {
+        "mean": 0.4617473505526422,
+        "sd": 0.008621068809228572
+      },
+      "aoeShare": {
+        "mean": 0.28543065613554597,
+        "sd": 0.008605899708110123
+      },
+      "dotShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "extraShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "petShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceMinimum": {
+        "mean": 55.101999999999215,
+        "sd": 2.1316282072803006e-14
+      },
+      "resourceBlocked": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 44.40000000000003,
+        "sd": 2.842170943040401e-14
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "holy-light": 13,
+        "holy-nova": 9,
+        "holy-smite": 7,
+        "holy-storm": 5
+      },
+      "damageBySource": {
+        "holy-light": 2472.3,
+        "basic-attack": 12101.85,
+        "holy-nova": 3969.62,
+        "holy-smite": 1492.82,
+        "holy-storm": 2450.93
+      },
+      "effectiveHealing": {
+        "mean": 495.64,
+        "sd": 4.995037537396493
+      },
+      "overhealing": {
+        "mean": 816.0402999999999,
+        "sd": 32.13263712971596
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "holy-smite",
+        "passiveLv6": "light-grace"
+      },
+      "mode": "five",
+      "dps": {
+        "mean": 187.10100000000003,
+        "sd": 2.8628167655882772
+      },
+      "ttk": {
+        "mean": 0,
+        "sd": 0
+      },
+      "killsPerMinute": {
+        "mean": 4,
+        "sd": 0
+      },
+      "totalDamage": {
+        "mean": 22452.12,
+        "sd": 343.5380118705934
+      },
+      "basicShare": {
+        "mean": 0.5382629956667343,
+        "sd": 0.008224836640039958
+      },
+      "activeSkillShare": {
+        "mean": 0.46173700433326564,
+        "sd": 0.00822483664003996
+      },
+      "aoeShare": {
+        "mean": 0.27513356848576564,
+        "sd": 0.00814637134455153
+      },
+      "dotShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "extraShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "petShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceMinimum": {
+        "mean": 55.101999999999215,
+        "sd": 2.1316282072803006e-14
+      },
+      "resourceBlocked": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 44.40000000000003,
+        "sd": 2.842170943040401e-14
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "holy-light": 13,
+        "holy-nova": 9,
+        "holy-smite": 7,
+        "holy-storm": 5
+      },
+      "damageBySource": {
+        "holy-light": 2479.1,
+        "basic-attack": 12083.66,
+        "holy-nova": 3977,
+        "holy-smite": 1710.66,
+        "holy-storm": 2201.7
+      },
+      "effectiveHealing": {
+        "mean": 495.91,
+        "sd": 4.835483429813407
+      },
+      "overhealing": {
+        "mean": 871.1432000000001,
+        "sd": 34.4856264226126
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "heal",
+        "passiveLv6": "light-grace"
+      },
+      "mode": "five",
+      "dps": {
+        "mean": 185.23166666666668,
+        "sd": 3.0489073634846813
+      },
+      "ttk": {
+        "mean": 0,
+        "sd": 0
+      },
+      "killsPerMinute": {
+        "mean": 3.995,
+        "sd": 0.049749371855330994
+      },
+      "totalDamage": {
+        "mean": 22227.8,
+        "sd": 365.86888361816176
+      },
+      "basicShare": {
+        "mean": 0.5442476045150764,
+        "sd": 0.00738833801348321
+      },
+      "activeSkillShare": {
+        "mean": 0.4557523954849237,
+        "sd": 0.007388338013483214
+      },
+      "aoeShare": {
+        "mean": 0.27765552049007935,
+        "sd": 0.008444360443235452
+      },
+      "dotShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "extraShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "petShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceMinimum": {
+        "mean": 55.101999999999215,
+        "sd": 2.1316282072803006e-14
+      },
+      "resourceBlocked": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 44.40000000000003,
+        "sd": 2.842170943040401e-14
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "holy-light": 13,
+        "holy-nova": 9,
+        "holy-smite": 7,
+        "holy-storm": 5
+      },
+      "damageBySource": {
+        "holy-light": 2462.95,
+        "basic-attack": 12095.72,
+        "holy-nova": 3951.99,
+        "holy-smite": 1495.76,
+        "holy-storm": 2221.38
+      },
+      "effectiveHealing": {
+        "mean": 495.24,
+        "sd": 4.718304780321012
+      },
+      "overhealing": {
+        "mean": 778.2932000000002,
+        "sd": 27.098698045478102
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "holy-light",
+        "passiveLv6": "holy-protection"
+      },
+      "mode": "five",
+      "dps": {
+        "mean": 182.74116666666671,
+        "sd": 3.170830118263811
+      },
+      "ttk": {
+        "mean": 0,
+        "sd": 0
+      },
+      "killsPerMinute": {
+        "mean": 3.905,
+        "sd": 0.19615045245933008
+      },
+      "totalDamage": {
+        "mean": 21928.94,
+        "sd": 380.49961419165726
+      },
+      "basicShare": {
+        "mean": 0.5183999079785859,
+        "sd": 0.008175785522107704
+      },
+      "activeSkillShare": {
+        "mean": 0.48160009202141424,
+        "sd": 0.00817578552210771
+      },
+      "aoeShare": {
+        "mean": 0.28509422771058285,
+        "sd": 0.008986932626370701
+      },
+      "dotShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "extraShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "petShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceMinimum": {
+        "mean": 55.101999999999215,
+        "sd": 2.1316282072803006e-14
+      },
+      "resourceBlocked": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 44.40000000000003,
+        "sd": 2.842170943040401e-14
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "holy-light": 13,
+        "holy-nova": 9,
+        "holy-smite": 7,
+        "holy-storm": 5
+      },
+      "damageBySource": {
+        "holy-light": 2686.61,
+        "basic-attack": 11366.57,
+        "holy-nova": 4009.74,
+        "holy-smite": 1622.35,
+        "holy-storm": 2243.67
+      },
+      "effectiveHealing": {
+        "mean": 493.6700000000001,
+        "sd": 5.101088119215355
+      },
+      "overhealing": {
+        "mean": 825.8778999999998,
+        "sd": 26.92909943889695
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "holy-light",
+        "passiveLv6": "divine-grace"
+      },
+      "mode": "five",
+      "dps": {
+        "mean": 182.74116666666671,
+        "sd": 3.170830118263811
+      },
+      "ttk": {
+        "mean": 0,
+        "sd": 0
+      },
+      "killsPerMinute": {
+        "mean": 3.905,
+        "sd": 0.19615045245933008
+      },
+      "totalDamage": {
+        "mean": 21928.94,
+        "sd": 380.49961419165726
+      },
+      "basicShare": {
+        "mean": 0.5183999079785859,
+        "sd": 0.008175785522107704
+      },
+      "activeSkillShare": {
+        "mean": 0.48160009202141424,
+        "sd": 0.00817578552210771
+      },
+      "aoeShare": {
+        "mean": 0.28509422771058285,
+        "sd": 0.008986932626370701
+      },
+      "dotShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "extraShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "petShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceMinimum": {
+        "mean": 55.101999999999215,
+        "sd": 2.1316282072803006e-14
+      },
+      "resourceBlocked": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 44.40000000000003,
+        "sd": 2.842170943040401e-14
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "holy-light": 13,
+        "holy-nova": 9,
+        "holy-smite": 7,
+        "holy-storm": 5
+      },
+      "damageBySource": {
+        "holy-light": 2686.61,
+        "basic-attack": 11366.57,
+        "holy-nova": 4009.74,
+        "holy-smite": 1622.35,
+        "holy-storm": 2243.67
+      },
+      "effectiveHealing": {
+        "mean": 493.6700000000001,
+        "sd": 5.101088119215355
+      },
+      "overhealing": {
+        "mean": 825.8778999999998,
+        "sd": 26.92909943889695
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "holy-light",
+        "passiveLv6": "fanatical-faith"
+      },
+      "mode": "five",
+      "dps": {
+        "mean": 182.74116666666671,
+        "sd": 3.170830118263811
+      },
+      "ttk": {
+        "mean": 0,
+        "sd": 0
+      },
+      "killsPerMinute": {
+        "mean": 3.905,
+        "sd": 0.19615045245933008
+      },
+      "totalDamage": {
+        "mean": 21928.94,
+        "sd": 380.49961419165726
+      },
+      "basicShare": {
+        "mean": 0.5183999079785859,
+        "sd": 0.008175785522107704
+      },
+      "activeSkillShare": {
+        "mean": 0.48160009202141424,
+        "sd": 0.00817578552210771
+      },
+      "aoeShare": {
+        "mean": 0.28509422771058285,
+        "sd": 0.008986932626370701
+      },
+      "dotShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "extraShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "petShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceMinimum": {
+        "mean": 55.101999999999215,
+        "sd": 2.1316282072803006e-14
+      },
+      "resourceBlocked": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 44.40000000000003,
+        "sd": 2.842170943040401e-14
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "holy-light": 13,
+        "holy-nova": 9,
+        "holy-smite": 7,
+        "holy-storm": 5
+      },
+      "damageBySource": {
+        "holy-light": 2686.61,
+        "basic-attack": 11366.57,
+        "holy-nova": 4009.74,
+        "holy-smite": 1622.35,
+        "holy-storm": 2243.67
+      },
+      "effectiveHealing": {
+        "mean": 493.6700000000001,
+        "sd": 5.101088119215355
+      },
+      "overhealing": {
+        "mean": 825.8778999999998,
+        "sd": 26.92909943889695
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "holy-light",
+        "passiveLv6": "light-devotion"
+      },
+      "mode": "five",
+      "dps": {
+        "mean": 182.74116666666671,
+        "sd": 3.170830118263811
+      },
+      "ttk": {
+        "mean": 0,
+        "sd": 0
+      },
+      "killsPerMinute": {
+        "mean": 3.905,
+        "sd": 0.19615045245933008
+      },
+      "totalDamage": {
+        "mean": 21928.94,
+        "sd": 380.49961419165726
+      },
+      "basicShare": {
+        "mean": 0.5183999079785859,
+        "sd": 0.008175785522107704
+      },
+      "activeSkillShare": {
+        "mean": 0.48160009202141424,
+        "sd": 0.00817578552210771
+      },
+      "aoeShare": {
+        "mean": 0.28509422771058285,
+        "sd": 0.008986932626370701
+      },
+      "dotShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "extraShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "petShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceMinimum": {
+        "mean": 55.101999999999215,
+        "sd": 2.1316282072803006e-14
+      },
+      "resourceBlocked": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 44.40000000000003,
+        "sd": 2.842170943040401e-14
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "holy-light": 13,
+        "holy-nova": 9,
+        "holy-smite": 7,
+        "holy-storm": 5
+      },
+      "damageBySource": {
+        "holy-light": 2686.61,
+        "basic-attack": 11366.57,
+        "holy-nova": 4009.74,
+        "holy-smite": 1622.35,
+        "holy-storm": 2243.67
+      },
+      "effectiveHealing": {
+        "mean": 493.67,
+        "sd": 5.101088119215344
+      },
+      "overhealing": {
+        "mean": 931.5016,
+        "sd": 29.728198018716164
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "holy-storm",
+        "passiveLv6": "holy-protection"
+      },
+      "mode": "five",
+      "dps": {
+        "mean": 179.76483333333334,
+        "sd": 2.7873448088339075
+      },
+      "ttk": {
+        "mean": 0,
+        "sd": 0
+      },
+      "killsPerMinute": {
+        "mean": 3.705,
+        "sd": 0.24591665254715867
+      },
+      "totalDamage": {
+        "mean": 21571.78,
+        "sd": 334.48137706006895
+      },
+      "basicShare": {
+        "mean": 0.5181661121045245,
+        "sd": 0.007639941215859035
+      },
+      "activeSkillShare": {
+        "mean": 0.48183388789547554,
+        "sd": 0.007639941215859037
+      },
+      "aoeShare": {
+        "mean": 0.2974143392159347,
+        "sd": 0.008859545959858344
+      },
+      "dotShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "extraShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "petShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceMinimum": {
+        "mean": 55.101999999999215,
+        "sd": 2.1316282072803006e-14
+      },
+      "resourceBlocked": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 44.40000000000003,
+        "sd": 2.842170943040401e-14
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "holy-light": 13,
+        "holy-nova": 9,
+        "holy-smite": 7,
+        "holy-storm": 5
+      },
+      "damageBySource": {
+        "holy-light": 2469.75,
+        "basic-attack": 11176.28,
+        "holy-nova": 3966.75,
+        "holy-smite": 1508.5,
+        "holy-storm": 2450.5
+      },
+      "effectiveHealing": {
+        "mean": 494.33,
+        "sd": 4.921493675704567
+      },
+      "overhealing": {
+        "mean": 820.875,
+        "sd": 26.39117214145673
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "holy-storm",
+        "passiveLv6": "divine-grace"
+      },
+      "mode": "five",
+      "dps": {
+        "mean": 179.76483333333334,
+        "sd": 2.7873448088339075
+      },
+      "ttk": {
+        "mean": 0,
+        "sd": 0
+      },
+      "killsPerMinute": {
+        "mean": 3.705,
+        "sd": 0.24591665254715867
+      },
+      "totalDamage": {
+        "mean": 21571.78,
+        "sd": 334.48137706006895
+      },
+      "basicShare": {
+        "mean": 0.5181661121045245,
+        "sd": 0.007639941215859035
+      },
+      "activeSkillShare": {
+        "mean": 0.48183388789547554,
+        "sd": 0.007639941215859037
+      },
+      "aoeShare": {
+        "mean": 0.2974143392159347,
+        "sd": 0.008859545959858344
+      },
+      "dotShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "extraShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "petShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceMinimum": {
+        "mean": 55.101999999999215,
+        "sd": 2.1316282072803006e-14
+      },
+      "resourceBlocked": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 44.40000000000003,
+        "sd": 2.842170943040401e-14
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "holy-light": 13,
+        "holy-nova": 9,
+        "holy-smite": 7,
+        "holy-storm": 5
+      },
+      "damageBySource": {
+        "holy-light": 2469.75,
+        "basic-attack": 11176.28,
+        "holy-nova": 3966.75,
+        "holy-smite": 1508.5,
+        "holy-storm": 2450.5
+      },
+      "effectiveHealing": {
+        "mean": 494.33,
+        "sd": 4.921493675704567
+      },
+      "overhealing": {
+        "mean": 820.875,
+        "sd": 26.39117214145673
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "holy-storm",
+        "passiveLv6": "fanatical-faith"
+      },
+      "mode": "five",
+      "dps": {
+        "mean": 179.76483333333334,
+        "sd": 2.7873448088339075
+      },
+      "ttk": {
+        "mean": 0,
+        "sd": 0
+      },
+      "killsPerMinute": {
+        "mean": 3.705,
+        "sd": 0.24591665254715867
+      },
+      "totalDamage": {
+        "mean": 21571.78,
+        "sd": 334.48137706006895
+      },
+      "basicShare": {
+        "mean": 0.5181661121045245,
+        "sd": 0.007639941215859035
+      },
+      "activeSkillShare": {
+        "mean": 0.48183388789547554,
+        "sd": 0.007639941215859037
+      },
+      "aoeShare": {
+        "mean": 0.2974143392159347,
+        "sd": 0.008859545959858344
+      },
+      "dotShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "extraShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "petShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceMinimum": {
+        "mean": 55.101999999999215,
+        "sd": 2.1316282072803006e-14
+      },
+      "resourceBlocked": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 44.40000000000003,
+        "sd": 2.842170943040401e-14
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "holy-light": 13,
+        "holy-nova": 9,
+        "holy-smite": 7,
+        "holy-storm": 5
+      },
+      "damageBySource": {
+        "holy-light": 2469.75,
+        "basic-attack": 11176.28,
+        "holy-nova": 3966.75,
+        "holy-smite": 1508.5,
+        "holy-storm": 2450.5
+      },
+      "effectiveHealing": {
+        "mean": 494.33,
+        "sd": 4.921493675704567
+      },
+      "overhealing": {
+        "mean": 820.875,
+        "sd": 26.39117214145673
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "holy-storm",
+        "passiveLv6": "light-devotion"
+      },
+      "mode": "five",
+      "dps": {
+        "mean": 179.76483333333334,
+        "sd": 2.7873448088339075
+      },
+      "ttk": {
+        "mean": 0,
+        "sd": 0
+      },
+      "killsPerMinute": {
+        "mean": 3.705,
+        "sd": 0.24591665254715867
+      },
+      "totalDamage": {
+        "mean": 21571.78,
+        "sd": 334.48137706006895
+      },
+      "basicShare": {
+        "mean": 0.5181661121045245,
+        "sd": 0.007639941215859035
+      },
+      "activeSkillShare": {
+        "mean": 0.48183388789547554,
+        "sd": 0.007639941215859037
+      },
+      "aoeShare": {
+        "mean": 0.2974143392159347,
+        "sd": 0.008859545959858344
+      },
+      "dotShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "extraShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "petShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceMinimum": {
+        "mean": 55.101999999999215,
+        "sd": 2.1316282072803006e-14
+      },
+      "resourceBlocked": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 44.40000000000003,
+        "sd": 2.842170943040401e-14
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "holy-light": 13,
+        "holy-nova": 9,
+        "holy-smite": 7,
+        "holy-storm": 5
+      },
+      "damageBySource": {
+        "holy-light": 2469.75,
+        "basic-attack": 11176.28,
+        "holy-nova": 3966.75,
+        "holy-smite": 1508.5,
+        "holy-storm": 2450.5
+      },
+      "effectiveHealing": {
+        "mean": 494.33,
+        "sd": 4.921493675704555
+      },
+      "overhealing": {
+        "mean": 924.8299999999991,
+        "sd": 29.018123647127794
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "holy-nova",
+        "passiveLv6": "holy-protection"
+      },
+      "mode": "five",
+      "dps": {
+        "mean": 178.90291666666673,
+        "sd": 2.802824065662266
+      },
+      "ttk": {
+        "mean": 0,
+        "sd": 0
+      },
+      "killsPerMinute": {
+        "mean": 3.645,
+        "sd": 0.22688102609076846
+      },
+      "totalDamage": {
+        "mean": 21468.35,
+        "sd": 336.3388878794719
+      },
+      "basicShare": {
+        "mean": 0.5088101698117279,
+        "sd": 0.0072205014482906935
+      },
+      "activeSkillShare": {
+        "mean": 0.49118983018827206,
+        "sd": 0.007220501448290696
+      },
+      "aoeShare": {
+        "mean": 0.30691005209142075,
+        "sd": 0.009412116301573188
+      },
+      "dotShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "extraShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "petShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceMinimum": {
+        "mean": 55.101999999999215,
+        "sd": 2.1316282072803006e-14
+      },
+      "resourceBlocked": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 44.40000000000003,
+        "sd": 2.842170943040401e-14
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "holy-light": 13,
+        "holy-nova": 9,
+        "holy-smite": 7,
+        "holy-storm": 5
+      },
+      "damageBySource": {
+        "holy-light": 2470.6,
+        "basic-attack": 10922.12,
+        "holy-nova": 4380.75,
+        "holy-smite": 1484.98,
+        "holy-storm": 2209.9
+      },
+      "effectiveHealing": {
+        "mean": 0.06,
+        "sd": 0.36932370625238825
+      },
+      "overhealing": {
+        "mean": 1452.6236999999992,
+        "sd": 22.65715532254655
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "holy-nova",
+        "passiveLv6": "divine-grace"
+      },
+      "mode": "five",
+      "dps": {
+        "mean": 178.90291666666673,
+        "sd": 2.802824065662266
+      },
+      "ttk": {
+        "mean": 0,
+        "sd": 0
+      },
+      "killsPerMinute": {
+        "mean": 3.645,
+        "sd": 0.22688102609076846
+      },
+      "totalDamage": {
+        "mean": 21468.35,
+        "sd": 336.3388878794719
+      },
+      "basicShare": {
+        "mean": 0.5088101698117279,
+        "sd": 0.0072205014482906935
+      },
+      "activeSkillShare": {
+        "mean": 0.49118983018827206,
+        "sd": 0.007220501448290696
+      },
+      "aoeShare": {
+        "mean": 0.30691005209142075,
+        "sd": 0.009412116301573188
+      },
+      "dotShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "extraShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "petShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceMinimum": {
+        "mean": 55.101999999999215,
+        "sd": 2.1316282072803006e-14
+      },
+      "resourceBlocked": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 44.40000000000003,
+        "sd": 2.842170943040401e-14
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "holy-light": 13,
+        "holy-nova": 9,
+        "holy-smite": 7,
+        "holy-storm": 5
+      },
+      "damageBySource": {
+        "holy-light": 2470.6,
+        "basic-attack": 10922.12,
+        "holy-nova": 4380.75,
+        "holy-smite": 1484.98,
+        "holy-storm": 2209.9
+      },
+      "effectiveHealing": {
+        "mean": 0.06,
+        "sd": 0.36932370625238825
+      },
+      "overhealing": {
+        "mean": 1452.6236999999992,
+        "sd": 22.65715532254655
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "holy-nova",
+        "passiveLv6": "fanatical-faith"
+      },
+      "mode": "five",
+      "dps": {
+        "mean": 178.90291666666673,
+        "sd": 2.802824065662266
+      },
+      "ttk": {
+        "mean": 0,
+        "sd": 0
+      },
+      "killsPerMinute": {
+        "mean": 3.645,
+        "sd": 0.22688102609076846
+      },
+      "totalDamage": {
+        "mean": 21468.35,
+        "sd": 336.3388878794719
+      },
+      "basicShare": {
+        "mean": 0.5088101698117279,
+        "sd": 0.0072205014482906935
+      },
+      "activeSkillShare": {
+        "mean": 0.49118983018827206,
+        "sd": 0.007220501448290696
+      },
+      "aoeShare": {
+        "mean": 0.30691005209142075,
+        "sd": 0.009412116301573188
+      },
+      "dotShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "extraShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "petShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceMinimum": {
+        "mean": 55.101999999999215,
+        "sd": 2.1316282072803006e-14
+      },
+      "resourceBlocked": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 44.40000000000003,
+        "sd": 2.842170943040401e-14
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "holy-light": 13,
+        "holy-nova": 9,
+        "holy-smite": 7,
+        "holy-storm": 5
+      },
+      "damageBySource": {
+        "holy-light": 2470.6,
+        "basic-attack": 10922.12,
+        "holy-nova": 4380.75,
+        "holy-smite": 1484.98,
+        "holy-storm": 2209.9
+      },
+      "effectiveHealing": {
+        "mean": 0.06,
+        "sd": 0.36932370625238825
+      },
+      "overhealing": {
+        "mean": 1452.6236999999992,
+        "sd": 22.65715532254655
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "holy-nova",
+        "passiveLv6": "light-devotion"
+      },
+      "mode": "five",
+      "dps": {
+        "mean": 178.90291666666673,
+        "sd": 2.802824065662266
+      },
+      "ttk": {
+        "mean": 0,
+        "sd": 0
+      },
+      "killsPerMinute": {
+        "mean": 3.645,
+        "sd": 0.22688102609076846
+      },
+      "totalDamage": {
+        "mean": 21468.35,
+        "sd": 336.3388878794719
+      },
+      "basicShare": {
+        "mean": 0.5088101698117279,
+        "sd": 0.0072205014482906935
+      },
+      "activeSkillShare": {
+        "mean": 0.49118983018827206,
+        "sd": 0.007220501448290696
+      },
+      "aoeShare": {
+        "mean": 0.30691005209142075,
+        "sd": 0.009412116301573188
+      },
+      "dotShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "extraShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "petShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceMinimum": {
+        "mean": 55.101999999999215,
+        "sd": 2.1316282072803006e-14
+      },
+      "resourceBlocked": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 44.40000000000003,
+        "sd": 2.842170943040401e-14
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "holy-light": 13,
+        "holy-nova": 9,
+        "holy-smite": 7,
+        "holy-storm": 5
+      },
+      "damageBySource": {
+        "holy-light": 2470.6,
+        "basic-attack": 10922.12,
+        "holy-nova": 4380.75,
+        "holy-smite": 1484.98,
+        "holy-storm": 2209.9
+      },
+      "effectiveHealing": {
+        "mean": 0.06,
+        "sd": 0.36932370625238825
+      },
+      "overhealing": {
+        "mean": 1558.0860000000007,
+        "sd": 25.09713258521775
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "holy-smite",
+        "passiveLv6": "holy-protection"
+      },
+      "mode": "five",
+      "dps": {
+        "mean": 177.02791666666673,
+        "sd": 3.0187916951341824
+      },
+      "ttk": {
+        "mean": 0,
+        "sd": 0
+      },
+      "killsPerMinute": {
+        "mean": 3.57,
+        "sd": 0.17349351572897476
+      },
+      "totalDamage": {
+        "mean": 21243.35,
+        "sd": 362.25500341610194
+      },
+      "basicShare": {
+        "mean": 0.5147143303819217,
+        "sd": 0.00724970333651655
+      },
+      "activeSkillShare": {
+        "mean": 0.4852856696180783,
+        "sd": 0.007249703336516555
+      },
+      "aoeShare": {
+        "mean": 0.29125366801169666,
+        "sd": 0.009396659843289794
+      },
+      "dotShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "extraShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "petShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceMinimum": {
+        "mean": 55.101999999999215,
+        "sd": 2.1316282072803006e-14
+      },
+      "resourceBlocked": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 44.40000000000003,
+        "sd": 2.842170943040401e-14
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "holy-light": 13,
+        "holy-nova": 9,
+        "holy-smite": 7,
+        "holy-storm": 5
+      },
+      "damageBySource": {
+        "holy-light": 2451.05,
+        "basic-attack": 10932.8,
+        "holy-nova": 3968.8,
+        "holy-smite": 1670.55,
+        "holy-storm": 2220.15
+      },
+      "effectiveHealing": {
+        "mean": 494.82,
+        "sd": 4.831935430032159
+      },
+      "overhealing": {
+        "mean": 863.0010000000001,
+        "sd": 30.28336617683041
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "holy-smite",
+        "passiveLv6": "divine-grace"
+      },
+      "mode": "five",
+      "dps": {
+        "mean": 177.02791666666673,
+        "sd": 3.0187916951341824
+      },
+      "ttk": {
+        "mean": 0,
+        "sd": 0
+      },
+      "killsPerMinute": {
+        "mean": 3.57,
+        "sd": 0.17349351572897476
+      },
+      "totalDamage": {
+        "mean": 21243.35,
+        "sd": 362.25500341610194
+      },
+      "basicShare": {
+        "mean": 0.5147143303819217,
+        "sd": 0.00724970333651655
+      },
+      "activeSkillShare": {
+        "mean": 0.4852856696180783,
+        "sd": 0.007249703336516555
+      },
+      "aoeShare": {
+        "mean": 0.29125366801169666,
+        "sd": 0.009396659843289794
+      },
+      "dotShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "extraShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "petShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceMinimum": {
+        "mean": 55.101999999999215,
+        "sd": 2.1316282072803006e-14
+      },
+      "resourceBlocked": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 44.40000000000003,
+        "sd": 2.842170943040401e-14
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "holy-light": 13,
+        "holy-nova": 9,
+        "holy-smite": 7,
+        "holy-storm": 5
+      },
+      "damageBySource": {
+        "holy-light": 2451.05,
+        "basic-attack": 10932.8,
+        "holy-nova": 3968.8,
+        "holy-smite": 1670.55,
+        "holy-storm": 2220.15
+      },
+      "effectiveHealing": {
+        "mean": 494.82,
+        "sd": 4.831935430032159
+      },
+      "overhealing": {
+        "mean": 863.0010000000001,
+        "sd": 30.28336617683041
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "holy-smite",
+        "passiveLv6": "fanatical-faith"
+      },
+      "mode": "five",
+      "dps": {
+        "mean": 177.02791666666673,
+        "sd": 3.0187916951341824
+      },
+      "ttk": {
+        "mean": 0,
+        "sd": 0
+      },
+      "killsPerMinute": {
+        "mean": 3.57,
+        "sd": 0.17349351572897476
+      },
+      "totalDamage": {
+        "mean": 21243.35,
+        "sd": 362.25500341610194
+      },
+      "basicShare": {
+        "mean": 0.5147143303819217,
+        "sd": 0.00724970333651655
+      },
+      "activeSkillShare": {
+        "mean": 0.4852856696180783,
+        "sd": 0.007249703336516555
+      },
+      "aoeShare": {
+        "mean": 0.29125366801169666,
+        "sd": 0.009396659843289794
+      },
+      "dotShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "extraShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "petShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceMinimum": {
+        "mean": 55.101999999999215,
+        "sd": 2.1316282072803006e-14
+      },
+      "resourceBlocked": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 44.40000000000003,
+        "sd": 2.842170943040401e-14
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "holy-light": 13,
+        "holy-nova": 9,
+        "holy-smite": 7,
+        "holy-storm": 5
+      },
+      "damageBySource": {
+        "holy-light": 2451.05,
+        "basic-attack": 10932.8,
+        "holy-nova": 3968.8,
+        "holy-smite": 1670.55,
+        "holy-storm": 2220.15
+      },
+      "effectiveHealing": {
+        "mean": 494.82,
+        "sd": 4.831935430032159
+      },
+      "overhealing": {
+        "mean": 863.0010000000001,
+        "sd": 30.28336617683041
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "holy-smite",
+        "passiveLv6": "light-devotion"
+      },
+      "mode": "five",
+      "dps": {
+        "mean": 177.02791666666673,
+        "sd": 3.0187916951341824
+      },
+      "ttk": {
+        "mean": 0,
+        "sd": 0
+      },
+      "killsPerMinute": {
+        "mean": 3.57,
+        "sd": 0.17349351572897476
+      },
+      "totalDamage": {
+        "mean": 21243.35,
+        "sd": 362.25500341610194
+      },
+      "basicShare": {
+        "mean": 0.5147143303819217,
+        "sd": 0.00724970333651655
+      },
+      "activeSkillShare": {
+        "mean": 0.4852856696180783,
+        "sd": 0.007249703336516555
+      },
+      "aoeShare": {
+        "mean": 0.29125366801169666,
+        "sd": 0.009396659843289794
+      },
+      "dotShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "extraShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "petShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceMinimum": {
+        "mean": 55.101999999999215,
+        "sd": 2.1316282072803006e-14
+      },
+      "resourceBlocked": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 44.40000000000003,
+        "sd": 2.842170943040401e-14
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "holy-light": 13,
+        "holy-nova": 9,
+        "holy-smite": 7,
+        "holy-storm": 5
+      },
+      "damageBySource": {
+        "holy-light": 2451.05,
+        "basic-attack": 10932.8,
+        "holy-nova": 3968.8,
+        "holy-smite": 1670.55,
+        "holy-storm": 2220.15
+      },
+      "effectiveHealing": {
+        "mean": 494.82,
+        "sd": 4.831935430032146
+      },
+      "overhealing": {
+        "mean": 966.1064999999994,
+        "sd": 32.71923197066222
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "heal",
+        "passiveLv6": "holy-protection"
+      },
+      "mode": "five",
+      "dps": {
+        "mean": 175.27625000000003,
+        "sd": 2.810910878216842
+      },
+      "ttk": {
+        "mean": 0,
+        "sd": 0
+      },
+      "killsPerMinute": {
+        "mean": 3.53,
+        "sd": 0.11874342087037912
+      },
+      "totalDamage": {
+        "mean": 21033.15,
+        "sd": 337.3093053860211
+      },
+      "basicShare": {
+        "mean": 0.5188913462803921,
+        "sd": 0.007887586417017922
+      },
+      "activeSkillShare": {
+        "mean": 0.48110865371960804,
+        "sd": 0.007887586417017919
+      },
+      "aoeShare": {
+        "mean": 0.29367941664480146,
+        "sd": 0.009543726068337463
+      },
+      "dotShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "extraShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "petShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceMinimum": {
+        "mean": 55.101999999999215,
+        "sd": 2.1316282072803006e-14
+      },
+      "resourceBlocked": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 44.40000000000003,
+        "sd": 2.842170943040401e-14
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "holy-light": 13,
+        "holy-nova": 9,
+        "holy-smite": 7,
+        "holy-storm": 5
+      },
+      "damageBySource": {
+        "holy-light": 2462.95,
+        "basic-attack": 10912.4,
+        "holy-nova": 3940.1,
+        "holy-smite": 1479.1,
+        "holy-storm": 2238.6
+      },
+      "effectiveHealing": {
+        "mean": 495.87,
+        "sd": 4.421888736727794
+      },
+      "overhealing": {
+        "mean": 775.5745000000002,
+        "sd": 25.635244815487884
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "heal",
+        "passiveLv6": "divine-grace"
+      },
+      "mode": "five",
+      "dps": {
+        "mean": 175.27625000000003,
+        "sd": 2.810910878216842
+      },
+      "ttk": {
+        "mean": 0,
+        "sd": 0
+      },
+      "killsPerMinute": {
+        "mean": 3.53,
+        "sd": 0.11874342087037912
+      },
+      "totalDamage": {
+        "mean": 21033.15,
+        "sd": 337.3093053860211
+      },
+      "basicShare": {
+        "mean": 0.5188913462803921,
+        "sd": 0.007887586417017922
+      },
+      "activeSkillShare": {
+        "mean": 0.48110865371960804,
+        "sd": 0.007887586417017919
+      },
+      "aoeShare": {
+        "mean": 0.29367941664480146,
+        "sd": 0.009543726068337463
+      },
+      "dotShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "extraShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "petShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceMinimum": {
+        "mean": 55.101999999999215,
+        "sd": 2.1316282072803006e-14
+      },
+      "resourceBlocked": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 44.40000000000003,
+        "sd": 2.842170943040401e-14
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "holy-light": 13,
+        "holy-nova": 9,
+        "holy-smite": 7,
+        "holy-storm": 5
+      },
+      "damageBySource": {
+        "holy-light": 2462.95,
+        "basic-attack": 10912.4,
+        "holy-nova": 3940.1,
+        "holy-smite": 1479.1,
+        "holy-storm": 2238.6
+      },
+      "effectiveHealing": {
+        "mean": 495.87,
+        "sd": 4.421888736727794
+      },
+      "overhealing": {
+        "mean": 775.5745000000002,
+        "sd": 25.635244815487884
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "heal",
+        "passiveLv6": "fanatical-faith"
+      },
+      "mode": "five",
+      "dps": {
+        "mean": 175.27625000000003,
+        "sd": 2.810910878216842
+      },
+      "ttk": {
+        "mean": 0,
+        "sd": 0
+      },
+      "killsPerMinute": {
+        "mean": 3.53,
+        "sd": 0.11874342087037912
+      },
+      "totalDamage": {
+        "mean": 21033.15,
+        "sd": 337.3093053860211
+      },
+      "basicShare": {
+        "mean": 0.5188913462803921,
+        "sd": 0.007887586417017922
+      },
+      "activeSkillShare": {
+        "mean": 0.48110865371960804,
+        "sd": 0.007887586417017919
+      },
+      "aoeShare": {
+        "mean": 0.29367941664480146,
+        "sd": 0.009543726068337463
+      },
+      "dotShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "extraShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "petShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceMinimum": {
+        "mean": 55.101999999999215,
+        "sd": 2.1316282072803006e-14
+      },
+      "resourceBlocked": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 44.40000000000003,
+        "sd": 2.842170943040401e-14
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "holy-light": 13,
+        "holy-nova": 9,
+        "holy-smite": 7,
+        "holy-storm": 5
+      },
+      "damageBySource": {
+        "holy-light": 2462.95,
+        "basic-attack": 10912.4,
+        "holy-nova": 3940.1,
+        "holy-smite": 1479.1,
+        "holy-storm": 2238.6
+      },
+      "effectiveHealing": {
+        "mean": 495.87,
+        "sd": 4.421888736727794
+      },
+      "overhealing": {
+        "mean": 775.5745000000002,
+        "sd": 25.635244815487884
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "heal",
+        "passiveLv6": "light-devotion"
+      },
+      "mode": "five",
+      "dps": {
+        "mean": 175.27625000000003,
+        "sd": 2.810910878216842
+      },
+      "ttk": {
+        "mean": 0,
+        "sd": 0
+      },
+      "killsPerMinute": {
+        "mean": 3.53,
+        "sd": 0.11874342087037912
+      },
+      "totalDamage": {
+        "mean": 21033.15,
+        "sd": 337.3093053860211
+      },
+      "basicShare": {
+        "mean": 0.5188913462803921,
+        "sd": 0.007887586417017922
+      },
+      "activeSkillShare": {
+        "mean": 0.48110865371960804,
+        "sd": 0.007887586417017919
+      },
+      "aoeShare": {
+        "mean": 0.29367941664480146,
+        "sd": 0.009543726068337463
+      },
+      "dotShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "extraShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "petShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceMinimum": {
+        "mean": 55.101999999999215,
+        "sd": 2.1316282072803006e-14
+      },
+      "resourceBlocked": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 44.40000000000003,
+        "sd": 2.842170943040401e-14
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "holy-light": 13,
+        "holy-nova": 9,
+        "holy-smite": 7,
+        "holy-storm": 5
+      },
+      "damageBySource": {
+        "holy-light": 2462.95,
+        "basic-attack": 10912.4,
+        "holy-nova": 3940.1,
+        "holy-smite": 1479.1,
+        "holy-storm": 2238.6
+      },
+      "effectiveHealing": {
+        "mean": 495.87,
+        "sd": 4.421888736727791
+      },
+      "overhealing": {
+        "mean": 876.7819999999996,
+        "sd": 28.265632771972417
+      }
+    }
+  ],
+  "boss": [
+    {
+      "config": {
+        "activeLv6": "holy-light",
+        "passiveLv6": "holy-faith"
+      },
+      "mode": "boss",
+      "dps": {
+        "mean": 184.28214851583405,
+        "sd": 2.741750224247514
+      },
+      "ttk": {
+        "mean": 65.6,
+        "sd": 0.9716995420396172
+      },
+      "killsPerMinute": {
+        "mean": 0,
+        "sd": 0
+      },
+      "totalDamage": {
+        "mean": 12086.47,
+        "sd": 74.99592722274988
+      },
+      "basicShare": {
+        "mean": 0.5548363216531895,
+        "sd": 0.009817018298856183
+      },
+      "activeSkillShare": {
+        "mean": 0.4451636783468105,
+        "sd": 0.009817018298856185
+      },
+      "aoeShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "dotShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "extraShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "petShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceMinimum": {
+        "mean": 55.101999999999215,
+        "sd": 2.1316282072803006e-14
+      },
+      "resourceBlocked": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 18.300000000000022,
+        "sd": 0.9716995420396164
+      },
+      "faithAverage": {
+        "mean": 1.7238002645139556,
+        "sd": 0.01925593397444709
+      },
+      "skillCasts": {
+        "holy-light": 9.6,
+        "holy-nova": 6.9,
+        "holy-smite": 6,
+        "holy-storm": 4
+      },
+      "damageBySource": {
+        "holy-light": 2452.85,
+        "basic-attack": 6705.73,
+        "holy-nova": 790.69,
+        "holy-smite": 1666.42,
+        "holy-storm": 470.78
+      },
+      "effectiveHealing": {
+        "mean": 64.77,
+        "sd": 2.513384172783779
+      },
+      "overhealing": {
+        "mean": 571.5222000000006,
+        "sd": 18.345633244998666
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "holy-light",
+        "passiveLv6": "light-grace"
+      },
+      "mode": "boss",
+      "dps": {
+        "mean": 180.8244825343717,
+        "sd": 3.407600721805649
+      },
+      "ttk": {
+        "mean": 66.78599999999999,
+        "sd": 1.2203294637105178
+      },
+      "killsPerMinute": {
+        "mean": 0,
+        "sd": 0
+      },
+      "totalDamage": {
+        "mean": 12072.5,
+        "sd": 52.354846958042
+      },
+      "basicShare": {
+        "mean": 0.6187726127276113,
+        "sd": 0.010155098764072173
+      },
+      "activeSkillShare": {
+        "mean": 0.3812273872723886,
+        "sd": 0.010155098764072173
+      },
+      "aoeShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "dotShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "extraShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "petShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceMinimum": {
+        "mean": 55.101999999999215,
+        "sd": 2.1316282072803006e-14
+      },
+      "resourceBlocked": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 19.486000000000033,
+        "sd": 1.2203294637105186
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "holy-light": 9.83,
+        "holy-nova": 6.99,
+        "holy-smite": 6,
+        "holy-storm": 4
+      },
+      "damageBySource": {
+        "holy-light": 2143.15,
+        "basic-attack": 7470.09,
+        "holy-nova": 677.25,
+        "holy-smite": 1396.81,
+        "holy-storm": 385.2
+      },
+      "effectiveHealing": {
+        "mean": 65.11000000000001,
+        "sd": 2.395391408517617
+      },
+      "overhealing": {
+        "mean": 484.94890000000026,
+        "sd": 16.392348208539246
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "holy-smite",
+        "passiveLv6": "holy-faith"
+      },
+      "mode": "boss",
+      "dps": {
+        "mean": 166.13511724889204,
+        "sd": 5.477192262803136
+      },
+      "ttk": {
+        "mean": 72.62199999999997,
+        "sd": 2.3633273154601318
+      },
+      "killsPerMinute": {
+        "mean": 0,
+        "sd": 0
+      },
+      "totalDamage": {
+        "mean": 12052.17,
+        "sd": 31.009693645697315
+      },
+      "basicShare": {
+        "mean": 0.5786943243473669,
+        "sd": 0.013405564968672633
+      },
+      "activeSkillShare": {
+        "mean": 0.42130567565263305,
+        "sd": 0.013405564968672628
+      },
+      "aoeShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "dotShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "extraShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "petShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceMinimum": {
+        "mean": 55.101999999999215,
+        "sd": 2.1316282072803006e-14
+      },
+      "resourceBlocked": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 25.293999999999997,
+        "sd": 2.3125232971799448
+      },
+      "faithAverage": {
+        "mean": 1.79228824455501,
+        "sd": 0.033436936995155625
+      },
+      "skillCasts": {
+        "holy-light": 10,
+        "holy-nova": 7,
+        "holy-smite": 6,
+        "holy-storm": 4
+      },
+      "damageBySource": {
+        "holy-light": 2253.65,
+        "basic-attack": 6974.52,
+        "holy-nova": 729.37,
+        "holy-smite": 1666.7,
+        "holy-storm": 427.93
+      },
+      "effectiveHealing": {
+        "mean": 65.55999999999999,
+        "sd": 2.290502128355262
+      },
+      "overhealing": {
+        "mean": 600.2205000000004,
+        "sd": 24.225549957637682
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "holy-nova",
+        "passiveLv6": "holy-faith"
+      },
+      "mode": "boss",
+      "dps": {
+        "mean": 164.06543216829087,
+        "sd": 5.399727176873494
+      },
+      "ttk": {
+        "mean": 73.53699999999999,
+        "sd": 2.3799434867240024
+      },
+      "killsPerMinute": {
+        "mean": 0,
+        "sd": 0
+      },
+      "totalDamage": {
+        "mean": 12052.07,
+        "sd": 25.35675649605051
+      },
+      "basicShare": {
+        "mean": 0.5850352192963328,
+        "sd": 0.013129462836126217
+      },
+      "activeSkillShare": {
+        "mean": 0.41496478070366727,
+        "sd": 0.01312946283612622
+      },
+      "aoeShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "dotShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "extraShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "petShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceMinimum": {
+        "mean": 55.101999999999215,
+        "sd": 2.1316282072803006e-14
+      },
+      "resourceBlocked": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 26.147999999999982,
+        "sd": 2.2376541287696816
+      },
+      "faithAverage": {
+        "mean": 1.7801556046019473,
+        "sd": 0.03794535511553305
+      },
+      "skillCasts": {
+        "holy-light": 10,
+        "holy-nova": 7,
+        "holy-smite": 6,
+        "holy-storm": 4
+      },
+      "damageBySource": {
+        "holy-light": 2253.65,
+        "basic-attack": 7050.9,
+        "holy-nova": 805.54,
+        "holy-smite": 1514.05,
+        "holy-storm": 427.93
+      },
+      "effectiveHealing": {
+        "mean": 65.56,
+        "sd": 2.2905021283552687
+      },
+      "overhealing": {
+        "mean": 549.9979,
+        "sd": 19.985635406211127
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "holy-storm",
+        "passiveLv6": "holy-faith"
+      },
+      "mode": "boss",
+      "dps": {
+        "mean": 163.3567720653934,
+        "sd": 5.2653984594809
+      },
+      "ttk": {
+        "mean": 73.77900000000002,
+        "sd": 2.358698581845505
+      },
+      "killsPerMinute": {
+        "mean": 0,
+        "sd": 0
+      },
+      "totalDamage": {
+        "mean": 12039.94,
+        "sd": 29.821743745126632
+      },
+      "basicShare": {
+        "mean": 0.5873363291480479,
+        "sd": 0.012972425551885705
+      },
+      "activeSkillShare": {
+        "mean": 0.4126636708519522,
+        "sd": 0.012972425551885703
+      },
+      "aoeShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "dotShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "extraShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "petShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceMinimum": {
+        "mean": 55.101999999999215,
+        "sd": 2.1316282072803006e-14
+      },
+      "resourceBlocked": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 26.34999999999998,
+        "sd": 2.147440336773062
+      },
+      "faithAverage": {
+        "mean": 1.7774609453728087,
+        "sd": 0.04011226251956399
+      },
+      "skillCasts": {
+        "holy-light": 10,
+        "holy-nova": 7,
+        "holy-smite": 6,
+        "holy-storm": 4
+      },
+      "damageBySource": {
+        "holy-light": 2253.65,
+        "basic-attack": 7071.52,
+        "holy-nova": 729.37,
+        "holy-smite": 1514.05,
+        "holy-storm": 471.35
+      },
+      "effectiveHealing": {
+        "mean": 65.55999999999999,
+        "sd": 2.290502128355262
+      },
+      "overhealing": {
+        "mean": 527.6153999999999,
+        "sd": 19.88936768326236
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "holy-smite",
+        "passiveLv6": "light-grace"
+      },
+      "mode": "boss",
+      "dps": {
+        "mean": 162.10278587917833,
+        "sd": 4.818134461335174
+      },
+      "ttk": {
+        "mean": 74.38,
+        "sd": 2.183025423580772
+      },
+      "killsPerMinute": {
+        "mean": 0,
+        "sd": 0
+      },
+      "totalDamage": {
+        "mean": 12046.73,
+        "sd": 30.857691099627015
+      },
+      "basicShare": {
+        "mean": 0.6440645376828013,
+        "sd": 0.010705144595612968
+      },
+      "activeSkillShare": {
+        "mean": 0.35593546231719886,
+        "sd": 0.010705144595612972
+      },
+      "aoeShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "dotShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "extraShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "petShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceMinimum": {
+        "mean": 55.101999999999215,
+        "sd": 2.1316282072803006e-14
+      },
+      "resourceBlocked": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 26.939999999999976,
+        "sd": 1.9779787663167674
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "holy-light": 10,
+        "holy-nova": 7,
+        "holy-smite": 6,
+        "holy-storm": 4
+      },
+      "damageBySource": {
+        "holy-light": 1925.7,
+        "basic-attack": 7758.86,
+        "holy-nova": 618.28,
+        "holy-smite": 1392.93,
+        "holy-storm": 350.96
+      },
+      "effectiveHealing": {
+        "mean": 69.85,
+        "sd": 3.3207679834640684
+      },
+      "overhealing": {
+        "mean": 499.5804,
+        "sd": 21.283884228213616
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "heal",
+        "passiveLv6": "holy-faith"
+      },
+      "mode": "boss",
+      "dps": {
+        "mean": 162.08817773573548,
+        "sd": 5.225348622468074
+      },
+      "ttk": {
+        "mean": 74.42800000000004,
+        "sd": 2.3770183003081824
+      },
+      "killsPerMinute": {
+        "mean": 0,
+        "sd": 0
+      },
+      "totalDamage": {
+        "mean": 12051.52,
+        "sd": 27.747965691199784
+      },
+      "basicShare": {
+        "mean": 0.5913335018270288,
+        "sd": 0.013006323452934095
+      },
+      "activeSkillShare": {
+        "mean": 0.40866649817297107,
+        "sd": 0.013006323452934097
+      },
+      "aoeShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "dotShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "extraShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "petShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceMinimum": {
+        "mean": 55.101999999999215,
+        "sd": 2.1316282072803006e-14
+      },
+      "resourceBlocked": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 26.921,
+        "sd": 2.097107293392496
+      },
+      "faithAverage": {
+        "mean": 1.7658626436643368,
+        "sd": 0.04282424864369053
+      },
+      "skillCasts": {
+        "holy-light": 10,
+        "holy-nova": 7,
+        "holy-smite": 6,
+        "holy-storm": 4
+      },
+      "damageBySource": {
+        "holy-light": 2253.65,
+        "basic-attack": 7126.52,
+        "holy-nova": 729.37,
+        "holy-smite": 1514.05,
+        "holy-storm": 427.93
+      },
+      "effectiveHealing": {
+        "mean": 65.55999999999999,
+        "sd": 2.290502128355262
+      },
+      "overhealing": {
+        "mean": 521.216,
+        "sd": 19.85093065828402
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "holy-light",
+        "passiveLv6": "holy-protection"
+      },
+      "mode": "boss",
+      "dps": {
+        "mean": 161.66073403687002,
+        "sd": 5.189613364658586
+      },
+      "ttk": {
+        "mean": 74.59300000000002,
+        "sd": 2.362594125109093
+      },
+      "killsPerMinute": {
+        "mean": 0,
+        "sd": 0
+      },
+      "totalDamage": {
+        "mean": 12046.53,
+        "sd": 26.467510272029745
+      },
+      "basicShare": {
+        "mean": 0.6143141611551386,
+        "sd": 0.012160106383546527
+      },
+      "activeSkillShare": {
+        "mean": 0.3856858388448614,
+        "sd": 0.012160106383546528
+      },
+      "aoeShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "dotShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "extraShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "petShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceMinimum": {
+        "mean": 55.101999999999215,
+        "sd": 2.1316282072803006e-14
+      },
+      "resourceBlocked": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 27.067999999999998,
+        "sd": 2.0709843070385636
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "holy-light": 10,
+        "holy-nova": 7,
+        "holy-smite": 6,
+        "holy-storm": 4
+      },
+      "damageBySource": {
+        "holy-light": 2178.67,
+        "basic-attack": 7400.38,
+        "holy-nova": 678.6,
+        "holy-smite": 1403.23,
+        "holy-storm": 385.65
+      },
+      "effectiveHealing": {
+        "mean": 65.44000000000001,
+        "sd": 2.2817537115122626
+      },
+      "overhealing": {
+        "mean": 488.5181000000002,
+        "sd": 18.34295116359414
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "holy-light",
+        "passiveLv6": "divine-grace"
+      },
+      "mode": "boss",
+      "dps": {
+        "mean": 161.66073403687002,
+        "sd": 5.189613364658586
+      },
+      "ttk": {
+        "mean": 74.59300000000002,
+        "sd": 2.362594125109093
+      },
+      "killsPerMinute": {
+        "mean": 0,
+        "sd": 0
+      },
+      "totalDamage": {
+        "mean": 12046.53,
+        "sd": 26.467510272029745
+      },
+      "basicShare": {
+        "mean": 0.6143141611551386,
+        "sd": 0.012160106383546527
+      },
+      "activeSkillShare": {
+        "mean": 0.3856858388448614,
+        "sd": 0.012160106383546528
+      },
+      "aoeShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "dotShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "extraShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "petShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceMinimum": {
+        "mean": 55.101999999999215,
+        "sd": 2.1316282072803006e-14
+      },
+      "resourceBlocked": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 27.067999999999998,
+        "sd": 2.0709843070385636
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "holy-light": 10,
+        "holy-nova": 7,
+        "holy-smite": 6,
+        "holy-storm": 4
+      },
+      "damageBySource": {
+        "holy-light": 2178.67,
+        "basic-attack": 7400.38,
+        "holy-nova": 678.6,
+        "holy-smite": 1403.23,
+        "holy-storm": 385.65
+      },
+      "effectiveHealing": {
+        "mean": 65.44000000000001,
+        "sd": 2.2817537115122626
+      },
+      "overhealing": {
+        "mean": 488.5181000000002,
+        "sd": 18.34295116359414
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "holy-light",
+        "passiveLv6": "fanatical-faith"
+      },
+      "mode": "boss",
+      "dps": {
+        "mean": 161.66073403687002,
+        "sd": 5.189613364658586
+      },
+      "ttk": {
+        "mean": 74.59300000000002,
+        "sd": 2.362594125109093
+      },
+      "killsPerMinute": {
+        "mean": 0,
+        "sd": 0
+      },
+      "totalDamage": {
+        "mean": 12046.53,
+        "sd": 26.467510272029745
+      },
+      "basicShare": {
+        "mean": 0.6143141611551386,
+        "sd": 0.012160106383546527
+      },
+      "activeSkillShare": {
+        "mean": 0.3856858388448614,
+        "sd": 0.012160106383546528
+      },
+      "aoeShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "dotShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "extraShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "petShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceMinimum": {
+        "mean": 55.101999999999215,
+        "sd": 2.1316282072803006e-14
+      },
+      "resourceBlocked": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 27.067999999999998,
+        "sd": 2.0709843070385636
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "holy-light": 10,
+        "holy-nova": 7,
+        "holy-smite": 6,
+        "holy-storm": 4
+      },
+      "damageBySource": {
+        "holy-light": 2178.67,
+        "basic-attack": 7400.38,
+        "holy-nova": 678.6,
+        "holy-smite": 1403.23,
+        "holy-storm": 385.65
+      },
+      "effectiveHealing": {
+        "mean": 65.44000000000001,
+        "sd": 2.2817537115122626
+      },
+      "overhealing": {
+        "mean": 488.5181000000002,
+        "sd": 18.34295116359414
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "holy-light",
+        "passiveLv6": "light-devotion"
+      },
+      "mode": "boss",
+      "dps": {
+        "mean": 161.66073403687002,
+        "sd": 5.189613364658586
+      },
+      "ttk": {
+        "mean": 74.59300000000002,
+        "sd": 2.362594125109093
+      },
+      "killsPerMinute": {
+        "mean": 0,
+        "sd": 0
+      },
+      "totalDamage": {
+        "mean": 12046.53,
+        "sd": 26.467510272029745
+      },
+      "basicShare": {
+        "mean": 0.6143141611551386,
+        "sd": 0.012160106383546527
+      },
+      "activeSkillShare": {
+        "mean": 0.3856858388448614,
+        "sd": 0.012160106383546528
+      },
+      "aoeShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "dotShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "extraShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "petShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceMinimum": {
+        "mean": 55.101999999999215,
+        "sd": 2.1316282072803006e-14
+      },
+      "resourceBlocked": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 27.067999999999998,
+        "sd": 2.0709843070385636
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "holy-light": 10,
+        "holy-nova": 7,
+        "holy-smite": 6,
+        "holy-storm": 4
+      },
+      "damageBySource": {
+        "holy-light": 2178.67,
+        "basic-attack": 7400.38,
+        "holy-nova": 678.6,
+        "holy-smite": 1403.23,
+        "holy-storm": 385.65
+      },
+      "effectiveHealing": {
+        "mean": 65.43999999999998,
+        "sd": 2.2817537115122617
+      },
+      "overhealing": {
+        "mean": 534.9796000000001,
+        "sd": 19.666864311323256
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "holy-nova",
+        "passiveLv6": "light-grace"
+      },
+      "mode": "boss",
+      "dps": {
+        "mean": 160.80908579001596,
+        "sd": 4.659136277911628
+      },
+      "ttk": {
+        "mean": 74.95,
+        "sd": 2.188035648704107
+      },
+      "killsPerMinute": {
+        "mean": 0,
+        "sd": 0
+      },
+      "totalDamage": {
+        "mean": 12042.49,
+        "sd": 27.745087853528247
+      },
+      "basicShare": {
+        "mean": 0.6486085273983995,
+        "sd": 0.010398098969384723
+      },
+      "activeSkillShare": {
+        "mean": 0.35139147260160053,
+        "sd": 0.01039809896938472
+      },
+      "aoeShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "dotShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "extraShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "petShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceMinimum": {
+        "mean": 55.101999999999215,
+        "sd": 2.1316282072803006e-14
+      },
+      "resourceBlocked": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 27.369999999999976,
+        "sd": 1.8113806888669195
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "holy-light": 10,
+        "holy-nova": 7,
+        "holy-smite": 6,
+        "holy-storm": 4
+      },
+      "damageBySource": {
+        "holy-light": 1925.7,
+        "basic-attack": 7810.89,
+        "holy-nova": 685.6,
+        "holy-smite": 1269.34,
+        "holy-storm": 350.96
+      },
+      "effectiveHealing": {
+        "mean": 69.85000000000001,
+        "sd": 3.3207679834640675
+      },
+      "overhealing": {
+        "mean": 462.4728,
+        "sd": 17.062338414179923
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "holy-storm",
+        "passiveLv6": "light-grace"
+      },
+      "mode": "boss",
+      "dps": {
+        "mean": 160.1113731878561,
+        "sd": 4.572462363138295
+      },
+      "ttk": {
+        "mean": 75.3,
+        "sd": 2.1354156504062622
+      },
+      "killsPerMinute": {
+        "mean": 0,
+        "sd": 0
+      },
+      "totalDamage": {
+        "mean": 12046.66,
+        "sd": 29.20932043030099
+      },
+      "basicShare": {
+        "mean": 0.6511469362370192,
+        "sd": 0.010245449225498807
+      },
+      "activeSkillShare": {
+        "mean": 0.3488530637629811,
+        "sd": 0.010245449225498806
+      },
+      "aoeShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "dotShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "extraShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "petShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceMinimum": {
+        "mean": 55.101999999999215,
+        "sd": 2.1316282072803006e-14
+      },
+      "resourceBlocked": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 27.669999999999977,
+        "sd": 1.7346757622103333
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "holy-light": 10,
+        "holy-nova": 7,
+        "holy-smite": 6,
+        "holy-storm": 4
+      },
+      "damageBySource": {
+        "holy-light": 1925.7,
+        "basic-attack": 7844.14,
+        "holy-nova": 618.28,
+        "holy-smite": 1269.34,
+        "holy-storm": 389.2
+      },
+      "effectiveHealing": {
+        "mean": 69.85,
+        "sd": 3.3207679834640684
+      },
+      "overhealing": {
+        "mean": 440.34719999999993,
+        "sd": 17.026179141545533
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "heal",
+        "passiveLv6": "light-grace"
+      },
+      "mode": "boss",
+      "dps": {
+        "mean": 159.19560892274615,
+        "sd": 4.520353240401764
+      },
+      "ttk": {
+        "mean": 75.75,
+        "sd": 2.146508793366568
+      },
+      "killsPerMinute": {
+        "mean": 0,
+        "sd": 0
+      },
+      "totalDamage": {
+        "mean": 12049.4,
+        "sd": 28.38274123477151
+      },
+      "basicShare": {
+        "mean": 0.6543958707174927,
+        "sd": 0.010323023641392128
+      },
+      "activeSkillShare": {
+        "mean": 0.3456041292825071,
+        "sd": 0.010323023641392126
+      },
+      "aoeShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "dotShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "extraShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "petShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceMinimum": {
+        "mean": 55.101999999999215,
+        "sd": 2.1316282072803006e-14
+      },
+      "resourceBlocked": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 27.92999999999997,
+        "sd": 1.5802215034608287
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "holy-light": 10,
+        "holy-nova": 7,
+        "holy-smite": 6,
+        "holy-storm": 4
+      },
+      "damageBySource": {
+        "holy-light": 1925.7,
+        "basic-attack": 7885.12,
+        "holy-nova": 618.28,
+        "holy-smite": 1269.34,
+        "holy-storm": 350.96
+      },
+      "effectiveHealing": {
+        "mean": 69.85,
+        "sd": 3.3207679834640684
+      },
+      "overhealing": {
+        "mean": 434.31040000000013,
+        "sd": 16.995382662358615
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "holy-smite",
+        "passiveLv6": "holy-protection"
+      },
+      "mode": "boss",
+      "dps": {
+        "mean": 143.89725609901248,
+        "sd": 4.1344807449885455
+      },
+      "ttk": {
+        "mean": 83.778,
+        "sd": 2.4248950492753294
+      },
+      "killsPerMinute": {
+        "mean": 0,
+        "sd": 0
+      },
+      "totalDamage": {
+        "mean": 12045.45,
+        "sd": 30.08101560785472
+      },
+      "basicShare": {
+        "mean": 0.6436372187645767,
+        "sd": 0.01153613485312058
+      },
+      "activeSkillShare": {
+        "mean": 0.3563627812354234,
+        "sd": 0.011536134853120583
+      },
+      "aoeShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "dotShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "extraShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "petShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceMinimum": {
+        "mean": 55.101999999999215,
+        "sd": 2.1316282072803006e-14
+      },
+      "resourceBlocked": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 29.195999999999966,
+        "sd": 0.03979949748426465
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "holy-light": 10,
+        "holy-nova": 7,
+        "holy-smite": 6,
+        "holy-storm": 4
+      },
+      "damageBySource": {
+        "holy-light": 1924,
+        "basic-attack": 7752.99,
+        "holy-nova": 618.28,
+        "holy-smite": 1398.81,
+        "holy-storm": 351.37
+      },
+      "effectiveHealing": {
+        "mean": 69.99,
+        "sd": 2.9681475704553484
+      },
+      "overhealing": {
+        "mean": 500.64370000000025,
+        "sd": 20.896343922083602
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "holy-smite",
+        "passiveLv6": "divine-grace"
+      },
+      "mode": "boss",
+      "dps": {
+        "mean": 143.89725609901248,
+        "sd": 4.1344807449885455
+      },
+      "ttk": {
+        "mean": 83.778,
+        "sd": 2.4248950492753294
+      },
+      "killsPerMinute": {
+        "mean": 0,
+        "sd": 0
+      },
+      "totalDamage": {
+        "mean": 12045.45,
+        "sd": 30.08101560785472
+      },
+      "basicShare": {
+        "mean": 0.6436372187645767,
+        "sd": 0.01153613485312058
+      },
+      "activeSkillShare": {
+        "mean": 0.3563627812354234,
+        "sd": 0.011536134853120583
+      },
+      "aoeShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "dotShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "extraShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "petShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceMinimum": {
+        "mean": 55.101999999999215,
+        "sd": 2.1316282072803006e-14
+      },
+      "resourceBlocked": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 29.195999999999966,
+        "sd": 0.03979949748426465
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "holy-light": 10,
+        "holy-nova": 7,
+        "holy-smite": 6,
+        "holy-storm": 4
+      },
+      "damageBySource": {
+        "holy-light": 1924,
+        "basic-attack": 7752.99,
+        "holy-nova": 618.28,
+        "holy-smite": 1398.81,
+        "holy-storm": 351.37
+      },
+      "effectiveHealing": {
+        "mean": 69.99,
+        "sd": 2.9681475704553484
+      },
+      "overhealing": {
+        "mean": 500.64370000000025,
+        "sd": 20.896343922083602
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "holy-smite",
+        "passiveLv6": "fanatical-faith"
+      },
+      "mode": "boss",
+      "dps": {
+        "mean": 143.89725609901248,
+        "sd": 4.1344807449885455
+      },
+      "ttk": {
+        "mean": 83.778,
+        "sd": 2.4248950492753294
+      },
+      "killsPerMinute": {
+        "mean": 0,
+        "sd": 0
+      },
+      "totalDamage": {
+        "mean": 12045.45,
+        "sd": 30.08101560785472
+      },
+      "basicShare": {
+        "mean": 0.6436372187645767,
+        "sd": 0.01153613485312058
+      },
+      "activeSkillShare": {
+        "mean": 0.3563627812354234,
+        "sd": 0.011536134853120583
+      },
+      "aoeShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "dotShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "extraShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "petShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceMinimum": {
+        "mean": 55.101999999999215,
+        "sd": 2.1316282072803006e-14
+      },
+      "resourceBlocked": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 29.195999999999966,
+        "sd": 0.03979949748426465
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "holy-light": 10,
+        "holy-nova": 7,
+        "holy-smite": 6,
+        "holy-storm": 4
+      },
+      "damageBySource": {
+        "holy-light": 1924,
+        "basic-attack": 7752.99,
+        "holy-nova": 618.28,
+        "holy-smite": 1398.81,
+        "holy-storm": 351.37
+      },
+      "effectiveHealing": {
+        "mean": 69.99,
+        "sd": 2.9681475704553484
+      },
+      "overhealing": {
+        "mean": 500.64370000000025,
+        "sd": 20.896343922083602
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "holy-smite",
+        "passiveLv6": "light-devotion"
+      },
+      "mode": "boss",
+      "dps": {
+        "mean": 143.89725609901248,
+        "sd": 4.1344807449885455
+      },
+      "ttk": {
+        "mean": 83.778,
+        "sd": 2.4248950492753294
+      },
+      "killsPerMinute": {
+        "mean": 0,
+        "sd": 0
+      },
+      "totalDamage": {
+        "mean": 12045.45,
+        "sd": 30.08101560785472
+      },
+      "basicShare": {
+        "mean": 0.6436372187645767,
+        "sd": 0.01153613485312058
+      },
+      "activeSkillShare": {
+        "mean": 0.3563627812354234,
+        "sd": 0.011536134853120583
+      },
+      "aoeShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "dotShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "extraShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "petShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceMinimum": {
+        "mean": 55.101999999999215,
+        "sd": 2.1316282072803006e-14
+      },
+      "resourceBlocked": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 29.195999999999966,
+        "sd": 0.03979949748426465
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "holy-light": 10,
+        "holy-nova": 7,
+        "holy-smite": 6,
+        "holy-storm": 4
+      },
+      "damageBySource": {
+        "holy-light": 1924,
+        "basic-attack": 7752.99,
+        "holy-nova": 618.28,
+        "holy-smite": 1398.81,
+        "holy-storm": 351.37
+      },
+      "effectiveHealing": {
+        "mean": 69.99,
+        "sd": 2.9681475704553457
+      },
+      "overhealing": {
+        "mean": 543.5683000000001,
+        "sd": 22.10606120750591
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "holy-nova",
+        "passiveLv6": "holy-protection"
+      },
+      "mode": "boss",
+      "dps": {
+        "mean": 142.71793898193343,
+        "sd": 3.998345514295278
+      },
+      "ttk": {
+        "mean": 84.493,
+        "sd": 2.3264674938627454
+      },
+      "killsPerMinute": {
+        "mean": 0,
+        "sd": 0
+      },
+      "totalDamage": {
+        "mean": 12049.41,
+        "sd": 30.72396296052969
+      },
+      "basicShare": {
+        "mean": 0.6484306593824489,
+        "sd": 0.010982125519548311
+      },
+      "activeSkillShare": {
+        "mean": 0.3515693406175511,
+        "sd": 0.010982125519548315
+      },
+      "aoeShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "dotShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "extraShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "petShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceMinimum": {
+        "mean": 55.101999999999215,
+        "sd": 2.1316282072803006e-14
+      },
+      "resourceBlocked": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 29.199999999999967,
+        "sd": 3.197442310920451e-14
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "holy-light": 10,
+        "holy-nova": 7,
+        "holy-smite": 6,
+        "holy-storm": 4
+      },
+      "damageBySource": {
+        "holy-light": 1924,
+        "basic-attack": 7813.22,
+        "holy-nova": 685.6,
+        "holy-smite": 1275.22,
+        "holy-storm": 351.37
+      },
+      "effectiveHealing": {
+        "mean": 69.99000000000002,
+        "sd": 2.9681475704553524
+      },
+      "overhealing": {
+        "mean": 463.3597000000001,
+        "sd": 17.18802870924994
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "holy-nova",
+        "passiveLv6": "divine-grace"
+      },
+      "mode": "boss",
+      "dps": {
+        "mean": 142.71793898193343,
+        "sd": 3.998345514295278
+      },
+      "ttk": {
+        "mean": 84.493,
+        "sd": 2.3264674938627454
+      },
+      "killsPerMinute": {
+        "mean": 0,
+        "sd": 0
+      },
+      "totalDamage": {
+        "mean": 12049.41,
+        "sd": 30.72396296052969
+      },
+      "basicShare": {
+        "mean": 0.6484306593824489,
+        "sd": 0.010982125519548311
+      },
+      "activeSkillShare": {
+        "mean": 0.3515693406175511,
+        "sd": 0.010982125519548315
+      },
+      "aoeShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "dotShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "extraShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "petShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceMinimum": {
+        "mean": 55.101999999999215,
+        "sd": 2.1316282072803006e-14
+      },
+      "resourceBlocked": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 29.199999999999967,
+        "sd": 3.197442310920451e-14
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "holy-light": 10,
+        "holy-nova": 7,
+        "holy-smite": 6,
+        "holy-storm": 4
+      },
+      "damageBySource": {
+        "holy-light": 1924,
+        "basic-attack": 7813.22,
+        "holy-nova": 685.6,
+        "holy-smite": 1275.22,
+        "holy-storm": 351.37
+      },
+      "effectiveHealing": {
+        "mean": 69.99000000000002,
+        "sd": 2.9681475704553524
+      },
+      "overhealing": {
+        "mean": 463.3597000000001,
+        "sd": 17.18802870924994
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "holy-nova",
+        "passiveLv6": "fanatical-faith"
+      },
+      "mode": "boss",
+      "dps": {
+        "mean": 142.71793898193343,
+        "sd": 3.998345514295278
+      },
+      "ttk": {
+        "mean": 84.493,
+        "sd": 2.3264674938627454
+      },
+      "killsPerMinute": {
+        "mean": 0,
+        "sd": 0
+      },
+      "totalDamage": {
+        "mean": 12049.41,
+        "sd": 30.72396296052969
+      },
+      "basicShare": {
+        "mean": 0.6484306593824489,
+        "sd": 0.010982125519548311
+      },
+      "activeSkillShare": {
+        "mean": 0.3515693406175511,
+        "sd": 0.010982125519548315
+      },
+      "aoeShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "dotShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "extraShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "petShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceMinimum": {
+        "mean": 55.101999999999215,
+        "sd": 2.1316282072803006e-14
+      },
+      "resourceBlocked": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 29.199999999999967,
+        "sd": 3.197442310920451e-14
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "holy-light": 10,
+        "holy-nova": 7,
+        "holy-smite": 6,
+        "holy-storm": 4
+      },
+      "damageBySource": {
+        "holy-light": 1924,
+        "basic-attack": 7813.22,
+        "holy-nova": 685.6,
+        "holy-smite": 1275.22,
+        "holy-storm": 351.37
+      },
+      "effectiveHealing": {
+        "mean": 69.99000000000002,
+        "sd": 2.9681475704553524
+      },
+      "overhealing": {
+        "mean": 463.3597000000001,
+        "sd": 17.18802870924994
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "holy-nova",
+        "passiveLv6": "light-devotion"
+      },
+      "mode": "boss",
+      "dps": {
+        "mean": 142.71793898193343,
+        "sd": 3.998345514295278
+      },
+      "ttk": {
+        "mean": 84.493,
+        "sd": 2.3264674938627454
+      },
+      "killsPerMinute": {
+        "mean": 0,
+        "sd": 0
+      },
+      "totalDamage": {
+        "mean": 12049.41,
+        "sd": 30.72396296052969
+      },
+      "basicShare": {
+        "mean": 0.6484306593824489,
+        "sd": 0.010982125519548311
+      },
+      "activeSkillShare": {
+        "mean": 0.3515693406175511,
+        "sd": 0.010982125519548315
+      },
+      "aoeShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "dotShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "extraShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "petShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceMinimum": {
+        "mean": 55.101999999999215,
+        "sd": 2.1316282072803006e-14
+      },
+      "resourceBlocked": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 29.199999999999967,
+        "sd": 3.197442310920451e-14
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "holy-light": 10,
+        "holy-nova": 7,
+        "holy-smite": 6,
+        "holy-storm": 4
+      },
+      "damageBySource": {
+        "holy-light": 1924,
+        "basic-attack": 7813.22,
+        "holy-nova": 685.6,
+        "holy-smite": 1275.22,
+        "holy-storm": 351.37
+      },
+      "effectiveHealing": {
+        "mean": 69.99000000000002,
+        "sd": 2.9681475704553537
+      },
+      "overhealing": {
+        "mean": 505.72159999999974,
+        "sd": 18.375429068187774
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "holy-storm",
+        "passiveLv6": "holy-protection"
+      },
+      "mode": "boss",
+      "dps": {
+        "mean": 142.1160683366858,
+        "sd": 3.996971831970877
+      },
+      "ttk": {
+        "mean": 84.845,
+        "sd": 2.3866451349121838
+      },
+      "killsPerMinute": {
+        "mean": 0,
+        "sd": 0
+      },
+      "totalDamage": {
+        "mean": 12048.33,
+        "sd": 22.841652742303914
+      },
+      "basicShare": {
+        "mean": 0.6508045529250636,
+        "sd": 0.0110213733698142
+      },
+      "activeSkillShare": {
+        "mean": 0.3491954470749362,
+        "sd": 0.011021373369814201
+      },
+      "aoeShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "dotShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "extraShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "petShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceMinimum": {
+        "mean": 55.101999999999215,
+        "sd": 2.1316282072803006e-14
+      },
+      "resourceBlocked": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 29.199999999999967,
+        "sd": 3.197442310920451e-14
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "holy-light": 10,
+        "holy-nova": 7,
+        "holy-smite": 6,
+        "holy-storm": 4
+      },
+      "damageBySource": {
+        "holy-light": 1924,
+        "basic-attack": 7841.18,
+        "holy-nova": 618.28,
+        "holy-smite": 1275.22,
+        "holy-storm": 389.65
+      },
+      "effectiveHealing": {
+        "mean": 69.99,
+        "sd": 2.9681475704553484
+      },
+      "overhealing": {
+        "mean": 441.23690000000005,
+        "sd": 17.11353959267341
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "holy-storm",
+        "passiveLv6": "divine-grace"
+      },
+      "mode": "boss",
+      "dps": {
+        "mean": 142.1160683366858,
+        "sd": 3.996971831970877
+      },
+      "ttk": {
+        "mean": 84.845,
+        "sd": 2.3866451349121838
+      },
+      "killsPerMinute": {
+        "mean": 0,
+        "sd": 0
+      },
+      "totalDamage": {
+        "mean": 12048.33,
+        "sd": 22.841652742303914
+      },
+      "basicShare": {
+        "mean": 0.6508045529250636,
+        "sd": 0.0110213733698142
+      },
+      "activeSkillShare": {
+        "mean": 0.3491954470749362,
+        "sd": 0.011021373369814201
+      },
+      "aoeShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "dotShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "extraShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "petShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceMinimum": {
+        "mean": 55.101999999999215,
+        "sd": 2.1316282072803006e-14
+      },
+      "resourceBlocked": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 29.199999999999967,
+        "sd": 3.197442310920451e-14
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "holy-light": 10,
+        "holy-nova": 7,
+        "holy-smite": 6,
+        "holy-storm": 4
+      },
+      "damageBySource": {
+        "holy-light": 1924,
+        "basic-attack": 7841.18,
+        "holy-nova": 618.28,
+        "holy-smite": 1275.22,
+        "holy-storm": 389.65
+      },
+      "effectiveHealing": {
+        "mean": 69.99,
+        "sd": 2.9681475704553484
+      },
+      "overhealing": {
+        "mean": 441.23690000000005,
+        "sd": 17.11353959267341
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "holy-storm",
+        "passiveLv6": "fanatical-faith"
+      },
+      "mode": "boss",
+      "dps": {
+        "mean": 142.1160683366858,
+        "sd": 3.996971831970877
+      },
+      "ttk": {
+        "mean": 84.845,
+        "sd": 2.3866451349121838
+      },
+      "killsPerMinute": {
+        "mean": 0,
+        "sd": 0
+      },
+      "totalDamage": {
+        "mean": 12048.33,
+        "sd": 22.841652742303914
+      },
+      "basicShare": {
+        "mean": 0.6508045529250636,
+        "sd": 0.0110213733698142
+      },
+      "activeSkillShare": {
+        "mean": 0.3491954470749362,
+        "sd": 0.011021373369814201
+      },
+      "aoeShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "dotShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "extraShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "petShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceMinimum": {
+        "mean": 55.101999999999215,
+        "sd": 2.1316282072803006e-14
+      },
+      "resourceBlocked": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 29.199999999999967,
+        "sd": 3.197442310920451e-14
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "holy-light": 10,
+        "holy-nova": 7,
+        "holy-smite": 6,
+        "holy-storm": 4
+      },
+      "damageBySource": {
+        "holy-light": 1924,
+        "basic-attack": 7841.18,
+        "holy-nova": 618.28,
+        "holy-smite": 1275.22,
+        "holy-storm": 389.65
+      },
+      "effectiveHealing": {
+        "mean": 69.99,
+        "sd": 2.9681475704553484
+      },
+      "overhealing": {
+        "mean": 441.23690000000005,
+        "sd": 17.11353959267341
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "holy-storm",
+        "passiveLv6": "light-devotion"
+      },
+      "mode": "boss",
+      "dps": {
+        "mean": 142.1160683366858,
+        "sd": 3.996971831970877
+      },
+      "ttk": {
+        "mean": 84.845,
+        "sd": 2.3866451349121838
+      },
+      "killsPerMinute": {
+        "mean": 0,
+        "sd": 0
+      },
+      "totalDamage": {
+        "mean": 12048.33,
+        "sd": 22.841652742303914
+      },
+      "basicShare": {
+        "mean": 0.6508045529250636,
+        "sd": 0.0110213733698142
+      },
+      "activeSkillShare": {
+        "mean": 0.3491954470749362,
+        "sd": 0.011021373369814201
+      },
+      "aoeShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "dotShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "extraShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "petShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceMinimum": {
+        "mean": 55.101999999999215,
+        "sd": 2.1316282072803006e-14
+      },
+      "resourceBlocked": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 29.199999999999967,
+        "sd": 3.197442310920451e-14
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "holy-light": 10,
+        "holy-nova": 7,
+        "holy-smite": 6,
+        "holy-storm": 4
+      },
+      "damageBySource": {
+        "holy-light": 1924,
+        "basic-attack": 7841.18,
+        "holy-nova": 618.28,
+        "holy-smite": 1275.22,
+        "holy-storm": 389.65
+      },
+      "effectiveHealing": {
+        "mean": 69.99,
+        "sd": 2.9681475704553457
+      },
+      "overhealing": {
+        "mean": 483.3083999999997,
+        "sd": 18.287020354338765
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "heal",
+        "passiveLv6": "holy-protection"
+      },
+      "mode": "boss",
+      "dps": {
+        "mean": 141.39858592974923,
+        "sd": 3.9228429055205223
+      },
+      "ttk": {
+        "mean": 85.23000000000002,
+        "sd": 2.3256611963052585
+      },
+      "killsPerMinute": {
+        "mean": 0,
+        "sd": 0
+      },
+      "totalDamage": {
+        "mean": 12042.32,
+        "sd": 29.913836263508596
+      },
+      "basicShare": {
+        "mean": 0.6538207157898814,
+        "sd": 0.010618175497125943
+      },
+      "activeSkillShare": {
+        "mean": 0.3461792842101186,
+        "sd": 0.010618175497125945
+      },
+      "aoeShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "dotShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "extraShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "petShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceMinimum": {
+        "mean": 55.101999999999215,
+        "sd": 2.1316282072803006e-14
+      },
+      "resourceBlocked": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 29.199999999999967,
+        "sd": 3.197442310920451e-14
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "holy-light": 10,
+        "holy-nova": 7,
+        "holy-smite": 6,
+        "holy-storm": 4
+      },
+      "damageBySource": {
+        "holy-light": 1924,
+        "basic-attack": 7873.45,
+        "holy-nova": 618.28,
+        "holy-smite": 1275.22,
+        "holy-storm": 351.37
+      },
+      "effectiveHealing": {
+        "mean": 69.99,
+        "sd": 2.9681475704553484
+      },
+      "overhealing": {
+        "mean": 435.19730000000027,
+        "sd": 17.09050776630115
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "heal",
+        "passiveLv6": "divine-grace"
+      },
+      "mode": "boss",
+      "dps": {
+        "mean": 141.39858592974923,
+        "sd": 3.9228429055205223
+      },
+      "ttk": {
+        "mean": 85.23000000000002,
+        "sd": 2.3256611963052585
+      },
+      "killsPerMinute": {
+        "mean": 0,
+        "sd": 0
+      },
+      "totalDamage": {
+        "mean": 12042.32,
+        "sd": 29.913836263508596
+      },
+      "basicShare": {
+        "mean": 0.6538207157898814,
+        "sd": 0.010618175497125943
+      },
+      "activeSkillShare": {
+        "mean": 0.3461792842101186,
+        "sd": 0.010618175497125945
+      },
+      "aoeShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "dotShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "extraShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "petShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceMinimum": {
+        "mean": 55.101999999999215,
+        "sd": 2.1316282072803006e-14
+      },
+      "resourceBlocked": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 29.199999999999967,
+        "sd": 3.197442310920451e-14
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "holy-light": 10,
+        "holy-nova": 7,
+        "holy-smite": 6,
+        "holy-storm": 4
+      },
+      "damageBySource": {
+        "holy-light": 1924,
+        "basic-attack": 7873.45,
+        "holy-nova": 618.28,
+        "holy-smite": 1275.22,
+        "holy-storm": 351.37
+      },
+      "effectiveHealing": {
+        "mean": 69.99,
+        "sd": 2.9681475704553484
+      },
+      "overhealing": {
+        "mean": 435.19730000000027,
+        "sd": 17.09050776630115
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "heal",
+        "passiveLv6": "fanatical-faith"
+      },
+      "mode": "boss",
+      "dps": {
+        "mean": 141.39858592974923,
+        "sd": 3.9228429055205223
+      },
+      "ttk": {
+        "mean": 85.23000000000002,
+        "sd": 2.3256611963052585
+      },
+      "killsPerMinute": {
+        "mean": 0,
+        "sd": 0
+      },
+      "totalDamage": {
+        "mean": 12042.32,
+        "sd": 29.913836263508596
+      },
+      "basicShare": {
+        "mean": 0.6538207157898814,
+        "sd": 0.010618175497125943
+      },
+      "activeSkillShare": {
+        "mean": 0.3461792842101186,
+        "sd": 0.010618175497125945
+      },
+      "aoeShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "dotShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "extraShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "petShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceMinimum": {
+        "mean": 55.101999999999215,
+        "sd": 2.1316282072803006e-14
+      },
+      "resourceBlocked": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 29.199999999999967,
+        "sd": 3.197442310920451e-14
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "holy-light": 10,
+        "holy-nova": 7,
+        "holy-smite": 6,
+        "holy-storm": 4
+      },
+      "damageBySource": {
+        "holy-light": 1924,
+        "basic-attack": 7873.45,
+        "holy-nova": 618.28,
+        "holy-smite": 1275.22,
+        "holy-storm": 351.37
+      },
+      "effectiveHealing": {
+        "mean": 69.99,
+        "sd": 2.9681475704553484
+      },
+      "overhealing": {
+        "mean": 435.19730000000027,
+        "sd": 17.09050776630115
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "heal",
+        "passiveLv6": "light-devotion"
+      },
+      "mode": "boss",
+      "dps": {
+        "mean": 141.39858592974923,
+        "sd": 3.9228429055205223
+      },
+      "ttk": {
+        "mean": 85.23000000000002,
+        "sd": 2.3256611963052585
+      },
+      "killsPerMinute": {
+        "mean": 0,
+        "sd": 0
+      },
+      "totalDamage": {
+        "mean": 12042.32,
+        "sd": 29.913836263508596
+      },
+      "basicShare": {
+        "mean": 0.6538207157898814,
+        "sd": 0.010618175497125943
+      },
+      "activeSkillShare": {
+        "mean": 0.3461792842101186,
+        "sd": 0.010618175497125945
+      },
+      "aoeShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "dotShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "extraShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "petShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceMinimum": {
+        "mean": 55.101999999999215,
+        "sd": 2.1316282072803006e-14
+      },
+      "resourceBlocked": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 29.199999999999967,
+        "sd": 3.197442310920451e-14
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "holy-light": 10,
+        "holy-nova": 7,
+        "holy-smite": 6,
+        "holy-storm": 4
+      },
+      "damageBySource": {
+        "holy-light": 1924,
+        "basic-attack": 7873.45,
+        "holy-nova": 618.28,
+        "holy-smite": 1275.22,
+        "holy-storm": 351.37
+      },
+      "effectiveHealing": {
+        "mean": 69.99,
+        "sd": 2.9681475704553457
+      },
+      "overhealing": {
+        "mean": 476.88599999999997,
+        "sd": 18.260578194569852
+      }
+    }
+  ]
+}

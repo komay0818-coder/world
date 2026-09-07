@@ -1,0 +1,52 @@
+{
+  "mode": "long-boss",
+  "id": "venom",
+  "job": "assassin",
+  "config": {
+    "activeLv6": "backstab",
+    "passiveLv6": "dagger-mastery"
+  },
+  "seeds": 100,
+  "ttk": {
+    "mean": 207.72199999999978,
+    "sd": 2.189364291295533
+  },
+  "dps": {
+    "mean": 289.1896706635343,
+    "sd": 3.0653758146838297
+  },
+  "resourceMinimum": {
+    "mean": 0,
+    "sd": 0
+  },
+  "resourceBlocked": {
+    "mean": 31.77,
+    "sd": 0.7050531894828933
+  },
+  "resourceZeroDuration": {
+    "mean": 0,
+    "sd": 0
+  },
+  "damageBySource": {
+    "poison-blade": 2646,
+    "poison-entry": 462.22,
+    "basic-attack": 24897.48,
+    "backstab": 9652.63,
+    "blood-venom-rend": 4450.22,
+    "rupture-entry": 578.4,
+    "poison": 4154.539942828754,
+    "corrosive-strike": 6337.12,
+    "bleed": 1314.707931729672,
+    "shadow-dance": 81.94,
+    "rupture": 2278.4921254415717,
+    "offhand": 2833.16,
+    "bleed-trigger": 377.46
+  },
+  "skillCasts": {
+    "poison-blade": 22.36,
+    "backstab": 43.94,
+    "blood-venom-rend": 24.96,
+    "corrosive-strike": 31.61,
+    "shadow-dance": 1
+  }
+}

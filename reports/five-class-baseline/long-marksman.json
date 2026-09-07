@@ -1,0 +1,46 @@
+{
+  "mode": "long-boss",
+  "id": "marksman",
+  "job": "hunter",
+  "config": {
+    "activeLv6": "power-shot",
+    "passiveLv6": "hunting-instinct"
+  },
+  "seeds": 100,
+  "ttk": {
+    "mean": 170.59400000000005,
+    "sd": 1.7055098944304043
+  },
+  "dps": {
+    "mean": 352.36824404427466,
+    "sd": 3.5445952067609268
+  },
+  "resourceMinimum": {
+    "mean": 0,
+    "sd": 0
+  },
+  "resourceBlocked": {
+    "mean": 37.02,
+    "sd": 0.2821347195933175
+  },
+  "resourceZeroDuration": {
+    "mean": 61.229999999999976,
+    "sd": 0.807279381626957
+  },
+  "damageBySource": {
+    "power-shot": 9153.37,
+    "basic-attack": 30055.45,
+    "pet-basic": 7995.65,
+    "multi-shot": 1949.54,
+    "piercing-shot": 3256.04,
+    "sniper-shot": 5341.34,
+    "beast-slam": 2354.54
+  },
+  "skillCasts": {
+    "power-shot": 43.09,
+    "multi-shot": 19.02,
+    "piercing-shot": 18.53,
+    "sniper-shot": 18.82,
+    "gale-rapid-fire": 1
+  }
+}
