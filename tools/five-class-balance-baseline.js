@@ -25,9 +25,17 @@ function equipment(job, advancedClass) {
 
 function combinations(job, advancedClass) {
   const skills = listSkills(job, advancedClass);
-  const active = skills.filter((skill) => skill.type === 'active');
-  const passive = skills.filter((skill) => skill.type === 'passive');
-  return active.flatMap((a) => passive.map((p) => ({ activeLv6: a.id, passiveLv6: p.id })));
+  const baseIds = new Set(listSkills(job, '').map((skill) => skill.id));
+  const baseActive = skills.filter((skill) => skill.type === 'active' && baseIds.has(skill.id));
+  const basePassive = skills.filter((skill) => skill.type === 'passive' && baseIds.has(skill.id));
+  const advancedActive = skills.filter((skill) => skill.type === 'active' && !baseIds.has(skill.id));
+  const advancedPassive = skills.filter((skill) => skill.type === 'passive' && !baseIds.has(skill.id));
+  return baseActive.flatMap((baseA) => basePassive.flatMap((baseP) => advancedActive.flatMap((advancedA) => advancedPassive.map((advancedP) => ({
+    baseActiveLv6: baseA.id,
+    basePassiveLv6: baseP.id,
+    advancedActiveLv6: advancedA.id,
+    advancedPassiveLv6: advancedP.id
+  })))));
 }
 
 function mean(values) { return values.reduce((sum, value) => sum + value, 0) / values.length; }
