@@ -13,8 +13,8 @@
   const active = (id,name,cooldown,levels,advancedClass) => Object.freeze({ level:45,type:'active',id,name,detail:SKILL_DETAILS[id],cooldown,energyCost:levels[0]?.energyCost||0,advancedClass,levels:Object.freeze(levels.map(Object.freeze)) });
   const passive = (id,name,levels,advancedClass) => Object.freeze({ level:45,type:'passive',id,name,detail:SKILL_DETAILS[id],cooldown:0,advancedClass,levels:Object.freeze(levels.map(Object.freeze)) });
   const ASSASSINATION_SKILLS = Object.freeze([
-    active('shadow-assassination','暗影刺殺',6,[190,205,220,235,250,270].map((power,i)=>({power:power/100,skillCrit:[5,6,7,8,10,12][i]/100,bleedingDamage:.20,energyCost:30,offhandOnCrit:i===5})),'assassination'),
-    active('death-mark','死亡標記',7,[8,10,12,14,16,20].map((damage,i)=>({duration:5,damage:damage/100,energyCost:20,killCooldownReduction:2,executeCritDamage:i===5?.35:0})),'assassination'),
+    active('shadow-assassination','暗影刺殺',6,[190,205,220,235,250,270].map((power,i)=>({power:power/100,skillCrit:[5,6,7,8,10,12][i]/100,bleedingDamage:.20,energyCost:20,offhandOnCrit:i===5})),'assassination'),
+    active('death-mark','死亡標記',7,[8,10,12,14,16,20].map((damage,i)=>({duration:5,damage:damage/100,energyCost:0,killCooldownReduction:2,executeCritDamage:i===5?.35:0})),'assassination'),
     passive('lethal-technique','致命技巧',[3,4,5,6,8,10].map((criticalChance,i)=>({criticalChance:criticalChance/100,nextBasic:[10,12,14,16,18,20][i]/100,extraOffhandChance:i===5?.20:0})),'assassination'),
     passive('weakness-insight','弱點洞察',[3,4,5,6,8,10].map((attack,i)=>({bleedingAttack:attack/100,bleedingAttackSpeed:[2,3,4,5,6,8][i]/100,bleedingBasicDamage:i===5?.15:0})),'assassination')
   ]);
