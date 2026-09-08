@@ -1,0 +1,5498 @@
+{
+  "job": "hunter",
+  "advancedClass": "beastmaster",
+  "combinationCount": 30,
+  "seeds": 100,
+  "equipment": {
+    "chest": {
+      "id": "baseline-chest",
+      "slot": "chest",
+      "defense": 12
+    },
+    "weapon": {
+      "id": "baseline-weapon",
+      "slot": "weapon",
+      "attack": 24,
+      "attackMin": 22,
+      "attackMax": 26,
+      "criticalChance": 0.1,
+      "weaponType": "two-handed-bow"
+    }
+  },
+  "five": [
+    {
+      "config": {
+        "activeLv6": "power-shot",
+        "passiveLv6": "pack-summoning"
+      },
+      "mode": "five",
+      "dps": {
+        "mean": 435.5574166666667,
+        "sd": 6.971862386188097
+      },
+      "ttk": {
+        "mean": 0,
+        "sd": 0
+      },
+      "killsPerMinute": {
+        "mean": 9.925,
+        "sd": 0.20463381929681118
+      },
+      "totalDamage": {
+        "mean": 52266.89,
+        "sd": 836.6234863425722
+      },
+      "basicShare": {
+        "mean": 0.3048312089255645,
+        "sd": 0.005353417635201352
+      },
+      "activeSkillShare": {
+        "mean": 0.31107890701285024,
+        "sd": 0.0073538220613920905
+      },
+      "aoeShare": {
+        "mean": 0.2020849509699192,
+        "sd": 0.0067396122060664546
+      },
+      "dotShare": {
+        "mean": 0.003357027980164135,
+        "sd": 0.0010532766797005778
+      },
+      "extraShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "petShare": {
+        "mean": 0.38408988406158534,
+        "sd": 0.009540331653560217
+      },
+      "resourceMinimum": {
+        "mean": 3,
+        "sd": 0
+      },
+      "resourceBlocked": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "power-shot": 30,
+        "multi-shot": 15,
+        "piercing-shot": 13,
+        "beast-fury": 8,
+        "bloody-hunt": 11
+      },
+      "damageBySource": {
+        "power-shot": 5695.77,
+        "basic-attack": 15930.41,
+        "pet-basic": 15508.34,
+        "multi-shot": 5252.26,
+        "piercing-shot": 5309.97,
+        "beast-slam": 4394.58,
+        "pet-bleed": 175.56
+      },
+      "effectiveHealing": {
+        "mean": 0,
+        "sd": 0
+      },
+      "overhealing": {
+        "mean": 0,
+        "sd": 0
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "beast-fury",
+        "passiveLv6": "pack-summoning"
+      },
+      "mode": "five",
+      "dps": {
+        "mean": 420.82266666666675,
+        "sd": 7.4802932837630856
+      },
+      "ttk": {
+        "mean": 0,
+        "sd": 0
+      },
+      "killsPerMinute": {
+        "mean": 9.595,
+        "sd": 0.2201703885630402
+      },
+      "totalDamage": {
+        "mean": 50498.72,
+        "sd": 897.63519405157
+      },
+      "basicShare": {
+        "mean": 0.2872944224292776,
+        "sd": 0.005458888462772264
+      },
+      "activeSkillShare": {
+        "mean": 0.30180962392265576,
+        "sd": 0.00879290843617838
+      },
+      "aoeShare": {
+        "mean": 0.20483506364573617,
+        "sd": 0.008226478075556137
+      },
+      "dotShare": {
+        "mean": 0.0023596569796430497,
+        "sd": 0.0006883656236751359
+      },
+      "extraShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "petShare": {
+        "mean": 0.41089595364806675,
+        "sd": 0.010739782411961161
+      },
+      "resourceMinimum": {
+        "mean": 3,
+        "sd": 0
+      },
+      "resourceBlocked": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "power-shot": 30,
+        "multi-shot": 15,
+        "piercing-shot": 13,
+        "beast-fury": 8,
+        "bloody-hunt": 11
+      },
+      "damageBySource": {
+        "power-shot": 4896.16,
+        "basic-attack": 14505.27,
+        "pet-basic": 14583.7,
+        "multi-shot": 5174.88,
+        "piercing-shot": 5168,
+        "beast-slam": 4124.02,
+        "pet-bite": 1927.42,
+        "pet-bleed": 119.27
+      },
+      "effectiveHealing": {
+        "mean": 0,
+        "sd": 0
+      },
+      "overhealing": {
+        "mean": 0,
+        "sd": 0
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "piercing-shot",
+        "passiveLv6": "pack-summoning"
+      },
+      "mode": "five",
+      "dps": {
+        "mean": 418.84725000000003,
+        "sd": 7.261328128345394
+      },
+      "ttk": {
+        "mean": 0,
+        "sd": 0
+      },
+      "killsPerMinute": {
+        "mean": 9.5,
+        "sd": 0.18708286933869708
+      },
+      "totalDamage": {
+        "mean": 50261.67,
+        "sd": 871.3593754014471
+      },
+      "basicShare": {
+        "mean": 0.2877788204116634,
+        "sd": 0.007264369308370477
+      },
+      "activeSkillShare": {
+        "mean": 0.3462075670198949,
+        "sd": 0.007488024291736863
+      },
+      "aoeShare": {
+        "mean": 0.2482534554508958,
+        "sd": 0.007374101038798686
+      },
+      "dotShare": {
+        "mean": 0.0024606829989697126,
+        "sd": 0.0005706308088606152
+      },
+      "extraShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "petShare": {
+        "mean": 0.36601361256844167,
+        "sd": 0.009793495432773783
+      },
+      "resourceMinimum": {
+        "mean": 3,
+        "sd": 0
+      },
+      "resourceBlocked": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "power-shot": 30,
+        "multi-shot": 15,
+        "piercing-shot": 13,
+        "beast-fury": 8,
+        "bloody-hunt": 11
+      },
+      "damageBySource": {
+        "power-shot": 4922.43,
+        "basic-attack": 14459.74,
+        "pet-basic": 14242.15,
+        "multi-shot": 5137.88,
+        "piercing-shot": 7340.72,
+        "beast-slam": 4035.06,
+        "pet-bleed": 123.69
+      },
+      "effectiveHealing": {
+        "mean": 0,
+        "sd": 0
+      },
+      "overhealing": {
+        "mean": 0,
+        "sd": 0
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "multi-shot",
+        "passiveLv6": "pack-summoning"
+      },
+      "mode": "five",
+      "dps": {
+        "mean": 417.34475000000015,
+        "sd": 7.913177007635219
+      },
+      "ttk": {
+        "mean": 0,
+        "sd": 0
+      },
+      "killsPerMinute": {
+        "mean": 9.45,
+        "sd": 0.2500000000000001
+      },
+      "totalDamage": {
+        "mean": 50081.37,
+        "sd": 949.5812409162264
+      },
+      "basicShare": {
+        "mean": 0.28851753955869747,
+        "sd": 0.005660742116642186
+      },
+      "activeSkillShare": {
+        "mean": 0.3441073956192332,
+        "sd": 0.009377293176395402
+      },
+      "aoeShare": {
+        "mean": 0.24630305497405117,
+        "sd": 0.009500048209411334
+      },
+      "dotShare": {
+        "mean": 0.0027568855198719542,
+        "sd": 0.0006651421379388207
+      },
+      "extraShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "petShare": {
+        "mean": 0.3673750648220696,
+        "sd": 0.009953848853468204
+      },
+      "resourceMinimum": {
+        "mean": 3,
+        "sd": 0
+      },
+      "resourceBlocked": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "power-shot": 29.99,
+        "multi-shot": 15.36,
+        "piercing-shot": 13,
+        "beast-fury": 8,
+        "bloody-hunt": 11
+      },
+      "damageBySource": {
+        "power-shot": 4896.87,
+        "basic-attack": 14445.44,
+        "pet-basic": 14238.71,
+        "multi-shot": 7178.28,
+        "piercing-shot": 5159.25,
+        "beast-slam": 4024.89,
+        "pet-bleed": 137.93
+      },
+      "effectiveHealing": {
+        "mean": 0,
+        "sd": 0
+      },
+      "overhealing": {
+        "mean": 0,
+        "sd": 0
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "bloody-hunt",
+        "passiveLv6": "pack-summoning"
+      },
+      "mode": "five",
+      "dps": {
+        "mean": 409.42866666666663,
+        "sd": 6.534582716423276
+      },
+      "ttk": {
+        "mean": 0,
+        "sd": 0
+      },
+      "killsPerMinute": {
+        "mean": 9.29,
+        "sd": 0.24677925358506114
+      },
+      "totalDamage": {
+        "mean": 49131.44,
+        "sd": 784.1499259707931
+      },
+      "basicShare": {
+        "mean": 0.2939724799962542,
+        "sd": 0.005990818571987716
+      },
+      "activeSkillShare": {
+        "mean": 0.30910486823108757,
+        "sd": 0.006731344443217121
+      },
+      "aoeShare": {
+        "mean": 0.20913818012242383,
+        "sd": 0.007297791330497154
+      },
+      "dotShare": {
+        "mean": 0.003036874543534216,
+        "sd": 0.0005732789351494551
+      },
+      "extraShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "petShare": {
+        "mean": 0.39692265177265823,
+        "sd": 0.008491731628598486
+      },
+      "resourceMinimum": {
+        "mean": 3,
+        "sd": 0
+      },
+      "resourceBlocked": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "power-shot": 30,
+        "multi-shot": 15,
+        "piercing-shot": 13,
+        "beast-fury": 8,
+        "bloody-hunt": 11
+      },
+      "damageBySource": {
+        "power-shot": 4911.07,
+        "basic-attack": 14440.35,
+        "pet-basic": 15318.54,
+        "multi-shot": 5087.56,
+        "piercing-shot": 5187.25,
+        "beast-slam": 4037.44,
+        "pet-bleed": 149.23
+      },
+      "effectiveHealing": {
+        "mean": 0,
+        "sd": 0
+      },
+      "overhealing": {
+        "mean": 0,
+        "sd": 0
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "power-shot",
+        "passiveLv6": "hunting-instinct"
+      },
+      "mode": "five",
+      "dps": {
+        "mean": 388.39741666666674,
+        "sd": 6.622187526183809
+      },
+      "ttk": {
+        "mean": 0,
+        "sd": 0
+      },
+      "killsPerMinute": {
+        "mean": 8.66,
+        "sd": 0.23323807579381176
+      },
+      "totalDamage": {
+        "mean": 46607.69,
+        "sd": 794.6625031420572
+      },
+      "basicShare": {
+        "mean": 0.40632536851920487,
+        "sd": 0.007690724680954617
+      },
+      "activeSkillShare": {
+        "mean": 0.3515943826921123,
+        "sd": 0.008689764532990536
+      },
+      "aoeShare": {
+        "mean": 0.22856320986044898,
+        "sd": 0.007823582094769077
+      },
+      "dotShare": {
+        "mean": 0.0024008704266565034,
+        "sd": 0.0004194205639834387
+      },
+      "extraShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "petShare": {
+        "mean": 0.24208024878868276,
+        "sd": 0.012001353493039267
+      },
+      "resourceMinimum": {
+        "mean": 3,
+        "sd": 0
+      },
+      "resourceBlocked": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "power-shot": 30,
+        "multi-shot": 15,
+        "piercing-shot": 13,
+        "beast-fury": 8,
+        "bloody-hunt": 11
+      },
+      "damageBySource": {
+        "power-shot": 5733.39,
+        "basic-attack": 18933.22,
+        "pet-basic": 8758.04,
+        "multi-shot": 5283.33,
+        "piercing-shot": 5368.92,
+        "beast-slam": 2418.83,
+        "pet-bleed": 111.96
+      },
+      "effectiveHealing": {
+        "mean": 0,
+        "sd": 0
+      },
+      "overhealing": {
+        "mean": 0,
+        "sd": 0
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "power-shot",
+        "passiveLv6": "precision-shot"
+      },
+      "mode": "five",
+      "dps": {
+        "mean": 387.86383333333333,
+        "sd": 8.234370145581533
+      },
+      "ttk": {
+        "mean": 0,
+        "sd": 0
+      },
+      "killsPerMinute": {
+        "mean": 8.695,
+        "sd": 0.25391927851189255
+      },
+      "totalDamage": {
+        "mean": 46543.66,
+        "sd": 988.1244174697839
+      },
+      "basicShare": {
+        "mean": 0.3647619017976982,
+        "sd": 0.009035682198022237
+      },
+      "activeSkillShare": {
+        "mean": 0.3720226862905867,
+        "sd": 0.010562211720869744
+      },
+      "aoeShare": {
+        "mean": 0.2413525678936427,
+        "sd": 0.009972789056074158
+      },
+      "dotShare": {
+        "mean": 0.002387871956788369,
+        "sd": 0.000531096567616409
+      },
+      "extraShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "petShare": {
+        "mean": 0.26321541191171516,
+        "sd": 0.012354287739653573
+      },
+      "resourceMinimum": {
+        "mean": 3,
+        "sd": 0
+      },
+      "resourceBlocked": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "power-shot": 30,
+        "multi-shot": 15,
+        "piercing-shot": 13,
+        "beast-fury": 8,
+        "bloody-hunt": 11
+      },
+      "damageBySource": {
+        "power-shot": 6080.36,
+        "basic-attack": 16972.55,
+        "pet-basic": 9478.74,
+        "multi-shot": 5610.93,
+        "piercing-shot": 5623.97,
+        "beast-slam": 2666.04,
+        "pet-bleed": 111.07
+      },
+      "effectiveHealing": {
+        "mean": 0,
+        "sd": 0
+      },
+      "overhealing": {
+        "mean": 0,
+        "sd": 0
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "power-shot",
+        "passiveLv6": "wild-bond"
+      },
+      "mode": "five",
+      "dps": {
+        "mean": 385.5872499999999,
+        "sd": 8.225830121483183
+      },
+      "ttk": {
+        "mean": 0,
+        "sd": 0
+      },
+      "killsPerMinute": {
+        "mean": 8.645,
+        "sd": 0.2479415253643487
+      },
+      "totalDamage": {
+        "mean": 46270.47,
+        "sd": 987.0996145779816
+      },
+      "basicShare": {
+        "mean": 0.36204224171970895,
+        "sd": 0.007856704169095619
+      },
+      "activeSkillShare": {
+        "mean": 0.35330600954665664,
+        "sd": 0.010094697624797004
+      },
+      "aoeShare": {
+        "mean": 0.2291756741984286,
+        "sd": 0.00828516116859488
+      },
+      "dotShare": {
+        "mean": 0.002689415878329681,
+        "sd": 0.0005078740848960882
+      },
+      "extraShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "petShare": {
+        "mean": 0.2846517487336342,
+        "sd": 0.014024374994983012
+      },
+      "resourceMinimum": {
+        "mean": 3,
+        "sd": 0
+      },
+      "resourceBlocked": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "power-shot": 30,
+        "multi-shot": 15,
+        "piercing-shot": 13,
+        "beast-fury": 8,
+        "bloody-hunt": 11
+      },
+      "damageBySource": {
+        "power-shot": 5741.51,
+        "basic-attack": 16746.7,
+        "pet-basic": 9719.72,
+        "multi-shot": 5267.11,
+        "piercing-shot": 5334.27,
+        "beast-slam": 3336.69,
+        "pet-bleed": 124.47
+      },
+      "effectiveHealing": {
+        "mean": 0,
+        "sd": 0
+      },
+      "overhealing": {
+        "mean": 0,
+        "sd": 0
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "piercing-shot",
+        "passiveLv6": "precision-shot"
+      },
+      "mode": "five",
+      "dps": {
+        "mean": 375.15358333333336,
+        "sd": 9.539946733996999
+      },
+      "ttk": {
+        "mean": 0,
+        "sd": 0
+      },
+      "killsPerMinute": {
+        "mean": 8.37,
+        "sd": 0.27946377224964275
+      },
+      "totalDamage": {
+        "mean": 45018.43,
+        "sd": 1144.7936080796399
+      },
+      "basicShare": {
+        "mean": 0.34105974279850365,
+        "sd": 0.010042888624450911
+      },
+      "activeSkillShare": {
+        "mean": 0.41264497366465464,
+        "sd": 0.013273204439708239
+      },
+      "aoeShare": {
+        "mean": 0.2963754897772919,
+        "sd": 0.013404923054021583
+      },
+      "dotShare": {
+        "mean": 0.002211891993861647,
+        "sd": 0.0004766887650677196
+      },
+      "extraShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "petShare": {
+        "mean": 0.24629528353684194,
+        "sd": 0.013333185448638235
+      },
+      "resourceMinimum": {
+        "mean": 3,
+        "sd": 0
+      },
+      "resourceBlocked": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "power-shot": 30,
+        "multi-shot": 15,
+        "piercing-shot": 13,
+        "beast-fury": 8,
+        "bloody-hunt": 11
+      },
+      "damageBySource": {
+        "power-shot": 5232.18,
+        "basic-attack": 15347.27,
+        "pet-basic": 8604.57,
+        "multi-shot": 5488,
+        "piercing-shot": 7858,
+        "beast-slam": 2388.85,
+        "pet-bleed": 99.56
+      },
+      "effectiveHealing": {
+        "mean": 0,
+        "sd": 0
+      },
+      "overhealing": {
+        "mean": 0,
+        "sd": 0
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "piercing-shot",
+        "passiveLv6": "hunting-instinct"
+      },
+      "mode": "five",
+      "dps": {
+        "mean": 374.1601666666668,
+        "sd": 5.99198870020074
+      },
+      "ttk": {
+        "mean": 0,
+        "sd": 0
+      },
+      "killsPerMinute": {
+        "mean": 8.355,
+        "sd": 0.22688102609076852
+      },
+      "totalDamage": {
+        "mean": 44899.22,
+        "sd": 719.0386440240886
+      },
+      "basicShare": {
+        "mean": 0.38024420632595046,
+        "sd": 0.006658477262718011
+      },
+      "activeSkillShare": {
+        "mean": 0.3898240986281615,
+        "sd": 0.008408168418293796
+      },
+      "aoeShare": {
+        "mean": 0.280077017121147,
+        "sd": 0.008483554496495072
+      },
+      "dotShare": {
+        "mean": 0.0022359456669710136,
+        "sd": 0.0004234710923138163
+      },
+      "extraShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "petShare": {
+        "mean": 0.22993169504588817,
+        "sd": 0.01029398318591668
+      },
+      "resourceMinimum": {
+        "mean": 3,
+        "sd": 0
+      },
+      "resourceBlocked": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "power-shot": 30,
+        "multi-shot": 15,
+        "piercing-shot": 13,
+        "beast-fury": 8,
+        "bloody-hunt": 11
+      },
+      "damageBySource": {
+        "power-shot": 4926.69,
+        "basic-attack": 17069.03,
+        "pet-basic": 8033.59,
+        "multi-shot": 5170.44,
+        "piercing-shot": 7405.2,
+        "beast-slam": 2193.93,
+        "pet-bleed": 100.34
+      },
+      "effectiveHealing": {
+        "mean": 0,
+        "sd": 0
+      },
+      "overhealing": {
+        "mean": 0,
+        "sd": 0
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "multi-shot",
+        "passiveLv6": "precision-shot"
+      },
+      "mode": "five",
+      "dps": {
+        "mean": 372.5204166666665,
+        "sd": 8.689863377570061
+      },
+      "ttk": {
+        "mean": 0,
+        "sd": 0
+      },
+      "killsPerMinute": {
+        "mean": 8.265,
+        "sd": 0.2688401011754016
+      },
+      "totalDamage": {
+        "mean": 44702.45,
+        "sd": 1042.7836053084072
+      },
+      "basicShare": {
+        "mean": 0.3426350034644902,
+        "sd": 0.008356205770932367
+      },
+      "activeSkillShare": {
+        "mean": 0.41144593923590284,
+        "sd": 0.012375597496679415
+      },
+      "aoeShare": {
+        "mean": 0.29425515818159353,
+        "sd": 0.013057568770602417
+      },
+      "dotShare": {
+        "mean": 0.0022789769147828383,
+        "sd": 0.00042974504508165666
+      },
+      "extraShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "petShare": {
+        "mean": 0.24591905729960695,
+        "sd": 0.011855474124691553
+      },
+      "resourceMinimum": {
+        "mean": 3,
+        "sd": 0
+      },
+      "resourceBlocked": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "power-shot": 29.99,
+        "multi-shot": 15.38,
+        "piercing-shot": 13,
+        "beast-fury": 8,
+        "bloody-hunt": 11
+      },
+      "damageBySource": {
+        "power-shot": 5237.69,
+        "basic-attack": 15311.49,
+        "pet-basic": 8542.91,
+        "multi-shot": 7640.68,
+        "piercing-shot": 5515.44,
+        "beast-slam": 2352.49,
+        "pet-bleed": 101.75
+      },
+      "effectiveHealing": {
+        "mean": 0,
+        "sd": 0
+      },
+      "overhealing": {
+        "mean": 0,
+        "sd": 0
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "power-shot",
+        "passiveLv6": "pack-leader"
+      },
+      "mode": "five",
+      "dps": {
+        "mean": 372.5109166666667,
+        "sd": 6.822691479235549
+      },
+      "ttk": {
+        "mean": 0,
+        "sd": 0
+      },
+      "killsPerMinute": {
+        "mean": 8.345,
+        "sd": 0.24181604578687513
+      },
+      "totalDamage": {
+        "mean": 44701.31,
+        "sd": 818.7229775082657
+      },
+      "basicShare": {
+        "mean": 0.3579685072936296,
+        "sd": 0.00858025413091338
+      },
+      "activeSkillShare": {
+        "mean": 0.3659498185368345,
+        "sd": 0.008395633299253384
+      },
+      "aoeShare": {
+        "mean": 0.23661726939431435,
+        "sd": 0.007461961263575668
+      },
+      "dotShare": {
+        "mean": 0.0023081485646417486,
+        "sd": 0.0004014344206090289
+      },
+      "extraShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "petShare": {
+        "mean": 0.276081674169536,
+        "sd": 0.012933949709580514
+      },
+      "resourceMinimum": {
+        "mean": 3,
+        "sd": 0
+      },
+      "resourceBlocked": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "power-shot": 30,
+        "multi-shot": 15,
+        "piercing-shot": 13,
+        "beast-fury": 8,
+        "bloody-hunt": 11
+      },
+      "damageBySource": {
+        "power-shot": 5780.01,
+        "basic-attack": 15996.91,
+        "pet-basic": 9043.77,
+        "multi-shot": 5239.38,
+        "piercing-shot": 5336.68,
+        "beast-slam": 3201.31,
+        "pet-bleed": 103.25
+      },
+      "effectiveHealing": {
+        "mean": 0,
+        "sd": 0
+      },
+      "overhealing": {
+        "mean": 0,
+        "sd": 0
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "piercing-shot",
+        "passiveLv6": "wild-bond"
+      },
+      "mode": "five",
+      "dps": {
+        "mean": 372.49491666666677,
+        "sd": 8.211336328431024
+      },
+      "ttk": {
+        "mean": 0,
+        "sd": 0
+      },
+      "killsPerMinute": {
+        "mean": 8.31,
+        "sd": 0.27184554438136405
+      },
+      "totalDamage": {
+        "mean": 44699.39,
+        "sd": 985.3603594117232
+      },
+      "basicShare": {
+        "mean": 0.33745894070642,
+        "sd": 0.007630708744281831
+      },
+      "activeSkillShare": {
+        "mean": 0.3910783300460015,
+        "sd": 0.009703890422028356
+      },
+      "aoeShare": {
+        "mean": 0.28133062859452407,
+        "sd": 0.008947270374351689
+      },
+      "dotShare": {
+        "mean": 0.0025759559290829833,
+        "sd": 0.00045224113448383605
+      },
+      "extraShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "petShare": {
+        "mean": 0.2714627292475782,
+        "sd": 0.012938794222145071
+      },
+      "resourceMinimum": {
+        "mean": 3,
+        "sd": 0
+      },
+      "resourceBlocked": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "power-shot": 30,
+        "multi-shot": 15,
+        "piercing-shot": 13,
+        "beast-fury": 8,
+        "bloody-hunt": 11
+      },
+      "damageBySource": {
+        "power-shot": 4903.97,
+        "basic-attack": 15078.94,
+        "pet-basic": 8981.95,
+        "multi-shot": 5109.76,
+        "piercing-shot": 7464.72,
+        "beast-slam": 3044.88,
+        "pet-bleed": 115.17
+      },
+      "effectiveHealing": {
+        "mean": 0,
+        "sd": 0
+      },
+      "overhealing": {
+        "mean": 0,
+        "sd": 0
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "multi-shot",
+        "passiveLv6": "hunting-instinct"
+      },
+      "mode": "five",
+      "dps": {
+        "mean": 371.17866666666663,
+        "sd": 6.938681763210582
+      },
+      "ttk": {
+        "mean": 0,
+        "sd": 0
+      },
+      "killsPerMinute": {
+        "mean": 8.25,
+        "sd": 0.2598076211353316
+      },
+      "totalDamage": {
+        "mean": 44541.44,
+        "sd": 832.6418115852698
+      },
+      "basicShare": {
+        "mean": 0.38384086350924157,
+        "sd": 0.007530990157852293
+      },
+      "activeSkillShare": {
+        "mean": 0.3856306619756279,
+        "sd": 0.00907000697082332
+      },
+      "aoeShare": {
+        "mean": 0.27575581691138945,
+        "sd": 0.00889237263012819
+      },
+      "dotShare": {
+        "mean": 0.0023125184007580135,
+        "sd": 0.00038741129291132366
+      },
+      "extraShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "petShare": {
+        "mean": 0.23052847451513064,
+        "sd": 0.010260481540329807
+      },
+      "resourceMinimum": {
+        "mean": 3,
+        "sd": 0
+      },
+      "resourceBlocked": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "power-shot": 30,
+        "multi-shot": 15.34,
+        "piercing-shot": 13,
+        "beast-fury": 8,
+        "bloody-hunt": 11
+      },
+      "damageBySource": {
+        "power-shot": 4893.32,
+        "basic-attack": 17091.7,
+        "pet-basic": 7965.96,
+        "multi-shot": 7156.55,
+        "piercing-shot": 5127.75,
+        "beast-slam": 2203.19,
+        "pet-bleed": 102.97
+      },
+      "effectiveHealing": {
+        "mean": 0,
+        "sd": 0
+      },
+      "overhealing": {
+        "mean": 0,
+        "sd": 0
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "multi-shot",
+        "passiveLv6": "wild-bond"
+      },
+      "mode": "five",
+      "dps": {
+        "mean": 370.0309166666666,
+        "sd": 8.213309599448257
+      },
+      "ttk": {
+        "mean": 0,
+        "sd": 0
+      },
+      "killsPerMinute": {
+        "mean": 8.235,
+        "sd": 0.2868361901852696
+      },
+      "totalDamage": {
+        "mean": 44403.71,
+        "sd": 985.5971519337909
+      },
+      "basicShare": {
+        "mean": 0.33838572811637624,
+        "sd": 0.008640228609659292
+      },
+      "activeSkillShare": {
+        "mean": 0.39055021642020465,
+        "sd": 0.009790791719231222
+      },
+      "aoeShare": {
+        "mean": 0.2791899542159971,
+        "sd": 0.00962362056272554
+      },
+      "dotShare": {
+        "mean": 0.0026448898540296535,
+        "sd": 0.00041458257976256595
+      },
+      "extraShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "petShare": {
+        "mean": 0.27106405546341905,
+        "sd": 0.012210027945170532
+      },
+      "resourceMinimum": {
+        "mean": 3,
+        "sd": 0
+      },
+      "resourceBlocked": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "power-shot": 29.99,
+        "multi-shot": 15.42,
+        "piercing-shot": 13,
+        "beast-fury": 8,
+        "bloody-hunt": 11
+      },
+      "damageBySource": {
+        "power-shot": 4943.02,
+        "basic-attack": 15019.76,
+        "pet-basic": 8920.79,
+        "multi-shot": 7241.83,
+        "piercing-shot": 5155.75,
+        "beast-slam": 3005.14,
+        "pet-bleed": 117.42
+      },
+      "effectiveHealing": {
+        "mean": 0,
+        "sd": 0
+      },
+      "overhealing": {
+        "mean": 0,
+        "sd": 0
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "beast-fury",
+        "passiveLv6": "precision-shot"
+      },
+      "mode": "five",
+      "dps": {
+        "mean": 366.38866666666667,
+        "sd": 8.40133500634803
+      },
+      "ttk": {
+        "mean": 0,
+        "sd": 0
+      },
+      "killsPerMinute": {
+        "mean": 8.225,
+        "sd": 0.2586020108197151
+      },
+      "totalDamage": {
+        "mean": 43966.64,
+        "sd": 1008.1602007617637
+      },
+      "basicShare": {
+        "mean": 0.3505626968461961,
+        "sd": 0.008876597628666211
+      },
+      "activeSkillShare": {
+        "mean": 0.3672583621423358,
+        "sd": 0.010832809303086324
+      },
+      "aoeShare": {
+        "mean": 0.24918169089788264,
+        "sd": 0.01080282318276055
+      },
+      "dotShare": {
+        "mean": 0.0022253731874505175,
+        "sd": 0.000401622768817964
+      },
+      "extraShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "petShare": {
+        "mean": 0.28217894101146807,
+        "sd": 0.01239148545619573
+      },
+      "resourceMinimum": {
+        "mean": 3,
+        "sd": 0
+      },
+      "resourceBlocked": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "power-shot": 30,
+        "multi-shot": 15,
+        "piercing-shot": 13,
+        "beast-fury": 8,
+        "bloody-hunt": 11
+      },
+      "damageBySource": {
+        "power-shot": 5189.61,
+        "basic-attack": 15407.79,
+        "pet-basic": 8744.29,
+        "multi-shot": 5450.56,
+        "piercing-shot": 5505.72,
+        "beast-slam": 2441.89,
+        "pet-bite": 1129,
+        "pet-bleed": 97.78
+      },
+      "effectiveHealing": {
+        "mean": 0,
+        "sd": 0
+      },
+      "overhealing": {
+        "mean": 0,
+        "sd": 0
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "beast-fury",
+        "passiveLv6": "hunting-instinct"
+      },
+      "mode": "five",
+      "dps": {
+        "mean": 365.90708333333345,
+        "sd": 6.774417192542184
+      },
+      "ttk": {
+        "mean": 0,
+        "sd": 0
+      },
+      "killsPerMinute": {
+        "mean": 8.175,
+        "sd": 0.23848480035423655
+      },
+      "totalDamage": {
+        "mean": 43908.85,
+        "sd": 812.9300631050619
+      },
+      "basicShare": {
+        "mean": 0.38874907029991385,
+        "sd": 0.008113649158283689
+      },
+      "activeSkillShare": {
+        "mean": 0.34582900288684504,
+        "sd": 0.008206311239547537
+      },
+      "aoeShare": {
+        "mean": 0.23423740948349533,
+        "sd": 0.006925112115803946
+      },
+      "dotShare": {
+        "mean": 0.0022232820966157202,
+        "sd": 0.00034368297943124855
+      },
+      "extraShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "petShare": {
+        "mean": 0.26542192681324095,
+        "sd": 0.012358821549052676
+      },
+      "resourceMinimum": {
+        "mean": 3,
+        "sd": 0
+      },
+      "resourceBlocked": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "power-shot": 30,
+        "multi-shot": 15,
+        "piercing-shot": 13,
+        "beast-fury": 8,
+        "bloody-hunt": 11
+      },
+      "damageBySource": {
+        "power-shot": 4898.29,
+        "basic-attack": 17063.89,
+        "pet-basic": 8219.96,
+        "multi-shot": 5109.76,
+        "piercing-shot": 5175,
+        "beast-slam": 2267.64,
+        "pet-bite": 1076.75,
+        "pet-bleed": 97.56
+      },
+      "effectiveHealing": {
+        "mean": 0,
+        "sd": 0
+      },
+      "overhealing": {
+        "mean": 0,
+        "sd": 0
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "beast-fury",
+        "passiveLv6": "wild-bond"
+      },
+      "mode": "five",
+      "dps": {
+        "mean": 364.2539166666664,
+        "sd": 9.04754436105609
+      },
+      "ttk": {
+        "mean": 0,
+        "sd": 0
+      },
+      "killsPerMinute": {
+        "mean": 8.17,
+        "sd": 0.2471841418861657
+      },
+      "totalDamage": {
+        "mean": 43710.47,
+        "sd": 1085.7053233267302
+      },
+      "basicShare": {
+        "mean": 0.34453377424006193,
+        "sd": 0.00771582538207312
+      },
+      "activeSkillShare": {
+        "mean": 0.348360911741062,
+        "sd": 0.009236761580299766
+      },
+      "aoeShare": {
+        "mean": 0.23605424294833122,
+        "sd": 0.008424644149539761
+      },
+      "dotShare": {
+        "mean": 0.002550035048386741,
+        "sd": 0.0004390945812086197
+      },
+      "extraShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "petShare": {
+        "mean": 0.30710531401887614,
+        "sd": 0.012440400330732555
+      },
+      "resourceMinimum": {
+        "mean": 3,
+        "sd": 0
+      },
+      "resourceBlocked": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "power-shot": 30,
+        "multi-shot": 15,
+        "piercing-shot": 13,
+        "beast-fury": 8,
+        "bloody-hunt": 11
+      },
+      "damageBySource": {
+        "power-shot": 4906.81,
+        "basic-attack": 15054.09,
+        "pet-basic": 9071.35,
+        "multi-shot": 5124.56,
+        "piercing-shot": 5192.5,
+        "beast-slam": 3063.61,
+        "pet-bite": 1186.08,
+        "pet-bleed": 111.47
+      },
+      "effectiveHealing": {
+        "mean": 0,
+        "sd": 0
+      },
+      "overhealing": {
+        "mean": 0,
+        "sd": 0
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "power-shot",
+        "passiveLv6": "quick-reload"
+      },
+      "mode": "five",
+      "dps": {
+        "mean": 363.7846666666666,
+        "sd": 7.313872446704732
+      },
+      "ttk": {
+        "mean": 0,
+        "sd": 0
+      },
+      "killsPerMinute": {
+        "mean": 8.145,
+        "sd": 0.23764469276632286
+      },
+      "totalDamage": {
+        "mean": 43654.16,
+        "sd": 877.664693604568
+      },
+      "basicShare": {
+        "mean": 0.3677095006123037,
+        "sd": 0.007386848405926416
+      },
+      "activeSkillShare": {
+        "mean": 0.37377899306416906,
+        "sd": 0.008433738080722411
+      },
+      "aoeShare": {
+        "mean": 0.2415141982775698,
+        "sd": 0.007382394545431508
+      },
+      "dotShare": {
+        "mean": 0.002435965398855491,
+        "sd": 0.0004307157170560835
+      },
+      "extraShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "petShare": {
+        "mean": 0.25851150632352726,
+        "sd": 0.011439079640981304
+      },
+      "resourceMinimum": {
+        "mean": 3.5,
+        "sd": 0.5
+      },
+      "resourceBlocked": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "power-shot": 30,
+        "multi-shot": 15,
+        "piercing-shot": 13,
+        "beast-fury": 8,
+        "bloody-hunt": 11
+      },
+      "damageBySource": {
+        "power-shot": 5772.27,
+        "basic-attack": 16048.31,
+        "pet-basic": 8772.27,
+        "multi-shot": 5216.43,
+        "piercing-shot": 5326.15,
+        "beast-slam": 2412.44,
+        "pet-bleed": 106.29
+      },
+      "effectiveHealing": {
+        "mean": 0,
+        "sd": 0
+      },
+      "overhealing": {
+        "mean": 0,
+        "sd": 0
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "piercing-shot",
+        "passiveLv6": "pack-leader"
+      },
+      "mode": "five",
+      "dps": {
+        "mean": 360.2396666666667,
+        "sd": 8.145300205912884
+      },
+      "ttk": {
+        "mean": 0,
+        "sd": 0
+      },
+      "killsPerMinute": {
+        "mean": 8.04,
+        "sd": 0.2199999999999998
+      },
+      "totalDamage": {
+        "mean": 43228.76,
+        "sd": 977.436024709546
+      },
+      "basicShare": {
+        "mean": 0.33453993689857364,
+        "sd": 0.007601681283537954
+      },
+      "activeSkillShare": {
+        "mean": 0.4033033801453763,
+        "sd": 0.010283617581427195
+      },
+      "aoeShare": {
+        "mean": 0.2898922094406144,
+        "sd": 0.00991152811328498
+      },
+      "dotShare": {
+        "mean": 0.0024868415580036303,
+        "sd": 0.000350251384664935
+      },
+      "extraShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "petShare": {
+        "mean": 0.26215668295605005,
+        "sd": 0.012465579099984863
+      },
+      "resourceMinimum": {
+        "mean": 3,
+        "sd": 0
+      },
+      "resourceBlocked": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "power-shot": 30,
+        "multi-shot": 15,
+        "piercing-shot": 13,
+        "beast-fury": 8,
+        "bloody-hunt": 11
+      },
+      "damageBySource": {
+        "power-shot": 4901.84,
+        "basic-attack": 14456.42,
+        "pet-basic": 8301.57,
+        "multi-shot": 5134.92,
+        "piercing-shot": 7397.76,
+        "beast-slam": 2928.76,
+        "pet-bleed": 107.49
+      },
+      "effectiveHealing": {
+        "mean": 0,
+        "sd": 0
+      },
+      "overhealing": {
+        "mean": 0,
+        "sd": 0
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "bloody-hunt",
+        "passiveLv6": "hunting-instinct"
+      },
+      "mode": "five",
+      "dps": {
+        "mean": 359.9129166666667,
+        "sd": 6.618457500619006
+      },
+      "ttk": {
+        "mean": 0,
+        "sd": 0
+      },
+      "killsPerMinute": {
+        "mean": 8.04,
+        "sd": 0.168522995463527
+      },
+      "totalDamage": {
+        "mean": 43189.55,
+        "sd": 794.2149000742809
+      },
+      "basicShare": {
+        "mean": 0.39589625236030074,
+        "sd": 0.006972538813540103
+      },
+      "activeSkillShare": {
+        "mean": 0.35178460766517283,
+        "sd": 0.00851691246951098
+      },
+      "aoeShare": {
+        "mean": 0.23787772730515633,
+        "sd": 0.007883213530088024
+      },
+      "dotShare": {
+        "mean": 0.0028765513004289306,
+        "sd": 0.0004668656107004679
+      },
+      "extraShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "petShare": {
+        "mean": 0.2523191399745264,
+        "sd": 0.010721134991862205
+      },
+      "resourceMinimum": {
+        "mean": 3,
+        "sd": 0
+      },
+      "resourceBlocked": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "power-shot": 30,
+        "multi-shot": 15,
+        "piercing-shot": 13,
+        "beast-fury": 8,
+        "bloody-hunt": 11
+      },
+      "damageBySource": {
+        "power-shot": 4918.17,
+        "basic-attack": 17094.28,
+        "pet-basic": 8574.44,
+        "multi-shot": 5087.56,
+        "piercing-shot": 5187.25,
+        "beast-slam": 2203.71,
+        "pet-bleed": 124.14
+      },
+      "effectiveHealing": {
+        "mean": 0,
+        "sd": 0
+      },
+      "overhealing": {
+        "mean": 0,
+        "sd": 0
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "multi-shot",
+        "passiveLv6": "pack-leader"
+      },
+      "mode": "five",
+      "dps": {
+        "mean": 359.4725000000001,
+        "sd": 7.0797741548253725
+      },
+      "ttk": {
+        "mean": 0,
+        "sd": 0
+      },
+      "killsPerMinute": {
+        "mean": 8,
+        "sd": 0.2
+      },
+      "totalDamage": {
+        "mean": 43136.7,
+        "sd": 849.5728985790449
+      },
+      "basicShare": {
+        "mean": 0.3356650500955633,
+        "sd": 0.007695680687403688
+      },
+      "activeSkillShare": {
+        "mean": 0.39872761834319065,
+        "sd": 0.010796040843709487
+      },
+      "aoeShare": {
+        "mean": 0.2850758916401953,
+        "sd": 0.010288168462718227
+      },
+      "dotShare": {
+        "mean": 0.002484626729007833,
+        "sd": 0.0003724497026080931
+      },
+      "extraShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "petShare": {
+        "mean": 0.26560733156124605,
+        "sd": 0.013105397942537362
+      },
+      "resourceMinimum": {
+        "mean": 3,
+        "sd": 0
+      },
+      "resourceBlocked": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "power-shot": 30,
+        "multi-shot": 15.34,
+        "piercing-shot": 13,
+        "beast-fury": 8,
+        "bloody-hunt": 11
+      },
+      "damageBySource": {
+        "power-shot": 4901.13,
+        "basic-attack": 14475.08,
+        "pet-basic": 8395.21,
+        "multi-shot": 7150.81,
+        "piercing-shot": 5145.25,
+        "beast-slam": 2962.11,
+        "pet-bleed": 107.11
+      },
+      "effectiveHealing": {
+        "mean": 0,
+        "sd": 0
+      },
+      "overhealing": {
+        "mean": 0,
+        "sd": 0
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "bloody-hunt",
+        "passiveLv6": "precision-shot"
+      },
+      "mode": "five",
+      "dps": {
+        "mean": 358.93891666666684,
+        "sd": 8.95019917958068
+      },
+      "ttk": {
+        "mean": 0,
+        "sd": 0
+      },
+      "killsPerMinute": {
+        "mean": 8.035,
+        "sd": 0.2761792895928293
+      },
+      "totalDamage": {
+        "mean": 43072.67,
+        "sd": 1074.0239015496816
+      },
+      "basicShare": {
+        "mean": 0.35707857075085575,
+        "sd": 0.010018667951138857
+      },
+      "activeSkillShare": {
+        "mean": 0.3745790184679753,
+        "sd": 0.01114219411598852
+      },
+      "aoeShare": {
+        "mean": 0.2538333005843088,
+        "sd": 0.010084795692565988
+      },
+      "dotShare": {
+        "mean": 0.0027399378176940986,
+        "sd": 0.00044947755241864907
+      },
+      "extraShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "petShare": {
+        "mean": 0.26834241078116894,
+        "sd": 0.013665667545206294
+      },
+      "resourceMinimum": {
+        "mean": 3,
+        "sd": 0
+      },
+      "resourceBlocked": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "power-shot": 30,
+        "multi-shot": 15,
+        "piercing-shot": 13,
+        "beast-fury": 8,
+        "bloody-hunt": 11
+      },
+      "damageBySource": {
+        "power-shot": 5198.52,
+        "basic-attack": 15373.95,
+        "pet-basic": 9089.82,
+        "multi-shot": 5421.44,
+        "piercing-shot": 5513.01,
+        "beast-slam": 2358.09,
+        "pet-bleed": 117.84
+      },
+      "effectiveHealing": {
+        "mean": 0,
+        "sd": 0
+      },
+      "overhealing": {
+        "mean": 0,
+        "sd": 0
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "bloody-hunt",
+        "passiveLv6": "wild-bond"
+      },
+      "mode": "five",
+      "dps": {
+        "mean": 357.72608333333324,
+        "sd": 7.370875650434395
+      },
+      "ttk": {
+        "mean": 0,
+        "sd": 0
+      },
+      "killsPerMinute": {
+        "mean": 8.05,
+        "sd": 0.2061552812808831
+      },
+      "totalDamage": {
+        "mean": 42927.13,
+        "sd": 884.5050780521273
+      },
+      "basicShare": {
+        "mean": 0.3521638455549847,
+        "sd": 0.007284788391774631
+      },
+      "activeSkillShare": {
+        "mean": 0.35310170263225543,
+        "sd": 0.00991003275693896
+      },
+      "aoeShare": {
+        "mean": 0.23906023398727214,
+        "sd": 0.00810751733770613
+      },
+      "dotShare": {
+        "mean": 0.0032517808452876148,
+        "sd": 0.0004788439435954832
+      },
+      "extraShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "petShare": {
+        "mean": 0.2947344518127598,
+        "sd": 0.013711397936782551
+      },
+      "resourceMinimum": {
+        "mean": 3,
+        "sd": 0
+      },
+      "resourceBlocked": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "power-shot": 30,
+        "multi-shot": 15,
+        "piercing-shot": 13,
+        "beast-fury": 8,
+        "bloody-hunt": 11
+      },
+      "damageBySource": {
+        "power-shot": 4893.32,
+        "basic-attack": 15112.96,
+        "pet-basic": 9483.04,
+        "multi-shot": 5102.36,
+        "piercing-shot": 5157.5,
+        "beast-slam": 3038.45,
+        "pet-bleed": 139.5
+      },
+      "effectiveHealing": {
+        "mean": 0,
+        "sd": 0
+      },
+      "overhealing": {
+        "mean": 0,
+        "sd": 0
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "beast-fury",
+        "passiveLv6": "pack-leader"
+      },
+      "mode": "five",
+      "dps": {
+        "mean": 352.80275,
+        "sd": 8.573382342961915
+      },
+      "ttk": {
+        "mean": 0,
+        "sd": 0
+      },
+      "killsPerMinute": {
+        "mean": 7.93,
+        "sd": 0.2740437921208946
+      },
+      "totalDamage": {
+        "mean": 42336.33,
+        "sd": 1028.8058811554297
+      },
+      "basicShare": {
+        "mean": 0.34187149289937935,
+        "sd": 0.007977948244676703
+      },
+      "activeSkillShare": {
+        "mean": 0.358449527405447,
+        "sd": 0.009643978214199232
+      },
+      "aoeShare": {
+        "mean": 0.24272195951587233,
+        "sd": 0.007927520396389333
+      },
+      "dotShare": {
+        "mean": 0.0028375274426656657,
+        "sd": 0.00047808671730932247
+      },
+      "extraShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "petShare": {
+        "mean": 0.29967897969517365,
+        "sd": 0.013872433143313994
+      },
+      "resourceMinimum": {
+        "mean": 3,
+        "sd": 0
+      },
+      "resourceBlocked": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "power-shot": 30,
+        "multi-shot": 15,
+        "piercing-shot": 13,
+        "beast-fury": 8,
+        "bloody-hunt": 11
+      },
+      "damageBySource": {
+        "power-shot": 4897.58,
+        "basic-attack": 14467.44,
+        "pet-basic": 8499.88,
+        "multi-shot": 5121.6,
+        "piercing-shot": 5152.25,
+        "beast-slam": 2972.38,
+        "pet-bite": 1105.26,
+        "pet-bleed": 119.94
+      },
+      "effectiveHealing": {
+        "mean": 0,
+        "sd": 0
+      },
+      "overhealing": {
+        "mean": 0,
+        "sd": 0
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "piercing-shot",
+        "passiveLv6": "quick-reload"
+      },
+      "mode": "five",
+      "dps": {
+        "mean": 351.29774999999995,
+        "sd": 6.8426175602899875
+      },
+      "ttk": {
+        "mean": 0,
+        "sd": 0
+      },
+      "killsPerMinute": {
+        "mean": 7.78,
+        "sd": 0.2481934729198173
+      },
+      "totalDamage": {
+        "mean": 42155.73,
+        "sd": 821.1141072347983
+      },
+      "basicShare": {
+        "mean": 0.3419837531578024,
+        "sd": 0.007149726545633034
+      },
+      "activeSkillShare": {
+        "mean": 0.41304392472576057,
+        "sd": 0.009292088148201975
+      },
+      "aoeShare": {
+        "mean": 0.29639132043804645,
+        "sd": 0.009143734975850689
+      },
+      "dotShare": {
+        "mean": 0.002432226604922404,
+        "sd": 0.00043999310430135473
+      },
+      "extraShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "petShare": {
+        "mean": 0.24497232211643716,
+        "sd": 0.011525937327876486
+      },
+      "resourceMinimum": {
+        "mean": 3.5,
+        "sd": 0.5
+      },
+      "resourceBlocked": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "power-shot": 30,
+        "multi-shot": 15,
+        "piercing-shot": 13,
+        "beast-fury": 8,
+        "bloody-hunt": 11
+      },
+      "damageBySource": {
+        "power-shot": 4916.04,
+        "basic-attack": 14412.67,
+        "pet-basic": 8009.38,
+        "multi-shot": 5124.56,
+        "piercing-shot": 7370.48,
+        "beast-slam": 2219.95,
+        "pet-bleed": 102.65
+      },
+      "effectiveHealing": {
+        "mean": 0,
+        "sd": 0
+      },
+      "overhealing": {
+        "mean": 0,
+        "sd": 0
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "multi-shot",
+        "passiveLv6": "quick-reload"
+      },
+      "mode": "five",
+      "dps": {
+        "mean": 349.95183333333335,
+        "sd": 7.837400236827405
+      },
+      "ttk": {
+        "mean": 0,
+        "sd": 0
+      },
+      "killsPerMinute": {
+        "mean": 7.785,
+        "sd": 0.247537875889731
+      },
+      "totalDamage": {
+        "mean": 41994.22,
+        "sd": 940.4880284192883
+      },
+      "basicShare": {
+        "mean": 0.34500125117724467,
+        "sd": 0.007478018608126035
+      },
+      "activeSkillShare": {
+        "mean": 0.40811058226399305,
+        "sd": 0.010084940642511286
+      },
+      "aoeShare": {
+        "mean": 0.29168011726258036,
+        "sd": 0.009748320398706706
+      },
+      "dotShare": {
+        "mean": 0.0025522858799027835,
+        "sd": 0.0004640253242184169
+      },
+      "extraShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "petShare": {
+        "mean": 0.24688816655876222,
+        "sd": 0.012430942608567088
+      },
+      "resourceMinimum": {
+        "mean": 3.51,
+        "sd": 0.49989998999799995
+      },
+      "resourceBlocked": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "power-shot": 30,
+        "multi-shot": 15.29,
+        "piercing-shot": 13,
+        "beast-fury": 8,
+        "bloody-hunt": 11
+      },
+      "damageBySource": {
+        "power-shot": 4887.64,
+        "basic-attack": 14483.24,
+        "pet-basic": 8040.53,
+        "multi-shot": 7090.13,
+        "piercing-shot": 5161,
+        "beast-slam": 2224.41,
+        "pet-bleed": 107.27
+      },
+      "effectiveHealing": {
+        "mean": 0,
+        "sd": 0
+      },
+      "overhealing": {
+        "mean": 0,
+        "sd": 0
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "bloody-hunt",
+        "passiveLv6": "pack-leader"
+      },
+      "mode": "five",
+      "dps": {
+        "mean": 346.63700000000006,
+        "sd": 7.2067483151403176
+      },
+      "ttk": {
+        "mean": 0,
+        "sd": 0
+      },
+      "killsPerMinute": {
+        "mean": 7.73,
+        "sd": 0.24919871588754222
+      },
+      "totalDamage": {
+        "mean": 41596.44,
+        "sd": 864.809797816838
+      },
+      "basicShare": {
+        "mean": 0.34805150402063567,
+        "sd": 0.007569097155848441
+      },
+      "activeSkillShare": {
+        "mean": 0.364636031289979,
+        "sd": 0.009415852055160377
+      },
+      "aoeShare": {
+        "mean": 0.24720637069139847,
+        "sd": 0.008033234783393963
+      },
+      "dotShare": {
+        "mean": 0.0031147177884966247,
+        "sd": 0.00047385710023350666
+      },
+      "extraShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "petShare": {
+        "mean": 0.2873124646893853,
+        "sd": 0.012592008129436227
+      },
+      "resourceMinimum": {
+        "mean": 3,
+        "sd": 0
+      },
+      "resourceBlocked": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "power-shot": 30,
+        "multi-shot": 15,
+        "piercing-shot": 13,
+        "beast-fury": 8,
+        "bloody-hunt": 11
+      },
+      "damageBySource": {
+        "power-shot": 4883.38,
+        "basic-attack": 14473.55,
+        "pet-basic": 8886.97,
+        "multi-shot": 5127.52,
+        "piercing-shot": 5154,
+        "beast-slam": 2941.46,
+        "pet-bleed": 129.56
+      },
+      "effectiveHealing": {
+        "mean": 0,
+        "sd": 0
+      },
+      "overhealing": {
+        "mean": 0,
+        "sd": 0
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "beast-fury",
+        "passiveLv6": "quick-reload"
+      },
+      "mode": "five",
+      "dps": {
+        "mean": 343.6935833333332,
+        "sd": 7.325452380323615
+      },
+      "ttk": {
+        "mean": 0,
+        "sd": 0
+      },
+      "killsPerMinute": {
+        "mean": 7.665,
+        "sd": 0.23510635891017478
+      },
+      "totalDamage": {
+        "mean": 41243.23,
+        "sd": 879.0542856388336
+      },
+      "basicShare": {
+        "mean": 0.3516294340853887,
+        "sd": 0.008577562162321745
+      },
+      "activeSkillShare": {
+        "mean": 0.3677738128407671,
+        "sd": 0.009207479355300273
+      },
+      "aoeShare": {
+        "mean": 0.24954668146504183,
+        "sd": 0.007868209815686204
+      },
+      "dotShare": {
+        "mean": 0.0025957710783784393,
+        "sd": 0.0004709042864154071
+      },
+      "extraShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "petShare": {
+        "mean": 0.2805967530738443,
+        "sd": 0.013786456390957073
+      },
+      "resourceMinimum": {
+        "mean": 3.5,
+        "sd": 0.5
+      },
+      "resourceBlocked": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "power-shot": 30,
+        "multi-shot": 15,
+        "piercing-shot": 13,
+        "beast-fury": 8,
+        "bloody-hunt": 11
+      },
+      "damageBySource": {
+        "power-shot": 4874.15,
+        "basic-attack": 14496.38,
+        "pet-basic": 8154.92,
+        "multi-shot": 5142.32,
+        "piercing-shot": 5148.75,
+        "beast-slam": 2251.03,
+        "pet-bite": 1068.62,
+        "pet-bleed": 107.06
+      },
+      "effectiveHealing": {
+        "mean": 0,
+        "sd": 0
+      },
+      "overhealing": {
+        "mean": 0,
+        "sd": 0
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "bloody-hunt",
+        "passiveLv6": "quick-reload"
+      },
+      "mode": "five",
+      "dps": {
+        "mean": 337.52308333333343,
+        "sd": 7.4345431428606
+      },
+      "ttk": {
+        "mean": 0,
+        "sd": 0
+      },
+      "killsPerMinute": {
+        "mean": 7.56,
+        "sd": 0.19078784028338933
+      },
+      "totalDamage": {
+        "mean": 40502.77,
+        "sd": 892.1451771432719
+      },
+      "basicShare": {
+        "mean": 0.3566965460825797,
+        "sd": 0.008256933491552465
+      },
+      "activeSkillShare": {
+        "mean": 0.37471468308377254,
+        "sd": 0.008691197958399122
+      },
+      "aoeShare": {
+        "mean": 0.25335789452021784,
+        "sd": 0.008235423008980376
+      },
+      "dotShare": {
+        "mean": 0.003015040657276981,
+        "sd": 0.0004986079448773961
+      },
+      "extraShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "petShare": {
+        "mean": 0.2685887708336476,
+        "sd": 0.012017013232728916
+      },
+      "resourceMinimum": {
+        "mean": 3.5,
+        "sd": 0.5
+      },
+      "resourceBlocked": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "power-shot": 30,
+        "multi-shot": 15,
+        "piercing-shot": 13,
+        "beast-fury": 8,
+        "bloody-hunt": 11
+      },
+      "damageBySource": {
+        "power-shot": 4913.91,
+        "basic-attack": 14441.73,
+        "pet-basic": 8550.46,
+        "multi-shot": 5123.08,
+        "piercing-shot": 5138.25,
+        "beast-slam": 2213.22,
+        "pet-bleed": 122.12
+      },
+      "effectiveHealing": {
+        "mean": 0,
+        "sd": 0
+      },
+      "overhealing": {
+        "mean": 0,
+        "sd": 0
+      }
+    }
+  ],
+  "boss": [
+    {
+      "config": {
+        "activeLv6": "power-shot",
+        "passiveLv6": "pack-summoning"
+      },
+      "mode": "boss",
+      "dps": {
+        "mean": 466.167828205795,
+        "sd": 7.164972641532541
+      },
+      "ttk": {
+        "mean": 25.82300000000001,
+        "sd": 0.40714984956401473
+      },
+      "killsPerMinute": {
+        "mean": 0,
+        "sd": 0
+      },
+      "totalDamage": {
+        "mean": 12034.97,
+        "sd": 26.917449730611555
+      },
+      "basicShare": {
+        "mean": 0.29469834016750457,
+        "sd": 0.00864668351795819
+      },
+      "activeSkillShare": {
+        "mean": 0.19763877642385397,
+        "sd": 0.01084158204999068
+      },
+      "aoeShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "dotShare": {
+        "mean": 0.006813511735143051,
+        "sd": 0.000015206808918623913
+      },
+      "extraShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "petShare": {
+        "mean": 0.5076628834086414,
+        "sd": 0.012384154714028733
+      },
+      "resourceMinimum": {
+        "mean": 3,
+        "sd": 0
+      },
+      "resourceBlocked": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "power-shot": 7,
+        "multi-shot": 4,
+        "piercing-shot": 3,
+        "beast-fury": 2,
+        "bloody-hunt": 2.12
+      },
+      "damageBySource": {
+        "power-shot": 1478.53,
+        "basic-attack": 3546.69,
+        "pet-basic": 4727.21,
+        "multi-shot": 404.28,
+        "piercing-shot": 495.75,
+        "beast-slam": 1300.51,
+        "pet-bleed": 82
+      },
+      "effectiveHealing": {
+        "mean": 0,
+        "sd": 0
+      },
+      "overhealing": {
+        "mean": 0,
+        "sd": 0
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "beast-fury",
+        "passiveLv6": "pack-summoning"
+      },
+      "mode": "boss",
+      "dps": {
+        "mean": 428.8570160870583,
+        "sd": 5.479000463537056
+      },
+      "ttk": {
+        "mean": 28.139999999999958,
+        "sd": 0.3274141108748972
+      },
+      "killsPerMinute": {
+        "mean": 0,
+        "sd": 0
+      },
+      "totalDamage": {
+        "mean": 12066.35,
+        "sd": 53.99525442110632
+      },
+      "basicShare": {
+        "mean": 0.27976213688016865,
+        "sd": 0.009464935212158725
+      },
+      "activeSkillShare": {
+        "mean": 0.1757548211914186,
+        "sd": 0.009026039795682894
+      },
+      "aoeShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "dotShare": {
+        "mean": 0.006132880081414343,
+        "sd": 0.000027365065999585567
+      },
+      "extraShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "petShare": {
+        "mean": 0.5444830419284125,
+        "sd": 0.009021522656399817
+      },
+      "resourceMinimum": {
+        "mean": 3,
+        "sd": 0
+      },
+      "resourceBlocked": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "power-shot": 7.94,
+        "multi-shot": 4,
+        "piercing-shot": 3,
+        "beast-fury": 2,
+        "bloody-hunt": 3
+      },
+      "damageBySource": {
+        "power-shot": 1331.25,
+        "basic-attack": 3375.65,
+        "pet-basic": 4501.5,
+        "multi-shot": 342.18,
+        "piercing-shot": 447.45,
+        "beast-slam": 1286.26,
+        "pet-bite": 708.06,
+        "pet-bleed": 74
+      },
+      "effectiveHealing": {
+        "mean": 0,
+        "sd": 0
+      },
+      "overhealing": {
+        "mean": 0,
+        "sd": 0
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "power-shot",
+        "passiveLv6": "wild-bond"
+      },
+      "mode": "boss",
+      "dps": {
+        "mean": 412.49644788523574,
+        "sd": 13.827692593665436
+      },
+      "ttk": {
+        "mean": 29.25999999999999,
+        "sd": 1.0438390680559915
+      },
+      "killsPerMinute": {
+        "mean": 0,
+        "sd": 0
+      },
+      "totalDamage": {
+        "mean": 12055.36,
+        "sd": 53.11996234938432
+      },
+      "basicShare": {
+        "mean": 0.35440445650672786,
+        "sd": 0.011814173738555929
+      },
+      "activeSkillShare": {
+        "mean": 0.21540703313205667,
+        "sd": 0.0106655212469139
+      },
+      "aoeShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "dotShare": {
+        "mean": 0.005322171689936003,
+        "sd": 0.00009297283445810711
+      },
+      "extraShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "petShare": {
+        "mean": 0.4301885103612152,
+        "sd": 0.014212592259754256
+      },
+      "resourceMinimum": {
+        "mean": 3,
+        "sd": 0
+      },
+      "resourceBlocked": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "power-shot": 8.02,
+        "multi-shot": 4,
+        "piercing-shot": 3.23,
+        "beast-fury": 2,
+        "bloody-hunt": 3
+      },
+      "damageBySource": {
+        "power-shot": 1663.15,
+        "basic-attack": 4272.53,
+        "pet-basic": 3822.16,
+        "multi-shot": 391.26,
+        "piercing-shot": 542.54,
+        "beast-slam": 1299.56,
+        "pet-bleed": 64.16
+      },
+      "effectiveHealing": {
+        "mean": 0,
+        "sd": 0
+      },
+      "overhealing": {
+        "mean": 0,
+        "sd": 0
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "bloody-hunt",
+        "passiveLv6": "pack-summoning"
+      },
+      "mode": "boss",
+      "dps": {
+        "mean": 405.0028653167906,
+        "sd": 8.784184861054491
+      },
+      "ttk": {
+        "mean": 29.743999999999968,
+        "sd": 0.6521226878433235
+      },
+      "killsPerMinute": {
+        "mean": 0,
+        "sd": 0
+      },
+      "totalDamage": {
+        "mean": 12040.72,
+        "sd": 32.453683920319435
+      },
+      "basicShare": {
+        "mean": 0.2953376950178201,
+        "sd": 0.00861190091244671
+      },
+      "activeSkillShare": {
+        "mean": 0.18180918571200272,
+        "sd": 0.008543990973146566
+      },
+      "aoeShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "dotShare": {
+        "mean": 0.006982199635651345,
+        "sd": 0.00006185119030837193
+      },
+      "extraShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "petShare": {
+        "mean": 0.5228531192701772,
+        "sd": 0.00959893186124091
+      },
+      "resourceMinimum": {
+        "mean": 3,
+        "sd": 0
+      },
+      "resourceBlocked": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "power-shot": 8,
+        "multi-shot": 4,
+        "piercing-shot": 3.41,
+        "beast-fury": 2,
+        "bloody-hunt": 3
+      },
+      "damageBySource": {
+        "power-shot": 1349,
+        "basic-attack": 3556.01,
+        "pet-basic": 4962.75,
+        "multi-shot": 349.58,
+        "piercing-shot": 490.59,
+        "beast-slam": 1248.72,
+        "pet-bleed": 84.07
+      },
+      "effectiveHealing": {
+        "mean": 0,
+        "sd": 0
+      },
+      "overhealing": {
+        "mean": 0,
+        "sd": 0
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "power-shot",
+        "passiveLv6": "precision-shot"
+      },
+      "mode": "boss",
+      "dps": {
+        "mean": 405.84476054599224,
+        "sd": 14.624245227780357
+      },
+      "ttk": {
+        "mean": 29.74599999999999,
+        "sd": 1.0939305279587006
+      },
+      "killsPerMinute": {
+        "mean": 0,
+        "sd": 0
+      },
+      "totalDamage": {
+        "mean": 12056.41,
+        "sd": 50.23964470415768
+      },
+      "basicShare": {
+        "mean": 0.3646709779914872,
+        "sd": 0.014276369241903205
+      },
+      "activeSkillShare": {
+        "mean": 0.23377955717945997,
+        "sd": 0.013937737927758164
+      },
+      "aoeShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "dotShare": {
+        "mean": 0.0046739794856058775,
+        "sd": 0.00017399183194756108
+      },
+      "extraShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "petShare": {
+        "mean": 0.40154946482905296,
+        "sd": 0.01642357900390247
+      },
+      "resourceMinimum": {
+        "mean": 3,
+        "sd": 0
+      },
+      "resourceBlocked": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "power-shot": 8.06,
+        "multi-shot": 4.01,
+        "piercing-shot": 3.47,
+        "beast-fury": 2,
+        "bloody-hunt": 3
+      },
+      "damageBySource": {
+        "power-shot": 1784.66,
+        "basic-attack": 4396.72,
+        "pet-basic": 3746.54,
+        "multi-shot": 414.36,
+        "piercing-shot": 619.65,
+        "beast-slam": 1038.13,
+        "pet-bleed": 56.35
+      },
+      "effectiveHealing": {
+        "mean": 0,
+        "sd": 0
+      },
+      "overhealing": {
+        "mean": 0,
+        "sd": 0
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "power-shot",
+        "passiveLv6": "hunting-instinct"
+      },
+      "mode": "boss",
+      "dps": {
+        "mean": 403.5633765257781,
+        "sd": 11.219758846874203
+      },
+      "ttk": {
+        "mean": 29.887999999999984,
+        "sd": 0.8716971951314292
+      },
+      "killsPerMinute": {
+        "mean": 0,
+        "sd": 0
+      },
+      "totalDamage": {
+        "mean": 12052.04,
+        "sd": 52.4114338670485
+      },
+      "basicShare": {
+        "mean": 0.4047292161787675,
+        "sd": 0.009166013101623412
+      },
+      "activeSkillShare": {
+        "mean": 0.2222113906274331,
+        "sd": 0.009167558994038197
+      },
+      "aoeShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "dotShare": {
+        "mean": 0.004704655556638102,
+        "sd": 0.0002097420663214168
+      },
+      "extraShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "petShare": {
+        "mean": 0.37305939319379944,
+        "sd": 0.011735813291165772
+      },
+      "resourceMinimum": {
+        "mean": 3,
+        "sd": 0
+      },
+      "resourceBlocked": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "power-shot": 8.05,
+        "multi-shot": 4,
+        "piercing-shot": 3.47,
+        "beast-fury": 2,
+        "bloody-hunt": 3
+      },
+      "damageBySource": {
+        "power-shot": 1696.17,
+        "basic-attack": 4877.79,
+        "pet-basic": 3493.47,
+        "multi-shot": 395.04,
+        "piercing-shot": 587.06,
+        "beast-slam": 945.81,
+        "pet-bleed": 56.7
+      },
+      "effectiveHealing": {
+        "mean": 0,
+        "sd": 0
+      },
+      "overhealing": {
+        "mean": 0,
+        "sd": 0
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "piercing-shot",
+        "passiveLv6": "pack-summoning"
+      },
+      "mode": "boss",
+      "dps": {
+        "mean": 400.35632040538593,
+        "sd": 7.959322436789981
+      },
+      "ttk": {
+        "mean": 30.143999999999977,
+        "sd": 0.5903083939772499
+      },
+      "killsPerMinute": {
+        "mean": 0,
+        "sd": 0
+      },
+      "totalDamage": {
+        "mean": 12063.81,
+        "sd": 65.06576596029588
+      },
+      "basicShare": {
+        "mean": 0.2976044828804611,
+        "sd": 0.00803244304821207
+      },
+      "activeSkillShare": {
+        "mean": 0.20531221756974663,
+        "sd": 0.009362442047603605
+      },
+      "aoeShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "dotShare": {
+        "mean": 0.006144173769377219,
+        "sd": 0.00010430813567675721
+      },
+      "extraShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "petShare": {
+        "mean": 0.49708329954979213,
+        "sd": 0.009596323173967287
+      },
+      "resourceMinimum": {
+        "mean": 3,
+        "sd": 0
+      },
+      "resourceBlocked": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "power-shot": 8.02,
+        "multi-shot": 4,
+        "piercing-shot": 3.79,
+        "beast-fury": 2,
+        "bloody-hunt": 3
+      },
+      "damageBySource": {
+        "power-shot": 1351.84,
+        "basic-attack": 3590.19,
+        "pet-basic": 4666.02,
+        "multi-shot": 349.58,
+        "piercing-shot": 775.62,
+        "beast-slam": 1256.44,
+        "pet-bleed": 74.12
+      },
+      "effectiveHealing": {
+        "mean": 0,
+        "sd": 0
+      },
+      "overhealing": {
+        "mean": 0,
+        "sd": 0
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "multi-shot",
+        "passiveLv6": "pack-summoning"
+      },
+      "mode": "boss",
+      "dps": {
+        "mean": 394.4966403608505,
+        "sd": 6.945455100261969
+      },
+      "ttk": {
+        "mean": 30.515999999999995,
+        "sd": 0.5452925820144637
+      },
+      "killsPerMinute": {
+        "mean": 0,
+        "sd": 0
+      },
+      "totalDamage": {
+        "mean": 12034.71,
+        "sd": 28.20435959209147
+      },
+      "basicShare": {
+        "mean": 0.3022032632051317,
+        "sd": 0.008211211356945367
+      },
+      "activeSkillShare": {
+        "mean": 0.19139618856595803,
+        "sd": 0.008746333378083934
+      },
+      "aoeShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "dotShare": {
+        "mean": 0.006168840443787464,
+        "sd": 0.00012029817548781369
+      },
+      "extraShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "petShare": {
+        "mean": 0.5064005482289108,
+        "sd": 0.01085537674573231
+      },
+      "resourceMinimum": {
+        "mean": 3,
+        "sd": 0
+      },
+      "resourceBlocked": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "power-shot": 8.06,
+        "multi-shot": 4,
+        "piercing-shot": 3.91,
+        "beast-fury": 2,
+        "bloody-hunt": 3
+      },
+      "damageBySource": {
+        "power-shot": 1358.23,
+        "basic-attack": 3636.94,
+        "pet-basic": 4713.46,
+        "multi-shot": 382.94,
+        "piercing-shot": 562.24,
+        "beast-slam": 1306.66,
+        "pet-bleed": 74.24
+      },
+      "effectiveHealing": {
+        "mean": 0,
+        "sd": 0
+      },
+      "overhealing": {
+        "mean": 0,
+        "sd": 0
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "power-shot",
+        "passiveLv6": "pack-leader"
+      },
+      "mode": "boss",
+      "dps": {
+        "mean": 393.39823431431284,
+        "sd": 11.612211774303029
+      },
+      "ttk": {
+        "mean": 30.66399999999999,
+        "sd": 0.9517898927809637
+      },
+      "killsPerMinute": {
+        "mean": 0,
+        "sd": 0
+      },
+      "totalDamage": {
+        "mean": 12052.21,
+        "sd": 45.24340725453823
+      },
+      "basicShare": {
+        "mean": 0.3532537043290114,
+        "sd": 0.012534532461938908
+      },
+      "activeSkillShare": {
+        "mean": 0.22695454146894042,
+        "sd": 0.010654327731425006
+      },
+      "aoeShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "dotShare": {
+        "mean": 0.004710295295358305,
+        "sd": 0.00022864372410261419
+      },
+      "extraShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "petShare": {
+        "mean": 0.4197917542020481,
+        "sd": 0.016003302605119063
+      },
+      "resourceMinimum": {
+        "mean": 3,
+        "sd": 0
+      },
+      "resourceBlocked": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "power-shot": 8.12,
+        "multi-shot": 4.02,
+        "piercing-shot": 3.89,
+        "beast-fury": 2.01,
+        "bloody-hunt": 3
+      },
+      "damageBySource": {
+        "power-shot": 1685.7,
+        "basic-attack": 4257.46,
+        "pet-basic": 3688.53,
+        "multi-shot": 393,
+        "piercing-shot": 656.72,
+        "beast-slam": 1314.03,
+        "pet-bleed": 56.77
+      },
+      "effectiveHealing": {
+        "mean": 0,
+        "sd": 0
+      },
+      "overhealing": {
+        "mean": 0,
+        "sd": 0
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "power-shot",
+        "passiveLv6": "quick-reload"
+      },
+      "mode": "boss",
+      "dps": {
+        "mean": 378.44602394339944,
+        "sd": 10.155676189080712
+      },
+      "ttk": {
+        "mean": 31.910000000000014,
+        "sd": 0.9057041459549581
+      },
+      "killsPerMinute": {
+        "mean": 0,
+        "sd": 0
+      },
+      "totalDamage": {
+        "mean": 12067.11,
+        "sd": 52.276360814425466
+      },
+      "basicShare": {
+        "mean": 0.36289358310988346,
+        "sd": 0.013529185019760461
+      },
+      "activeSkillShare": {
+        "mean": 0.2400023988362171,
+        "sd": 0.012024790578498545
+      },
+      "aoeShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "dotShare": {
+        "mean": 0.004750766245796126,
+        "sd": 0.000310490973526708
+      },
+      "extraShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "petShare": {
+        "mean": 0.3971040180538995,
+        "sd": 0.01649915249975323
+      },
+      "resourceMinimum": {
+        "mean": 3.55,
+        "sd": 0.6062177826491071
+      },
+      "resourceBlocked": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "power-shot": 8.58,
+        "multi-shot": 4.09,
+        "piercing-shot": 4,
+        "beast-fury": 2.01,
+        "bloody-hunt": 3
+      },
+      "damageBySource": {
+        "power-shot": 1816.13,
+        "basic-attack": 4379.11,
+        "pet-basic": 3668.49,
+        "multi-shot": 401.19,
+        "piercing-shot": 679,
+        "beast-slam": 1065.86,
+        "pet-bleed": 57.33
+      },
+      "effectiveHealing": {
+        "mean": 0,
+        "sd": 0
+      },
+      "overhealing": {
+        "mean": 0,
+        "sd": 0
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "beast-fury",
+        "passiveLv6": "wild-bond"
+      },
+      "mode": "boss",
+      "dps": {
+        "mean": 373.0766090071392,
+        "sd": 12.85098250364945
+      },
+      "ttk": {
+        "mean": 32.353999999999985,
+        "sd": 1.1874695785577005
+      },
+      "killsPerMinute": {
+        "mean": 0,
+        "sd": 0
+      },
+      "totalDamage": {
+        "mean": 12055.36,
+        "sd": 48.21815425749935
+      },
+      "basicShare": {
+        "mean": 0.33598891365997896,
+        "sd": 0.013696356196055514
+      },
+      "activeSkillShare": {
+        "mean": 0.20242279425243734,
+        "sd": 0.0076715488584059265
+      },
+      "aoeShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "dotShare": {
+        "mean": 0.004790438228024618,
+        "sd": 0.00033219655001266794
+      },
+      "extraShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "petShare": {
+        "mean": 0.4615882920875836,
+        "sd": 0.014329405417014818
+      },
+      "resourceMinimum": {
+        "mean": 3,
+        "sd": 0
+      },
+      "resourceBlocked": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "power-shot": 8.8,
+        "multi-shot": 4.14,
+        "piercing-shot": 4,
+        "beast-fury": 2.08,
+        "bloody-hunt": 3.01
+      },
+      "damageBySource": {
+        "power-shot": 1496.68,
+        "basic-attack": 4050.49,
+        "pet-basic": 3686.05,
+        "multi-shot": 351.57,
+        "piercing-shot": 592.05,
+        "beast-slam": 1300.81,
+        "pet-bite": 519.96,
+        "pet-bleed": 57.75
+      },
+      "effectiveHealing": {
+        "mean": 0,
+        "sd": 0
+      },
+      "overhealing": {
+        "mean": 0,
+        "sd": 0
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "beast-fury",
+        "passiveLv6": "precision-shot"
+      },
+      "mode": "boss",
+      "dps": {
+        "mean": 366.0116840535811,
+        "sd": 13.56617855926082
+      },
+      "ttk": {
+        "mean": 32.983000000000004,
+        "sd": 1.2621453957448803
+      },
+      "killsPerMinute": {
+        "mean": 0,
+        "sd": 0
+      },
+      "totalDamage": {
+        "mean": 12055.18,
+        "sd": 47.95943702755487
+      },
+      "basicShare": {
+        "mean": 0.3489210379923488,
+        "sd": 0.015282901190432017
+      },
+      "activeSkillShare": {
+        "mean": 0.2199281756842959,
+        "sd": 0.010420427766685694
+      },
+      "aoeShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "dotShare": {
+        "mean": 0.004260810733722898,
+        "sd": 0.00045175555907250517
+      },
+      "extraShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "petShare": {
+        "mean": 0.4311507863233555,
+        "sd": 0.013848938879575482
+      },
+      "resourceMinimum": {
+        "mean": 3,
+        "sd": 0
+      },
+      "resourceBlocked": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "power-shot": 8.96,
+        "multi-shot": 4.3,
+        "piercing-shot": 4,
+        "beast-fury": 2.15,
+        "bloody-hunt": 3.01
+      },
+      "damageBySource": {
+        "power-shot": 1638.62,
+        "basic-attack": 4206.1,
+        "pet-basic": 3611.9,
+        "multi-shot": 386.98,
+        "piercing-shot": 625.8,
+        "beast-slam": 1035.07,
+        "pet-bite": 499.35,
+        "pet-bleed": 51.36
+      },
+      "effectiveHealing": {
+        "mean": 0,
+        "sd": 0
+      },
+      "overhealing": {
+        "mean": 0,
+        "sd": 0
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "beast-fury",
+        "passiveLv6": "hunting-instinct"
+      },
+      "mode": "boss",
+      "dps": {
+        "mean": 362.8340616587118,
+        "sd": 11.343450940691135
+      },
+      "ttk": {
+        "mean": 33.329000000000036,
+        "sd": 1.0531187017615828
+      },
+      "killsPerMinute": {
+        "mean": 0,
+        "sd": 0
+      },
+      "totalDamage": {
+        "mean": 12081.19,
+        "sd": 73.81852003393186
+      },
+      "basicShare": {
+        "mean": 0.3952571020819007,
+        "sd": 0.01126437768922615
+      },
+      "activeSkillShare": {
+        "mean": 0.20431812193833054,
+        "sd": 0.009225976428755106
+      },
+      "aoeShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "dotShare": {
+        "mean": 0.004252806324516825,
+        "sd": 0.0004210408572034282
+      },
+      "extraShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "petShare": {
+        "mean": 0.4004247759797688,
+        "sd": 0.014245056729445496
+      },
+      "resourceMinimum": {
+        "mean": 3,
+        "sd": 0
+      },
+      "resourceBlocked": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "power-shot": 9.04,
+        "multi-shot": 4.36,
+        "piercing-shot": 4,
+        "beast-fury": 2.16,
+        "bloody-hunt": 3.01
+      },
+      "damageBySource": {
+        "power-shot": 1511.59,
+        "basic-attack": 4775.12,
+        "pet-basic": 3366.18,
+        "multi-shot": 370.66,
+        "piercing-shot": 586.2,
+        "beast-slam": 956.82,
+        "pet-bite": 463.25,
+        "pet-bleed": 51.37
+      },
+      "effectiveHealing": {
+        "mean": 0,
+        "sd": 0
+      },
+      "overhealing": {
+        "mean": 0,
+        "sd": 0
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "bloody-hunt",
+        "passiveLv6": "wild-bond"
+      },
+      "mode": "boss",
+      "dps": {
+        "mean": 360.4207454831734,
+        "sd": 13.427325751543522
+      },
+      "ttk": {
+        "mean": 33.471,
+        "sd": 1.3015602175850352
+      },
+      "killsPerMinute": {
+        "mean": 0,
+        "sd": 0
+      },
+      "totalDamage": {
+        "mean": 12046.29,
+        "sd": 41.60824317367896
+      },
+      "basicShare": {
+        "mean": 0.35238957902942386,
+        "sd": 0.012652783183653074
+      },
+      "activeSkillShare": {
+        "mean": 0.20532360374857955,
+        "sd": 0.009883150984080474
+      },
+      "aoeShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "dotShare": {
+        "mean": 0.005843696136659393,
+        "sd": 0.000699682537127283
+      },
+      "extraShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "petShare": {
+        "mean": 0.44228681722199636,
+        "sd": 0.01610132533252195
+      },
+      "resourceMinimum": {
+        "mean": 3,
+        "sd": 0
+      },
+      "resourceBlocked": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "power-shot": 9.04,
+        "multi-shot": 4.51,
+        "piercing-shot": 4.01,
+        "beast-fury": 2.23,
+        "bloody-hunt": 3.01
+      },
+      "damageBySource": {
+        "power-shot": 1500.94,
+        "basic-attack": 4245.01,
+        "pet-basic": 3968.53,
+        "multi-shot": 380.43,
+        "piercing-shot": 592.04,
+        "beast-slam": 1288.95,
+        "pet-bleed": 70.39
+      },
+      "effectiveHealing": {
+        "mean": 0,
+        "sd": 0
+      },
+      "overhealing": {
+        "mean": 0,
+        "sd": 0
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "piercing-shot",
+        "passiveLv6": "wild-bond"
+      },
+      "mode": "boss",
+      "dps": {
+        "mean": 359.6218504793683,
+        "sd": 13.56786218374272
+      },
+      "ttk": {
+        "mean": 33.533,
+        "sd": 1.32665406191667
+      },
+      "killsPerMinute": {
+        "mean": 0,
+        "sd": 0
+      },
+      "totalDamage": {
+        "mean": 12041.32,
+        "sd": 38.26457369421489
+      },
+      "basicShare": {
+        "mean": 0.35309141299201896,
+        "sd": 0.01232188344723715
+      },
+      "activeSkillShare": {
+        "mean": 0.2262777987614809,
+        "sd": 0.010410209279402999
+      },
+      "aoeShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "dotShare": {
+        "mean": 0.00517817869056346,
+        "sd": 0.000613946940697964
+      },
+      "extraShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "petShare": {
+        "mean": 0.4206307882464999,
+        "sd": 0.015636137368953106
+      },
+      "resourceMinimum": {
+        "mean": 3,
+        "sd": 0
+      },
+      "resourceBlocked": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "power-shot": 9.03,
+        "multi-shot": 4.54,
+        "piercing-shot": 4.01,
+        "beast-fury": 2.25,
+        "bloody-hunt": 3.01
+      },
+      "damageBySource": {
+        "power-shot": 1499.52,
+        "basic-attack": 4251.79,
+        "pet-basic": 3713.96,
+        "multi-shot": 382.68,
+        "piercing-shot": 842.49,
+        "beast-slam": 1288.53,
+        "pet-bleed": 62.35
+      },
+      "effectiveHealing": {
+        "mean": 0,
+        "sd": 0
+      },
+      "overhealing": {
+        "mean": 0,
+        "sd": 0
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "beast-fury",
+        "passiveLv6": "pack-leader"
+      },
+      "mode": "boss",
+      "dps": {
+        "mean": 356.2625023415226,
+        "sd": 13.026152665147096
+      },
+      "ttk": {
+        "mean": 33.84099999999998,
+        "sd": 1.2823490164537905
+      },
+      "killsPerMinute": {
+        "mean": 0,
+        "sd": 0
+      },
+      "totalDamage": {
+        "mean": 12039.65,
+        "sd": 35.035803116240956
+      },
+      "basicShare": {
+        "mean": 0.33947147021550994,
+        "sd": 0.012575293533315
+      },
+      "activeSkillShare": {
+        "mean": 0.21044193519479168,
+        "sd": 0.007535949077651662
+      },
+      "aoeShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "dotShare": {
+        "mean": 0.004871737115244006,
+        "sd": 0.0005378805451312862
+      },
+      "extraShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "petShare": {
+        "mean": 0.4500865945896985,
+        "sd": 0.01335198759825503
+      },
+      "resourceMinimum": {
+        "mean": 3,
+        "sd": 0
+      },
+      "resourceBlocked": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "power-shot": 9.08,
+        "multi-shot": 4.7,
+        "piercing-shot": 4,
+        "beast-fury": 2.31,
+        "bloody-hunt": 3.03
+      },
+      "damageBySource": {
+        "power-shot": 1542.12,
+        "basic-attack": 4087.17,
+        "pet-basic": 3586.71,
+        "multi-shot": 399.49,
+        "piercing-shot": 592.05,
+        "beast-slam": 1284.53,
+        "pet-bite": 488.93,
+        "pet-bleed": 58.65
+      },
+      "effectiveHealing": {
+        "mean": 0,
+        "sd": 0
+      },
+      "overhealing": {
+        "mean": 0,
+        "sd": 0
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "bloody-hunt",
+        "passiveLv6": "precision-shot"
+      },
+      "mode": "boss",
+      "dps": {
+        "mean": 353.86670932928683,
+        "sd": 14.63716781885866
+      },
+      "ttk": {
+        "mean": 34.099999999999994,
+        "sd": 1.4686728703152383
+      },
+      "killsPerMinute": {
+        "mean": 0,
+        "sd": 0
+      },
+      "totalDamage": {
+        "mean": 12045.5,
+        "sd": 44.07504963128232
+      },
+      "basicShare": {
+        "mean": 0.3653224658848631,
+        "sd": 0.015330403566509408
+      },
+      "activeSkillShare": {
+        "mean": 0.22149383058867167,
+        "sd": 0.012408818849642652
+      },
+      "aoeShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "dotShare": {
+        "mean": 0.005470025130874536,
+        "sd": 0.0006335859602318179
+      },
+      "extraShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "petShare": {
+        "mean": 0.4131837035264653,
+        "sd": 0.018403568626720948
+      },
+      "resourceMinimum": {
+        "mean": 3,
+        "sd": 0
+      },
+      "resourceBlocked": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "power-shot": 9.11,
+        "multi-shot": 4.75,
+        "piercing-shot": 4.01,
+        "beast-fury": 2.43,
+        "bloody-hunt": 3.06
+      },
+      "damageBySource": {
+        "power-shot": 1616.36,
+        "basic-attack": 4400.58,
+        "pet-basic": 3890.83,
+        "multi-shot": 422.81,
+        "piercing-shot": 628.89,
+        "beast-slam": 1020.14,
+        "pet-bleed": 65.89
+      },
+      "effectiveHealing": {
+        "mean": 0,
+        "sd": 0
+      },
+      "overhealing": {
+        "mean": 0,
+        "sd": 0
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "piercing-shot",
+        "passiveLv6": "precision-shot"
+      },
+      "mode": "boss",
+      "dps": {
+        "mean": 353.2294669291973,
+        "sd": 14.615399311732759
+      },
+      "ttk": {
+        "mean": 34.15699999999998,
+        "sd": 1.4611129319802763
+      },
+      "killsPerMinute": {
+        "mean": 0,
+        "sd": 0
+      },
+      "totalDamage": {
+        "mean": 12044.04,
+        "sd": 38.24550169627797
+      },
+      "basicShare": {
+        "mean": 0.36561345392643574,
+        "sd": 0.015532521093154592
+      },
+      "activeSkillShare": {
+        "mean": 0.2434681998033912,
+        "sd": 0.013516757668967063
+      },
+      "aoeShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "dotShare": {
+        "mean": 0.00469291711745275,
+        "sd": 0.0005538916719676366
+      },
+      "extraShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "petShare": {
+        "mean": 0.39091834627017297,
+        "sd": 0.017959660759463487
+      },
+      "resourceMinimum": {
+        "mean": 3,
+        "sd": 0
+      },
+      "resourceBlocked": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "power-shot": 9.09,
+        "multi-shot": 4.74,
+        "piercing-shot": 4.01,
+        "beast-fury": 2.48,
+        "bloody-hunt": 3.06
+      },
+      "damageBySource": {
+        "power-shot": 1612.53,
+        "basic-attack": 4403.62,
+        "pet-basic": 3629.25,
+        "multi-shot": 422.06,
+        "piercing-shot": 897.8,
+        "beast-slam": 1022.26,
+        "pet-bleed": 56.52
+      },
+      "effectiveHealing": {
+        "mean": 0,
+        "sd": 0
+      },
+      "overhealing": {
+        "mean": 0,
+        "sd": 0
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "bloody-hunt",
+        "passiveLv6": "hunting-instinct"
+      },
+      "mode": "boss",
+      "dps": {
+        "mean": 351.5356732224875,
+        "sd": 12.57674767901526
+      },
+      "ttk": {
+        "mean": 34.32099999999998,
+        "sd": 1.3205525358727688
+      },
+      "killsPerMinute": {
+        "mean": 0,
+        "sd": 0
+      },
+      "totalDamage": {
+        "mean": 12048.56,
+        "sd": 49.334636919713915
+      },
+      "basicShare": {
+        "mean": 0.4049795241951606,
+        "sd": 0.01247179435390573
+      },
+      "activeSkillShare": {
+        "mean": 0.2110458240797283,
+        "sd": 0.009203055902695493
+      },
+      "aoeShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "dotShare": {
+        "mean": 0.005556166698836642,
+        "sd": 0.00069208961984505
+      },
+      "extraShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "petShare": {
+        "mean": 0.383974651725111,
+        "sd": 0.014403085555098559
+      },
+      "resourceMinimum": {
+        "mean": 3,
+        "sd": 0
+      },
+      "resourceBlocked": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "power-shot": 9.17,
+        "multi-shot": 4.84,
+        "piercing-shot": 4,
+        "beast-fury": 2.44,
+        "bloody-hunt": 3.03
+      },
+      "damageBySource": {
+        "power-shot": 1543.54,
+        "basic-attack": 4879.68,
+        "pet-basic": 3617.19,
+        "multi-shot": 411.84,
+        "piercing-shot": 587.5,
+        "beast-slam": 941.86,
+        "pet-bleed": 66.95
+      },
+      "effectiveHealing": {
+        "mean": 0,
+        "sd": 0
+      },
+      "overhealing": {
+        "mean": 0,
+        "sd": 0
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "multi-shot",
+        "passiveLv6": "wild-bond"
+      },
+      "mode": "boss",
+      "dps": {
+        "mean": 351.44703881772256,
+        "sd": 13.373073750445556
+      },
+      "ttk": {
+        "mean": 34.32399999999996,
+        "sd": 1.3568433955324395
+      },
+      "killsPerMinute": {
+        "mean": 0,
+        "sd": 0
+      },
+      "totalDamage": {
+        "mean": 12045.02,
+        "sd": 35.81842542602898
+      },
+      "basicShare": {
+        "mean": 0.36011714884394475,
+        "sd": 0.013335115021195776
+      },
+      "activeSkillShare": {
+        "mean": 0.21203008928256786,
+        "sd": 0.009913547986760167
+      },
+      "aoeShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "dotShare": {
+        "mean": 0.005546758199677049,
+        "sd": 0.0005990995336563371
+      },
+      "extraShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "petShare": {
+        "mean": 0.4278527618734876,
+        "sd": 0.016579885726210084
+      },
+      "resourceMinimum": {
+        "mean": 3,
+        "sd": 0
+      },
+      "resourceBlocked": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "power-shot": 9.11,
+        "multi-shot": 4.85,
+        "piercing-shot": 4.01,
+        "beast-fury": 2.48,
+        "bloody-hunt": 3.06
+      },
+      "damageBySource": {
+        "power-shot": 1513.01,
+        "basic-attack": 4337.68,
+        "pet-basic": 3785.7,
+        "multi-shot": 448.95,
+        "piercing-shot": 592.04,
+        "beast-slam": 1300.83,
+        "pet-bleed": 66.81
+      },
+      "effectiveHealing": {
+        "mean": 0,
+        "sd": 0
+      },
+      "overhealing": {
+        "mean": 0,
+        "sd": 0
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "piercing-shot",
+        "passiveLv6": "hunting-instinct"
+      },
+      "mode": "boss",
+      "dps": {
+        "mean": 350.963001339952,
+        "sd": 12.605105155987703
+      },
+      "ttk": {
+        "mean": 34.36299999999998,
+        "sd": 1.3103171371847349
+      },
+      "killsPerMinute": {
+        "mean": 0,
+        "sd": 0
+      },
+      "totalDamage": {
+        "mean": 12043.74,
+        "sd": 46.16180672374078
+      },
+      "basicShare": {
+        "mean": 0.40516690573229464,
+        "sd": 0.012358371954227149
+      },
+      "activeSkillShare": {
+        "mean": 0.2314860698729576,
+        "sd": 0.009479449431190485
+      },
+      "aoeShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "dotShare": {
+        "mean": 0.004782399577843647,
+        "sd": 0.0005792599418510377
+      },
+      "extraShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "petShare": {
+        "mean": 0.3633470243947477,
+        "sd": 0.013525799739096228
+      },
+      "resourceMinimum": {
+        "mean": 3,
+        "sd": 0
+      },
+      "resourceBlocked": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "power-shot": 9.15,
+        "multi-shot": 4.85,
+        "piercing-shot": 4,
+        "beast-fury": 2.48,
+        "bloody-hunt": 3.03
+      },
+      "damageBySource": {
+        "power-shot": 1539.28,
+        "basic-attack": 4879.98,
+        "pet-basic": 3377.26,
+        "multi-shot": 412.59,
+        "piercing-shot": 836.1,
+        "beast-slam": 940.93,
+        "pet-bleed": 57.6
+      },
+      "effectiveHealing": {
+        "mean": 0,
+        "sd": 0
+      },
+      "overhealing": {
+        "mean": 0,
+        "sd": 0
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "multi-shot",
+        "passiveLv6": "precision-shot"
+      },
+      "mode": "boss",
+      "dps": {
+        "mean": 345.55547624517334,
+        "sd": 14.0413066925594
+      },
+      "ttk": {
+        "mean": 34.907999999999966,
+        "sd": 1.479234937391623
+      },
+      "killsPerMinute": {
+        "mean": 0,
+        "sd": 0
+      },
+      "totalDamage": {
+        "mean": 12042.04,
+        "sd": 40.80463699140086
+      },
+      "basicShare": {
+        "mean": 0.37213192954210117,
+        "sd": 0.015943266614730358
+      },
+      "activeSkillShare": {
+        "mean": 0.22738527177302673,
+        "sd": 0.013250698195294097
+      },
+      "aoeShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "dotShare": {
+        "mean": 0.004956113260747657,
+        "sd": 0.000528187764819791
+      },
+      "extraShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "petShare": {
+        "mean": 0.4004827986848719,
+        "sd": 0.020243243510836062
+      },
+      "resourceMinimum": {
+        "mean": 3,
+        "sd": 0
+      },
+      "resourceBlocked": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "power-shot": 9.16,
+        "multi-shot": 4.92,
+        "piercing-shot": 4.02,
+        "beast-fury": 2.71,
+        "bloody-hunt": 3.07
+      },
+      "damageBySource": {
+        "power-shot": 1625.44,
+        "basic-attack": 4481.32,
+        "pet-basic": 3709.48,
+        "multi-shot": 481.74,
+        "piercing-shot": 631.08,
+        "beast-slam": 1053.3,
+        "pet-bleed": 59.68
+      },
+      "effectiveHealing": {
+        "mean": 0,
+        "sd": 0
+      },
+      "overhealing": {
+        "mean": 0,
+        "sd": 0
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "multi-shot",
+        "passiveLv6": "hunting-instinct"
+      },
+      "mode": "boss",
+      "dps": {
+        "mean": 343.36355996990983,
+        "sd": 11.014979279656272
+      },
+      "ttk": {
+        "mean": 35.11699999999997,
+        "sd": 1.2152411283362656
+      },
+      "killsPerMinute": {
+        "mean": 0,
+        "sd": 0
+      },
+      "totalDamage": {
+        "mean": 12044.61,
+        "sd": 48.851590557524396
+      },
+      "basicShare": {
+        "mean": 0.4122430050460187,
+        "sd": 0.013501598730134588
+      },
+      "activeSkillShare": {
+        "mean": 0.21735308028850672,
+        "sd": 0.009736372047905884
+      },
+      "aoeShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "dotShare": {
+        "mean": 0.005054087981752641,
+        "sd": 0.00043886391151712063
+      },
+      "extraShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "petShare": {
+        "mean": 0.3704039146654747,
+        "sd": 0.016343951699098053
+      },
+      "resourceMinimum": {
+        "mean": 3,
+        "sd": 0
+      },
+      "resourceBlocked": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "power-shot": 9.31,
+        "multi-shot": 4.99,
+        "piercing-shot": 4,
+        "beast-fury": 2.79,
+        "bloody-hunt": 3.08
+      },
+      "damageBySource": {
+        "power-shot": 1565.55,
+        "basic-attack": 4965.63,
+        "pet-basic": 3443.37,
+        "multi-shot": 464.94,
+        "piercing-shot": 587.5,
+        "beast-slam": 956.74,
+        "pet-bleed": 60.88
+      },
+      "effectiveHealing": {
+        "mean": 0,
+        "sd": 0
+      },
+      "overhealing": {
+        "mean": 0,
+        "sd": 0
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "bloody-hunt",
+        "passiveLv6": "pack-leader"
+      },
+      "mode": "boss",
+      "dps": {
+        "mean": 341.93074210920497,
+        "sd": 12.606705306148106
+      },
+      "ttk": {
+        "mean": 35.25599999999998,
+        "sd": 1.3790808533222407
+      },
+      "killsPerMinute": {
+        "mean": 0,
+        "sd": 0
+      },
+      "totalDamage": {
+        "mean": 12037.82,
+        "sd": 35.30648099145535
+      },
+      "basicShare": {
+        "mean": 0.3518803679709922,
+        "sd": 0.014315306666761311
+      },
+      "activeSkillShare": {
+        "mean": 0.21125579197610223,
+        "sd": 0.011395185624591131
+      },
+      "aoeShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "dotShare": {
+        "mean": 0.005903072567839663,
+        "sd": 0.0005246569870340146
+      },
+      "extraShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "petShare": {
+        "mean": 0.4368638400529054,
+        "sd": 0.020014602811622758
+      },
+      "resourceMinimum": {
+        "mean": 3,
+        "sd": 0
+      },
+      "resourceBlocked": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "power-shot": 9.21,
+        "multi-shot": 4.95,
+        "piercing-shot": 4.03,
+        "beast-fury": 2.84,
+        "bloody-hunt": 3.09
+      },
+      "damageBySource": {
+        "power-shot": 1528.63,
+        "basic-attack": 4235.99,
+        "pet-basic": 3875.88,
+        "multi-shot": 418.61,
+        "piercing-shot": 595.92,
+        "beast-slam": 1311.73,
+        "pet-bleed": 71.06
+      },
+      "effectiveHealing": {
+        "mean": 0,
+        "sd": 0
+      },
+      "overhealing": {
+        "mean": 0,
+        "sd": 0
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "piercing-shot",
+        "passiveLv6": "pack-leader"
+      },
+      "mode": "boss",
+      "dps": {
+        "mean": 341.80176551301787,
+        "sd": 12.395738326744151
+      },
+      "ttk": {
+        "mean": 35.27999999999998,
+        "sd": 1.3786950351691274
+      },
+      "killsPerMinute": {
+        "mean": 0,
+        "sd": 0
+      },
+      "totalDamage": {
+        "mean": 12041.79,
+        "sd": 42.74302165266279
+      },
+      "basicShare": {
+        "mean": 0.351606438073944,
+        "sd": 0.013762254367341166
+      },
+      "activeSkillShare": {
+        "mean": 0.23223487752535377,
+        "sd": 0.012449192293830368
+      },
+      "aoeShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "dotShare": {
+        "mean": 0.005048124307756305,
+        "sd": 0.0004464139775777099
+      },
+      "extraShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "petShare": {
+        "mean": 0.41615868440070225,
+        "sd": 0.019748454790226116
+      },
+      "resourceMinimum": {
+        "mean": 3,
+        "sd": 0
+      },
+      "resourceBlocked": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "power-shot": 9.22,
+        "multi-shot": 4.95,
+        "piercing-shot": 4.03,
+        "beast-fury": 2.85,
+        "bloody-hunt": 3.1
+      },
+      "damageBySource": {
+        "power-shot": 1530.05,
+        "basic-attack": 4234.16,
+        "pet-basic": 3637.22,
+        "multi-shot": 418.61,
+        "piercing-shot": 847.99,
+        "beast-slam": 1312.97,
+        "pet-bleed": 60.79
+      },
+      "effectiveHealing": {
+        "mean": 0,
+        "sd": 0
+      },
+      "overhealing": {
+        "mean": 0,
+        "sd": 0
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "multi-shot",
+        "passiveLv6": "pack-leader"
+      },
+      "mode": "boss",
+      "dps": {
+        "mean": 336.58047584113575,
+        "sd": 12.138585480513
+      },
+      "ttk": {
+        "mean": 35.852999999999966,
+        "sd": 1.3620906724590685
+      },
+      "killsPerMinute": {
+        "mean": 0,
+        "sd": 0
+      },
+      "totalDamage": {
+        "mean": 12050.98,
+        "sd": 44.96798416651563
+      },
+      "basicShare": {
+        "mean": 0.35609906008891584,
+        "sd": 0.01574151744297679
+      },
+      "activeSkillShare": {
+        "mean": 0.21762943436875457,
+        "sd": 0.012340207231172233
+      },
+      "aoeShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "dotShare": {
+        "mean": 0.0052773320054893625,
+        "sd": 0.000490282993625451
+      },
+      "extraShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "petShare": {
+        "mean": 0.42627150554232957,
+        "sd": 0.022436553914083713
+      },
+      "resourceMinimum": {
+        "mean": 3,
+        "sd": 0
+      },
+      "resourceBlocked": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "power-shot": 9.38,
+        "multi-shot": 4.99,
+        "piercing-shot": 4.07,
+        "beast-fury": 2.95,
+        "bloody-hunt": 3.15
+      },
+      "damageBySource": {
+        "power-shot": 1557.03,
+        "basic-attack": 4291.31,
+        "pet-basic": 3701.59,
+        "multi-shot": 463.3,
+        "piercing-shot": 602.38,
+        "beast-slam": 1371.77,
+        "pet-bleed": 63.6
+      },
+      "effectiveHealing": {
+        "mean": 0,
+        "sd": 0
+      },
+      "overhealing": {
+        "mean": 0,
+        "sd": 0
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "beast-fury",
+        "passiveLv6": "quick-reload"
+      },
+      "mode": "boss",
+      "dps": {
+        "mean": 334.23001477941847,
+        "sd": 12.376113476342283
+      },
+      "ttk": {
+        "mean": 36.085999999999984,
+        "sd": 1.3975707495508052
+      },
+      "killsPerMinute": {
+        "mean": 0,
+        "sd": 0
+      },
+      "totalDamage": {
+        "mean": 12043.79,
+        "sd": 37.71188009102702
+      },
+      "basicShare": {
+        "mean": 0.35538342472240736,
+        "sd": 0.015708324857336274
+      },
+      "activeSkillShare": {
+        "mean": 0.2147675050205798,
+        "sd": 0.011486913829215668
+      },
+      "aoeShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "dotShare": {
+        "mean": 0.005320568021918959,
+        "sd": 0.00045269894300970686
+      },
+      "extraShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "petShare": {
+        "mean": 0.4298490702570125,
+        "sd": 0.022216859127414102
+      },
+      "resourceMinimum": {
+        "mean": 3.55,
+        "sd": 0.6062177826491071
+      },
+      "resourceBlocked": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "power-shot": 9.35,
+        "multi-shot": 5,
+        "piercing-shot": 4.09,
+        "beast-fury": 2.98,
+        "bloody-hunt": 3.2
+      },
+      "damageBySource": {
+        "power-shot": 1554.9,
+        "basic-attack": 4280.2,
+        "pet-basic": 3591.26,
+        "multi-shot": 426.8,
+        "piercing-shot": 604.96,
+        "beast-slam": 1039.84,
+        "pet-bite": 481.75,
+        "pet-bleed": 64.08
+      },
+      "effectiveHealing": {
+        "mean": 0,
+        "sd": 0
+      },
+      "overhealing": {
+        "mean": 0,
+        "sd": 0
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "bloody-hunt",
+        "passiveLv6": "quick-reload"
+      },
+      "mode": "boss",
+      "dps": {
+        "mean": 327.7946701627939,
+        "sd": 11.912407775875176
+      },
+      "ttk": {
+        "mean": 36.80899999999999,
+        "sd": 1.3873063828873569
+      },
+      "killsPerMinute": {
+        "mean": 0,
+        "sd": 0
+      },
+      "totalDamage": {
+        "mean": 12049.36,
+        "sd": 46.38804156245448
+      },
+      "basicShare": {
+        "mean": 0.36292884788365887,
+        "sd": 0.01592553023990597
+      },
+      "activeSkillShare": {
+        "mean": 0.22272291204695854,
+        "sd": 0.012152131292972301
+      },
+      "aoeShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "dotShare": {
+        "mean": 0.0066094420182223525,
+        "sd": 0.0004225312361100216
+      },
+      "extraShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "petShare": {
+        "mean": 0.41434824006938237,
+        "sd": 0.021043280434416712
+      },
+      "resourceMinimum": {
+        "mean": 3.55,
+        "sd": 0.6062177826491071
+      },
+      "resourceBlocked": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "power-shot": 9.71,
+        "multi-shot": 5,
+        "piercing-shot": 4.19,
+        "beast-fury": 3,
+        "bloody-hunt": 3.3
+      },
+      "damageBySource": {
+        "power-shot": 1643.65,
+        "basic-attack": 4373.07,
+        "pet-basic": 3867.38,
+        "multi-shot": 421.62,
+        "piercing-shot": 618.51,
+        "beast-slam": 1045.49,
+        "pet-bleed": 79.64
+      },
+      "effectiveHealing": {
+        "mean": 0,
+        "sd": 0
+      },
+      "overhealing": {
+        "mean": 0,
+        "sd": 0
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "piercing-shot",
+        "passiveLv6": "quick-reload"
+      },
+      "mode": "boss",
+      "dps": {
+        "mean": 327.8299791495408,
+        "sd": 11.450045308702553
+      },
+      "ttk": {
+        "mean": 36.83499999999998,
+        "sd": 1.3590713741375031
+      },
+      "killsPerMinute": {
+        "mean": 0,
+        "sd": 0
+      },
+      "totalDamage": {
+        "mean": 12060.21,
+        "sd": 61.53426606371449
+      },
+      "basicShare": {
+        "mean": 0.3627143809131242,
+        "sd": 0.015317064811431318
+      },
+      "activeSkillShare": {
+        "mean": 0.24497472631042483,
+        "sd": 0.013291694239562831
+      },
+      "aoeShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "dotShare": {
+        "mean": 0.005634443673202023,
+        "sd": 0.00036581410519722913
+      },
+      "extraShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "petShare": {
+        "mean": 0.3923108927764508,
+        "sd": 0.021099658668642482
+      },
+      "resourceMinimum": {
+        "mean": 3.55,
+        "sd": 0.6062177826491071
+      },
+      "resourceBlocked": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "power-shot": 9.76,
+        "multi-shot": 5,
+        "piercing-shot": 4.19,
+        "beast-fury": 3,
+        "bloody-hunt": 3.31
+      },
+      "damageBySource": {
+        "power-shot": 1652.88,
+        "basic-attack": 4374.51,
+        "pet-basic": 3621.01,
+        "multi-shot": 421.62,
+        "piercing-shot": 880.16,
+        "beast-slam": 1042.08,
+        "pet-bleed": 67.95
+      },
+      "effectiveHealing": {
+        "mean": 0,
+        "sd": 0
+      },
+      "overhealing": {
+        "mean": 0,
+        "sd": 0
+      }
+    },
+    {
+      "config": {
+        "activeLv6": "multi-shot",
+        "passiveLv6": "quick-reload"
+      },
+      "mode": "boss",
+      "dps": {
+        "mean": 321.51728346366633,
+        "sd": 11.37457645672459
+      },
+      "ttk": {
+        "mean": 37.54399999999998,
+        "sd": 1.3815440637200098
+      },
+      "killsPerMinute": {
+        "mean": 0,
+        "sd": 0
+      },
+      "totalDamage": {
+        "mean": 12055.45,
+        "sd": 50.63069721028935
+      },
+      "basicShare": {
+        "mean": 0.3700222791454075,
+        "sd": 0.0155109396052207
+      },
+      "activeSkillShare": {
+        "mean": 0.2318719322421733,
+        "sd": 0.013233188914820705
+      },
+      "aoeShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "dotShare": {
+        "mean": 0.005682423108807134,
+        "sd": 0.0003276223744782189
+      },
+      "extraShare": {
+        "mean": 0,
+        "sd": 0
+      },
+      "petShare": {
+        "mean": 0.3981057886124194,
+        "sd": 0.02094390405557617
+      },
+      "resourceMinimum": {
+        "mean": 3.55,
+        "sd": 0.6062177826491071
+      },
+      "resourceBlocked": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceZeroDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "resourceLowDuration": {
+        "mean": 0,
+        "sd": 0
+      },
+      "faithAverage": {
+        "mean": 0,
+        "sd": 0
+      },
+      "skillCasts": {
+        "power-shot": 10.08,
+        "multi-shot": 5,
+        "piercing-shot": 4.24,
+        "beast-fury": 3,
+        "bloody-hunt": 3.53
+      },
+      "damageBySource": {
+        "power-shot": 1707.55,
+        "basic-attack": 4460.8,
+        "pet-basic": 3675.89,
+        "multi-shot": 461.66,
+        "piercing-shot": 626.26,
+        "beast-slam": 1054.79,
+        "pet-bleed": 68.5
+      },
+      "effectiveHealing": {
+        "mean": 0,
+        "sd": 0
+      },
+      "overhealing": {
+        "mean": 0,
+        "sd": 0
+      }
+    }
+  ]
+}
