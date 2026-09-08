@@ -5,7 +5,8 @@ assert.equal(policy.FIRST_JOB_CHANGE_LEVEL, 45);
 assert.equal(policy.POISON_ENTRY_RATIO, .75);
 assert.equal(policy.ASSASSINATION_SKILLS.length, 4);
 assert.equal(policy.VENOM_SKILLS.length, 4);
-assert.deepEqual(policy.getEffect('shadow-assassination', 6), { power: 2.7, skillCrit: .12, bleedingDamage: .20, energyCost: 20, offhandOnCrit: true });
+assert.deepEqual(policy.getEffect('shadow-assassination', 6), { power: 3, skillCrit: .12, bleedingDamage: .20, energyCost: 20, offhandOnCrit: true });
+assert.deepEqual([1,2,3,4,5,6].map(level => policy.getEffect('shadow-assassination', level).power), [1.9,2.1,2.3,2.5,2.75,3]);
 assert.equal(policy.getEffect('death-mark', 6).executeCritDamage, .35);
 assert.equal(policy.getSkill('shadow-assassination').energyCost, 20);
 assert.equal(policy.getSkill('death-mark').energyCost, 0);
@@ -26,7 +27,7 @@ assert.deepEqual([1,2,3,4,5,6].map(level => policy.getEffect('venom-mastery', le
 assert.deepEqual([1,2,3,4,5,6].map(level => policy.getEffect('toxic-blood-symbiosis', level).dotDamage), [.06,.08,.10,.13,.16,.25]);
 assert.deepEqual([1,2,3,4,5,6].map(level => policy.getEffect('lethal-technique', level).criticalChance), [.03,.04,.05,.06,.08,.10]);
 assert.deepEqual([1,2,3,4,5,6].map(level => policy.getEffect('weakness-insight', level).bleedingAttack), [.03,.04,.05,.06,.08,.10]);
-assert.deepEqual([1,2,3,4,5,6].map(level => policy.getEffect('weakness-insight', level).bleedingAttackSpeed), [.02,.03,.04,.05,.06,.08]);
+assert.deepEqual([1,2,3,4,5,6].map(level => policy.getEffect('weakness-insight', level).bleedingAttackSpeed), [.03,.05,.07,.09,.11,.14]);
 assert.deepEqual(policy.getAutoSkillPriority({ advancedClass: 'assassination' }, [
   { id: 'backstab' }, { id: 'shadow-dance' }, { id: 'poison-blade' }, { id: 'shadow-assassination' }, { id: 'death-mark' }
 ]).map((skill) => skill.id), ['death-mark', 'backstab', 'shadow-assassination', 'shadow-dance', 'poison-blade']);
@@ -43,8 +44,8 @@ assert.equal(progress.advancedClass, 'assassination');
 const assassin = { id: 'rogue', progress: { advancedClass: 'assassination', skillLevels: { 'assassin:lethal-technique': 6, 'assassin:weakness-insight': 6 } }, skillCooldowns: { 'death-mark': 10000 } };
 const state = {};
 policy.markTarget(assassin, state, 6, 1000);
-assert.deepEqual(policy.getTargetBonuses(assassin, [{ type: 'bleed', remaining: 3 }], state, .29, 'skill', 2000), { damage: .10, crit: .10, criticalDamage: .35, dotDamage: 0, defenseReduction: 0, attackSpeed: .08, basicDamage: 0 });
-assert.deepEqual(policy.getTargetBonuses(assassin, [{ type: 'rupture', remaining: 3 }], {}, 1, 'basic', 2000), { damage: .10, crit: .10, criticalDamage: 0, dotDamage: 0, defenseReduction: 0, attackSpeed: .08, basicDamage: .15 });
+assert.deepEqual(policy.getTargetBonuses(assassin, [{ type: 'bleed', remaining: 3 }], state, .29, 'skill', 2000), { damage: .10, crit: .10, criticalDamage: .35, dotDamage: 0, defenseReduction: 0, attackSpeed: .14, basicDamage: 0 });
+assert.deepEqual(policy.getTargetBonuses(assassin, [{ type: 'rupture', remaining: 3 }], {}, 1, 'basic', 2000), { damage: .10, crit: .10, criticalDamage: 0, dotDamage: 0, defenseReduction: 0, attackSpeed: .14, basicDamage: .15 });
 assert.equal(policy.getTargetBonuses(assassin, [], {}, 1, 'basic', 2000).crit, .10, 'lethal technique critical chance applies without a bleeding target');
 assert.equal(policy.getDeathMarkDamageMultiplier(assassin, state, 2000), 1.20);
 assert.equal(policy.hasBleedingStatus([{ type: 'rupture', remaining: 1 }]), true);
