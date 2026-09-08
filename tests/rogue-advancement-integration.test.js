@@ -14,7 +14,10 @@ assert.match(source, /masteryChance = \(mastery\.offhandChance \|\| 0\) \+ \(let
 assert.match(source, /skill\.id === 'poison-blade'[\s\S]*stats\.attack \* \.20 \* stats\.dotMultiplier[\s\S]*tickIntervalMs: 2000/);
 assert.match(source, /function applyRoguePoison[\s\S]*const added[\s\S]*applyRogueDotEntryDamage/, 'only newly added poison stacks deal entry damage');
 assert.match(source, /ruptureDamage[\s\S]*applyRogueDotEntryDamage\(target\.index, member, 'rupture'/, 'rupture deals its separate entry damage');
-assert.match(source, /skill\.id === 'backstab'[\s\S]*stats\.attack \* \.18[\s\S]*tickIntervalMs: 2000/);
+assert.match(source, /skill\.id === 'backstab'[\s\S]*bleedDuration[\s\S]*stats\.attack \* \.18[\s\S]*durationMs: bleedDuration \* 1000/);
+assert.match(source, /backstabBleedingCrit[\s\S]*skillEffect\.bleedingCrit/, 'backstab Lv3 adds crit chance only while the target is bleeding');
+assert.match(source, /shadowBleedingMultiplier[\s\S]*\(1 \+ rogueBonuses\.damage\)/, 'weakness insight attack bonus applies to direct skill damage against bleeding targets');
+assert.match(source, /\(1 \+ rogueBonuses\.damage\) \* \(1 \+ rogueBonuses\.basicDamage\)/, 'weakness insight Lv6 bonus is isolated to the main-hand basic body');
 assert.match(source, /skill\.id === 'corrosive-strike'[\s\S]*applyCoating/);
 assert.match(source, /getAutoSkillPriority\(progress, unlocked\)/, 'advanced rogues use their formal specialization priority');
 assert.match(source, /getCoatingExecution[\s\S]*coating-poison[\s\S]*applyRoguePoison/, 'coating bonus uses pre-hit stacks before adding one poison layer');

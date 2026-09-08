@@ -62,7 +62,7 @@
       passive(20, 'hunting-instinct', '獵殺本能', [1.4, 1.5, 1.6, 1.75, 2, 2.5].map((power, i) => ({ interval: 6, power, guaranteedCrit: i === 5, cooldownReduction: i === 5 ? 1 : 0 })))
     ]),
     assassin: Object.freeze([
-      active(1, 'backstab', '背刺', 4, [{ power: 1.8 }, { power: 1.95 }, { power: 1.95, bleedingCrit: .1 }, { power: 1.95, bleedBonus: .25 }, { power: 1.95, critBleedDuration: 2 }, { power: 2.3, bleedTrigger: .5, breakthrough: '攻擊已流血目標時額外觸發 50% 流血傷害' }]),
+      active(1, 'backstab', '背刺', 4, [{ power: 1.8, bleedDuration: 5 }, { power: 1.95, bleedDuration: 5 }, { power: 1.95, bleedDuration: 5, bleedingCrit: .1 }, { power: 1.95, bleedDuration: 5, bleedBonus: .25 }, { power: 1.95, bleedDuration: 5, critBleedDuration: 2 }, { power: 2.3, bleedDuration: 5, bleedTrigger: .5, breakthrough: '攻擊已流血目標時額外觸發 50% 流血傷害' }]),
       passive(3, 'deadly-strike', '致命一擊', [{ crit: .1 }, { crit: .1, criticalDamage: .1 }, { crit: .1, critSpeed: .05 }, { crit: .1, critSpeed: .08 }, { crit: .1, critSpeed: .08, refresh: true }, { crit: .1, critSpeed: .15, duration: 4, refresh: true, breakthrough: '暴擊後攻速 +15%，可持續刷新' }]),
       active(5, 'shadow-dance', '影刃旋舞', 7, [{ power: .75, targets: 5 }, { power: .85, targets: 5 }, { power: .85, targets: 5, speedPerTarget: .03 }, { power: .85, targets: 5, cooldown: 6, speedPerTarget: .03 }, { power: .85, targets: 5, offhandChance: .2 }, { power: 1.1, targets: 5, offhandChance: .2, offhandPerTarget: .05, breakthrough: '敵人越多，追加副手攻擊機率越高' }], { targets: 5 }),
       passive(8, 'evasion', '閃避', [{ dodge: .1 }, { dodge: .1, nextDamage: .1 }, { dodge: .1, speed: .1 }, { dodge: .15, speed: .1 }, { dodge: .15, guaranteedCrit: true }, { dodge: .15, counterPower: .5, breakthrough: '閃避後立即進行暗影反擊' }]),

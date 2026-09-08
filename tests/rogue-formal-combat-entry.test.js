@@ -56,7 +56,7 @@ const offhandConfig = {
 };
 const offhand = runCombat(offhandConfig);
 assert.ok(offhand.offhandAttacks >= 5);
-assert.equal(offhand.energy.spent, Object.entries(offhand.skillCasts).reduce((sum, [id, casts]) => sum + ({ backstab: 35, 'shadow-dance': 60, 'poison-blade': 25 }[id] || 0) * casts, 0));
+assert.equal(offhand.energy.spent, Object.entries(offhand.skillCasts).reduce((sum, [id, casts]) => sum + ({ backstab: 35, 'shadow-dance': 60, 'poison-blade': 25, 'shadow-assassination': 30, 'death-mark': 20 }[id] || 0) * casts, 0));
 assert.deepEqual(runCombat({ ...offhandConfig, entry: 'ui' }), offhand, 'high-frequency offhand triggers must be UI/headless identical');
 
 const venomConfig = {

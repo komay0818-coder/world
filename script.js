@@ -3451,6 +3451,7 @@ function applyDot(index, type, damage, duration, maxStacks = 1, options = {}) {
     dot.remaining = duration;
     dot.extendedSeconds = 0;
     dot.toxicBloodBonusTickUsed = false;
+    if (options.durationMs) dot.expiresAt = (options.now || Date.now()) + options.durationMs;
     if (options.tickIntervalMs) {
       dot.tickIntervalMs = options.tickIntervalMs;
       dot.nextTickAt = (options.now || Date.now()) + options.tickIntervalMs;
@@ -3462,6 +3463,7 @@ function applyDot(index, type, damage, duration, maxStacks = 1, options = {}) {
     if (!options.refreshOnly) existing.damage = Math.max(existing.damage, damage);
     existing.remaining = options.refreshDuration ? duration : Math.max(existing.remaining, duration);
     if (options.refreshDuration) { existing.extendedSeconds = 0; existing.toxicBloodBonusTickUsed = false; }
+    if (options.durationMs) existing.expiresAt = (options.now || Date.now()) + options.durationMs;
     existing.defenseReduction = Math.max(existing.defenseReduction || 0, options.defenseReduction || 0);
     if (options.tickIntervalMs) {
       existing.tickIntervalMs = options.tickIntervalMs;
@@ -3474,7 +3476,7 @@ function applyDot(index, type, damage, duration, maxStacks = 1, options = {}) {
     }
     return false;
   }
-  dots.push({ type, damage, remaining: duration, source: options.source || null, defenseReduction: options.defenseReduction || 0, tickIntervalMs: options.tickIntervalMs || 0, nextTickAt: options.tickIntervalMs ? (options.now || Date.now()) + options.tickIntervalMs : 0 });
+  dots.push({ type, damage, remaining: duration, source: options.source || null, defenseReduction: options.defenseReduction || 0, tickIntervalMs: options.tickIntervalMs || 0, nextTickAt: options.tickIntervalMs ? (options.now || Date.now()) + options.tickIntervalMs : 0, expiresAt: options.durationMs ? (options.now || Date.now()) + options.durationMs : 0 });
   battle.enemyDots[index] = dots;
   if (options.source) {
     const telemetry = CombatCorePolicy.telemetry(options.source), stacks = dots.filter((dot) => dot.type === type).length;
@@ -3535,6 +3537,7 @@ function processEnemyDots() {
     if (battle.enemyHps[index] <= 0 || !dots.length) return;
     const damageBySource = new Map();
     dots.forEach((dot) => {
+      if (dot.expiresAt && now >= dot.expiresAt) { dot.remaining = 0; return; }
       let tickCount = 0;
       if (dot.tickIntervalMs) {
         if (now < dot.nextTickAt) return;
@@ -4952,6 +4955,11 @@ function useAutoSkillForMember(member, now = Date.now()) {
     if (skill.id === 'death-mark') {
       RogueAdvancementPolicy.markTarget(member, getEnemySkillState(targets[0]), getSkillUpgradeLevel(progress, member.job, skill), now);
       CombatCorePolicy.recordSkillCast(member, skill.id, { atMs: now, targets: [targets[0]], damage: 0, critical: false });
+      const resourceBeforeSkillCost = member.resourceCurrent;
+      member.resourceCurrent = Math.max(0, member.resourceCurrent - cost);
+      const actualResourceSpent = resourceBeforeSkillCost - member.resourceCurrent;
+      CombatCorePolicy.record(member, 'resourceSpent', actualResourceSpent);
+      CombatCorePolicy.recordEvent(member, 'resourceEvents', { atMs: now, type: 'spend', amount: actualResourceSpent, current: member.resourceCurrent, skill: skill.id });
       member.skillCooldowns[skill.id] = now + skill.cooldown * 1000; member.globalSkillReadyAt = now + 1000; logBattle(`☠ ${member.name}對【${getEnemyDefinition(targets[0]).name}】施加【死亡標記】。`, 'system'); return true;
     }
     const craftedEpicExecution = ChapterThreeCraftedEpicAbilityPolicy.beginSkillExecution(member, now, { eligible: skill.id !== 'companion' });
@@ -4961,7 +4969,8 @@ function useAutoSkillForMember(member, now = Date.now()) {
     const primaryRogueBonuses = RogueAdvancementPolicy.getTargetBonuses(member, battle.enemyDots[targets[0]], getEnemySkillState(targets[0]), battle.enemyHps[targets[0]] / getEnemyDefinition(targets[0]).maxHp, 'skill', now);
     const shootingBonuses = HunterAdvancementPolicy.getShootingBonuses(member, skill.id, now);
     const resonanceBonuses = MageAdvancementPolicy.getResonanceBonuses(member, castElement, now);
-    const critical = Math.random() < Math.min(.95, stats.crit + runtimeBonuses.crit + primaryRogueBonuses.crit + (skillEffect.skillCrit || 0) + resonanceBonuses.crit);
+    const backstabBleedingCrit = skill.id === 'backstab' && RogueAdvancementPolicy.hasBleedingStatus(battle.enemyDots[targets[0]]) ? skillEffect.bleedingCrit || 0 : 0;
+    const critical = Math.random() < Math.min(.95, stats.crit + runtimeBonuses.crit + primaryRogueBonuses.crit + backstabBleedingCrit + (skillEffect.skillCrit || 0) + resonanceBonuses.crit);
     CombatCorePolicy.recordCritical(member, critical);
     let damagePower = Number(skillEffect.power) || Number(skill.power) || 1;
     const priestFaith = member.job === 'priest' ? PriestAdvancementPolicy.getFaithBonuses(member, now) : { magicDamage: 0, cooldownSpeed: 0 };
@@ -5014,7 +5023,7 @@ function useAutoSkillForMember(member, now = Date.now()) {
         armorIgnore: (skillEffect.armorIgnore || 0) + (berserkerSlash?.armorIgnore || 0) + shootingBonuses.armorIgnore,
         conditionalDamageMultiplier,
         craftedEpicExecution,
-        specialEquipmentMultiplier: (epicWeaponExecution.multipliers[targetOrder] || 1) * (1 + grandmasterSkillBonus) * shadowBleedingMultiplier * (1 + resonanceBonuses.damage),
+        specialEquipmentMultiplier: (epicWeaponExecution.multipliers[targetOrder] || 1) * (1 + grandmasterSkillBonus) * shadowBleedingMultiplier * (1 + resonanceBonuses.damage) * (1 + rogueBonuses.damage),
         controlledBonus: skillEffect.controlledBonus,
         showDamage: !['heavy-strike', 'whirlwind', 'charge', 'power-shot', 'multi-shot', 'piercing-shot', 'backstab', 'shadow-dance', 'poison-blade', 'fireball', 'blizzard', 'chain-lightning', 'holy-light', 'holy-nova'].includes(skill.id)
       }) };
@@ -5092,7 +5101,9 @@ function useAutoSkillForMember(member, now = Date.now()) {
     if (skill.id === 'backstab') hits.forEach((target) => {
       const bleeding = (battle.enemyDots[target.index] || []).find((dot) => dot.type === 'bleed');
       if (bleeding && skillEffect.bleedTrigger) applyDamageToMonster(target.index, bleeding.damage * skillEffect.bleedTrigger, { damageType: 'periodic', attackRange: 'none' }, { attacker: member, attackKind: 'bleed-trigger', canEvade: false, canParry: false });
-      applyDot(target.index, 'bleed', Math.max(1, Math.ceil(stats.attack * .18 * stats.dotMultiplier)), 3, 1, { source: member, tickIntervalMs: 2000, now, refreshOnly: true, refreshDuration: true });
+      const bleedDuration = (skillEffect.bleedDuration || 5) + (critical ? skillEffect.critBleedDuration || 0 : 0);
+      const bleedTicks = Math.floor(bleedDuration / 2);
+      applyDot(target.index, 'bleed', Math.max(1, Math.ceil(stats.attack * .18 * (1 + (skillEffect.bleedBonus || 0)) * stats.dotMultiplier)), bleedTicks + 1, 1, { source: member, tickIntervalMs: 2000, durationMs: bleedDuration * 1000, now, refreshOnly: true, refreshDuration: true });
       getEnemySkillState(target.index).visualBleedAt = now + 500;
     });
     if (skill.id === 'poison-blade') {
@@ -5463,7 +5474,7 @@ function processPartyMemberAttacks(now = Date.now()) {
     const fatalSlashBonus = now < (member.fatalSlashUntil || 0) ? .50 : 0;
     const grandmasterBasicBonus = now < (member.weaponGrandmasterBasicUntil || 0) ? .20 : 0;
     const temporaryBasicBonus = (now < (member.skillHasteUntil || 0) ? member.skillBasicDamageBonus || 0 : 0) + (now < (member.galeUntil || 0) ? member.galeBasicDamage || 0 : 0) + (member.nextBasicDamageBonus || 0) + (member.nextHunterAttackBonus || 0) + (desperate?.attack || 0) + fatalSlashBonus + grandmasterBasicBonus + (lethalExecution?.damage || 0) + hunterExecution.sniper + hunterExecution.eagle;
-    const baseHit = Math.max(1, Math.ceil(attackWithWeaponRoll * (1 + temporaryBasicBonus) * (orcRage ? 1.10 : 1) * (critical ? member.stats.criticalDamageMultiplier + rogueBonuses.criticalDamage : 1)));
+    const baseHit = Math.max(1, Math.ceil(attackWithWeaponRoll * (1 + temporaryBasicBonus) * (1 + rogueBonuses.damage) * (1 + rogueBonuses.basicDamage) * (orcRage ? 1.10 : 1) * (critical ? member.stats.criticalDamageMultiplier + rogueBonuses.criticalDamage : 1)));
     member.nextBasicDamageBonus = 0;
     member.nextHunterAttackBonus = 0;
     const hit = Math.max(1, Math.ceil(baseHit * (instinctTriggered ? hunterInstinct.power : 1)));
@@ -5576,7 +5587,7 @@ function processPartyMemberAttacks(now = Date.now()) {
     const warriorSpeedMultiplier = 1 + WarriorAdvancementPolicy.getRuntimeBonuses(member, 'basic', now).attackSpeed;
     const galeSpeedMultiplier = now < (member.galeUntil || 0) ? 1 + (member.galeAttackSpeed || 0) : 1;
     const holyStormSpeedMultiplier = now < (member.holyStormHasteUntil || 0) ? 1 + (member.holyStormAttackSpeed || 0) : 1;
-    PartyPolicy.scheduleNextAttack(member, now, member.attackSpeed * skillHasteMultiplier * blessingSpeedMultiplier * corruptedSwiftnessMultiplier * runeFrenzyMultiplier * huntingRhythmMultiplier * warriorSpeedMultiplier * galeSpeedMultiplier * holyStormSpeedMultiplier * (1 + (desperate?.speed || 0)), exhaustedMultiplier * trailSlowMultiplier);
+    PartyPolicy.scheduleNextAttack(member, now, member.attackSpeed * skillHasteMultiplier * blessingSpeedMultiplier * corruptedSwiftnessMultiplier * runeFrenzyMultiplier * huntingRhythmMultiplier * warriorSpeedMultiplier * galeSpeedMultiplier * holyStormSpeedMultiplier * (1 + rogueBonuses.attackSpeed) * (1 + (desperate?.speed || 0)), exhaustedMultiplier * trailSlowMultiplier);
   }
 }
 
