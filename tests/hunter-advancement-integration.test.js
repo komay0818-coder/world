@@ -20,6 +20,8 @@ assert.match(source, /pet\.wildAwakeningUntil[\s\S]*attackKind: 'beast-slam'/);
 assert.match(source, /HunterAdvancementPolicy\.tryStun[\s\S]*getEnemySkillState/);
 assert.match(source, /applyGuardDamage\(target, damage, now, Math\.random\)[\s\S]*damage = guard\.hunterDamage/);
 assert.match(source, /kind: 'pet-guard'[\s\S]*usesRemaining: guard\.petUsesRemaining/);
+assert.match(source, /petGuardCooldownSkips/);
+assert.match(source, /guardReadyAt: guard\.guardReadyAt/);
 assert.match(source, /pet\.alive === false[\s\S]*kind: 'pet-revive'/);
 assert.match(source, /advancedSkillUpgradePending[\s\S]*HunterAdvancementPolicy\.getSkill[\s\S]*升級需求待定/);
 

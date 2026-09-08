@@ -69,15 +69,18 @@ assert.ok(exhaustion.arrows.recovered > 0);
 assert.deepEqual(runCombat({ ...exhaustionConfig, entry: 'ui' }), exhaustion, 'arrow exhaustion and recovery must be UI/headless identical');
 
 const petGuardConfig = {
-  ...marksmanConfig, seconds: 70, seed: 901,
+  ...marksmanConfig, seconds: 130, seed: 901,
   advancedClass: 'beastmaster',
   skills: { activeLv6: 'beast-fury', passiveLv6: 'pack-summoning' },
   enemy: { hp: 100000, defense: 10, attack: .05, attackSpeed: 1 }
 };
 const petGuard = runCombat(petGuardConfig);
 assert.ok(petGuard.combat.petGuardTriggers >= 3);
+assert.ok(petGuard.combat.petGuardCooldownSkips > 0);
 assert.ok(petGuard.combat.petEvents.some((event) => event.kind === 'pet-death'));
 assert.ok(petGuard.combat.petEvents.some((event) => event.kind === 'pet-revive'));
+assert.ok(petGuard.combat.petEvents.filter((event) => event.kind === 'pet-guard').every((event, index, events) => index === 0 || event.atMs - events[index - 1].atMs >= 10000));
+assert.equal(petGuard.final.hunterState.petGuardReadyAt, petGuard.combat.petEvents.filter((event) => event.kind === 'pet-guard').at(-1).guardReadyAt);
 assert.ok(petGuard.final.companions.every((pet) => Number.isInteger(pet.currentGuardUses) && !('currentHp' in pet)));
 
 assert.throws(() => runCombat({

@@ -6604,10 +6604,13 @@ function enemyAttackTick() {
     HunterAdvancementPolicy.updatePetSurvival(target, now);
     const guard = HunterAdvancementPolicy.applyGuardDamage(target, damage, now, Math.random);
     damage = guard.hunterDamage;
+    if (guard.blockedReason === 'cooldown') CombatCorePolicy.record(target, 'petGuardCooldownSkips');
+    else if (guard.blockedReason === 'chance') CombatCorePolicy.record(target, 'petGuardChanceMisses');
+    else if (guard.blockedReason === 'no-pet') CombatCorePolicy.record(target, 'petGuardNoPetSkips');
     if (guard.triggered) {
       CombatCorePolicy.record(target, 'petGuardTriggers');
       CombatCorePolicy.record(target, 'petGuardAbsorbed', guard.petDamage);
-      CombatCorePolicy.recordEvent(target, 'petEvents', { atMs: now, petId: guard.petId, kind: 'pet-guard', damage: guard.petDamage, share: guard.share, usesRemaining: guard.petUsesRemaining });
+      CombatCorePolicy.recordEvent(target, 'petEvents', { atMs: now, petId: guard.petId, kind: 'pet-guard', damage: guard.petDamage, share: guard.share, usesRemaining: guard.petUsesRemaining, guardReadyAt: guard.guardReadyAt });
       if (guard.petDied) CombatCorePolicy.recordEvent(target, 'petEvents', { atMs: now, petId: guard.petId, kind: 'pet-death', reviveAt: guard.reviveAt });
       logBattle(`🐾 ${target.name}的戰寵發動護主，承受 ${Math.round(guard.petDamage)} 點傷害（該寵物剩餘 ${guard.petUsesRemaining} 次）。`, 'system');
     }

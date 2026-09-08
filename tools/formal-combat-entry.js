@@ -209,7 +209,7 @@ function formalSnapshot(member, duration, cycle, resourceMonitor, dotMonitor, pa
       companions: JSON.parse(JSON.stringify(member.companions || [])),
       hunterState: {
         galeUntil: member.galeUntil || 0, galeHitCount: member.galeHitCount || 0,
-        beastFuryUntil: member.beastFuryUntil || 0, bloodyHuntUntil: member.bloodyHuntUntil || 0,
+        beastFuryUntil: member.beastFuryUntil || 0, bloodyHuntUntil: member.bloodyHuntUntil || 0, petGuardReadyAt: member.petGuardReadyAt || 0,
         sniperBasicUntil: member.sniperBasicUntil || 0, eagleEyeUntil: member.eagleEyeUntil || 0,
         weaknessShotUntil: member.weaknessShotUntil || 0, nextHunterAttackBonus: member.nextHunterAttackBonus || 0
       },
