@@ -16,6 +16,7 @@ const focusedCombinations = [
   { activeLv6: 'power-shot', passiveLv6: 'wild-bond' },
   { activeLv6: 'beast-fury', passiveLv6: 'pack-leader' }
 ];
+const survivalPairCombinations = focusedCombinations.slice(0, 2);
 const mean = (values) => values.reduce((sum, value) => sum + value, 0) / values.length;
 const stat = (values) => { const average = mean(values); return { mean: average, sd: Math.sqrt(mean(values.map((value) => (value - average) ** 2))) }; };
 
@@ -44,7 +45,10 @@ function survival(result) {
   if (aliveCount === 0) zeroPetMs += durationMs - groupChangedAt;
   Object.values(state).forEach((pet) => { pet.aliveMs += (durationMs - pet.changedAt) * (pet.alive ? 1 : 0); });
   return {
+    petCount: pets.length,
     petAliveRate: pets.length && durationMs ? groupAlivePetMs / (durationMs * pets.length) : 0,
+    averageAlivePets: durationMs ? groupAlivePetMs / durationMs : 0,
+    anyPetAliveRate: durationMs ? 1 - zeroPetMs / durationMs : 0,
     zeroPetRate: durationMs ? zeroPetMs / durationMs : 0,
     deaths: Object.values(state).reduce((sum, pet) => sum + pet.deaths, 0),
     revives: Object.values(state).reduce((sum, pet) => sum + pet.revives, 0),
@@ -56,11 +60,12 @@ function survival(result) {
 function sample(result) {
   const source = result.combat.damageBySource;
   const petDamage = (source['pet-basic'] || 0) + (source['pet-bite'] || 0) + (source['beast-slam'] || 0) + (source['pet-bleed'] || 0);
-  return { dps: result.dps, ttk: result.ttk || 0, kpm: result.killsPerMinute || 0, totalDamage: result.totalDamage, petDamage, petDps: petDamage / result.duration, petShare: petDamage / result.totalDamage, basicDamage: result.basicDamage, activeSkillDamage: result.activeSkillTotal, ...survival(result) };
+  const petSurvival = survival(result);
+  return { dps: result.dps, ttk: result.ttk || 0, kpm: result.killsPerMinute || 0, totalDamage: result.totalDamage, petDamage, petDps: petDamage / result.duration, petShare: petDamage / result.totalDamage, basicDamage: result.basicDamage, activeSkillDamage: result.activeSkillTotal, ...petSurvival, petAliveSeconds: petSurvival.petAliveRate * result.duration, anyPetAliveSeconds: petSurvival.anyPetAliveRate * result.duration, zeroPetSeconds: petSurvival.zeroPetRate * result.duration };
 }
 
 function aggregate(runs, config) {
-  const keys = ['dps', 'ttk', 'kpm', 'totalDamage', 'petDamage', 'petDps', 'petShare', 'basicDamage', 'activeSkillDamage', 'petAliveRate', 'zeroPetRate', 'deaths', 'revives', 'guardTriggers', 'guardAbsorbed'];
+  const keys = ['petCount', 'dps', 'ttk', 'kpm', 'totalDamage', 'petDamage', 'petDps', 'petShare', 'basicDamage', 'activeSkillDamage', 'petAliveRate', 'petAliveSeconds', 'averageAlivePets', 'anyPetAliveRate', 'anyPetAliveSeconds', 'zeroPetRate', 'zeroPetSeconds', 'deaths', 'revives', 'guardTriggers', 'guardAbsorbed'];
   return { config, ...Object.fromEntries(keys.map((key) => [key, stat(runs.map((run) => run[key]))])) };
 }
 
@@ -76,9 +81,10 @@ function evaluate(mode, configs) {
 const mode = process.argv.find((argument) => argument.startsWith('--mode='))?.split('=')[1];
 const output = process.argv.find((argument) => argument.startsWith('--output='))?.slice(9);
 const focused = process.argv.includes('--focused');
+const survivalPairs = process.argv.includes('--survival-pairs');
 if (!['five', 'boss'].includes(mode) || !output) throw new Error('Required --mode=five|boss --output=<file>');
-const selectedCombinations = focused ? focusedCombinations : combinations;
-const report = { mode, seeds: SEEDS.length, combinations: selectedCombinations.length, focused, equipment: EQUIPMENT, enemy: mode === 'five' ? ENEMY_FIVE : ENEMY_BOSS, results: evaluate(mode, selectedCombinations) };
+const selectedCombinations = survivalPairs ? survivalPairCombinations : focused ? focusedCombinations : combinations;
+const report = { mode, seeds: SEEDS.length, combinations: selectedCombinations.length, focused, survivalPairs, equipment: EQUIPMENT, enemy: mode === 'five' ? ENEMY_FIVE : ENEMY_BOSS, results: evaluate(mode, selectedCombinations) };
 fs.mkdirSync(path.dirname(output), { recursive: true });
 fs.writeFileSync(output, JSON.stringify(report, null, 2));
 console.log(`${mode} complete`);
