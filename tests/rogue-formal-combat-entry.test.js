@@ -71,13 +71,17 @@ assert.equal(venom.poison.maxStacks, 6);
 assert.ok(venom.poison.applications >= 6);
 assert.ok(venom.skillCasts['corrosive-strike'] > 0);
 assert.ok((venom.skillDamage['coating-poison'] || 0) > 0);
-assert.ok(venom.combat.resourceEvents.some((event) => event.type === 'spend' && event.skill === 'corrosive-strike' && event.amount === 25));
+assert.ok(venom.combat.resourceEvents.some((event) => event.type === 'spend' && event.skill === 'corrosive-strike' && event.amount === 0));
 assert.ok(venom.combat.resourceEvents.some((event) => event.type === 'spend' && event.skill === 'blood-venom-rend' && event.amount === 30));
 assert.ok(venom.bleed.damage > 0 && venom.bleed.refreshes > 0);
 assert.ok(venom.poison.timeline.length > 0 && venom.bleed.timeline.length > 0);
 assert.ok(venom.combat.dotEvents.some((event) => event.action === 'bonus-tick' && event.type === 'poison'));
 assert.ok(venom.combat.dotEvents.some((event) => event.action === 'bonus-tick' && ['bleed', 'rupture'].includes(event.type)));
 assert.deepEqual(runCombat({ ...venomConfig, entry: 'ui' }), venom, 'poison stacks, bleed refresh and tick timing must be UI/headless identical');
+
+const zeroEnergyCoating = runCombat({ ...venomConfig, seconds: 1, initialResource: 0 });
+assert.equal(zeroEnergyCoating.skillCasts['corrosive-strike'], 1, 'coating may start the venom cycle at zero energy when cooldowns are ready');
+assert.equal(zeroEnergyCoating.energy.spent, 0, 'zero-cost coating does not spend energy or trigger a resource refund');
 
 assert.doesNotThrow(() => runCombat({
   ...venomConfig,

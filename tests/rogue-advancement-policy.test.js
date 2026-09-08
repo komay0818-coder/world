@@ -14,7 +14,7 @@ assert.deepEqual([1,2,3,4,5,6].map(level => policy.getEffect('corrosive-strike',
 assert.deepEqual([1,2,3,4,5,6].map(level => policy.getEffect('corrosive-strike', level).cooldown), [10,10,10,9,9,9]);
 assert.deepEqual([1,2,3,4,5,6].map(level => policy.getEffect('corrosive-strike', level).poisonBonusPerStack), [0,.08,.10,.12,.14,.16]);
 assert.equal(policy.getEffect('corrosive-strike', 6).lethalCoating, .25);
-assert.equal(policy.getSkill('corrosive-strike').energyCost, 25);
+assert.equal(policy.getSkill('corrosive-strike').energyCost, 0);
 assert.equal(policy.getSkill('blood-venom-rend').energyCost, 30);
 assert.equal(policy.getEffect('blood-venom-rend', 6).ruptureTick, .30);
 assert.equal(policy.getEffect('blood-venom-rend', 6).ruptureEntryRatio, .75);

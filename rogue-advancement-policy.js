@@ -8,7 +8,7 @@
   const POISON_ENTRY_RATIO = .75;
   const ADVANCED_CLASSES = Object.freeze({ assassination: Object.freeze({ id: 'assassination', name: '刺殺系' }), venom: Object.freeze({ id: 'venom', name: '劇毒系' }) });
   const SKILL_DETAILS = Object.freeze({
-    'shadow-assassination':'單體刺殺；流血目標傷害提高，Lv6 暴擊追加副手攻擊。','death-mark':'標記目標5秒，提高自身對其傷害；擊殺縮短冷卻。','lethal-technique':'提高暴擊率；背刺暴擊強化下一次主手普通攻擊。','weakness-insight':'攻擊流血／割裂目標時提高攻擊與攻速。','corrosive-strike':'武器淬毒；期間主手普通攻擊施加中毒，並依命中前毒層追加毒傷。','blood-venom-rend':'直接傷害並施加持續6秒的割裂；中毒目標承受更高割裂傷害。','venom-mastery':'提高中毒傷害與中毒層數上限；Lv6滿6層時進一步提高中毒傷害。','toxic-blood-symbiosis':'目標同時中毒與流血時提高持續傷害；Lv6 直接暴擊使每個中毒與流血／割裂追加1次傷害。'
+    'shadow-assassination':'單體刺殺；流血目標傷害提高，Lv6 暴擊追加副手攻擊。','death-mark':'標記目標5秒，提高自身對其傷害；擊殺縮短冷卻。','lethal-technique':'提高暴擊率；背刺暴擊強化下一次主手普通攻擊。','weakness-insight':'攻擊流血／割裂目標時提高攻擊與攻速。','corrosive-strike':'0能量武器淬毒；需有存活敵人且技能與共用冷卻均就緒，施放後期間主手普通攻擊施加中毒並依命中前毒層追加毒傷。','blood-venom-rend':'直接傷害並施加持續6秒的割裂；中毒目標承受更高割裂傷害。','venom-mastery':'提高中毒傷害與中毒層數上限；Lv6滿6層時進一步提高中毒傷害。','toxic-blood-symbiosis':'目標同時中毒與流血時提高持續傷害；Lv6 直接暴擊使每個中毒與流血／割裂追加1次傷害。'
   });
   const active = (id,name,cooldown,levels,advancedClass) => Object.freeze({ level:45,type:'active',id,name,detail:SKILL_DETAILS[id],cooldown,energyCost:levels[0]?.energyCost||0,advancedClass,levels:Object.freeze(levels.map(Object.freeze)) });
   const passive = (id,name,levels,advancedClass) => Object.freeze({ level:45,type:'passive',id,name,detail:SKILL_DETAILS[id],cooldown:0,advancedClass,levels:Object.freeze(levels.map(Object.freeze)) });
@@ -19,7 +19,7 @@
     passive('weakness-insight','弱點洞察',[3,4,5,6,8,10].map((attack,i)=>({bleedingAttack:attack/100,bleedingAttackSpeed:[2,3,4,5,6,8][i]/100,bleedingBasicDamage:i===5?.15:0})),'assassination')
   ]);
   const VENOM_SKILLS = Object.freeze([
-    active('corrosive-strike','淬毒',10,[5,5,6,6,7,7].map((duration,i)=>({duration,cooldown:[10,10,10,9,9,9][i],energyCost:25,poisonBonusPerStack:[0,8,10,12,14,16][i]/100,lethalCoating:i===5?.25:0,breakthrough:i===5?'滿6層時，淬毒追加毒傷提高25%':''})),'venom'),
+    active('corrosive-strike','淬毒',10,[5,5,6,6,7,7].map((duration,i)=>({duration,cooldown:[10,10,10,9,9,9][i],energyCost:0,poisonBonusPerStack:[0,8,10,12,14,16][i]/100,lethalCoating:i===5?.25:0,breakthrough:i===5?'滿6層時，淬毒追加毒傷提高25%':''})),'venom'),
     active('blood-venom-rend','血毒割裂',8,[140,150,160,170,185,200].map((power,i)=>({power:power/100,energyCost:30,ruptureTick:[17,19,21,23,26,30][i]/100,ruptureDuration:6,ruptureTickInterval:2,ruptureEntryRatio:.75,poisonedRuptureBonus:.20,toxicBloodDefense:i===5?.06:0,breakthrough:i===5?'目標同時中毒與割裂時，額外降低6%防禦':''})),'venom'),
     passive('venom-mastery','劇毒精通',[5,8,10,13,16,25].map((poisonDamage,i)=>({poisonDamage:poisonDamage/100,poisonMaxStacks:[4,4,5,5,6,6][i],maxStackPoisonDamage:i===5?.20:0,breakthrough:i===5?'目標達到6層中毒時，中毒傷害額外提高20%':''})),'venom'),
     passive('toxic-blood-symbiosis','血毒共生',[6,8,10,13,16,25].map((dotDamage,i)=>({dotDamage:dotDamage/100,bonusTickOnDirectCrit:i===5,breakthrough:i===5?'直接暴擊使每個中毒與流血／割裂各追加1次傷害，每次施加限1次':''})),'venom')
