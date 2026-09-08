@@ -1,0 +1,125 @@
+{
+  "mode": "five",
+  "seeds": 100,
+  "combinations": 1,
+  "focused": false,
+  "survivalPairs": false,
+  "wildBondOnly": true,
+  "equipment": {
+    "chest": {
+      "id": "baseline-chest",
+      "slot": "chest",
+      "defense": 12
+    },
+    "weapon": {
+      "id": "baseline-bow",
+      "slot": "weapon",
+      "attack": 24,
+      "attackMin": 22,
+      "attackMax": 26,
+      "criticalChance": 0.1,
+      "weaponType": "two-handed-bow"
+    }
+  },
+  "enemy": {
+    "hp": 2500,
+    "defense": 20,
+    "attack": 0.1,
+    "attackSpeed": 1,
+    "level": 45,
+    "evasion": 0,
+    "parry": 0
+  },
+  "results": [
+    {
+      "config": {
+        "activeLv6": "power-shot",
+        "passiveLv6": "wild-bond"
+      },
+      "petCount": {
+        "mean": 2,
+        "sd": 0
+      },
+      "dps": {
+        "mean": 358.3154166666667,
+        "sd": 7.431025835325683
+      },
+      "ttk": {
+        "mean": 0,
+        "sd": 0
+      },
+      "kpm": {
+        "mean": 8.02,
+        "sd": 0.18601075237738265
+      },
+      "totalDamage": {
+        "mean": 42997.85,
+        "sd": 891.7231002390821
+      },
+      "petDamage": {
+        "mean": 9976.36,
+        "sd": 649.995977218321
+      },
+      "petDps": {
+        "mean": 83.13633333333335,
+        "sd": 5.416633143486009
+      },
+      "petShare": {
+        "mean": 0.231867550474421,
+        "sd": 0.011491861908605579
+      },
+      "basicDamage": {
+        "mean": 16722.62,
+        "sd": 336.47834343386796
+      },
+      "activeSkillDamage": {
+        "mean": 16298.87,
+        "sd": 423.64937519132496
+      },
+      "petAliveRate": {
+        "mean": 0.6479541666666665,
+        "sd": 0.0410711228896492
+      },
+      "petAliveSeconds": {
+        "mean": 77.7545,
+        "sd": 4.928534746757905
+      },
+      "averageAlivePets": {
+        "mean": 1.295908333333333,
+        "sd": 0.0821422457792984
+      },
+      "anyPetAliveRate": {
+        "mean": 0.8812916666666666,
+        "sd": 0.04740932500281166
+      },
+      "anyPetAliveSeconds": {
+        "mean": 105.755,
+        "sd": 5.689119000337402
+      },
+      "zeroPetRate": {
+        "mean": 0.11870833333333333,
+        "sd": 0.04740932500281164
+      },
+      "zeroPetSeconds": {
+        "mean": 14.245000000000003,
+        "sd": 5.689119000337398
+      },
+      "deaths": {
+        "mean": 3.48,
+        "sd": 0.4995998398718715
+      },
+      "revives": {
+        "mean": 2.38,
+        "sd": 0.4853864439804638
+      },
+      "guardTriggers": {
+        "mean": 11.58,
+        "sd": 0.4935585071701229
+      },
+      "guardAbsorbed": {
+        "mean": 2.895,
+        "sd": 0.12338962679253072
+      }
+    }
+  ]
+}

@@ -17,6 +17,7 @@ const focusedCombinations = [
   { activeLv6: 'beast-fury', passiveLv6: 'pack-leader' }
 ];
 const survivalPairCombinations = focusedCombinations.slice(0, 2);
+const wildBondCombination = focusedCombinations.slice(2, 3);
 const mean = (values) => values.reduce((sum, value) => sum + value, 0) / values.length;
 const stat = (values) => { const average = mean(values); return { mean: average, sd: Math.sqrt(mean(values.map((value) => (value - average) ** 2))) }; };
 
@@ -82,9 +83,10 @@ const mode = process.argv.find((argument) => argument.startsWith('--mode='))?.sp
 const output = process.argv.find((argument) => argument.startsWith('--output='))?.slice(9);
 const focused = process.argv.includes('--focused');
 const survivalPairs = process.argv.includes('--survival-pairs');
+const wildBondOnly = process.argv.includes('--wild-bond-only');
 if (!['five', 'boss'].includes(mode) || !output) throw new Error('Required --mode=five|boss --output=<file>');
-const selectedCombinations = survivalPairs ? survivalPairCombinations : focused ? focusedCombinations : combinations;
-const report = { mode, seeds: SEEDS.length, combinations: selectedCombinations.length, focused, survivalPairs, equipment: EQUIPMENT, enemy: mode === 'five' ? ENEMY_FIVE : ENEMY_BOSS, results: evaluate(mode, selectedCombinations) };
+const selectedCombinations = wildBondOnly ? wildBondCombination : survivalPairs ? survivalPairCombinations : focused ? focusedCombinations : combinations;
+const report = { mode, seeds: SEEDS.length, combinations: selectedCombinations.length, focused, survivalPairs, wildBondOnly, equipment: EQUIPMENT, enemy: mode === 'five' ? ENEMY_FIVE : ENEMY_BOSS, results: evaluate(mode, selectedCombinations) };
 fs.mkdirSync(path.dirname(output), { recursive: true });
 fs.writeFileSync(output, JSON.stringify(report, null, 2));
 console.log(`${mode} complete`);
