@@ -83,9 +83,13 @@ assert.ok(petGuard.combat.petEvents.filter((event) => event.kind === 'pet-guard'
 assert.equal(petGuard.final.hunterState.petGuardReadyAt, petGuard.combat.petEvents.filter((event) => event.kind === 'pet-guard').at(-1).guardReadyAt);
 assert.ok(petGuard.final.companions.every((pet) => Number.isInteger(pet.currentGuardUses) && !('currentHp' in pet)));
 
-assert.throws(() => runCombat({
+assert.doesNotThrow(() => runCombat({
   ...marksmanConfig,
   skills: { levels: { 'power-shot': 6, 'gale-rapid-fire': 6 } }
-}), /Only one active skill may be Lv6/);
+}), 'base and advancement active Lv6 slots are independent');
+assert.throws(() => runCombat({
+  ...marksmanConfig,
+  skills: { levels: { 'power-shot': 6, 'multi-shot': 6 } }
+}), /Only one active skill may be Lv6 in base pool/);
 
 console.log('hunter-formal-combat-entry: assertions passed');

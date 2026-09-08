@@ -63,6 +63,7 @@ function formalSkillDefinitions(job, advancedClass) {
 function buildFormalSkillLevels(job, advancedClass, requested) {
   const definitions = formalSkillDefinitions(job, advancedClass);
   const byId = Object.fromEntries(definitions.map((skill) => [skill.id, skill]));
+  const advancementIds = new Set(definitions.filter((skill) => WarriorAdvancementPolicy.getSkill(skill.id) || RogueAdvancementPolicy.getSkill(skill.id) || HunterAdvancementPolicy.getSkill(skill.id) || MageAdvancementPolicy.getSkill(skill.id) || PriestAdvancementPolicy.getSkill(skill.id)).map((skill) => skill.id));
   const levels = Object.fromEntries(definitions.map((skill) => [job + ':' + skill.id, 5]));
   const explicit = requested?.levels || {};
   for (const [rawId, rawLevel] of Object.entries(explicit)) {
@@ -72,14 +73,19 @@ function buildFormalSkillLevels(job, advancedClass, requested) {
     if (!Number.isInteger(level) || level < 1 || level > 6) throw new Error('Skill level must be an integer from 1 to 6: ' + id);
     levels[job + ':' + id] = level;
   }
-  for (const [type, id] of [['active', requested?.activeLv6], ['passive', requested?.passiveLv6]]) {
+  const requestedLv6 = [
+    ['active', requested?.baseActiveLv6], ['passive', requested?.basePassiveLv6],
+    ['active', requested?.advancedActiveLv6], ['passive', requested?.advancedPassiveLv6],
+    ['active', requested?.activeLv6], ['passive', requested?.passiveLv6]
+  ];
+  for (const [type, id] of requestedLv6) {
     if (!id) continue;
     if (!byId[id] || byId[id].type !== type) throw new Error('Invalid ' + type + ' Lv6 skill: ' + id);
     levels[job + ':' + id] = 6;
   }
-  for (const type of ['active', 'passive']) {
-    const specialized = definitions.filter((skill) => skill.type === type && levels[job + ':' + skill.id] === 6);
-    if (specialized.length > 1) throw new Error('Only one ' + type + ' skill may be Lv6: ' + specialized.map((skill) => skill.id).join(', '));
+  for (const pool of ['base', 'advanced']) for (const type of ['active', 'passive']) {
+    const specialized = definitions.filter((skill) => skill.type === type && (advancementIds.has(skill.id) ? 'advanced' : 'base') === pool && levels[job + ':' + skill.id] === 6);
+    if (specialized.length > 1) throw new Error('Only one ' + type + ' skill may be Lv6 in ' + pool + ' pool: ' + specialized.map((skill) => skill.id).join(', '));
   }
   return levels;
 }
@@ -155,7 +161,7 @@ function formalSnapshot(member, duration, cycle, resourceMonitor, dotMonitor, pa
   const petSources = ['pet-basic', 'pet-bite', 'beast-slam', 'pet-bleed'];
   const petDamage = petSources.reduce((sum, source) => sum + (combat.damageBySource[source] || 0), 0);
   const extraShotDamage = combat.damageBySource['extra-shot'] || 0;
-  const dotSources = ['burn', 'dot', 'pet-bleed', 'bleed', 'rupture', 'poison', 'bleed-entry', 'bleed-trigger', 'rupture-entry', 'poison-entry'];
+  const dotSources = ['burn', 'dot', 'pet-bleed', 'bleed', 'rupture', 'poison', 'bleed-entry', 'bleed-trigger', 'rupture-entry', 'poison-entry', 'coating-poison'];
   const dotDamage = dotSources.reduce((sum, source) => sum + (combat.damageBySource[source] || 0), 0);
   const activeSkillIds = new Set(formalSkillDefinitions(member.job, member.progress.advancedClass).filter((skill) => skill.type === 'active').map((skill) => skill.id));
   const activeSkillDamage = Object.fromEntries(Object.entries(combat.damageBySource).filter(([source]) => activeSkillIds.has(source)));
@@ -164,7 +170,7 @@ function formalSnapshot(member, duration, cycle, resourceMonitor, dotMonitor, pa
   const bleedTickDamage = (combat.damageBySource.bleed || 0) + (combat.damageBySource.rupture || 0);
   const bleedSpecialDamage = (combat.damageBySource['bleed-entry'] || 0) + (combat.damageBySource['bleed-trigger'] || 0) + (combat.damageBySource['rupture-entry'] || 0);
   const poisonTickDamage = combat.damageBySource.poison || 0;
-  const poisonEntryDamage = combat.damageBySource['poison-entry'] || 0;
+  const poisonEntryDamage = (combat.damageBySource['poison-entry'] || 0) + (combat.damageBySource['coating-poison'] || 0);
   const classifiedSources = new Set(['basic-attack', 'offhand', 'extra-shot', ...petSources, ...dotSources, ...activeSkillIds]);
   const specialDamage = Object.entries(combat.damageBySource).filter(([source]) => !classifiedSources.has(source)).reduce((sum, [, damage]) => sum + damage, 0);
   const naturalRecovery = combat.resourceEvents.filter((event) => event.type === 'natural').reduce((sum, event) => sum + event.amount, 0);
@@ -215,7 +221,8 @@ function formalSnapshot(member, duration, cycle, resourceMonitor, dotMonitor, pa
       },
       rogueState: {
         lethalTechniqueUntil: member.lethalTechniqueUntil || 0, shadowDanceUntil: member.shadowDanceUntil || 0,
-        plagueSpreadPending: Boolean(member.plagueSpreadPending), desperateDodgeUntil: member.desperateDodgeUntil || 0
+        plagueSpreadPending: Boolean(member.plagueSpreadPending), desperateDodgeUntil: member.desperateDodgeUntil || 0,
+        venomCoatingUntil: member.venomCoatingUntil || 0, venomCoatingEffect: JSON.parse(JSON.stringify(member.venomCoatingEffect || null))
       },
       priestState: {faithStacks:member.faithStacks||0,faithUntil:member.faithUntil||0,lightValue:member.lightValue||0,sanctuaryUntil:member.sanctuaryUntil||0,sanctuaryNextTickAt:member.sanctuaryNextTickAt||0,sacredGuardianReadyAt:battle.sacredGuardianReadyAt||0},
       warriorState: {

@@ -67,17 +67,29 @@ const venomConfig = {
 };
 const venom = runCombat(venomConfig);
 assert.ok(venom.poison.damage > 0 && venom.poison.ticks > 0);
-assert.equal(venom.poison.maxStacks, 3);
-assert.ok(venom.poison.applications >= 3 && venom.poison.refreshes > 0);
+assert.equal(venom.poison.maxStacks, 6);
+assert.ok(venom.poison.applications >= 6);
+assert.ok(venom.skillCasts['corrosive-strike'] > 0);
+assert.ok((venom.skillDamage['coating-poison'] || 0) > 0);
+assert.ok(venom.combat.resourceEvents.some((event) => event.type === 'spend' && event.skill === 'corrosive-strike' && event.amount === 25));
+assert.ok(venom.combat.resourceEvents.some((event) => event.type === 'spend' && event.skill === 'blood-venom-rend' && event.amount === 30));
 assert.ok(venom.bleed.damage > 0 && venom.bleed.refreshes > 0);
 assert.ok(venom.poison.timeline.length > 0 && venom.bleed.timeline.length > 0);
 assert.ok(venom.combat.dotEvents.some((event) => event.action === 'bonus-tick' && event.type === 'poison'));
 assert.ok(venom.combat.dotEvents.some((event) => event.action === 'bonus-tick' && ['bleed', 'rupture'].includes(event.type)));
 assert.deepEqual(runCombat({ ...venomConfig, entry: 'ui' }), venom, 'poison stacks, bleed refresh and tick timing must be UI/headless identical');
 
-assert.throws(() => runCombat({
+assert.doesNotThrow(() => runCombat({
   ...venomConfig,
   skills: { levels: { 'poison-blade': 6, 'corrosive-strike': 6 } }
-}), /Only one active skill may be Lv6/);
+}), 'base and advancement active Lv6 slots are independent');
+assert.throws(() => runCombat({
+  ...venomConfig,
+  skills: { levels: { 'poison-blade': 6, 'backstab': 6 } }
+}), /Only one active skill may be Lv6 in base pool/);
+assert.throws(() => runCombat({
+  ...venomConfig,
+  skills: { levels: { 'corrosive-strike': 6, 'blood-venom-rend': 6 } }
+}), /Only one active skill may be Lv6 in advanced pool/);
 
 console.log('rogue-formal-combat-entry: assertions passed');

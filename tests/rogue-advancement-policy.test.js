@@ -7,11 +7,19 @@ assert.equal(policy.ASSASSINATION_SKILLS.length, 4);
 assert.equal(policy.VENOM_SKILLS.length, 4);
 assert.deepEqual(policy.getEffect('shadow-assassination', 6), { power: 2.7, skillCrit: .12, bleedingDamage: .15, offhandOnCrit: true });
 assert.equal(policy.getEffect('death-mark', 6).executeCritDamage, .25);
-assert.equal(policy.getEffect('corrosive-strike', 6).dotVulnerability, .12);
+assert.deepEqual([1,2,3,4,5,6].map(level => policy.getEffect('corrosive-strike', level).duration), [5,5,6,6,7,7]);
+assert.deepEqual([1,2,3,4,5,6].map(level => policy.getEffect('corrosive-strike', level).cooldown), [10,10,10,9,9,9]);
+assert.deepEqual([1,2,3,4,5,6].map(level => policy.getEffect('corrosive-strike', level).poisonBonusPerStack), [0,.08,.10,.12,.14,.16]);
+assert.equal(policy.getEffect('corrosive-strike', 6).lethalCoating, .25);
+assert.equal(policy.getSkill('corrosive-strike').energyCost, 25);
+assert.equal(policy.getSkill('blood-venom-rend').energyCost, 30);
 assert.equal(policy.getEffect('blood-venom-rend', 6).ruptureTick, .30);
 assert.equal(policy.getEffect('blood-venom-rend', 6).ruptureEntryRatio, .75);
+assert.equal(policy.getEffect('blood-venom-rend', 6).ruptureDuration, 6);
+assert.equal(policy.getEffect('blood-venom-rend', 6).ruptureTickInterval, 2);
 assert.deepEqual([1,2,3,4,5,6].map(level => policy.getEffect('blood-venom-rend', level).ruptureTick), [.17,.19,.21,.23,.26,.30]);
-assert.deepEqual([1,2,3,4,5,6].map(level => policy.getEffect('venom-mastery', level).poisonDamage), [.07,.09,.12,.15,.18,.25]);
+assert.deepEqual([1,2,3,4,5,6].map(level => policy.getEffect('venom-mastery', level).poisonDamage), [.05,.08,.10,.13,.16,.25]);
+assert.deepEqual([1,2,3,4,5,6].map(level => policy.getEffect('venom-mastery', level).poisonMaxStacks), [4,4,5,5,6,6]);
 assert.deepEqual([1,2,3,4,5,6].map(level => policy.getEffect('toxic-blood-symbiosis', level).dotDamage), [.06,.08,.10,.13,.16,.25]);
 assert.deepEqual([1,2,3,4,5,6].map(level => policy.getEffect('lethal-technique', level).criticalDamage), [.05,.07,.09,.11,.13,.15]);
 assert.deepEqual(policy.getAutoSkillPriority({ advancedClass: 'assassination' }, [
@@ -19,7 +27,7 @@ assert.deepEqual(policy.getAutoSkillPriority({ advancedClass: 'assassination' },
 ]).map((skill) => skill.id), ['death-mark', 'backstab', 'shadow-assassination', 'shadow-dance', 'poison-blade']);
 assert.deepEqual(policy.getAutoSkillPriority({ advancedClass: 'venom' }, [
   { id: 'backstab' }, { id: 'shadow-dance' }, { id: 'poison-blade' }, { id: 'corrosive-strike' }, { id: 'blood-venom-rend' }
-]).map((skill) => skill.id), ['poison-blade', 'backstab', 'blood-venom-rend', 'corrosive-strike', 'shadow-dance']);
+]).map((skill) => skill.id), ['corrosive-strike', 'poison-blade', 'backstab', 'blood-venom-rend', 'shadow-dance']);
 
 const character = { job: 'assassin' };
 const progress = { level: 45, preJobTrial: { proofTiers: [1, 2, 3] } };
@@ -47,13 +55,17 @@ assert.equal(policy.poisonStacks(dots), 3);
 assert.equal(policy.getTargetBonuses(venom, dots, {}, 1, 'dot', 1000).dotDamage, .25);
 assert.equal(policy.getTargetBonuses(venom, dots, {}, 1, 'basic', 1000).defenseReduction, .06);
 assert.equal(policy.getTargetDefenseReduction(dots), .06, 'toxic blood is a target debuff independent of the current attacker');
+assert.equal(policy.getPoisonMaxStacks(venom), 6);
+assert.equal(policy.getPoisonDamageBonus(venom, dots), .25);
+const sixPoison = Array.from({ length: 6 }, () => ({ type: 'poison', remaining: 3, source: venom }));
+assert.equal(policy.getPoisonDamageBonus(venom, sixPoison), .45, 'Lv6 poison erosion applies only at six stacks');
+policy.applyCoating(venom, 6, 1000);
+assert.deepEqual(policy.getCoatingExecution(venom, 5, 2000), { stacks: 5, maxStacks: 6, applyPoison: true, bonusPower: .8, bonusMultiplier: 1 });
+assert.deepEqual(policy.getCoatingExecution(venom, 6, 2000), { stacks: 6, maxStacks: 6, applyPoison: false, bonusPower: .96, bonusMultiplier: 1.25 });
+assert.equal(policy.getCoatingExecution(venom, 6, 8000), null, 'coating expires at the exact duration boundary');
 const bonusTicks = policy.consumeBonusDotTicksOnCrit(venom, dots, true);
 assert.equal(bonusTicks.length, 4, 'each poison layer and rupture receive one bonus tick');
 assert.equal(policy.consumeBonusDotTicksOnCrit(venom, dots, true).length, 0, 'the same DoT application cannot trigger twice');
-assert.equal(policy.resolvePlagueDeath(venom, dots), true);
-assert.equal(policy.consumePlague(venom), true);
-assert.equal(policy.consumePlague(venom), false);
-assert.equal(policy.resolvePlagueDeath(venom, dots.slice(0, 2)), false, 'two poison stacks are insufficient');
-assert.equal(policy.resolvePlagueDeath(venom, dots.slice(0, 1)), false, 'one poison stack is insufficient');
+assert.equal(policy.resolvePlagueDeath(venom, sixPoison), false, 'plague spread was removed from venom mastery');
 
 console.log('rogue-advancement-policy: assertions passed');
