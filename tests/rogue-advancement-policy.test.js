@@ -21,12 +21,14 @@ assert.deepEqual([1,2,3,4,5,6].map(level => policy.getEffect('corrosive-strike',
 assert.equal(policy.getEffect('corrosive-strike', 6).lethalCoating, .25);
 assert.equal(policy.getSkill('corrosive-strike').energyCost, 0);
 assert.equal(policy.getSkill('blood-venom-rend').energyCost, 30);
-assert.equal(policy.getEffect('blood-venom-rend', 6).bleedTick, .05);
+assert.equal(policy.getEffect('blood-venom-rend', 6).bleedTick, .08);
 assert.equal(policy.getEffect('blood-venom-rend', 6).targets, 3);
 assert.equal(policy.getEffect('blood-venom-rend', 6).bleedEntryRatio, .75);
 assert.equal(policy.getEffect('blood-venom-rend', 6).bleedDuration, 12);
 assert.equal(policy.getEffect('blood-venom-rend', 6).bleedTickInterval, 2);
-assert.deepEqual([1,2,3,4,5,6].map(level => policy.getEffect('blood-venom-rend', level).bleedTick), [.03,.03,.035,.04,.045,.05]);
+assert.deepEqual([1,2,3,4,5,6].map(level => policy.getEffect('blood-venom-rend', level).bleedTick), [.04,.045,.05,.055,.06,.08]);
+assert.equal(policy.getEffect('blood-venom-rend', 6).bloodTideBleedDamage, .25);
+assert.equal(policy.getEffect('blood-venom-rend', 6).bloodTideDefense, .15);
 assert.deepEqual([1,2,3,4,5,6].map(level => policy.getEffect('venom-mastery', level).bloodDotDamage), [.05,.08,.10,.13,.16,.25]);
 assert.deepEqual([1,2,3,4,5,6].map(level => policy.getEffect('venom-mastery', level).poisonMaxStacks), [4,4,5,5,6,6]);
 assert.deepEqual([1,2,3,4,5,6].map(level => policy.getEffect('venom-mastery', level).bleedMaxStacks), [4,4,5,5,6,6]);
@@ -83,8 +85,8 @@ const venom = { progress: { advancedClass: 'venom', skillLevels: { 'assassin:ven
 const dots = [{ type: 'poison', remaining: 3, nextTickAt: 3000, source: venom }, { type: 'poison', remaining: 3, nextTickAt: 3000, source: venom }, { type: 'poison', remaining: 3, nextTickAt: 3000, source: venom }, { type: 'bleed', bloodVenomBleed: true, remaining: 3, nextTickAt: 3000, source: venom }];
 assert.equal(policy.poisonStacks(dots), 3);
 assert.equal(policy.getTargetBonuses(venom, dots, {}, 1, 'dot', 1000).dotDamage, .25);
-assert.equal(policy.getTargetBonuses(venom, dots, {}, 1, 'basic', 1000).defenseReduction, .06);
-assert.equal(policy.getTargetDefenseReduction(dots), .06, 'toxic blood is a target debuff independent of the current attacker');
+assert.equal(policy.getTargetBonuses(venom, dots, {}, 1, 'basic', 1000).defenseReduction, 0);
+assert.equal(policy.getTargetDefenseReduction(dots), 0, 'blood tide does not start below six bleed stacks');
 assert.equal(policy.getPoisonMaxStacks(venom), 6);
 assert.equal(policy.getBleedMaxStacks(venom), 6);
 assert.equal(policy.getPoisonDamageBonus(venom, dots), .25);
@@ -92,6 +94,9 @@ const sixPoison = Array.from({ length: 6 }, () => ({ type: 'poison', remaining: 
 assert.equal(policy.getPoisonDamageBonus(venom, sixPoison), .25, 'six poison stacks alone do not trigger blood venom erosion');
 const sixBloodBleeds = Array.from({ length: 6 }, () => ({ type: 'bleed', bloodVenomBleed: true, remaining: 3, source: venom }));
 assert.equal(policy.getPoisonDamageBonus(venom, [...sixPoison, ...sixBloodBleeds]), .45, 'blood venom erosion requires six poison and six bleed stacks');
+assert.equal(policy.getBloodDotDamageBonus(venom, sixBloodBleeds, 'bleed'), .50, 'blood tide adds 25% only to bleed at six stacks');
+assert.equal(policy.getBloodDotDamageBonus(venom, sixBloodBleeds, 'poison'), .25, 'blood tide does not increase poison damage');
+assert.equal(policy.getTargetDefenseReduction(sixBloodBleeds), .15, 'six bleed stacks apply one non-stacking 15% blood tide defense reduction');
 policy.applyCoating(venom, 6, 1000);
 assert.deepEqual(policy.getCoatingExecution(venom, 5, 2000), { stacks: 5, maxStacks: 6, applyPoison: true, bonusPower: .8, bonusMultiplier: 1 });
 assert.deepEqual(policy.getCoatingExecution(venom, 6, 2000), { stacks: 6, maxStacks: 6, applyPoison: false, bonusPower: .96, bonusMultiplier: 1.25 });
