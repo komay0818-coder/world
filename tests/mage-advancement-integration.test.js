@@ -9,6 +9,7 @@ assert.match(source,/MageAdvancementPolicy\.resolveKill/);
 assert.match(source,/getElementalBurstParts[\s\S]*part\.element[\s\S]*recordBonusDamage/);
 assert.match(source,/extendElementalCollapseStatuses[\s\S]*shock\.until \+= 1000[\s\S]*shock\.extended = true/);
 assert.match(source,/skillEffect\.transformPowerMultiplier[\s\S]*stormFollowupDamage/);
+assert.match(source,/stormTargetMultiplier[\s\S]*multiTargetBonusPerTarget[\s\S]*secondDamage \* stormTargetMultiplier/);
 assert.match(source,/rollStormElements[\s\S]*applyElementalStormStatus/);
 assert.match(source,/addElementMark[\s\S]*reduceLongestElementCooldown/);
 assert.match(source,/finishResonance[\s\S]*aliveEnemyIndexesByAge\(\)\.slice\(0, release\.targets \|\| 1\)[\s\S]*attackKind: 'resonance'/);

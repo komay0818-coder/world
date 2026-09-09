@@ -13,7 +13,7 @@
     active('elemental-burst', '元素爆破', 8, [
       { power:1.3,bonus:.2 },{ power:1.4,bonus:.25 },{ power:1.4,bonus:.3 },{ power:1.5,bonus:.35 },{ power:1.5,bonus:.4 },{ power:1.6,bonus:.4,extendStatuses:1,breakthrough:'元素崩解：命中三種元素狀態齊全的目標時，各延長 1 秒' }
     ], 'elementalist', '依目標的燃燒、冰系控制與麻痺狀態追加對應元素傷害。'),
-    active('elemental-storm', '元素風暴', 14, [120,128,136,144,152,160].map((power,index)=>({ power:power/100,targets:5,randomElement:true,fireBurn:true,iceSlow:.25,statusDuration:4,lightningParalysis:true,transformChance:index===5?.30:0,transformPowerMultiplier:index===5?.50:0,breakthrough:index===5?'元素變幻：30% 機率追加一次不同元素、50%傷害的風暴':'' })), 'elementalist', '隨機造成火、冰或雷元素範圍傷害並附加對應狀態。'),
+    active('elemental-storm', '元素風暴', 14, [120,128,136,144,152,160].map((power,index)=>({ power:power/100,targets:5,randomElement:true,fireBurn:true,iceSlow:.25,statusDuration:4,lightningParalysis:true,multiTargetBonusPerTarget:.08,multiTargetBonusStartsAt:3,transformChance:index===5?.30:0,transformPowerMultiplier:index===5?.50:0,breakthrough:index===5?'元素變幻：30% 機率追加一次不同元素、50%傷害的風暴':'' })), 'elementalist', '隨機造成火、冰或雷元素範圍傷害並附加對應狀態；命中 3 名以上敵人時，每多 1 名傷害提高 8%。'),
     passive('elemental-marks', '元素印記', [8,10,12,15,20,20].map((damage,index)=>({ resonanceDamage:damage/100,resonanceDuration:6,extensionPerDifferentElement:index===5?1:0,maxExtension:index===5?3:0,breakthrough:index===5?'元素循環：交替元素可延長共振，最多 3 秒':'' })), 'elementalist', '收集火、冰、雷印記；集齊後消耗印記並進入共振。'),
     passive('resonance-overload', '共振超載', [3,4,5,7,10,10].map((crit,index)=>({ resonanceCrit:crit/100,cooldownReduction:index>=4?2:index>=2?1:0,releasePower:index===5?1.5:0,releaseTargets:index===5?5:0,breakthrough:index===5?'超載釋放：共振結束時，對最多 5 名存活敵人造成 150% 最後元素傷害':'' })), 'elementalist', '共振期間提高元素暴擊率，觸發時推進最長的元素技能冷卻。')
   ]);

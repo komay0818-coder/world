@@ -12,6 +12,7 @@ assert.equal(policy.getElementalBurstParts(policy.getEffect('elemental-burst',6)
 assert.deepEqual(policy.rollStormElements(policy.getEffect('elemental-storm', 6), (()=>{const rolls=[0,.29,.99];return()=>rolls.shift();})()), ['fire','lightning']);
 
 const elementalist={progress:{advancedClass:'elementalist',skillLevels:{'mage:elemental-marks':6,'mage:resonance-overload':6}},skillCooldowns:{fireball:9000,blizzard:12000,'chain-lightning':10000}};
+assert.deepEqual([1,2,3,4,5].map(targets=>targets>=3?1+(targets-2)*policy.getEffect('elemental-storm',6).multiTargetBonusPerTarget:1),[1,1,1.08,1.16,1.24]);
 assert.equal(policy.addElementMark(elementalist,'fire',1000).resonance,false);
 policy.addElementMark(elementalist,'ice',1000);
 assert.equal(policy.addElementMark(elementalist,'lightning',1000).resonance,true);

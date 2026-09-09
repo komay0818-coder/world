@@ -4973,6 +4973,9 @@ function useAutoSkillForMember(member, now = Date.now()) {
       ? Array.from({ length: skillEffect.missiles || 4 }, () => livingTargets[Math.floor(Math.random() * livingTargets.length)])
       : livingTargets.slice(0, skillEffect.targets || skill.targets || 1);
     if (!targets.length) continue;
+    const stormTargetMultiplier = skill.id === 'elemental-storm' && targets.length >= (skillEffect.multiTargetBonusStartsAt || 3)
+      ? 1 + (targets.length - 2) * (skillEffect.multiTargetBonusPerTarget || 0)
+      : 1;
     if (shadowAssassinationFree) RogueAdvancementPolicy.consumeShadowAssassinationFree(member, now);
     if (skill.id === 'gale-rapid-fire' || skill.id === 'beast-fury' || skill.id === 'bloody-hunt') {
       if (skill.id === 'gale-rapid-fire') HunterAdvancementPolicy.applyGale(member, skillEffect, now);
@@ -5072,7 +5075,7 @@ function useAutoSkillForMember(member, now = Date.now()) {
         armorIgnore: (skillEffect.armorIgnore || 0) + (berserkerSlash?.armorIgnore || 0) + shootingBonuses.armorIgnore,
         conditionalDamageMultiplier,
         craftedEpicExecution,
-        specialEquipmentMultiplier: (epicWeaponExecution.multipliers[targetOrder] || 1) * (1 + grandmasterSkillBonus) * shadowBleedingMultiplier * (1 + resonanceBonuses.damage) * (1 + rogueBonuses.damage),
+        specialEquipmentMultiplier: (epicWeaponExecution.multipliers[targetOrder] || 1) * (1 + grandmasterSkillBonus) * shadowBleedingMultiplier * (1 + resonanceBonuses.damage) * (1 + rogueBonuses.damage) * stormTargetMultiplier,
         controlledBonus: skillEffect.controlledBonus,
         showDamage: !['heavy-strike', 'whirlwind', 'charge', 'power-shot', 'multi-shot', 'piercing-shot', 'backstab', 'shadow-dance', 'poison-blade', 'fireball', 'blizzard', 'chain-lightning', 'holy-light', 'holy-nova'].includes(skill.id)
       });
@@ -5089,7 +5092,7 @@ function useAutoSkillForMember(member, now = Date.now()) {
         const secondBonus = MageAdvancementPolicy.getResonanceBonuses(member, stormElements[1], now);
         const secondCritical = Math.random() < Math.min(.95, stats.crit + secondBonus.crit);
         const secondDamage = Math.max(1, Math.ceil(stats.attack * skillEffect.power * skillEffect.transformPowerMultiplier * (secondCritical ? stats.criticalDamageMultiplier : 1)));
-        const result = applyDamageToMonster(index, secondDamage * (1 + secondBonus.damage) * getRuneOutgoingMultiplier(member,index), secondProfile, { attacker:member,attackKind:'skill-followup',sourceSkill:'elemental-storm',canParry:false });
+        const result = applyDamageToMonster(index, secondDamage * stormTargetMultiplier * (1 + secondBonus.damage) * getRuneOutgoingMultiplier(member,index), secondProfile, { attacker:member,attackKind:'skill-followup',sourceSkill:'elemental-storm',canParry:false });
         if (!result.evaded) { applyElementalStormStatus(index, stormElements[1], member, result.finalDamage, now); MageAdvancementPolicy.record(member, 'stormFollowupDamage', result.finalDamage); }
       });
     }
