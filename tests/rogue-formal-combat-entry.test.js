@@ -96,6 +96,18 @@ assert.ok(venom.combat.dotEvents.some((event) => event.action === 'bonus-tick' &
 assert.ok(venom.combat.dotEvents.some((event) => event.action === 'bonus-tick' && ['bleed', 'rupture'].includes(event.type)));
 assert.deepEqual(runCombat({ ...venomConfig, entry: 'ui' }), venom, 'poison stacks, bleed refresh and tick timing must be UI/headless identical');
 
+const ruptureTransferConfig = {
+  ...venomConfig, seconds: 45, seed: 0x8eed,
+  skills: { baseActiveLv6: 'backstab', basePassiveLv6: 'dagger-mastery', advancedActiveLv6: 'blood-venom-rend', advancedPassiveLv6: 'venom-mastery' },
+  enemy: { hp: 650, defense: 8, attack: .05, attackSpeed: .5, evasion: 0, parry: 0 }
+};
+const ruptureTransfer = runCombat(ruptureTransferConfig);
+const transferEvents = ruptureTransfer.combat.dotEvents.filter((event) => event.type === 'rupture' && event.action === 'transfer');
+assert.ok(transferEvents.length > 0, 'Lv6 rupture transfers when its target dies with duration remaining');
+assert.ok(transferEvents.every((event) => event.fromTargetIndex !== event.targetIndex && event.transferCount <= 2));
+assert.ok(transferEvents.some((event) => event.transferCount === 2), 'the same rupture may transfer a second time');
+assert.deepEqual(runCombat({ ...ruptureTransferConfig, entry: 'ui' }), ruptureTransfer, 'rupture random target selection and chained transfer must be UI/headless identical');
+
 const zeroEnergyCoating = runCombat({ ...venomConfig, seconds: 1, initialResource: 0 });
 assert.equal(zeroEnergyCoating.skillCasts['corrosive-strike'], 1, 'coating may start the venom cycle at zero energy when cooldowns are ready');
 assert.equal(zeroEnergyCoating.energy.spent, 0, 'zero-cost coating does not spend energy or trigger a resource refund');

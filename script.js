@@ -3460,7 +3460,8 @@ function applyDot(index, type, damage, duration, maxStacks = 1, options = {}) {
   const existing = sameType.length >= maxStacks ? sameType.sort((a, b) => a.remaining - b.remaining)[0] : null;
   if (existing) {
     if (options.replaceOnlyIfStronger && damage < existing.damage) return false;
-    if (!options.refreshOnly) existing.damage = Math.max(existing.damage, damage);
+    if (options.replaceDamage) existing.damage = damage;
+    else if (!options.refreshOnly) existing.damage = Math.max(existing.damage, damage);
     existing.remaining = options.refreshDuration ? duration : Math.max(existing.remaining, duration);
     if (options.refreshDuration) { existing.extendedSeconds = 0; existing.toxicBloodBonusTickUsed = false; }
     if (options.durationMs) existing.expiresAt = (options.now || Date.now()) + options.durationMs;
@@ -3469,6 +3470,12 @@ function applyDot(index, type, damage, duration, maxStacks = 1, options = {}) {
       existing.tickIntervalMs = options.tickIntervalMs;
       existing.nextTickAt = (options.now || Date.now()) + options.tickIntervalMs;
     }
+    if (options.source) existing.source = options.source;
+    if (options.ruptureDuration) existing.ruptureDuration = options.ruptureDuration;
+    if (options.ruptureTransferLimit) existing.ruptureTransferLimit = options.ruptureTransferLimit;
+    if (Number.isFinite(options.ruptureTransferCount)) existing.ruptureTransferCount = options.ruptureTransferCount;
+    if (options.ruptureBaseDamage) existing.ruptureBaseDamage = options.ruptureBaseDamage;
+    if (options.rupturePoisonedBonus) existing.rupturePoisonedBonus = options.rupturePoisonedBonus;
     if (options.source) {
       const telemetry = CombatCorePolicy.telemetry(options.source);
       telemetry.dotRefreshes[type] = (telemetry.dotRefreshes[type] || 0) + 1;
@@ -3476,7 +3483,7 @@ function applyDot(index, type, damage, duration, maxStacks = 1, options = {}) {
     }
     return false;
   }
-  dots.push({ type, damage, remaining: duration, source: options.source || null, defenseReduction: options.defenseReduction || 0, tickIntervalMs: options.tickIntervalMs || 0, nextTickAt: options.tickIntervalMs ? (options.now || Date.now()) + options.tickIntervalMs : 0, expiresAt: options.durationMs ? (options.now || Date.now()) + options.durationMs : 0 });
+  dots.push({ type, damage, remaining: duration, source: options.source || null, defenseReduction: options.defenseReduction || 0, tickIntervalMs: options.tickIntervalMs || 0, nextTickAt: options.tickIntervalMs ? (options.now || Date.now()) + options.tickIntervalMs : 0, expiresAt: options.durationMs ? (options.now || Date.now()) + options.durationMs : 0, ruptureDuration: options.ruptureDuration || 0, ruptureTransferLimit: options.ruptureTransferLimit || 0, ruptureTransferCount: options.ruptureTransferCount || 0, ruptureBaseDamage: options.ruptureBaseDamage || 0, rupturePoisonedBonus: options.rupturePoisonedBonus || 0 });
   battle.enemyDots[index] = dots;
   if (options.source) {
     const telemetry = CombatCorePolicy.telemetry(options.source), stacks = dots.filter((dot) => dot.type === type).length;
@@ -3505,6 +3512,42 @@ function applyRoguePoison(index, member, damage, duration, maxStacks, options = 
 }
 
 function applyPendingRoguePlagueSpread() { return false; }
+
+function transferBloodVenomRendOnDeath(index, now = Date.now()) {
+  const rupture = (battle.enemyDots[index] || []).find((dot) => dot.type === 'rupture'
+    && dot.remaining > 0 && dot.ruptureTransferLimit > (dot.ruptureTransferCount || 0));
+  if (!rupture) return false;
+  const candidates = battle.enemyHps
+    .map((hp, targetIndex) => hp > 0 && targetIndex !== index ? targetIndex : -1)
+    .filter((targetIndex) => targetIndex >= 0);
+  if (!candidates.length) return false;
+  const targetIndex = candidates[Math.floor(Math.random() * candidates.length)];
+  const duration = rupture.ruptureDuration || 8;
+  const intervalMs = rupture.tickIntervalMs || 2000;
+  const transferCount = (rupture.ruptureTransferCount || 0) + 1;
+  const baseDamage = rupture.ruptureBaseDamage || rupture.damage;
+  const poisoned = RogueAdvancementPolicy.poisonStacks(battle.enemyDots[targetIndex]) > 0;
+  const transferDamage = Math.max(1, Math.ceil(baseDamage * (poisoned ? 1 + (rupture.rupturePoisonedBonus || 0) : 1)));
+  applyDot(targetIndex, 'rupture', transferDamage, Math.ceil(duration * 1000 / intervalMs), 1, {
+    source: rupture.source,
+    tickIntervalMs: intervalMs,
+    now,
+    refreshOnly: true,
+    refreshDuration: true,
+    replaceDamage: true,
+    ruptureDuration: duration,
+    ruptureTransferLimit: rupture.ruptureTransferLimit,
+    ruptureTransferCount: transferCount,
+    ruptureBaseDamage: baseDamage,
+    rupturePoisonedBonus: rupture.rupturePoisonedBonus || 0
+  });
+  if (rupture.source) CombatCorePolicy.recordEvent(rupture.source, 'dotEvents', {
+    atMs: now, type: 'rupture', action: 'transfer', fromTargetIndex: index, targetIndex,
+    transferCount, transferLimit: rupture.ruptureTransferLimit,
+    remaining: Math.ceil(duration * 1000 / intervalMs), nextTickAt: now + intervalMs
+  });
+  return true;
+}
 
 function triggerRogueBonusDotTicks(index, member, critical, now = Date.now()) {
   const dots = battle.enemyDots[index] || [];
@@ -4797,6 +4840,7 @@ function applyDamageToMonster(index, baseDamage, profile, options = {}) {
     if (markOwner) RogueAdvancementPolicy.resolveMarkedKill(markOwner, skillState, now, { executed: deathMarkExecuted });
     const poisonSource = (battle.enemyDots[index] || []).find((dot) => dot.type === 'poison' && dot.source)?.source;
     if (poisonSource) RogueAdvancementPolicy.resolvePlagueDeath(poisonSource, battle.enemyDots[index]);
+    transferBloodVenomRendOnDeath(index, now);
     const hpRecovery = Math.ceil((attacker.maxHp || 0) * (attackerStats.killHealthRecoveryPercent || 0));
     const resourceRecovery = Math.ceil((attacker.resourceMax || 0) * (attackerStats.killResourceRecoveryPercent || 0));
     if (hpRecovery > 0) attacker.currentHp = Math.min(attacker.maxHp, attacker.currentHp + hpRecovery);
@@ -5114,9 +5158,10 @@ function useAutoSkillForMember(member, now = Date.now()) {
     }
     if (skill.id === 'blood-venom-rend') hits.forEach((target) => {
       const poisoned = RogueAdvancementPolicy.poisonStacks(battle.enemyDots[target.index]) > 0;
-      const ruptureDamage = Math.max(1, Math.ceil(stats.attack * skillEffect.ruptureTick * (poisoned ? 1 + skillEffect.poisonedRuptureBonus : 1)));
+      const ruptureBaseDamage = Math.max(1, Math.ceil(stats.attack * skillEffect.ruptureTick));
+      const ruptureDamage = Math.max(1, Math.ceil(ruptureBaseDamage * (poisoned ? 1 + skillEffect.poisonedRuptureBonus : 1)));
       const ruptureTicks = Math.ceil(skillEffect.ruptureDuration / skillEffect.ruptureTickInterval);
-      applyDot(target.index, 'rupture', ruptureDamage, ruptureTicks, 1, { source: member, tickIntervalMs: skillEffect.ruptureTickInterval * 1000, now, refreshOnly: true, refreshDuration: true });
+      applyDot(target.index, 'rupture', ruptureDamage, ruptureTicks, 1, { source: member, tickIntervalMs: skillEffect.ruptureTickInterval * 1000, now, refreshOnly: true, refreshDuration: true, ruptureDuration: skillEffect.ruptureDuration, ruptureTransferLimit: skillEffect.ruptureTransferLimit || 0, ruptureTransferCount: 0, ruptureBaseDamage, rupturePoisonedBonus: skillEffect.poisonedRuptureBonus || 0 });
       applyRogueDotEntryDamage(target.index, member, 'rupture', ruptureDamage, skillEffect.ruptureEntryRatio || 0, now);
     });
     if (critical) hits.forEach((target) => triggerRogueBonusDotTicks(target.index, member, true, now));
