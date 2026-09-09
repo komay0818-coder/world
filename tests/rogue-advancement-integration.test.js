@@ -24,6 +24,8 @@ assert.match(source, /getAutoSkillPriority\(progress, unlocked\)/, 'advanced rog
 assert.match(source, /getCoatingExecution[\s\S]*coating-poison[\s\S]*applyRoguePoison/, 'coating bonus uses pre-hit stacks before adding one poison layer');
 assert.match(source, /skill\.id === 'blood-venom-rend'[\s\S]*bleedDuration[\s\S]*bleedTickInterval/);
 assert.match(source, /function applyBloodVenomBleed[\s\S]*const nextTickAt = existing\.length \? Math\.min/, 'stacking bleed preserves the existing next tick');
+assert.match(source, /resolveSymbiosisSettlement[\s\S]*consumeSymbiosisLayers/, 'direct critical settlement resolves damage before consuming layers');
+assert.match(source, /resolveBloodVenomBurst[\s\S]*sourceSkill: 'blood-venom-burst'/, 'formal ticks can produce one separately sourced blood venom burst');
 assert.match(source, /const dotGroup = options\.dotGroup[\s\S]*dot\.dotGroup/, 'base bleed and blood-venom bleed retain independent applications');
 assert.doesNotMatch(source, /transferBloodVenomRendOnDeath/, 'blood venom death transfer remains disabled');
 assert.match(source, /processEnemyDots[\s\S]*getPoisonDamageBonus[\s\S]*getTargetBonuses/);

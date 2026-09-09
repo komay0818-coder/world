@@ -3536,27 +3536,22 @@ function applyBloodVenomBleed(index, member, skillEffect, tickDamage, now = Date
   return { added, stacks, tickDamage: dots.filter((dot) => dot.type === 'bleed' && dot.bloodVenomBleed && dot.remaining > 0).reduce((sum, dot) => sum + dot.damage, 0) };
 }
 
-function triggerRogueBonusDotTicks(index, member, critical, now = Date.now()) {
+function triggerRogueSymbiosisSettlement(index, member, critical, now = Date.now()) {
   const dots = battle.enemyDots[index] || [];
-  const triggered = RogueAdvancementPolicy.consumeBonusDotTicksOnCrit(member, dots, critical);
-  if (!triggered.length || battle.enemyHps[index] <= 0) return 0;
-  const damageByType = {}, triggeredDamage = [];
-  triggered.forEach((dot) => {
+  const settlement = RogueAdvancementPolicy.resolveSymbiosisSettlement(member, dots, getEnemySkillState(index), critical, now);
+  if (!settlement || battle.enemyHps[index] <= 0) return 0;
+  const damageByType = {};
+  settlement.dots.forEach((dot) => {
     let multiplier = 1;
     multiplier += RogueAdvancementPolicy.getBloodDotDamageBonus(member, dots, dot.type);
     multiplier += RogueAdvancementPolicy.getTargetBonuses(member, dots, getEnemySkillState(index), battle.enemyHps[index] / getEnemyDefinition(index).maxHp, 'dot', now).dotDamage;
     const damage = dot.damage * multiplier;
     damageByType[dot.type] = (damageByType[dot.type] || 0) + damage;
-    triggeredDamage.push({ dot, damage });
   });
   const total = Object.values(damageByType).reduce((sum, damage) => sum + damage, 0);
   const result = applyDamageToMonster(index, total, { damageType: 'periodic', attackRange: 'none' }, { attacker: member, sourceSkill: 'dot', damageBreakdown: damageByType, canEvade: false, canParry: false, effectType: 'dot' });
-  CombatCorePolicy.record(member, 'dotTicks', triggered.length);
-  const telemetry = CombatCorePolicy.telemetry(member);
-  triggeredDamage.forEach(({ dot, damage }) => {
-    telemetry.dotTicksByType[dot.type] = (telemetry.dotTicksByType[dot.type] || 0) + 1;
-    CombatCorePolicy.recordEvent(member, 'dotEvents', { atMs: now, type: dot.type, action: 'bonus-tick', targetIndex: index, rawDamage: damage, remaining: dot.remaining });
-  });
+  const consumed = RogueAdvancementPolicy.consumeSymbiosisLayers(dots, settlement);
+  CombatCorePolicy.recordEvent(member, 'dotEvents', { atMs: now, type: 'blood-symbiosis', action: 'immediate-settlement', targetIndex: index, damageByType, consumed, poisonStacks: RogueAdvancementPolicy.poisonStacks(dots), bleedStacks: RogueAdvancementPolicy.bloodBleedStacks(dots), readyAt: getEnemySkillState(index).toxicBloodSettlementReadyAt });
   return result.finalDamage;
 }
 
@@ -3567,6 +3562,7 @@ function processEnemyDots() {
     if (battle.enemyHps[index] <= 0 || !dots.length) return;
     const bonusDots = dots.map((dot) => ({ ...dot }));
     const damageBySource = new Map();
+    const bloodTickSources = new Set();
     dots.forEach((dot) => {
       if (dot.expiresAt && now > dot.expiresAt) { dot.remaining = 0; return; }
       let tickCount = 0;
@@ -3591,6 +3587,7 @@ function processEnemyDots() {
       sourceDamage.byType[dot.type] = (sourceDamage.byType[dot.type] || 0) + tickDamage;
       damageBySource.set(key, sourceDamage);
       if (source) {
+        if (['poison', 'bleed'].includes(dot.type)) bloodTickSources.add(source);
         CombatCorePolicy.record(source, 'dotTicks', tickCount);
         const telemetry = CombatCorePolicy.telemetry(source);
         telemetry.dotTicksByType[dot.type] = (telemetry.dotTicksByType[dot.type] || 0) + tickCount;
@@ -3618,6 +3615,13 @@ function processEnemyDots() {
         logDefense: false,
         effectType: 'dot'
       });
+    });
+    bloodTickSources.forEach((source) => {
+      if (battle.enemyHps[index] <= 0) return;
+      const power = RogueAdvancementPolicy.resolveBloodVenomBurst(source, bonusDots, getEnemySkillState(index), true, now);
+      if (!power) return;
+      const result = applyDamageToMonster(index, Math.max(1, source.stats.attack * power), { damageType: 'periodic', attackRange: 'none' }, { attacker: source, sourceSkill: 'blood-venom-burst', attackKind: 'blood-venom-burst', canEvade: false, canParry: false, effectType: 'special' });
+      CombatCorePolicy.recordEvent(source, 'dotEvents', { atMs: now, type: 'blood-venom', action: 'burst', targetIndex: index, damage: result.finalDamage, readyAt: getEnemySkillState(index).bloodVenomBurstReadyAt });
     });
   });
 }
@@ -5057,7 +5061,7 @@ function useAutoSkillForMember(member, now = Date.now()) {
         });
         return { index, result:{ finalDamage:results.reduce((sum,result)=>sum+result.finalDamage,0),evaded:results.every(result=>result.evaded),parried:results.some(result=>result.parried) } };
       }
-      return { index, result: applyDamageToMonster(index, damage * chainMultiplier * piercingMultiplier * getRuneOutgoingMultiplier(member, index), profile, {
+      const result = applyDamageToMonster(index, damage * chainMultiplier * piercingMultiplier * getRuneOutgoingMultiplier(member, index), profile, {
         attacker: member,
         attackKind: 'skill',
         sourceSkill: skill.id,
@@ -5068,7 +5072,9 @@ function useAutoSkillForMember(member, now = Date.now()) {
         specialEquipmentMultiplier: (epicWeaponExecution.multipliers[targetOrder] || 1) * (1 + grandmasterSkillBonus) * shadowBleedingMultiplier * (1 + resonanceBonuses.damage) * (1 + rogueBonuses.damage),
         controlledBonus: skillEffect.controlledBonus,
         showDamage: !['heavy-strike', 'whirlwind', 'charge', 'power-shot', 'multi-shot', 'piercing-shot', 'backstab', 'shadow-dance', 'poison-blade', 'fireball', 'blizzard', 'chain-lightning', 'holy-light', 'holy-nova'].includes(skill.id)
-      }) };
+      });
+      if (!result.evaded && result.finalDamage > 0 && critical) triggerRogueSymbiosisSettlement(index, member, true, now);
+      return { index, result };
     });
     if (skill.id === 'arcane-missile') MageAdvancementPolicy.recordArcaneMissileCast(member, targets.length, new Set(targets).size);
     const hits = resolvedTargets.filter((target) => !target.result.evaded);
@@ -5148,7 +5154,6 @@ function useAutoSkillForMember(member, now = Date.now()) {
       const applied = applyBloodVenomBleed(target.index, member, skillEffect, bleedDamage, now);
       applyRogueDotEntryDamage(target.index, member, 'bleed', applied.tickDamage, skillEffect.bleedEntryRatio || 0, now);
     });
-    if (critical) hits.forEach((target) => triggerRogueBonusDotTicks(target.index, member, true, now));
     if (MageAdvancementPolicy.isAdvanced(progress, 'elementalist')) {
       const appliedElements = skill.id === 'elemental-storm' ? stormElements : (castElement ? [castElement] : []);
       appliedElements.forEach((element) => {
@@ -5521,7 +5526,7 @@ function processPartyMemberAttacks(now = Date.now()) {
     ChapterThreeSpecialEquipmentPolicy.completeMainHandBasicAttack(member, specialBasicExecution, !result.evaded && result.finalDamage > 0, battle.enemyHps[targetIndex] > 0);
     RogueAdvancementPolicy.consumeBasic(member, lethalExecution, !result.evaded && result.finalDamage > 0);
     HunterAdvancementPolicy.consumeBasic(member, hunterExecution, !result.evaded && result.finalDamage > 0, critical, now);
-    if (!result.evaded && result.finalDamage > 0) triggerRogueBonusDotTicks(targetIndex, member, critical, now);
+    if (!result.evaded && result.finalDamage > 0) triggerRogueSymbiosisSettlement(targetIndex, member, critical, now);
     if (!result.evaded && result.finalDamage > 0 && coatingExecution && battle.enemyHps[targetIndex] > 0) {
       if (coatingExecution.bonusPower > 0) {
         const poisonMultiplier = 1

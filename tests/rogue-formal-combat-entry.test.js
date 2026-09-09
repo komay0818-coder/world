@@ -92,8 +92,7 @@ assert.ok(venom.combat.resourceEvents.some((event) => event.type === 'spend' && 
 assert.ok(venom.combat.resourceEvents.some((event) => event.type === 'spend' && event.skill === 'blood-venom-rend' && event.amount === 30));
 assert.ok(venom.bleed.damage > 0 && venom.bleed.refreshes > 0);
 assert.ok(venom.poison.timeline.length > 0 && venom.bleed.timeline.length > 0);
-assert.ok(venom.combat.dotEvents.some((event) => event.action === 'bonus-tick' && event.type === 'poison'));
-assert.ok(venom.combat.dotEvents.some((event) => event.action === 'bonus-tick' && ['bleed', 'rupture'].includes(event.type)));
+assert.ok(venom.combat.dotEvents.some((event) => event.action === 'immediate-settlement' && event.type === 'blood-symbiosis'));
 assert.deepEqual(runCombat({ ...venomConfig, entry: 'ui' }), venom, 'poison stacks, bleed refresh and tick timing must be UI/headless identical');
 
 const bloodVenomConfig = {
@@ -107,6 +106,7 @@ assert.ok(bloodVenom.combat.skillEvents.filter((event) => event.skill === 'blood
 assert.ok(bloodVenomEvents.some((event) => event.stacks === 6), 'poisoned blood venom rend reaches six bleed layers after two casts');
 assert.ok(bloodVenomEvents.some((event) => event.action === 'stack-refresh'), 'later casts add layers and refresh the shared twelve-second duration');
 assert.ok(!bloodVenom.combat.dotEvents.some((event) => event.type === 'rupture' || event.action === 'transfer'), 'blood venom uses only bleed and keeps death transfer disabled');
+assert.ok(bloodVenom.combat.dotEvents.some((event) => event.action === 'burst' && event.type === 'blood-venom'), 'full blood venom mastery produces its separate timed burst');
 assert.deepEqual(runCombat({ ...bloodVenomConfig, entry: 'ui' }), bloodVenom, 'stacked bleed timing must be UI/headless identical');
 const bloodVenomBoss = runCombat({ ...bloodVenomConfig, mode: 'boss', maxSeconds: 180, enemy: { ...bloodVenomConfig.enemy, hp: 7500 } });
 assert.ok(bloodVenomBoss.combat.skillEvents.filter((event) => event.skill === 'blood-venom-rend').every((event) => event.targets.length === 1), 'blood venom rend hits a lone boss only once');
