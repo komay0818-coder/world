@@ -35,6 +35,23 @@ assert.ok(boss.ttk > 0 && boss.final.enemyHps[0] <= 0);
 assert.ok(boss.cycle.length > 0 && boss.skillCasts['death-mark'] > 0);
 assert.deepEqual(runCombat({ ...bossConfig, entry: 'ui' }), boss, 'rogue boss must be UI/headless identical');
 
+const execute = runCombat({
+  ...assassinationConfig, seconds: 30, seed: 0xecec,
+  skills: { baseActiveLv6: 'backstab', basePassiveLv6: 'evasion', advancedActiveLv6: 'death-mark', advancedPassiveLv6: 'weakness-insight' },
+  enemy: { hp: 600, defense: 20, attack: .1, attackSpeed: 1, evasion: 0, parry: 0 }
+});
+assert.ok(execute.combat.assassinationEvents.some((event) => event.action === 'death-mark-execute'), 'Lv6 death mark executes a surviving normal target at or below 30%');
+
+const chain = runCombat({
+  ...bossConfig, mode: 'fixed-five', seconds: 20, seed: 0xc1a1,
+  skills: { baseActiveLv6: 'backstab', basePassiveLv6: 'dagger-mastery', advancedActiveLv6: 'shadow-assassination', advancedPassiveLv6: 'weakness-insight' },
+  equipment: { weapon: { ...MAIN_DAGGER, criticalChance: .95 }, offhand: OFFHAND_DAGGER },
+  enemy: { hp: 100000, defense: 20, attack: .1, attackSpeed: 1, evasion: 0, parry: 0 }
+});
+assert.ok(chain.combat.assassinationEvents.some((event) => event.action === 'shadow-reset'));
+assert.ok(chain.skillCasts['shadow-assassination'] > 3, 'repeated criticals may chain multiple shadow assassinations without a hard cap');
+assert.ok(chain.energy.spent < chain.skillCasts['shadow-assassination'] * 20 + chain.skillCasts.backstab * 35 + chain.skillCasts['poison-blade'] * 25 + chain.skillCasts['shadow-dance'] * 60, 'at least one chained shadow assassination is free');
+
 const exhaustionConfig = {
   ...assassinationConfig, seconds: 20, seed: 0xe11,
   initialResource: 0,

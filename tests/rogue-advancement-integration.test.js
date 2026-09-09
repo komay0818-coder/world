@@ -8,7 +8,8 @@ assert.match(html, /assassin-offhand-policy\.js[\s\S]*rogue-advancement-policy\.
 assert.match(source, /character\.job === 'assassin' \? RogueAdvancementPolicy/);
 assert.match(source, /getKnownSkills[\s\S]*RogueAdvancementPolicy\.getSkills/);
 assert.match(source, /skill\.id === 'death-mark'[\s\S]*markTarget/);
-assert.match(source, /shadow-assassination'[\s\S]*offhandOnCrit[\s\S]*AssassinOffhandPolicy\.calculateOffhandStrike/);
+assert.doesNotMatch(source, /shadow-assassination'[\s\S]{0,240}offhandOnCrit/, 'shadow assassination no longer grants an offhand strike');
+assert.match(source, /shadowAssassinationFree[\s\S]*resolveShadowAssassinationCrit/, 'Lv6 shadow assassination consumes and can renew a six-second free cast');
 assert.match(source, /resolveBackstabCrit[\s\S]*getBasicExecution[\s\S]*consumeBasic/);
 assert.match(source, /masteryChance = \(mastery\.offhandChance \|\| 0\) \+ \(lethalExecution\?\.extraOffhandChance \|\| 0\)/);
 assert.match(source, /skill\.id === 'poison-blade'[\s\S]*stats\.attack \* \.20 \* stats\.dotMultiplier[\s\S]*tickIntervalMs: 2000/);
@@ -24,6 +25,7 @@ assert.match(source, /getCoatingExecution[\s\S]*coating-poison[\s\S]*applyRogueP
 assert.match(source, /skill\.id === 'blood-venom-rend'[\s\S]*ruptureDuration[\s\S]*ruptureTickInterval/);
 assert.match(source, /processEnemyDots[\s\S]*getPoisonDamageBonus[\s\S]*getTargetBonuses/);
 assert.match(source, /deathMarkMultiplier = RogueAdvancementPolicy\.getDeathMarkDamageMultiplier[\s\S]*adjustedBaseDamage[\s\S]*deathMarkMultiplier/, 'all owned damage uses the common death-mark multiplier');
+assert.match(source, /shouldExecuteMarkedNormal[\s\S]*deathMarkExecuted[\s\S]*resolveMarkedKill/, 'normal enemies are executed through the shared death flow without synthetic damage');
 assert.match(source, /const damageBySource = new Map\(\)[\s\S]*damageBySource\.forEach/, 'DOT damage keeps its source owner through common damage resolution');
 assert.match(source, /rogueDefenseMultiplier = 1 - RogueAdvancementPolicy\.getTargetDefenseReduction/, 'toxic blood defense reduction is target-owned');
 assert.match(source, /shadowBleedingMultiplier[\s\S]*hasBleedingStatus/, 'shadow assassination uses the shared bleed classification');

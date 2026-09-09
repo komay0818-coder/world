@@ -4691,7 +4691,8 @@ function applyDamageToMonster(index, baseDamage, profile, options = {}) {
   const warriorRuntime = WarriorAdvancementPolicy.getRuntimeBonuses(attacker, options.attackKind, now);
   const craftedEpicMultiplier = ChapterThreeCraftedEpicAbilityPolicy.getOutgoingDamageMultiplier(attacker, options.attackKind, { execution: options.craftedEpicExecution }, now);
   const specialEquipmentMultiplier = Math.max(0, Number(options.specialEquipmentMultiplier) || 1);
-  const deathMarkMultiplier = RogueAdvancementPolicy.getDeathMarkDamageMultiplier(attacker, skillState, now);
+  const enemyHpRatio = enemy.maxHp > 0 ? battle.enemyHps[index] / enemy.maxHp : 1;
+  const deathMarkMultiplier = RogueAdvancementPolicy.getDeathMarkDamageMultiplier(attacker, skillState, now, enemyHpRatio, Boolean(enemy.isElite || enemy.isBoss));
   const sensitivityMultiplier = typeof getCombatSensitivityDamageMultiplier === 'function' ? Math.max(0,Number(getCombatSensitivityDamageMultiplier(options.sourceSkill||options.attackKind||'',attacker))||0) : 1;
   magicAdjustedDamage *= sensitivityMultiplier;
   const adjustedBaseDamage = magicAdjustedDamage * (1 + warriorRuntime.attack) * (1 + (attackerStats.damageBonus || 0) + warriorAdvancement.damage + warriorRuntime.damage) * rankMultiplier * attackKindMultiplier * conditionalDamageMultiplier * craftedEpicMultiplier * specialEquipmentMultiplier * deathMarkMultiplier * markMultiplier * vulnerabilityMultiplier * controlledMultiplier * statusElementMultiplier * frostResonanceMultiplier * lightningResonanceMultiplier * shockedVulnerabilityMultiplier;
@@ -4782,11 +4783,18 @@ function applyDamageToMonster(index, baseDamage, profile, options = {}) {
     : null;
   const wasAlive = battle.enemyHps[index] > 0;
   battle.enemyHps[index] -= result.finalDamage;
+  const markOwner = (battle.partyMembers || []).find((member) => member.id === skillState.deathMarkOwner);
+  const deathMarkExecuted = battle.enemyHps[index] > 0
+    && markOwner === attacker
+    && RogueAdvancementPolicy.shouldExecuteMarkedNormal(markOwner, skillState, battle.enemyHps[index] / enemy.maxHp, enemy, now);
+  if (deathMarkExecuted) {
+    battle.enemyHps[index] = 0;
+    CombatCorePolicy.recordEvent(markOwner, 'assassinationEvents', { atMs: now, action: 'death-mark-execute', targetIndex: index, hpRatio: Math.max(0, battle.enemyHps[index] / enemy.maxHp) });
+  }
   if (wasAlive && battle.enemyHps[index] <= 0 && attacker?.alive) {
     CombatCorePolicy.record(attacker, 'kills');
     MageAdvancementPolicy.clearArcaneMarksOnDeath(skillState, battle.partyMembers || []);
-    const markOwner = (battle.partyMembers || []).find((member) => member.id === skillState.deathMarkOwner);
-    if (markOwner) RogueAdvancementPolicy.resolveMarkedKill(markOwner, skillState, now);
+    if (markOwner) RogueAdvancementPolicy.resolveMarkedKill(markOwner, skillState, now, { executed: deathMarkExecuted });
     const poisonSource = (battle.enemyDots[index] || []).find((dot) => dot.type === 'poison' && dot.source)?.source;
     if (poisonSource) RogueAdvancementPolicy.resolvePlagueDeath(poisonSource, battle.enemyDots[index]);
     const hpRecovery = Math.ceil((attacker.maxHp || 0) * (attackerStats.killHealthRecoveryPercent || 0));
@@ -4899,7 +4907,9 @@ function useAutoSkillForMember(member, now = Date.now()) {
     const skillEffect = getSkillEffect(progress, member.job, skill);
     const stormElements = skill.id === 'elemental-storm' ? MageAdvancementPolicy.rollStormElements(skillEffect, Math.random, member) : [];
     const castElement = getMageSkillElement(skill.id, stormElements[0]);
-    const cost = getSkillResourceCost(member.job, skill);
+    const baseCost = getSkillResourceCost(member.job, skill);
+    const shadowAssassinationFree = skill.id === 'shadow-assassination' && RogueAdvancementPolicy.isShadowAssassinationFree(member, now);
+    const cost = shadowAssassinationFree ? 0 : baseCost;
     if (member.resourceType === 'arrows' && !HunterArrowPolicy.canUseSkill(member.resourceCurrent, skill.id, progress.equipment)) {
       CombatCorePolicy.recordResourceBlock(member, skill.id, member.resourceCurrent);
       continue;
@@ -4925,6 +4935,7 @@ function useAutoSkillForMember(member, now = Date.now()) {
       ? Array.from({ length: skillEffect.missiles || 4 }, () => livingTargets[Math.floor(Math.random() * livingTargets.length)])
       : livingTargets.slice(0, skillEffect.targets || skill.targets || 1);
     if (!targets.length) continue;
+    if (shadowAssassinationFree) RogueAdvancementPolicy.consumeShadowAssassinationFree(member, now);
     if (skill.id === 'gale-rapid-fire' || skill.id === 'beast-fury' || skill.id === 'bloody-hunt') {
       if (skill.id === 'gale-rapid-fire') HunterAdvancementPolicy.applyGale(member, skillEffect, now);
       else HunterAdvancementPolicy.applyPetBuff(member, skill.id, skillEffect, now);
@@ -5067,15 +5078,6 @@ function useAutoSkillForMember(member, now = Date.now()) {
     if (hits.length && grandmaster?.mastery && WarriorAdvancementPolicy.isAdvanced(progress, 'weapon-master') && WarriorAdvancementPolicy.weaponFamily(progress.equipment?.weapon) === 'axe') member.weaponGrandmasterBasicUntil = now + 5000;
     if (skill.id === 'fatal-slash' && critical && skillEffect.mastery && hits.length) member.fatalSlashUntil = now + 5000;
     if (skill.id === 'backstab') RogueAdvancementPolicy.resolveBackstabCrit(member, critical && hits.length > 0, Number(progress.skillLevels?.['assassin:lethal-technique']) || 1, now);
-    if (skill.id === 'shadow-assassination' && critical && skillEffect.offhandOnCrit && hits.length && AssassinOffhandPolicy.isDagger(progress.equipment?.offhand)) {
-      const mastery = ClassSkillPolicy.getEffect('assassin', 'dagger-mastery', Number(progress.skillLevels?.['assassin:dagger-mastery']) || 1);
-      const strike = AssassinOffhandPolicy.calculateOffhandStrike({ ...stats, criticalDamageMultiplier: stats.criticalDamageMultiplier + primaryRogueBonuses.criticalDamage }, mastery, Math.random());
-      const offhandResult = applyDamageToMonster(hits[0].index, strike.damage, profile, { attacker: member, attackKind: 'offhand', sourceSkill: 'offhand', canParry: false });
-      CombatCorePolicy.record(member, 'offhandAttacks');
-      CombatCorePolicy.record(member, 'offhandCriticalRolls');
-      if (strike.critical) CombatCorePolicy.record(member, 'offhandCriticalHits');
-      CombatCorePolicy.recordEvent(member, 'offhandEvents', { atMs: now, targetIndex: hits[0].index, trigger: 'shadow-assassination-lv6', damage: offhandResult.finalDamage, critical: strike.critical });
-    }
     if (hits.length) triggerRuneFrenzy(member, critical, now);
     hits.forEach((target) => applyEnemySkillState(target.index, skillEffect, now, member));
     if (skill.id === 'chain-lightning') hits.forEach((target, order) => {
@@ -5177,6 +5179,9 @@ function useAutoSkillForMember(member, now = Date.now()) {
     const blinkCooldownMultiplier = member.blinkCooldownReduction ? 1 - member.blinkCooldownReduction : 1;
     const blessingCooldownSpeed = now < (member.lightGraceUntil || 0) ? 1 + (member.lightGraceCooldownSpeed || 0) : 1;
     member.skillCooldowns[skill.id] = arcaneCharge.noCooldown ? now : now + (skillEffect.cooldown || skill.cooldown) * blinkCooldownMultiplier * skillCooldownMultiplier * 1000 / (stats.cooldownSpeed * blessingCooldownSpeed * (1 + (priestFaith.cooldownSpeed || 0)));
+    if (skill.id === 'shadow-assassination' && RogueAdvancementPolicy.resolveShadowAssassinationCrit(member, skillEffect, critical, hits.length > 0, now)) {
+      CombatCorePolicy.recordEvent(member, 'assassinationEvents', { atMs: now, action: 'shadow-reset', freeUntil: member.shadowAssassinationFreeUntil });
+    }
     if (member.pendingSkillCooldownReduction) {
       member.skillCooldowns[skill.id] = Math.max(now, member.skillCooldowns[skill.id] - member.pendingSkillCooldownReduction);
       member.pendingSkillCooldownReduction = 0;
