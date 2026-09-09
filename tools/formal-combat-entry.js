@@ -161,14 +161,14 @@ function formalSnapshot(member, duration, cycle, resourceMonitor, dotMonitor, pa
   const petSources = ['pet-basic', 'pet-bite', 'beast-slam', 'pet-bleed'];
   const petDamage = petSources.reduce((sum, source) => sum + (combat.damageBySource[source] || 0), 0);
   const extraShotDamage = combat.damageBySource['extra-shot'] || 0;
-  const dotSources = ['burn', 'dot', 'pet-bleed', 'bleed', 'rupture', 'poison', 'bleed-entry', 'bleed-trigger', 'rupture-entry', 'poison-entry', 'coating-poison'];
+  const dotSources = ['burn', 'dot', 'pet-bleed', 'bleed', 'poison', 'bleed-entry', 'bleed-trigger', 'poison-entry', 'coating-poison'];
   const dotDamage = dotSources.reduce((sum, source) => sum + (combat.damageBySource[source] || 0), 0);
   const activeSkillIds = new Set(formalSkillDefinitions(member.job, member.progress.advancedClass).filter((skill) => skill.type === 'active').map((skill) => skill.id));
   const activeSkillDamage = Object.fromEntries(Object.entries(combat.damageBySource).filter(([source]) => activeSkillIds.has(source)));
   const activeSkillTotal = Object.values(activeSkillDamage).reduce((sum, damage) => sum + damage, 0);
   const offhandDamage = combat.damageBySource.offhand || 0;
-  const bleedTickDamage = (combat.damageBySource.bleed || 0) + (combat.damageBySource.rupture || 0);
-  const bleedSpecialDamage = (combat.damageBySource['bleed-entry'] || 0) + (combat.damageBySource['bleed-trigger'] || 0) + (combat.damageBySource['rupture-entry'] || 0);
+  const bleedTickDamage = combat.damageBySource.bleed || 0;
+  const bleedSpecialDamage = (combat.damageBySource['bleed-entry'] || 0) + (combat.damageBySource['bleed-trigger'] || 0);
   const poisonTickDamage = combat.damageBySource.poison || 0;
   const poisonEntryDamage = (combat.damageBySource['poison-entry'] || 0) + (combat.damageBySource['coating-poison'] || 0);
   const classifiedSources = new Set(['basic-attack', 'offhand', 'extra-shot', ...petSources, ...dotSources, ...activeSkillIds]);
@@ -194,7 +194,7 @@ function formalSnapshot(member, duration, cycle, resourceMonitor, dotMonitor, pa
     dotDamage, specialDamage,
     offhandDamage, offhandDps: offhandDamage / Math.max(.1, duration), offhandShare: combat.totalDamage ? offhandDamage / combat.totalDamage : 0,
     offhandAttacks: combat.offhandAttacks, offhandCriticalRate: combat.offhandCriticalRolls ? combat.offhandCriticalHits / combat.offhandCriticalRolls : null,
-    bleed: { damage: bleedTickDamage + bleedSpecialDamage, tickDamage: bleedTickDamage, specialDamage: bleedSpecialDamage, share: combat.totalDamage ? (bleedTickDamage + bleedSpecialDamage) / combat.totalDamage : 0, applications: (combat.dotApplications.bleed || 0) + (combat.dotApplications.rupture || 0), refreshes: (combat.dotRefreshes.bleed || 0) + (combat.dotRefreshes.rupture || 0), ticks: (combat.dotTicksByType.bleed || 0) + (combat.dotTicksByType.rupture || 0), timeline: dotMonitor.timeline.filter((event) => event.targets.some((target) => target.bleed || target.rupture)) },
+    bleed: { damage: bleedTickDamage + bleedSpecialDamage, tickDamage: bleedTickDamage, specialDamage: bleedSpecialDamage, share: combat.totalDamage ? (bleedTickDamage + bleedSpecialDamage) / combat.totalDamage : 0, applications: combat.dotApplications.bleed || 0, refreshes: combat.dotRefreshes.bleed || 0, ticks: combat.dotTicksByType.bleed || 0, timeline: dotMonitor.timeline.filter((event) => event.targets.some((target) => target.bleed)) },
     poison: { damage: poisonTickDamage + poisonEntryDamage, tickDamage: poisonTickDamage, entryDamage: poisonEntryDamage, share: combat.totalDamage ? (poisonTickDamage + poisonEntryDamage) / combat.totalDamage : 0, applications: combat.dotApplications.poison || 0, refreshes: combat.dotRefreshes.poison || 0, ticks: combat.dotTicksByType.poison || 0, maxStacks: dotMonitor.maxPoisonStacks, averageStacks: dotMonitor.samples ? dotMonitor.poisonStackTotal / dotMonitor.samples : 0, timeline: dotMonitor.timeline.filter((event) => event.targets.some((target) => target.poison)) },
     skillCasts: combat.skillCasts,
     criticalRate: combat.criticalRolls ? combat.criticalHits / combat.criticalRolls : 0,
@@ -263,7 +263,7 @@ function runFormalCombat(config) {
     const dotState = battle.enemyDots.map((dots, targetIndex) => ({
       targetIndex,
       bleed: dots.filter((dot) => dot.type === 'bleed').length,
-      rupture: dots.filter((dot) => dot.type === 'rupture').length,
+      bloodVenomBleed: RogueAdvancementPolicy.bloodBleedStacks(dots),
       poison: RogueAdvancementPolicy.poisonStacks(dots)
     }));
     dotMonitor.samples += dotState.length;

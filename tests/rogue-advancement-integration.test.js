@@ -14,7 +14,7 @@ assert.match(source, /resolveBackstabCrit[\s\S]*getBasicExecution[\s\S]*consumeB
 assert.match(source, /masteryChance = \(mastery\.offhandChance \|\| 0\) \+ \(lethalExecution\?\.extraOffhandChance \|\| 0\)/);
 assert.match(source, /skill\.id === 'poison-blade'[\s\S]*stats\.attack \* \.20 \* stats\.dotMultiplier[\s\S]*tickIntervalMs: 2000/);
 assert.match(source, /function applyRoguePoison[\s\S]*const added[\s\S]*applyRogueDotEntryDamage/, 'only newly added poison stacks deal entry damage');
-assert.match(source, /ruptureDamage[\s\S]*applyRogueDotEntryDamage\(target\.index, member, 'rupture'/, 'rupture deals its separate entry damage');
+assert.match(source, /applyBloodVenomBleed[\s\S]*applyRogueDotEntryDamage\(target\.index, member, 'bleed'/, 'blood venom rend uses the common bleed damage source');
 assert.match(source, /skill\.id === 'backstab'[\s\S]*bleedDuration[\s\S]*stats\.attack \* \.18[\s\S]*durationMs: bleedDuration \* 1000/);
 assert.match(source, /backstabBleedingCrit[\s\S]*skillEffect\.bleedingCrit/, 'backstab Lv3 adds crit chance only while the target is bleeding');
 assert.match(source, /shadowBleedingMultiplier[\s\S]*\(1 \+ rogueBonuses\.damage\)/, 'weakness insight attack bonus applies to direct skill damage against bleeding targets');
@@ -22,9 +22,10 @@ assert.match(source, /\(1 \+ rogueBonuses\.damage\) \* \(1 \+ rogueBonuses\.basi
 assert.match(source, /skill\.id === 'corrosive-strike'[\s\S]*applyCoating/);
 assert.match(source, /getAutoSkillPriority\(progress, unlocked\)/, 'advanced rogues use their formal specialization priority');
 assert.match(source, /getCoatingExecution[\s\S]*coating-poison[\s\S]*applyRoguePoison/, 'coating bonus uses pre-hit stacks before adding one poison layer');
-assert.match(source, /skill\.id === 'blood-venom-rend'[\s\S]*ruptureDuration[\s\S]*ruptureTickInterval/);
-assert.match(source, /function transferBloodVenomRendOnDeath[\s\S]*Math\.random\(\)[\s\S]*action: 'transfer'/, 'Lv6 rupture transfers to one random living target through the shared death flow');
-assert.match(source, /transferBloodVenomRendOnDeath\(index, now\)/, 'every formal damage death checks the remaining Lv6 rupture');
+assert.match(source, /skill\.id === 'blood-venom-rend'[\s\S]*bleedDuration[\s\S]*bleedTickInterval/);
+assert.match(source, /function applyBloodVenomBleed[\s\S]*const nextTickAt = existing\.length \? Math\.min/, 'stacking bleed preserves the existing next tick');
+assert.match(source, /const dotGroup = options\.dotGroup[\s\S]*dot\.dotGroup/, 'base bleed and blood-venom bleed retain independent applications');
+assert.doesNotMatch(source, /transferBloodVenomRendOnDeath/, 'blood venom death transfer remains disabled');
 assert.match(source, /processEnemyDots[\s\S]*getPoisonDamageBonus[\s\S]*getTargetBonuses/);
 assert.match(source, /deathMarkMultiplier = RogueAdvancementPolicy\.getDeathMarkDamageMultiplier[\s\S]*adjustedBaseDamage[\s\S]*deathMarkMultiplier/, 'all owned damage uses the common death-mark multiplier');
 assert.match(source, /shouldExecuteMarkedNormal[\s\S]*deathMarkExecuted[\s\S]*resolveMarkedKill/, 'normal enemies are executed through the shared death flow without synthetic damage');
