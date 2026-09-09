@@ -4895,11 +4895,14 @@ function applyElementalStormStatus(index, element, member, damage, now) {
 function resolveFinishedMageResonance(member, now) {
   const release = MageAdvancementPolicy.finishResonance(member, now);
   if (!release) return;
-  const targetIndex = member.targetIndex >= 0 && battle.enemyHps[member.targetIndex] > 0
-    ? member.targetIndex : aliveEnemyIndexesByAge()[0];
-  if (targetIndex === undefined) return;
-  const result = applyDamageToMonster(targetIndex, member.stats.attack * release.power, { damageType: 'magic', attackRange: 'ranged', element: release.element }, { attacker: member, attackKind: 'resonance', sourceSkill:'resonance-overload', canParry: false });
-  MageAdvancementPolicy.recordOverloadDamage(member, result.finalDamage);
+  const targets = aliveEnemyIndexesByAge().slice(0, release.targets || 1);
+  if (!targets.length) return;
+  let totalDamage = 0;
+  for (const targetIndex of targets) {
+    const result = applyDamageToMonster(targetIndex, member.stats.attack * release.power, { damageType: 'magic', attackRange: 'ranged', element: release.element }, { attacker: member, attackKind: 'resonance', sourceSkill:'resonance-overload', canParry: false });
+    totalDamage += result.finalDamage;
+  }
+  MageAdvancementPolicy.recordOverloadDamage(member, totalDamage, targets.length);
 }
 
 function useAutoSkillForMember(member, now = Date.now()) {

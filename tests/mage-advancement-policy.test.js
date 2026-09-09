@@ -21,7 +21,7 @@ assert.equal(elementalist.skillCooldowns.blizzard,10000);
 assert.equal(policy.useElementDuringResonance(elementalist,'fire',2000),true);
 assert.equal(elementalist.resonanceUntil,8000);
 assert.deepEqual(policy.getResonanceBonuses(elementalist,'fire',2000),{damage:.2,crit:.1});
-assert.deepEqual(policy.finishResonance(elementalist,8000),{power:1.5,element:'fire'});
+assert.deepEqual(policy.finishResonance(elementalist,8000),{power:1.5,element:'fire',targets:5});
 
 const arcane={id:'arcane-test',progress:{advancedClass:'arcane-mage',skillLevels:{'mage:arcane-missile':6,'mage:arcane-charge':6,'mage:mana-drain':6}},resourceMax:1000,resourceCurrent:900,skillCooldowns:{'arcane-missile':5000,fireball:9000}};
 const missileEffect=policy.getEffect('arcane-missile',6);

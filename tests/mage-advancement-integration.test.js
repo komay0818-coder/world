@@ -11,7 +11,7 @@ assert.match(source,/extendElementalCollapseStatuses[\s\S]*shock\.until \+= 1000
 assert.match(source,/skillEffect\.transformPowerMultiplier[\s\S]*stormFollowupDamage/);
 assert.match(source,/rollStormElements[\s\S]*applyElementalStormStatus/);
 assert.match(source,/addElementMark[\s\S]*reduceLongestElementCooldown/);
-assert.match(source,/finishResonance[\s\S]*attackKind: 'resonance'/);
+assert.match(source,/finishResonance[\s\S]*aliveEnemyIndexesByAge\(\)\.slice\(0, release\.targets \|\| 1\)[\s\S]*attackKind: 'resonance'/);
 assert.match(source,/skill\.id === 'arcane-missile'[\s\S]*skillEffect\.missilePower[\s\S]*addArcaneMark/);
 assert.match(source,/consumeArcaneMark[\s\S]*sourceSkill: 'arcane-mark-explosion'/);
 assert.doesNotMatch(source,/skillEffect\.repeatChance/,'the removed random fifth missile is not part of formal combat');

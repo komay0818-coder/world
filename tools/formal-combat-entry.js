@@ -203,6 +203,7 @@ function formalSnapshot(member, duration, cycle, resourceMonitor, dotMonitor, pa
     arrows: member.resourceType === 'arrows' ? resource : null,
     energy: member.resourceType === 'energy' ? resource : null,
     mana: member.resourceType === 'mana' ? resource : null,
+    mage: member.job==='mage'?JSON.parse(JSON.stringify(MageAdvancementPolicy.telemetry(member))):null,
     healing: member.job==='priest'?JSON.parse(JSON.stringify(PriestAdvancementPolicy.telemetry(member))):null,
     shield: member.job==='priest'?{generated:PriestAdvancementPolicy.telemetry(member).shieldGenerated,absorbed:PriestAdvancementPolicy.telemetry(member).shieldAbsorbed,expired:PriestAdvancementPolicy.telemetry(member).shieldExpired,remaining:(battle.partyMembers||[]).reduce((sum,ally)=>sum+(ally.priestShieldGrants||[]).filter(grant=>grant.owner===member).reduce((value,grant)=>value+grant.remaining,0),0),events:JSON.parse(JSON.stringify(PriestAdvancementPolicy.telemetry(member).shieldEvents))}:null,
     faith: member.job==='priest'?{end:PriestAdvancementPolicy.getFaithStacks(member,formalNow),maximum:PriestAdvancementPolicy.FAITH_MAX_STACKS,average:PriestAdvancementPolicy.telemetry(member).faithSamples?PriestAdvancementPolicy.telemetry(member).faithStackTotal/PriestAdvancementPolicy.telemetry(member).faithSamples:0,fullSamples:PriestAdvancementPolicy.telemetry(member).faithFullSamples,events:JSON.parse(JSON.stringify(PriestAdvancementPolicy.telemetry(member).faithEvents))}:null,
