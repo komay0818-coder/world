@@ -22,6 +22,7 @@ assert.equal(policy.getEffect('corrosive-strike', 6).lethalCoating, .25);
 assert.equal(policy.getSkill('corrosive-strike').energyCost, 0);
 assert.equal(policy.getSkill('blood-venom-rend').energyCost, 30);
 assert.equal(policy.getEffect('blood-venom-rend', 6).bleedTick, .05);
+assert.equal(policy.getEffect('blood-venom-rend', 6).targets, 3);
 assert.equal(policy.getEffect('blood-venom-rend', 6).bleedEntryRatio, .75);
 assert.equal(policy.getEffect('blood-venom-rend', 6).bleedDuration, 12);
 assert.equal(policy.getEffect('blood-venom-rend', 6).bleedTickInterval, 2);

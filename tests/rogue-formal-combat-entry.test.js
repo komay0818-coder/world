@@ -103,10 +103,13 @@ const bloodVenomConfig = {
 };
 const bloodVenom = runCombat(bloodVenomConfig);
 const bloodVenomEvents = bloodVenom.combat.dotEvents.filter((event) => event.type === 'bleed' && ['apply', 'stack-refresh'].includes(event.action));
+assert.ok(bloodVenom.combat.skillEvents.filter((event) => event.skill === 'blood-venom-rend').every((event) => event.targets.length === 3), 'blood venom rend hits three living targets for one cast and one energy cost');
 assert.ok(bloodVenomEvents.some((event) => event.stacks === 6), 'poisoned blood venom rend reaches six bleed layers after two casts');
 assert.ok(bloodVenomEvents.some((event) => event.action === 'stack-refresh'), 'later casts add layers and refresh the shared twelve-second duration');
 assert.ok(!bloodVenom.combat.dotEvents.some((event) => event.type === 'rupture' || event.action === 'transfer'), 'blood venom uses only bleed and keeps death transfer disabled');
 assert.deepEqual(runCombat({ ...bloodVenomConfig, entry: 'ui' }), bloodVenom, 'stacked bleed timing must be UI/headless identical');
+const bloodVenomBoss = runCombat({ ...bloodVenomConfig, mode: 'boss', maxSeconds: 180, enemy: { ...bloodVenomConfig.enemy, hp: 7500 } });
+assert.ok(bloodVenomBoss.combat.skillEvents.filter((event) => event.skill === 'blood-venom-rend').every((event) => event.targets.length === 1), 'blood venom rend hits a lone boss only once');
 
 const zeroEnergyCoating = runCombat({ ...venomConfig, seconds: 1, initialResource: 0 });
 assert.equal(zeroEnergyCoating.skillCasts['corrosive-strike'], 1, 'coating may start the venom cycle at zero energy when cooldowns are ready');
