@@ -22,6 +22,7 @@ assert.match(source, /\(1 \+ rogueBonuses\.damage\) \* \(1 \+ rogueBonuses\.basi
 assert.match(source, /skill\.id === 'corrosive-strike'[\s\S]*applyCoating/);
 assert.match(source, /getAutoSkillPriority\(progress, unlocked\)/, 'advanced rogues use their formal specialization priority');
 assert.match(source, /getCoatingExecution[\s\S]*coating-poison[\s\S]*applyRoguePoison/, 'coating bonus uses pre-hit stacks before adding one poison layer');
+assert.match(source, /applyRoguePoison[\s\S]*poisonStacks[\s\S]*performAssassinOffhandStrike[\s\S]*'venom-coating'/, 'coating checks post-application poison stacks and uses the formal offhand strike once');
 assert.match(source, /skill\.id === 'blood-venom-rend'[\s\S]*bleedDuration[\s\S]*bleedTickInterval/);
 assert.match(source, /function applyBloodVenomBleed[\s\S]*const nextTickAt = existing\.length \? Math\.min/, 'stacking bleed preserves the existing next tick');
 assert.match(source, /resolveSymbiosisSettlement[\s\S]*consumeSymbiosisLayers/, 'direct critical settlement resolves damage before consuming layers');

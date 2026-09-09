@@ -88,6 +88,7 @@ assert.equal(venom.poison.maxStacks, 6);
 assert.ok(venom.poison.applications >= 6);
 assert.ok(venom.skillCasts['corrosive-strike'] > 0);
 assert.ok((venom.skillDamage['coating-poison'] || 0) > 0);
+assert.ok(venom.combat.offhandEvents.some((event) => event.trigger === 'venom-coating' && Number.isInteger(event.targetIndex)), 'coating follows up on the same poisoned target with the formal offhand strike');
 assert.ok(venom.combat.resourceEvents.some((event) => event.type === 'spend' && event.skill === 'corrosive-strike' && event.amount === 0));
 assert.ok(venom.combat.resourceEvents.some((event) => event.type === 'spend' && event.skill === 'blood-venom-rend' && event.amount === 30));
 assert.ok(venom.bleed.damage > 0 && venom.bleed.refreshes > 0);

@@ -5478,6 +5478,17 @@ function updatePartyMemberHealthRegeneration(member, now) {
   member.currentHp = Math.min(member.maxHp, member.currentHp + member.stats.hpRegeneration * elapsedSeconds);
 }
 
+function performAssassinOffhandStrike(member, targetIndex, profile, mastery, rogueBonuses, trigger, now = Date.now()) {
+  if (!member?.alive || battle.enemyHps[targetIndex] <= 0 || !AssassinOffhandPolicy.isDagger(member.progress.equipment?.offhand)) return false;
+  const offhandStrike = AssassinOffhandPolicy.calculateOffhandStrike({ ...member.stats, criticalDamageMultiplier: member.stats.criticalDamageMultiplier + (rogueBonuses?.criticalDamage || 0) }, mastery, Math.random());
+  const offhandResult = applyDamageToMonster(targetIndex, offhandStrike.damage, profile, { attacker: member, attackKind: 'offhand', sourceSkill: 'offhand', canParry: false });
+  CombatCorePolicy.record(member, 'offhandAttacks');
+  CombatCorePolicy.record(member, 'offhandCriticalRolls');
+  if (offhandStrike.critical) CombatCorePolicy.record(member, 'offhandCriticalHits');
+  CombatCorePolicy.recordEvent(member, 'offhandEvents', { atMs: now, targetIndex, trigger, damage: offhandResult.finalDamage, critical: offhandStrike.critical });
+  return true;
+}
+
 function processPartyMemberAttacks(now = Date.now()) {
   for (const member of battle.partyMembers || []) {
     if (!PartyPolicy.canMemberAttack(member, now)) continue;
@@ -5527,6 +5538,7 @@ function processPartyMemberAttacks(now = Date.now()) {
     RogueAdvancementPolicy.consumeBasic(member, lethalExecution, !result.evaded && result.finalDamage > 0);
     HunterAdvancementPolicy.consumeBasic(member, hunterExecution, !result.evaded && result.finalDamage > 0, critical, now);
     if (!result.evaded && result.finalDamage > 0) triggerRogueSymbiosisSettlement(targetIndex, member, critical, now);
+    let coatingOffhandFollowup = false;
     if (!result.evaded && result.finalDamage > 0 && coatingExecution && battle.enemyHps[targetIndex] > 0) {
       if (coatingExecution.bonusPower > 0) {
         const poisonMultiplier = 1
@@ -5537,6 +5549,9 @@ function processPartyMemberAttacks(now = Date.now()) {
       if (coatingExecution.applyPoison && battle.enemyHps[targetIndex] > 0) {
         applyRoguePoison(targetIndex, member, Math.max(1, Math.ceil(member.stats.attack * .20 * member.stats.dotMultiplier)), 3, coatingExecution.maxStacks, { source: member, tickIntervalMs: 2000, now, refreshDuration: true, refreshAllSameType: true });
       }
+      coatingOffhandFollowup = battle.enemyHps[targetIndex] > 0
+        && RogueAdvancementPolicy.poisonStacks(battle.enemyDots[targetIndex]) >= coatingExecution.offhandPoisonThreshold
+        && (coatingExecution.offhandFollowupChance >= 1 || Math.random() < coatingExecution.offhandFollowupChance);
     }
     const epicWeaponHit = ChapterThreeEpicWeaponPolicy.resolveBasicHit(member, { hit: !result.evaded && result.finalDamage > 0, critical, actualDamage: result.finalDamage, enemyState: getEnemySkillState(targetIndex), now, random: Math.random });
     if (epicWeaponHit.combo && battle.enemyHps[targetIndex] > 0) applyDamageToMonster(targetIndex, Math.max(1, (rolledWeaponAttack ?? displayedWeaponAttack) * .5), profile, { attacker: member, attackKind: 'weapon-proc', canEvade: false, canParry: false });
@@ -5586,16 +5601,12 @@ function processPartyMemberAttacks(now = Date.now()) {
         const masteryProc = masteryChance > 0 && Math.random() < masteryChance;
         const danceProc = now < (member.shadowDanceUntil || 0) && Math.random() < (member.shadowDanceOffhandChance || 0);
         if ((masteryProc || danceProc) && AssassinOffhandPolicy.isDagger(member.progress.equipment?.offhand)) {
-          const offhandStrike = AssassinOffhandPolicy.calculateOffhandStrike({ ...member.stats, criticalDamageMultiplier: member.stats.criticalDamageMultiplier + rogueBonuses.criticalDamage }, mastery, Math.random());
-          const offhandResult = applyDamageToMonster(targetIndex, offhandStrike.damage, profile, { attacker: member, attackKind: 'offhand', sourceSkill: 'offhand', canParry: false });
           const triggers = [];
           if (masteryProc) triggers.push(lethalExecution?.extraOffhandChance ? 'dagger-mastery-or-lethal-technique' : 'dagger-mastery');
           if (danceProc) triggers.push('shadow-dance');
-          CombatCorePolicy.record(member, 'offhandAttacks');
-          CombatCorePolicy.record(member, 'offhandCriticalRolls');
-          if (offhandStrike.critical) CombatCorePolicy.record(member, 'offhandCriticalHits');
-          CombatCorePolicy.recordEvent(member, 'offhandEvents', { atMs: now, targetIndex, trigger: triggers.join('+'), damage: offhandResult.finalDamage, critical: offhandStrike.critical });
+          performAssassinOffhandStrike(member, targetIndex, profile, mastery, rogueBonuses, triggers.join('+'), now);
         }
+        if (coatingOffhandFollowup) performAssassinOffhandStrike(member, targetIndex, profile, mastery, rogueBonuses, 'venom-coating', now);
       }
       const titanStrike = WarriorAdvancementPolicy.rollTitanStrike(member, battle.enemyHps[targetIndex] > 0, true, Math.random);
       if (titanStrike) {

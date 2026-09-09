@@ -99,8 +99,8 @@ assert.equal(policy.getBloodDotDamageBonus(venom, sixBloodBleeds, 'poison'), .25
 assert.equal(policy.getBloodDotDamageBonus(venom, [...sixPoison, ...sixBloodBleeds], 'bleed'), .85, 'full bleed receives mastery, blood venom erosion and blood tide');
 assert.equal(policy.getTargetDefenseReduction(sixBloodBleeds), .15, 'six bleed stacks apply one non-stacking 15% blood tide defense reduction');
 policy.applyCoating(venom, 6, 1000);
-assert.deepEqual(policy.getCoatingExecution(venom, 5, 2000), { stacks: 5, maxStacks: 6, applyPoison: true, bonusPower: .8, bonusMultiplier: 1 });
-assert.deepEqual(policy.getCoatingExecution(venom, 6, 2000), { stacks: 6, maxStacks: 6, applyPoison: false, bonusPower: .96, bonusMultiplier: 1.25 });
+assert.deepEqual(policy.getCoatingExecution(venom, 5, 2000), { stacks: 5, maxStacks: 6, applyPoison: true, bonusPower: .8, bonusMultiplier: 1, offhandPoisonThreshold: 3, offhandFollowupChance: 1 });
+assert.deepEqual(policy.getCoatingExecution(venom, 6, 2000), { stacks: 6, maxStacks: 6, applyPoison: false, bonusPower: .96, bonusMultiplier: 1.25, offhandPoisonThreshold: 3, offhandFollowupChance: 1 });
 assert.equal(policy.getCoatingExecution(venom, 6, 8000), null, 'coating expires at the exact duration boundary');
 const settlementState = {};
 const settlement = policy.resolveSymbiosisSettlement(venom, dots, settlementState, true, 1000);
