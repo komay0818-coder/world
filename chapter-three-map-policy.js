@@ -42,10 +42,10 @@
     skullcrusherScout: enemy('skullcrusher-scout', '碎顱斥候', 'normal', ['armor-breaking-throw']),
     redrockHornbeast: enemy('redrock-hornbeast', '赤岩角獸', 'elite', ['high-health', 'frenzied-charge', 'wounded-frenzy']),
     redrockGiantLizard: enemy('redrock-giant-lizard', '赤岩巨蜥', 'boss', ['giant-jaw-rend', 'rock-armor', 'wasteland-fury']),
-    skullcrusherSpearman: enemy('skullcrusher-spearman', '碎顱投矛手', 'normal', ['ranged-high-damage']),
-    skullcrusherWarrior: enemy('skullcrusher-warrior', '碎顱戰士', 'normal', ['high-health', 'high-defense']),
-    brokenrockBrute: enemy('brokenrock-brute', '斷岩蠻兵', 'elite', ['two-handed-weapon', 'high-health', 'high-single-hit-damage', 'rockbreaker-smash', 'temporary-defense-reduction']),
-    canyonWarlord: enemy('canyon-warlord', '峽谷督軍', 'boss', ['progressive-combat-power']),
+    skullcrusherSpearman: enemy('skullcrusher-spearman', '碎顱投矛手', 'normal', ['ranged-high-damage', 'armor-piercing-spear']),
+    skullcrusherWarrior: enemy('skullcrusher-warrior', '碎顱戰士', 'normal', ['high-health', 'high-defense', 'battle-cry']),
+    brokenrockBrute: enemy('brokenrock-brute', '斷岩蠻兵', 'elite', ['two-handed-weapon', 'brute-smash', 'bloodlust']),
+    canyonWarlord: enemy('canyon-warlord', '峽谷督軍', 'boss', ['warlord-slash', 'offensive-command', 'execution-command']),
     skullcrusherBerserker: enemy('skullcrusher-berserker', '碎顱狂戰士', 'normal', ['high-attack', 'low-defense', 'low-hp-speed-up']),
     skullcrusherShieldguard: enemy('skullcrusher-shieldguard', '碎顱盾衛', 'normal', ['high-health', 'high-defense', 'shield-block']),
     skullcrusherHunter: enemy('skullcrusher-hunter', '碎顱獵手', 'normal', ['ranged', 'high-attack-speed', 'aimed-shot']),
@@ -90,6 +90,7 @@
       story: Object.freeze({ previousMapId: 'black-forest-depths', nextMapId: 'brokenrock-canyon' })
     }),
     map('brokenrock-canyon', 2, '斷岩峽谷', 15, {
+      skillPolicyId: 'brokenrock-canyon', skillStatus: 'implemented',
       environment: Object.freeze(['紅色峽谷', '狹窄山道', '木製吊橋', '哨塔', '路障', '碎顱旗幟', '簡易營地']),
       normalEnemyIds: Object.freeze(['wasteland-hyena', 'skullcrusher-scout', 'skullcrusher-spearman', 'skullcrusher-warrior']),
       eliteId: 'brokenrock-brute', bossId: 'canyon-warlord',

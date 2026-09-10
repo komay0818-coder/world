@@ -1,0 +1,15 @@
+'use strict';
+const assert=require('node:assert/strict');
+const redrock=require('../redrock-wastes-policy.js');
+const policy=require('../brokenrock-canyon-policy.js');
+assert.equal(policy.getSkill('rend-bite'),redrock.getSkill('rend-bite'),'3-2 reuses the exact 3-1 skill definition');
+assert.equal(policy.getSkill('armor-breaking-throw'),redrock.getSkill('armor-breaking-throw'));
+assert.deepEqual(policy.getEnemySkills('wasteland-hyena'),['rend-bite']);assert.deepEqual(policy.getEnemySkills('skullcrusher-scout'),['armor-breaking-throw']);
+const spear=policy.getSkill('armor-piercing-spear');assert.deepEqual({cooldownMs:spear.cooldownMs,damage:spear.damageMultiplier,ignore:spear.defenseIgnore,target:spear.target},{cooldownMs:7000,damage:1.5,ignore:.2,target:'random-alive'});
+const warrior=policy.createState();assert.deepEqual(policy.resolveScheduledActions('skullcrusher-warrior',warrior,9999),[]);assert.deepEqual(policy.resolveScheduledActions('skullcrusher-warrior',warrior,10000).map(x=>x.id),['battle-cry']);
+const brute=policy.createState();assert.deepEqual(policy.updateThresholds('brokenrock-brute',brute,19,100).map(x=>x.threshold),[.8,.6,.4,.2]);assert.equal(brute.bloodlustStacks,4);assert.equal(policy.getCombatMultipliers('brokenrock-brute',brute).attack,1.2);assert.deepEqual(policy.updateThresholds('brokenrock-brute',brute,90,100),[]);assert.deepEqual(policy.updateThresholds('brokenrock-brute',brute,10,100),[]);assert.deepEqual(brute.telemetry.bloodlustThresholds,{80:1,60:1,40:1,20:1});
+const boss=policy.createState();assert.deepEqual(policy.resolveScheduledActions('canyon-warlord',boss,6000,{otherAliveEnemies:0}).map(x=>x.id),['warlord-slash']);assert.deepEqual(policy.resolveScheduledActions('canyon-warlord',boss,12000,{otherAliveEnemies:0}).map(x=>x.id),['warlord-slash']);assert.equal(boss.telemetry.skillAttempts['offensive-command'],1);assert.equal(boss.telemetry.skillCasts['offensive-command'],undefined,'empty command is not an effective cast');assert.deepEqual(policy.resolveScheduledActions('canyon-warlord',boss,24000,{otherAliveEnemies:3}).map(x=>x.id),['warlord-slash','offensive-command']);
+assert.deepEqual(policy.updateThresholds('canyon-warlord',boss,29,100).map(x=>x.id),['execution-command']);assert.deepEqual(policy.updateThresholds('canyon-warlord',boss,80,100),[]);assert.deepEqual(policy.updateThresholds('canyon-warlord',boss,20,100),[]);policy.recordExecutionOutcome(boss,true);assert.equal(boss.telemetry.executionTriggers,1);assert.equal(boss.telemetry.executionKills,1);
+policy.recordSkillDamage(boss,'armor-piercing-spear',321);policy.recordBuffTargets(boss,'offensive-command',3);policy.recordCoverage(boss,{battleCry:true,warlordDefenseDown:true},500);
+assert.equal(boss.telemetry.skillDamage['armor-piercing-spear'],321);assert.equal(boss.telemetry.buffTargets['offensive-command'],3);assert.equal(boss.telemetry.battleCryActiveMs,500);assert.equal(boss.telemetry.warlordDefenseDownActiveMs,500);
+console.log('brokenrock-canyon-policy: assertions passed');
