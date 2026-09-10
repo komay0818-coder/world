@@ -23,7 +23,8 @@
   const POISON = Object.freeze({ chance: .30, durationMs: 5000, tickMs: 1000, attackRatio: .06 });
   const CONTROL = Object.freeze({ chargeChance: .20, chargeMultiplier: 1.4, chargeStunMs: 1000, rootChance: .20, rootDurationMs: 4000, rootAttackSpeedPenalty: .20 });
   const ENRAGE = Object.freeze({ hpThreshold: .40, attackBonus: .20, attackSpeedBonus: .15 });
-  const HUNTER = Object.freeze({ bindChance: .25, bindMultiplier: 1.2, bindDurationMs: 3000, executeThreshold: .30, executeMultiplier: 1.6 });
+  const HUNTER = Object.freeze({ bindChance: .25, bindMultiplier: 1.2, bindDurationMs: 2000, executeThreshold: .30, executeMultiplier: 1.6 });
+  const BINDING_ARROW = Object.freeze({ durationMs: HUNTER.bindDurationMs });
   const GUARDIAN = Object.freeze({ phaseTwoThreshold: .70, phaseThreeThreshold: .35, rootStrikeChance: .25, rootStrikeMultiplier: 1.5, stormChance: .20, stormMultiplier: .60, phaseThreeAttackBonus: .20, phaseThreeAttackSpeedBonus: .15, phaseThreeDefensePenalty: .10 });
 
   function monster(id, name, rank, role, options = {}) {
@@ -127,5 +128,20 @@
     return ({ charge: CONTROL.chargeMultiplier, 'binding-arrow': HUNTER.bindMultiplier, 'execution-arrow': HUNTER.executeMultiplier, 'root-strike': GUARDIAN.rootStrikeMultiplier, 'leaf-storm': GUARDIAN.stormMultiplier })[action] || 1;
   }
 
-  return Object.freeze({ MAP, GROWTH, BLEED, POISON, CONTROL, ENRAGE, HUNTER, GUARDIAN, MONSTERS, getMonster, getMonstersByRank, rollLevel, toCombatMonster, getCombatMonster, getCombatPool, getPhase, getCombatMultipliers, resolveAction, getDamageMultiplier });
+  function applyBindingArrow(member, now = Date.now()) {
+    if (!member || member.alive === false || !(member.currentHp > 0)) return false;
+    member.boundUntil = Math.max(0, Number(now) || 0) + BINDING_ARROW.durationMs;
+    return true;
+  }
+
+  function isBound(member, now = Date.now()) {
+    return Boolean(member?.alive !== false && member?.currentHp > 0 && Number(member.boundUntil) > Number(now));
+  }
+
+  function clearBinding(member) {
+    if (member) member.boundUntil = 0;
+    return member;
+  }
+
+  return Object.freeze({ MAP, GROWTH, BLEED, POISON, CONTROL, ENRAGE, HUNTER, BINDING_ARROW, GUARDIAN, MONSTERS, getMonster, getMonstersByRank, rollLevel, toCombatMonster, getCombatMonster, getCombatPool, getPhase, getCombatMultipliers, resolveAction, getDamageMultiplier, applyBindingArrow, isBound, clearBinding });
 });

@@ -3747,6 +3747,7 @@ function createBattlePartyMember(slot, slotIndex, mainId, now = Date.now()) {
     manaExhausted: false,
     shield: 0,
     stunnedUntil: 0,
+    boundUntil: 0,
     bleed: null,
     blackstoneMarkedUntil: 0,
     blackstoneArmorBreakUntil: 0,
@@ -5524,6 +5525,7 @@ function performAssassinOffhandStrike(member, targetIndex, profile, mastery, rog
 function processPartyMemberAttacks(now = Date.now()) {
   for (const member of battle.partyMembers || []) {
     if (!PartyPolicy.canMemberAttack(member, now)) continue;
+    if (BlackForestEntrancePolicy.isBound(member, now)) continue;
     const targetIndex = PartyPolicy.getFrontAliveEnemyIndex(battle.enemyHps, battle.enemySpawnedAt);
     member.targetIndex = targetIndex;
     if (targetIndex < 0) continue;
@@ -6313,6 +6315,7 @@ function endBattleAfterPlayerDefeat(now = Date.now()) {
     member.undeadRevived = false;
     member.bleed = null;
     member.stunnedUntil = 0;
+    BlackForestEntrancePolicy.clearBinding(member);
     member.targetIndex = -1;
     member.reviveAt = null;
   });
@@ -6354,6 +6357,7 @@ function defeatPartyMember(member, now = Date.now()) {
   member.targetIndex = -1;
   member.bleed = null;
   member.stunnedUntil = 0;
+  BlackForestEntrancePolicy.clearBinding(member);
   member.blackstoneMarkedUntil = 0;
   member.blackstoneArmorBreakUntil = 0;
   member.spiderNestArmorBreakUntil = 0;
@@ -6380,6 +6384,7 @@ function reviveDefeatedTeammates(now = Date.now()) {
     member.shield = 0;
     member.bleed = null;
     member.stunnedUntil = 0;
+    BlackForestEntrancePolicy.clearBinding(member);
     member.blackstoneMarkedUntil = 0;
     member.blackstoneArmorBreakUntil = 0;
     member.spiderNestArmorBreakUntil = 0;
@@ -6416,6 +6421,7 @@ function resetPartyAfterDefeat(now = Date.now()) {
     member.undeadRevived = false;
     member.bleed = null;
     member.stunnedUntil = 0;
+    BlackForestEntrancePolicy.clearBinding(member);
     member.blackstoneMarkedUntil = 0;
     member.blackstoneArmorBreakUntil = 0;
     member.spiderNestArmorBreakUntil = 0;
@@ -6430,6 +6436,47 @@ function resetPartyAfterDefeat(now = Date.now()) {
   persistPartyRuntimeState();
   logBattle('全隊倒下，已撤退並恢復隊伍狀態。', 'system');
   return true;
+}
+
+function resolveBlackForestLeafStorm(enemy, enemyCurrentHp, now = Date.now()) {
+  const progress = getProgress();
+  const targets = (battle.partyMembers || []).filter((member) => member.alive && member.currentHp > 0);
+  if (!targets.length) return [];
+  const results = [];
+  for (const target of targets) {
+    if (!fighting) break;
+    const stats = getCharacterStats(target.level, target.progress, target.character);
+    const rawDamage = getMonsterAttackPower(enemy, progress, enemyCurrentHp) * BlackForestEntrancePolicy.GUARDIAN.stormMultiplier;
+    const resolvedDamage = MonsterDefense.resolvePlayerDamage({
+      baseDamage: rawDamage,
+      defense: Math.max(0, Math.round(stats.defense * ChapterThreeSpecialEquipmentPolicy.getDefenseMultiplier(target, now))),
+      damageReduction: Math.min(.9, stats.damageReduction
+        + ChapterTwoSpecialEquipmentPolicy.getIncomingDamageReduction(target.progress.equipment, target.currentHp / target.maxHp)
+        + ChapterThreeCraftedEpicAbilityPolicy.getWastelandDamageReduction(target, now)
+        + WarriorAdvancementPolicy.getUnyieldingReduction(target, now)
+        + (now < (target.sanctuaryUntil || 0) ? target.sanctuaryDamageReduction || 0 : 0)
+        + (target.job === 'priest' ? PriestAdvancementPolicy.getFaithBonuses(target, now).selfDamageReduction : 0)
+        + (now < (target.manaShieldReductionUntil || 0) ? target.manaShieldDamageReduction || 0 : 0))
+    }).finalDamage;
+    const absorbed = Math.min(target.shield || 0, resolvedDamage);
+    target.shield = Math.max(0, (target.shield || 0) - absorbed);
+    PriestAdvancementPolicy.recordShieldAbsorption(target, absorbed, now);
+    const damage = Math.max(0, resolvedDamage - absorbed);
+    const hpBeforeHit = target.currentHp;
+    target.currentHp = Math.max(0, target.currentHp - damage);
+    if (target.currentHp <= 0) {
+      const holyPriest = targets.find((member) => member.alive && PriestAdvancementPolicy.isAdvanced(member.progress, 'holy-priest') && Number(member.progress.skillLevels?.['priest:prayer-of-life']) >= 6);
+      if (holyPriest) PriestAdvancementPolicy.trySacredGuardian(holyPriest, target, battle, now);
+    }
+    WarriorAdvancementPolicy.crossUnyielding(target, hpBeforeHit, now);
+    resolveEnemyDirectHitRecovery(target, damage, stats);
+    ChapterThreeSpecialEquipmentPolicy.resolveEnemyAttackOutcome(target, { actualDamage: damage, parried: false, dodged: false }, now);
+    if (damage > 0) playPartyMemberHitAnimation(target);
+    logBattle(`🍃【落葉風暴】對 ${target.name} 造成 ${damage} 點傷害${absorbed ? `，護盾吸收 ${absorbed}` : ''}。`, 'damage-taken');
+    defeatPartyMember(target, now);
+    results.push({ memberId: target.id, damage, absorbed });
+  }
+  return results;
 }
 
 function enemyAttackTick() {
@@ -6572,6 +6619,17 @@ function enemyAttackTick() {
     const blackForestAction = getActiveMap(progress).id === 'black-forest-entrance'
       ? BlackForestEntrancePolicy.resolveAction(enemy.id, Math.random(), target.currentHp / target.maxHp, enemyCurrentHp, enemy.maxHp)
       : 'attack';
+    if (blackForestAction === 'leaf-storm') {
+      logBattle(`🍃【${enemy.name}】施放【落葉風暴】，席捲所有存活隊員！`, 'system');
+      resolveBlackForestLeafStorm(enemy, enemyCurrentHp, now);
+      playMonsterAttackAnimation(enemyIndex, true);
+      if (!fighting) return;
+      if (resetPartyAfterDefeat(now)) {
+        updateBattleUI();
+        return;
+      }
+      continue;
+    }
     let blackForestTrailAction = getActiveMap(progress).id === 'black-forest-trail'
       ? BlackForestTrailPolicy.resolveAction(enemy.id, Math.random(), target.currentHp / target.maxHp, enemyCurrentHp, enemy.maxHp)
       : 'attack';
@@ -6816,10 +6874,12 @@ function enemyAttackTick() {
       applyControlEffectToPlayer(target, { type: 'stun', baseDurationMs: BlackForestEntrancePolicy.CONTROL.rootDurationMs, source: '纏繞根鬚' }, now);
       logBattle(`🌿【${enemy.name}】施放【纏繞根鬚】，${target.name}受困 4 秒！`, 'system');
     }
-    if (!dodged && damage > 0 && blackForestAction === 'binding-arrow') logBattle(`🏹【${enemy.name}】施放【束縛箭】！`, 'system');
+    if (!dodged && damage > 0 && blackForestAction === 'binding-arrow') {
+      BlackForestEntrancePolicy.applyBindingArrow(target, now);
+      logBattle(`🏹【${enemy.name}】施放【束縛箭】，${target.name}被束縛 2 秒！`, 'system');
+    }
     if (!dodged && damage > 0 && blackForestAction === 'execution-arrow') logBattle(`🏹【${enemy.name}】對低生命目標施放【處決箭】！`, 'system');
     if (!dodged && damage > 0 && blackForestAction === 'root-strike') logBattle(`🌳【${enemy.name}】施放【根鬚重擊】！`, 'system');
-    if (!dodged && damage > 0 && blackForestAction === 'leaf-storm') logBattle(`🍃【${enemy.name}】施放【落葉風暴】！`, 'system');
     if (!dodged && damage > 0 && ['venom-fang', 'venom-flask'].includes(blackForestTrailAction)) inflictBlackForestTrailPoison(target, enemy, now);
     if (!dodged && damage > 0 && blackForestTrailAction === 'webbed-strike') {
       applyBlackstoneAttackSpeedPenalty(target, BlackForestTrailPolicy.CONTROL.webAttackSpeedPenalty, BlackForestTrailPolicy.CONTROL.webDurationMs, now, '蛛絲纏繞');
