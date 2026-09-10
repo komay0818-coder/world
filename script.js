@@ -265,8 +265,8 @@ function getNextAdventureMap(currentMap) {
   const nextId = ChapterOneProgressionPolicy.NEXT_MAP[currentMap.id];
   if (nextId) return mapProgression.find((map) => map.id === nextId) || (nextId === 'black-forest' ? mapProgression.find((map) => map.id === ChapterTwoMapPolicy.CHAPTER.id) : null);
   if (currentMap.chapter === 2) {
-    const regions = mapProgression.filter((map) => map.chapter === 2 && map.regionOf && !map.dungeon);
-    return regions[regions.findIndex((map) => map.id === currentMap.id) + 1] || null;
+    const chapterTwoNextId = ChapterTwoProgressionPolicy.NEXT_MAP[currentMap.id];
+    return mapProgression.find((map) => map.id === chapterTwoNextId) || null;
   }
   return null;
 }
@@ -1102,6 +1102,7 @@ function getProgress() {
     skillBooks: {},
     skillLevels: {},
     blackForestCorruption: BlackForestCorruptionPolicy.normalizeState(null),
+    chapterTwoProgress: ChapterTwoProgressionPolicy.createDefaultState(),
     unlockedChapter: 1,
     selectedMapId: 'beginner-plains',
     inventory: [],
@@ -1116,6 +1117,7 @@ function getProgress() {
     village: VillagePolicy.normalizeVillageData(saved.village)
   };
   ChapterOneProgressionPolicy.normalize(normalizedProgress);
+  ChapterTwoProgressionPolicy.normalize(normalizedProgress);
   const activeCharacter = getActiveCharacter();
   const activeSlotIndex = getActiveCharacterSlotIndex();
   let partySlots = JSON.parse(localStorage.getItem('stardust-character-slots') || '[]');
@@ -1181,6 +1183,7 @@ function syncActiveCharacterSlot(progressOverride = null) {
 function saveProgress(progress) {
   normalizeCurrentParty(progress);
   progress.village = VillagePolicy.normalizeVillageData(progress.village);
+  ChapterTwoProgressionPolicy.normalize(progress);
   localStorage.setItem('stardust-progress', JSON.stringify(progress));
   syncActiveCharacterSlot(progress);
 }
@@ -2602,7 +2605,7 @@ function getDropLookupItems() {
 function isDropLookupMapUnlocked(map, progress = getProgress()) {
   if (!map?.implemented) return false;
   if (map.chapter === 1 && !ChapterOneProgressionPolicy.isUnlocked(progress, map.id)) return false;
-  if (map.chapter === 2 && (!ChapterOneProgressionPolicy.isUnlocked(progress, 'black-forest') || progress.level < map.min)) return false;
+  if (map.chapter === 2 && (!ChapterOneProgressionPolicy.isUnlocked(progress, 'black-forest') || progress.level < map.min || !ChapterTwoProgressionPolicy.canEnter(progress, map.id, map.implemented))) return false;
   if (map.ticketItemId && getInventoryItemQuantity(progress, map.ticketItemId) < 1) return false;
   if (map.dungeon && !map.ticketItemId && (getAccountResources().dungeonKeys?.blackForestAltar || 0) < 1) return false;
   return true;
@@ -2714,7 +2717,7 @@ function selectAdventureMap(mapId) {
     if (status) showToast(`${map.name}尚未解鎖：Lv${status.level}/${status.requirement.level}・壓制 ${status.normalKills}/${status.requirement.normalKills}・Boss ${status.bossCleared ? '完成' : '未完成'}`);
     return;
   }
-  if (map.chapter === 2 && (!ChapterOneProgressionPolicy.isUnlocked(progress, 'black-forest') || progress.level < map.min)) return;
+  if (map.chapter === 2 && (!ChapterOneProgressionPolicy.isUnlocked(progress, 'black-forest') || progress.level < map.min || !ChapterTwoProgressionPolicy.canEnter(progress, map.id, map.implemented))) return;
   if (map.chapter === 2) BlackForestCorruptionPolicy.enterChapter(progress);
   if (map.dungeon) {
     if (map.ticketItemId) {
@@ -2825,6 +2828,8 @@ function exchangePreJobTrialCores() {
 }
 
 function renderBlackForestRegions() {
+  const progress = getProgress();
+  const activeMap = getActiveMap(progress);
   const modal = document.querySelector('#inventory-modal');
   document.querySelector('#inventory-title').textContent = '第二章・黑森林';
   document.querySelector('#inventory-content').innerHTML = `
@@ -2833,16 +2838,26 @@ function renderBlackForestRegions() {
       <div><b>黑森林</b><small>第二章・Lv15～30</small></div>
       <em>${ChapterTwoMapPolicy.CHAPTER.summary}</em>
     </section>
-    <section class="map-region-grid">${blackForestRegions.map((region) => {
+    <section class="map-region-grid">${ChapterTwoProgressionPolicy.MAP_ORDER.map((mapId, index) => {
+      const region = blackForestRegions.find((entry) => entry.id === mapId);
+      const status = ChapterTwoProgressionPolicy.getMapState(progress, region.id, region.implemented);
       const dungeon = region.dungeon ? ChapterTwoMapPolicy.getDungeon(region.id) : null;
       const detail = region.id === 'blackstone-stronghold'
         ? `副本骨架・${dungeon.primaryFaction === 'blackstone-bandits' ? '黑石山賊' : dungeon.primaryFaction}與哥布林合作勢力`
         : region.isFinalMap ? '第二章最終地圖' : '怪物、Boss、掉落、材料、事件與環境效果待後續設定';
+      const stateClass = !status.implemented ? 'pending locked' : status.unlocked ? 'available' : 'locked';
+      const action = !status.implemented
+        ? '<em>規劃中／尚未開放</em>'
+        : !status.unlocked
+          ? '<em>尚未解鎖</em>'
+          : activeMap.id === region.id && !progress.requiresMapSelectionAfterDefeat
+            ? `<em class="current-region">目前區域${status.cleared ? '・已通關' : ''}</em>`
+            : `<button type="button" data-select-map="${region.id}">${progress.requiresMapSelectionAfterDefeat ? '重新進入區域' : status.cleared ? '再次進入' : '進入區域'}</button>`;
       return `
-      <article class="map-region-card pending locked ${region.dungeon ? 'dungeon-card' : ''}">
-        <span>${String(region.order).padStart(2, '0')}</span>
+      <article class="map-region-card ${stateClass} ${region.dungeon ? 'dungeon-card' : ''}">
+        <span>${String(index + 1).padStart(2, '0')}</span>
         <div><b>${region.dungeon ? '◆ ' : ''}${region.name}</b><small>${detail}</small></div>
-        <em>規劃中</em>
+        ${action}
       </article>`;
     }).join('')}
     </section>`;
@@ -4430,6 +4445,17 @@ function rewardVictory(index) {
     showToast(`${name}已解鎖`);
     logBattle(`◆ 區域推進完成：${name}已解鎖`, 'progress');
   });
+  if (currentMap.chapter === 2) {
+    if (!enemy.isElite && !enemy.isBoss) ChapterTwoProgressionPolicy.recordNormalKill(progress, currentMap.id);
+    if (enemy.isBoss) {
+      const chapterTwoResult = ChapterTwoProgressionPolicy.recordBossKill(progress, currentMap.id, enemy);
+      if (chapterTwoResult.firstClear) {
+        const nextMap = mapProgression.find((map) => map.id === chapterTwoResult.nextMapId);
+        showToast(chapterTwoResult.chapterCompleted ? '第二章已完成！' : `${nextMap?.name || chapterTwoResult.nextMapId}已解鎖`);
+        logBattle(chapterTwoResult.chapterCompleted ? '◆ 第二章通關完成。' : `◆ 首次擊敗區域首領，${nextMap?.name || chapterTwoResult.nextMapId}已解鎖。`, 'progress');
+      }
+    }
+  }
   addRoundLoot('gold', '金幣', earnedGold, '🪙', '+');
   if (loot) addRoundLoot(`loot:${loot.name}`, loot.name, loot.quantity || 1, loot.kind === 'consumable' ? '🧪' : '◆');
   materialDrops.forEach((material) => addRoundLoot(`material:${material.id || material.name}`, material.name, material.quantity || 1, material.icon || '◆'));

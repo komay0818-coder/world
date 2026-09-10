@@ -89,8 +89,8 @@ assert.match(combatCore, /runtime\.environment\(now\)/);
 assert.match(script, /previousMapId: 'plains-depths'/, 'chapter two connects from the first chapter finale');
 assert.match(script, /function renderBlackForestRegions\(/, 'black forest has a chapter region view');
 assert.match(blackForestRenderer, /ChapterTwoMapPolicy\.getDungeon\(region\.id\)/, 'the stronghold preview reads the dungeon foundation');
-assert.match(blackForestRenderer, /<em>規劃中<\/em>/, 'unfinished maps are visibly marked as planned');
-assert.doesNotMatch(blackForestRenderer, /data-select-map=/, 'planned chapter-two cards do not expose entry controls');
+assert.match(blackForestRenderer, /<em>規劃中／尚未開放<\/em>/, 'unfinished maps are visibly marked as planned and unavailable');
+assert.match(blackForestRenderer, /!status\.implemented[\s\S]*data-select-map=/, 'only implemented and unlocked chapter-two cards expose entry controls');
 assert.match(script, /if \(regionHubButton\.dataset\.openMapRegion === 'black-forest'\) renderBlackForestRegions\(\)/,
   'the shared region action opens the second chapter view');
 
