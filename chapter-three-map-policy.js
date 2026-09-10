@@ -62,11 +62,12 @@
     runeGuard: enemy('rune-guard', '符文守衛', 'normal', ['rune-shield']),
     awakenedGuard: enemy('awakened-guard', '覺醒守衛', 'elite', ['awakened-smash', 'awakened-rune']),
     fallenHighPriest: enemy('fallen-high-priest', '墮落大祭司', 'boss', ['fallen-flame', 'blood-sacrifice', 'forbidden-ritual']),
-    templeStoneguard: enemy('temple-stoneguard', '聖殿石衛', 'normal', ['high-defense']),
-    runeGolem: enemy('rune-golem', '符文魔像', 'normal', ['magic-damage']),
-    templeExecutioner: enemy('temple-executioner', '聖殿執行者', 'normal', ['slow', 'extreme-single-hit-physical-damage', 'execution-smash']),
-    ancientPriest: enemy('ancient-priest', '遠古祭司', 'normal', ['magic-debuff', 'player-damage-down']),
-    templeGuardian: enemy('temple-guardian', '聖殿守護者', 'elite', ['high-defense', 'attack-up-below-50'])
+    templeStoneguard: enemy('temple-stoneguard', '聖殿石衛', 'normal', ['temple-bulwark']),
+    runeGolem: enemy('rune-golem', '符文魔像', 'normal', ['rune-overload']),
+    templeExecutioner: enemy('temple-executioner', '聖殿執行者', 'normal', ['execution']),
+    ancientPriest: enemy('ancient-priest', '遠古祭司', 'normal', ['rune-blessing']),
+    templeGuardian: enemy('temple-guardian', '聖殿守護者', 'elite', ['guardian-smash', 'guardian-rune', 'shield-shatter']),
+    redrockAncientGod: enemy('redrock-ancient-god', '赤岩古神（暫定）', 'boss', ['ancient-god-smash', 'ancient-rune', 'ancient-awakening', 'redrock-divine-wrath'])
   });
 
   function map(id, order, name, facilityRequirement, options) {
@@ -120,11 +121,12 @@
       story: Object.freeze({ previousMapId: 'skullcrusher-war-camp', nextMapId: 'redrock-temple', completion: '祭壇已啟動，聖殿入口無法重新封閉' })
     }),
     map('redrock-temple', 6, '赤岩聖殿', 35, {
+      skillPolicyId: 'redrock-temple', skillStatus: 'implemented',
       isFinalMap: true,
       environment: Object.freeze(['巨型石造長廊', '超大型守護者雕像', '發光符文牆壁', '巨型石門', '地下祭壇', '發光晶體', '遠古壁畫', '巨型核心裝置', '青藍與紫色符文光源']),
       normalEnemyIds: Object.freeze(['temple-stoneguard', 'rune-golem', 'temple-executioner', 'ancient-priest']),
-      eliteId: 'temple-guardian', bossId: null,
-      finalBossStatus: 'reserved', awakeningCoreSource: null,
+      eliteId: 'temple-guardian', bossId: 'redrock-ancient-god',
+      finalBossStatus: 'provisional-mechanics-implemented', awakeningCoreSource: null,
       story: Object.freeze({ previousMapId: 'ancient-altar', nextMapId: null, finalStoryStatus: 'pending' })
     })
   ]);

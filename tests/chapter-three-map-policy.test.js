@@ -11,10 +11,11 @@ assert.ok(policy.MAPS.every((map) => map.min === null && map.max === null && map
 assert.ok(policy.MAPS.every((map) => map.implemented === false && policy.canEnter(map.id) === false));
 assert.equal(policy.getMap('skullcrusher-war-camp').dungeon, true);
 assert.equal(policy.getMap('ancient-altar').facilityPresentationStatus, 'name-and-appearance-pending');
-assert.equal(policy.getMap('redrock-temple').bossId, null);
-assert.equal(policy.getMap('redrock-temple').finalBossStatus, 'reserved');
+assert.equal(policy.getMap('redrock-temple').bossId, 'redrock-ancient-god');
+assert.equal(policy.getMap('redrock-temple').finalBossStatus, 'provisional-mechanics-implemented');
 assert.equal(policy.getMap('redrock-temple').awakeningCoreSource, null);
 assert.equal(policy.getEnemy('redrock-giant-lizard').name, '赤岩巨蜥');
+assert.equal(policy.getEnemy('redrock-ancient-god').name, '赤岩古神（暫定）');
 
 const empty = policy.normalizeFacilityProgress();
 assert.deepEqual(empty['redrock-wastes-entrance'], { 'supply-station': 0, armory: 0, 'shaman-altar': 0 });
