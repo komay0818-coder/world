@@ -1,0 +1,14 @@
+'use strict';
+const assert=require('node:assert/strict');
+const policy=require('../redrock-wastes-policy.js');
+assert.equal(policy.MAP_ID,'redrock-wastes-entrance');
+assert.deepEqual(policy.getEnemySkills('redrock-giant-lizard'),['giant-jaw-rend','rock-armor','wasteland-fury']);
+const hyena=policy.createState();assert.equal(policy.resolveHyenaBasicHit(hyena,.20),null);assert.equal(policy.resolveHyenaBasicHit(hyena,.199).id,'rend-bite');
+assert.deepEqual(policy.createDot('rend-bite','hyena-1',100),{type:'bleed',sourceId:'hyena-1',skillId:'rend-bite',damage:20,durationMs:4000,tickMs:2000,ticks:2,stacking:'refresh-by-source'});
+policy.recordDotApplication(hyena,'rend-bite');policy.recordDotTick(hyena,'rend-bite');policy.recordDotTick(hyena,'rend-bite');assert.deepEqual(hyena.telemetry.dotTicks,{'rend-bite':2});
+const vulture=policy.createState(1000);policy.initializeSchedule('wasteland-vulture',vulture,1000);assert.equal(policy.resolveScheduledAction('wasteland-vulture',vulture,8999),null);assert.equal(policy.resolveScheduledAction('wasteland-vulture',vulture,9000).id,'dive');assert.equal(vulture.nextSkillAt.dive,17000);
+const scout=policy.createState();assert.equal(policy.resolveScheduledAction('skullcrusher-scout',scout,7000).id,'armor-breaking-throw');policy.recordDebuff(scout,'armor-breaking-throw');assert.equal(scout.telemetry.debuffApplications['armor-breaking-throw'],1);
+const horn=policy.createState();assert.deepEqual(policy.updateThresholds('redrock-hornbeast',horn,39,100),['wounded-frenzy']);assert.deepEqual(policy.updateThresholds('redrock-hornbeast',horn,80,100),[]);assert.deepEqual(policy.getCombatMultipliers('redrock-hornbeast',horn),{attack:1.15,attackSpeed:1.25,defense:1});assert.equal(policy.resolveStun(horn,.30),null);assert.deepEqual(policy.resolveStun(horn,.299),{type:'stun',durationMs:1000});
+const boss=policy.createState();assert.equal(policy.getCombatMultipliers('redrock-giant-lizard',boss).defense,1.25);assert.deepEqual(policy.updateThresholds('redrock-giant-lizard',boss,49,100),['rock-armor-weakened']);assert.equal(policy.getCombatMultipliers('redrock-giant-lizard',boss).defense,1.10);assert.deepEqual(policy.updateThresholds('redrock-giant-lizard',boss,29,100),['wasteland-fury']);assert.deepEqual(policy.getCombatMultipliers('redrock-giant-lizard',boss),{attack:1.25,attackSpeed:1.2,defense:1.1});assert.deepEqual(policy.updateThresholds('redrock-giant-lizard',boss,90,100),[]);assert.deepEqual(boss.telemetry.thresholdTriggers,{woundedFrenzy:0,rockArmorWeakened:1,wastelandFury:1});assert.equal(boss.telemetry.rockArmorTransitions,1);
+const rend=policy.createDot('giant-jaw-rend','boss-1',200);assert.equal(rend.damage,50);assert.equal(rend.ticks,3);
+console.log('redrock-wastes-policy: assertions passed');

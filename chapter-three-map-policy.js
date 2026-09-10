@@ -36,12 +36,12 @@
   }
 
   const ENEMIES = Object.freeze({
-    wastelandHyena: enemy('wasteland-hyena', '荒原鬣狗', 'normal', ['high-attack-speed', 'bleed']),
-    redrockLizard: enemy('redrock-lizard', '赤岩蜥蜴', 'normal', ['high-physical-defense']),
-    wastelandVulture: enemy('wasteland-vulture', '荒原禿鷹', 'normal', ['high-evasion', 'dive-attack']),
-    skullcrusherScout: enemy('skullcrusher-scout', '碎顱斥候', 'normal', ['balanced']),
-    redrockHornbeast: enemy('redrock-hornbeast', '赤岩角獸', 'elite', ['high-health', 'high-single-hit-damage', 'brute-charge']),
-    redrockGiantLizard: enemy('redrock-giant-lizard', '赤岩巨蜥', 'boss', ['high-health', 'high-defense', 'rock-armor', 'frenzied-tail-sweep', 'low-hp-defense-down-speed-up']),
+    wastelandHyena: enemy('wasteland-hyena', '荒原鬣狗', 'normal', ['high-attack-speed', 'rend-bite']),
+    redrockLizard: enemy('redrock-lizard', '赤岩蜥蜴', 'normal', ['hardened-scales']),
+    wastelandVulture: enemy('wasteland-vulture', '荒原禿鷹', 'normal', ['high-evasion', 'dive']),
+    skullcrusherScout: enemy('skullcrusher-scout', '碎顱斥候', 'normal', ['armor-breaking-throw']),
+    redrockHornbeast: enemy('redrock-hornbeast', '赤岩角獸', 'elite', ['high-health', 'frenzied-charge', 'wounded-frenzy']),
+    redrockGiantLizard: enemy('redrock-giant-lizard', '赤岩巨蜥', 'boss', ['giant-jaw-rend', 'rock-armor', 'wasteland-fury']),
     skullcrusherSpearman: enemy('skullcrusher-spearman', '碎顱投矛手', 'normal', ['ranged-high-damage']),
     skullcrusherWarrior: enemy('skullcrusher-warrior', '碎顱戰士', 'normal', ['high-health', 'high-defense']),
     brokenrockBrute: enemy('brokenrock-brute', '斷岩蠻兵', 'elite', ['two-handed-weapon', 'high-health', 'high-single-hit-damage', 'rockbreaker-smash', 'temporary-defense-reduction']),
@@ -83,6 +83,7 @@
 
   const MAPS = Object.freeze([
     map('redrock-wastes-entrance', 1, '赤岩荒原', 10, {
+      skillPolicyId: 'redrock-wastes', skillStatus: 'implemented',
       environment: Object.freeze(['乾裂紅土地', '巨型赤色岩柱', '枯木', '獸骨', '少量碎顱旗幟與營火']),
       normalEnemyIds: Object.freeze(['wasteland-hyena', 'redrock-lizard', 'wasteland-vulture', 'skullcrusher-scout']),
       eliteId: 'redrock-hornbeast', bossId: 'redrock-giant-lizard',
