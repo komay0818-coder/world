@@ -52,10 +52,10 @@
     skullcrusherShaman: enemy('skullcrusher-shaman', '碎顱薩滿', 'normal', ['warblood-totem']),
     skullcrusherCenturion: enemy('skullcrusher-centurion', '碎顱百夫長', 'elite', ['centurion-cleave', 'battle-formation-command']),
     skullcrusherVanguard: enemy('skullcrusher-vanguard-commander', '碎顱先鋒統領', 'boss', ['vanguard-smash', 'full-army-charge', 'fight-to-the-end']),
-    skullcrusherHeavyGuard: enemy('skullcrusher-heavy-guard', '碎顱重甲衛士', 'normal', ['extreme-defense', 'flat-physical-damage-reduction']),
-    skullcrusherWolfRider: enemy('skullcrusher-wolf-rider', '碎顱戰狼騎兵', 'normal', ['high-speed-burst', 'opening-charge', 'empowered-first-hit']),
-    skullcrusherChampion: enemy('skullcrusher-champion', '碎顱勇士', 'elite', ['high-health', 'high-attack', 'armor-shattering-strike', 'low-hp-damage-up']),
-    skullcrusherChieftain: enemy('skullcrusher-great-chieftain', '碎顱大酋長', 'boss', ['phase-up-75-50-25', 'skullcrusher-smash']),
+    skullcrusherHeavyGuard: enemy('skullcrusher-heavy-guard', '碎顱重甲衛士', 'normal', ['heavy-armor-line']),
+    skullcrusherWolfRider: enemy('skullcrusher-wolf-rider', '碎顱戰狼騎兵', 'normal', ['warwolf-assault']),
+    skullcrusherChampion: enemy('skullcrusher-champion', '碎顱勇士', 'elite', ['champion-slash', 'unyielding-will']),
+    skullcrusherChieftain: enemy('skullcrusher-great-chieftain', '碎顱大酋長', 'boss', ['chieftain-earthsplitter', 'fallen-warrior-rage', 'skullcrusher-overlord']),
     skullcrusherPriest: enemy('skullcrusher-priest', '碎顱祭司', 'normal', ['magic-damage', 'ancient-curse']),
     skullcrusherFanatic: enemy('skullcrusher-fanatic', '碎顱狂信者', 'normal', ['high-attack', 'low-defense', 'missing-hp-damage-up']),
     ancientStoneguard: enemy('ancient-stoneguard', '遠古石衛', 'normal', ['high-defense', 'stone-body', 'physical-damage-reduction']),
@@ -104,6 +104,7 @@
       story: Object.freeze({ previousMapId: 'brokenrock-canyon', nextMapId: 'skullcrusher-war-camp' })
     }),
     map('skullcrusher-war-camp', 4, '碎顱戰爭營地', 25, {
+      skillPolicyId: 'skullcrusher-war-camp', skillStatus: 'implemented',
       dungeon: true,
       environment: Object.freeze(['大型木製城牆', '瞭望塔', '尖刺拒馬', '戰鼓', '獸籠', '武器架', '鍛造區', '大型帳篷', '碎顱旗幟', '巨獸頭骨', '補給箱與戰車']),
       normalEnemyIds: Object.freeze(['skullcrusher-berserker', 'skullcrusher-shaman', 'skullcrusher-heavy-guard', 'skullcrusher-wolf-rider']),
