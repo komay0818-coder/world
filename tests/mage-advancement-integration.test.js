@@ -16,7 +16,10 @@ assert.match(source,/finishResonance[\s\S]*aliveEnemyIndexesByAge\(\)\.slice\(0,
 assert.match(source,/skill\.id === 'arcane-missile'[\s\S]*skillEffect\.missilePower[\s\S]*addArcaneMark/);
 assert.match(source,/consumeArcaneMark[\s\S]*sourceSkill: 'arcane-mark-explosion'/);
 assert.doesNotMatch(source,/skillEffect\.repeatChance/,'the removed random fifth missile is not part of formal combat');
-assert.match(source,/castArcaneCharge[\s\S]*arcaneCharge\.noCooldown/);
+assert.match(source,/getArcaneDamageMultiplier\(attacker, options\.sourceSkill\)/);
+assert.match(source,/suppressesBaseElementEffects\(member, skill\.id\)/);
+assert.match(source,/getArcaneCooldownMultiplier\(member\)[\s\S]*skillCooldownMultiplier/);
+assert.doesNotMatch(source,/castArcaneCharge\(member/,'formal combat no longer accumulates legacy Arcane Charge stacks');
 assert.match(source,/resolveArcaneTorrentMana\(member,skillEffect,hits\.length\)/);
 assert.doesNotMatch(source,/MageAdvancementPolicy\.advanceOtherCooldowns/);
 assert.match(source,/getMaxManaBonus[\s\S]*getManaBonuses/);

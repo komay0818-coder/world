@@ -15,4 +15,7 @@ assert.ok(result.mage.arcaneMarkApplications>0);
 assert.ok(result.mage.arcaneMarkBonusStacks>0);
 assert.ok(result.mage.arcaneMarkDetonations>0);
 assert.ok(result.mage.arcaneMarkDamage>0);
+assert.equal(result.mage.shockedApplications,0,'Arcane Conversion suppresses Chain Lightning shock effects');
+assert.equal(result.mage.chargeStackTotal,0,'legacy Arcane Charge stacks are no longer accumulated');
+assert.equal(result.mage.chargeReleases,0,'legacy zero-cooldown releases are disabled');
 console.log('arcane-missile-formal: assertions passed');

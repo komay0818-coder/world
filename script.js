@@ -4729,7 +4729,8 @@ function applyDamageToMonster(index, baseDamage, profile, options = {}) {
   const enemyHpRatio = enemy.maxHp > 0 ? battle.enemyHps[index] / enemy.maxHp : 1;
   const deathMarkMultiplier = RogueAdvancementPolicy.getDeathMarkDamageMultiplier(attacker, skillState, now, enemyHpRatio, Boolean(enemy.isElite || enemy.isBoss));
   const sensitivityMultiplier = typeof getCombatSensitivityDamageMultiplier === 'function' ? Math.max(0,Number(getCombatSensitivityDamageMultiplier(options.sourceSkill||options.attackKind||'',attacker))||0) : 1;
-  magicAdjustedDamage *= sensitivityMultiplier;
+  const arcaneConversionMultiplier = MageAdvancementPolicy.getArcaneDamageMultiplier(attacker, options.sourceSkill);
+  magicAdjustedDamage *= sensitivityMultiplier * arcaneConversionMultiplier;
   const adjustedBaseDamage = magicAdjustedDamage * (1 + warriorRuntime.attack) * (1 + (attackerStats.damageBonus || 0) + warriorAdvancement.damage + warriorRuntime.damage) * rankMultiplier * attackKindMultiplier * conditionalDamageMultiplier * craftedEpicMultiplier * specialEquipmentMultiplier * deathMarkMultiplier * markMultiplier * vulnerabilityMultiplier * controlledMultiplier * statusElementMultiplier * frostResonanceMultiplier * lightningResonanceMultiplier * shockedVulnerabilityMultiplier;
   if (enemy.mapId) {
     const hitChance = ChapterOneLevelPolicy.getPlayerHitChance(progress.level, enemy.level, attackerStats.accuracy, 0);
@@ -5122,7 +5123,7 @@ function useAutoSkillForMember(member, now = Date.now()) {
     if (skill.id === 'fatal-slash' && critical && skillEffect.mastery && hits.length) member.fatalSlashUntil = now + 5000;
     if (skill.id === 'backstab') RogueAdvancementPolicy.resolveBackstabCrit(member, critical && hits.length > 0, Number(progress.skillLevels?.['assassin:lethal-technique']) || 1, now);
     if (hits.length) triggerRuneFrenzy(member, critical, now);
-    hits.forEach((target) => applyEnemySkillState(target.index, skillEffect, now, member));
+    if (!MageAdvancementPolicy.suppressesBaseElementEffects(member, skill.id)) hits.forEach((target) => applyEnemySkillState(target.index, skillEffect, now, member));
     if (skill.id === 'chain-lightning') hits.forEach((target, order) => {
       const state = getEnemySkillState(target.index);
       if (state.paralyzedUntil > now) state.visualParalyzedAt = now + 330 + order * 100;
@@ -5137,7 +5138,7 @@ function useAutoSkillForMember(member, now = Date.now()) {
       if (skillEffect.slow) state.visualSlowAt = now + 550;
       if (skillEffect.mark) state.visualMarkAt = now + 550;
     });
-    if (skill.id === 'fireball') hits.forEach((target) => {
+    if (skill.id === 'fireball' && !MageAdvancementPolicy.suppressesBaseElementEffects(member, skill.id)) hits.forEach((target) => {
       const state = getEnemySkillState(target.index);
       const shockSnapshot = getMageShockState(target.index,member)?.until > now ? 1.5 : 1;
       applyDot(target.index, 'burn', Math.max(1, Math.ceil(target.result.finalDamage / shockSnapshot * .18 * (1 + (skillEffect.burnBonus || 0)) * stats.dotMultiplier)), 4 + (skillEffect.burnDuration || 0), 1, { source: member });
@@ -5203,7 +5204,6 @@ function useAutoSkillForMember(member, now = Date.now()) {
     CombatCorePolicy.record(member, 'resourceSpent', actualResourceSpent);
     if (member.resourceType === 'arrows' || member.resourceType === 'energy' || member.resourceType === 'mana') CombatCorePolicy.recordEvent(member, 'resourceEvents', { atMs: now, type: 'spend', amount: actualResourceSpent, current: member.resourceCurrent, skill: skill.id });
     if (skill.id === 'arcane-torrent') MageAdvancementPolicy.resolveArcaneTorrentMana(member,skillEffect,hits.length);
-    const arcaneCharge = MageAdvancementPolicy.castArcaneCharge(member, skill.id, now);
     ChapterThreeCraftedEpicAbilityPolicy.completeSkillExecution(member, craftedEpicExecution, now);
     if (skill.id !== 'companion') ChapterThreeSpecialEquipmentPolicy.resolveManaSurge(member, actualResourceSpent, Math.random);
     const resourceBeforeCriticalRecovery = member.resourceCurrent;
@@ -5218,7 +5218,7 @@ function useAutoSkillForMember(member, now = Date.now()) {
     if (criticalResourceRecovery) CombatCorePolicy.recordEvent(member, 'resourceEvents', { atMs: now, type: 'critical-recovery', amount: criticalResourceRecovery, current: member.resourceCurrent });
     const blinkCooldownMultiplier = member.blinkCooldownReduction ? 1 - member.blinkCooldownReduction : 1;
     const blessingCooldownSpeed = now < (member.lightGraceUntil || 0) ? 1 + (member.lightGraceCooldownSpeed || 0) : 1;
-    member.skillCooldowns[skill.id] = arcaneCharge.noCooldown ? now : now + (skillEffect.cooldown || skill.cooldown) * blinkCooldownMultiplier * skillCooldownMultiplier * 1000 / (stats.cooldownSpeed * blessingCooldownSpeed * (1 + (priestFaith.cooldownSpeed || 0)));
+    member.skillCooldowns[skill.id] = now + (skillEffect.cooldown || skill.cooldown) * MageAdvancementPolicy.getArcaneCooldownMultiplier(member) * blinkCooldownMultiplier * skillCooldownMultiplier * 1000 / (stats.cooldownSpeed * blessingCooldownSpeed * (1 + (priestFaith.cooldownSpeed || 0)));
     if (skill.id === 'shadow-assassination' && RogueAdvancementPolicy.resolveShadowAssassinationCrit(member, skillEffect, critical, hits.length > 0, now)) {
       CombatCorePolicy.recordEvent(member, 'assassinationEvents', { atMs: now, action: 'shadow-reset', freeUntil: member.shadowAssassinationFreeUntil });
     }
