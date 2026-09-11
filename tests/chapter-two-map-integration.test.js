@@ -18,12 +18,12 @@ assert.match(index, /spider-nest-policy\.js[\s\S]*chapter-two-map-policy\.js/);
 assert.match(index, /forest-altar-policy\.js[\s\S]*chapter-two-map-policy\.js/);
 assert.match(index, /VER\. 0\.6\.36/);
 assert.match(index, /black-forest-depths-policy\.js\?v=20260810-depths-boss-v13/);
-assert.match(index, /blackstone-stronghold-policy\.js\?v=20260810-outpost-objective-v17/);
+assert.match(index, /blackstone-stronghold-policy\.js\?v=20260911-stronghold-dungeon-v1/);
 assert.match(index, /black-forest-trail-policy\.js\?v=20260809-trail-balance-v10/);
 assert.match(index, /spider-nest-policy\.js\?v=20260809-spider-combat-v9/);
 assert.match(index, /forest-altar-policy\.js\?v=20260810-altar-skills-v12/);
-assert.match(index, /chapter-two-map-policy\.js\?v=20260810-depths-boss-v20/);
-assert.match(index, /script\.js\?v=20260906-chain-paralysis-v2/);
+assert.match(index, /chapter-two-map-policy\.js\?v=20260911-stronghold-dungeon-v1/);
+assert.match(index, /script\.js\?v=20260911-stronghold-dungeon-v1/);
 assert.match(index, /VER\. \d+\.\d+\.\d+/, 'the game exposes a semantic version');
 assert.match(script, /\.\.\.ChapterTwoMapPolicy\.MAPS/, 'chapter-two maps join the shared progression data');
 assert.match(script, /blackForestEntrance: BlackForestEntrancePolicy\.getCombatPool\(\)/);
@@ -33,6 +33,15 @@ assert.match(script, /BlackForestTrailPolicy\.resolveAction/);
 assert.match(script, /spiderNest: SpiderNestPolicy\.getCombatPool\(\)/);
 assert.match(script, /SpiderNestPolicy\.resolveAction/);
 assert.match(script, /blackstoneStronghold: BlackstoneStrongholdPolicy\.getCombatPool\(\)/);
+assert.match(script, /'blackstone-stronghold': \{[\s\S]*mode: 'outpost-siege'[\s\S]*finalBossId: 'blackstoneStrongholdWarlord'/);
+assert.match(script, /return dungeonDefinitions\[mapId\] \|\| null/, 'unknown dungeons must not fall back to Goblin Camp');
+assert.match(script, /mapId === 'blackstone-stronghold'[\s\S]*definition\.normalIds[\s\S]*definition\.eliteIds/,
+  'Blackstone waves use only their dedicated normal and elite pools');
+assert.match(script, /battle\.dungeonId === 'blackstone-stronghold'[\s\S]*battle\.blackstoneStrongholdState\?\.bossSpawned[\s\S]*completeDungeon\(\)/,
+  'Blackstone completion is gated by the five-outpost boss flow');
+assert.match(script, /map\.id !== 'blackstone-stronghold'[\s\S]*dungeonKeys\?\.blackForestAltar/,
+  'Blackstone entry must not consume the legacy altar key');
+assert.match(script, /params\.get\('playtest'\) !== 'blackstone-outpost'/);
 assert.match(script, /mapId === 'blackstone-stronghold'\) return mapMonsterPools\.blackstoneStronghold/);
 assert.match(script, /BlackstoneStrongholdPolicy\.getCombatMonster/);
 assert.match(script, /forestAltar: ForestAltarPolicy\.getCombatPool\(\)/);

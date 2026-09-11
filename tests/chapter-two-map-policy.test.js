@@ -46,7 +46,7 @@ assert.equal(policy.CHAPTER.corruptionPolicyId, 'black-forest-corruption');
 assert.equal(new Set(policy.MAPS.map((map) => map.materialTableId)).size, 6);
 assert.equal(policy.canEnter('black-forest-trail'), true, 'the Black Forest trail combat map can be entered');
 assert.equal(policy.canEnter('spider-nest'), true, 'the Spider Nest combat map can be entered');
-assert.ok(policy.MAPS.filter((map) => !['black-forest-trail', 'spider-nest'].includes(map.id)).every((map) => map.implemented === false), 'unfinished chapter-two maps remain disabled');
+assert.ok(policy.MAPS.filter((map) => ['forest-altar', 'black-forest-depths'].includes(map.id)).every((map) => map.implemented === false), 'unfinished chapter-two maps remain disabled');
 assert.ok(policy.MAPS.every((map) => 'enemyPoolId' in map && 'bossId' in map && 'dropTableId' in map
   && 'materialTableId' in map && 'eventTableId' in map && Array.isArray(map.environmentEffects)),
 'all maps reserve future content fields');
@@ -63,12 +63,12 @@ assert.equal(stronghold.bossId, 'blackstone-warlord');
 assert.deepEqual(stronghold.enemyFactionIds, ['blackstone-bandits', 'goblins']);
 assert.equal(policy.getDungeon('blackstone-stronghold').primaryFaction, 'blackstone-bandits');
 assert.equal(policy.getDungeon('blackstone-stronghold').alliedFaction, 'goblins');
-assert.equal(policy.getDungeon('blackstone-stronghold').waveTableId, null);
+assert.equal(policy.getDungeon('blackstone-stronghold').waveTableId, 'blackstone-stronghold-encounters');
 assert.equal(policy.getDungeon('blackstone-stronghold').gameplayType, 'outpost-siege');
 assert.equal(policy.getDungeon('blackstone-stronghold').encounterPolicyId, 'blackstone-stronghold');
-assert.equal(policy.getDungeon('blackstone-stronghold').contentStatus, 'monster-roster');
+assert.equal(policy.getDungeon('blackstone-stronghold').contentStatus, 'combat-ready');
 assert.equal(policy.getDungeon('blackstone-stronghold').finalBossId, 'blackstone-warlord');
-assert.equal(policy.canEnter('blackstone-stronghold'), false, 'placeholder dungeon cannot be entered');
+assert.equal(policy.canEnter('blackstone-stronghold'), true, 'the Blackstone Stronghold dungeon can be entered');
 const forestAltar = policy.getMap('forest-altar');
 assert.equal(forestAltar.contentStatus, 'skill-foundation');
 assert.equal(forestAltar.background, 'assets/forest-altar-background.png');

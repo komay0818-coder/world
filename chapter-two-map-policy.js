@@ -49,6 +49,7 @@
 
   const MAPS = Object.freeze([
     map('black-forest-entrance', 1, '黑森林入口', {
+      implemented: true,
       contentStatus: 'combat-ready',
       background: 'assets/black-forest-entrance-background.png',
       enemyPoolId: 'black-forest-entrance-enemies',
@@ -91,6 +92,7 @@
       })
     }),
     map('blackstone-stronghold', 4, '黑石據點', {
+      implemented: true,
       dungeon: true,
       gameplayType: 'outpost-siege',
       objectiveCount: 5,
@@ -127,16 +129,16 @@
       id: 'blackstone-stronghold',
       chapter: 2,
       name: '黑石據點',
-      implemented: false,
-      contentStatus: 'monster-roster',
+      implemented: true,
+      contentStatus: 'combat-ready',
       primaryFaction: 'blackstone-bandits',
       alliedFaction: 'goblins',
       gameplayType: 'outpost-siege',
       objectiveCount: 5,
       encounterPolicyId: 'blackstone-stronghold',
-      waveTableId: null,
+      waveTableId: 'blackstone-stronghold-encounters',
       specialEventTableId: null,
-      bossMechanicId: null,
+      bossMechanicId: 'five-outpost-siege',
       finalBossId: 'blackstone-warlord',
       entryItemId: null,
       rewardTableId: null,

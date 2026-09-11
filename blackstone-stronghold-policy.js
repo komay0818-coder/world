@@ -20,6 +20,7 @@
     enrageAttackSpeedBonus: .30,
     enrageDurationMs: 15000
   });
+  const OUTPOST_KILL_THRESHOLDS = Object.freeze([10, 25, 40, 55, 70]);
 
   function monster(id, name, rank, race, role, options = {}) {
     return Object.freeze({
@@ -154,9 +155,9 @@
     return available[Math.floor(normalizeRandom(random) * available.length)];
   }
 
-  function rollRequiredKills(random = Math.random) {
-    const roll = normalizeRandom(random);
-    return RULES.minKillsPerOutpost + Math.floor(roll * (RULES.maxKillsPerOutpost - RULES.minKillsPerOutpost + 1));
+  function getRequiredKills(destroyedOutposts = 0) {
+    const index = Math.min(OUTPOST_KILL_THRESHOLDS.length - 1, Math.max(0, Math.floor(Number(destroyedOutposts) || 0)));
+    return OUTPOST_KILL_THRESHOLDS[index];
   }
 
   function getOutpostMaxHp(destroyedOutposts = 0) {
@@ -164,7 +165,7 @@
   }
 
   function createState(random = Math.random) {
-    return { destroyedOutposts: 0, destroyedOutpostIds: [], availableOutpostIds: OUTPOSTS.map((entry) => entry.id), activeOutpostId: null, activeOutpostHp: 0, activeOutpostMaxHp: 0, killsSinceOutpost: 0, nextOutpostAtKills: rollRequiredKills(random), outpostActive: false, bossSpawned: false, enragedUntil: 0 };
+    return { destroyedOutposts: 0, destroyedOutpostIds: [], availableOutpostIds: OUTPOSTS.map((entry) => entry.id), activeOutpostId: null, activeOutpostHp: 0, activeOutpostMaxHp: 0, killsSinceOutpost: 0, nextOutpostAtKills: getRequiredKills(0), outpostActive: false, bossSpawned: false, enragedUntil: 0 };
   }
 
   function normalizeState(saved, random = Math.random) {
@@ -178,7 +179,7 @@
     const activeOutpostMaxHp = outpostActive ? getOutpostMaxHp(destroyedOutposts) : 0;
     const savedOutpostHp = Number(source.activeOutpostHp);
     const activeOutpostHp = outpostActive ? Math.min(activeOutpostMaxHp, savedOutpostHp > 0 ? savedOutpostHp : activeOutpostMaxHp) : 0;
-    const nextOutpostAtKills = Math.min(RULES.maxKillsPerOutpost, Math.max(RULES.minKillsPerOutpost, Math.floor(Number(source.nextOutpostAtKills) || rollRequiredKills(random))));
+    const nextOutpostAtKills = destroyedOutposts >= RULES.objectiveCount ? 0 : getRequiredKills(destroyedOutposts);
     return {
       destroyedOutposts,
       destroyedOutpostIds,
@@ -221,7 +222,7 @@
     next.killsSinceOutpost = 0;
     next.enragedUntil = Math.max(0, Number(options.now) || Date.now()) + RULES.enrageDurationMs;
     next.bossSpawned = next.destroyedOutposts >= RULES.objectiveCount;
-    next.nextOutpostAtKills = next.bossSpawned ? 0 : rollRequiredKills(options.random);
+    next.nextOutpostAtKills = next.bossSpawned ? 0 : getRequiredKills(next.destroyedOutposts);
     return { ok: true, state: next, destroyedOutpostId, effectRemoved: getOutpostEffect(destroyedOutpostId), triggerEnrage: true, spawnBoss: next.bossSpawned };
   }
 
@@ -240,8 +241,8 @@
     return { active, attackBonus: active ? RULES.enrageAttackBonus : 0, attackSpeedBonus: active ? RULES.enrageAttackSpeedBonus : 0, remainingMs: active ? state.enragedUntil - now : 0 };
   }
 
-  return Object.freeze({ RULES, GUARD, CROSSBOWMAN, BERSERKER, WARHOUND, LION_GUARD, BULLHORN, WARLORD, MONSTERS, OUTPOSTS,
+  return Object.freeze({ RULES, OUTPOST_KILL_THRESHOLDS, GUARD, CROSSBOWMAN, BERSERKER, WARHOUND, LION_GUARD, BULLHORN, WARLORD, MONSTERS, OUTPOSTS,
     getMonster, getMonstersByRank, rollLevel, toCombatMonster, getCombatMonster, getCombatPool, getBossPhase, getCombatMultipliers,
-    resolveAction, getDamageMultiplier, getDefenseIgnore, getOutpost, getOutpostEffect, applyOutpostEffect, rollOutpostId, rollRequiredKills,
+    resolveAction, getDamageMultiplier, getDefenseIgnore, getOutpost, getOutpostEffect, applyOutpostEffect, rollOutpostId, getRequiredKills,
     createState, normalizeState, recordMonsterKill, getOutpostMaxHp, damageOutpost, destroyOutpost, getEnrage });
 });

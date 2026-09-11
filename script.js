@@ -274,7 +274,9 @@ function getNextAdventureMap(currentMap) {
 function renderBattleAdventureInfo(progress = getProgress()) {
   const currentMap = getActiveMap(progress);
   const requirement = ChapterOneProgressionPolicy.REQUIREMENTS[currentMap.id];
-  const kills = Math.max(0, Number(progress.mapKillProgress?.[currentMap.id]) || 0);
+  const kills = currentMap.chapter === 2
+    ? ChapterTwoProgressionPolicy.getMapState(progress, currentMap.id, currentMap.implemented).normalKills
+    : Math.max(0, Number(progress.mapKillProgress?.[currentMap.id]) || 0);
   const target = Math.max(0, Number(requirement?.normalKills) || 0);
   const percent = target > 0 ? Math.min(100, Math.round(kills / target * 100)) : 0;
   const nextMap = getNextAdventureMap(currentMap);
@@ -711,7 +713,18 @@ const dungeonBossId = 'eclipseSovereign';
 const GOBLIN_CAMP_TICKET_ID = 'goblin-camp-map';
 const GOBLIN_CAMP_TICKET_DROP_RATE = .50;
 const dungeonDefinitions = {
-  'goblin-camp': { name: '哥布林營地', waves: 7, minWaves: 4, maxWaves: 7, ticketItemId: GOBLIN_CAMP_TICKET_ID, finalBossId: 'goblinHighChief' }
+  'goblin-camp': { name: '哥布林營地', waves: 7, minWaves: 4, maxWaves: 7, ticketItemId: GOBLIN_CAMP_TICKET_ID, finalBossId: 'goblinHighChief' },
+  'blackstone-stronghold': {
+    name: '黑石據點',
+    mode: 'outpost-siege',
+    encounterSize: 5,
+    eliteEvery: 5,
+    ticketItemId: null,
+    finalBossId: 'blackstoneStrongholdWarlord',
+    normalIds: BlackstoneStrongholdPolicy.getCombatPool().normal,
+    eliteIds: BlackstoneStrongholdPolicy.getCombatPool().elite,
+    bossId: BlackstoneStrongholdPolicy.getCombatPool().boss[0]
+  }
 };
 const dropLookupMapPools = {
   'plains-entrance': mapMonsterPools.plainsEntrance,
@@ -933,10 +946,43 @@ function getActiveCharacter() {
     || JSON.parse(localStorage.getItem('stardust-character') || 'null');
 }
 
+function getBlackForestEntrancePlaytestConfig() {
+  if (!['localhost', '127.0.0.1'].includes(window.location.hostname)) return {};
+  const params = new URLSearchParams(window.location.search);
+  if (params.get('playtest') !== 'black-forest-entrance') return {};
+  return { enemy: params.get('enemy') || '', partySize: Math.max(1, Math.min(3, Number(params.get('party')) || 1)), invincible: params.get('invincible') === '1' };
+}
+
+function getBlackstoneStrongholdPlaytestConfig() {
+  if (!['localhost', '127.0.0.1'].includes(window.location.hostname)) return {};
+  const params = new URLSearchParams(window.location.search);
+  if (params.get('playtest') !== 'blackstone-outpost') return {};
+  return {
+    active: true,
+    accelerated: params.get('accelerated') !== '0',
+    partySize: Math.max(1, Math.min(3, Number(params.get('party')) || 1)),
+    invincible: params.get('invincible') === '1'
+  };
+}
+
+function getLocalPlaytestProgressKey() {
+  if (getBlackForestEntrancePlaytestConfig().partySize) return 'black-forest-entrance-playtest-progress';
+  if (getBlackstoneStrongholdPlaytestConfig().active) return 'blackstone-stronghold-playtest-progress';
+  return '';
+}
+
+function getPlaytestHpFloor() {
+  return getBlackForestEntrancePlaytestConfig().invincible || getBlackstoneStrongholdPlaytestConfig().invincible ? 1 : 0;
+}
+
 function getProgress() {
   const slots = JSON.parse(localStorage.getItem('stardust-character-slots') || '[]');
   const slotProgress = Array.isArray(slots) ? slots[getActiveCharacterSlotIndex()]?.progress : null;
-  const saved = JSON.parse(JSON.stringify(slotProgress || JSON.parse(localStorage.getItem('stardust-progress') || '{}')));
+  const playtestProgressKey = getLocalPlaytestProgressKey();
+  const playtestProgress = playtestProgressKey
+    ? JSON.parse(sessionStorage.getItem(playtestProgressKey) || 'null')
+    : null;
+  const saved = JSON.parse(JSON.stringify(playtestProgress || slotProgress || JSON.parse(localStorage.getItem('stardust-progress') || '{}')));
   delete saved.collection;
   delete saved.collectibleMigrationVersion;
   if (['black-forest', 'black-forest-altar'].includes(saved.selectedMapId)) {
@@ -1118,6 +1164,27 @@ function getProgress() {
   };
   ChapterOneProgressionPolicy.normalize(normalizedProgress);
   ChapterTwoProgressionPolicy.normalize(normalizedProgress);
+  const isBlackForestEntrancePlaytest = Boolean(getBlackForestEntrancePlaytestConfig().partySize);
+  if (isBlackForestEntrancePlaytest) {
+    normalizedProgress.unlockedChapter = Math.max(2, Number(normalizedProgress.unlockedChapter) || 1);
+    normalizedProgress.mapUnlocked['black-forest'] = true;
+    ['black-forest-trail', 'spider-nest'].forEach((mapId) => {
+      normalizedProgress.chapterTwoProgress.unlocked[mapId] = true;
+      normalizedProgress.chapterTwoProgress.cleared[mapId] = true;
+      normalizedProgress.chapterTwoProgress.bossFirstKills[mapId] = true;
+    });
+    normalizedProgress.chapterTwoProgress.unlocked['black-forest-entrance'] = true;
+  }
+  if (getBlackstoneStrongholdPlaytestConfig().active) {
+    normalizedProgress.unlockedChapter = Math.max(2, Number(normalizedProgress.unlockedChapter) || 1);
+    normalizedProgress.mapUnlocked['black-forest'] = true;
+    ['black-forest-trail', 'spider-nest', 'black-forest-entrance'].forEach((mapId) => {
+      normalizedProgress.chapterTwoProgress.unlocked[mapId] = true;
+      normalizedProgress.chapterTwoProgress.cleared[mapId] = true;
+      normalizedProgress.chapterTwoProgress.bossFirstKills[mapId] = true;
+    });
+    normalizedProgress.chapterTwoProgress.unlocked['blackstone-stronghold'] = true;
+  }
   const activeCharacter = getActiveCharacter();
   const activeSlotIndex = getActiveCharacterSlotIndex();
   let partySlots = JSON.parse(localStorage.getItem('stardust-character-slots') || '[]');
@@ -1184,6 +1251,11 @@ function saveProgress(progress) {
   normalizeCurrentParty(progress);
   progress.village = VillagePolicy.normalizeVillageData(progress.village);
   ChapterTwoProgressionPolicy.normalize(progress);
+  const playtestProgressKey = getLocalPlaytestProgressKey();
+  if (playtestProgressKey) {
+    sessionStorage.setItem(playtestProgressKey, JSON.stringify(progress));
+    return;
+  }
   localStorage.setItem('stardust-progress', JSON.stringify(progress));
   syncActiveCharacterSlot(progress);
 }
@@ -1824,7 +1896,7 @@ function renderBattleLog() {
   if (!container) return;
   let entries = battleLogEntries.filter((entry) => PARTY_DEBUG || !entry.partyDebug);
   if (battleLogMode === 'player') entries = entries.filter((entry) => entry.partyDebug || ['damage-dealt', 'pet-damage'].includes(entry.type));
-  if (battleLogMode === 'enemy') entries = entries.filter((entry) => entry.partyDebug || ['damage-taken', 'enemy-healing'].includes(entry.type));
+  if (battleLogMode === 'enemy') entries = entries.filter((entry) => entry.partyDebug || ['damage-taken', 'enemy-healing', 'system'].includes(entry.type));
   if (battleLogMode === 'loot') entries = entries.filter((entry) => entry.partyDebug || ['loot', 'reward', 'progress'].includes(entry.type));
   container.innerHTML = entries.slice(0, 100).map((entry) => {
     const message = entry.count > 1 ? `${entry.summary || entry.message}：${entry.damage} 總傷害 ×${entry.count}` : entry.message;
@@ -1879,6 +1951,14 @@ function randomEliteId(level = getProgress().level) { const pool = getMonsterPoo
 function randomBossId(level = getProgress().level) { const pool = getMonsterPool(level).boss; return pool[Math.floor(Math.random() * pool.length)]; }
 
 function createEnemyTypes(playerLevel = 1) {
+  const playtestEnemy = getBlackForestEntrancePlaytestConfig().enemy;
+  if (getActiveMap(getProgress()).id === 'black-forest-entrance' && playtestEnemy) {
+    const forcedCombatId = {
+      'black-forest-hunter': 'blackForestHunter',
+      'forest-guardian': 'forestGuardianV2'
+    }[playtestEnemy];
+    if (forcedCombatId) return [forcedCombatId];
+  }
   if (getActiveMap(getProgress()).id === 'plains-entrance') {
     return Array.from({ length: 5 }, () => randomEnemyId(playerLevel));
   }
@@ -1891,12 +1971,18 @@ function createEnemyTypes(playerLevel = 1) {
 }
 
 function getDungeonDefinition(mapId = battle.dungeonId || getActiveMap(getProgress()).id) {
-  return dungeonDefinitions[mapId] || dungeonDefinitions['goblin-camp'];
+  return dungeonDefinitions[mapId] || null;
 }
 
 function createDungeonWaveTypes(wave, mapId = battle.dungeonId || getActiveMap(getProgress()).id) {
   const definition = getDungeonDefinition(mapId);
   if (mapId === 'goblin-camp') return DungeonTicketCycle.getGoblinCampWaveTypes(wave);
+  if (mapId === 'blackstone-stronghold' && definition) {
+    const types = Array.from({ length: definition.encounterSize }, (_, index) => definition.normalIds[(wave + index - 1) % definition.normalIds.length]);
+    if (wave % definition.eliteEvery === 0) types[types.length - 1] = definition.eliteIds[(wave / definition.eliteEvery - 1) % definition.eliteIds.length];
+    return types;
+  }
+  if (!definition) return [];
   const enemyCount = wave <= 3 ? 3 : wave <= 6 ? 4 : 5;
   const eliteCount = wave === definition.waves ? 4 : enemyCount;
   const types = Array.from({ length: eliteCount }, () => dungeonEliteIds[Math.floor(Math.random() * dungeonEliteIds.length)]);
@@ -1961,7 +2047,11 @@ function loadDungeonWave(wave) {
   enemyTypes.forEach((_, index) => applyPendingRoguePlagueSpread(index, now));
   battle.targetIndexes = [];
   battle.waveTransitioning = false;
-  const waveRange = battle.dungeonId === 'goblin-camp' ? `第 ${wave} 波` : `第 ${wave}／${definition.waves} 波`;
+  const waveRange = battle.dungeonId === 'blackstone-stronghold'
+    ? `第 ${wave} 波・據點攻城`
+    : battle.dungeonId === 'goblin-camp'
+      ? `第 ${wave} 波`
+      : `第 ${wave}／${definition.waves} 波`;
   logBattle(`◆ ${definition.name}${waveRange}開始：${enemyTypes.length} 名敵人來襲。`, 'system');
   showToast(`副本${waveRange}`);
   updateBattleUI();
@@ -2607,7 +2697,7 @@ function isDropLookupMapUnlocked(map, progress = getProgress()) {
   if (map.chapter === 1 && !ChapterOneProgressionPolicy.isUnlocked(progress, map.id)) return false;
   if (map.chapter === 2 && (!ChapterOneProgressionPolicy.isUnlocked(progress, 'black-forest') || progress.level < map.min || !ChapterTwoProgressionPolicy.canEnter(progress, map.id, map.implemented))) return false;
   if (map.ticketItemId && getInventoryItemQuantity(progress, map.ticketItemId) < 1) return false;
-  if (map.dungeon && !map.ticketItemId && (getAccountResources().dungeonKeys?.blackForestAltar || 0) < 1) return false;
+  if (map.dungeon && !map.ticketItemId && map.id !== 'blackstone-stronghold' && (getAccountResources().dungeonKeys?.blackForestAltar || 0) < 1) return false;
   return true;
 }
 
@@ -2722,7 +2812,7 @@ function selectAdventureMap(mapId) {
   if (map.dungeon) {
     if (map.ticketItemId) {
       if (getInventoryItemQuantity(progress, map.ticketItemId) < 1) { showToast('需要哥布林營地地圖才能進入。'); return; }
-    } else {
+    } else if (map.id !== 'blackstone-stronghold') {
       const resources = getAccountResources();
       const keys = resources.dungeonKeys?.blackForestAltar || 0;
       if (keys < 1) { showToast('需要黑森林祭壇鑰匙才能進入。'); return; }
@@ -2739,7 +2829,11 @@ function selectAdventureMap(mapId) {
   saveProgress(progress);
   if (!document.querySelector('#drop-lookup-modal')?.classList.contains('hidden')) renderDropLookup();
   document.querySelector('#inventory-modal').classList.add('hidden');
-  showToast(map.dungeon ? map.ticketItemId ? `持有地圖，進入：${map.name}` : `已消耗 1 把鑰匙，進入：${map.name}` : `已前往：${map.name}`);
+  showToast(map.dungeon && !map.ticketItemId && map.id === 'blackstone-stronghold'
+    ? `進入副本：${map.name}`
+    : map.dungeon
+      ? map.ticketItemId ? `持有地圖，進入：${map.name}` : `已消耗 1 把鑰匙，進入：${map.name}`
+      : `已前往：${map.name}`);
   openBattle();
 }
 
@@ -3776,7 +3870,7 @@ function buildBattlePartyMembers(now = Date.now()) {
   const party = normalizeCurrentParty(progress);
   const slots = getCharacterSlots();
   const mainId = party.activeMemberIds[0];
-  return party.activeMemberIds.map((memberId) => {
+  const members = party.activeMemberIds.map((memberId) => {
     const slotIndex = slots.findIndex((slot) => slot?.character?.id === memberId);
     if (slotIndex < 0) return null;
     const slot = memberId === mainId
@@ -3784,6 +3878,29 @@ function buildBattlePartyMembers(now = Date.now()) {
       : slots[slotIndex];
     return createBattlePartyMember(slot, slotIndex, mainId, now);
   }).filter(Boolean);
+  const playtestConfig = getBlackstoneStrongholdPlaytestConfig().active
+    ? getBlackstoneStrongholdPlaytestConfig()
+    : getBlackForestEntrancePlaytestConfig();
+  const playtestPartySize = playtestConfig.partySize || 1;
+  if (playtestConfig.enemy === 'forest-guardian' && playtestPartySize === 3 && members.length === 1) {
+    members[0].currentHp = members[0].maxHp;
+  }
+  if (playtestPartySize > members.length && members.length === 1) {
+    for (let index = 1; index < playtestPartySize; index += 1) {
+      const main = members[0];
+      members.push({
+        ...main,
+        id: `local-playtest-member-${index + 1}`,
+        slotIndex: -index,
+        isMain: false,
+        name: `測試隊員 ${index + 1}`,
+        progress: { ...main.progress },
+        skillCooldowns: {},
+        companions: []
+      });
+    }
+  }
+  return members;
 }
 
 function getMainBattleMember() {
@@ -3856,7 +3973,7 @@ function persistPartyRuntimeState() {
     if (member.slotIndex === activeIndex) mainProgress.partyMemberState = state;
     if (slots[member.slotIndex]) slots[member.slotIndex].progress = { ...slots[member.slotIndex].progress, partyMemberState: state };
   });
-  localStorage.setItem('stardust-character-slots', JSON.stringify(slots));
+  if (!getLocalPlaytestProgressKey()) localStorage.setItem('stardust-character-slots', JSON.stringify(slots));
   saveProgress(mainProgress);
 }
 
@@ -4212,9 +4329,11 @@ function updateBattleUI() {
     companionIcons.innerHTML = activeBattleCompanions.map((unit) => `<span class="battle-companion-icon ${unit.portrait ? 'portrait' : ''}" data-companion-id="${unit.id}" role="img" aria-label="${unit.name}" style="--companion-icon:url('${unit.image}')"></span>`).join('');
   }
   const currentDungeonDefinition = currentMap.dungeon ? getDungeonDefinition(currentMap.id) : null;
-  const dungeonWaveText = currentMap.id === 'goblin-camp'
-    ? `第 ${battle.dungeonWave || 1} 波`
-    : `第 ${battle.dungeonWave || 1}／${currentDungeonDefinition?.waves || 10} 波`;
+  const dungeonWaveText = currentMap.id === 'blackstone-stronghold'
+    ? `第 ${battle.dungeonWave || 1} 波・據點攻城`
+    : currentMap.id === 'goblin-camp'
+      ? `第 ${battle.dungeonWave || 1} 波`
+      : `第 ${battle.dungeonWave || 1}／${currentDungeonDefinition?.waves || 10} 波`;
   const displayedMonsterMin = currentMap.monsterMin || currentMap.min;
   const displayedMonsterMax = currentMap.monsterMax || currentMap.max;
   document.querySelector('#map-level-text').textContent = currentMap.dungeon ? `特殊副本・${dungeonWaveText}・Lv. ${displayedMonsterMin}–${displayedMonsterMax}` : `怪物等級：Lv. ${displayedMonsterMin}–${displayedMonsterMax}`;
@@ -4345,8 +4464,14 @@ function rewardVictory(index) {
   renderStrongholdObjective(currentMap);
   if (currentMap.id === 'blackstone-stronghold' && battle.blackstoneStrongholdState) {
     const previousActive = battle.blackstoneStrongholdState.outpostActive;
-    battle.blackstoneStrongholdState = BlackstoneStrongholdPolicy.recordMonsterKill(battle.blackstoneStrongholdState);
+    const killCredit = getBlackstoneStrongholdPlaytestConfig().accelerated
+      ? BlackstoneStrongholdPolicy.getRequiredKills(battle.blackstoneStrongholdState.destroyedOutposts)
+      : 1;
+    for (let credit = 0; credit < killCredit; credit += 1) {
+      battle.blackstoneStrongholdState = BlackstoneStrongholdPolicy.recordMonsterKill(battle.blackstoneStrongholdState);
+    }
     if (!previousActive && battle.blackstoneStrongholdState.outpostActive) {
+      if (getBlackstoneStrongholdPlaytestConfig().accelerated) battle.blackstoneStrongholdState.activeOutpostHp = 1;
       const outpost = BlackstoneStrongholdPolicy.getOutpost(battle.blackstoneStrongholdState.activeOutpostId);
       if (outpost) logBattle(`🏴 黑石${outpost.name}出現：${outpost.effect.label}。`, 'system');
     }
@@ -4640,6 +4765,15 @@ function queueDefeatedEnemies() {
         }, outcome.horn ? 1200 : 650);
         return;
       }
+      if (battle.dungeonId === 'blackstone-stronghold') {
+        const transitionSessionId = battle.sessionId;
+        setTimeout(() => {
+          if (battle.sessionId !== transitionSessionId || !battle.isDungeon || battle.dungeonWave !== clearedWave) return;
+          if (battle.blackstoneStrongholdState?.bossSpawned) completeDungeon();
+          else loadDungeonWave(clearedWave + 1);
+        }, 650);
+        return;
+      }
       const transitionSessionId = battle.sessionId;
       setTimeout(() => {
         if (battle.sessionId !== transitionSessionId || !battle.isDungeon || battle.dungeonWave !== clearedWave) return;
@@ -4809,7 +4943,7 @@ function applyDamageToMonster(index, baseDamage, profile, options = {}) {
     const absorbed = Math.min(attacker.shield || 0, counterDamage);
     attacker.shield = Math.max(0, (attacker.shield || 0) - absorbed);
     const actualCounterDamage = counterDamage - absorbed;
-    attacker.currentHp = Math.max(0, attacker.currentHp - actualCounterDamage);
+    attacker.currentHp = Math.max(getPlaytestHpFloor(), attacker.currentHp - actualCounterDamage);
     resolveEnemyDirectHitRecovery(attacker, actualCounterDamage, counterStats, Math.random, { triggerWasteland: false });
     logBattle(`↩【${enemy.name}】招架後反擊，對${attacker.name}造成 ${actualCounterDamage} 傷害。`, 'damage-taken');
     defeatPartyMember(attacker);
@@ -4821,7 +4955,7 @@ function applyDamageToMonster(index, baseDamage, profile, options = {}) {
     const absorbed = Math.min(attacker.shield || 0, counterDamage);
     attacker.shield = Math.max(0, (attacker.shield || 0) - absorbed);
     const actualCounterDamage = counterDamage - absorbed;
-    attacker.currentHp = Math.max(0, attacker.currentHp - actualCounterDamage);
+    attacker.currentHp = Math.max(getPlaytestHpFloor(), attacker.currentHp - actualCounterDamage);
     resolveEnemyDirectHitRecovery(attacker, actualCounterDamage, counterStats, Math.random, { triggerWasteland: false });
     logBattle(`↩【${enemy.name}】以【盾架反擊】對${attacker.name}造成 ${actualCounterDamage} 傷害。`, 'damage-taken');
     defeatPartyMember(attacker);
@@ -5762,7 +5896,7 @@ function processBlackForestCorruption(now = Date.now()) {
   (battle.partyMembers || []).forEach((member) => {
     if (!member.alive || member.currentHp <= 0) return;
     const hpLoss = BlackForestCorruptionPolicy.getHpLoss(member.maxHp, elapsedSeconds, progress.blackForestCorruption);
-    member.currentHp = Math.max(0, member.currentHp - hpLoss);
+    member.currentHp = Math.max(getPlaytestHpFloor(), member.currentHp - hpLoss);
     if (member.currentHp <= 0) defeatPartyMember(member, now);
   });
 }
@@ -5807,7 +5941,14 @@ function processStrongholdOutpost(now = Date.now()) {
   }
   logBattle(`💥【${outpost?.name || '黑石據點'}】已摧毀，敵軍失去「${outpost?.effect.label || '據點增益'}」並狂暴 15 秒！`, 'progress');
   if (result.spawnBoss) spawnStrongholdWarlord(now);
+  else if (getBlackstoneStrongholdPlaytestConfig().accelerated) battle.blackstoneStrongholdState.nextOutpostAtKills = 1;
   return true;
+}
+
+function createBlackstoneStrongholdBattleState() {
+  const state = BlackstoneStrongholdPolicy.createState();
+  if (getBlackstoneStrongholdPlaytestConfig().accelerated) state.nextOutpostAtKills = 1;
+  return state;
 }
 
 function createBattleTickRuntime() {
@@ -6209,7 +6350,7 @@ function processPartyMemberBleed(member, now = Date.now()) {
   const ticks = Math.max(1, Math.floor((now - bleed.nextTickAt) / tickMs) + 1);
   const damage = bleed.tickDamage * ticks;
   bleed.nextTickAt += tickMs * ticks;
-  member.currentHp = Math.max(0, member.currentHp - damage);
+  member.currentHp = Math.max(getPlaytestHpFloor(), member.currentHp - damage);
   const effectName = bleed.effectName || '流血';
   logBattle(`${member.name} 因${effectName}受到 ${damage} 點傷害。`, 'damage-taken', {
     aggregateKey: `enemy-bleed-${member.id}`,
@@ -6463,7 +6604,7 @@ function resolveBlackForestLeafStorm(enemy, enemyCurrentHp, now = Date.now()) {
     PriestAdvancementPolicy.recordShieldAbsorption(target, absorbed, now);
     const damage = Math.max(0, resolvedDamage - absorbed);
     const hpBeforeHit = target.currentHp;
-    target.currentHp = Math.max(0, target.currentHp - damage);
+    target.currentHp = Math.max(getPlaytestHpFloor(), target.currentHp - damage);
     if (target.currentHp <= 0) {
       const holyPriest = targets.find((member) => member.alive && PriestAdvancementPolicy.isAdvanced(member.progress, 'holy-priest') && Number(member.progress.skillLevels?.['priest:prayer-of-life']) >= 6);
       if (holyPriest) PriestAdvancementPolicy.trySacredGuardian(holyPriest, target, battle, now);
@@ -6787,7 +6928,7 @@ function enemyAttackTick() {
     damage -= absorbed;
     CombatCorePolicy.record(target,'shieldAbsorbed',absorbed);CombatCorePolicy.record(target,'damageTaken',damage);
     const hpBeforeEnemyHit = target.currentHp;
-    target.currentHp = Math.max(0, target.currentHp - damage);
+    target.currentHp = Math.max(getPlaytestHpFloor(), target.currentHp - damage);
     if (target.currentHp <= 0) {
       const holyPriest=(battle.partyMembers||[]).find(member=>member.alive&&PriestAdvancementPolicy.isAdvanced(member.progress,'holy-priest')&&Number(member.progress.skillLevels?.['priest:prayer-of-life'])>=6);
       if(holyPriest&&PriestAdvancementPolicy.trySacredGuardian(holyPriest,target,battle,now)) logBattle(`✨ ${holyPriest.name}的【神聖守護】阻止 ${target.name}死亡！`, 'healing');
@@ -7015,7 +7156,7 @@ function openBattle() {
   const sessionId = ++battleSessionSequence;
   const partyMembers = buildBattlePartyMembers(battleStart);
   const mainMember = partyMembers.find((member) => member.isMain) || partyMembers[0];
-  battle = { enemyTypes, enemyLevels, enemyHps, partyMembers, playerHp: mainMember?.currentHp || getMaxHp(progress.level, progress), playerMana: mainMember?.resourceCurrent || 0, playerArrows: mainMember?.resourceType === 'arrows' ? mainMember.resourceCurrent : 0, playerShield: 0, playerStunnedUntil: 0, playerBleed: null, manaExhausted: false, playerAttackCharge: 0, hunterAttackCount: 0, lastManaRegenAt: battleStart, lastResourceUpdatedAt: battleStart, lastArrowRecoveryAt: battleStart, lastCorruptionTickAt: battleStart, lastStrongholdRegenAt: battleStart, enemyNextAttackAt: createEnemyAttackSchedule(enemyTypes, battleStart, currentMap.id, enemyLevels), enemyBoarEnraged: enemyTypes.map(() => false), enemyTrailSummoned: enemyTypes.map(() => false), enemySummonProfiles: enemyTypes.map(() => null), enemyCaptainShieldUntil: enemyTypes.map(() => 0), enemyAssassinDashUntil: enemyTypes.map(() => 0), enemySpiderNestPhase: enemyTypes.map(() => 1), blackstoneRoarUntil: 0, blackstoneCommandUntil: 0, blackstoneSpiderCommandUntil: 0, spiderNestCommandUntil: 0, strongholdCommandUntil: 0, blackstoneStrongholdState: BlackstoneStrongholdPolicy.createState(), globalSkillReadyAt: 0, undeadRevived: false, skillCooldowns: {}, enemyRespawns: enemyTypes.map(() => null), enemySpawnedAt: enemyTypes.map((_, index) => battleStart + index), enemyDots: enemyTypes.map(() => []), enemySkillStates: enemyTypes.map(() => null), monsterMoveSpeed: 200, targetIndexes: [], enemyDamages: enemyTypes.map(() => []), damageTimers: [], rewardedEnemyIndexes: new Set(), roundLoot: {}, isDungeon, dungeonId: isDungeon ? currentMap.id : null, dungeonWave: isDungeon ? 1 : 0, dungeonComplete: false, waveTransitioning: false, goblinScoutSummons: 0 };
+  battle = { enemyTypes, enemyLevels, enemyHps, partyMembers, playerHp: mainMember?.currentHp || getMaxHp(progress.level, progress), playerMana: mainMember?.resourceCurrent || 0, playerArrows: mainMember?.resourceType === 'arrows' ? mainMember.resourceCurrent : 0, playerShield: 0, playerStunnedUntil: 0, playerBleed: null, manaExhausted: false, playerAttackCharge: 0, hunterAttackCount: 0, lastManaRegenAt: battleStart, lastResourceUpdatedAt: battleStart, lastArrowRecoveryAt: battleStart, lastCorruptionTickAt: battleStart, lastStrongholdRegenAt: battleStart, enemyNextAttackAt: createEnemyAttackSchedule(enemyTypes, battleStart, currentMap.id, enemyLevels), enemyBoarEnraged: enemyTypes.map(() => false), enemyTrailSummoned: enemyTypes.map(() => false), enemySummonProfiles: enemyTypes.map(() => null), enemyCaptainShieldUntil: enemyTypes.map(() => 0), enemyAssassinDashUntil: enemyTypes.map(() => 0), enemySpiderNestPhase: enemyTypes.map(() => 1), blackstoneRoarUntil: 0, blackstoneCommandUntil: 0, blackstoneSpiderCommandUntil: 0, spiderNestCommandUntil: 0, strongholdCommandUntil: 0, blackstoneStrongholdState: createBlackstoneStrongholdBattleState(), globalSkillReadyAt: 0, undeadRevived: false, skillCooldowns: {}, enemyRespawns: enemyTypes.map(() => null), enemySpawnedAt: enemyTypes.map((_, index) => battleStart + index), enemyDots: enemyTypes.map(() => []), enemySkillStates: enemyTypes.map(() => null), monsterMoveSpeed: 200, targetIndexes: [], enemyDamages: enemyTypes.map(() => []), damageTimers: [], rewardedEnemyIndexes: new Set(), roundLoot: {}, isDungeon, dungeonId: isDungeon ? currentMap.id : null, dungeonWave: isDungeon ? 1 : 0, dungeonComplete: false, waveTransitioning: false, goblinScoutSummons: 0 };
   battle.enemyAffixes = enemyAffixes;
   battle.sessionId = sessionId;
   clearBattleLog();
