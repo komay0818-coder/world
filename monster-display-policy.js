@@ -55,7 +55,11 @@
     'wasteland-vulture': 'assets/wasteland-vulture.png?v=20260912-redrock-monsters-v1',
     'skullcrusher-scout': 'assets/skullcrusher-scout.png?v=20260912-redrock-monsters-v1',
     'redrock-hornbeast': 'assets/redrock-hornbeast.png?v=20260912-redrock-monsters-v1',
-    'redrock-giant-lizard': 'assets/redrock-giant-lizard.png?v=20260912-redrock-monsters-v1'
+    'redrock-giant-lizard': 'assets/redrock-giant-lizard.png?v=20260912-redrock-monsters-v1',
+    'skullcrusher-spearman': 'assets/skullcrusher-spearman.png?v=20260912-brokenrock-monsters-v1',
+    'skullcrusher-warrior': 'assets/skullcrusher-warrior.png?v=20260912-brokenrock-monsters-v1',
+    'brokenrock-brute': 'assets/brokenrock-brute.png?v=20260912-brokenrock-monsters-v1',
+    'canyon-warlord': 'assets/canyon-warlord.png?v=20260912-brokenrock-monsters-v1'
   });
 
   const STATUS_DISPLAY = Object.freeze({
