@@ -14,8 +14,8 @@
     background: 'assets/forest-altar-background.png',
     enemyPoolId: 'forest-altar-enemies',
     bossId: 'corrupted-altar-guardian',
-    implemented: false,
-    contentStatus: 'skill-foundation'
+    implemented: true,
+    contentStatus: 'combat-ready'
   });
 
   const SKILLS = Object.freeze({
@@ -23,7 +23,7 @@
     thornDemonVine: Object.freeze({ active: 'thorn-entangle', passive: 'barbed-hide', chance: .24, damage: 1.08, slow: .20, durationMs: 4000, threshold: .50 }),
     corruptedBlackstoneSoldier: Object.freeze({ active: 'blackstone-heavy-slash', passive: 'corrupted-shield-wall', chance: .22, damage: 1.32, threshold: .50 }),
     altarGuard: Object.freeze({ active: 'rune-shock', passive: 'ancient-bulwark', chance: .24, damage: 1.35, slow: .15, durationMs: 3000 }),
-    corruptedBlackstonePriest: Object.freeze({ active: 'corruption-flame', passive: 'dark-sacrifice', chance: .28, damage: 1.20, threshold: .35 }),
+    corruptedBlackstonePriest: Object.freeze({ active: 'corruption-flame', passive: 'dark-sacrifice', chance: .28, damage: 1.20, threshold: .35, dotAttackRatio: .25, dotTickMs: 1000, dotDurationMs: 5000 }),
     fallenDruid: Object.freeze({ active: 'withering-touch', passive: 'spreading-corruption', chance: .26, damage: 1.15, slow: .15, durationMs: 4000, threshold: .50 }),
     corruptedAltarGuardian: Object.freeze({ active: 'root-sweep', passive: 'altar-resonance', chance: .28, damage: 1.45, slow: .20, durationMs: 4000, phaseTwoThreshold: .70, phaseThreeThreshold: .35 })
   });
@@ -44,7 +44,7 @@
       dropTableId: null,
       skillIds: Object.freeze([]),
       aiProfileId: null,
-      implemented: false,
+      implemented: true,
       ...options
     });
   }
@@ -134,5 +134,10 @@
     return skill?.slow ? Object.freeze({ attackSpeedPenalty: skill.slow, durationMs: skill.durationMs }) : null;
   }
 
-  return Object.freeze({ MAP, SKILLS, MONSTERS, getMonster, getMonstersByRank, getMonsterPool, rollLevel, toCombatMonster, getCombatMonster, getCombatPool, getBossPhase, getCombatMultipliers, resolveAction, getDamageMultiplier, getControlEffect });
+  function getDotEffect(action) {
+    if (action !== SKILLS.corruptedBlackstonePriest.active) return null;
+    return Object.freeze({ effectName: '腐化之焰', attackRatio: SKILLS.corruptedBlackstonePriest.dotAttackRatio, tickMs: SKILLS.corruptedBlackstonePriest.dotTickMs, durationMs: SKILLS.corruptedBlackstonePriest.dotDurationMs });
+  }
+
+  return Object.freeze({ MAP, SKILLS, MONSTERS, getMonster, getMonstersByRank, getMonsterPool, rollLevel, toCombatMonster, getCombatMonster, getCombatPool, getBossPhase, getCombatMultipliers, resolveAction, getDamageMultiplier, getControlEffect, getDotEffect });
 });

@@ -965,14 +965,27 @@ function getBlackstoneStrongholdPlaytestConfig() {
   };
 }
 
+function getForestAltarPlaytestConfig() {
+  if (!['localhost', '127.0.0.1'].includes(window.location.hostname)) return {};
+  const params = new URLSearchParams(window.location.search);
+  if (params.get('playtest') !== 'forest-altar') return {};
+  return {
+    active: true,
+    enemy: params.get('enemy') || '',
+    partySize: Math.max(1, Math.min(3, Number(params.get('party')) || 1)),
+    invincible: params.get('invincible') === '1'
+  };
+}
+
 function getLocalPlaytestProgressKey() {
   if (getBlackForestEntrancePlaytestConfig().partySize) return 'black-forest-entrance-playtest-progress';
   if (getBlackstoneStrongholdPlaytestConfig().active) return 'blackstone-stronghold-playtest-progress';
+  if (getForestAltarPlaytestConfig().active) return 'forest-altar-playtest-progress';
   return '';
 }
 
 function getPlaytestHpFloor() {
-  return getBlackForestEntrancePlaytestConfig().invincible || getBlackstoneStrongholdPlaytestConfig().invincible ? 1 : 0;
+  return getBlackForestEntrancePlaytestConfig().invincible || getBlackstoneStrongholdPlaytestConfig().invincible || getForestAltarPlaytestConfig().invincible ? 1 : 0;
 }
 
 function getProgress() {
@@ -1184,6 +1197,16 @@ function getProgress() {
       normalizedProgress.chapterTwoProgress.bossFirstKills[mapId] = true;
     });
     normalizedProgress.chapterTwoProgress.unlocked['blackstone-stronghold'] = true;
+  }
+  if (getForestAltarPlaytestConfig().active) {
+    normalizedProgress.unlockedChapter = Math.max(2, Number(normalizedProgress.unlockedChapter) || 1);
+    normalizedProgress.mapUnlocked['black-forest'] = true;
+    ['black-forest-trail', 'spider-nest', 'black-forest-entrance', 'blackstone-stronghold'].forEach((mapId) => {
+      normalizedProgress.chapterTwoProgress.unlocked[mapId] = true;
+      normalizedProgress.chapterTwoProgress.cleared[mapId] = true;
+      normalizedProgress.chapterTwoProgress.bossFirstKills[mapId] = true;
+    });
+    normalizedProgress.chapterTwoProgress.unlocked['forest-altar'] = true;
   }
   const activeCharacter = getActiveCharacter();
   const activeSlotIndex = getActiveCharacterSlotIndex();
@@ -1957,6 +1980,15 @@ function createEnemyTypes(playerLevel = 1) {
       'black-forest-hunter': 'blackForestHunter',
       'forest-guardian': 'forestGuardianV2'
     }[playtestEnemy];
+    if (forcedCombatId) return [forcedCombatId];
+  }
+  const forestAltarPlaytestEnemy = getForestAltarPlaytestConfig().enemy;
+  if (getActiveMap(getProgress()).id === 'forest-altar' && forestAltarPlaytestEnemy) {
+    const forcedCombatId = {
+      'altar-guardian': 'corruptedAltarGuardian',
+      'corrupted-altar-guardian': 'corruptedAltarGuardian',
+      'corrupted-blackstone-priest': 'corruptedBlackstonePriest'
+    }[forestAltarPlaytestEnemy];
     if (forcedCombatId) return [forcedCombatId];
   }
   if (getActiveMap(getProgress()).id === 'plains-entrance') {
@@ -3878,9 +3910,11 @@ function buildBattlePartyMembers(now = Date.now()) {
       : slots[slotIndex];
     return createBattlePartyMember(slot, slotIndex, mainId, now);
   }).filter(Boolean);
-  const playtestConfig = getBlackstoneStrongholdPlaytestConfig().active
-    ? getBlackstoneStrongholdPlaytestConfig()
-    : getBlackForestEntrancePlaytestConfig();
+  const playtestConfig = getForestAltarPlaytestConfig().active
+    ? getForestAltarPlaytestConfig()
+    : getBlackstoneStrongholdPlaytestConfig().active
+      ? getBlackstoneStrongholdPlaytestConfig()
+      : getBlackForestEntrancePlaytestConfig();
   const playtestPartySize = playtestConfig.partySize || 1;
   if (playtestConfig.enemy === 'forest-guardian' && playtestPartySize === 3 && members.length === 1) {
     members[0].currentHp = members[0].maxHp;
@@ -6178,6 +6212,20 @@ function inflictPartyMemberBleed(member, enemy, now = Date.now()) {
   logBattle(`${member.name} 受到 ${enemy.name} 的流血效果。`, 'system');
 }
 
+function inflictForestAltarCorruptionFlame(member, enemy, now = Date.now()) {
+  const effect = ForestAltarPolicy.getDotEffect('corruption-flame');
+  if (!effect) return false;
+  member.bleed = {
+    effectName: effect.effectName,
+    tickMs: effect.tickMs,
+    tickDamage: Math.max(2, Math.ceil((Number(enemy.attack) || 1) * effect.attackRatio)),
+    nextTickAt: now + effect.tickMs,
+    expiresAt: now + effect.durationMs
+  };
+  logBattle(`🔥 ${member.name} 受到 ${enemy.name} 的【腐化之焰】，持續受到腐化傷害。`, 'system');
+  return true;
+}
+
 function healBlackForestDepthsAlly(healerIndex) {
   const wounded = getWoundedEnemyIndexes();
   if (!wounded.length) return false;
@@ -7061,7 +7109,8 @@ function enemyAttackTick() {
     }
     const strongholdActionNames = { 'armor-piercing-bolt': '穿甲弩箭', 'aimed-volley': '瞄準齊射', 'twin-axe-cleave': '雙斧橫掃', 'hunting-pounce': '狩獵撲擊', 'crushing-hammer': '碎甲重錘', 'seismic-smash': '震地重擊', 'warhammer-sweep': '戰錘橫掃', 'warlord-execution': '督軍處決' };
     if (!dodged && damage > 0 && strongholdActionNames[strongholdAction]) logBattle(`⚔【${enemy.name}】施放【${strongholdActionNames[strongholdAction]}】！`, 'system');
-    if (!dodged && damage > 0 && ['corrupted-bite', 'corruption-flame'].includes(forestAltarAction)) inflictPartyMemberBleed(target, enemy, now);
+    if (!dodged && damage > 0 && forestAltarAction === 'corrupted-bite') inflictPartyMemberBleed(target, enemy, now);
+    if (!dodged && damage > 0 && forestAltarAction === 'corruption-flame') inflictForestAltarCorruptionFlame(target, enemy, now);
     const forestAltarControl = ForestAltarPolicy.getControlEffect(forestAltarAction);
     if (!dodged && damage > 0 && forestAltarControl) {
       const forestAltarControlNames = { 'thorn-entangle': '荊棘纏繞', 'rune-shock': '符文震擊', 'withering-touch': '凋零之觸', 'root-sweep': '根鬚橫掃' };

@@ -103,7 +103,8 @@
       story: Object.freeze({ previousMapId: 'spider-nest', nextMapId: 'forest-altar', objectiveId: null })
     }),
     map('forest-altar', 5, '森林祭壇', {
-      contentStatus: 'skill-foundation',
+      implemented: true,
+      contentStatus: 'combat-ready',
       background: 'assets/forest-altar-background.png',
       enemyPoolId: 'forest-altar-enemies',
       bossId: 'corrupted-altar-guardian',

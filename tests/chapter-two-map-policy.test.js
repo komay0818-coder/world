@@ -46,7 +46,7 @@ assert.equal(policy.CHAPTER.corruptionPolicyId, 'black-forest-corruption');
 assert.equal(new Set(policy.MAPS.map((map) => map.materialTableId)).size, 6);
 assert.equal(policy.canEnter('black-forest-trail'), true, 'the Black Forest trail combat map can be entered');
 assert.equal(policy.canEnter('spider-nest'), true, 'the Spider Nest combat map can be entered');
-assert.ok(policy.MAPS.filter((map) => ['forest-altar', 'black-forest-depths'].includes(map.id)).every((map) => map.implemented === false), 'unfinished chapter-two maps remain disabled');
+assert.equal(policy.getMap('black-forest-depths').implemented, false, 'unfinished chapter-two maps remain disabled');
 assert.ok(policy.MAPS.every((map) => 'enemyPoolId' in map && 'bossId' in map && 'dropTableId' in map
   && 'materialTableId' in map && 'eventTableId' in map && Array.isArray(map.environmentEffects)),
 'all maps reserve future content fields');
@@ -70,7 +70,7 @@ assert.equal(policy.getDungeon('blackstone-stronghold').contentStatus, 'combat-r
 assert.equal(policy.getDungeon('blackstone-stronghold').finalBossId, 'blackstone-warlord');
 assert.equal(policy.canEnter('blackstone-stronghold'), true, 'the Blackstone Stronghold dungeon can be entered');
 const forestAltar = policy.getMap('forest-altar');
-assert.equal(forestAltar.contentStatus, 'skill-foundation');
+assert.equal(forestAltar.contentStatus, 'combat-ready');
 assert.equal(forestAltar.background, 'assets/forest-altar-background.png');
 const forestAltarBackground = fs.readFileSync(path.join(__dirname, '..', forestAltar.background));
 assert.equal(forestAltarBackground.subarray(1, 4).toString(), 'PNG', 'the Forest Altar background is a PNG asset');
@@ -78,7 +78,7 @@ assert.equal(forestAltarBackground[25], 2, 'the Forest Altar background uses RGB
 assert.equal(forestAltar.enemyPoolId, 'forest-altar-enemies');
 assert.equal(forestAltar.bossId, 'corrupted-altar-guardian');
 assert.equal(forestAltar.primaryFaction, 'corrupted-forest');
-assert.equal(policy.canEnter('forest-altar'), false);
+assert.equal(policy.canEnter('forest-altar'), true);
 assert.equal(policy.getMap('black-forest-depths').isFinalMap, true);
 assert.equal(policy.getMap('black-forest-depths').min, 25);
 assert.equal(policy.getMap('black-forest-depths').max, 25);
