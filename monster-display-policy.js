@@ -59,7 +59,13 @@
     'skullcrusher-spearman': 'assets/skullcrusher-spearman.png?v=20260912-brokenrock-monsters-v1',
     'skullcrusher-warrior': 'assets/skullcrusher-warrior.png?v=20260912-brokenrock-monsters-v1',
     'brokenrock-brute': 'assets/brokenrock-brute.png?v=20260912-brokenrock-monsters-v1',
-    'canyon-warlord': 'assets/canyon-warlord.png?v=20260912-brokenrock-monsters-v1'
+    'canyon-warlord': 'assets/canyon-warlord.png?v=20260912-brokenrock-monsters-v1',
+    'skullcrusher-berserker': 'assets/skullcrusher-berserker.png?v=20260912-bloodwar-monsters-v1',
+    'skullcrusher-shieldguard': 'assets/skullcrusher-shieldguard.png?v=20260912-bloodwar-monsters-v1',
+    'skullcrusher-hunter': 'assets/skullcrusher-hunter.png?v=20260912-bloodwar-monsters-v1',
+    'skullcrusher-shaman': 'assets/skullcrusher-shaman.png?v=20260912-bloodwar-monsters-v1',
+    'skullcrusher-centurion': 'assets/skullcrusher-centurion.png?v=20260912-bloodwar-monsters-v1',
+    'skullcrusher-vanguard-commander': 'assets/skullcrusher-vanguard-commander.png?v=20260912-bloodwar-monsters-v1'
   });
 
   const STATUS_DISPLAY = Object.freeze({
