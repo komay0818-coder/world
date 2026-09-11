@@ -17,7 +17,7 @@ for (const [mapId, config] of Object.entries(policy.MAP_DROP_CONFIGS)) {
   assert.equal(policy.getDropConfig(mapId, { isElite: true }).runeId, config.runeId, 'elite retains the local rune');
   assert.equal(policy.getDropConfig(mapId, { isBoss: true }).runeId, config.runeId, 'boss retains the local rune');
 }
-assert.equal(policy.getDropConfig('black-forest-depths', {}), null, 'depths do not drop the five base runes');
+assert.equal(policy.getDropConfig('black-forest-depths', {}), null, 'depths intentionally preserve earlier maps as the five chapter-two rune farming locations');
 assert.equal(policy.getDropConfig('plains-depths', { isBoss: true }), null, 'chapter one never drops runes');
 
 const progress = { inventory: [] };
@@ -28,6 +28,6 @@ assert.equal(progress.inventory[0].quantity, 1);
 policy.grantRuneDrop(progress, 'black-forest-trail', { id: 'blackstoneCenturion', isBoss: true }, { random: () => .0799 });
 assert.equal(progress.inventory[0].quantity, 2, 'duplicate runes stack');
 assert.equal(policy.grantRuneDrop(progress, 'black-forest-trail', {}, { random: () => .008 }), null, 'normal rate boundary does not drop');
-assert.equal(policy.grantRuneDrop(progress, 'black-forest-depths', { isBoss: true }, { random: () => 0 }), null, 'even a depths boss cannot roll a base rune');
+assert.equal(policy.grantRuneDrop(progress, 'black-forest-depths', { isBoss: true }, { random: () => 0 }), null, 'even the final boss intentionally cannot roll a chapter-two rune');
 
 console.log('chapter-two-rune-drop-policy: assertions passed');

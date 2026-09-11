@@ -13,7 +13,7 @@
     background: 'assets/black-forest-depths-background.png',
     enemyPoolId: 'black-forest-depths-enemies',
     bossId: 'heart-of-the-black-forest',
-    implemented: false,
+    implemented: true,
     contentStatus: 'combat-ready',
     denseFogAccuracyPenalty: .15,
     denseFogUnavoidable: true,
@@ -47,7 +47,7 @@
     return Object.freeze({
       id, name, rank, chapter: RULES.chapter, mapId: RULES.mapId, level: RULES.level,
       visualEnergy, role: null, faction: 'deep-forest-corruption', combatId: null, image: null, stats: null,
-      dropTableId: null, skillIds: Object.freeze([]), aiProfileId: null, implemented: false,
+      dropTableId: null, skillIds: Object.freeze([]), aiProfileId: null, implemented: true,
       ...options
     });
   }

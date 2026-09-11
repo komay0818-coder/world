@@ -46,7 +46,7 @@ assert.equal(policy.CHAPTER.corruptionPolicyId, 'black-forest-corruption');
 assert.equal(new Set(policy.MAPS.map((map) => map.materialTableId)).size, 6);
 assert.equal(policy.canEnter('black-forest-trail'), true, 'the Black Forest trail combat map can be entered');
 assert.equal(policy.canEnter('spider-nest'), true, 'the Spider Nest combat map can be entered');
-assert.equal(policy.getMap('black-forest-depths').implemented, false, 'unfinished chapter-two maps remain disabled');
+assert.equal(policy.getMap('black-forest-depths').implemented, true, 'the completed final map is enterable once unlocked');
 assert.ok(policy.MAPS.every((map) => 'enemyPoolId' in map && 'bossId' in map && 'dropTableId' in map
   && 'materialTableId' in map && 'eventTableId' in map && Array.isArray(map.environmentEffects)),
 'all maps reserve future content fields');
@@ -88,5 +88,6 @@ assert.equal(policy.getMap('black-forest-depths').enemyPoolId, 'black-forest-dep
 assert.equal(policy.getMap('black-forest-depths').bossId, 'heart-of-the-black-forest');
 assert.deepEqual(policy.getMap('black-forest-depths').environmentEffects, ['dense-fog']);
 assert.equal(policy.getMap('black-forest-depths').bossAuraPolicyId, 'black-forest-depths-boss-aura');
+assert.equal(policy.canEnter('black-forest-depths'), true);
 
 console.log('chapter-two-map-policy: assertions passed');

@@ -977,15 +977,28 @@ function getForestAltarPlaytestConfig() {
   };
 }
 
+function getBlackForestDepthsPlaytestConfig() {
+  if (!['localhost', '127.0.0.1'].includes(window.location.hostname)) return {};
+  const params = new URLSearchParams(window.location.search);
+  if (params.get('playtest') !== 'deep-black-forest') return {};
+  return {
+    active: true,
+    enemy: params.get('enemy') || '',
+    partySize: Math.max(1, Math.min(3, Number(params.get('party')) || 1)),
+    invincible: params.get('invincible') === '1'
+  };
+}
+
 function getLocalPlaytestProgressKey() {
   if (getBlackForestEntrancePlaytestConfig().partySize) return 'black-forest-entrance-playtest-progress';
   if (getBlackstoneStrongholdPlaytestConfig().active) return 'blackstone-stronghold-playtest-progress';
   if (getForestAltarPlaytestConfig().active) return 'forest-altar-playtest-progress';
+  if (getBlackForestDepthsPlaytestConfig().active) return 'black-forest-depths-playtest-progress';
   return '';
 }
 
 function getPlaytestHpFloor() {
-  return getBlackForestEntrancePlaytestConfig().invincible || getBlackstoneStrongholdPlaytestConfig().invincible || getForestAltarPlaytestConfig().invincible ? 1 : 0;
+  return getBlackForestEntrancePlaytestConfig().invincible || getBlackstoneStrongholdPlaytestConfig().invincible || getForestAltarPlaytestConfig().invincible || getBlackForestDepthsPlaytestConfig().invincible ? 1 : 0;
 }
 
 function getProgress() {
@@ -1207,6 +1220,16 @@ function getProgress() {
       normalizedProgress.chapterTwoProgress.bossFirstKills[mapId] = true;
     });
     normalizedProgress.chapterTwoProgress.unlocked['forest-altar'] = true;
+  }
+  if (getBlackForestDepthsPlaytestConfig().active) {
+    normalizedProgress.unlockedChapter = Math.max(2, Number(normalizedProgress.unlockedChapter) || 1);
+    normalizedProgress.mapUnlocked['black-forest'] = true;
+    ['black-forest-trail', 'spider-nest', 'black-forest-entrance', 'blackstone-stronghold', 'forest-altar'].forEach((mapId) => {
+      normalizedProgress.chapterTwoProgress.unlocked[mapId] = true;
+      normalizedProgress.chapterTwoProgress.cleared[mapId] = true;
+      normalizedProgress.chapterTwoProgress.bossFirstKills[mapId] = true;
+    });
+    normalizedProgress.chapterTwoProgress.unlocked['black-forest-depths'] = true;
   }
   const activeCharacter = getActiveCharacter();
   const activeSlotIndex = getActiveCharacterSlotIndex();
@@ -1989,6 +2012,20 @@ function createEnemyTypes(playerLevel = 1) {
       'corrupted-altar-guardian': 'corruptedAltarGuardian',
       'corrupted-blackstone-priest': 'corruptedBlackstonePriest'
     }[forestAltarPlaytestEnemy];
+    if (forcedCombatId) return [forcedCombatId];
+  }
+  const depthsPlaytestEnemy = getBlackForestDepthsPlaytestConfig().enemy;
+  if (getActiveMap(getProgress()).id === 'black-forest-depths' && depthsPlaytestEnemy) {
+    const forcedCombatId = {
+      'heart-of-black-forest': 'heartOfTheBlackForest',
+      'heart-of-the-black-forest': 'heartOfTheBlackForest',
+      'corrupted-forest-wolf': 'depthsCorruptedForestWolf',
+      'corrupted-treant': 'corruptedTreant',
+      'dark-spore-beast': 'darkSporeBeast',
+      'forest-spirit': 'forestSpirit',
+      'corrupted-blackstone-centurion': 'corruptedBlackstoneCenturion',
+      'corrupted-fallen-druid': 'corruptedFallenDruid'
+    }[depthsPlaytestEnemy];
     if (forcedCombatId) return [forcedCombatId];
   }
   if (getActiveMap(getProgress()).id === 'plains-entrance') {
@@ -2963,6 +3000,7 @@ function renderBlackForestRegions() {
     <section class="region-overview-card" style="--map-preview:url('${ChapterTwoMapPolicy.CHAPTER.background}')">
       <div><b>黑森林</b><small>第二章・Lv15～30</small></div>
       <em>${ChapterTwoMapPolicy.CHAPTER.summary}</em>
+      ${progress.chapterTwoProgress?.completed ? '<strong class="chapter-complete-status">✓ 第二章已完成</strong>' : ''}
     </section>
     <section class="map-region-grid">${ChapterTwoProgressionPolicy.MAP_ORDER.map((mapId, index) => {
       const region = blackForestRegions.find((entry) => entry.id === mapId);
@@ -3910,11 +3948,13 @@ function buildBattlePartyMembers(now = Date.now()) {
       : slots[slotIndex];
     return createBattlePartyMember(slot, slotIndex, mainId, now);
   }).filter(Boolean);
-  const playtestConfig = getForestAltarPlaytestConfig().active
-    ? getForestAltarPlaytestConfig()
-    : getBlackstoneStrongholdPlaytestConfig().active
-      ? getBlackstoneStrongholdPlaytestConfig()
-      : getBlackForestEntrancePlaytestConfig();
+  const playtestConfig = getBlackForestDepthsPlaytestConfig().active
+    ? getBlackForestDepthsPlaytestConfig()
+    : getForestAltarPlaytestConfig().active
+      ? getForestAltarPlaytestConfig()
+      : getBlackstoneStrongholdPlaytestConfig().active
+        ? getBlackstoneStrongholdPlaytestConfig()
+        : getBlackForestEntrancePlaytestConfig();
   const playtestPartySize = playtestConfig.partySize || 1;
   if (playtestConfig.enemy === 'forest-guardian' && playtestPartySize === 3 && members.length === 1) {
     members[0].currentHp = members[0].maxHp;
@@ -4762,6 +4802,20 @@ function processEnemyRespawns() {
   });
 }
 
+function completeChapterTwoFinalBattle() {
+  fighting = false;
+  clearInterval(battleTimer);
+  clearInterval(skillTimer);
+  clearInterval(enemyAttackTimer);
+  battle.enemyRespawns = battle.enemyRespawns.map(() => -1);
+  battle.enemyNextAttackAt = battle.enemyNextAttackAt.map(() => null);
+  const toggle = document.querySelector('#battle-toggle');
+  if (toggle) toggle.textContent = '第二章完成';
+  logBattle('✓ 黑森林之心已淨化，第二章完成。可返回地圖或村莊。', 'progress');
+  showToast('第二章已完成！');
+  updateBattleUI();
+}
+
 function queueDefeatedEnemies() {
   if (battle.isDungeon) {
     battle.enemyHps.forEach((hp, index) => {
@@ -4825,11 +4879,20 @@ function queueDefeatedEnemies() {
       battle.enemyRespawns[index] = -1;
       return;
     }
+    const currentMapId = getActiveMap(getProgress()).id;
+    const defeatedEnemy = getEnemyDefinition(index);
+    const firstFinalBossKill = currentMapId === 'black-forest-depths'
+      && defeatedEnemy.id === 'heartOfTheBlackForest'
+      && !ChapterTwoProgressionPolicy.getMapState(getProgress(), currentMapId, true).bossFirstKilled;
     battle.enemyHps[index] = 0;
     battle.enemyNextAttackAt[index] = null;
     const respawnTicks = getMonsterRespawnTicks() + battle.enemyRespawns.filter((timer) => timer !== null).length;
     battle.enemyRespawns[index] = respawnTicks;
     rewardVictory(index);
+    if (firstFinalBossKill) {
+      battle.enemyRespawns[index] = -1;
+      completeChapterTwoFinalBattle();
+    }
   });
 }
 

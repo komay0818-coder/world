@@ -35,4 +35,19 @@ assert.equal(legacy.chapterTwoProgress.unlocked['spider-nest'], true);
 
 const reset = { unlockedChapter: 1 };
 assert.deepEqual(policy.normalize(reset), policy.createDefaultState());
+
+const finale = { unlockedChapter: 2, mapUnlocked: { 'black-forest': true } };
+policy.normalize(finale);
+policy.MAP_ORDER.slice(0, -1).forEach((mapId) => {
+  policy.recordBossKill(finale, mapId, { id: policy.BOSS_IDS[mapId] });
+});
+const chapterClear = policy.recordBossKill(finale, 'black-forest-depths', { id: 'heartOfTheBlackForest' });
+assert.deepEqual(chapterClear, { firstClear: true, mapId: 'black-forest-depths', nextMapId: null, chapterCompleted: true });
+assert.equal(finale.chapterTwoProgress.completed, true);
+assert.equal(finale.chapterTwoProgress.cleared['black-forest-depths'], true);
+assert.equal(finale.chapterTwoProgress.bossFirstKills['black-forest-depths'], true);
+assert.equal(policy.recordBossKill(finale, 'black-forest-depths', { id: 'heartOfTheBlackForest' }).firstClear, false);
+const finaleReloaded = JSON.parse(JSON.stringify(finale));
+policy.normalize(finaleReloaded);
+assert.equal(finaleReloaded.chapterTwoProgress.completed, true);
 console.log('chapter-two-progression-policy: assertions passed');

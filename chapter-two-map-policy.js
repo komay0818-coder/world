@@ -112,6 +112,7 @@
       story: Object.freeze({ previousMapId: 'blackstone-stronghold', nextMapId: 'black-forest-depths', objectiveId: null })
     }),
     map('black-forest-depths', 6, '黑森林深處', {
+      implemented: true,
       isFinalMap: true,
       min: 25,
       max: 25,

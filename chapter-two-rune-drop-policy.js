@@ -6,6 +6,8 @@
 }(typeof globalThis !== 'undefined' ? globalThis : this, function createChapterTwoRuneDropPolicy(RunePolicy) {
   'use strict';
 
+  // 黑森林深處刻意不配置符文：最終地圖以專屬裝備、材料、配方與副手維持價值，
+  // 第二章五種符文則保留在前五張地圖，避免後期只需永久掛最後一張地圖。
   const MAP_DROP_CONFIGS = Object.freeze({
     'black-forest-entrance': Object.freeze({ runeId: 'rune-life', normalRate: .008 }),
     'black-forest-trail': Object.freeze({ runeId: 'rune-strength', normalRate: .008 }),
