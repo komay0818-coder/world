@@ -49,7 +49,13 @@
     grasslandVulture: 'assets/plains-depths-grassland-vulture.png?v=20260831-monster-style-v1',
     blackstoneRaider: 'assets/plains-depths-blackstone-raider.png?v=20260831-monster-style-v1',
     wanderingBlackKnight: 'assets/plains-depths-wandering-black-knight.png?v=20260831-monster-style-v1',
-    blackstoneLeader: 'assets/plains-depths-blackstone-leader.png?v=20260831-monster-style-v1'
+    blackstoneLeader: 'assets/plains-depths-blackstone-leader.png?v=20260831-monster-style-v1',
+    'wasteland-hyena': 'assets/wasteland-hyena.png?v=20260912-redrock-monsters-v1',
+    'redrock-lizard': 'assets/redrock-lizard.png?v=20260912-redrock-monsters-v1',
+    'wasteland-vulture': 'assets/wasteland-vulture.png?v=20260912-redrock-monsters-v1',
+    'skullcrusher-scout': 'assets/skullcrusher-scout.png?v=20260912-redrock-monsters-v1',
+    'redrock-hornbeast': 'assets/redrock-hornbeast.png?v=20260912-redrock-monsters-v1',
+    'redrock-giant-lizard': 'assets/redrock-giant-lizard.png?v=20260912-redrock-monsters-v1'
   });
 
   const STATUS_DISPLAY = Object.freeze({

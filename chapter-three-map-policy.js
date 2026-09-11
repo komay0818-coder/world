@@ -31,17 +31,17 @@
     shamanAltar: Object.freeze({ id: 'shaman-altar', name: '薩滿祭壇', pressure: 'player-defense-reduction', value: null })
   });
 
-  function enemy(id, name, rank, traits) {
-    return Object.freeze({ id, name, rank, traits: Object.freeze(traits) });
+  function enemy(id, name, rank, traits, image = null) {
+    return Object.freeze({ id, name, rank, traits: Object.freeze(traits), image });
   }
 
   const ENEMIES = Object.freeze({
-    wastelandHyena: enemy('wasteland-hyena', '荒原鬣狗', 'normal', ['high-attack-speed', 'rend-bite']),
-    redrockLizard: enemy('redrock-lizard', '赤岩蜥蜴', 'normal', ['hardened-scales']),
-    wastelandVulture: enemy('wasteland-vulture', '荒原禿鷹', 'normal', ['high-evasion', 'dive']),
-    skullcrusherScout: enemy('skullcrusher-scout', '碎顱斥候', 'normal', ['armor-breaking-throw']),
-    redrockHornbeast: enemy('redrock-hornbeast', '赤岩角獸', 'elite', ['high-health', 'frenzied-charge', 'wounded-frenzy']),
-    redrockGiantLizard: enemy('redrock-giant-lizard', '赤岩巨蜥', 'boss', ['giant-jaw-rend', 'rock-armor', 'wasteland-fury']),
+    wastelandHyena: enemy('wasteland-hyena', '荒原鬣狗', 'normal', ['high-attack-speed', 'rend-bite'], 'assets/wasteland-hyena.png'),
+    redrockLizard: enemy('redrock-lizard', '赤岩蜥蜴', 'normal', ['hardened-scales'], 'assets/redrock-lizard.png'),
+    wastelandVulture: enemy('wasteland-vulture', '荒原禿鷹', 'normal', ['high-evasion', 'dive'], 'assets/wasteland-vulture.png'),
+    skullcrusherScout: enemy('skullcrusher-scout', '碎顱斥候', 'normal', ['armor-breaking-throw'], 'assets/skullcrusher-scout.png'),
+    redrockHornbeast: enemy('redrock-hornbeast', '赤岩角獸', 'elite', ['high-health', 'frenzied-charge', 'wounded-frenzy'], 'assets/redrock-hornbeast.png'),
+    redrockGiantLizard: enemy('redrock-giant-lizard', '赤岩巨蜥', 'boss', ['giant-jaw-rend', 'rock-armor', 'wasteland-fury'], 'assets/redrock-giant-lizard.png'),
     skullcrusherSpearman: enemy('skullcrusher-spearman', '碎顱投矛手', 'normal', ['ranged-high-damage', 'armor-piercing-spear']),
     skullcrusherWarrior: enemy('skullcrusher-warrior', '碎顱戰士', 'normal', ['high-health', 'high-defense', 'battle-cry']),
     brokenrockBrute: enemy('brokenrock-brute', '斷岩蠻兵', 'elite', ['two-handed-weapon', 'brute-smash', 'bloodlust']),
