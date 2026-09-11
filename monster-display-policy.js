@@ -65,7 +65,11 @@
     'skullcrusher-hunter': 'assets/skullcrusher-hunter.png?v=20260912-bloodwar-monsters-v1',
     'skullcrusher-shaman': 'assets/skullcrusher-shaman.png?v=20260912-bloodwar-monsters-v1',
     'skullcrusher-centurion': 'assets/skullcrusher-centurion.png?v=20260912-bloodwar-monsters-v1',
-    'skullcrusher-vanguard-commander': 'assets/skullcrusher-vanguard-commander.png?v=20260912-bloodwar-monsters-v1'
+    'skullcrusher-vanguard-commander': 'assets/skullcrusher-vanguard-commander.png?v=20260912-bloodwar-monsters-v1',
+    'skullcrusher-heavy-guard': 'assets/skullcrusher-heavy-guard.png?v=20260912-war-camp-monsters-v1',
+    'skullcrusher-wolf-rider': 'assets/skullcrusher-wolf-rider.png?v=20260912-war-camp-monsters-v1',
+    'skullcrusher-champion': 'assets/skullcrusher-champion.png?v=20260912-war-camp-monsters-v1',
+    'skullcrusher-great-chieftain': 'assets/skullcrusher-great-chieftain.png?v=20260912-war-camp-monsters-v1'
   });
 
   const STATUS_DISPLAY = Object.freeze({
