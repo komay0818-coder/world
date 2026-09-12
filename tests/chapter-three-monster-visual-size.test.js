@@ -11,6 +11,19 @@ chapterThreeIds.forEach((enemyId) => {
   assert.match(script, new RegExp(`['"]${enemyId}['"]\\s*:\\s*(?:\\d|\\.)`), `${enemyId} has a visual-size correction`);
 });
 
+[
+  ['redrock-lizard', 1.32],
+  ['wasteland-vulture', 1.35],
+  ['redrock-giant-lizard', 1.33],
+  ['temple-executioner', 1.38]
+].forEach(([enemyId, expectedScale]) => {
+  assert.match(
+    script,
+    new RegExp(`['"]${enemyId}['"]\\s*:\\s*${String(expectedScale).replace('.', '\\.')}`),
+    `${enemyId} uses the corrected landscape-art scale`
+  );
+});
+
 assert.match(
   css,
   /monster-battle-slot\[class\*="visual-size-"\] \.monster-slot-image \{\s*scale: var\(--unit-art-correction, 1\) !important;/,

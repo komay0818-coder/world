@@ -685,11 +685,11 @@ const monsterVisualScaleCorrections = {
   // Chapter 3 artwork uses mixed portrait and landscape canvases. These values
   // equalize perceived body height while keeping rank from changing art size.
   'wasteland-hyena': 1.06,
-  'redrock-lizard': 1.12,
-  'wasteland-vulture': 1.12,
+  'redrock-lizard': 1.32,
+  'wasteland-vulture': 1.35,
   'skullcrusher-scout': 1.05,
   'redrock-hornbeast': 1.04,
-  'redrock-giant-lizard': 1.12,
+  'redrock-giant-lizard': 1.33,
   'skullcrusher-spearman': 1.05,
   'skullcrusher-warrior': 1.05,
   'brokenrock-brute': 1,
@@ -712,7 +712,7 @@ const monsterVisualScaleCorrections = {
   'fallen-high-priest': .96,
   'temple-stoneguard': 1.06,
   'rune-golem': 1.06,
-  'temple-executioner': 1.12,
+  'temple-executioner': 1.38,
   'ancient-priest': 1.06,
   'temple-guardian': .94,
   'redrock-ancient-god': .92
