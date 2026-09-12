@@ -69,7 +69,13 @@
     'skullcrusher-heavy-guard': 'assets/skullcrusher-heavy-guard.png?v=20260912-war-camp-monsters-v1',
     'skullcrusher-wolf-rider': 'assets/skullcrusher-wolf-rider.png?v=20260912-war-camp-monsters-v1',
     'skullcrusher-champion': 'assets/skullcrusher-champion.png?v=20260912-war-camp-monsters-v1',
-    'skullcrusher-great-chieftain': 'assets/skullcrusher-great-chieftain.png?v=20260912-war-camp-monsters-v1'
+    'skullcrusher-great-chieftain': 'assets/skullcrusher-great-chieftain.png?v=20260912-war-camp-monsters-v1',
+    'skullcrusher-priest': 'assets/skullcrusher-priest.png?v=20260912-ancient-altar-monsters-v1',
+    'skullcrusher-fanatic': 'assets/skullcrusher-fanatic.png?v=20260912-ancient-altar-monsters-v1',
+    'ancient-stoneguard': 'assets/ancient-stoneguard.png?v=20260912-ancient-altar-monsters-v1',
+    'rune-guard': 'assets/rune-guard.png?v=20260912-ancient-altar-monsters-v1',
+    'awakened-guard': 'assets/awakened-guard.png?v=20260912-ancient-altar-monsters-v1',
+    'fallen-high-priest': 'assets/fallen-high-priest.png?v=20260912-ancient-altar-monsters-v1'
   });
 
   const STATUS_DISPLAY = Object.freeze({
