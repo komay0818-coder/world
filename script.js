@@ -681,7 +681,42 @@ const monsterVisualSizeOverrides = {
 
 // Optional per-asset correction for unusual aspect ratios. Transparent canvas
 // padding is normalized in the asset itself so rank never changes image size.
-const monsterVisualScaleCorrections = {};
+const monsterVisualScaleCorrections = {
+  // Chapter 3 artwork uses mixed portrait and landscape canvases. These values
+  // equalize perceived body height while keeping rank from changing art size.
+  'wasteland-hyena': 1.06,
+  'redrock-lizard': 1.12,
+  'wasteland-vulture': 1.12,
+  'skullcrusher-scout': 1.05,
+  'redrock-hornbeast': 1.04,
+  'redrock-giant-lizard': 1.12,
+  'skullcrusher-spearman': 1.05,
+  'skullcrusher-warrior': 1.05,
+  'brokenrock-brute': 1,
+  'canyon-warlord': 1.06,
+  'skullcrusher-berserker': 1,
+  'skullcrusher-shieldguard': 1.06,
+  'skullcrusher-hunter': .98,
+  'skullcrusher-shaman': .96,
+  'skullcrusher-centurion': .98,
+  'skullcrusher-vanguard-commander': .98,
+  'skullcrusher-heavy-guard': 1.05,
+  'skullcrusher-wolf-rider': 1.08,
+  'skullcrusher-champion': 1.08,
+  'skullcrusher-great-chieftain': 1.08,
+  'skullcrusher-priest': 1.05,
+  'skullcrusher-fanatic': 1,
+  'ancient-stoneguard': 1,
+  'rune-guard': 1,
+  'awakened-guard': .98,
+  'fallen-high-priest': .96,
+  'temple-stoneguard': 1.06,
+  'rune-golem': 1.06,
+  'temple-executioner': 1.12,
+  'ancient-priest': 1.06,
+  'temple-guardian': .94,
+  'redrock-ancient-god': .92
+};
 
 function getMonsterVisualSize(enemy = {}) {
   if (enemy.visualSize) return enemy.visualSize;
