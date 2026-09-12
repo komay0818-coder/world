@@ -75,7 +75,13 @@
     'ancient-stoneguard': 'assets/ancient-stoneguard.png?v=20260912-ancient-altar-monsters-v1',
     'rune-guard': 'assets/rune-guard.png?v=20260912-ancient-altar-monsters-v1',
     'awakened-guard': 'assets/awakened-guard.png?v=20260912-ancient-altar-monsters-v1',
-    'fallen-high-priest': 'assets/fallen-high-priest.png?v=20260912-ancient-altar-monsters-v1'
+    'fallen-high-priest': 'assets/fallen-high-priest.png?v=20260912-ancient-altar-monsters-v1',
+    'temple-stoneguard': 'assets/temple-stoneguard.png?v=20260912-redrock-temple-monsters-v1',
+    'rune-golem': 'assets/rune-golem.png?v=20260912-redrock-temple-monsters-v1',
+    'temple-executioner': 'assets/temple-executioner.png?v=20260912-redrock-temple-monsters-v1',
+    'ancient-priest': 'assets/ancient-priest.png?v=20260912-redrock-temple-monsters-v1',
+    'temple-guardian': 'assets/temple-guardian.png?v=20260912-redrock-temple-monsters-v1',
+    'redrock-ancient-god': 'assets/redrock-ancient-god.png?v=20260912-redrock-temple-monsters-v1'
   });
 
   const STATUS_DISPLAY = Object.freeze({

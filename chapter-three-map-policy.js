@@ -62,12 +62,12 @@
     runeGuard: enemy('rune-guard', '符文守衛', 'normal', ['rune-shield'], 'assets/rune-guard.png'),
     awakenedGuard: enemy('awakened-guard', '覺醒守衛', 'elite', ['awakened-smash', 'awakened-rune'], 'assets/awakened-guard.png'),
     fallenHighPriest: enemy('fallen-high-priest', '墮落大祭司', 'boss', ['fallen-flame', 'blood-sacrifice', 'forbidden-ritual'], 'assets/fallen-high-priest.png'),
-    templeStoneguard: enemy('temple-stoneguard', '聖殿石衛', 'normal', ['temple-bulwark']),
-    runeGolem: enemy('rune-golem', '符文魔像', 'normal', ['rune-overload']),
-    templeExecutioner: enemy('temple-executioner', '聖殿執行者', 'normal', ['execution']),
-    ancientPriest: enemy('ancient-priest', '遠古祭司', 'normal', ['rune-blessing']),
-    templeGuardian: enemy('temple-guardian', '聖殿守護者', 'elite', ['guardian-smash', 'guardian-rune', 'shield-shatter']),
-    redrockAncientGod: enemy('redrock-ancient-god', '赤岩古神（暫定）', 'boss', ['ancient-god-smash', 'ancient-rune', 'ancient-awakening', 'redrock-divine-wrath'])
+    templeStoneguard: enemy('temple-stoneguard', '聖殿石衛', 'normal', ['temple-bulwark'], 'assets/temple-stoneguard.png'),
+    runeGolem: enemy('rune-golem', '符文魔像', 'normal', ['rune-overload'], 'assets/rune-golem.png'),
+    templeExecutioner: enemy('temple-executioner', '聖殿執行者', 'normal', ['execution'], 'assets/temple-executioner.png'),
+    ancientPriest: enemy('ancient-priest', '遠古祭司', 'normal', ['rune-blessing'], 'assets/ancient-priest.png'),
+    templeGuardian: enemy('temple-guardian', '聖殿守護者', 'elite', ['guardian-smash', 'guardian-rune', 'shield-shatter'], 'assets/temple-guardian.png'),
+    redrockAncientGod: enemy('redrock-ancient-god', '赤岩古神（暫定）', 'boss', ['ancient-god-smash', 'ancient-rune', 'ancient-awakening', 'redrock-divine-wrath'], 'assets/redrock-ancient-god.png')
   });
 
   function map(id, order, name, facilityRequirement, options) {
