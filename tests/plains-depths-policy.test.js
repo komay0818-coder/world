@@ -3,7 +3,7 @@ const policy = require('../plains-depths-policy');
 
 const expectedNames = [
   '高地野狼', '岩背野豬', '黑石斥侯', '草原禿鷹',
-  '黑石掠奪者', '流浪黑騎士', '黑石頭目'
+  '黑石掠奪者', '黑石聖騎士', '黑石頭目'
 ];
 const monsters = Object.values(policy.MONSTER_TYPES);
 const closeTo = (actual, expected) => assert.ok(Math.abs(actual - expected) < 1e-9, `${actual} should equal ${expected}`);
