@@ -52,9 +52,9 @@ progression.normalize(progress);
 progress.chapterTwoProgress.unlocked['black-forest-entrance'] = true;
 const entranceClear = progression.recordBossKill(progress, 'black-forest-entrance', { id: 'forestGuardianV2', isBoss: true });
 assert.equal(entranceClear.firstClear, true);
-assert.equal(entranceClear.nextMapId, 'blackstone-stronghold');
+assert.equal(entranceClear.nextMapId, 'black-forest-trail');
 assert.equal(progress.chapterTwoProgress.cleared['black-forest-entrance'], true);
-assert.equal(progress.chapterTwoProgress.unlocked['blackstone-stronghold'], true);
+assert.equal(progress.chapterTwoProgress.unlocked['black-forest-trail'], true);
 assert.equal(progression.recordBossKill(progress, 'black-forest-entrance', { id: 'forestGuardianV2', isBoss: true }).firstClear, false);
 
 console.log('black-forest-entrance-combat-integration: assertions passed');

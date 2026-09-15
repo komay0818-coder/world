@@ -13,6 +13,7 @@ assert.match(script, /ChapterTwoProgressionPolicy\.normalize\(normalizedProgress
 assert.match(script, /ChapterTwoProgressionPolicy\.recordBossKill\(progress, currentMap\.id, enemy\)/);
 assert.match(script, /ChapterTwoProgressionPolicy\.canEnter\(progress, map\.id, map\.implemented\)/);
 assert.match(renderer, /ChapterTwoProgressionPolicy\.MAP_ORDER/);
+assert.match(renderer, /String\(index \+ 1\)\.padStart\(2, '0'\)/, 'the corrected progression order supplies the 2-1 through 2-6 UI numbering');
 assert.match(renderer, /data-select-map=/);
 assert.match(renderer, /尚未解鎖/);
 assert.match(renderer, /規劃中／尚未開放/);

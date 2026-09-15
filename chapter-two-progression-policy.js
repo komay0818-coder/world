@@ -5,7 +5,7 @@
 })(typeof globalThis !== 'undefined' ? globalThis : this, function () {
   'use strict';
 
-  const MAP_ORDER = Object.freeze(['black-forest-trail', 'spider-nest', 'black-forest-entrance', 'blackstone-stronghold', 'forest-altar', 'black-forest-depths']);
+  const MAP_ORDER = Object.freeze(['black-forest-entrance', 'black-forest-trail', 'spider-nest', 'blackstone-stronghold', 'forest-altar', 'black-forest-depths']);
   const BOSS_IDS = Object.freeze({
     'black-forest-trail': 'blackstoneCenturion',
     'spider-nest': 'giantSpider',
@@ -52,8 +52,10 @@
     if (selectedIndex >= 0) {
       for (let index = 0; index <= selectedIndex; index += 1) state.unlocked[MAP_ORDER[index]] = true;
     }
-    MAP_ORDER.forEach((mapId) => {
-      if (state.cleared[mapId] && NEXT_MAP[mapId]) state.unlocked[NEXT_MAP[mapId]] = true;
+    let priorMapsComplete = true;
+    MAP_ORDER.slice(0, -1).forEach((mapId) => {
+      priorMapsComplete = priorMapsComplete && state.cleared[mapId];
+      if (priorMapsComplete) state.unlocked[NEXT_MAP[mapId]] = true;
     });
     state.completed = Boolean(state.completed || state.cleared[MAP_ORDER[MAP_ORDER.length - 1]]);
     progress.chapterTwoProgress = state;
@@ -82,9 +84,12 @@
     state.unlocked[mapId] = true;
     state.bossFirstKills[mapId] = true;
     state.cleared[mapId] = true;
-    const nextMapId = NEXT_MAP[mapId] || null;
+    const candidateNextMapId = NEXT_MAP[mapId] || null;
+    const mapIndex = MAP_ORDER.indexOf(mapId);
+    const prerequisitesComplete = MAP_ORDER.slice(0, mapIndex + 1).every((requiredMapId) => state.cleared[requiredMapId]);
+    const nextMapId = candidateNextMapId && prerequisitesComplete ? candidateNextMapId : null;
     if (nextMapId) state.unlocked[nextMapId] = true;
-    else state.completed = true;
+    if (!candidateNextMapId) state.completed = true;
     return Object.freeze({ firstClear: true, mapId, nextMapId, chapterCompleted: state.completed });
   }
 

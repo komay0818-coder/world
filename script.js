@@ -1223,11 +1223,6 @@ function getProgress() {
   if (isBlackForestEntrancePlaytest) {
     normalizedProgress.unlockedChapter = Math.max(2, Number(normalizedProgress.unlockedChapter) || 1);
     normalizedProgress.mapUnlocked['black-forest'] = true;
-    ['black-forest-trail', 'spider-nest'].forEach((mapId) => {
-      normalizedProgress.chapterTwoProgress.unlocked[mapId] = true;
-      normalizedProgress.chapterTwoProgress.cleared[mapId] = true;
-      normalizedProgress.chapterTwoProgress.bossFirstKills[mapId] = true;
-    });
     normalizedProgress.chapterTwoProgress.unlocked['black-forest-entrance'] = true;
   }
   if (getBlackstoneStrongholdPlaytestConfig().active) {
