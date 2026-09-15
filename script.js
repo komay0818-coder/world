@@ -1810,9 +1810,7 @@ function removePartyMember(memberId) {
 }
 
 function requiredXp(level) {
-  const beginnerCurve = { 1: 40, 2: 70, 3: 110, 4: 160 };
-  if (beginnerCurve[level]) return beginnerCurve[level];
-  return level < 15 ? level * 100 : Math.ceil(1400 * Math.pow(1.2, level - 15));
+  return MapExpPolicy.requiredXp(level);
 }
 
 const offlineLimitMs = 12 * 60 * 60 * 1000;
