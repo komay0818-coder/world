@@ -37,6 +37,12 @@ check(policy.rollLevel('wolf-den', 'denForestWolf', 0), 4);
 check(policy.rollLevel('wolf-den', 'denForestWolf', .999), 5);
 check(policy.rollLevel('boar-woods', 'forestBoar', 0), 7);
 check(policy.rollLevel('boar-woods', 'forestBoar', .999), 8);
+check(policy.getConcurrentEnemyLimit('plains-entrance'), 3);
+check(policy.getConcurrentEnemyLimit('wolf-den'), 3);
+check(policy.getConcurrentEnemyLimit('boar-woods'), 5);
+check(policy.getAttackMultiplier('plains-entrance'), .90);
+check(policy.getAttackMultiplier('wolf-den'), .90);
+check(policy.getAttackMultiplier('boar-woods'), 1);
 
 const forestBoarBase = { id: 'forestBoar', evasion: 2, damageReduction: 5 };
 const forestBoar7 = policy.scaleMonster(forestBoarBase, 'boar-woods', 7);
@@ -45,6 +51,14 @@ ok(forestBoar8.maxHp > forestBoar7.maxHp, 'higher level raises HP');
 ok(forestBoar8.attack > forestBoar7.attack, 'higher level raises attack');
 ok(forestBoar8.defense > forestBoar7.defense, 'higher level raises defense');
 ok(forestBoar8.xp > forestBoar7.xp, 'higher level raises EXP');
+
+const entranceWolf = policy.scaleMonster({ id: 'plainsWolfPup' }, 'plains-entrance', 1);
+const unadjustedEntranceAttack = Math.max(1, Math.round(policy.getProfile('plains-entrance', 'plainsWolfPup').baseAttack * policy.getGrowthMultiplier(1, policy.GROWTH.attackPerLevel)));
+check(entranceWolf.attack, Math.max(1, Math.round(unadjustedEntranceAttack * .90)), 'plains entrance applies the approved attack multiplier');
+const denWolf = policy.scaleMonster({ id: 'denForestWolf' }, 'wolf-den', 5);
+const unadjustedDenAttack = policy.getProfile('wolf-den', 'denForestWolf').baseAttack * policy.getGrowthMultiplier(5, policy.GROWTH.attackPerLevel);
+check(denWolf.attack, Math.max(1, Math.round(unadjustedDenAttack * .90)), 'wolf den applies the approved attack multiplier');
+check(forestBoar7.attack, Math.max(1, Math.round(policy.getProfile('boar-woods', 'forestBoar').baseAttack * policy.getGrowthMultiplier(7, policy.GROWTH.attackPerLevel))), 'boar woods attack remains unchanged');
 
 const levelOneAccuracy = 1.05;
 const playerHitEntrance = policy.getPlayerHitChance(1, 1, levelOneAccuracy);

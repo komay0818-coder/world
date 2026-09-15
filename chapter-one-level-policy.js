@@ -4,6 +4,10 @@
   else root.ChapterOneLevelPolicy = api;
 }(typeof globalThis !== 'undefined' ? globalThis : this, function createChapterOneLevelPolicy() {
   const CHAPTER_MAP_IDS = Object.freeze(['plains-entrance', 'wolf-den', 'boar-woods', 'goblin-camp', 'plains-depths']);
+  const EARLY_SOLO_MAP_IDS = Object.freeze(['plains-entrance', 'wolf-den']);
+  const EARLY_SOLO_ENEMY_LIMIT = 3;
+  const DEFAULT_ENEMY_LIMIT = 5;
+  const EARLY_SOLO_ATTACK_MULTIPLIER = .90;
   const GROWTH = Object.freeze({ hpPerLevel: .12, attackPerLevel: .08, defensePerLevel: .07, expPerLevel: .10 });
   const HIT = Object.freeze({
     playerPenaltyPerLevel: .075,
@@ -109,10 +113,18 @@
       isElite: data.isElite,
       isBoss: data.isBoss,
       maxHp: Math.max(1, Math.round(data.baseHp * getGrowthMultiplier(resolvedLevel, GROWTH.hpPerLevel))),
-      attack: Math.max(1, Math.round(data.baseAttack * getGrowthMultiplier(resolvedLevel, GROWTH.attackPerLevel))),
+      attack: Math.max(1, Math.round(data.baseAttack * getGrowthMultiplier(resolvedLevel, GROWTH.attackPerLevel) * getAttackMultiplier(mapId))),
       defense: Math.max(0, Math.round(data.baseDefense * getGrowthMultiplier(resolvedLevel, GROWTH.defensePerLevel))),
       xp: Math.max(1, Math.round(data.baseExp * getGrowthMultiplier(resolvedLevel, GROWTH.expPerLevel)))
     };
+  }
+
+  function getConcurrentEnemyLimit(mapId) {
+    return EARLY_SOLO_MAP_IDS.includes(mapId) ? EARLY_SOLO_ENEMY_LIMIT : DEFAULT_ENEMY_LIMIT;
+  }
+
+  function getAttackMultiplier(mapId) {
+    return EARLY_SOLO_MAP_IDS.includes(mapId) ? EARLY_SOLO_ATTACK_MULTIPLIER : 1;
   }
 
   function getPlayerHitChance(playerLevel, monsterLevel, accuracy = 1, monsterEvasion = 0) {
@@ -132,12 +144,18 @@
 
   return {
     CHAPTER_MAP_IDS,
+    EARLY_SOLO_MAP_IDS,
+    EARLY_SOLO_ENEMY_LIMIT,
+    DEFAULT_ENEMY_LIMIT,
+    EARLY_SOLO_ATTACK_MULTIPLIER,
     GROWTH,
     HIT,
     MONSTER_PROFILES,
     getProfile,
     rollLevel,
     getGrowthMultiplier,
+    getConcurrentEnemyLimit,
+    getAttackMultiplier,
     scaleMonster,
     getPlayerHitChance,
     getMonsterHitChance,

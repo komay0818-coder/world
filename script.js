@@ -769,6 +769,8 @@ const dropLookupMapPools = {
 
 const potionDropRate = .10;
 const manaPotionDropRate = .07;
+const AUTO_HEALING_POTION_PURCHASE_AMOUNT = 15;
+const AUTO_HEALING_POTION_PURCHASE_COST = 50;
 const PARTY_REVIVE_DELAY_MS = 10000;
 const PARTY_REVIVE_HEALTH_RATIO = .30;
 const PARTY_AUTO_POTION_HEALTH_RATIO = .35;
@@ -2053,11 +2055,13 @@ function createEnemyTypes(playerLevel = 1) {
     }[depthsPlaytestEnemy];
     if (forcedCombatId) return [forcedCombatId];
   }
-  if (getActiveMap(getProgress()).id === 'plains-entrance') {
-    return Array.from({ length: 5 }, () => randomEnemyId(playerLevel));
+  const activeMapId = getActiveMap(getProgress()).id;
+  const enemyLimit = ChapterOneLevelPolicy.getConcurrentEnemyLimit(activeMapId);
+  if (activeMapId === 'plains-entrance') {
+    return Array.from({ length: enemyLimit }, () => randomEnemyId(playerLevel));
   }
-  const types = [...getMonsterPool(playerLevel).normal];
-  while (types.length < 5) types.push(randomEnemyId(playerLevel));
+  const types = [...getMonsterPool(playerLevel).normal].slice(0, enemyLimit);
+  while (types.length < enemyLimit) types.push(randomEnemyId(playerLevel));
   const specialRoll = Math.random();
   if (specialRoll < bossSpawnChance) types[Math.floor(Math.random() * types.length)] = randomBossId(playerLevel);
   else if (specialRoll < bossSpawnChance + eliteSpawnChance) types[Math.floor(Math.random() * types.length)] = randomEliteId(playerLevel);
@@ -4462,8 +4466,8 @@ function updateBattleUI() {
 
 function autoBuyPotions() {
   const progress = getProgress();
-  const purchaseAmount = 50;
-  const purchaseCost = 50;
+  const purchaseAmount = AUTO_HEALING_POTION_PURCHASE_AMOUNT;
+  const purchaseCost = AUTO_HEALING_POTION_PURCHASE_COST;
   if (progress.gold < purchaseCost) return false;
   progress.gold -= purchaseCost;
   progress.potions += purchaseAmount;
