@@ -652,11 +652,6 @@ const monsterTypes = EquipmentDropPolicy.applyDefaultLootConfigs({
   moonfangAlpha: { id: 'moonfangAlpha', name: '月牙狼王', maxHp: 680, attack: 21, defense: 14, evasion: 15, parry: 0, damageReduction: 8, artClass: 'black-forest-wolf black-forest-elite', xp: 20, gold: 55, isElite: true, lootSource: 'blackWolf' },
   thornbackTyrant: { id: 'thornbackTyrant', name: '棘背暴君', maxHp: 820, attack: 24, defense: 25, evasion: 3, parry: 0, damageReduction: 12, artClass: 'black-forest-boar black-forest-elite', xp: 20, gold: 65, isElite: true, lootSource: 'blackBoar' },
   forestGuardian: { id: 'forestGuardian', name: '腐月森林守衛', maxHp: 2400, attack: 28, defense: 36, evasion: 5, parry: 8, damageReduction: 15, artClass: 'black-forest-guardian black-forest-boss', xp: 80, gold: 320, isBoss: true, lootSource: 'blackBoss' },
-  rootExecutioner: { id: 'rootExecutioner', name: '根縛行刑者', maxHp: 920, attack: 27, defense: 24, evasion: 4, parry: 12, damageReduction: 10, artClass: 'dungeon-root-executioner dungeon-monster-art', xp: 32, gold: 70, isElite: true, lootSource: 'dungeonElite' },
-  altarNightblade: { id: 'altarNightblade', name: '祭壇夜刃', maxHp: 820, attack: 31, defense: 14, evasion: 14, parry: 14, damageReduction: 8, artClass: 'dungeon-nightblade dungeon-monster-art', xp: 32, gold: 74, isElite: true, lootSource: 'dungeonElite' },
-  moonboneSentinel: { id: 'moonboneSentinel', name: '月骨守衛', maxHp: 1120, attack: 25, defense: 32, evasion: 3, parry: 10, damageReduction: 14, artClass: 'dungeon-moonbone dungeon-monster-art', xp: 32, gold: 78, isElite: true, lootSource: 'dungeonElite' },
-  blightOracle: { id: 'blightOracle', name: '疫木神諭', maxHp: 860, attack: 30, defense: 16, evasion: 10, parry: 3, damageReduction: 12, artClass: 'dungeon-oracle dungeon-monster-art', xp: 32, gold: 76, isElite: true, lootSource: 'dungeonElite' },
-  eclipseSovereign: { id: 'eclipseSovereign', name: '蝕月鹿王', maxHp: 5200, attack: 39, defense: 45, evasion: 8, parry: 12, damageReduction: 18, artClass: 'dungeon-boss dungeon-monster-art', xp: 180, gold: 620, isBoss: true, lootSource: 'dungeonBoss' },
   ...PlainsDepthsPolicy.MONSTER_TYPES,
   ...Object.fromEntries(BlackForestEntrancePolicy.MONSTERS.map((entry) => [entry.combatId, BlackForestEntrancePolicy.toCombatMonster(entry)])),
   ...Object.fromEntries(BlackForestTrailPolicy.MONSTERS.map((entry) => [entry.combatId, BlackForestTrailPolicy.toCombatMonster(entry)])),
@@ -676,7 +671,6 @@ const monsterVisualSizeOverrides = {
   plainsRabbit: 'small', plainsWolfPup: 'small', plainsSlime: 'small', plainsGoblinYoung: 'small',
   boarPiglet: 'small', goblinTreasureChest: 'small',
   boarTyrant: 'large', thornbackTyrant: 'large', forestGuardian: 'large',
-  rootExecutioner: 'large', moonboneSentinel: 'large'
 };
 
 // Optional per-asset correction for unusual aspect ratios. Transparent canvas
@@ -743,8 +737,6 @@ const mapMonsterPools = {
 };
 const eliteSpawnChance = .08;
 const bossSpawnChance = .03;
-const dungeonEliteIds = ['rootExecutioner', 'altarNightblade', 'moonboneSentinel', 'blightOracle'];
-const dungeonBossId = 'eclipseSovereign';
 const GOBLIN_CAMP_TICKET_ID = 'goblin-camp-map';
 const GOBLIN_CAMP_TICKET_DROP_RATE = .50;
 const dungeonDefinitions = {
@@ -2086,12 +2078,7 @@ function createDungeonWaveTypes(wave, mapId = battle.dungeonId || getActiveMap(g
     if (wave % definition.eliteEvery === 0) types[types.length - 1] = definition.eliteIds[(wave / definition.eliteEvery - 1) % definition.eliteIds.length];
     return types;
   }
-  if (!definition) return [];
-  const enemyCount = wave <= 3 ? 3 : wave <= 6 ? 4 : 5;
-  const eliteCount = wave === definition.waves ? 4 : enemyCount;
-  const types = Array.from({ length: eliteCount }, () => dungeonEliteIds[Math.floor(Math.random() * dungeonEliteIds.length)]);
-  if (wave === definition.waves) types.push(dungeonBossId);
-  return types;
+  return [];
 }
 
 function getMonsterDefinitionForMap(type, mapId = battle.dungeonId || getActiveMap(getProgress()).id, level = null) {
