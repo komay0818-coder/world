@@ -3,13 +3,12 @@
   if (typeof module === 'object' && module.exports) module.exports = policy;
   root.PartyPolicy = policy;
 })(typeof globalThis !== 'undefined' ? globalThis : this, function () {
-  const MAX_PARTY_SIZE = 4;
-  const UNLOCK_LEVELS = Object.freeze([1, 10, 20, 30]);
+  const MAX_PARTY_SIZE = 3;
+  const UNLOCK_LEVELS = Object.freeze([1, 10, 20]);
   const TARGET_WEIGHTS = Object.freeze({ warrior: 3, default: 1 });
 
   function getUnlockedPartySlots(level) {
     const safeLevel = Math.max(1, Number(level) || 1);
-    if (safeLevel >= 30) return 4;
     if (safeLevel >= 20) return 3;
     if (safeLevel >= 10) return 2;
     return 1;

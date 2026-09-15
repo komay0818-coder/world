@@ -6,8 +6,8 @@ assert.equal(policy.getUnlockedPartySlots(10), 2, 'Lv10 unlocks the second party
 assert.equal(policy.getUnlockedPartySlots(19), 2, 'Lv19 keeps two party slots');
 assert.equal(policy.getUnlockedPartySlots(20), 3, 'Lv20 unlocks the third party slot');
 assert.equal(policy.getUnlockedPartySlots(29), 3, 'Lv29 keeps three party slots');
-assert.equal(policy.getUnlockedPartySlots(30), 4, 'Lv30 unlocks the fourth party slot');
-assert.deepEqual([1, 2, 3].map(policy.getPartySlotUnlockLevel), [10, 20, 30], 'locked slots expose the requested unlock levels');
+assert.equal(policy.getUnlockedPartySlots(30), 3, 'Lv30 remains capped at three party slots');
+assert.deepEqual([1, 2].map(policy.getPartySlotUnlockLevel), [10, 20], 'locked slots expose the requested unlock levels');
 
 const slots = [
   { character: { name: '主角', race: 'human', job: 'warrior' }, progress: { level: 9, equipment: {} } },
@@ -57,7 +57,7 @@ const repaired = policy.normalizeParty({
 }, { slots: corruptSlots, mainSlotIndex: 0 });
 assert.equal(new Set(corruptSlots.map((slot) => slot.character.id)).size, 4, 'duplicate and missing character ids are repaired');
 assert.equal(repaired.activeMemberIds[0], 'duplicate', 'corrupt saves still keep the main character first');
-assert.equal(repaired.activeMemberIds.length, 4, 'deduplication occurs before the party size limit is applied');
+assert.equal(repaired.activeMemberIds.length, 3, 'legacy four-member parties are trimmed to the three-member limit');
 assert.equal(new Set(repaired.activeMemberIds).size, repaired.activeMemberIds.length, 'active party ids are unique');
 assert.ok(repaired.activeMemberIds.every((id) => repaired.members.some((member) => member.id === id)), 'unknown ids are removed');
 

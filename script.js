@@ -1778,7 +1778,7 @@ function renderParty() {
   const candidates = availableMembers.length
     ? availableMembers.map((member) => `<article class="party-candidate"><div><b>${member.name}</b><small>${jobName(member.job)}・Lv. ${member.level}</small></div><button type="button" data-party-add="${member.id}" ${party.activeMemberIds.length >= party.unlockedSlots ? 'disabled' : ''}>加入隊伍</button></article>`).join('')
     : '<p class="empty-inventory">目前沒有其他可加入的帳號角色。請先到「我的角色」建立角色。</p>';
-  document.querySelector('#party-content').innerHTML = `<p class="party-summary">主角色 Lv.${progress.level}・已開放 ${party.unlockedSlots}/4 個隊伍欄位</p><section class="party-slot-grid">${slotCards}</section><section class="party-candidates"><h3>可加入角色</h3>${candidates}</section>`;
+  document.querySelector('#party-content').innerHTML = `<p class="party-summary">主角色 Lv.${progress.level}・已開放 ${party.unlockedSlots}/${PartyPolicy.MAX_PARTY_SIZE} 個隊伍欄位</p><section class="party-slot-grid">${slotCards}</section><section class="party-candidates"><h3>可加入角色</h3>${candidates}</section>`;
   document.querySelector('#party-modal').classList.remove('hidden');
 }
 

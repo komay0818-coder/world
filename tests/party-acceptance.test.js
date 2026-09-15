@@ -19,7 +19,7 @@ function makeSlots(level = 30) {
 }
 
 verify(1, 'slot unlock boundaries', () => {
-  assert.deepEqual([9, 10, 19, 20, 29, 30].map(party.getUnlockedPartySlots), [1, 2, 2, 3, 3, 4]);
+  assert.deepEqual([9, 10, 19, 20, 29, 30].map(party.getUnlockedPartySlots), [1, 2, 2, 3, 3, 3]);
 });
 
 verify(2, 'main member fixed first', () => {
@@ -107,6 +107,7 @@ verify(13, 'party configuration saved and restored', () => {
     party.normalizeParty(restored.party, { slots, mainSlotIndex: 0 }),
     normalized
   );
+  assert.deepEqual(normalized.activeMemberIds, ['member-1', 'member-2', 'member-3']);
 });
 
 verify(14, 'legacy save creates solo party', () => {
@@ -120,7 +121,7 @@ verify(15, 'corrupt party data repaired', () => {
   const normalized = party.normalizeParty({ activeMemberIds: ['bad', 'member-1', 'member-1', 'member-3', 'member-4', 'extra'] }, { slots, mainSlotIndex: 0 });
   assert.equal(new Set(slots.map((slot) => slot.character.id)).size, 4);
   assert.equal(new Set(normalized.activeMemberIds).size, normalized.activeMemberIds.length);
-  assert.ok(normalized.activeMemberIds.length <= 4);
+  assert.ok(normalized.activeMemberIds.length <= 3);
 });
 
 verify(16, 'normal, dungeon, boss and return flows', () => {
