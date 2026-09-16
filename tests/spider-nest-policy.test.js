@@ -9,7 +9,7 @@ assert.equal(policy.MAP.background, 'assets/spider-nest-background.png');
 assert.equal(policy.MAP.implemented, true);
 assert.equal(policy.MAP.contentStatus, 'combat-ready');
 assert.deepEqual(policy.MONSTERS.map((monster) => monster.name), [
-  '黑石毒蜘蛛', '噴毒蜘蛛', '蛛網編織者', '黑石毒獵手', '黑石訓獸師', '黑石毒刃刺客', '巨大蜘蛛'
+  '黑石毒蜘蛛', '噴毒蜘蛛', '蛛網編織者', '黑石毒獵手', '黑石訓獸師', '黑石毒刃刺客', '蜘蛛皇后'
 ]);
 assert.deepEqual(policy.MONSTERS.map((monster) => monster.rank), ['normal', 'normal', 'normal', 'normal', 'elite', 'elite', 'boss']);
 assert.equal(policy.getMonstersByRank('normal').length, 4);

@@ -6912,9 +6912,9 @@ function enemyAttackTick() {
       const previousPhase = battle.enemySpiderNestPhase[enemyIndex] || 1;
       battle.enemySpiderNestPhase[enemyIndex] = currentBossPhase;
       if (currentBossPhase === 2 && previousPhase < 2) {
-        summonSpiderNestMonster('spiderNestBlackstonePoisonSpider', enemyIndex, SpiderNestPolicy.BOSS.summonHpRatio, SpiderNestPolicy.BOSS.summonAttackRatio, SpiderNestPolicy.BOSS.summonLimit, '🥚【巨大蜘蛛】進入孵化階段，一隻削弱版黑石毒蜘蛛破卵而出！', now);
+        summonSpiderNestMonster('spiderNestBlackstonePoisonSpider', enemyIndex, SpiderNestPolicy.BOSS.summonHpRatio, SpiderNestPolicy.BOSS.summonAttackRatio, SpiderNestPolicy.BOSS.summonLimit, '🥚【蜘蛛皇后】進入孵化階段，一隻削弱版黑石毒蜘蛛破卵而出！', now);
       }
-      if (currentBossPhase === 3 && previousPhase < 3) logBattle('🕷【巨大蜘蛛】進入【巢穴狂暴】，攻擊與攻速提高，但防禦降低！', 'system');
+      if (currentBossPhase === 3 && previousPhase < 3) logBattle('🕷【蜘蛛皇后】進入【巢穴狂暴】，攻擊與攻速提高，但防禦降低！', 'system');
     }
     let spiderNestAction = spiderNestActive
       ? SpiderNestPolicy.resolveAction(enemy.id, Math.random(), poisonStacks, enemyCurrentHp, enemy.maxHp,
@@ -6964,7 +6964,7 @@ function enemyAttackTick() {
       spiderNestAction = 'attack';
     }
     if (spiderNestAction === 'hatch-spider-eggs') {
-      if (summonSpiderNestMonster('spiderNestBlackstonePoisonSpider', enemyIndex, SpiderNestPolicy.BOSS.summonHpRatio, SpiderNestPolicy.BOSS.summonAttackRatio, SpiderNestPolicy.BOSS.summonLimit, '🥚【巨大蜘蛛】施放【孵化蛛卵】，一隻削弱版黑石毒蜘蛛加入戰鬥！', now)) continue;
+      if (summonSpiderNestMonster('spiderNestBlackstonePoisonSpider', enemyIndex, SpiderNestPolicy.BOSS.summonHpRatio, SpiderNestPolicy.BOSS.summonAttackRatio, SpiderNestPolicy.BOSS.summonLimit, '🥚【蜘蛛皇后】施放【孵化蛛卵】，一隻削弱版黑石毒蜘蛛加入戰鬥！', now)) continue;
       spiderNestAction = 'attack';
     }
     if (spiderNestAction === 'shadow-dash') {
