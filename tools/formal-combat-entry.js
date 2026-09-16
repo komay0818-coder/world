@@ -54,9 +54,10 @@ function seedFormalCombat(seed) {
 getProgress = () => formalProgress || getMainBattleMember()?.progress || { level: 45, equipment: emptyEquipment(), skillLevels: {} };
 getActiveCharacter = () => getMainBattleMember()?.character || null;
 getActiveMap = () => formalMap || ({ id: 'formal-headless', chapter: 1, min: 1, max: 45 });
+function withFormalLootConfig(enemy) { return !enemy || enemy.lootConfig ? enemy : { ...enemy, lootConfig: EquipmentDropPolicy.getDefaultLootConfig(enemy) }; }
 getEnemyDefinition = (index = 0) => { const enemy=formalEnemyDefinitions
   ? productionGetMonsterDefinitionForMap(battle.enemyTypes[index], formalMap.id, battle.enemyLevels[index])
-  : formalEnemy; return formalMonsterAttackMultiplier===1?enemy:{...enemy,attack:(Number(enemy.attack)||0)*formalMonsterAttackMultiplier}; };
+  : formalEnemy; const configuredEnemy=withFormalLootConfig(enemy); return formalMonsterAttackMultiplier===1?configuredEnemy:{...configuredEnemy,attack:(Number(configuredEnemy.attack)||0)*formalMonsterAttackMultiplier}; };
 function recordFormalSpawn(id) { if(formalTestTelemetry)formalTestTelemetry.spawns[id]=(formalTestTelemetry.spawns[id]||0)+1; return id; }
 randomEnemyId = (level) => formalEnemyDefinitions ? recordFormalSpawn(productionRandomEnemyId(level)) : formalEnemy.id;
 randomEliteId = (level) => formalEnemyDefinitions ? recordFormalSpawn(productionRandomEliteId(level)) : formalEnemy.id;

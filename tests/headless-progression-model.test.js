@@ -91,4 +91,18 @@ assert.equal(allyCombat.equipment.weapon.instanceId, 'first-green-bow');
 assert.ok(allyCombat.attack > 0 && allyCombat.defense >= 0 && allyCombat.maxHp > 0, 'snapshot battle stats are calculated by the formal combat formulas');
 assert.equal(model.getCharacter(combatRoster, 'ally').progress.level, 18, 'leader combat does not award ally EXP');
 
+const productionDropRoster = model.createRoster([
+  { characterId: 'drop-leader', job: 'warrior', level: 15, blackForestCorruption: { layers: 0 } }
+]);
+const productionDropCombat = runProgressionCombat(productionDropRoster, 'drop-leader', {
+  mode: 'fixed-five', seconds: 90, seed: 101,
+  mapId: 'black-forest-entrance', map: { id: 'black-forest-entrance', name: '黑森林入口', chapter: 2, min: 15, max: 15 },
+  useProductionPool: true, enemyDefinitions: { production: true }, enemyCount: 5,
+  monsterAttackMultiplier: .0001,
+  enemy: { id: 'formal-placeholder', hp: 1, attack: 1, defense: 0, level: 15 }
+});
+const productionEquipment = model.getCharacter(productionDropRoster, 'drop-leader').progress.inventory.filter((item) => item.kind === 'equipment');
+assert.ok(productionDropCombat.testTelemetry.equipmentDrops.length > 0, 'production map enemies retain their formal equipment loot profiles in headless combat');
+assert.equal(productionEquipment.length, productionDropCombat.testTelemetry.equipmentDrops.length, 'production equipment drops enter the active leader inventory');
+
 console.log('headless-progression-model: assertions passed');
