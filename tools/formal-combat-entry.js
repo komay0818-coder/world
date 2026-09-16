@@ -1,6 +1,7 @@
 'use strict';
 
 const { loadGame } = require('./headless-game-runtime.js');
+const HeadlessProgressionModel = require('./headless-progression-model.js');
 
 const game = loadGame();
 
@@ -9,9 +10,29 @@ let formalNow = 0;
 let formalSeed = 1;
 let formalProgress = null;
 let formalEnemy = null;
+let formalMap = null;
+let formalEnemyDefinitions = null;
+let formalPools = null;
+let formalTestTelemetry = null;
+let formalMonsterAttackMultiplier = 1;
+let formalAutoBuyPotionAmount = null;
+let formalAutoBuyPotionCost = 50;
+let formalRequiredXpTable = null;
+let formalChapterExpBands = null;
+let formalMapExpMultiplier = 1;
+let formalShamanHealCooldownMs = null;
 let formalTimers = [];
 let formalTimerSequence = 0;
 let formalSensitivity = { petDamageMultiplier: 1, wildBondLv6Scale: 1 };
+const productionGetMonsterDefinitionForMap = getMonsterDefinitionForMap;
+const productionCreateEnemyLevels = createEnemyLevels;
+const productionCreateEnemyTypes = createEnemyTypes;
+const productionRandomEnemyId = randomEnemyId;
+const productionRandomEliteId = randomEliteId;
+const productionRandomBossId = randomBossId;
+const productionUsePotion = usePotion;
+const productionAutoBuyPotions = autoBuyPotions;
+const productionRequiredXp = requiredXp;
 
 Date.now = () => formalNow;
 setTimeout = (callback, delay = 0) => { const id = ++formalTimerSequence; formalTimers.push({ id, at: formalNow + Math.max(0, Number(delay) || 0), callback }); return id; };
@@ -32,22 +53,29 @@ function seedFormalCombat(seed) {
 
 getProgress = () => formalProgress || getMainBattleMember()?.progress || { level: 45, equipment: emptyEquipment(), skillLevels: {} };
 getActiveCharacter = () => getMainBattleMember()?.character || null;
-getActiveMap = () => ({ id: 'formal-headless', chapter: 1, min: 1, max: 45 });
-getEnemyDefinition = () => formalEnemy;
-randomEnemyId = () => formalEnemy.id;
-randomEliteId = () => formalEnemy.id;
-randomBossId = () => formalEnemy.id;
-createEnemyLevels = (types) => types.map(() => formalEnemy.level);
+getActiveMap = () => formalMap || ({ id: 'formal-headless', chapter: 1, min: 1, max: 45 });
+getEnemyDefinition = (index = 0) => { const enemy=formalEnemyDefinitions
+  ? productionGetMonsterDefinitionForMap(battle.enemyTypes[index], formalMap.id, battle.enemyLevels[index])
+  : formalEnemy; return formalMonsterAttackMultiplier===1?enemy:{...enemy,attack:(Number(enemy.attack)||0)*formalMonsterAttackMultiplier}; };
+function recordFormalSpawn(id) { if(formalTestTelemetry)formalTestTelemetry.spawns[id]=(formalTestTelemetry.spawns[id]||0)+1; return id; }
+randomEnemyId = (level) => formalEnemyDefinitions ? recordFormalSpawn(productionRandomEnemyId(level)) : formalEnemy.id;
+randomEliteId = (level) => formalEnemyDefinitions ? recordFormalSpawn(productionRandomEliteId(level)) : formalEnemy.id;
+randomBossId = (level) => formalEnemyDefinitions ? recordFormalSpawn(productionRandomBossId(level)) : formalEnemy.id;
+createEnemyLevels = (types, mapId) => formalEnemyDefinitions ? productionCreateEnemyLevels(types, mapId) : types.map(() => formalEnemy.level);
 createEnemyAffixes = (types) => types.map(() => []);
 updateBattleUI = () => {};
-logBattle = () => {};
+logBattle = (message, kind, meta = {}) => { if(!formalTestTelemetry)return;if(kind==='enemy-healing'&&String(message).includes('【哥布林薩滿】')){const match=String(message).match(/替【([^】]+)】恢復 ([0-9]+)/);formalTestTelemetry.shamanHeals.push({atMs:formalNow,target:match?.[1]||'unknown',amount:Number(match?.[2])||0});}if(!meta.aggregateKey?.startsWith('enemy-'))return;const id=meta.aggregateKey.slice(6);formalTestTelemetry.damageByMonster[id]=(formalTestTelemetry.damageByMonster[id]||0)+(Number(meta.damage)||0);formalTestTelemetry.lastDamageSource=id; };
 showToast = () => {};
 openVillage = () => {};
 playPartyMemberCombatAnimation = () => {};
 playBattleSkillEffect = () => {};
 playMonsterAttackAnimation = () => {};
 renderDamageNumber = () => {};
-rewardVictory = () => {};
+requiredXp = (level) => formalRequiredXpTable?.[level] ?? productionRequiredXp(level);
+function formalChapterExpMultiplier(level){if(!formalChapterExpBands)return null;return formalChapterExpBands.find(band=>level<=band.maxLevel)?.multiplier??formalChapterExpBands[formalChapterExpBands.length-1]?.multiplier??1;}
+rewardVictory = (index) => { if(!formalTestTelemetry)return; const enemy=getEnemyDefinition(index); formalTestTelemetry.kills[enemy.id]=(formalTestTelemetry.kills[enemy.id]||0)+1;formalTestTelemetry.killEvents.push({atMs:formalNow,id:enemy.id}); const policyReward=MapExpPolicy.calculate(enemy.xp||0,formalProgress.level,formalMap||{});const chapterMultiplier=formalChapterExpMultiplier(formalProgress.level);const earnedXp=Math.round((chapterMultiplier===null?policyReward.actualExp:(enemy.xp||0)*chapterMultiplier)*formalMapExpMultiplier*100)/100; const gold=Math.max(1,Math.floor((enemy.gold||0)*.55));formalProgress.xp+=earnedXp;formalProgress.gold+=gold;formalTestTelemetry.earnedXp+=earnedXp;formalTestTelemetry.earnedGold+=gold;if(!enemy.lootPending&&Math.random()<.10){formalProgress.potions+=1;const item=formalProgress.inventory.find(entry=>entry.id==='healing-potion');if(item)item.quantity+=1;else formalProgress.inventory.push({id:'healing-potion',kind:'consumable',quantity:1});formalTestTelemetry.healingPotionDrops+=1;formalTestTelemetry.potionDropEvents.push({atMs:formalNow});} const inventoryBefore=formalProgress.inventory.length;grantCraftingMaterialDrops(formalProgress,formalMap,enemy);BlackForestCorruptionPolicy.grantMapDrop(formalProgress,formalMap?.id,enemy);SkillUpgradePolicy.grantChapterDrops(formalProgress,formalMap?.chapter,enemy);ChapterOneRecipeDropPolicy.grantRecipeDrops(formalProgress,enemy,formalMap?.id);ChapterTwoRecipeDropPolicy.grantRecipeDrops(formalProgress,enemy,formalMap?.id);ChapterThreeRecipeDropPolicy.grantRecipeDrops(formalProgress,enemy,formalMap?.id);ChapterTwoRuneDropPolicy.grantRuneDrop(formalProgress,formalMap?.id,enemy);const equipmentDrop=EquipmentDropPolicy.grantEquipmentDrop(formalProgress,enemy,{chapter:formalMap?.chapter||enemy.chapter,mapId:formalMap?.id||enemy.mapId,jobId:getActiveCharacter()?.job,random:Math.random,obtainedAt:formalNow,warningHandler:()=>{}});if(equipmentDrop)formalTestTelemetry.equipmentDrops.push(equipmentDrop.instanceId||equipmentDrop.id);formalTestTelemetry.nonEquipmentDrops+=Math.max(0,formalProgress.inventory.length-inventoryBefore-(equipmentDrop?1:0)); while(formalProgress.xp>=requiredXp(formalProgress.level)){formalProgress.xp-=requiredXp(formalProgress.level);formalProgress.level+=1;formalTestTelemetry.levelsGained+=1;formalTestTelemetry.levelEvents.push({atMs:formalNow,level:formalProgress.level});syncMainBattleMemberProgression(getActiveCharacter(),formalProgress);} const requirement=ChapterOneProgressionPolicy.REQUIREMENTS[formalMap?.id];if(requirement){if(enemy.id===requirement.bossId)ChapterOneProgressionPolicy.recordBossKill(formalProgress,formalMap.id,enemy);else if(!enemy.isElite)ChapterOneProgressionPolicy.recordNormalKill(formalProgress,formalMap.id);} };
+usePotion = (manual = false) => { const before=formalProgress?.potions||0;const result=productionUsePotion(manual);if(formalTestTelemetry&&(formalProgress?.potions||0)<before)formalTestTelemetry.potionUseEvents.push({atMs:formalNow});return result; };
+autoBuyPotions = () => { const before=formalProgress?.potions||0;let result;if(formalAutoBuyPotionAmount===null)result=productionAutoBuyPotions();else if((formalProgress?.gold||0)<formalAutoBuyPotionCost)result=false;else{formalProgress.gold-=formalAutoBuyPotionCost;formalProgress.potions+=formalAutoBuyPotionAmount;addPotionItem(formalProgress,formalAutoBuyPotionAmount);result=true;}const purchased=Math.max(0,(formalProgress?.potions||0)-before);if(formalTestTelemetry&&purchased){formalTestTelemetry.potionsPurchased+=purchased;formalTestTelemetry.potionPurchaseEvents.push({atMs:formalNow,quantity:purchased});}return result; };
 saveProgress = () => {};
 
 function formalSkillDefinitions(job, advancedClass) {
@@ -92,18 +120,21 @@ function buildFormalSkillLevels(job, advancedClass, requested) {
 
 function setupFormalCombat(config) {
   seedFormalCombat(config.seed);
-  formalTimers=[];formalTimerSequence=0;
+  formalTimers=[];formalTimerSequence=0;formalMap=config.map||null;formalEnemyDefinitions=config.enemyDefinitions||null;formalPools=config.pools||null;formalMonsterAttackMultiplier=config.monsterAttackMultiplier||1;formalAutoBuyPotionAmount=config.autoBuyPotionAmount??null;formalAutoBuyPotionCost=config.autoBuyPotionCost??50;formalRequiredXpTable=config.requiredXpTable||null;formalChapterExpBands=config.chapterExpBands||null;formalMapExpMultiplier=config.mapExpMultiplier||1;formalShamanHealCooldownMs=config.shamanHealCooldownMs??null;GoblinCampPolicy.SHAMAN_HEAL_COOLDOWN_MS=formalShamanHealCooldownMs??GoblinCampPolicy.SHAMAN_HEAL_COOLDOWN_MS;
+  formalTestTelemetry=config.enemyDefinitions?{spawns:{},kills:{},killEvents:[],levelEvents:[],shamanHeals:[],potionDropEvents:[],potionUseEvents:[],potionPurchaseEvents:[],equipmentDrops:[],nonEquipmentDrops:0,potionsPurchased:0,damageByMonster:{},lastDamageSource:null,deathSources:{},healingPotionDrops:0,levelsGained:0,earnedXp:0,earnedGold:0}:null;
   formalSensitivity={petDamageMultiplier:config.sensitivity?.petDamageMultiplier??1,wildBondLv6Scale:config.sensitivity?.wildBondLv6Scale??1};
   const character = { id: 'formal-' + config.job, name: 'Formal ' + config.job, job: config.job, race: config.race || 'human' };
   const formalEquipment = { ...emptyEquipment(), ...(config.equipment || {}) };
   if (config.job === 'hunter') HunterArrowPolicy.ensureStarterQuiver(formalEquipment);
+  const initialProgress=config.initialProgress||{};
   formalProgress = {
-    level: config.level || 45,
     advancedClass: config.advancedClass || '',
-    gold: 0, potions: config.potions || 0, manaPotions: 0, inventory: config.potions ? [{ id:'healing-potion',kind:'consumable',quantity:config.potions }] : [],
+    level: initialProgress.level||config.level||45, xp:Number(initialProgress.xp)||0, gold:Number(initialProgress.gold)||0, potions:initialProgress.potions??config.potions??0, initialPotions:initialProgress.potions??config.potions??0, manaPotions:Number(initialProgress.manaPotions)||0, inventory:JSON.parse(JSON.stringify(initialProgress.inventory||[])),mapKillProgress:{...(initialProgress.mapKillProgress||{})},mapBossCleared:{...(initialProgress.mapBossCleared||{})},mapUnlocked:{...(initialProgress.mapUnlocked||{})},selectedMapId:initialProgress.selectedMapId||config.mapId||formalMap?.id,
     equipment: formalEquipment,
-    skillLevels: buildFormalSkillLevels(config.job, config.advancedClass, config.skills || {})
+    skillLevels: config.exactSkillLevels ? JSON.parse(JSON.stringify(initialProgress.skillLevels||config.skills?.levels||{})) : buildFormalSkillLevels(config.job, config.advancedClass, config.skills || {}),
+    blackForestCorruption: JSON.parse(JSON.stringify(initialProgress.blackForestCorruption||null))
   };
+  ChapterOneProgressionPolicy.normalize(formalProgress);
   if (config.job === 'assassin') {
     formalProgress.energy = config.initialResource ?? AssassinEnergyPolicy.MAX_ENERGY;
     formalProgress.maxEnergy = AssassinEnergyPolicy.MAX_ENERGY;
@@ -112,24 +143,30 @@ function setupFormalCombat(config) {
   const member = createBattlePartyMember({ character, progress: formalProgress }, 0, character.id, 0);
   if (config.initialResource !== null && config.initialResource !== undefined) member.resourceCurrent = Math.max(0, Math.min(member.resourceMax, Number(config.initialResource) || 0));
   formalEnemy = {
-    id: 'formal-enemy', name: 'Formal Enemy', maxHp: config.enemy.hp,
+    id: config.enemy.id || 'formal-enemy', name: config.enemy.name || 'Formal Enemy', maxHp: config.enemy.hp,
     defense: config.enemy.defense || 0, attack: config.enemy.attack || 0,
     attackSpeed: config.enemy.attackSpeed || 1, level: config.enemy.level || 45,
     isBoss: config.mode === 'boss', evasion: config.enemy.evasion || 0,
     parry: config.enemy.parry || 0, damageReduction: config.enemy.damageReduction || 0,
-    xp: 0, gold: 0
+    xp: config.enemy.xp || 0, gold: config.enemy.gold || 0, mapId: config.mapId || null, chapter:config.enemy.chapter||formalMap?.chapter||1,isElite:Boolean(config.enemy.isElite),lootConfig:config.enemy.lootConfig||null
   };
   const partyMembers=[member];
   for(const [offset,spec] of (config.party||[]).entries()){
     const partyCharacter={id:'formal-party-'+offset,name:spec.name||'Formal ally '+(offset+1),job:spec.job,race:spec.race||'human'};
     const partyEquipment={...emptyEquipment(),...(spec.equipment||{})};if(spec.job==='hunter')HunterArrowPolicy.ensureStarterQuiver(partyEquipment);
-    const partyProgress={level:spec.level||config.level||45,advancedClass:spec.advancedClass||'',gold:0,potions:0,manaPotions:0,inventory:[],equipment:partyEquipment,skillLevels:buildFormalSkillLevels(spec.job,spec.advancedClass,spec.skills||{})};
+    const partyProgress={level:spec.level||config.level||45,advancedClass:spec.advancedClass||'',gold:0,potions:0,manaPotions:0,inventory:[],equipment:partyEquipment,skillLevels:spec.exactSkillLevels?JSON.parse(JSON.stringify(spec.skills?.levels||{})):buildFormalSkillLevels(spec.job,spec.advancedClass,spec.skills||{}),blackForestCorruption:JSON.parse(JSON.stringify(spec.blackForestCorruption||null)),selectedMapId:formalMap?.id||config.mapId};
     const ally=createBattlePartyMember({character:partyCharacter,progress:partyProgress},offset+1,character.id,0);if(spec.initialResource!==undefined)ally.resourceCurrent=Math.max(0,Math.min(ally.resourceMax,Number(spec.initialResource)||0));if(spec.currentHpRatio!==undefined)ally.currentHp=Math.max(1,Math.ceil(ally.maxHp*spec.currentHpRatio));partyMembers.push(ally);
   }
-  const count = config.mode === 'fixed-five' || config.mode === 'party-four' ? 5 : 1;
+  const defaultCount=config.mode==='fixed-five'||config.mode==='party-four'?5:1;
+  const generatedTypes=config.useProductionPool?productionCreateEnemyTypes(formalProgress.level):(config.initialTypes?.length?config.initialTypes:Array(defaultCount).fill(formalEnemy.id));
+  const initialTypes=generatedTypes.slice(0,config.enemyCount||generatedTypes.length);
+  if(formalTestTelemetry)formalTestTelemetry.spawns={};
+  if(formalTestTelemetry)for(const id of initialTypes)formalTestTelemetry.spawns[id]=(formalTestTelemetry.spawns[id]||0)+1;
+  const initialLevels=createEnemyLevels(initialTypes,formalMap?.id);
+  const count = initialTypes.length || (config.mode === 'fixed-five' || config.mode === 'party-four' ? 5 : 1);
   battle = {
-    enemyTypes: Array(count).fill(formalEnemy.id), enemyLevels: Array(count).fill(formalEnemy.level),
-    enemyHps: Array(count).fill(formalEnemy.maxHp), enemyRespawns: Array(count).fill(null),
+    enemyTypes: [...initialTypes], enemyLevels: initialLevels,
+    enemyHps: initialTypes.map((type,index)=>formalEnemyDefinitions?productionGetMonsterDefinitionForMap(type,formalMap.id,initialLevels[index]).maxHp:formalEnemy.maxHp), enemyRespawns: Array(count).fill(null),
     enemySpawnedAt: Array.from({ length: count }, (_, index) => index),
     enemyNextAttackAt: Array(count).fill(1000), enemyDots: Array.from({ length: count }, () => []),
     enemyDamages: Array.from({ length: count }, () => []), enemySkillStates: Array(count).fill(null),
@@ -138,8 +175,8 @@ function setupFormalCombat(config) {
     enemyTrailSummoned: Array(count).fill(false), enemyAssassinDashUntil: Array(count).fill(0),
     enemySpiderNestPhase: Array(count).fill(1), enemyDepthsPhase: Array(count).fill(1),
     partyMembers, monsterMoveSpeed: 400, targetIndexes: [], damageTimers: [],
-    rewardedEnemyIndexes: new Set(), roundLoot: {}, isDungeon: config.mode === 'boss',
-    dungeonId: null, dungeonWave: 1, dungeonComplete: false, waveTransitioning: false,
+    rewardedEnemyIndexes: new Set(), roundLoot: {}, isDungeon: config.mode === 'boss' || config.dungeon,
+    dungeonId: config.dungeon ? config.mapId : null, dungeonWave: config.dungeon ? 1 : 0, dungeonComplete: false, waveTransitioning: false,
     globalSkillReadyAt: 0, skillCooldowns: {}, lastStrongholdRegenAt: 0
   };
   if (member.job === 'hunter') {
@@ -148,6 +185,7 @@ function setupFormalCombat(config) {
   }
   for(const ally of partyMembers.filter(candidate=>candidate.job==='hunter'&&candidate!==member))ensureHunterCompanions(ally,0);
   fighting = true;
+  if (config.preserveDeath) endBattleAfterPlayerDefeat = () => { fighting = false; return true; };
   return member;
 }
 
@@ -183,6 +221,8 @@ function formalSnapshot(member, duration, cycle, resourceMonitor, dotMonitor, pa
     zeroDuration: resourceMonitor.zeroMs / 1000, lowDuration: resourceMonitor.lowMs / 1000, exhaustionDuration: resourceMonitor.exhaustedMs / 1000, exhaustionEpisodes: resourceMonitor.exhaustionEpisodes, curve: resourceMonitor.curve
   } : null;
   return {
+    testTelemetry: formalTestTelemetry?{...JSON.parse(JSON.stringify(formalTestTelemetry)),potionsUsed:formalTestTelemetry.potionUseEvents.length}:null,
+    progression: formalProgress?JSON.parse(JSON.stringify({level:formalProgress.level,xp:formalProgress.xp,gold:formalProgress.gold,potions:formalProgress.potions,manaPotions:formalProgress.manaPotions,inventory:formalProgress.inventory,equipment:formalProgress.equipment,skillLevels:formalProgress.skillLevels,advancedClass:formalProgress.advancedClass,selectedMapId:formalProgress.selectedMapId,mapKillProgress:formalProgress.mapKillProgress,mapBossCleared:formalProgress.mapBossCleared,mapUnlocked:formalProgress.mapUnlocked})):null,
     duration, ttk: battle.isDungeon ? duration : null, totalDamage: combat.totalDamage,
     dps: combat.totalDamage / Math.max(.1, duration), killsPerMinute: battle.isDungeon ? null : combat.kills / Math.max(.1, duration) * 60,
     basicDamage, basicShare: combat.totalDamage ? basicDamage / combat.totalDamage : 0,
@@ -207,7 +247,7 @@ function formalSnapshot(member, duration, cycle, resourceMonitor, dotMonitor, pa
     healing: member.job==='priest'?JSON.parse(JSON.stringify(PriestAdvancementPolicy.telemetry(member))):null,
     shield: member.job==='priest'?{generated:PriestAdvancementPolicy.telemetry(member).shieldGenerated,absorbed:PriestAdvancementPolicy.telemetry(member).shieldAbsorbed,expired:PriestAdvancementPolicy.telemetry(member).shieldExpired,remaining:(battle.partyMembers||[]).reduce((sum,ally)=>sum+(ally.priestShieldGrants||[]).filter(grant=>grant.owner===member).reduce((value,grant)=>value+grant.remaining,0),0),events:JSON.parse(JSON.stringify(PriestAdvancementPolicy.telemetry(member).shieldEvents))}:null,
     faith: member.job==='priest'?{end:PriestAdvancementPolicy.getFaithStacks(member,formalNow),maximum:PriestAdvancementPolicy.FAITH_MAX_STACKS,average:PriestAdvancementPolicy.telemetry(member).faithSamples?PriestAdvancementPolicy.telemetry(member).faithStackTotal/PriestAdvancementPolicy.telemetry(member).faithSamples:0,fullSamples:PriestAdvancementPolicy.telemetry(member).faithFullSamples,events:JSON.parse(JSON.stringify(PriestAdvancementPolicy.telemetry(member).faithEvents))}:null,
-    party: partyMonitor?{minimumHpByMember:partyMonitor.minimumHpByMember,averageHpRatioByMember:Object.fromEntries((battle.partyMembers||[]).map(ally=>[ally.id,partyMonitor.samples?partyMonitor.hpRatioTotal[ally.id]/partyMonitor.samples:0])),averageHpRatio:partyMonitor.samples?Object.values(partyMonitor.hpRatioTotal).reduce((sum,value)=>sum+value,0)/(partyMonitor.samples*(battle.partyMembers||[]).length):0,deaths:partyMonitor.deaths,revives:partyMonitor.revives,firstDeathAtMs:partyMonitor.firstDeathAtMs,healthCurve:partyMonitor.healthCurve,statusTimeline:partyMonitor.statusTimeline,final:(battle.partyMembers||[]).map(ally=>({id:ally.id,job:ally.job,hp:ally.currentHp,maxHp:ally.maxHp,alive:ally.alive,shield:ally.shield,resource:ally.resourceCurrent,damageTaken:CombatCorePolicy.telemetry(ally).damageTaken})),memberDamage:Object.fromEntries((battle.partyMembers||[]).map(ally=>[ally.id,CombatCorePolicy.telemetry(ally).totalDamage])),totalDamage:(battle.partyMembers||[]).reduce((sum,ally)=>sum+CombatCorePolicy.telemetry(ally).totalDamage,0),kills:(battle.partyMembers||[]).reduce((sum,ally)=>sum+CombatCorePolicy.telemetry(ally).kills,0),support:Object.fromEntries((battle.partyMembers||[]).filter(ally=>ally.job==='priest').map(ally=>[ally.id,JSON.parse(JSON.stringify(PriestAdvancementPolicy.telemetry(ally)))]))}:null,
+    party: partyMonitor?{minimumHpByMember:partyMonitor.minimumHpByMember,averageHpRatioByMember:Object.fromEntries((battle.partyMembers||[]).map(ally=>[ally.id,partyMonitor.samples?partyMonitor.hpRatioTotal[ally.id]/partyMonitor.samples:0])),averageHpRatio:partyMonitor.samples?Object.values(partyMonitor.hpRatioTotal).reduce((sum,value)=>sum+value,0)/(partyMonitor.samples*(battle.partyMembers||[]).length):0,deaths:partyMonitor.deaths,revives:partyMonitor.revives,firstDeathAtMs:partyMonitor.firstDeathAtMs,healthCurve:partyMonitor.healthCurve,statusTimeline:partyMonitor.statusTimeline,final:(battle.partyMembers||[]).map(ally=>({id:ally.id,job:ally.job,level:ally.level,attack:ally.attack,defense:ally.defense,hp:ally.currentHp,maxHp:ally.maxHp,alive:ally.alive,shield:ally.shield,resource:ally.resourceCurrent,equipment:JSON.parse(JSON.stringify(ally.progress.equipment||{})),damageTaken:CombatCorePolicy.telemetry(ally).damageTaken})),memberDamage:Object.fromEntries((battle.partyMembers||[]).map(ally=>[ally.id,CombatCorePolicy.telemetry(ally).totalDamage])),totalDamage:(battle.partyMembers||[]).reduce((sum,ally)=>sum+CombatCorePolicy.telemetry(ally).totalDamage,0),kills:(battle.partyMembers||[]).reduce((sum,ally)=>sum+CombatCorePolicy.telemetry(ally).kills,0),support:Object.fromEntries((battle.partyMembers||[]).filter(ally=>ally.job==='priest').map(ally=>[ally.id,JSON.parse(JSON.stringify(PriestAdvancementPolicy.telemetry(ally)))]))}:null,
     cycle, combat,
     final: {
       hp: member.currentHp, maxHp: member.maxHp, defense: member.stats.defense, resource: member.resourceCurrent, alive: member.alive,
@@ -276,13 +316,15 @@ function runFormalCombat(config) {
       dotMonitor.lastSignature = dotSignature;
     }
     const partyState=battle.partyMembers.map(ally=>({id:ally.id,hp:ally.currentHp,alive:ally.alive,shield:ally.shield}));
-    partyMonitor.samples++;for(const ally of battle.partyMembers){partyMonitor.minimumHpByMember[ally.id]=Math.min(partyMonitor.minimumHpByMember[ally.id],ally.currentHp);partyMonitor.hpRatioTotal[ally.id]+=ally.maxHp?ally.currentHp/ally.maxHp:0;if(partyMonitor.alive[ally.id]&&!ally.alive){partyMonitor.deaths++;if(partyMonitor.firstDeathAtMs===null)partyMonitor.firstDeathAtMs=formalNow;}if(!partyMonitor.alive[ally.id]&&ally.alive)partyMonitor.revives++;partyMonitor.alive[ally.id]=ally.alive;}
+    partyMonitor.samples++;for(const ally of battle.partyMembers){partyMonitor.minimumHpByMember[ally.id]=Math.min(partyMonitor.minimumHpByMember[ally.id],ally.currentHp);partyMonitor.hpRatioTotal[ally.id]+=ally.maxHp?ally.currentHp/ally.maxHp:0;if(partyMonitor.alive[ally.id]&&!ally.alive){partyMonitor.deaths++;if(partyMonitor.firstDeathAtMs===null)partyMonitor.firstDeathAtMs=formalNow;if(formalTestTelemetry&&formalTestTelemetry.lastDamageSource){const source=formalTestTelemetry.lastDamageSource;formalTestTelemetry.deathSources[source]=(formalTestTelemetry.deathSources[source]||0)+1;}}if(!partyMonitor.alive[ally.id]&&ally.alive)partyMonitor.revives++;partyMonitor.alive[ally.id]=ally.alive;}
     const partySignature=JSON.stringify(partyState);if(partySignature!==partyMonitor.lastSignature){partyMonitor.healthCurve.push({atMs:formalNow,members:partyState});partyMonitor.lastSignature=partySignature;}
     const statusState={allies:battle.partyMembers.map(ally=>({id:ally.id,sanctuary:formalNow<(ally.sanctuaryUntil||0),lightGrace:formalNow<(ally.lightGraceUntil||0),holyStormHaste:formalNow<(ally.holyStormHasteUntil||0),buffed:Object.entries(ally).some(([key,value])=>key.endsWith('Until')&&!key.startsWith('visual')&&Number(value)>formalNow)})),enemies:battle.enemySkillStates.map((state,index)=>({index,holyLightAttackDownUntil:state?.holyLightAttackDownUntil||0,controlled:['stunnedUntil','frozenUntil','paralyzedUntil','slowedUntil'].some(key=>Number(state?.[key])>formalNow),debuffed:Object.entries(state||{}).some(([key,value])=>key.endsWith('Until')&&!key.startsWith('visual')&&Number(value)>formalNow)}))};const statusSignature=JSON.stringify(statusState);if(statusSignature!==partyMonitor.lastStatusSignature){partyMonitor.statusTimeline.push({atMs:formalNow,...statusState});partyMonitor.lastStatusSignature=statusSignature;}
     const after = CombatCorePolicy.telemetry(member).skillCasts;
     for (const [id, casts] of Object.entries(after)) {
       if (casts > (before[id] || 0)) cycle.push({ atMs: formalNow, skill: id, cooldownReadyAt: member.skillCooldowns[id] || formalNow });
     }
+    if (config.stopAtLevel && formalProgress.level >= config.stopAtLevel) fighting = false;
+    if (config.stopWhenMapUnlocked && formalProgress.mapUnlocked?.[config.stopWhenMapUnlocked]) fighting = false;
   }
   if (config.mode === 'boss' && battle.enemyHps[0] > 0) throw new Error('Boss did not die within maxSeconds');
   return formalSnapshot(member, formalNow / 1000, cycle, resourceMonitor, dotMonitor, partyMonitor);
@@ -296,12 +338,20 @@ function normalizeConfig(input = {}) {
   return {
     job: input.job, advancedClass: input.advancedClass || '', race: input.race || 'human', level: input.level || 45,
     equipment: input.equipment || {}, skills: input.skills || {}, mode, seed: input.seed ?? 1,
+    exactSkillLevels: Boolean(input.exactSkillLevels),
     initialResource: input.initialResource ?? null,
     petStates: input.petStates || [],
     party: input.party || [],
     potions: Math.max(0, Number(input.potions) || 0),
     sensitivity: { petDamageMultiplier: input.sensitivity?.petDamageMultiplier ?? 1, wildBondLv6Scale: input.sensitivity?.wildBondLv6Scale ?? 1 },
     seconds: input.seconds || 60, maxSeconds: input.maxSeconds || 600, entry: input.entry || 'headless',
+    mapId: input.mapId || null, map: input.map || null, preserveDeath: Boolean(input.preserveDeath), dungeon: Boolean(input.dungeon),
+    enemyCount: Math.max(0,Number(input.enemyCount)||0), monsterAttackMultiplier: Number(input.monsterAttackMultiplier)||1,
+    autoBuyPotionAmount: input.autoBuyPotionAmount===undefined?null:Math.max(0,Number(input.autoBuyPotionAmount)||0), autoBuyPotionCost:input.autoBuyPotionCost===undefined?50:Math.max(0,Number(input.autoBuyPotionCost)||0),
+    initialProgress: input.initialProgress || null, stopAtLevel: Math.max(0,Number(input.stopAtLevel)||0), stopWhenMapUnlocked: input.stopWhenMapUnlocked || null,
+    requiredXpTable: input.requiredXpTable || null, chapterExpBands: input.chapterExpBands || null, mapExpMultiplier: Number(input.mapExpMultiplier)||1,
+    shamanHealCooldownMs: input.shamanHealCooldownMs===undefined?null:Math.max(0,Number(input.shamanHealCooldownMs)||0),
+    enemyDefinitions: input.enemyDefinitions || null, pools: input.pools || null, initialTypes: input.initialTypes || null, useProductionPool: Boolean(input.useProductionPool),
     enemy: { hp: mode === 'boss' ? 25000 : 1200, defense: 20, attack: 8, attackSpeed: 1, level: 45, ...(input.enemy || {}) }
   };
 }
@@ -315,4 +365,16 @@ function listSkills(job, advancedClass = '') {
   return game.evaluate(`formalSkillDefinitions(${JSON.stringify(job)}, ${JSON.stringify(advancedClass)}).map(({id,name,type,cooldown})=>({id,name,type,cooldown}))`);
 }
 
-module.exports = { runCombat, listSkills };
+function runProgressionCombat(roster, leaderId, input = {}) {
+  const leader = HeadlessProgressionModel.getCharacter(roster, leaderId);
+  const inventoryBefore = new Set(leader.progress.inventory.map((item) => item?.instanceId || item?.id));
+  const result = runCombat(HeadlessProgressionModel.createCombatConfig(roster, leaderId, input));
+  HeadlessProgressionModel.applyCombatProgression(roster, leaderId, result.progression);
+  const updatedLeader = HeadlessProgressionModel.getCharacter(roster, leaderId);
+  const newEquipment = updatedLeader.progress.inventory.filter((item) => item?.kind === 'equipment' && !inventoryBefore.has(item.instanceId || item.id));
+  result.equipmentDecisions = HeadlessProgressionModel.applyConservativeEquipmentUpgrades(updatedLeader, newEquipment);
+  result.rosterLeader = JSON.parse(JSON.stringify(updatedLeader));
+  return result;
+}
+
+module.exports = { runCombat, runProgressionCombat, listSkills };
