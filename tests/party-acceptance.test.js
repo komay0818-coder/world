@@ -29,9 +29,10 @@ verify(2, 'main member fixed first', () => {
 });
 
 verify(3, 'duplicate member rejected', () => {
-  const normalized = party.normalizeParty(null, { slots: makeSlots(), mainSlotIndex: 0 });
-  assert.equal(party.addActiveMember(normalized, 'member-2'), true);
-  assert.equal(party.addActiveMember(normalized, 'member-2'), false);
+  const slots = makeSlots();
+  const normalized = party.normalizeParty(null, { slots, mainSlotIndex: 0 });
+  assert.equal(party.addActiveMember(normalized, 'member-2', { slots }), true);
+  assert.equal(party.addActiveMember(normalized, 'member-2', { slots }), false);
 });
 
 verify(4, 'add/remove persists and rebuilds runtime UI', () => {

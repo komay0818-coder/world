@@ -1260,6 +1260,12 @@ function getProgress() {
   let partySlots = JSON.parse(localStorage.getItem('stardust-character-slots') || '[]');
   if (!Array.isArray(partySlots) || !partySlots.length) partySlots = activeCharacter ? [{ character: activeCharacter, progress: normalizedProgress }] : [];
   if (partySlots[activeSlotIndex]?.character) partySlots[activeSlotIndex] = { ...partySlots[activeSlotIndex], progress: normalizedProgress };
+  const savedPartyMemberIds = Array.isArray(saved.party?.activeMemberIds)
+    ? saved.party.activeMemberIds.filter((memberId) => memberId !== activeCharacter?.id)
+    : [];
+  const needsInvitationSnapshotMigration = savedPartyMemberIds.some((memberId) => (
+    !PartyPolicy.isValidInvitationSnapshot(saved.party?.memberSnapshots?.[memberId], memberId)
+  ));
   normalizedProgress.party = PartyPolicy.normalizeParty(saved.party, {
     slots: partySlots,
     mainSlotIndex: activeSlotIndex,
@@ -1268,6 +1274,13 @@ function getProgress() {
   });
   if (AssassinEnergyPolicy.isAssassin(activeCharacter?.job)) {
     AssassinEnergyPolicy.normalizeProgress(normalizedProgress);
+  }
+  if (needsInvitationSnapshotMigration) {
+    if (playtestProgressKey) sessionStorage.setItem(playtestProgressKey, JSON.stringify(normalizedProgress));
+    else {
+      localStorage.setItem('stardust-progress', JSON.stringify(normalizedProgress));
+      if (partySlots[activeSlotIndex]?.character) localStorage.setItem('stardust-character-slots', JSON.stringify(partySlots));
+    }
   }
   return normalizedProgress;
 }
@@ -1733,8 +1746,11 @@ function upgradeVillageBuilding(buildingId) {
   showToast(`${building.name}已升級至 Lv${result.level}！`);
 }
 
-function getPartyMemberDisplayStats(memberRecord, slots = getCharacterSlots()) {
-  const slot = slots[memberRecord.slotIndex] || slots.find((entry) => entry?.character?.id === memberRecord.id);
+function getPartyMemberDisplayStats(memberRecord, slots = getCharacterSlots(), snapshot = null, battleContext = null) {
+  const liveSlot = slots[memberRecord.slotIndex] || slots.find((entry) => entry?.character?.id === memberRecord.id);
+  const slot = snapshot
+    ? PartyPolicy.createSlotFromInvitationSnapshot(snapshot, liveSlot?.progress?.partyMemberState, battleContext)
+    : liveSlot;
   if (!slot?.character) return { ...memberRecord, currentHp: 0, maxHp: 1 };
   const stats = getCharacterStats(slot.progress.level || 1, slot.progress, slot.character);
   return {
@@ -1756,7 +1772,7 @@ function renderParty() {
   const activeMembers = party.activeMemberIds
     .map((id) => party.members.find((member) => member.id === id))
     .filter(Boolean)
-    .map((member) => getPartyMemberDisplayStats(member, slots));
+    .map((member) => getPartyMemberDisplayStats(member, slots, party.memberSnapshots?.[member.id], progress));
   const availableMembers = party.members.filter((member) => !party.activeMemberIds.includes(member.id));
   const jobName = (job) => classes.find((entry) => entry.id === job)?.name || job;
   const slotCards = Array.from({ length: PartyPolicy.MAX_PARTY_SIZE }, (_, index) => {
@@ -1785,7 +1801,7 @@ function addPartyMember(memberId) {
     showToast(`目前隊伍上限為 ${party.unlockedSlots} 人。`);
     return;
   }
-  if (!PartyPolicy.addActiveMember(party, memberId)) return;
+  if (!PartyPolicy.addActiveMember(party, memberId, { slots: getCharacterSlots() })) return;
   saveProgress(progress);
   logPartyDebug('隊員加入', { memberId, activeMemberIds: party.activeMemberIds.join(',') });
   renderParty();
@@ -3962,9 +3978,11 @@ function buildBattlePartyMembers(now = Date.now()) {
   const members = party.activeMemberIds.map((memberId) => {
     const slotIndex = slots.findIndex((slot) => slot?.character?.id === memberId);
     if (slotIndex < 0) return null;
+    const liveSlot = slots[slotIndex];
+    const snapshot = party.memberSnapshots?.[memberId];
     const slot = memberId === mainId
       ? { character: getActiveCharacter(), progress }
-      : slots[slotIndex];
+      : PartyPolicy.createSlotFromInvitationSnapshot(snapshot, liveSlot?.progress?.partyMemberState, progress);
     return createBattlePartyMember(slot, slotIndex, mainId, now);
   }).filter(Boolean);
   const playtestConfig = getBlackForestDepthsPlaytestConfig().active

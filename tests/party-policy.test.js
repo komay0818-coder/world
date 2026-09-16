@@ -82,11 +82,17 @@ const editableParty = {
   members: [{ id: 'main' }, { id: 'second' }, { id: 'third' }]
 };
 assert.equal(policy.removeActiveMember(editableParty, 'main'), false, 'the main character cannot be removed');
-assert.equal(policy.addActiveMember(editableParty, 'second'), true, 'an available member can be added');
+const editableSlots = [
+  { character: { id: 'main', job: 'warrior' }, progress: { level: 10, equipment: {}, skillLevels: {} } },
+  { character: { id: 'second', job: 'hunter' }, progress: { level: 1, equipment: { weapon: { id: 'old-bow' } }, skillLevels: { shot: 1 } } }
+];
+assert.equal(policy.addActiveMember(editableParty, 'second', { slots: editableSlots }), true, 'an available member can be added');
+assert.equal(editableParty.memberSnapshots.second.progress.level, 1, 'adding a member captures its current level');
 assert.equal(policy.addActiveMember(editableParty, 'second'), false, 'the same member cannot be added twice');
 assert.equal(policy.addActiveMember(editableParty, 'third'), false, 'members cannot exceed the unlocked slot count');
 assert.equal(policy.removeActiveMember(editableParty, 'second'), true, 'a non-main member can be removed');
 assert.deepEqual(editableParty.activeMemberIds, ['main'], 'removal updates the active party immediately');
+assert.equal(editableParty.memberSnapshots.second, undefined, 'removal deletes the invitation snapshot');
 
 const independentRecords = [
   policy.createMemberRecord({ character: { id: 'warrior', job: 'warrior' }, progress: { level: 10 } }, 0),
