@@ -17,12 +17,13 @@ assert.deepEqual(policy.getMonsterPool(), {
 });
 assert.equal(policy.getMonster('forest-spirit').visualEnergy, 'green-nature');
 assert.ok(policy.MONSTERS.filter((monster) => monster.id !== 'forest-spirit').every((monster) => monster.visualEnergy === 'purple-corruption'));
-assert.equal(policy.getMonster('heart-of-the-black-forest').image, 'assets/heart-of-the-black-forest.png');
-assert.equal(policy.getMonster('corrupted-fallen-druid').image, 'assets/corrupted-fallen-druid.png');
-assert.equal(policy.getMonster('corrupted-blackstone-centurion').image, 'assets/corrupted-blackstone-centurion.png');
-assert.equal(policy.getMonster('forest-spirit').image, 'assets/forest-spirit.png');
-assert.equal(policy.getMonster('dark-spore-beast').image, 'assets/dark-spore-beast.png');
-assert.equal(policy.getMonster('corrupted-treant').image, 'assets/corrupted-treant.png');
+const depthsMonsterImageVersion = '?v=20260920-black-forest-depths-monsters-v1';
+assert.equal(policy.getMonster('heart-of-the-black-forest').image, `assets/heart-of-the-black-forest.png${depthsMonsterImageVersion}`);
+assert.equal(policy.getMonster('corrupted-fallen-druid').image, `assets/corrupted-fallen-druid.png${depthsMonsterImageVersion}`);
+assert.equal(policy.getMonster('corrupted-blackstone-centurion').image, `assets/corrupted-blackstone-centurion.png${depthsMonsterImageVersion}`);
+assert.equal(policy.getMonster('forest-spirit').image, `assets/forest-spirit.png${depthsMonsterImageVersion}`);
+assert.equal(policy.getMonster('dark-spore-beast').image, `assets/dark-spore-beast.png${depthsMonsterImageVersion}`);
+assert.equal(policy.getMonster('corrupted-treant').image, `assets/corrupted-treant.png${depthsMonsterImageVersion}`);
 assert.equal(policy.getMonster('corrupted-forest-wolf').image, 'assets/corrupted-forest-wolf.png?v=20260920-forest-altar-monsters-v1');
 assert.equal(policy.MONSTERS.filter((monster) => monster.image !== null).length, 7);
 assert.deepEqual(policy.getCombatPool(), {
@@ -78,7 +79,14 @@ const path = require('node:path');
 const background = fs.readFileSync(path.join(__dirname, '..', policy.RULES.background));
 assert.equal(background.subarray(1, 4).toString(), 'PNG', 'the black forest depths background is a PNG asset');
 assert.equal(background[25], 2, 'the black forest depths background uses RGB color');
-// Monster art is intentionally absent while the chapter-two art set is being replaced.
+policy.MONSTERS.forEach((monster) => {
+  const imagePath = monster.image.split('?')[0];
+  const png = fs.readFileSync(path.join(__dirname, '..', imagePath));
+  assert.equal(png.subarray(1, 4).toString(), 'PNG', `${monster.name} uses a PNG asset`);
+  assert.equal(png.readUInt32BE(16), 1024, `${monster.name} uses the shared canvas width`);
+  assert.equal(png.readUInt32BE(20), 1024, `${monster.name} uses the shared canvas height`);
+  assert.equal(png[25], 6, `${monster.name} uses RGBA color with transparency`);
+});
 assert.equal(policy.RULES.denseFogAccuracyPenalty, .15);
 assert.equal(policy.RULES.denseFogUnavoidable, true);
 assert.deepEqual(policy.RULES.bossAuraModifiers, { attackBonus: .10, defenseBonus: .10 });
