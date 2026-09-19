@@ -133,7 +133,25 @@
 
   function getMap(mapId) { return MAPS.find((entry) => entry.id === mapId) || null; }
   function getEnemy(enemyId) { return Object.values(ENEMIES).find((entry) => entry.id === enemyId) || null; }
-  function canEnter() { return false; }
+  function isChapterUnlocked(progress = {}) {
+    return Math.max(1, Number(progress.unlockedChapter) || 1) >= CHAPTER.chapter;
+  }
+  function normalizeChapterUnlock(progress = {}) {
+    progress.unlockedChapter = Math.max(1, Number(progress.unlockedChapter) || 1);
+    if (progress.chapterTwoProgress?.completed) progress.unlockedChapter = Math.max(CHAPTER.chapter, progress.unlockedChapter);
+    return progress.unlockedChapter;
+  }
+  function getMapState(progress = {}, mapId) {
+    const mapEntry = getMap(mapId);
+    if (!mapEntry) return null;
+    const chapterUnlocked = isChapterUnlocked(progress);
+    const unlocked = chapterUnlocked && mapId === CHAPTER.firstMapId;
+    return Object.freeze({ mapId, chapterUnlocked, unlocked, implemented: Boolean(mapEntry.implemented) });
+  }
+  function canEnter(progress = {}, mapId) {
+    const state = getMapState(progress, mapId);
+    return Boolean(state?.chapterUnlocked && state.unlocked && state.implemented);
+  }
 
   function normalizeFacilityProgress(saved) {
     const source = saved && typeof saved === 'object' ? saved : {};
@@ -161,5 +179,5 @@
     return Object.freeze({ count, required: mapEntry.facilityRequirement, complete: count >= mapEntry.facilityRequirement });
   }
 
-  return Object.freeze({ CHAPTER, FACILITY_TYPES, ENEMIES, MAPS, getMap, getEnemy, canEnter, normalizeFacilityProgress, recordFacilityDestroyed, getFacilityStatus });
+  return Object.freeze({ CHAPTER, FACILITY_TYPES, ENEMIES, MAPS, getMap, getEnemy, isChapterUnlocked, normalizeChapterUnlock, getMapState, canEnter, normalizeFacilityProgress, recordFacilityDestroyed, getFacilityStatus });
 });

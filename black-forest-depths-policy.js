@@ -25,7 +25,7 @@
     depthsCorruptedForestWolf: Object.freeze({ active: 'depths-shadow-bite', passive: 'depths-corrupted-hunt', chance: .25, damage: 1.25, threshold: .40 }),
     corruptedTreant: Object.freeze({ active: 'corrupted-root-entangle', passive: 'corrupted-bark', chance: .24, damage: 1.10, slow: .20, durationMs: 4000, threshold: .50 }),
     darkSporeBeast: Object.freeze({ active: 'spore-eruption', passive: 'spore-proliferation', chance: .28, damage: 1.12, threshold: .50 }),
-    forestSpirit: Object.freeze({ active: 'nature-echo', passive: 'pure-spirit', chance: .28, healRatio: .18 }),
+    forestSpirit: Object.freeze({ active: 'nature-echo', passive: 'pure-spirit', chance: .28, healRatio: .18, cooldownMs: 10000 }),
     corruptedBlackstoneCenturion: Object.freeze({ active: 'corrupted-heavy-axe', passive: 'blackstone-command', chance: .24, damage: 1.40, armorBreak: .15, durationMs: 5000 }),
     corruptedFallenDruid: Object.freeze({ active: 'withering-storm', passive: 'deep-forest-corruption', chance: .26, damage: 1.25, slow: .20, durationMs: 4000, threshold: .50 }),
     heartOfTheBlackForest: Object.freeze({ active: 'corruption-pulse', passive: 'black-forest-core', chance: .28, damage: 1.35 })
@@ -114,10 +114,10 @@
     }
     return { attack, attackSpeed, defense, evasion };
   }
-  function resolveAction(monsterId, randomValue, hasWoundedAlly = false) {
+  function resolveAction(monsterId, randomValue, hasWoundedAlly = false, options = {}) {
     const skill = SKILLS[monsterId];
     const roll = Math.max(0, Math.min(.999999, Number(randomValue) || 0));
-    if (monsterId === 'forestSpirit') return hasWoundedAlly && roll < skill.chance ? skill.active : 'attack';
+    if (monsterId === 'forestSpirit') return hasWoundedAlly && options.canUseNatureEcho !== false && roll < skill.chance ? skill.active : 'attack';
     return skill && roll < skill.chance ? skill.active : 'attack';
   }
   function getDamageMultiplier(action) {

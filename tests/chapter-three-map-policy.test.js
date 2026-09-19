@@ -8,13 +8,39 @@ assert.equal(policy.CHAPTER.firstJobChangeLevel, 45);
 assert.deepEqual(policy.MAPS.map((map) => map.name), ['赤岩荒原', '斷岩峽谷', '血戰荒原', '碎顱戰爭營地', '遠古祭壇', '赤岩聖殿']);
 assert.deepEqual(policy.MAPS.map((map) => map.facilityRequirement), [10, 15, 20, 25, 30, 35]);
 assert.ok(policy.MAPS.every((map) => map.min === null && map.max === null && map.suppressionValues === null));
-assert.ok(policy.MAPS.every((map) => map.implemented === false && policy.canEnter(map.id) === false));
+assert.ok(policy.MAPS.every((map) => map.implemented === false));
+const lockedChapter = { unlockedChapter: 2 };
+const unlockedChapter = { unlockedChapter: 3 };
+assert.equal(policy.isChapterUnlocked(lockedChapter), false);
+assert.equal(policy.isChapterUnlocked(unlockedChapter), true);
+assert.deepEqual(policy.getMapState(unlockedChapter, 'redrock-wastes-entrance'), {
+  mapId: 'redrock-wastes-entrance', chapterUnlocked: true, unlocked: true, implemented: false
+});
+assert.equal(policy.getMapState(unlockedChapter, 'brokenrock-canyon').unlocked, false, 'only the first map is eligible before chapter-three progression exists');
+assert.equal(policy.canEnter(unlockedChapter, 'redrock-wastes-entrance'), false, 'an unlocked chapter never bypasses the map implemented gate');
+assert.equal(policy.canEnter(lockedChapter, 'redrock-wastes-entrance'), false);
+const completedLegacySave = { unlockedChapter: 2, chapterTwoProgress: { completed: true } };
+assert.equal(policy.normalizeChapterUnlock(completedLegacySave), 3);
+assert.equal(completedLegacySave.unlockedChapter, 3, 'a completed chapter-two save migrates without another boss kill');
+const newCharacter = { unlockedChapter: 1, chapterTwoProgress: { completed: false } };
+assert.equal(policy.normalizeChapterUnlock(newCharacter), 1, 'new characters keep only chapter one unlocked');
 assert.equal(policy.getMap('skullcrusher-war-camp').dungeon, true);
 assert.equal(policy.getMap('ancient-altar').facilityPresentationStatus, 'name-and-appearance-pending');
 assert.equal(policy.getMap('redrock-temple').bossId, 'redrock-ancient-god');
 assert.equal(policy.getMap('redrock-temple').finalBossStatus, 'provisional-mechanics-implemented');
 assert.equal(policy.getMap('redrock-temple').awakeningCoreSource, null);
 assert.equal(policy.getEnemy('redrock-giant-lizard').name, '赤岩巨蜥');
+[
+  'wasteland-hyena', 'redrock-lizard', 'wasteland-vulture',
+  'skullcrusher-scout', 'redrock-hornbeast', 'redrock-giant-lizard'
+].forEach((enemyId) => {
+  assert.equal(policy.getEnemy(enemyId).image, `assets/${enemyId}.png`, `${enemyId} has dedicated 3-1 artwork`);
+});
+[
+  'skullcrusher-spearman', 'skullcrusher-warrior', 'brokenrock-brute', 'canyon-warlord'
+].forEach((enemyId) => {
+  assert.equal(policy.getEnemy(enemyId).image, `assets/${enemyId}.png`, `${enemyId} has dedicated 3-2 artwork`);
+});
 assert.equal(policy.getEnemy('redrock-ancient-god').name, '赤岩古神（暫定）');
 
 const empty = policy.normalizeFacilityProgress();

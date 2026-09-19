@@ -53,6 +53,8 @@ assert.equal(policy.resolveAction('depthsCorruptedForestWolf', .25), 'attack');
 assert.equal(policy.resolveAction('corruptedTreant', .10), 'corrupted-root-entangle');
 assert.equal(policy.resolveAction('darkSporeBeast', .10), 'spore-eruption');
 assert.equal(policy.resolveAction('forestSpirit', .10, true), 'nature-echo');
+assert.equal(policy.resolveAction('forestSpirit', .10, true, { canUseNatureEcho: false }), 'attack');
+assert.equal(policy.SKILLS.forestSpirit.cooldownMs, 10000);
 assert.equal(policy.resolveAction('forestSpirit', .10, false), 'attack');
 assert.equal(policy.resolveAction('corruptedBlackstoneCenturion', .10), 'corrupted-heavy-axe');
 assert.equal(policy.resolveAction('corruptedFallenDruid', .10), 'withering-storm');

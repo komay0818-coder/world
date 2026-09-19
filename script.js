@@ -96,6 +96,7 @@ const mapProgression = [
   { id: 'goblin-camp', chapter: 1, regionOf: 'beginner-plains', min: 2, max: 5, monsterMin: 8, monsterMax: 12, name: '哥布林營地', background: 'assets/goblin-camp-background.png', implemented: true, dungeon: true, ticketItemId: 'goblin-camp-map', normalXp: 10, eliteXp: 28, bossXp: 120, recommended: { attack: 18, defense: 5, hp: 120 } },
   { id: ChapterTwoMapPolicy.CHAPTER.id, chapter: 2, min: 15, max: 30, chapterLevelRange: [15, 30], name: ChapterTwoMapPolicy.CHAPTER.name, background: ChapterTwoMapPolicy.CHAPTER.background, implemented: true, regionHub: true, contentStatus: 'planned', previousMapId: 'plains-depths', recommended: { attack: 0, defense: 0, hp: 0 } },
   ...ChapterTwoMapPolicy.MAPS,
+  { id: ChapterThreeMapPolicy.CHAPTER.id, chapter: 3, min: null, max: null, name: ChapterThreeMapPolicy.CHAPTER.name, background: '', implemented: false, chapterEntry: true, regionHub: true, contentStatus: ChapterThreeMapPolicy.CHAPTER.contentStatus, previousMapId: ChapterThreeMapPolicy.CHAPTER.previousMapId, recommended: { attack: 0, defense: 0, hp: 0 } },
   { min: 10, max: 15, name: '石牙山谷', normalXp: 8, eliteXp: 35, bossXp: 140 },
   { min: 15, max: 20, name: '荒蕪沙漠', normalXp: 18, eliteXp: 70, bossXp: 280 },
   { min: 20, max: 25, name: '冰霜高原', normalXp: 35, eliteXp: 140, bossXp: 560 },
@@ -956,6 +957,7 @@ function normalizeWearableSeriesName(item) {
 const TAB_ACTIVE_CHARACTER_SLOT_KEY = 'stardust-tab-active-character-slot';
 
 function getActiveCharacterSlotIndex() {
+  if (ChapterTwoBalancePlaytestPolicy?.isActive()) return ChapterTwoBalancePlaytestPolicy.getActiveSlotIndex();
   const slots = JSON.parse(localStorage.getItem('stardust-character-slots') || '[]');
   const legacyIndex = Number(localStorage.getItem('stardust-active-character-slot') || 0);
   const storedTabIndex = sessionStorage.getItem(TAB_ACTIVE_CHARACTER_SLOT_KEY);
@@ -965,11 +967,13 @@ function getActiveCharacterSlotIndex() {
 }
 
 function setActiveCharacterSlotIndex(index) {
+  if (ChapterTwoBalancePlaytestPolicy?.isActive()) return;
   sessionStorage.setItem(TAB_ACTIVE_CHARACTER_SLOT_KEY, String(index));
   localStorage.setItem('stardust-active-character-slot', String(index));
 }
 
 function getActiveCharacter() {
+  if (ChapterTwoBalancePlaytestPolicy?.isActive()) return getCharacterSlots()[getActiveCharacterSlotIndex()]?.character || null;
   const slots = JSON.parse(localStorage.getItem('stardust-character-slots') || '[]');
   return slots[getActiveCharacterSlotIndex()]?.character
     || JSON.parse(localStorage.getItem('stardust-character') || 'null');
@@ -1019,6 +1023,7 @@ function getBlackForestDepthsPlaytestConfig() {
 }
 
 function getLocalPlaytestProgressKey() {
+  if (ChapterTwoBalancePlaytestPolicy?.isActive()) return ChapterTwoBalancePlaytestPolicy.PROGRESS_KEY;
   if (getBlackForestEntrancePlaytestConfig().partySize) return 'black-forest-entrance-playtest-progress';
   if (getBlackstoneStrongholdPlaytestConfig().active) return 'blackstone-stronghold-playtest-progress';
   if (getForestAltarPlaytestConfig().active) return 'forest-altar-playtest-progress';
@@ -1031,7 +1036,7 @@ function getPlaytestHpFloor() {
 }
 
 function getProgress() {
-  const slots = JSON.parse(localStorage.getItem('stardust-character-slots') || '[]');
+  const slots = getCharacterSlots();
   const slotProgress = Array.isArray(slots) ? slots[getActiveCharacterSlotIndex()]?.progress : null;
   const playtestProgressKey = getLocalPlaytestProgressKey();
   const playtestProgress = playtestProgressKey
@@ -1219,6 +1224,7 @@ function getProgress() {
   };
   ChapterOneProgressionPolicy.normalize(normalizedProgress);
   ChapterTwoProgressionPolicy.normalize(normalizedProgress);
+  ChapterThreeMapPolicy.normalizeChapterUnlock(normalizedProgress);
   const isBlackForestEntrancePlaytest = Boolean(getBlackForestEntrancePlaytestConfig().partySize);
   if (isBlackForestEntrancePlaytest) {
     normalizedProgress.unlockedChapter = Math.max(2, Number(normalizedProgress.unlockedChapter) || 1);
@@ -1257,7 +1263,7 @@ function getProgress() {
   }
   const activeCharacter = getActiveCharacter();
   const activeSlotIndex = getActiveCharacterSlotIndex();
-  let partySlots = JSON.parse(localStorage.getItem('stardust-character-slots') || '[]');
+  let partySlots = getCharacterSlots();
   if (!Array.isArray(partySlots) || !partySlots.length) partySlots = activeCharacter ? [{ character: activeCharacter, progress: normalizedProgress }] : [];
   if (partySlots[activeSlotIndex]?.character) partySlots[activeSlotIndex] = { ...partySlots[activeSlotIndex], progress: normalizedProgress };
   const savedPartyMemberIds = Array.isArray(saved.party?.activeMemberIds)
@@ -1282,10 +1288,24 @@ function getProgress() {
       if (partySlots[activeSlotIndex]?.character) localStorage.setItem('stardust-character-slots', JSON.stringify(partySlots));
     }
   }
+  if (!playtestProgressKey && normalizedProgress.chapterTwoProgress.completed && (Number(saved.unlockedChapter) || 1) < 3) {
+    localStorage.setItem('stardust-progress', JSON.stringify(normalizedProgress));
+    if (partySlots[activeSlotIndex]?.character) localStorage.setItem('stardust-character-slots', JSON.stringify(partySlots));
+  }
   return normalizedProgress;
 }
 
 function getCharacterSlots() {
+  if (ChapterTwoBalancePlaytestPolicy?.isActive()) {
+    let testSlots = JSON.parse(sessionStorage.getItem(ChapterTwoBalancePlaytestPolicy.SLOT_KEY) || 'null');
+    const requestedLoadout = ChapterTwoBalancePlaytestPolicy.getLoadout();
+    if (!Array.isArray(testSlots) || testSlots.length !== 3 || testSlots[0]?.progress?.balancePlaytestLoadout !== requestedLoadout) {
+      testSlots = ChapterTwoBalancePlaytestPolicy.createSlots({ EquipmentPolicy, EquipmentDropPolicy, location: window.location });
+      sessionStorage.setItem(ChapterTwoBalancePlaytestPolicy.SLOT_KEY, JSON.stringify(testSlots));
+      sessionStorage.removeItem(ChapterTwoBalancePlaytestPolicy.PROGRESS_KEY);
+    }
+    return testSlots;
+  }
   let slots = JSON.parse(localStorage.getItem('stardust-character-slots') || '[]');
   if (!Array.isArray(slots)) slots = [];
   const legacyCharacter = JSON.parse(localStorage.getItem('stardust-character') || 'null');
@@ -1325,8 +1345,12 @@ function syncActiveCharacterSlot(progressOverride = null) {
   const character = getActiveCharacter();
   if (!character) return;
   const activeIndex = getActiveCharacterSlotIndex();
-  const slots = JSON.parse(localStorage.getItem('stardust-character-slots') || '[]');
+  const slots = getCharacterSlots();
   slots[activeIndex] = { character, progress: progressOverride || slots[activeIndex]?.progress || JSON.parse(localStorage.getItem('stardust-progress') || '{}') };
+  if (ChapterTwoBalancePlaytestPolicy?.isActive()) {
+    sessionStorage.setItem(ChapterTwoBalancePlaytestPolicy.SLOT_KEY, JSON.stringify(slots));
+    return;
+  }
   localStorage.setItem('stardust-character-slots', JSON.stringify(slots));
 }
 
@@ -1344,15 +1368,22 @@ function saveProgress(progress) {
 }
 
 function getAccountResources() {
-  const saved = JSON.parse(localStorage.getItem('stardust-account-resources') || '{}');
+  const storage = ChapterTwoBalancePlaytestPolicy?.isActive() ? sessionStorage : localStorage;
+  const saved = JSON.parse(storage.getItem('stardust-account-resources') || '{}');
+  if (Object.prototype.hasOwnProperty.call(saved, 'starIron')) {
+    delete saved.starIron;
+    storage.setItem('stardust-account-resources', JSON.stringify(saved));
+  }
   return {
-    starIron: Math.max(0, Number(saved.starIron) || 0),
     dungeonKeys: { blackForestAltar: 0, ...(saved.dungeonKeys || {}) }
   };
 }
 
 function saveAccountResources(resources) {
-  localStorage.setItem('stardust-account-resources', JSON.stringify(resources));
+  const storage = ChapterTwoBalancePlaytestPolicy?.isActive() ? sessionStorage : localStorage;
+  const sanitized = { ...(resources || {}) };
+  delete sanitized.starIron;
+  storage.setItem('stardust-account-resources', JSON.stringify(sanitized));
 }
 
 function getAffixStatValue(item, stat) {
@@ -2035,6 +2066,17 @@ function randomEliteId(level = getProgress().level) { const pool = getMonsterPoo
 function randomBossId(level = getProgress().level) { const pool = getMonsterPool(level).boss; return pool[Math.floor(Math.random() * pool.length)]; }
 
 function createEnemyTypes(playerLevel = 1) {
+  if (
+    getActiveMap(getProgress()).id === 'black-forest-depths'
+    && ChapterTwoBalancePlaytestPolicy?.getScenario() === 'purified-heart-pressure'
+  ) {
+    return [
+      'heartOfTheBlackForest',
+      'forestSpirit',
+      'darkSporeBeast',
+      'corruptedBlackstoneCenturion'
+    ];
+  }
   const playtestEnemy = getBlackForestEntrancePlaytestConfig().enemy;
   if (getActiveMap(getProgress()).id === 'black-forest-entrance' && playtestEnemy) {
     const forcedCombatId = {
@@ -2685,8 +2727,6 @@ function renderInventory(view = 'inventory') {
   const title = document.querySelector('#inventory-title');
   const content = document.querySelector('#inventory-content');
   title.textContent = view === 'equipment' ? '裝備' : '背包';
-  const accountResources = getAccountResources();
-  const resourceBar = `<section class="account-resource-bar"><span>◆ 星鐵碎片 <b>${accountResources.starIron}</b></span></section>`;
   const renderItemCard = (item, options = {}) => {
     const equipped = Boolean(options.equipped);
     const wearable = isItemWearableByCharacter(item, character, progress.level);
@@ -2739,8 +2779,8 @@ function renderInventory(view = 'inventory') {
     return `<article class="equipment-frame slot-${slot} ${item ? `equipped ${itemQualityClass(item)}` : ''}"><span class="equipment-frame-icon">${visual}</span><b>${info.label}</b><small>${item ? item.name : '空欄位'}</small>${item ? `<em>${itemStatsText(item)}</em>${unequipButton}` : ''}</article>`;
   }).join('');
   content.innerHTML = view === 'equipment'
-    ? `${resourceBar}<section class="paper-doll" aria-label="角色裝備紙娃娃"><span class="paper-doll-silhouette" aria-hidden="true">🧍</span>${paperDoll}</section>`
-    : `${resourceBar}${inventoryTabs}${scrapTools}<section class="inventory-list">${itemCards}</section>`;
+    ? `<section class="paper-doll" aria-label="角色裝備紙娃娃"><span class="paper-doll-silhouette" aria-hidden="true">🧍</span>${paperDoll}</section>`
+    : `${inventoryTabs}${scrapTools}<section class="inventory-list">${itemCards}</section>`;
   modal.classList.remove('hidden');
   modal.dataset.view = view;
 }
@@ -2832,7 +2872,7 @@ function renderMapSelector() {
   const character = getActiveCharacter();
   const stats = getCharacterStats(progress.level, progress, character);
   const activeMap = getActiveMap(progress);
-  const maps = mapProgression.filter((map) => map.implemented && !map.regionOf);
+  const maps = mapProgression.filter((map) => (map.implemented || map.chapterEntry) && !map.regionOf);
   const trialMarks = Object.values(PreJobTrialPolicy.MARKS).map((mark) => `${mark.name} ${getInventoryItemQuantity(progress, mark.id)}`).join('・');
   const trialCard = `<article class="map-selection-card trial-entry-card"><div><b>⚔️ ${PreJobTrialPolicy.ENTRY.name}</b><small>獨立60秒傷害試煉・不屬於3-1～3-6</small><em>${trialMarks}</em><strong class="map-recommendation danger">傷害門檻與守護者基礎數值待實測校準</strong></div><button type="button" data-open-pre-job-trial>查看試煉</button></article>`;
   const modal = document.querySelector('#inventory-modal');
@@ -2840,9 +2880,10 @@ function renderMapSelector() {
   document.querySelector('#inventory-content').innerHTML = `<section class="map-selection-grid">${maps.map((map) => {
     const unlocked = map.id === 'beginner-plains'
       || (map.chapter === 1 && ChapterOneProgressionPolicy.isUnlocked(progress, map.id))
-      || (map.chapter === 2 && ChapterOneProgressionPolicy.isUnlocked(progress, 'black-forest') && progress.level >= map.min);
+      || (map.chapter === 2 && ChapterOneProgressionPolicy.isUnlocked(progress, 'black-forest') && progress.level >= map.min)
+      || (map.chapter === 3 && ChapterThreeMapPolicy.isChapterUnlocked(progress));
     const isRegionHub = map.id === 'beginner-plains' || map.regionHub;
-    const regionCount = map.id === 'black-forest' ? blackForestRegions.length : beginnerPlainsRegions.length;
+    const regionCount = map.id === 'black-forest' ? blackForestRegions.length : map.chapter === 3 ? ChapterThreeMapPolicy.MAPS.length : beginnerPlainsRegions.length;
     const recommended = map.recommended || { attack: 0, defense: 0, hp: 0 };
     const ready = stats.attack >= recommended.attack && stats.defense >= recommended.defense && stats.hp >= recommended.hp;
     const recommendation = `<strong class="map-recommendation ${ready ? 'ready' : 'danger'}">${ready ? '✓ 能力達標' : '⚠ 建議整備'}　攻 ${recommended.attack}・防 ${recommended.defense}・生命 ${recommended.hp}</strong>`;
@@ -2850,16 +2891,20 @@ function renderMapSelector() {
     const dungeonPasses = map.ticketItemId ? getInventoryItemQuantity(progress, map.ticketItemId) : resources.dungeonKeys?.blackForestAltar || 0;
     const dungeonPassName = map.ticketItemId ? '哥布林營地地圖' : '祭壇鑰匙';
     const detail = isRegionHub
-      ? map.id === 'black-forest'
+      ? map.chapter === 3
+        ? `<em>${unlocked ? '第三章已解鎖・內容開發中／尚未開放' : '完成第二章後解鎖・內容尚未開放'}</em>`
+        : map.id === 'black-forest'
         ? '<em>第二章 Lv15～30・承接平原深處的黑石山賊主線・目前僅完成地圖架構</em>'
         : `<em>包含 ${regionCount} 個探索區域・怪物與掉落物將陸續追加</em>`
       : map.dungeon ? `<em>${map.id === 'goblin-camp' ? '清場後留意哥布林號角' : `${dungeonDefinition?.waves || 10} 波戰鬥・最終波 BOSS・職業套裝`}${map.ticketItemId ? '・可連續自動挑戰' : ''}</em><strong class="dungeon-key-count">${dungeonPassName}：${dungeonPasses}</strong>` : `<em>普通 ${map.normalXp} EXP・精英 ${map.eliteXp} EXP・Boss ${map.bossXp} EXP</em>`;
-    const action = isRegionHub
+    const action = map.chapterEntry
+      ? `<span>${unlocked ? '已解鎖・尚未開放' : '尚未解鎖'}</span>`
+      : isRegionHub
       ? unlocked ? `<button type="button" data-open-map-region="${map.id}">查看 ${regionCount} 個區域</button>` : `<span>Lv. ${map.min} 解鎖</span>`
       : map.dungeon
       ? unlocked ? `<button type="button" data-select-map="${map.id}" ${dungeonPasses < 1 ? 'disabled' : ''}>${dungeonPasses > 0 ? map.ticketItemId ? '使用地圖進入' : '消耗鑰匙進入' : `需要${dungeonPassName}`}</button>` : `<span>Lv. ${map.min} 解鎖</span>`
       : unlocked ? map.id === activeMap.id ? '<span>目前地圖</span>' : `<button type="button" data-select-map="${map.id}">前往地圖</button>` : `<span>Lv. ${map.min} 解鎖</span>`;
-    return `<article class="map-selection-card ${isRegionHub ? 'region-hub-card' : ''} ${map.dungeon ? 'dungeon-card' : ''} ${map.id === activeMap.id ? 'selected' : ''} ${unlocked ? '' : 'locked'}" style="--map-preview:url('${map.background}')"><div><b>${map.dungeon ? '◆ ' : ''}${map.name}</b><small>${isRegionHub ? `第 ${map.chapter} 章探索地區` : `怪物等級 Lv. ${map.monsterMin || map.min}～${map.monsterMax || map.max}`}</small>${detail}${isRegionHub ? '' : recommendation}</div>${action}</article>`;
+    return `<article class="map-selection-card ${isRegionHub ? 'region-hub-card' : ''} ${map.chapterEntry ? 'chapter-entry-card' : ''} ${map.dungeon ? 'dungeon-card' : ''} ${map.id === activeMap.id ? 'selected' : ''} ${unlocked ? '' : 'locked'}"${map.background ? ` style="--map-preview:url('${map.background}')"` : ''}><div><b>${map.dungeon ? '◆ ' : ''}${map.name}</b><small>${isRegionHub ? `第 ${map.chapter} 章探索地區` : `怪物等級 Lv. ${map.monsterMin || map.min}～${map.monsterMax || map.max}`}</small>${detail}${isRegionHub ? '' : recommendation}</div>${action}</article>`;
   }).join('')}${trialCard}</section>`;
   modal.dataset.view = 'maps';
   modal.classList.remove('hidden');
@@ -4084,7 +4129,8 @@ function persistPartyRuntimeState() {
     if (member.slotIndex === activeIndex) mainProgress.partyMemberState = state;
     if (slots[member.slotIndex]) slots[member.slotIndex].progress = { ...slots[member.slotIndex].progress, partyMemberState: state };
   });
-  if (!getLocalPlaytestProgressKey()) localStorage.setItem('stardust-character-slots', JSON.stringify(slots));
+  if (ChapterTwoBalancePlaytestPolicy?.isActive()) sessionStorage.setItem(ChapterTwoBalancePlaytestPolicy.SLOT_KEY, JSON.stringify(slots));
+  else if (!getLocalPlaytestProgressKey()) localStorage.setItem('stardust-character-slots', JSON.stringify(slots));
   saveProgress(mainProgress);
 }
 
@@ -4590,7 +4636,8 @@ function rewardVictory(index) {
   const baseXp = enemy.mapId ? enemy.xp : enemy.isBoss ? currentMap.bossXp : enemy.isElite ? currentMap.eliteXp : currentMap.normalXp;
   const expReward = MapExpPolicy.calculate(baseXp, progress.level, currentMap);
   const earnedXp = expReward.actualExp;
-  progress.xp += earnedXp;
+  if (ChapterTwoBalancePlaytestPolicy?.isActive()) progress.balancePlaytestEarnedXp = (Number(progress.balancePlaytestEarnedXp) || 0) + earnedXp;
+  else progress.xp += earnedXp;
   const earnedGold = Math.max(1, Math.floor(enemy.gold * .55));
   progress.gold += earnedGold;
   const loot = addLoot(progress, enemy);
@@ -4637,27 +4684,10 @@ function rewardVictory(index) {
     offhandDrop = EquipmentDropPolicy.createChapterOneOffhandDrop({ random: Math.random, instanceId: `${Date.now()}-${Math.floor(Math.random() * 1000000)}`, jobId: getActiveCharacter()?.job, obtainedFrom: enemy.id });
     progress.inventory.push(offhandDrop);
   }
-  const accountDrops = [];
   let goblinCampMapDropped = false;
   if (enemy.id === 'lostGoblin' && DungeonTicketCycle.shouldDropTicket(Math.random(), GOBLIN_CAMP_TICKET_DROP_RATE)) {
     addGoblinCampMap(progress);
     goblinCampMapDropped = true;
-  }
-  const dungeonItemDropsEnabled = currentMap.dungeon && currentMap.id !== 'goblin-camp';
-  if (dungeonItemDropsEnabled) {
-    const resources = getAccountResources();
-    const ironChance = enemy.isBoss ? 1 : .22;
-    if (Math.random() < ironChance) {
-      const amount = enemy.isBoss ? 2 : 1;
-      resources.starIron += amount;
-      accountDrops.push(`星鐵碎片 ×${amount}`);
-      addRoundLoot('star-iron', '星鐵碎片', amount, '✦');
-    }
-    saveAccountResources(resources);
-  } else if (enemy.isBoss) {
-    const resources = getAccountResources();
-    if (Math.random() < .12) { resources.starIron += 1; accountDrops.push('星鐵碎片 ×1'); addRoundLoot('star-iron', '星鐵碎片', 1, '✦'); }
-    saveAccountResources(resources);
   }
   const levelBeforeRewards = progress.level;
   while (progress.xp >= requiredXp(progress.level)) {
@@ -4687,6 +4717,7 @@ function rewardVictory(index) {
     if (enemy.isBoss) {
       const chapterTwoResult = ChapterTwoProgressionPolicy.recordBossKill(progress, currentMap.id, enemy);
       if (chapterTwoResult.firstClear) {
+        if (chapterTwoResult.chapterCompleted) ChapterThreeMapPolicy.normalizeChapterUnlock(progress);
         const nextMap = mapProgression.find((map) => map.id === chapterTwoResult.nextMapId);
         showToast(chapterTwoResult.chapterCompleted ? '第二章已完成！' : `${nextMap?.name || chapterTwoResult.nextMapId}已解鎖`);
         logBattle(chapterTwoResult.chapterCompleted ? '◆ 第二章通關完成。' : `◆ 首次擊敗區域首領，${nextMap?.name || chapterTwoResult.nextMapId}已解鎖。`, 'progress');
@@ -4751,14 +4782,13 @@ function rewardVictory(index) {
     logBattle(`🎁 掉落【${offhandDrop.name}】－${offhandDrop.affix.text}`, 'loot');
   }
   if (goblinCampMapDropped) logBattle('🗺 迷路的哥布林掉落【哥布林營地地圖 ×1】', 'loot');
-  accountDrops.forEach((drop) => logBattle(`◆ BOSS掉落【${drop}】`, 'loot'));
   logPartyDebug('掉落事件', {
     targetId: enemy.id,
     targetName: enemy.name,
     rewardKey,
     xp: earnedXp,
     gold: earnedGold,
-    loot: [loot?.name, ...materialDrops.map((material) => material.name), ...recipeDrops.map((recipe) => recipe.name), runeDrop?.name, equipmentDrop?.name, blueEquipmentDrop?.name, specialEquipmentDrop?.name, chapterThreeSpecialEquipmentDrop?.name, offhandDrop?.name, ...accountDrops].filter(Boolean).join(',') || 'none'
+    loot: [loot?.name, ...materialDrops.map((material) => material.name), ...recipeDrops.map((recipe) => recipe.name), runeDrop?.name, equipmentDrop?.name, blueEquipmentDrop?.name, specialEquipmentDrop?.name, chapterThreeSpecialEquipmentDrop?.name, offhandDrop?.name].filter(Boolean).join(',') || 'none'
   });
 }
 
@@ -6326,7 +6356,7 @@ function inflictForestAltarCorruptionFlame(member, enemy, now = Date.now()) {
   return true;
 }
 
-function healBlackForestDepthsAlly(healerIndex) {
+function healBlackForestDepthsAlly(healerIndex, now = Date.now()) {
   const wounded = getWoundedEnemyIndexes();
   if (!wounded.length) return false;
   const targetIndex = wounded.sort((first, second) => (
@@ -6337,6 +6367,7 @@ function healBlackForestDepthsAlly(healerIndex) {
   const heal = Math.max(1, Math.ceil(target.maxHp * BlackForestDepthsPolicy.SKILLS.forestSpirit.healRatio));
   const restored = Math.min(heal, target.maxHp - battle.enemyHps[targetIndex]);
   battle.enemyHps[targetIndex] += restored;
+  getEnemySkillState(healerIndex).natureEchoReadyAt = now + BlackForestDepthsPolicy.SKILLS.forestSpirit.cooldownMs;
   playMonsterAttackAnimation(healerIndex, false);
   logBattle(`🌿【森林之魂】施放【自然回響】，替【${target.name}】恢復 ${restored} 生命。`, 'enemy-healing');
   return true;
@@ -6962,9 +6993,11 @@ function enemyAttackTick() {
       ? ForestAltarPolicy.resolveAction(enemy.id, Math.random())
       : 'attack';
     const blackForestDepthsAction = getActiveMap(progress).id === 'black-forest-depths'
-      ? BlackForestDepthsPolicy.resolveAction(enemy.id, Math.random(), getWoundedEnemyIndexes().length > 0)
+      ? BlackForestDepthsPolicy.resolveAction(enemy.id, Math.random(), getWoundedEnemyIndexes().length > 0, {
+        canUseNatureEcho: now >= (getEnemySkillState(enemyIndex).natureEchoReadyAt || 0)
+      })
       : 'attack';
-    if (blackForestDepthsAction === 'nature-echo' && healBlackForestDepthsAlly(enemyIndex)) continue;
+    if (blackForestDepthsAction === 'nature-echo' && healBlackForestDepthsAlly(enemyIndex, now)) continue;
     if (strongholdAction === 'lion-roar' || strongholdAction === 'warlord-command') {
       battle.strongholdCommandUntil = Math.max(battle.strongholdCommandUntil || 0, now + BlackstoneStrongholdPolicy.LION_GUARD.roarDurationMs);
       logBattle(`📣【${enemy.name}】施放【${strongholdAction === 'lion-roar' ? '獅吼' : '督軍號令'}】，黑石據點敵軍攻擊提高 15%，持續 6 秒！`, 'system');

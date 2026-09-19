@@ -10,6 +10,8 @@ const renderer = script.slice(script.indexOf('function renderBlackForestRegions(
 assert.match(index, /chapter-two-progression-policy\.js[\s\S]*script\.js/);
 assert.match(script, /chapterTwoProgress: ChapterTwoProgressionPolicy\.createDefaultState\(\)/);
 assert.match(script, /ChapterTwoProgressionPolicy\.normalize\(normalizedProgress\)/);
+assert.match(script, /ChapterTwoProgressionPolicy\.normalize\(normalizedProgress\);[\s\S]*ChapterThreeMapPolicy\.normalizeChapterUnlock\(normalizedProgress\)/,
+  'completed legacy saves migrate to the chapter-three unlock');
 assert.match(script, /ChapterTwoProgressionPolicy\.recordBossKill\(progress, currentMap\.id, enemy\)/);
 assert.match(script, /ChapterTwoProgressionPolicy\.canEnter\(progress, map\.id, map\.implemented\)/);
 assert.match(renderer, /ChapterTwoProgressionPolicy\.MAP_ORDER/);
@@ -18,4 +20,10 @@ assert.match(renderer, /data-select-map=/);
 assert.match(renderer, /尚未解鎖/);
 assert.match(renderer, /規劃中／尚未開放/);
 assert.doesNotMatch(renderer, /map-region-card pending locked \$\{region\.dungeon/);
+const mapSelector = script.slice(script.indexOf('function renderMapSelector()'), script.indexOf('function renderBeginnerPlainsRegions()'));
+assert.match(mapSelector, /map\.implemented \|\| map\.chapterEntry/, 'the locked or unlocked chapter-three entry remains visible independently from map implementation');
+assert.match(mapSelector, /ChapterThreeMapPolicy\.isChapterUnlocked\(progress\)/);
+assert.match(mapSelector, /已解鎖・尚未開放/);
+assert.match(mapSelector, /const action = map\.chapterEntry[\s\S]*\? `<span>\$\{unlocked \? '已解鎖・尚未開放' : '尚未解鎖'\}<\/span>`/,
+  'the chapter entry exposes status text rather than a map-entry action');
 console.log('chapter-two-progression-integration: assertions passed');

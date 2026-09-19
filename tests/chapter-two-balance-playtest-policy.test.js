@@ -1,0 +1,62 @@
+const assert = require('node:assert/strict');
+const BalancePolicy = require('../chapter-two-balance-playtest-policy');
+const EquipmentPolicy = require('../equipment-policy');
+const EquipmentDropPolicy = require('../equipment-drop-policy');
+const fs = require('node:fs');
+const path = require('node:path');
+
+assert.equal(BalancePolicy.isActive({ hostname: 'example.com', search: '?playtest=chapter-two-balance' }), false);
+assert.equal(BalancePolicy.isActive({ hostname: '127.0.0.1', search: '?playtest=chapter-two-balance' }), true);
+assert.equal(BalancePolicy.getActiveSlotIndex({ hostname: '127.0.0.1', search: '?playtest=chapter-two-balance&main=hunter' }), 1);
+assert.equal(BalancePolicy.getActiveSlotIndex({ hostname: '127.0.0.1', search: '?playtest=chapter-two-balance&main=priest' }), 2);
+assert.equal(BalancePolicy.getRequestedMapId({ hostname: '127.0.0.1', search: '?playtest=chapter-two-balance&map=spider-nest' }), 'spider-nest');
+assert.equal(BalancePolicy.getScenario({ hostname: '127.0.0.1', search: '?playtest=chapter-two-balance&scenario=purified-heart-pressure' }), 'purified-heart-pressure');
+assert.equal(BalancePolicy.getRemovedCorruptionLayers({ hostname: '127.0.0.1', search: '?playtest=chapter-two-balance&removedLayers=6' }), 6);
+assert.equal(BalancePolicy.getRemovedCorruptionLayers({ hostname: '127.0.0.1', search: '?playtest=chapter-two-balance&removedLayers=99' }), 6);
+assert.equal(BalancePolicy.getRemovedCorruptionLayers({ hostname: 'example.com', search: '?playtest=chapter-two-balance&removedLayers=6' }), 0);
+assert.equal(BalancePolicy.getLoadout({ hostname: '127.0.0.1', search: '?playtest=chapter-two-balance&loadout=full' }), 'full');
+
+const slots = BalancePolicy.createSlots({ EquipmentPolicy, EquipmentDropPolicy });
+assert.deepEqual(slots.map((slot) => slot.character.job), ['warrior', 'hunter', 'priest']);
+assert.deepEqual(slots.map((slot) => slot.progress.level), [25, 25, 25]);
+assert.ok(slots.every((slot) => slot.progress.party.activeMemberIds.length === 3));
+assert.ok(slots.every((slot) => slot.progress.inventory.length === 0));
+assert.ok(slots.every((slot) => Object.values(slot.progress.equipment).filter(Boolean).every((item) => !(item.runes || []).length)));
+
+const warrior = slots[0].progress.equipment;
+assert.equal(warrior.weapon.baseItemId, 'forest-guard-longsword');
+assert.equal(warrior.offhand.baseItemId, 'black-iron-guard-round-shield');
+assert.equal(warrior.gloves.baseItemId, 'starter-recruit-iron-gauntlets');
+assert.deepEqual(warrior.weapon.affixes.map((entry) => entry.id), ['accuracy_percent', 'attack_speed_percent', 'max_hp_flat']);
+assert.ok(warrior.weapon.affixes.every((entry) => !['boss_damage_percent', 'elite_damage_percent'].includes(entry.id)));
+
+const purifiedSlots = BalancePolicy.createSlots({
+  EquipmentPolicy,
+  EquipmentDropPolicy,
+  location: {
+    hostname: '127.0.0.1',
+    search: '?playtest=chapter-two-balance&map=black-forest-depths&scenario=purified-heart-pressure&removedLayers=6'
+  }
+});
+assert.ok(purifiedSlots.every((slot) => slot.progress.blackForestCorruption.removedLayers === 6));
+assert.ok(purifiedSlots.every((slot) => slot.progress.selectedMapId === 'black-forest-depths'));
+
+const fullLoadoutSlots = BalancePolicy.createSlots({
+  EquipmentPolicy,
+  EquipmentDropPolicy,
+  location: { hostname: '127.0.0.1', search: '?playtest=chapter-two-balance&loadout=full' }
+});
+assert.deepEqual(
+  fullLoadoutSlots.map((slot) => [slot.progress.equipment.gloves.baseItemId, slot.progress.equipment.pants.baseItemId, slot.progress.equipment.boots.baseItemId]),
+  [
+    ['blackstone-corrupted-gauntlets', 'blackstone-corrupted-legguards', 'blackstone-corrupted-warboots'],
+    ['deepwood-hunter-gloves', 'deepwood-hunter-legguards', 'deepwood-hunter-boots'],
+    ['spiritweave-spellgloves', 'spiritweave-pants', 'spiritweave-boots']
+  ]
+);
+assert.ok(fullLoadoutSlots.every((slot) => Object.values(slot.progress.equipment).filter(Boolean).every((item) => !(item.runes || []).length)));
+
+const script = fs.readFileSync(path.join(__dirname, '..', 'script.js'), 'utf8');
+assert.match(script, /getScenario\(\) === 'purified-heart-pressure'[\s\S]*'heartOfTheBlackForest',[\s\S]*'forestSpirit',[\s\S]*'darkSporeBeast',[\s\S]*'corruptedBlackstoneCenturion'/);
+
+console.log('chapter-two balance playtest policy tests passed');
