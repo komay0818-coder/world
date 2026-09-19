@@ -23,6 +23,9 @@ assert.equal(policy.getMonstersByRank('boss').length, 1);
 assert.equal(policy.getMonster('blackstone-poison-spider').ownerFaction, 'blackstone-bandits');
 assert.deepEqual(policy.getMonster('blackstone-poison-spider').tags, ['beast', 'poison', 'spider']);
 const blackstoneMonsterImageVersion = '?v=20260920-blackstone-trail-monsters-v2';
+const sharedPlainsDepthsImageVersion = '?v=20260920-shared-plains-depths-v2';
+assert.equal(policy.getMonster('blackstone-trail-scout').image, `assets/plains-depths-blackstone-scout.png${sharedPlainsDepthsImageVersion}`);
+assert.equal(policy.getMonster('blackstone-trail-raider').image, `assets/plains-depths-blackstone-raider.png${sharedPlainsDepthsImageVersion}`);
 assert.equal(policy.getMonster('blackstone-poison-spider').image, `assets/blackstone-poison-spider.png${blackstoneMonsterImageVersion}`);
 assert.equal(policy.getMonster('blackstone-archer').image, `assets/blackstone-archer.png${blackstoneMonsterImageVersion}`);
 assert.equal(policy.getMonster('blackstone-beastmaster').image, `assets/blackstone-beastmaster.png${blackstoneMonsterImageVersion}`);
@@ -38,7 +41,7 @@ assert.ok(policy.MONSTERS.every((monster) => monster.level[0] === 17 && monster.
   && monster.stats.attack > 0 && monster.stats.defense >= 0 && monster.stats.attackSpeed > 0
   && monster.dropTableId === 'black-forest-trail-pending' && monster.aiProfileId !== null
   && monster.skillIds.length > 0 && monster.implemented === true));
-assert.ok(policy.MONSTERS.filter((monster) => !['blackstone-poison-spider', 'blackstone-archer', 'blackstone-beastmaster', 'blackstone-captain', 'blackstone-centurion'].includes(monster.id)).every((monster) => monster.image === null));
+assert.ok(policy.MONSTERS.every((monster) => monster.image !== null));
 assert.equal(policy.getMonster('unknown'), null);
 assert.deepEqual(policy.getCombatPool(), {
   normal: ['blackstoneTrailScout', 'blackstoneTrailRaider', 'blackstoneArcher', 'blackstonePoisonSpider'],
@@ -109,6 +112,13 @@ for (const rank of ['normal', 'elite', 'boss']) {
 const background = fs.readFileSync(path.join(__dirname, '..', policy.MAP.background));
 assert.equal(background.subarray(1, 4).toString(), 'PNG', 'the Black Forest trail background is a PNG asset');
 assert.equal(background[25], 2, 'the Black Forest trail background uses RGB color');
+for (const monsterId of ['blackstone-trail-scout', 'blackstone-trail-raider']) {
+  const monster = policy.getMonster(monsterId);
+  const png = fs.readFileSync(path.join(__dirname, '..', monster.image.split('?')[0]));
+  assert.equal(png.readUInt32BE(16), 1024, `${monster.name} uses the shared canvas width`);
+  assert.equal(png.readUInt32BE(20), 1024, `${monster.name} uses the shared canvas height`);
+  assert.equal(png[25], 6, `${monster.name} uses RGBA color with transparency`);
+}
 const poisonSpider = fs.readFileSync(path.join(__dirname, '..', policy.getMonster('blackstone-poison-spider').image.split('?')[0]));
 assert.equal(poisonSpider.subarray(1, 4).toString(), 'PNG', 'the Blackstone poison spider is a PNG asset');
 assert.equal(poisonSpider[25], 6, 'the Blackstone poison spider uses RGBA color with transparency');

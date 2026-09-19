@@ -17,7 +17,7 @@ const imagePaths = new Set(
     .filter(Boolean)
 );
 
-assert.equal(imagePaths.size, 36, 'all chapter-two monster canvases are covered');
+assert.equal(imagePaths.size, 38, 'all chapter-two monster canvases are covered');
 for (const imagePath of imagePaths) {
   const png = fs.readFileSync(path.join(__dirname, '..', imagePath));
   assert.equal(png.subarray(1, 4).toString(), 'PNG', `${imagePath} is a PNG`);
