@@ -23,6 +23,18 @@
     'redrock-giant-lizard': Object.freeze(['giant-jaw-rend','rock-armor','wasteland-fury'])
   });
   const ACTIVE_SKILL_BY_ENEMY = Object.freeze({ 'wasteland-vulture':'dive', 'skullcrusher-scout':'armor-breaking-throw', 'redrock-hornbeast':'frenzied-charge', 'redrock-giant-lizard':'giant-jaw-rend' });
+  const MONSTERS = Object.freeze([
+    Object.freeze({id:'wasteland-hyena',name:'荒原鬣狗',maxHp:748,attack:94,defense:40,evasion:19,parry:0,damageReduction:6,attackSpeed:1.50,xp:82,gold:41}),
+    Object.freeze({id:'redrock-lizard',name:'赤岩蜥蜴',maxHp:1127,attack:87,defense:83,evasion:3,parry:8,damageReduction:18,attackSpeed:.78,xp:88,gold:45}),
+    Object.freeze({id:'wasteland-vulture',name:'荒原禿鷹',maxHp:874,attack:83,defense:51,evasion:16,parry:0,damageReduction:8,attackSpeed:1.10,xp:90,gold:50}),
+    Object.freeze({id:'skullcrusher-scout',name:'碎顱斥候',maxHp:943,attack:101,defense:55,evasion:8,parry:8,damageReduction:10,attackSpeed:.95,xp:92,gold:48}),
+    Object.freeze({id:'redrock-hornbeast',name:'赤岩角獸',maxHp:3105,attack:127,defense:106,evasion:4,parry:18,damageReduction:22,attackSpeed:.88,xp:340,gold:210,isElite:true}),
+    Object.freeze({id:'redrock-giant-lizard',name:'赤岩巨蜥',maxHp:13800,attack:152,defense:121,evasion:5,parry:12,damageReduction:24,attackSpeed:.92,xp:1500,gold:900,isBoss:true})
+  ]);
+  const MONSTER_BY_ID = Object.freeze(Object.fromEntries(MONSTERS.map((monster) => [monster.id, monster])));
+  const COMBAT_POOL = Object.freeze({normal:Object.freeze(MONSTERS.slice(0,4).map((monster)=>monster.id)),elite:Object.freeze(['redrock-hornbeast']),boss:Object.freeze(['redrock-giant-lizard'])});
+  function getCombatMonster(id){const monster=MONSTER_BY_ID[id];if(!monster)return null;return {...monster,level:30,mapId:MAP_ID,faction:id.startsWith('skullcrusher-')?'skullcrusher-tribe':'redrock-wildlife',artClass:`monster-image-art ${id}`,image:`assets/${id}.png`,skillIds:getEnemySkills(id)};}
+  function getCombatPool(){return COMBAT_POOL;}
   function telemetry(){return {skillCasts:{},dotApplications:{},dotTicks:{},debuffApplications:{},stuns:0,thresholdTriggers:{woundedFrenzy:0,rockArmorWeakened:0,wastelandFury:0},rockArmorTransitions:0};}
   function createState(now=0){return {nextSkillAt:{},woundedFrenzy:false,rockArmorWeakened:false,wastelandFury:false,previousHpRatio:1,telemetry:telemetry(),startedAt:now};}
   function record(bucket,key,amount=1){bucket[key]=(bucket[key]||0)+amount;}
@@ -39,5 +51,5 @@
     if(enemyId==='redrock-giant-lizard'&&!state.wastelandFury&&previous>=.30&&ratio<.30){state.wastelandFury=true;state.telemetry.thresholdTriggers.wastelandFury++;events.push('wasteland-fury');}
     state.previousHpRatio=ratio;return events;}
   function getCombatMultipliers(enemyId,state){return {attack:1+(enemyId==='redrock-hornbeast'&&state?.woundedFrenzy?SKILLS['wounded-frenzy'].attackBonus:0)+(enemyId==='redrock-giant-lizard'&&state?.wastelandFury?SKILLS['wasteland-fury'].attackBonus:0),attackSpeed:1+(enemyId==='redrock-hornbeast'&&state?.woundedFrenzy?SKILLS['wounded-frenzy'].attackSpeedBonus:0)+(enemyId==='redrock-giant-lizard'&&state?.wastelandFury?SKILLS['wasteland-fury'].attackSpeedBonus:0),defense:enemyId==='redrock-lizard'?1+SKILLS['hardened-scales'].defenseBonus:enemyId==='redrock-giant-lizard'?1+(state?.rockArmorWeakened?SKILLS['rock-armor'].weakenedDefenseBonus:SKILLS['rock-armor'].defenseBonus):1};}
-  return Object.freeze({MAP_ID,SKILLS,ENEMY_SKILLS,getSkill,getEnemySkills,createState,initializeSchedule,resolveScheduledAction,resolveHyenaBasicHit,createDot,recordDotApplication,recordDotTick,recordDebuff,resolveStun,updateThresholds,getCombatMultipliers});
+  return Object.freeze({MAP_ID,SKILLS,ENEMY_SKILLS,MONSTERS,getSkill,getEnemySkills,getCombatMonster,getCombatPool,createState,initializeSchedule,resolveScheduledAction,resolveHyenaBasicHit,createDot,recordDotApplication,recordDotTick,recordDebuff,resolveStun,updateThresholds,getCombatMultipliers});
 });

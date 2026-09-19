@@ -96,7 +96,8 @@ const mapProgression = [
   { id: 'goblin-camp', chapter: 1, regionOf: 'beginner-plains', min: 2, max: 5, monsterMin: 8, monsterMax: 12, name: '哥布林營地', background: 'assets/goblin-camp-background.png', implemented: true, dungeon: true, ticketItemId: 'goblin-camp-map', normalXp: 10, eliteXp: 28, bossXp: 120, recommended: { attack: 18, defense: 5, hp: 120 } },
   { id: ChapterTwoMapPolicy.CHAPTER.id, chapter: 2, min: 15, max: 30, chapterLevelRange: [15, 30], name: ChapterTwoMapPolicy.CHAPTER.name, background: ChapterTwoMapPolicy.CHAPTER.background, implemented: true, regionHub: true, contentStatus: 'planned', previousMapId: 'plains-depths', recommended: { attack: 0, defense: 0, hp: 0 } },
   ...ChapterTwoMapPolicy.MAPS,
-  { id: ChapterThreeMapPolicy.CHAPTER.id, chapter: 3, min: null, max: null, name: ChapterThreeMapPolicy.CHAPTER.name, background: '', implemented: false, chapterEntry: true, regionHub: true, contentStatus: ChapterThreeMapPolicy.CHAPTER.contentStatus, previousMapId: ChapterThreeMapPolicy.CHAPTER.previousMapId, recommended: { attack: 0, defense: 0, hp: 0 } },
+  { id: ChapterThreeMapPolicy.CHAPTER.id, chapter: 3, min: 30, max: 45, name: ChapterThreeMapPolicy.CHAPTER.name, background: '', implemented: true, regionHub: true, contentStatus: 'partially-playable', previousMapId: ChapterThreeMapPolicy.CHAPTER.previousMapId, recommended: { attack: 0, defense: 0, hp: 0 } },
+  ...ChapterThreeMapPolicy.MAPS,
   { min: 10, max: 15, name: '石牙山谷', normalXp: 8, eliteXp: 35, bossXp: 140 },
   { min: 15, max: 20, name: '荒蕪沙漠', normalXp: 18, eliteXp: 70, bossXp: 280 },
   { min: 20, max: 25, name: '冰霜高原', normalXp: 35, eliteXp: 140, bossXp: 560 },
@@ -659,7 +660,8 @@ const monsterTypes = EquipmentDropPolicy.applyDefaultLootConfigs({
   ...Object.fromEntries(SpiderNestPolicy.MONSTERS.map((entry) => [entry.combatId, SpiderNestPolicy.toCombatMonster(entry)])),
   ...Object.fromEntries(BlackstoneStrongholdPolicy.MONSTERS.map((entry) => [entry.combatId, BlackstoneStrongholdPolicy.toCombatMonster(entry)])),
   ...Object.fromEntries(ForestAltarPolicy.MONSTERS.map((entry) => [entry.combatId, ForestAltarPolicy.toCombatMonster(entry)])),
-  ...Object.fromEntries(BlackForestDepthsPolicy.MONSTERS.map((entry) => [entry.combatId, BlackForestDepthsPolicy.toCombatMonster(entry)]))
+  ...Object.fromEntries(BlackForestDepthsPolicy.MONSTERS.map((entry) => [entry.combatId, BlackForestDepthsPolicy.toCombatMonster(entry)])),
+  ...Object.fromEntries(RedrockWastesPolicy.MONSTERS.map((entry) => [entry.id, RedrockWastesPolicy.getCombatMonster(entry.id)]))
 });
 const normalMonsterIds = ['goblin', 'wolf', 'boar'];
 const eliteMonsterIds = ['goblinOverlord', 'wolfAlpha', 'boarTyrant'];
@@ -733,6 +735,7 @@ const mapMonsterPools = {
   blackstoneStronghold: BlackstoneStrongholdPolicy.getCombatPool(),
   forestAltar: ForestAltarPolicy.getCombatPool(),
   blackForestDepths: BlackForestDepthsPolicy.getCombatPool(),
+  redrockWastes: RedrockWastesPolicy.getCombatPool(),
   beginner: { normal: normalMonsterIds, elite: eliteMonsterIds, boss: bossMonsterIds },
   blackForest: { normal: ['nightGoblin', 'shadowWolf', 'thornBoar'], elite: ['forestShaman', 'moonfangAlpha', 'thornbackTyrant'], boss: ['forestGuardian'] }
 };
@@ -765,7 +768,8 @@ const dropLookupMapPools = {
   'spider-nest': mapMonsterPools.spiderNest,
   'blackstone-stronghold': mapMonsterPools.blackstoneStronghold,
   'forest-altar': mapMonsterPools.forestAltar,
-  'black-forest-depths': mapMonsterPools.blackForestDepths
+  'black-forest-depths': mapMonsterPools.blackForestDepths,
+  'redrock-wastes-entrance': mapMonsterPools.redrockWastes
 };
 
 const potionDropRate = .10;
@@ -1209,6 +1213,7 @@ function getProgress() {
     skillLevels: {},
     blackForestCorruption: BlackForestCorruptionPolicy.normalizeState(null),
     chapterTwoProgress: ChapterTwoProgressionPolicy.createDefaultState(),
+    chapterThreeProgress: ChapterThreeProgressionPolicy.createDefaultState(),
     unlockedChapter: 1,
     selectedMapId: 'beginner-plains',
     inventory: [],
@@ -1225,6 +1230,7 @@ function getProgress() {
   ChapterOneProgressionPolicy.normalize(normalizedProgress);
   ChapterTwoProgressionPolicy.normalize(normalizedProgress);
   ChapterThreeMapPolicy.normalizeChapterUnlock(normalizedProgress);
+  ChapterThreeProgressionPolicy.normalize(normalizedProgress);
   const isBlackForestEntrancePlaytest = Boolean(getBlackForestEntrancePlaytestConfig().partySize);
   if (isBlackForestEntrancePlaytest) {
     normalizedProgress.unlockedChapter = Math.max(2, Number(normalizedProgress.unlockedChapter) || 1);
@@ -1358,6 +1364,7 @@ function saveProgress(progress) {
   normalizeCurrentParty(progress);
   progress.village = VillagePolicy.normalizeVillageData(progress.village);
   ChapterTwoProgressionPolicy.normalize(progress);
+  ChapterThreeProgressionPolicy.normalize(progress);
   const playtestProgressKey = getLocalPlaytestProgressKey();
   if (playtestProgressKey) {
     sessionStorage.setItem(playtestProgressKey, JSON.stringify(progress));
@@ -2054,6 +2061,7 @@ function getMonsterPool(level = getProgress().level) {
   if (mapId === 'blackstone-stronghold') return mapMonsterPools.blackstoneStronghold;
   if (mapId === 'forest-altar') return mapMonsterPools.forestAltar;
   if (mapId === 'black-forest-depths') return mapMonsterPools.blackForestDepths;
+  if (mapId === 'redrock-wastes-entrance') return mapMonsterPools.redrockWastes;
   return mapId === 'black-forest' ? mapMonsterPools.blackForest : mapMonsterPools.beginner;
 }
 
@@ -2146,6 +2154,7 @@ function getMonsterDefinitionForMap(type, mapId = battle.dungeonId || getActiveM
   }
   if (mapId === 'forest-altar') return ForestAltarPolicy.getCombatMonster(type) || monsterTypes.goblin;
   if (mapId === 'black-forest-depths') return BlackForestDepthsPolicy.getCombatMonster(type) || monsterTypes.goblin;
+  if (mapId === 'redrock-wastes-entrance') return RedrockWastesPolicy.getCombatMonster(type) || monsterTypes.goblin;
   const monster = monsterTypes[type] || monsterTypes.goblin;
   const chapterMonster = ChapterOneLevelPolicy.scaleMonster(monster, mapId, level);
   const dungeonMonster = GoblinCampPolicy.scaleMonster(chapterMonster, mapId === 'goblin-camp');
@@ -2170,6 +2179,8 @@ function createEnemyLevels(enemyTypes, mapId, random = Math.random) {
           ? ForestAltarPolicy.rollLevel(type)
         : mapId === 'black-forest-depths'
           ? BlackForestDepthsPolicy.rollLevel(type)
+        : mapId === 'redrock-wastes-entrance'
+          ? 30
       : ChapterOneLevelPolicy.rollLevel(mapId, type, random()) ?? null);
 }
 
@@ -2280,6 +2291,8 @@ function getMonsterAttackPower(enemy, progress = getProgress(), currentHp = enem
   const strongholdMultiplier = BlackstoneStrongholdPolicy.getCombatMultipliers(enemy.id, currentHp, enemy.maxHp).attack;
   const forestAltarMultiplier = ForestAltarPolicy.getCombatMultipliers(enemy.id, currentHp, enemy.maxHp).attack;
   const depthsMultiplier = BlackForestDepthsPolicy.getCombatMultipliers(enemy.id, currentHp, enemy.maxHp, getBlackForestDepthsCombatContext()).attack;
+  const redrockState = enemy.mapId === 'redrock-wastes-entrance' ? getRedrockEnemyStateById(enemy.id, currentHp, enemy.maxHp) : null;
+  const redrockMultiplier = RedrockWastesPolicy.getCombatMultipliers(enemy.id, redrockState).attack;
   const strongholdCommandMultiplier = enemy.mapId === 'blackstone-stronghold' && Date.now() < (battle.strongholdCommandUntil || 0)
     ? 1 + BlackstoneStrongholdPolicy.LION_GUARD.roarAttackBonus : 1;
   const strongholdEnrageMultiplier = enemy.mapId === 'blackstone-stronghold'
@@ -2290,7 +2303,7 @@ function getMonsterAttackPower(enemy, progress = getProgress(), currentHp = enem
     ? 1 + BlackForestTrailPolicy.BEASTMASTER.spiderAttackBonus : 1;
   const nestSpiderCommandMultiplier = ['spiderNestBlackstonePoisonSpider', 'venomSpitterSpider', 'webWeaver', 'giantSpider'].includes(enemy.id)
     && Date.now() < (battle.spiderNestCommandUntil || 0) ? 1 + SpiderNestPolicy.BEASTMASTER.spiderAttackBonus : 1;
-  if (enemy.mapId) return Math.max(1, Math.round((enemy.attack || 1) * randomMultiplier * bloodFrenzy * irritable * plainsIrritable * blackForestMultiplier * blackForestTrailMultiplier * spiderNestMultiplier * strongholdMultiplier * forestAltarMultiplier * depthsMultiplier * strongholdCommandMultiplier * strongholdEnrageMultiplier * commandMultiplier * beastCommandMultiplier * nestSpiderCommandMultiplier));
+  if (enemy.mapId) return Math.max(1, Math.round((enemy.attack || 1) * randomMultiplier * bloodFrenzy * irritable * plainsIrritable * blackForestMultiplier * blackForestTrailMultiplier * spiderNestMultiplier * strongholdMultiplier * forestAltarMultiplier * depthsMultiplier * redrockMultiplier * strongholdCommandMultiplier * strongholdEnrageMultiplier * commandMultiplier * beastCommandMultiplier * nestSpiderCommandMultiplier));
   const map = getActiveMap(progress);
   const monsterLevel = Math.min(map.max, Math.max(map.min, progress.level));
   const levelMultiplier = 1 + (monsterLevel - 1) * .10;
@@ -2308,13 +2321,15 @@ function getMonsterAttackInterval(enemy, currentHp = enemy.maxHp) {
   const strongholdMultiplier = BlackstoneStrongholdPolicy.getCombatMultipliers(enemy.id, currentHp, enemy.maxHp).attackSpeed;
   const forestAltarMultiplier = ForestAltarPolicy.getCombatMultipliers(enemy.id, currentHp, enemy.maxHp).attackSpeed;
   const depthsMultiplier = BlackForestDepthsPolicy.getCombatMultipliers(enemy.id, currentHp, enemy.maxHp, getBlackForestDepthsCombatContext()).attackSpeed;
+  const redrockState = enemy.mapId === 'redrock-wastes-entrance' ? getRedrockEnemyStateById(enemy.id, currentHp, enemy.maxHp) : null;
+  const redrockMultiplier = RedrockWastesPolicy.getCombatMultipliers(enemy.id, redrockState).attackSpeed;
   const strongholdEnrageMultiplier = enemy.mapId === 'blackstone-stronghold'
     ? 1 + BlackstoneStrongholdPolicy.getEnrage(battle.blackstoneStrongholdState, Date.now()).attackSpeedBonus : 1;
   const beastCommandMultiplier = enemy.id === 'blackstonePoisonSpider' && Date.now() < (battle.blackstoneSpiderCommandUntil || 0)
     ? 1 + BlackForestTrailPolicy.BEASTMASTER.spiderAttackSpeedBonus : 1;
   const nestSpiderCommandMultiplier = ['spiderNestBlackstonePoisonSpider', 'venomSpitterSpider', 'webWeaver', 'giantSpider'].includes(enemy.id)
     && Date.now() < (battle.spiderNestCommandUntil || 0) ? 1 + SpiderNestPolicy.BEASTMASTER.spiderAttackSpeedBonus : 1;
-  return Math.max(250, (enemy.attackInterval || (1000 / (enemy.attackSpeed || 1))) / bloodFrenzy / irritable / plainsIrritable / blackForestMultiplier / blackForestTrailMultiplier / spiderNestMultiplier / strongholdMultiplier / forestAltarMultiplier / depthsMultiplier / strongholdEnrageMultiplier / beastCommandMultiplier / nestSpiderCommandMultiplier);
+  return Math.max(250, (enemy.attackInterval || (1000 / (enemy.attackSpeed || 1))) / bloodFrenzy / irritable / plainsIrritable / blackForestMultiplier / blackForestTrailMultiplier / spiderNestMultiplier / strongholdMultiplier / forestAltarMultiplier / depthsMultiplier / redrockMultiplier / strongholdEnrageMultiplier / beastCommandMultiplier / nestSpiderCommandMultiplier);
 }
 
 function createEnemyAttackSchedule(enemyTypes, startAt = Date.now(), mapId = getActiveMap(getProgress()).id, enemyLevels = []) {
@@ -2892,7 +2907,7 @@ function renderMapSelector() {
     const dungeonPassName = map.ticketItemId ? '哥布林營地地圖' : '祭壇鑰匙';
     const detail = isRegionHub
       ? map.chapter === 3
-        ? `<em>${unlocked ? '第三章已解鎖・內容開發中／尚未開放' : '完成第二章後解鎖・內容尚未開放'}</em>`
+        ? `<em>${unlocked ? '第三章已解鎖・3-1 赤岩荒原已開放' : '完成第二章後解鎖'}</em>`
         : map.id === 'black-forest'
         ? '<em>第二章 Lv15～30・承接平原深處的黑石山賊主線・目前僅完成地圖架構</em>'
         : `<em>包含 ${regionCount} 個探索區域・怪物與掉落物將陸續追加</em>`
@@ -2947,6 +2962,33 @@ function renderBeginnerPlainsRegions() {
   modal.classList.remove('hidden');
 }
 
+function renderRedrockWastesRegions() {
+  const progress = getProgress();
+  const activeMap = getActiveMap(progress);
+  const modal = document.querySelector('#inventory-modal');
+  document.querySelector('#inventory-title').textContent = '第三章・赤岩荒原';
+  document.querySelector('#inventory-content').innerHTML = `
+    <button type="button" class="map-region-back" data-map-region-back>← 返回地區選擇</button>
+    <section class="region-overview-card">
+      <div><b>赤岩荒原</b><small>第三章</small></div>
+      <em>${ChapterThreeMapPolicy.CHAPTER.summary}</em>
+    </section>
+    <section class="map-region-grid">${ChapterThreeMapPolicy.MAPS.map((region, index) => {
+      const status = ChapterThreeProgressionPolicy.getMapState(progress, region.id, region.implemented);
+      const stateClass = !status.implemented ? 'pending locked' : status.unlocked ? 'available' : 'locked';
+      const action = !status.implemented
+        ? `<em>${status.unlocked ? '已解鎖・尚未開放' : '規劃中／尚未開放'}</em>`
+        : !status.unlocked
+          ? '<em>尚未解鎖</em>'
+          : activeMap.id === region.id && !progress.requiresMapSelectionAfterDefeat
+            ? `<em class="current-region">目前區域${status.cleared ? '・已通關' : ''}</em>`
+            : `<button type="button" data-select-map="${region.id}">${status.cleared ? '再次進入' : '進入區域'}</button>`;
+      return `<article class="map-region-card ${stateClass}"><span>${String(index + 1).padStart(2, '0')}</span><div><b>${region.name}</b><small>${region.id === 'redrock-wastes-entrance' ? '專屬怪物池・赤岩角獸・赤岩巨蜥' : '尚未開放'}</small></div>${action}</article>`;
+    }).join('')}</section>`;
+  modal.dataset.view = 'redrock-wastes-regions';
+  modal.classList.remove('hidden');
+}
+
 function selectAdventureMap(mapId) {
   const progress = getProgress();
   const map = mapProgression.find((item) => item.id === mapId && item.implemented);
@@ -2957,6 +2999,7 @@ function selectAdventureMap(mapId) {
     return;
   }
   if (map.chapter === 2 && (!ChapterOneProgressionPolicy.isUnlocked(progress, 'black-forest') || progress.level < map.min || !ChapterTwoProgressionPolicy.canEnter(progress, map.id, map.implemented))) return;
+  if (map.chapter === 3 && !ChapterThreeProgressionPolicy.canEnter(progress, map.id, map.implemented)) return;
   if (map.chapter === 2) BlackForestCorruptionPolicy.enterChapter(progress);
   if (map.dungeon) {
     if (map.ticketItemId) {
@@ -4724,6 +4767,14 @@ function rewardVictory(index) {
       }
     }
   }
+  if (currentMap.chapter === 3 && enemy.isBoss) {
+    const chapterThreeResult = ChapterThreeProgressionPolicy.recordBossKill(progress, currentMap.id, enemy);
+    if (chapterThreeResult.firstClear) {
+      const nextMap = ChapterThreeMapPolicy.getMap(chapterThreeResult.nextMapId);
+      showToast(`${nextMap?.name || chapterThreeResult.nextMapId}已解鎖・尚未開放`);
+      logBattle(`◆ 首次擊敗赤岩巨蜥，${nextMap?.name || chapterThreeResult.nextMapId}已解鎖。`, 'progress');
+    }
+  }
   addRoundLoot('gold', '金幣', earnedGold, '🪙', '+');
   if (loot) addRoundLoot(`loot:${loot.name}`, loot.name, loot.quantity || 1, loot.kind === 'consumable' ? '🧪' : '◆');
   materialDrops.forEach((material) => addRoundLoot(`material:${material.id || material.name}`, material.name, material.quantity || 1, material.icon || '◆'));
@@ -4852,6 +4903,7 @@ function processEnemyRespawns() {
       battle.enemyDots[index] = [];
       applyPendingRoguePlagueSpread(index, battle.enemySpawnedAt[index]);
       if (battle.enemySkillStates) battle.enemySkillStates[index] = null;
+      if (battle.redrockEnemyStates) battle.redrockEnemyStates[index] = null;
       if (battle.enemyBoarEnraged) battle.enemyBoarEnraged[index] = false;
       battle.enemyNextAttackAt[index] = Date.now() + getMonsterAttackInterval(getEnemyDefinition(index));
       if (getEnemyDefinition(index).isBoss) {
@@ -4992,6 +5044,18 @@ function getEnemySkillState(index) {
   return battle.enemySkillStates[index];
 }
 
+function getRedrockEnemyState(index, currentHp = null, maxHp = null) {
+  battle.redrockEnemyStates = Array.isArray(battle.redrockEnemyStates) ? battle.redrockEnemyStates : [];
+  battle.redrockEnemyStates[index] = battle.redrockEnemyStates[index] || RedrockWastesPolicy.createState(Date.now());
+  if (currentHp !== null && maxHp !== null) RedrockWastesPolicy.updateThresholds(battle.enemyTypes[index], battle.redrockEnemyStates[index], currentHp, maxHp);
+  return battle.redrockEnemyStates[index];
+}
+
+function getRedrockEnemyStateById(enemyId, currentHp, maxHp) {
+  const index = (battle.enemyTypes || []).findIndex((type, candidate) => type === enemyId && battle.enemyHps?.[candidate] > 0);
+  return index >= 0 ? getRedrockEnemyState(index, currentHp, maxHp) : RedrockWastesPolicy.createState(Date.now());
+}
+
 function getMageShockKey(member) { return member?.id || member?.character?.id || ''; }
 
 function getMageShockState(index, member) {
@@ -5077,6 +5141,8 @@ function applyDamageToMonster(index, baseDamage, profile, options = {}) {
   const strongholdMultipliers = BlackstoneStrongholdPolicy.getCombatMultipliers(enemy.id, battle.enemyHps[index], enemy.maxHp);
   const forestAltarMultipliers = ForestAltarPolicy.getCombatMultipliers(enemy.id, battle.enemyHps[index], enemy.maxHp);
   const depthsMultipliers = BlackForestDepthsPolicy.getCombatMultipliers(enemy.id, battle.enemyHps[index], enemy.maxHp, getBlackForestDepthsCombatContext());
+  const redrockMultipliers = RedrockWastesPolicy.getCombatMultipliers(enemy.id,
+    enemy.mapId === 'redrock-wastes-entrance' ? getRedrockEnemyState(index, battle.enemyHps[index], enemy.maxHp) : null);
   const armorIgnore = ArmorPenetrationPolicy.getTotalArmorIgnore({
     skillArmorIgnore: options.armorIgnore,
     equipmentArmorPenetration: attackerStats.armorPenetrationPercent + warriorRuntime.armorPenetration,
@@ -5088,7 +5154,7 @@ function applyDamageToMonster(index, baseDamage, profile, options = {}) {
   const rogueDefenseMultiplier = 1 - RogueAdvancementPolicy.getTargetDefenseReduction(battle.enemyDots[index]);
   const defendedEnemy = {
     ...enemy,
-    defense: Math.max(0, Math.round(enemy.defense * armorShatterMultiplier * (1 - armorIgnore) * rogueDefenseMultiplier * (1 - Math.min(.9, (battle.enemyDots[index] || []).filter((dot) => dot.type === 'poison').reduce((total, dot) => total + (dot.defenseReduction || 0), 0))) * trailMultipliers.defense * spiderNestMultipliers.defense * strongholdMultipliers.defense * forestAltarMultipliers.defense * depthsMultipliers.defense)),
+    defense: Math.max(0, Math.round(enemy.defense * armorShatterMultiplier * (1 - armorIgnore) * rogueDefenseMultiplier * (1 - Math.min(.9, (battle.enemyDots[index] || []).filter((dot) => dot.type === 'poison').reduce((total, dot) => total + (dot.defenseReduction || 0), 0))) * trailMultipliers.defense * spiderNestMultipliers.defense * strongholdMultipliers.defense * forestAltarMultipliers.defense * depthsMultipliers.defense * redrockMultipliers.defense)),
     evasion: (enemy.evasion || 0) + (trailMultipliers.evasion || 0) + (spiderNestMultipliers.evasion || 0) + (strongholdMultipliers.evasion || 0) + (forestAltarMultipliers.evasion || 0) + (depthsMultipliers.evasion || 0) + (assassinDashActive ? SpiderNestPolicy.ASSASSIN.dashEvasionBonus : 0),
     parry: (enemy.parry || 0) + (captainShieldActive ? BlackForestTrailPolicy.CAPTAIN.shieldParryBonus : 0)
   };
@@ -6915,7 +6981,10 @@ function enemyAttackTick() {
       targetId: target.id,
       targetName: target.name
     });
-    const stats = getCharacterStats(target.level, target.progress, target.character);
+    const baseStats = getCharacterStats(target.level, target.progress, target.character);
+    const stats = now < (target.redrockDefenseDownUntil || 0)
+      ? { ...baseStats, defense: Math.max(0, Math.round(baseStats.defense * (1 - (target.redrockDefenseDown || 0)))) }
+      : baseStats;
     const lowHealthAssassin = target.job === 'assassin' && target.level >= 20 && target.currentHp / target.maxHp <= .3;
     if (!lowHealthAssassin) target.desperateLowActive = false;
     if (lowHealthAssassin && !target.desperateLowActive) {
@@ -6943,7 +7012,13 @@ function enemyAttackTick() {
         logBattle(`💨 ${target.name}觸發【閃現】，完全避開攻擊！`, 'system');
       }
     }
-    const critical = !dodged && Math.random() < (enemy.criticalChance ?? (enemy.isBoss ? .15 : enemy.isElite ? .10 : .05));
+    const redrockState = getActiveMap(progress).id === 'redrock-wastes-entrance'
+      ? getRedrockEnemyState(enemyIndex, enemyCurrentHp, enemy.maxHp) : null;
+    const redrockAction = redrockState
+      ? (RedrockWastesPolicy.resolveScheduledAction(enemy.id, redrockState, now)
+        || (enemy.id === 'wasteland-hyena' ? RedrockWastesPolicy.resolveHyenaBasicHit(redrockState, Math.random()) : null))
+      : null;
+    const critical = !dodged && Math.random() < ((enemy.criticalChance ?? (enemy.isBoss ? .15 : enemy.isElite ? .10 : .05)) + (redrockAction?.criticalBonus || 0));
     const blackForestAction = getActiveMap(progress).id === 'black-forest-entrance'
       ? BlackForestEntrancePolicy.resolveAction(enemy.id, Math.random(), target.currentHp / target.maxHp, enemyCurrentHp, enemy.maxHp)
       : 'attack';
@@ -7063,7 +7138,8 @@ function enemyAttackTick() {
       * SpiderNestPolicy.getDamageMultiplier(spiderNestAction, poisonStacks)
       * BlackstoneStrongholdPolicy.getDamageMultiplier(strongholdAction)
       * ForestAltarPolicy.getDamageMultiplier(forestAltarAction)
-      * BlackForestDepthsPolicy.getDamageMultiplier(blackForestDepthsAction);
+      * BlackForestDepthsPolicy.getDamageMultiplier(blackForestDepthsAction)
+      * (redrockAction?.damageMultiplier || 1);
     const marked = now < (target.blackstoneMarkedUntil || 0);
     const markedHumanBonus = marked && enemy.faction === 'blackstone-bandits'
       ? 1 + BlackForestTrailPolicy.MARK.blackstoneHumanDamageBonus : 1;
@@ -7272,6 +7348,25 @@ function enemyAttackTick() {
     }
     const depthsActionNames = { 'depths-shadow-bite': '暗影撕咬', 'spore-eruption': '孢子噴發', 'corruption-pulse': '腐化脈衝' };
     if (!dodged && damage > 0 && depthsActionNames[blackForestDepthsAction]) logBattle(`⚔【${enemy.name}】施放【${depthsActionNames[blackForestDepthsAction]}】！`, 'system');
+    if (!dodged && damage > 0 && redrockAction?.dot) {
+      const dot = RedrockWastesPolicy.createDot(redrockAction.id, enemy.id, enemy.attack);
+      target.bleed = { effectName: redrockAction.name, tickMs: dot.tickMs, tickDamage: Math.max(1, Math.ceil(dot.damage)), nextTickAt: now + dot.tickMs, expiresAt: now + dot.durationMs };
+      RedrockWastesPolicy.recordDotApplication(redrockState, redrockAction.id);
+      logBattle(`🩸【${enemy.name}】施放【${redrockAction.name}】，${target.name}陷入持續傷害。`, 'system');
+    }
+    if (!dodged && damage > 0 && redrockAction?.debuff?.type === 'defense-down') {
+      target.redrockDefenseDown = redrockAction.debuff.value;
+      target.redrockDefenseDownUntil = now + redrockAction.debuff.durationMs;
+      RedrockWastesPolicy.recordDebuff(redrockState, redrockAction.id);
+      logBattle(`🎯【${enemy.name}】施放【${redrockAction.name}】，${target.name}防禦降低 15%。`, 'system');
+    }
+    if (!dodged && damage > 0 && redrockAction?.stunChance) {
+      const stun = RedrockWastesPolicy.resolveStun(redrockState, Math.random());
+      if (stun) applyControlEffectToPlayer(target, { type: 'stun', baseDurationMs: stun.durationMs, source: redrockAction.name }, now);
+    }
+    if (!dodged && damage > 0 && redrockAction && !redrockAction.passive && !redrockAction.dot && !redrockAction.debuff) {
+      logBattle(`⚔【${enemy.name}】施放【${redrockAction.name}】！`, 'system');
+    }
 
     if (dodged) {
       logBattle(`${target.name} 閃避了 ${enemy.name} 的攻擊。`, 'damage-taken');
@@ -7346,7 +7441,7 @@ function openBattle() {
   const sessionId = ++battleSessionSequence;
   const partyMembers = buildBattlePartyMembers(battleStart);
   const mainMember = partyMembers.find((member) => member.isMain) || partyMembers[0];
-  battle = { enemyTypes, enemyLevels, enemyHps, partyMembers, playerHp: mainMember?.currentHp || getMaxHp(progress.level, progress), playerMana: mainMember?.resourceCurrent || 0, playerArrows: mainMember?.resourceType === 'arrows' ? mainMember.resourceCurrent : 0, playerShield: 0, playerStunnedUntil: 0, playerBleed: null, manaExhausted: false, playerAttackCharge: 0, hunterAttackCount: 0, lastManaRegenAt: battleStart, lastResourceUpdatedAt: battleStart, lastArrowRecoveryAt: battleStart, lastCorruptionTickAt: battleStart, lastStrongholdRegenAt: battleStart, enemyNextAttackAt: createEnemyAttackSchedule(enemyTypes, battleStart, currentMap.id, enemyLevels), enemyBoarEnraged: enemyTypes.map(() => false), enemyTrailSummoned: enemyTypes.map(() => false), enemySummonProfiles: enemyTypes.map(() => null), enemyCaptainShieldUntil: enemyTypes.map(() => 0), enemyAssassinDashUntil: enemyTypes.map(() => 0), enemySpiderNestPhase: enemyTypes.map(() => 1), blackstoneRoarUntil: 0, blackstoneCommandUntil: 0, blackstoneSpiderCommandUntil: 0, spiderNestCommandUntil: 0, strongholdCommandUntil: 0, blackstoneStrongholdState: createBlackstoneStrongholdBattleState(), globalSkillReadyAt: 0, undeadRevived: false, skillCooldowns: {}, enemyRespawns: enemyTypes.map(() => null), enemySpawnedAt: enemyTypes.map((_, index) => battleStart + index), enemyDots: enemyTypes.map(() => []), enemySkillStates: enemyTypes.map(() => null), monsterMoveSpeed: 200, targetIndexes: [], enemyDamages: enemyTypes.map(() => []), damageTimers: [], rewardedEnemyIndexes: new Set(), roundLoot: {}, isDungeon, dungeonId: isDungeon ? currentMap.id : null, dungeonWave: isDungeon ? 1 : 0, dungeonComplete: false, waveTransitioning: false, goblinScoutSummons: 0 };
+  battle = { enemyTypes, enemyLevels, enemyHps, partyMembers, playerHp: mainMember?.currentHp || getMaxHp(progress.level, progress), playerMana: mainMember?.resourceCurrent || 0, playerArrows: mainMember?.resourceType === 'arrows' ? mainMember.resourceCurrent : 0, playerShield: 0, playerStunnedUntil: 0, playerBleed: null, manaExhausted: false, playerAttackCharge: 0, hunterAttackCount: 0, lastManaRegenAt: battleStart, lastResourceUpdatedAt: battleStart, lastArrowRecoveryAt: battleStart, lastCorruptionTickAt: battleStart, lastStrongholdRegenAt: battleStart, enemyNextAttackAt: createEnemyAttackSchedule(enemyTypes, battleStart, currentMap.id, enemyLevels), enemyBoarEnraged: enemyTypes.map(() => false), enemyTrailSummoned: enemyTypes.map(() => false), enemySummonProfiles: enemyTypes.map(() => null), enemyCaptainShieldUntil: enemyTypes.map(() => 0), enemyAssassinDashUntil: enemyTypes.map(() => 0), enemySpiderNestPhase: enemyTypes.map(() => 1), blackstoneRoarUntil: 0, blackstoneCommandUntil: 0, blackstoneSpiderCommandUntil: 0, spiderNestCommandUntil: 0, strongholdCommandUntil: 0, blackstoneStrongholdState: createBlackstoneStrongholdBattleState(), globalSkillReadyAt: 0, undeadRevived: false, skillCooldowns: {}, enemyRespawns: enemyTypes.map(() => null), enemySpawnedAt: enemyTypes.map((_, index) => battleStart + index), enemyDots: enemyTypes.map(() => []), enemySkillStates: enemyTypes.map(() => null), redrockEnemyStates: enemyTypes.map(() => null), monsterMoveSpeed: 200, targetIndexes: [], enemyDamages: enemyTypes.map(() => []), damageTimers: [], rewardedEnemyIndexes: new Set(), roundLoot: {}, isDungeon, dungeonId: isDungeon ? currentMap.id : null, dungeonWave: isDungeon ? 1 : 0, dungeonComplete: false, waveTransitioning: false, goblinScoutSummons: 0 };
   battle.enemyAffixes = enemyAffixes;
   battle.sessionId = sessionId;
   clearBattleLog();
@@ -7666,6 +7761,7 @@ document.querySelector('#inventory-modal').addEventListener('click', (event) => 
   const regionHubButton = event.target.closest('[data-open-map-region]');
   if (regionHubButton) {
     if (regionHubButton.dataset.openMapRegion === 'black-forest') renderBlackForestRegions();
+    else if (regionHubButton.dataset.openMapRegion === 'redrock-wastes') renderRedrockWastesRegions();
     else renderBeginnerPlainsRegions();
     return;
   }

@@ -84,6 +84,8 @@
 
   const MAPS = Object.freeze([
     map('redrock-wastes-entrance', 1, '赤岩荒原', 10, {
+      implemented: true, contentStatus: 'combat-ready',
+      min: 30, max: 30, recommendedLevel: 30,
       skillPolicyId: 'redrock-wastes', skillStatus: 'implemented',
       environment: Object.freeze(['乾裂紅土地', '巨型赤色岩柱', '枯木', '獸骨', '少量碎顱旗幟與營火']),
       normalEnemyIds: Object.freeze(['wasteland-hyena', 'redrock-lizard', 'wasteland-vulture', 'skullcrusher-scout']),

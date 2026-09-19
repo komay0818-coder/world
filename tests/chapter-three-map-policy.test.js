@@ -7,17 +7,21 @@ assert.equal(policy.CHAPTER.recommendedLevelRange, null);
 assert.equal(policy.CHAPTER.firstJobChangeLevel, 45);
 assert.deepEqual(policy.MAPS.map((map) => map.name), ['赤岩荒原', '斷岩峽谷', '血戰荒原', '碎顱戰爭營地', '遠古祭壇', '赤岩聖殿']);
 assert.deepEqual(policy.MAPS.map((map) => map.facilityRequirement), [10, 15, 20, 25, 30, 35]);
-assert.ok(policy.MAPS.every((map) => map.min === null && map.max === null && map.suppressionValues === null));
-assert.ok(policy.MAPS.every((map) => map.implemented === false));
+assert.equal(policy.MAPS[0].min, 30);
+assert.equal(policy.MAPS[0].max, 30);
+assert.ok(policy.MAPS.slice(1).every((map) => map.min === null && map.max === null));
+assert.ok(policy.MAPS.every((map) => map.suppressionValues === null));
+assert.equal(policy.MAPS[0].implemented, true);
+assert.ok(policy.MAPS.slice(1).every((map) => map.implemented === false));
 const lockedChapter = { unlockedChapter: 2 };
 const unlockedChapter = { unlockedChapter: 3 };
 assert.equal(policy.isChapterUnlocked(lockedChapter), false);
 assert.equal(policy.isChapterUnlocked(unlockedChapter), true);
 assert.deepEqual(policy.getMapState(unlockedChapter, 'redrock-wastes-entrance'), {
-  mapId: 'redrock-wastes-entrance', chapterUnlocked: true, unlocked: true, implemented: false
+  mapId: 'redrock-wastes-entrance', chapterUnlocked: true, unlocked: true, implemented: true
 });
 assert.equal(policy.getMapState(unlockedChapter, 'brokenrock-canyon').unlocked, false, 'only the first map is eligible before chapter-three progression exists');
-assert.equal(policy.canEnter(unlockedChapter, 'redrock-wastes-entrance'), false, 'an unlocked chapter never bypasses the map implemented gate');
+assert.equal(policy.canEnter(unlockedChapter, 'redrock-wastes-entrance'), true, 'the implemented first map can be entered once chapter three is unlocked');
 assert.equal(policy.canEnter(lockedChapter, 'redrock-wastes-entrance'), false);
 const completedLegacySave = { unlockedChapter: 2, chapterTwoProgress: { completed: true } };
 assert.equal(policy.normalizeChapterUnlock(completedLegacySave), 3);

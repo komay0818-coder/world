@@ -21,9 +21,9 @@ assert.match(renderer, /尚未解鎖/);
 assert.match(renderer, /規劃中／尚未開放/);
 assert.doesNotMatch(renderer, /map-region-card pending locked \$\{region\.dungeon/);
 const mapSelector = script.slice(script.indexOf('function renderMapSelector()'), script.indexOf('function renderBeginnerPlainsRegions()'));
-assert.match(mapSelector, /map\.implemented \|\| map\.chapterEntry/, 'the locked or unlocked chapter-three entry remains visible independently from map implementation');
+assert.match(mapSelector, /map\.implemented \|\| map\.chapterEntry/, 'implemented region hubs remain visible');
 assert.match(mapSelector, /ChapterThreeMapPolicy\.isChapterUnlocked\(progress\)/);
-assert.match(mapSelector, /已解鎖・尚未開放/);
-assert.match(mapSelector, /const action = map\.chapterEntry[\s\S]*\? `<span>\$\{unlocked \? '已解鎖・尚未開放' : '尚未解鎖'\}<\/span>`/,
-  'the chapter entry exposes status text rather than a map-entry action');
+assert.match(mapSelector, /第三章已解鎖・3-1 赤岩荒原已開放/);
+assert.match(mapSelector, /data-open-map-region="\$\{map\.id\}"/,
+  'the unlocked chapter-three hub exposes its region selector');
 console.log('chapter-two-progression-integration: assertions passed');

@@ -17,7 +17,7 @@ assert.match(html, /direct-hit-health-recovery-policy\.js\?v=20260903-direct-hit
 assert.match(html, /chapter-three-crafted-epic-ability-policy\.js\?v=20260903-chapter3-crafted-epic-v1/, 'crafted epic ability policy loads before the main game script');
 assert.match(html, /chapter-three-epic-weapon-policy\.js\?v=20260903-epic-weapons-v1/, 'chapter-three epic weapon policy loads before the main game script');
 assert.match(html, /control-effect-policy\.js\?v=20260903-control-resistance-v1/, 'the shared player control policy loads before the main game script');
-assert.match(html, /script\.js\?v=20260920-stronghold-boss-clear-v1/, 'the affix UI renderer uses the current local build');
+assert.match(html, /script\.js\?v=20260920-redrock-31-playable-v1/, 'the affix UI renderer uses the current local build');
 assert.match(source, /equipmentAffixMigrationVersion !== 'green-affix-v1'/, 'legacy saves receive the affix compatibility migration');
 assert.match(source, /EquipmentAffixPolicy\.normalizeEquipment\(item\)/, 'inventory and equipped items are normalized on load');
 assert.match(source, /EquipmentAffixPolicy\.getEquippedAffixStats\(progress\.equipment\)/, 'stats read only the equipped item collection');
@@ -32,7 +32,7 @@ assert.match(source, /lowHealthDamagePercent: \(affixes\.lowHealthDamagePercent 
 assert.match(source, /criticalResourceRecoveryPercent: \(affixes\.criticalResourceRecoveryPercent \|\| 0\) \/ 100/, 'critical recovery enters shared equipment aggregation');
 assert.match(source, /directHitHealthRecoveryPercent: \(affixes\.directHitHealthRecoveryPercent \|\| 0\) \/ 100/, 'direct-hit recovery amount enters shared equipment aggregation');
 assert.match(source, /controlResistancePercent: \(affixes\.controlResistancePercent \|\| 0\) \/ 100/, 'control resistance enters shared equipment aggregation');
-assert.equal((source.match(/applyControlEffectToPlayer\(target, \{ type: 'stun'/g) || []).length, 7, 'all seven active player stun sources use the shared entry point');
+assert.equal((source.match(/applyControlEffectToPlayer\(target, \{ type: 'stun'/g) || []).length, 8, 'all eight active player stun sources use the shared entry point');
 assert.doesNotMatch(source.slice(source.indexOf('function enemyAttackTick()')), /target\.stunnedUntil\s*=/, 'the formal enemy attack path no longer writes stun state directly');
 assert.match(source, /function applyBlackstoneAttackSpeedPenalty[\s\S]*applyControlEffectToPlayer\(member, \{ type: 'attack-speed-slow'/, 'all existing attack-speed slow callers retain their wrapper and enter the shared policy');
 assert.match(source, /blackForestAction === 'binding-arrow'[\s\S]*BlackForestEntrancePolicy\.applyBindingArrow\(target, now\)/, 'binding arrow applies its dedicated non-stun control state');
