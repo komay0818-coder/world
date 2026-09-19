@@ -24,13 +24,14 @@ assert.deepEqual(policy.getCombatPool(), {
   boss: ['corruptedAltarGuardian']
 });
 assert.equal(policy.getMonster('fallen-druid').name, '墮落德魯伊');
-assert.equal(policy.getMonster('corrupted-forest-wolf').image, 'assets/corrupted-forest-wolf.png');
-assert.equal(policy.getMonster('thorn-demon-vine').image, 'assets/thorn-demon-vine.png');
-assert.equal(policy.getMonster('corrupted-blackstone-soldier').image, 'assets/corrupted-blackstone-soldier.png');
-assert.equal(policy.getMonster('altar-guard').image, 'assets/altar-guard.png');
-assert.equal(policy.getMonster('corrupted-blackstone-priest').image, 'assets/corrupted-blackstone-priest.png');
-assert.equal(policy.getMonster('fallen-druid').image, 'assets/fallen-druid.png');
-assert.equal(policy.getMonster('corrupted-altar-guardian').image, 'assets/corrupted-altar-guardian.png');
+const forestAltarMonsterImageVersion = '?v=20260920-forest-altar-monsters-v1';
+assert.equal(policy.getMonster('corrupted-forest-wolf').image, `assets/corrupted-forest-wolf.png${forestAltarMonsterImageVersion}`);
+assert.equal(policy.getMonster('thorn-demon-vine').image, `assets/thorn-demon-vine.png${forestAltarMonsterImageVersion}`);
+assert.equal(policy.getMonster('corrupted-blackstone-soldier').image, `assets/corrupted-blackstone-soldier.png${forestAltarMonsterImageVersion}`);
+assert.equal(policy.getMonster('altar-guard').image, `assets/altar-guard.png${forestAltarMonsterImageVersion}`);
+assert.equal(policy.getMonster('corrupted-blackstone-priest').image, `assets/corrupted-blackstone-priest.png${forestAltarMonsterImageVersion}`);
+assert.equal(policy.getMonster('fallen-druid').image, `assets/fallen-druid.png${forestAltarMonsterImageVersion}`);
+assert.equal(policy.getMonster('corrupted-altar-guardian').image, `assets/corrupted-altar-guardian.png${forestAltarMonsterImageVersion}`);
 assert.equal(policy.getMonster('unknown'), null);
 assert.ok(policy.MONSTERS.every((monster) => monster.chapter === 2 && monster.mapId === 'forest-altar'));
 assert.equal(policy.MONSTERS.filter((monster) => monster.image !== null).length, 7);
@@ -49,7 +50,7 @@ assert.deepEqual(policy.MONSTERS.map((monster) => monster.stats), [
 assert.equal(policy.rollLevel('corruptedForestWolf'), 23);
 assert.equal(policy.rollLevel('corrupted-altar-guardian'), 23);
 assert.equal(policy.rollLevel('unknown'), null);
-assert.equal(policy.getCombatMonster('corruptedForestWolf').image, 'assets/corrupted-forest-wolf.png');
+assert.equal(policy.getCombatMonster('corruptedForestWolf').image, `assets/corrupted-forest-wolf.png${forestAltarMonsterImageVersion}`);
 assert.equal(policy.getCombatMonster('corruptedBlackstoneSoldier').faction, 'corrupted-blackstone');
 assert.equal(policy.getCombatMonster('altarGuard').isElite, true);
 assert.equal(policy.getCombatMonster('corruptedAltarGuardian').isBoss, true);
@@ -77,7 +78,14 @@ assert.equal(policy.getBossPhase('corruptedAltarGuardian', 2500, 8000), 3);
 assert.deepEqual(policy.getCombatMultipliers('corruptedAltarGuardian', 2500, 8000), { attack: 1.25, attackSpeed: 1.20, defense: .90, evasion: 0 });
 const fs = require('node:fs');
 const path = require('node:path');
-// Monster art is intentionally absent while the Chapter Two art set is being replaced.
+policy.MONSTERS.forEach((monster) => {
+  const imagePath = monster.image.split('?')[0];
+  const png = fs.readFileSync(path.join(__dirname, '..', imagePath));
+  assert.equal(png.subarray(1, 4).toString(), 'PNG', `${monster.name} uses a PNG asset`);
+  assert.equal(png.readUInt32BE(16), 1024, `${monster.name} uses the shared canvas width`);
+  assert.equal(png.readUInt32BE(20), 1024, `${monster.name} uses the shared canvas height`);
+  assert.equal(png[25], 6, `${monster.name} uses RGBA color with transparency`);
+});
 const background = fs.readFileSync(path.join(__dirname, '..', policy.MAP.background));
 assert.equal(background.subarray(1, 4).toString(), 'PNG', 'the forest altar background is a PNG asset');
 assert.equal(background[25], 2, 'the forest altar background uses RGB color');

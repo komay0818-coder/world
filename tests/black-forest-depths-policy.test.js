@@ -23,7 +23,7 @@ assert.equal(policy.getMonster('corrupted-blackstone-centurion').image, 'assets/
 assert.equal(policy.getMonster('forest-spirit').image, 'assets/forest-spirit.png');
 assert.equal(policy.getMonster('dark-spore-beast').image, 'assets/dark-spore-beast.png');
 assert.equal(policy.getMonster('corrupted-treant').image, 'assets/corrupted-treant.png');
-assert.equal(policy.getMonster('corrupted-forest-wolf').image, 'assets/corrupted-forest-wolf.png');
+assert.equal(policy.getMonster('corrupted-forest-wolf').image, 'assets/corrupted-forest-wolf.png?v=20260920-forest-altar-monsters-v1');
 assert.equal(policy.MONSTERS.filter((monster) => monster.image !== null).length, 7);
 assert.deepEqual(policy.getCombatPool(), {
   normal: ['depthsCorruptedForestWolf', 'corruptedTreant', 'darkSporeBeast', 'forestSpirit'],
