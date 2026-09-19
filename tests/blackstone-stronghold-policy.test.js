@@ -25,13 +25,14 @@ assert.equal(policy.getMonstersByRank('normal').length, 4);
 assert.equal(policy.getMonstersByRank('elite').length, 2);
 assert.equal(policy.getMonstersByRank('boss').length, 1);
 assert.equal(policy.getMonster('blackstone-warlord').name, '黑石督軍');
-assert.equal(policy.getMonster('blackstone-guard').image, 'assets/blackstone-guard.png');
-assert.equal(policy.getMonster('blackstone-crossbowman').image, 'assets/blackstone-crossbowman.png');
-assert.equal(policy.getMonster('blackstone-berserker').image, 'assets/blackstone-berserker.png');
-assert.equal(policy.getMonster('blackstone-warhound').image, 'assets/blackstone-warhound.png');
-assert.equal(policy.getMonster('blackstone-lion-guard').image, 'assets/blackstone-lion-guard.png');
-assert.equal(policy.getMonster('blackstone-bullhorn-warrior').image, 'assets/blackstone-bullhorn-warrior.png');
-assert.equal(policy.getMonster('blackstone-warlord').image, 'assets/blackstone-warlord.png');
+const strongholdMonsterImageVersion = '?v=20260920-blackstone-stronghold-monsters-v1';
+assert.equal(policy.getMonster('blackstone-guard').image, `assets/blackstone-guard.png${strongholdMonsterImageVersion}`);
+assert.equal(policy.getMonster('blackstone-crossbowman').image, `assets/blackstone-crossbowman.png${strongholdMonsterImageVersion}`);
+assert.equal(policy.getMonster('blackstone-berserker').image, `assets/blackstone-berserker.png${strongholdMonsterImageVersion}`);
+assert.equal(policy.getMonster('blackstone-warhound').image, `assets/blackstone-warhound.png${strongholdMonsterImageVersion}`);
+assert.equal(policy.getMonster('blackstone-lion-guard').image, `assets/blackstone-lion-guard.png${strongholdMonsterImageVersion}`);
+assert.equal(policy.getMonster('blackstone-bullhorn-warrior').image, `assets/blackstone-bullhorn-warrior.png${strongholdMonsterImageVersion}`);
+assert.equal(policy.getMonster('blackstone-warlord').image, `assets/blackstone-warlord.png${strongholdMonsterImageVersion}`);
 assert.equal(policy.getMonster('unknown'), null);
 assert.ok(policy.MONSTERS.every((monster) => monster.image !== null));
 assert.ok(policy.MONSTERS.every((monster) => monster.level === 21 && monster.stats
@@ -76,8 +77,14 @@ assert.equal(policy.getDamageMultiplier('seismic-smash'), 1.7);
 assert.equal(policy.getDefenseIgnore('armor-piercing-bolt'), .35);
 const fs = require('node:fs');
 const path = require('node:path');
-// Monster art is intentionally absent while the Chapter Two art set is being replaced.
-// Runtime behavior is validated independently from those optional files in this round.
+policy.MONSTERS.forEach((monster) => {
+  const imagePath = monster.image.split('?')[0];
+  const png = fs.readFileSync(path.join(__dirname, '..', imagePath));
+  assert.equal(png.subarray(1, 4).toString(), 'PNG', `${monster.name} uses a PNG asset`);
+  assert.equal(png.readUInt32BE(16), 1024, `${monster.name} uses the shared canvas width`);
+  assert.equal(png.readUInt32BE(20), 1024, `${monster.name} uses the shared canvas height`);
+  assert.equal(png[25], 6, `${monster.name} uses RGBA color with transparency`);
+});
 const supplyStation = fs.readFileSync(path.join(__dirname, '..', policy.getOutpost('blackstone-supply-station').image));
 assert.equal(supplyStation.subarray(1, 4).toString(), 'PNG', 'the Blackstone supply station is a PNG asset');
 assert.equal(supplyStation[25], 6, 'the Blackstone supply station uses RGBA color with transparency');
