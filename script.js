@@ -4924,8 +4924,16 @@ function queueDefeatedEnemies() {
         const transitionSessionId = battle.sessionId;
         setTimeout(() => {
           if (battle.sessionId !== transitionSessionId || !battle.isDungeon || battle.dungeonWave !== clearedWave) return;
-          if (battle.blackstoneStrongholdState?.bossSpawned) completeDungeon();
-          else loadDungeonWave(clearedWave + 1);
+          const strongholdProgress = ChapterTwoProgressionPolicy.getMapState(getProgress(), 'blackstone-stronghold', true);
+          if (strongholdProgress.bossFirstKilled) {
+            completeDungeon();
+            return;
+          }
+          if (battle.blackstoneStrongholdState?.bossSpawned) {
+            battle.waveTransitioning = false;
+            return;
+          }
+          loadDungeonWave(clearedWave + 1);
         }, 650);
         return;
       }

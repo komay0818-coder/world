@@ -23,7 +23,7 @@ assert.match(index, /black-forest-trail-policy\.js\?v=20260809-trail-balance-v10
 assert.match(index, /spider-nest-policy\.js\?v=20260809-spider-combat-v9/);
 assert.match(index, /forest-altar-policy\.js\?v=20260911-forest-altar-v1/);
 assert.match(index, /chapter-two-map-policy\.js\?v=20260911-depths-complete-v1/);
-assert.match(index, /script\.js\?v=20260913-purified-pressure-v1/);
+assert.match(index, /script\.js\?v=20260920-stronghold-boss-clear-v1/);
 assert.match(index, /VER\. \d+\.\d+\.\d+/, 'the game exposes a semantic version');
 assert.match(script, /\.\.\.ChapterTwoMapPolicy\.MAPS/, 'chapter-two maps join the shared progression data');
 assert.match(script, /blackForestEntrance: BlackForestEntrancePolicy\.getCombatPool\(\)/);
@@ -37,8 +37,12 @@ assert.match(script, /'blackstone-stronghold': \{[\s\S]*mode: 'outpost-siege'[\s
 assert.match(script, /return dungeonDefinitions\[mapId\] \|\| null/, 'unknown dungeons must not fall back to Goblin Camp');
 assert.match(script, /mapId === 'blackstone-stronghold'[\s\S]*definition\.normalIds[\s\S]*definition\.eliteIds/,
   'Blackstone waves use only their dedicated normal and elite pools');
-assert.match(script, /battle\.dungeonId === 'blackstone-stronghold'[\s\S]*battle\.blackstoneStrongholdState\?\.bossSpawned[\s\S]*completeDungeon\(\)/,
-  'Blackstone completion is gated by the five-outpost boss flow');
+assert.match(script, /battle\.dungeonId === 'blackstone-stronghold'[\s\S]*getMapState\(getProgress\(\), 'blackstone-stronghold', true\)[\s\S]*strongholdProgress\.bossFirstKilled[\s\S]*completeDungeon\(\)/,
+  'Blackstone completion requires the formal boss-first-kill progression state');
+assert.match(script, /if \(battle\.blackstoneStrongholdState\?\.bossSpawned\) \{[\s\S]*battle\.waveTransitioning = false;[\s\S]*return;/,
+  'a living spawned Blackstone Warlord keeps the dungeon in its boss fight');
+assert.doesNotMatch(script, /if \(battle\.blackstoneStrongholdState\?\.bossSpawned\) completeDungeon\(\)/,
+  'spawning the Blackstone Warlord must not complete the dungeon');
 assert.match(script, /map\.id !== 'blackstone-stronghold'[\s\S]*dungeonKeys\?\.blackForestAltar/,
   'Blackstone entry must not consume the legacy altar key');
 assert.match(script, /params\.get\('playtest'\) !== 'blackstone-outpost'/);
