@@ -20,7 +20,7 @@ assert.equal(policy.getMonstersByRank('elite').length, 1);
 assert.equal(policy.getMonstersByRank('boss').length, 1);
 assert.equal(policy.getMonster('black-forest-hunter').visualStyle, 'night-elf');
 assert.deepEqual(policy.getMonster('shadow-spider').tags, ['poison']);
-const entranceMonsterImageVersion = '?v=20260901-entrance-monsters-v2';
+const entranceMonsterImageVersion = '?v=20260920-entrance-monsters-v3';
 assert.equal(policy.getMonster('black-forest-wolf').image, `assets/black-forest-wolf.png${entranceMonsterImageVersion}`);
 assert.equal(policy.getMonster('corrupted-boar').image, `assets/corrupted-boar.png${entranceMonsterImageVersion}`);
 assert.equal(policy.getMonster('shadow-spider').image, `assets/shadow-spider.png${entranceMonsterImageVersion}`);
