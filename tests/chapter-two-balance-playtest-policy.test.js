@@ -10,6 +10,7 @@ assert.equal(BalancePolicy.isActive({ hostname: '127.0.0.1', search: '?playtest=
 assert.equal(BalancePolicy.isActive({ hostname: 'komay0818-coder.github.io', pathname: '/world/', search: '?playtest=chapter-three-31' }), false);
 assert.equal(BalancePolicy.isActive({ hostname: 'raw.githack.com', pathname: '/komay0818-coder/world/main/', search: '?playtest=chapter-three-31' }), false);
 assert.equal(BalancePolicy.isActive({ hostname: 'raw.githack.com', pathname: '/komay0818-coder/world/dev/index.html', search: '?playtest=chapter-three-31' }), true);
+assert.equal(BalancePolicy.isActive({ hostname: 'raw.githack.com', pathname: '/komay0818-coder/world/ac852e3/index.html', search: '?playtest=chapter-three-31' }), true);
 assert.equal(BalancePolicy.isChapterThreeActive({ hostname: '127.0.0.1', search: '?playtest=chapter-three-31' }), true);
 assert.equal(BalancePolicy.getSlotKey({ hostname: '127.0.0.1', search: '?playtest=chapter-three-31' }), BalancePolicy.CHAPTER_THREE_SLOT_KEY);
 assert.equal(BalancePolicy.getProgressKey({ hostname: '127.0.0.1', search: '?playtest=chapter-three-31' }), BalancePolicy.CHAPTER_THREE_PROGRESS_KEY);

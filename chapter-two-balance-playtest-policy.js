@@ -15,7 +15,7 @@
   function isAllowedEnvironment(location) {
     if (['localhost', '127.0.0.1'].includes(location?.hostname)) return true;
     return location?.hostname === 'raw.githack.com'
-      && /^\/komay0818-coder\/world\/dev(?:\/|$)/.test(location.pathname || '');
+      && /^\/komay0818-coder\/world\/(?:dev|[0-9a-f]{7,40})(?:\/|$)/i.test(location.pathname || '');
   }
 
   function getPlaytestId(locationLike) {
