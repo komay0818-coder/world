@@ -1029,7 +1029,7 @@ function getBlackForestDepthsPlaytestConfig() {
 }
 
 function getLocalPlaytestProgressKey() {
-  if (ChapterTwoBalancePlaytestPolicy?.isActive()) return ChapterTwoBalancePlaytestPolicy.PROGRESS_KEY;
+  if (ChapterTwoBalancePlaytestPolicy?.isActive()) return ChapterTwoBalancePlaytestPolicy.getProgressKey();
   if (getBlackForestEntrancePlaytestConfig().partySize) return 'black-forest-entrance-playtest-progress';
   if (getBlackstoneStrongholdPlaytestConfig().active) return 'blackstone-stronghold-playtest-progress';
   if (getForestAltarPlaytestConfig().active) return 'forest-altar-playtest-progress';
@@ -1306,12 +1306,13 @@ function getProgress(activeCharacterOverride = null) {
 
 function getCharacterSlots() {
   if (ChapterTwoBalancePlaytestPolicy?.isActive()) {
-    let testSlots = JSON.parse(sessionStorage.getItem(ChapterTwoBalancePlaytestPolicy.SLOT_KEY) || 'null');
+    const playtestSlotKey = ChapterTwoBalancePlaytestPolicy.getSlotKey();
+    let testSlots = JSON.parse(sessionStorage.getItem(playtestSlotKey) || 'null');
     const requestedLoadout = ChapterTwoBalancePlaytestPolicy.getLoadout();
     if (!Array.isArray(testSlots) || testSlots.length !== 3 || testSlots[0]?.progress?.balancePlaytestLoadout !== requestedLoadout) {
       testSlots = ChapterTwoBalancePlaytestPolicy.createSlots({ EquipmentPolicy, EquipmentDropPolicy, location: window.location });
-      sessionStorage.setItem(ChapterTwoBalancePlaytestPolicy.SLOT_KEY, JSON.stringify(testSlots));
-      sessionStorage.removeItem(ChapterTwoBalancePlaytestPolicy.PROGRESS_KEY);
+      sessionStorage.setItem(playtestSlotKey, JSON.stringify(testSlots));
+      sessionStorage.removeItem(ChapterTwoBalancePlaytestPolicy.getProgressKey());
     }
     return testSlots;
   }
@@ -1357,7 +1358,7 @@ function syncActiveCharacterSlot(progressOverride = null) {
   const slots = getCharacterSlots();
   slots[activeIndex] = { character, progress: progressOverride || slots[activeIndex]?.progress || JSON.parse(localStorage.getItem('stardust-progress') || '{}') };
   if (ChapterTwoBalancePlaytestPolicy?.isActive()) {
-    sessionStorage.setItem(ChapterTwoBalancePlaytestPolicy.SLOT_KEY, JSON.stringify(slots));
+    sessionStorage.setItem(ChapterTwoBalancePlaytestPolicy.getSlotKey(), JSON.stringify(slots));
     return;
   }
   localStorage.setItem('stardust-character-slots', JSON.stringify(slots));
@@ -4244,7 +4245,7 @@ function persistPartyRuntimeState() {
     if (member.slotIndex === activeIndex) mainProgress.partyMemberState = state;
     if (slots[member.slotIndex]) slots[member.slotIndex].progress = { ...slots[member.slotIndex].progress, partyMemberState: state };
   });
-  if (ChapterTwoBalancePlaytestPolicy?.isActive()) sessionStorage.setItem(ChapterTwoBalancePlaytestPolicy.SLOT_KEY, JSON.stringify(slots));
+  if (ChapterTwoBalancePlaytestPolicy?.isActive()) sessionStorage.setItem(ChapterTwoBalancePlaytestPolicy.getSlotKey(), JSON.stringify(slots));
   else if (!getLocalPlaytestProgressKey()) localStorage.setItem('stardust-character-slots', JSON.stringify(slots));
   saveProgress(mainProgress);
 }
@@ -7553,9 +7554,10 @@ function openBattle() {
   });
 }
 
+const activePlaytestName = ChapterTwoBalancePlaytestPolicy?.isChapterThreeActive() ? '第三章 3-1 開發測試' : '';
 const savedName = localStorage.getItem('stardust-player-name');
-if (savedName) {
-  enterMenu(savedName);
+if (activePlaytestName || savedName) {
+  enterMenu(activePlaytestName || savedName);
   claimOfflineRewards();
 }
 

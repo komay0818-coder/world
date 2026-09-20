@@ -6,13 +6,39 @@
   'use strict';
 
   const PLAYTEST_ID = 'chapter-two-balance';
+  const CHAPTER_THREE_PLAYTEST_ID = 'chapter-three-31';
   const SLOT_KEY = 'chapter-two-balance-playtest-slots-v1';
   const PROGRESS_KEY = 'chapter-two-balance-playtest-progress-v2';
+  const CHAPTER_THREE_SLOT_KEY = 'chapter-three-31-playtest-slots-v1';
+  const CHAPTER_THREE_PROGRESS_KEY = 'chapter-three-31-playtest-progress-v1';
+
+  function isAllowedEnvironment(location) {
+    if (['localhost', '127.0.0.1'].includes(location?.hostname)) return true;
+    return location?.hostname === 'raw.githack.com'
+      && /^\/komay0818-coder\/world\/dev(?:\/|$)/.test(location.pathname || '');
+  }
+
+  function getPlaytestId(locationLike) {
+    const location = locationLike || (typeof window !== 'undefined' ? window.location : null);
+    if (!location || !isAllowedEnvironment(location)) return '';
+    const requested = new URLSearchParams(location.search || '').get('playtest');
+    return [PLAYTEST_ID, CHAPTER_THREE_PLAYTEST_ID].includes(requested) ? requested : '';
+  }
 
   function isActive(locationLike) {
-    const location = locationLike || (typeof window !== 'undefined' ? window.location : null);
-    if (!location || !['localhost', '127.0.0.1'].includes(location.hostname)) return false;
-    return new URLSearchParams(location.search || '').get('playtest') === PLAYTEST_ID;
+    return Boolean(getPlaytestId(locationLike));
+  }
+
+  function isChapterThreeActive(locationLike) {
+    return getPlaytestId(locationLike) === CHAPTER_THREE_PLAYTEST_ID;
+  }
+
+  function getSlotKey(locationLike) {
+    return isChapterThreeActive(locationLike) ? CHAPTER_THREE_SLOT_KEY : SLOT_KEY;
+  }
+
+  function getProgressKey(locationLike) {
+    return isChapterThreeActive(locationLike) ? CHAPTER_THREE_PROGRESS_KEY : PROGRESS_KEY;
   }
 
   function getActiveSlotIndex(locationLike) {
@@ -25,6 +51,7 @@
   function getRequestedMapId(locationLike) {
     const allowed = ['black-forest-trail', 'spider-nest', 'black-forest-entrance', 'blackstone-stronghold', 'forest-altar', 'black-forest-depths'];
     if (!isActive(locationLike)) return 'plains-entrance';
+    if (isChapterThreeActive(locationLike)) return 'redrock-wastes-entrance';
     const location = locationLike || window.location;
     const requested = new URLSearchParams(location.search || '').get('map');
     return allowed.includes(requested) ? requested : 'black-forest-trail';
@@ -109,22 +136,29 @@
   }
 
   function createSlots(dependencies) {
+    const chapterThreePlaytest = isChapterThreeActive(dependencies.location);
     const jobs = ['warrior', 'hunter', 'priest'];
-    const names = ['基準戰士', '基準獵人', '基準牧師'];
-    const ids = jobs.map((job) => `chapter-two-balance-${job}`);
+    const names = chapterThreePlaytest ? ['3-1 測試戰士', '3-1 測試獵人', '3-1 測試牧師'] : ['基準戰士', '基準獵人', '基準牧師'];
+    const ids = jobs.map((job) => `${chapterThreePlaytest ? 'chapter-three-31' : 'chapter-two-balance'}-${job}`);
     const selectedMapId = getRequestedMapId(dependencies.location);
     return jobs.map((job, index) => ({
       character: { id: ids[index], name: names[index], faction: 'light', race: 'human', job },
       progress: {
-        level: 25, xp: 0, gold: 0, potions: 20, manaPotions: 20, inventory: [],
+        level: chapterThreePlaytest ? 30 : 25, xp: 0, gold: 0, potions: 20, manaPotions: 20, inventory: [],
         balancePlaytestLoadout: getLoadout(dependencies.location),
         selectedMapId, equipment: makeEquipment(job, dependencies),
-        skillLevels: {}, lastActiveAt: Date.now(), unlockedChapter: 2,
+        skillLevels: {}, lastActiveAt: Date.now(), unlockedChapter: chapterThreePlaytest ? 3 : 2,
         mapUnlocked: { 'black-forest': true },
         blackForestCorruption: { initialized: true, removedLayers: getRemovedCorruptionLayers(dependencies.location) },
         chapterTwoProgress: {
           unlocked: Object.fromEntries(['black-forest-trail', 'spider-nest', 'black-forest-entrance', 'blackstone-stronghold', 'forest-altar', 'black-forest-depths'].map((id) => [id, true])),
-          cleared: {}, bossFirstKills: {}, normalKills: {}, completed: false
+          cleared: chapterThreePlaytest ? Object.fromEntries(['black-forest-trail', 'spider-nest', 'black-forest-entrance', 'blackstone-stronghold', 'forest-altar', 'black-forest-depths'].map((id) => [id, true])) : {},
+          bossFirstKills: chapterThreePlaytest ? Object.fromEntries(['black-forest-trail', 'spider-nest', 'black-forest-entrance', 'blackstone-stronghold', 'forest-altar', 'black-forest-depths'].map((id) => [id, true])) : {},
+          normalKills: {}, completed: chapterThreePlaytest
+        },
+        chapterThreeProgress: {
+          unlocked: { 'redrock-wastes-entrance': chapterThreePlaytest, 'brokenrock-canyon': false, 'bloodwar-wastes': false, 'skullcrusher-war-camp': false, 'ancient-altar': false, 'redrock-temple': false },
+          cleared: {}, bossFirstKills: {}
         },
         dungeonAdmission: selectedMapId === 'blackstone-stronghold',
         dungeonReturnMapId: 'black-forest-entrance',
@@ -149,5 +183,10 @@
     }));
   }
 
-  return Object.freeze({ PLAYTEST_ID, SLOT_KEY, PROGRESS_KEY, isActive, getActiveSlotIndex, getRequestedMapId, getScenario, getRemovedCorruptionLayers, getLoadout, createSlots });
+  return Object.freeze({
+    PLAYTEST_ID, CHAPTER_THREE_PLAYTEST_ID, SLOT_KEY, PROGRESS_KEY,
+    CHAPTER_THREE_SLOT_KEY, CHAPTER_THREE_PROGRESS_KEY,
+    isActive, isChapterThreeActive, getSlotKey, getProgressKey, getActiveSlotIndex,
+    getRequestedMapId, getScenario, getRemovedCorruptionLayers, getLoadout, createSlots
+  });
 }));

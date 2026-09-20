@@ -7,6 +7,12 @@ const path = require('node:path');
 
 assert.equal(BalancePolicy.isActive({ hostname: 'example.com', search: '?playtest=chapter-two-balance' }), false);
 assert.equal(BalancePolicy.isActive({ hostname: '127.0.0.1', search: '?playtest=chapter-two-balance' }), true);
+assert.equal(BalancePolicy.isActive({ hostname: 'komay0818-coder.github.io', pathname: '/world/', search: '?playtest=chapter-three-31' }), false);
+assert.equal(BalancePolicy.isActive({ hostname: 'raw.githack.com', pathname: '/komay0818-coder/world/main/', search: '?playtest=chapter-three-31' }), false);
+assert.equal(BalancePolicy.isActive({ hostname: 'raw.githack.com', pathname: '/komay0818-coder/world/dev/index.html', search: '?playtest=chapter-three-31' }), true);
+assert.equal(BalancePolicy.isChapterThreeActive({ hostname: '127.0.0.1', search: '?playtest=chapter-three-31' }), true);
+assert.equal(BalancePolicy.getSlotKey({ hostname: '127.0.0.1', search: '?playtest=chapter-three-31' }), BalancePolicy.CHAPTER_THREE_SLOT_KEY);
+assert.equal(BalancePolicy.getProgressKey({ hostname: '127.0.0.1', search: '?playtest=chapter-three-31' }), BalancePolicy.CHAPTER_THREE_PROGRESS_KEY);
 assert.equal(BalancePolicy.getActiveSlotIndex({ hostname: '127.0.0.1', search: '?playtest=chapter-two-balance&main=hunter' }), 1);
 assert.equal(BalancePolicy.getActiveSlotIndex({ hostname: '127.0.0.1', search: '?playtest=chapter-two-balance&main=priest' }), 2);
 assert.equal(BalancePolicy.getRequestedMapId({ hostname: '127.0.0.1', search: '?playtest=chapter-two-balance&map=spider-nest' }), 'spider-nest');
@@ -56,7 +62,21 @@ assert.deepEqual(
 );
 assert.ok(fullLoadoutSlots.every((slot) => Object.values(slot.progress.equipment).filter(Boolean).every((item) => !(item.runes || []).length)));
 
+const chapterThreeSlots = BalancePolicy.createSlots({
+  EquipmentPolicy,
+  EquipmentDropPolicy,
+  location: { hostname: 'raw.githack.com', pathname: '/komay0818-coder/world/dev/index.html', search: '?playtest=chapter-three-31' }
+});
+assert.deepEqual(chapterThreeSlots.map((slot) => slot.progress.level), [30, 30, 30]);
+assert.ok(chapterThreeSlots.every((slot) => slot.progress.selectedMapId === 'redrock-wastes-entrance'));
+assert.ok(chapterThreeSlots.every((slot) => slot.progress.unlockedChapter === 3));
+assert.ok(chapterThreeSlots.every((slot) => slot.progress.chapterTwoProgress.completed));
+assert.ok(chapterThreeSlots.every((slot) => slot.progress.chapterThreeProgress.unlocked['redrock-wastes-entrance']));
+assert.ok(chapterThreeSlots.every((slot) => !slot.progress.chapterThreeProgress.unlocked['brokenrock-canyon']));
+assert.ok(chapterThreeSlots.every((slot) => !slot.progress.chapterThreeProgress.cleared['redrock-wastes-entrance']));
+
 const script = fs.readFileSync(path.join(__dirname, '..', 'script.js'), 'utf8');
 assert.match(script, /getScenario\(\) === 'purified-heart-pressure'[\s\S]*'heartOfTheBlackForest',[\s\S]*'forestSpirit',[\s\S]*'darkSporeBeast',[\s\S]*'corruptedBlackstoneCenturion'/);
+assert.match(script, /sessionStorage\.setItem\(playtestProgressKey, JSON\.stringify\(progress\)\)/, 'playtest progress is session-only');
 
 console.log('chapter-two balance playtest policy tests passed');
