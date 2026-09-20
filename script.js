@@ -1039,7 +1039,8 @@ function getPlaytestHpFloor() {
   return getBlackForestEntrancePlaytestConfig().invincible || getBlackstoneStrongholdPlaytestConfig().invincible || getForestAltarPlaytestConfig().invincible || getBlackForestDepthsPlaytestConfig().invincible ? 1 : 0;
 }
 
-function getProgress() {
+function getProgress(activeCharacterOverride = null) {
+  const resolvedActiveCharacter = activeCharacterOverride || getActiveCharacter();
   const slots = getCharacterSlots();
   const slotProgress = Array.isArray(slots) ? slots[getActiveCharacterSlotIndex()]?.progress : null;
   const playtestProgressKey = getLocalPlaytestProgressKey();
@@ -1059,7 +1060,7 @@ function getProgress() {
     delete saved.skillEssence;
   }
   if (saved.starterGearVersion !== 'starter-gear-v1') {
-    const character = getActiveCharacter();
+    const character = resolvedActiveCharacter;
     if (character?.job) {
       const starterEquipment = createStarterEquipment(character.job);
       saved.equipment = { ...emptyEquipment(), ...(saved.equipment || {}) };
@@ -1070,7 +1071,7 @@ function getProgress() {
     localStorage.setItem('stardust-progress', JSON.stringify(saved));
   }
   if (saved.equipmentRetentionVersion !== 'planned-catalog-and-starter-v2') {
-    const character = getActiveCharacter();
+    const character = resolvedActiveCharacter;
     const starterEquipment = createStarterEquipment(character?.job || 'warrior');
     saved.inventory = EquipmentPolicy.removeLegacyEquipmentFromInventory(saved.inventory);
     saved.equipment = Object.fromEntries(Object.entries({
@@ -1082,7 +1083,7 @@ function getProgress() {
     saved.equipmentRetentionVersion = 'planned-catalog-and-starter-v2';
     localStorage.setItem('stardust-progress', JSON.stringify(saved));
   }
-  const activeCharacterForQuiver = getActiveCharacter();
+  const activeCharacterForQuiver = resolvedActiveCharacter;
   if (HunterArrowPolicy.isHunter(activeCharacterForQuiver?.job)) {
     saved.equipment = HunterArrowPolicy.ensureStarterQuiver({ ...emptyEquipment(), ...(saved.equipment || {}) });
     if (saved.hunterQuiverMigrationVersion !== 'hunter-quiver-resource-v1') {
@@ -1173,7 +1174,7 @@ function getProgress() {
     localStorage.setItem('stardust-progress', JSON.stringify(saved));
   }
   if (saved.jobRestrictionMigrationVersion !== 'job-restriction-v1') {
-    const character = getActiveCharacter();
+    const character = resolvedActiveCharacter;
     const inventoryForRestrictions = Array.isArray(saved.inventory) ? saved.inventory : [];
     const equipmentForRestrictions = saved.equipment || {};
     Object.entries(equipmentForRestrictions).forEach(([slot, item]) => {
@@ -1267,7 +1268,7 @@ function getProgress() {
     });
     normalizedProgress.chapterTwoProgress.unlocked['black-forest-depths'] = true;
   }
-  const activeCharacter = getActiveCharacter();
+  const activeCharacter = resolvedActiveCharacter;
   const activeSlotIndex = getActiveCharacterSlotIndex();
   let partySlots = getCharacterSlots();
   if (!Array.isArray(partySlots) || !partySlots.length) partySlots = activeCharacter ? [{ character: activeCharacter, progress: normalizedProgress }] : [];
@@ -2735,13 +2736,30 @@ function itemQualityLabel(item) {
   return item?.kind === 'equipment' ? EquipmentAffixPolicy.getQualityLabel(item) : item?.quality || '道具';
 }
 
+function renderEquipment(progress, modal, title, content) {
+  title.textContent = '裝備';
+  const paperDoll = Object.entries(equipmentSlots).map(([slot, info]) => {
+    const item = progress.equipment[slot];
+    const visual = item ? `<img src="${itemImagePath(item)}" alt="" class="paper-doll-item-image">` : info.icon;
+    const unequipButton = item ? `<button class="unequip-button" type="button" data-unequip-slot="${slot}">卸下</button>` : '';
+    return `<article class="equipment-frame slot-${slot} ${item ? `equipped ${itemQualityClass(item)}` : ''}"><span class="equipment-frame-icon">${visual}</span><b>${info.label}</b><small>${item ? item.name : '空欄位'}</small>${item ? `<em>${itemStatsText(item)}</em>${unequipButton}` : ''}</article>`;
+  }).join('');
+  content.innerHTML = `<section class="paper-doll" aria-label="角色裝備紙娃娃"><span class="paper-doll-silhouette" aria-hidden="true">🧍</span>${paperDoll}</section>`;
+  modal.classList.remove('hidden');
+  modal.dataset.view = 'equipment';
+}
+
 function renderInventory(view = 'inventory') {
-  const progress = getProgress();
   const character = getActiveCharacter();
+  const progress = getProgress(character);
   const modal = document.querySelector('#inventory-modal');
   const title = document.querySelector('#inventory-title');
   const content = document.querySelector('#inventory-content');
-  title.textContent = view === 'equipment' ? '裝備' : '背包';
+  if (view === 'equipment') {
+    renderEquipment(progress, modal, title, content);
+    return;
+  }
+  title.textContent = '背包';
   const renderItemCard = (item, options = {}) => {
     const equipped = Boolean(options.equipped);
     const wearable = isItemWearableByCharacter(item, character, progress.level);
@@ -2787,17 +2805,9 @@ function renderInventory(view = 'inventory') {
   const allScrapSelected = scrappableItems.length > 0 && scrappableItems.every((item) => scrapSelection.has(item.id));
   const categoryLabel = inventoryCategory === 'weapon' ? '武器' : inventoryCategory === 'armor' ? '防具' : '裝備';
   const scrapTools = `<section class="scrap-tools"><div><b>批次販賣</b><small>已選擇 ${saleSummary.count} 件・預計獲得 ${saleSummary.gold} 金幣</small></div><label class="scrap-select select-all-scrap"><input type="checkbox" data-select-all-scrap ${allScrapSelected ? 'checked' : ''} ${scrappableItems.length ? '' : 'disabled'}><span>全部勾選${categoryLabel}</span></label><button type="button" class="select-junk-button" data-select-common-equipment>勾選全部白色裝備</button><button type="button" data-open-sell-confirm ${selectedScrapCount ? '' : 'disabled'}>確認販賣（${selectedScrapCount}）</button></section>`;
-  const paperDoll = Object.entries(equipmentSlots).map(([slot, info]) => {
-    const item = progress.equipment[slot];
-    const visual = item ? `<img src="${itemImagePath(item)}" alt="" class="paper-doll-item-image">` : info.icon;
-    const unequipButton = item ? `<button class="unequip-button" type="button" data-unequip-slot="${slot}">卸下</button>` : '';
-    return `<article class="equipment-frame slot-${slot} ${item ? `equipped ${itemQualityClass(item)}` : ''}"><span class="equipment-frame-icon">${visual}</span><b>${info.label}</b><small>${item ? item.name : '空欄位'}</small>${item ? `<em>${itemStatsText(item)}</em>${unequipButton}` : ''}</article>`;
-  }).join('');
-  content.innerHTML = view === 'equipment'
-    ? `<section class="paper-doll" aria-label="角色裝備紙娃娃"><span class="paper-doll-silhouette" aria-hidden="true">🧍</span>${paperDoll}</section>`
-    : `${inventoryTabs}${scrapTools}<section class="inventory-list">${itemCards}</section>`;
+  content.innerHTML = `${inventoryTabs}${scrapTools}<section class="inventory-list">${itemCards}</section>`;
   modal.classList.remove('hidden');
-  modal.dataset.view = view;
+  modal.dataset.view = 'inventory';
 }
 
 function renderCharacterAbilities() {
@@ -7780,8 +7790,9 @@ document.querySelector('#inventory-modal').addEventListener('click', (event) => 
   if (equipButton) { equipItem(equipButton.dataset.equipId, equipButton.dataset.equipSlot || null); return; }
   const runeButton = event.target.closest('[data-socket-item]');
   if (runeButton) {
-    const result = RunePolicy.socketRune(getProgress(), runeButton.dataset.socketItem, runeButton.dataset.socketRune);
-    if (result.ok) { saveProgress(getProgress()); showToast(`已鑲嵌${result.rune.name}${result.word ? `，啟動【${result.word.name}】` : ''}`); renderInventory('inventory'); }
+    const progress = getProgress();
+    const result = RunePolicy.socketRune(progress, runeButton.dataset.socketItem, runeButton.dataset.socketRune);
+    if (result.ok) { saveProgress(progress); showToast(`已鑲嵌${result.rune.name}${result.word ? `，啟動【${result.word.name}】` : ''}`); renderInventory('inventory'); }
     return;
   }
   const unequipButton = event.target.closest('[data-unequip-slot]');
