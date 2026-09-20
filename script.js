@@ -4467,8 +4467,12 @@ function renderBattlePartyStatus() {
   }).join('');
   const playerStage = document.querySelector('#player-battle-stage');
   if (playerStage) {
-    playerStage.dataset.count = String(teammates.length);
-    playerStage.innerHTML = teammates.map((member) => {
+    const partySize = Math.max(1, Math.min(3, teammates.length + 1));
+    playerStage.dataset.count = String(partySize);
+    document.querySelector('.battle-field')?.setAttribute('data-player-party-size', String(partySize));
+    document.querySelector('#battle-player-art')?.setAttribute('data-party-slot', '1');
+    document.querySelector('#player-stage-info')?.setAttribute('data-party-slot', '1');
+    playerStage.innerHTML = teammates.slice(0, 2).map((member, index) => {
       const hpPercent = Math.max(0, Math.min(100, member.currentHp / member.maxHp * 100));
       const resourceMax = Math.max(1, getMaxCombatResourceForMember(member.character, member.progress));
       const resourcePercent = Math.max(0, Math.min(100, member.resourceCurrent / resourceMax * 100));
@@ -4478,7 +4482,7 @@ function renderBattlePartyStatus() {
       const poisonBlade = getPoisonBladeVisualState(member);
       const poisonBladeClass = poisonBlade.active ? ` has-poison-blade${poisonBlade.activating ? ' is-poison-blade-cast' : ''}` : '';
       const poisonBladeIndicator = poisonBlade.active ? `<span class="poison-blade-aura" aria-hidden="true"><i></i><i></i><i></i></span><span class="poison-blade-indicator" role="img" aria-label="毒刃效果${poisonBlade.stacks > 1 ? `，${poisonBlade.stacks} 層` : ''}"><i>🗡</i>${poisonBlade.stacks > 1 ? `<b>×${poisonBlade.stacks}</b>` : ''}</span>` : '';
-      return `<article class="player-stage-unit ${member.alive ? '' : 'is-dead'}${chargeBuffClass}${poisonBladeClass}" data-visual-size="humanoid" data-member-id="${member.id}" data-job="${member.character.job}"><div class="player-stage-floating"><b>${member.name}</b><small>${jobName}・Lv.${member.level}</small><span class="player-stage-hp"><i style="width:${hpPercent}%"></i></span><span class="player-stage-resource"><i style="width:${resourcePercent}%"></i></span></div><div class="player-stage-art" style="background-image:url('${art}')" aria-label="${member.name}"></div>${poisonBladeIndicator}</article>`;
+      return `<article class="player-stage-unit ${member.alive ? '' : 'is-dead'}${chargeBuffClass}${poisonBladeClass}" data-party-slot="${index + 2}" data-visual-size="humanoid" data-member-id="${member.id}" data-job="${member.character.job}"><div class="player-stage-floating"><b>${member.name}</b><small>${jobName}・Lv.${member.level}</small><span class="player-stage-hp"><i style="width:${hpPercent}%"></i></span><span class="player-stage-resource"><i style="width:${resourcePercent}%"></i></span></div><div class="player-stage-art" style="background-image:url('${art}')" aria-label="${member.name}"></div>${poisonBladeIndicator}</article>`;
     }).join('');
   }
 }

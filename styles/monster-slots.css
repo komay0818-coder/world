@@ -1279,3 +1279,68 @@ body:has(.battle-screen:not(.hidden)) .toast.show {
     inset: auto auto 16px 50% !important;
   }
 }
+
+/* Fixed three-slot player formation: total party size, including the main character. */
+#battle-screen .battle-field[data-player-party-size="1"] #battle-player-art[aria-label],
+#battle-screen .battle-field[data-player-party-size="1"] #player-stage-info[data-party-slot="1"] {
+  left: 50% !important;
+}
+
+#battle-screen .battle-field[data-player-party-size="1"]:has(#player-battle-stage) #battle-player-art[aria-label] {
+  inset: auto auto clamp(18px, 6%, 48px) 50% !important;
+}
+
+#battle-screen .battle-field[data-player-party-size="2"] #battle-player-art[aria-label],
+#battle-screen .battle-field[data-player-party-size="2"] #player-stage-info[data-party-slot="1"] {
+  left: 25% !important;
+}
+
+#battle-screen .battle-field[data-player-party-size="2"]:has(#player-battle-stage) #battle-player-art[aria-label] {
+  inset: auto auto clamp(18px, 6%, 48px) 25% !important;
+}
+
+#battle-screen .battle-field[data-player-party-size="2"] .player-stage-unit[data-party-slot="2"] {
+  left: 75% !important;
+}
+
+#battle-screen .battle-field[data-player-party-size="3"] #battle-player-art[aria-label],
+#battle-screen .battle-field[data-player-party-size="3"] #player-stage-info[data-party-slot="1"] {
+  left: 20% !important;
+}
+
+#battle-screen .battle-field[data-player-party-size="3"]:has(#player-battle-stage) #battle-player-art[aria-label] {
+  inset: auto auto clamp(18px, 6%, 48px) 20% !important;
+}
+
+#battle-screen .battle-field[data-player-party-size="3"] .player-stage-unit[data-party-slot="2"] {
+  left: 50% !important;
+}
+
+#battle-screen .battle-field[data-player-party-size="3"] .player-stage-unit[data-party-slot="3"] {
+  left: 80% !important;
+}
+
+#battle-screen .battle-field[data-player-party-size] #battle-player-art[aria-label],
+#battle-screen .battle-field[data-player-party-size] .player-stage-unit {
+  max-width: var(--player-portrait-size) !important;
+  translate: -50% 0;
+}
+
+@media (max-width: 700px) {
+  #battle-screen .battle-field[data-player-party-size="1"]:has(#player-battle-stage) #battle-player-art[aria-label] {
+    inset: auto auto 16px 50% !important;
+  }
+  #battle-screen .battle-field[data-player-party-size="2"] #battle-player-art[aria-label],
+  #battle-screen .battle-field[data-player-party-size="2"] #player-stage-info[data-party-slot="1"] { left: 24% !important; }
+  #battle-screen .battle-field[data-player-party-size="2"]:has(#player-battle-stage) #battle-player-art[aria-label] {
+    inset: auto auto 16px 24% !important;
+  }
+  #battle-screen .battle-field[data-player-party-size="2"] .player-stage-unit[data-party-slot="2"] { left: 76% !important; }
+  #battle-screen .battle-field[data-player-party-size="3"] #battle-player-art[aria-label],
+  #battle-screen .battle-field[data-player-party-size="3"] #player-stage-info[data-party-slot="1"] { left: 18% !important; }
+  #battle-screen .battle-field[data-player-party-size="3"]:has(#player-battle-stage) #battle-player-art[aria-label] {
+    inset: auto auto 16px 18% !important;
+  }
+  #battle-screen .battle-field[data-player-party-size="3"] .player-stage-unit[data-party-slot="2"] { left: 50% !important; }
+  #battle-screen .battle-field[data-player-party-size="3"] .player-stage-unit[data-party-slot="3"] { left: 82% !important; }
+}

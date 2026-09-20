@@ -10,7 +10,7 @@ const layoutCss = fs.readFileSync(path.join(root, 'styles', 'mmorpg-layout.css')
 
 assert.match(html, /id="player-battle-stage"/, 'party players render on the battlefield');
 assert.match(html, /id="battle-player-art" class="battle-player-art hidden"/, 'main player has a dedicated portrait node');
-assert.match(html, /styles\/monster-slots\.css\?v=20260822-single-target-travel-v6/, 'battlefield loads the current local portrait styles');
+assert.match(html, /styles\/monster-slots\.css\?v=20260921-player-party-slots-v1/, 'battlefield loads the current local portrait styles');
 assert.match(html, /script\.js\?v=20260920-redrock-31-playable-v1/, 'battlefield loads the current local combat logic');
 assert.match(script, /return battleCharacterArt\[`\$\{character\.race\}:\$\{character\.job\}`\] \|\| '';/, 'battle uses stable front character artwork');
 assert.match(script, /'orc:warrior': 'assets\/character-portraits\/orc-warrior\.png'/, 'orc warrior uses the supplied portrait');
@@ -37,9 +37,10 @@ assert.doesNotMatch(layoutCss, /character-attack-effect|characterAttackProjectil
 
 assert.match(css, /--player-portrait-size: clamp\(64px, 7\.2vw, 92px\)/, 'desktop portraits use one compact size');
 assert.match(css, /Final 0\.7\.1 battlefield composition[\s\S]*?--enemy-formation-top: calc\(3% \+ 24px\);[\s\S]*?--enemy-formation-height: 31%;/, 'desktop enemy formation leaves most of the battlefield background visible');
-assert.match(css, /Final 0\.7\.1 battlefield composition[\s\S]*?@media \(min-width: 701px\)[\s\S]*?data-count="3"[\s\S]*?left: 14%[\s\S]*?left: 38%[\s\S]*?left: 62%[\s\S]*?left: 86%/, 'four desktop player portraits use evenly separated anchors');
+assert.match(script, /const partySize = Math\.max\(1, Math\.min\(3, teammates\.length \+ 1\)\)[\s\S]*?data-player-party-size[\s\S]*?data-party-slot="\$\{index \+ 2\}"/, 'the battlefield assigns the main character and at most two teammates to fixed party slots');
+assert.match(css, /Fixed three-slot player formation[\s\S]*?data-player-party-size="2"[\s\S]*?left: 25%[\s\S]*?data-party-slot="2"[\s\S]*?left: 75%[\s\S]*?data-player-party-size="3"[\s\S]*?left: 20%[\s\S]*?data-party-slot="2"[\s\S]*?left: 50%[\s\S]*?data-party-slot="3"[\s\S]*?left: 80%/, 'desktop uses centered solo, split two-player, and evenly spaced three-player slots');
 assert.match(css, /Final 0\.7\.1 battlefield composition[\s\S]*?@media \(max-width: 700px\)[\s\S]*?--enemy-formation-height: 35%;[\s\S]*?--player-portrait-size: clamp\(48px, 14vw, 64px\)/, 'mobile keeps both formations compact');
-assert.match(css, /Final 0\.7\.1 battlefield composition[\s\S]*?data-count="3"[\s\S]*?left: 20%[\s\S]*?left: 41%[\s\S]*?left: 61%[\s\S]*?left: 81%/, 'four mobile portraits retain non-overlapping anchors');
+assert.match(css, /Fixed three-slot player formation[\s\S]*?@media \(max-width: 700px\)[\s\S]*?data-player-party-size="2"[\s\S]*?left: 24%[\s\S]*?left: 76%[\s\S]*?data-player-party-size="3"[\s\S]*?left: 18%[\s\S]*?left: 50%[\s\S]*?left: 82%/, 'narrow screens retain separated fixed slots');
 assert.match(css, /overflow: hidden !important;[\s\S]*?border: 3px solid #d9a93f !important;[\s\S]*?border-radius: 50% !important;/, 'player artwork is clipped inside a gold circle');
 assert.match(css, /@keyframes playerBasicShake/, 'basic attacks shake the portrait');
 assert.doesNotMatch(css.match(/#battle-screen \.battle-field:has\(#player-battle-stage\) #battle-player-art\[aria-label\]\s*{[\s\S]*?\n}/)?.[0] || '', /transform:\s*none\s*!important/, 'the portrait anchor does not override combat animation transforms');
