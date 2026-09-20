@@ -236,7 +236,9 @@ let fighting = false;
 let pendingOfflineReport = null;
 let creationSlotIndex = 0;
 let scrapSelection = new Set();
-let inventoryCategory = 'weapon';
+let inventoryTooltipEntries = new Map();
+let inventoryTooltipPinnedId = '';
+let inventoryTooltipProgress = null;
 let workshopQuality = 'uncommon';
 let workshopSlot = 'all';
 let furnaceSelectedItemId = null;
@@ -2650,11 +2652,11 @@ function itemCategory(item) {
   return 'other';
 }
 
-function isItemWearableByCharacter(item, character, level = 1) {
+function isItemWearableByCharacter(item, character, level = 1, progress = getProgress()) {
   if (item.kind !== 'equipment') return true;
   if (item.durability !== undefined && Number(item.durability) <= 0) return false;
   if ((Number(item.requiredLevel) || 0) > (Number(level) || 1)) return false;
-  return Boolean(character && (EquipmentPolicy.getEquipSlots(item, character.job).length || WarriorAdvancementPolicy.canEquipTwoHandedOffhand(item, character, getProgress())));
+  return Boolean(character && (EquipmentPolicy.getEquipSlots(item, character.job).length || WarriorAdvancementPolicy.canEquipTwoHandedOffhand(item, character, progress)));
 }
 
 function getCompatibleEquipSlots(item, character, progress = getProgress()) {
@@ -2760,54 +2762,114 @@ function renderInventory(view = 'inventory') {
     return;
   }
   title.textContent = '背包';
-  const renderItemCard = (item, options = {}) => {
-    const equipped = Boolean(options.equipped);
-    const wearable = isItemWearableByCharacter(item, character, progress.level);
-    const slot = options.slot ? `・${options.slot}` : '';
+  inventoryTooltipEntries = new Map();
+  inventoryTooltipPinnedId = '';
+  inventoryTooltipProgress = progress;
+  const inventoryById = new Map();
+  const scrappableItems = [];
+  const availableRuneIds = new Set();
+  progress.inventory.forEach((item) => {
+    inventoryById.set(item.id, item);
+    if (item.kind === 'equipment') scrappableItems.push(item);
+    if (item.kind === 'rune' && Number(item.quantity) > 0) availableRuneIds.add(item.id);
+  });
+  const wearableById = new Map();
+  const isWearable = (item) => {
+    if (!wearableById.has(item.id)) wearableById.set(item.id, isItemWearableByCharacter(item, character, progress.level, progress));
+    return wearableById.get(item.id);
+  };
+  const equipSlotsById = new Map();
+  const getEquipSlots = (item) => {
+    if (!equipSlotsById.has(item.id)) equipSlotsById.set(item.id, getCompatibleEquipSlots(item, character, progress));
+    return equipSlotsById.get(item.id);
+  };
+  const renderItemCard = (item) => {
+    const wearable = isWearable(item);
     const stackIds = item.stackIds || [item.id];
     const stackQuantity = item.kind === 'equipment' ? (item.stackQuantity || 1) : item.quantity;
-    const stackItems = stackIds.map((id) => progress.inventory.find((entry) => entry.id === id)).filter(Boolean);
+    const stackItems = stackIds.map((id) => inventoryById.get(id)).filter(Boolean);
     const selectedCount = stackIds.filter((id) => scrapSelection.has(id)).length;
-    const junkCandidate = stackItems.some((entry) => InventorySalePolicy.isJunkCandidate(entry, getItemJunkContext(entry, character, progress)));
+    const junkCandidate = stackItems.some((entry) => InventorySalePolicy.isJunkCandidate(entry, { level: progress.level, canEquip: Boolean(getEquipSlots(entry).length) }));
     const junkBadge = junkCandidate ? '<span class="junk-badge" title="不能裝備的廢品" aria-label="不能裝備的廢品">🗑</span>' : '';
     const visual = item.image || item.kind === 'recipe'
       ? `<img src="${itemImagePath(item)}" alt="" class="inventory-item-image">`
       : item.icon || '◈';
-    const currentItem = item.kind === 'equipment' ? progress.equipment[item.slot] : null;
-    const comparison = item.kind === 'equipment' && !equipped ? `<aside class="equipment-compare-tooltip"><strong>目前穿戴・${equipmentSlots[item.slot]?.label || item.slot}</strong>${currentItem ? `<div><span class="compare-item-icon"><img src="${itemImagePath(currentItem)}" alt=""></span><p><b>${currentItem.name}</b><small>${equipmentDetailsHtml(currentItem)}</small></p></div>` : '<p class="compare-empty">此欄位目前沒有穿戴裝備</p>'}</aside>` : '';
-    const equipSlots = item.kind === 'equipment' ? getCompatibleEquipSlots(item, character, progress) : [];
-    const equipControls = equipSlots.map((targetSlot) => `<button type="button" data-equip-id="${item.id}" data-equip-slot="${targetSlot}">${equipSlots.length > 1 ? targetSlot === 'weapon' ? '裝主手' : '裝副手' : '穿戴'}</button>`).join('');
-    const runeButtons = item.kind === 'equipment' && (item.socketedRunes || []).length < (Number(item.sockets) || 0)
-      ? Object.values(RunePolicy.RUNES).filter((rune) => progress.inventory.some((entry) => entry.id === rune.id && Number(entry.quantity) > 0)).map((rune) => `<button type="button" data-socket-item="${item.id}" data-socket-rune="${rune.id}">鑲嵌${rune.name}</button>`).join('') : '';
-    return `<article class="inventory-item ${itemQualityClass(item)} ${equipped ? 'is-equipped' : ''} ${!wearable ? 'incompatible' : ''} ${selectedCount === stackIds.length && selectedCount ? 'sale-selected' : selectedCount ? 'sale-partial' : ''}" tabindex="${item.kind === 'equipment' && !equipped ? '0' : '-1'}">${junkBadge}<span class="item-icon">${visual}</span><div><b>${item.name}${stackQuantity > 1 ? ` ×${stackQuantity}` : ''}${equipped ? '<mark>已穿戴</mark>' : ''}</b><small>${slot}${slot ? '　' : ''}${item.kind === 'equipment' ? equipmentDetailsHtml(item) : itemStatsText(item)}</small></div>${item.kind === 'equipment' && !equipped ? wearable && equipControls ? equipControls : '<span class="equip-blocked">無法穿戴</span>' : ''}${runeButtons}${comparison}</article>`;
+    const equipSlots = item.kind === 'equipment' ? getEquipSlots(item) : [];
+    const entry = { item, stackIds, stackQuantity, wearable, equipSlots, availableRuneIds };
+    inventoryTooltipEntries.set(item.id, entry);
+    const quantity = stackQuantity > 1 ? `<span class="inventory-grid-quantity">${stackQuantity}</span>` : '';
+    const socketStatus = item.kind === 'equipment' && Number(item.sockets) > 0 ? `<span class="inventory-grid-status" aria-label="符文插槽">◇${(item.socketedRunes || []).length}/${Number(item.sockets)}</span>` : '';
+    const blocked = item.kind === 'equipment' && !wearable ? '<span class="inventory-grid-blocked">異職</span>' : '';
+    return `<article class="inventory-item inventory-grid-item ${itemQualityClass(item)} ${!wearable ? 'incompatible' : ''} ${selectedCount === stackIds.length && selectedCount ? 'sale-selected' : selectedCount ? 'sale-partial' : ''}" tabindex="0" role="gridcell" data-inventory-item-id="${item.id}" aria-label="${item.name}，${itemQualityLabel(item)}" aria-describedby="inventory-shared-tooltip">${junkBadge}<span class="item-icon">${visual}</span><b>${item.name}</b>${quantity}${socketStatus}${blocked}</article>`;
   };
-  const categoryTabs = [
-    ['weapon', '武器'],
-    ['armor', '防具'],
-    ['consumable', '道具']
+  const stackedItems = stackIdenticalEquipment(progress.inventory);
+  const sections = [
+    { id: 'wearable', label: '可裝備', items: [] },
+    { id: 'other-equipment', label: '其他職業裝備', items: [] },
+    { id: 'other-items', label: '其他物品', items: [] }
   ];
-  const categoryCounts = Object.fromEntries(categoryTabs.map(([id]) => [id, progress.inventory.filter((item) => itemCategory(item) === id).length]));
-  const inventoryTabs = `<nav class="inventory-tabs" aria-label="背包分類">${categoryTabs.map(([id, label]) => `<button type="button" data-inventory-category="${id}" class="${inventoryCategory === id ? 'selected' : ''}">${label}<b>${categoryCounts[id]}</b></button>`).join('')}</nav>`;
-  const filteredItems = progress.inventory
-    .filter((item) => itemCategory(item) === inventoryCategory)
-    .sort((first, second) => {
-      if (!['weapon', 'armor'].includes(inventoryCategory)) return 0;
-      const wearableDifference = Number(isItemWearableByCharacter(second, character, progress.level)) - Number(isItemWearableByCharacter(first, character, progress.level));
-      return wearableDifference || first.name.localeCompare(second.name, 'zh-Hant');
-    });
-  const stackedItems = stackIdenticalEquipment(filteredItems);
-  const itemCards = stackedItems.length
-    ? stackedItems.map(renderItemCard).join('')
-    : '<p class="empty-inventory">這個分類目前沒有物品。</p>';
-  const selectedScrapCount = [...scrapSelection].filter((id) => progress.inventory.some((item) => item.id === id && item.kind === 'equipment')).length;
+  stackedItems.forEach((item) => {
+    if (item.kind !== 'equipment') sections[2].items.push(item);
+    else if (isWearable(item)) sections[0].items.push(item);
+    else sections[1].items.push(item);
+  });
+  sections.slice(0, 2).forEach((section) => section.items.sort((first, second) => first.name.localeCompare(second.name, 'zh-Hant')));
+  const inventorySections = sections.map((section) => `<section class="inventory-grid-section" data-inventory-section="${section.id}"><header><h3>${section.label}</h3><span>${section.items.reduce((sum, item) => sum + (item.kind === 'equipment' ? Number(item.stackQuantity) || 1 : 1), 0)}</span></header><div class="inventory-list inventory-grid" role="grid" aria-label="${section.label}">${section.items.length ? section.items.map(renderItemCard).join('') : '<p class="empty-inventory">目前沒有物品。</p>'}</div></section>`).join('');
+  const selectedScrapCount = [...scrapSelection].filter((id) => inventoryById.get(id)?.kind === 'equipment').length;
   const saleSummary = InventorySalePolicy.summarizeSelection(progress.inventory, scrapSelection, (item) => getItemJunkContext(item, character, progress));
-  const scrappableItems = progress.inventory.filter((item) => item.kind === 'equipment' && itemCategory(item) === inventoryCategory);
   const allScrapSelected = scrappableItems.length > 0 && scrappableItems.every((item) => scrapSelection.has(item.id));
-  const categoryLabel = inventoryCategory === 'weapon' ? '武器' : inventoryCategory === 'armor' ? '防具' : '裝備';
-  const scrapTools = `<section class="scrap-tools"><div><b>批次販賣</b><small>已選擇 ${saleSummary.count} 件・預計獲得 ${saleSummary.gold} 金幣</small></div><label class="scrap-select select-all-scrap"><input type="checkbox" data-select-all-scrap ${allScrapSelected ? 'checked' : ''} ${scrappableItems.length ? '' : 'disabled'}><span>全部勾選${categoryLabel}</span></label><button type="button" class="select-junk-button" data-select-common-equipment>勾選全部白色裝備</button><button type="button" data-open-sell-confirm ${selectedScrapCount ? '' : 'disabled'}>確認販賣（${selectedScrapCount}）</button></section>`;
-  content.innerHTML = `${inventoryTabs}${scrapTools}<section class="inventory-list">${itemCards}</section>`;
+  const scrapTools = `<section class="scrap-tools"><div><b>批次販賣</b><small>已選擇 ${saleSummary.count} 件・預計獲得 ${saleSummary.gold} 金幣</small></div><label class="scrap-select select-all-scrap"><input type="checkbox" data-select-all-scrap ${allScrapSelected ? 'checked' : ''} ${scrappableItems.length ? '' : 'disabled'}><span>全部勾選裝備</span></label><button type="button" class="select-junk-button" data-select-common-equipment>勾選全部白色裝備</button><button type="button" data-open-sell-confirm ${selectedScrapCount ? '' : 'disabled'}>確認販賣（${selectedScrapCount}）</button></section>`;
+  content.innerHTML = `${scrapTools}<div class="inventory-scroll-area">${inventorySections}</div><aside id="inventory-shared-tooltip" class="inventory-shared-tooltip" role="tooltip" aria-hidden="true"></aside>`;
   modal.classList.remove('hidden');
   modal.dataset.view = 'inventory';
+}
+
+function renderInventoryTooltip(itemId, anchor = null, pin = false) {
+  const tooltip = document.querySelector('#inventory-shared-tooltip');
+  const entry = inventoryTooltipEntries.get(itemId);
+  if (!tooltip || !entry) return;
+  const { item, stackIds, stackQuantity, wearable, equipSlots, availableRuneIds } = entry;
+  const progress = inventoryTooltipProgress || getProgress();
+  const quality = itemQualityLabel(item);
+  const slotLabel = item.kind === 'equipment' ? equipmentSlots[item.slot]?.label || item.slot : '';
+  const details = item.kind === 'equipment' ? equipmentDetailsHtml(item) : itemStatsText(item);
+  const visual = item.image || item.kind === 'recipe'
+    ? `<img src="${itemImagePath(item)}" alt="" class="inventory-item-image">`
+    : item.icon || '◈';
+  const equipControls = item.kind === 'equipment' && wearable
+    ? equipSlots.map((targetSlot) => `<button type="button" data-equip-id="${item.id}" data-equip-slot="${targetSlot}">${equipSlots.length > 1 ? targetSlot === 'weapon' ? '裝主手' : '裝副手' : '穿戴'}</button>`).join('')
+    : item.kind === 'equipment' ? '<span class="equip-blocked">目前角色無法穿戴</span>' : '';
+  const runeButtons = item.kind === 'equipment' && (item.socketedRunes || []).length < (Number(item.sockets) || 0)
+    ? Object.values(RunePolicy.RUNES).filter((rune) => availableRuneIds.has(rune.id)).map((rune) => `<button type="button" data-socket-item="${item.id}" data-socket-rune="${rune.id}">鑲嵌${rune.name}</button>`).join('') : '';
+  const comparisonSlots = equipSlots.length ? equipSlots : item.kind === 'equipment' ? [item.slot] : [];
+  const comparisonItems = comparisonSlots.map((targetSlot) => [targetSlot, progress.equipment[targetSlot]]).filter(([, equipped]) => equipped);
+  const comparison = item.kind === 'equipment' ? `<section class="inventory-tooltip-comparison"><strong>目前穿戴比較</strong>${comparisonItems.length ? comparisonItems.map(([targetSlot, equipped]) => `<div><span class="compare-item-icon"><img src="${itemImagePath(equipped)}" alt=""></span><p><b>${equipmentSlots[targetSlot]?.label || targetSlot}・${equipped.name}</b><small>${equipmentDetailsHtml(equipped)}</small></p></div>`).join('') : '<p class="compare-empty">可用欄位目前沒有穿戴裝備</p>'}</section>` : '';
+  const selectedCount = stackIds.filter((id) => scrapSelection.has(id)).length;
+  const saleControl = item.kind === 'equipment' ? `<label class="inventory-tooltip-sale"><input type="checkbox" data-select-scrap-stack="${item.id}" ${selectedCount === stackIds.length ? 'checked' : ''}><span>選取販賣${stackQuantity > 1 ? `（${stackQuantity} 件）` : ''}</span></label>` : '';
+  tooltip.className = `inventory-shared-tooltip ${itemQualityClass(item)} is-visible`;
+  tooltip.setAttribute('aria-hidden', 'false');
+  tooltip.dataset.itemId = item.id;
+  tooltip.innerHTML = `<header><span class="item-icon">${visual}</span><div><b>${item.name}${stackQuantity > 1 ? ` ×${stackQuantity}` : ''}</b><small>${quality}${slotLabel ? `・${slotLabel}` : ''}${Number(item.requiredLevel) > 0 ? `・需求 Lv${item.requiredLevel}` : ''}</small></div></header><section class="inventory-tooltip-details">${details || '<span>沒有其他詳細資訊。</span>'}</section>${item.kind === 'equipment' ? `<p class="inventory-tooltip-slots">可裝備欄位：${equipSlots.length ? equipSlots.map((slot) => equipmentSlots[slot]?.label || slot).join('、') : '目前角色無可用欄位'}</p>` : ''}${comparison}<footer>${equipControls}${runeButtons}${saleControl}</footer>`;
+  if (pin || inventoryTooltipPinnedId) inventoryTooltipPinnedId = item.id;
+  const target = anchor || document.querySelector(`[data-inventory-item-id="${CSS.escape(item.id)}"]`);
+  if (target) {
+    const rect = target.getBoundingClientRect();
+    const width = Math.min(380, window.innerWidth - 24);
+    const left = Math.min(window.innerWidth - width - 12, Math.max(12, rect.right + 10));
+    const top = Math.min(window.innerHeight - 24, Math.max(12, rect.top));
+    tooltip.style.setProperty('--inventory-tooltip-left', `${left}px`);
+    tooltip.style.setProperty('--inventory-tooltip-top', `${top}px`);
+    tooltip.style.setProperty('--inventory-tooltip-width', `${width}px`);
+  }
+}
+
+function hideInventoryTooltip(force = false) {
+  if (inventoryTooltipPinnedId && !force) return;
+  const tooltip = document.querySelector('#inventory-shared-tooltip');
+  if (!tooltip) return;
+  tooltip.classList.remove('is-visible');
+  tooltip.setAttribute('aria-hidden', 'true');
+  if (force) inventoryTooltipPinnedId = '';
 }
 
 function renderCharacterAbilities() {
@@ -7749,14 +7811,14 @@ document.querySelector('#drop-lookup-modal').addEventListener('input', (event) =
   const input = document.querySelector('[data-drop-search]');
   input.focus(); input.setSelectionRange(cursor, cursor);
 });
-document.querySelector('#inventory-close').addEventListener('click', () => document.querySelector('#inventory-modal').classList.add('hidden'));
+document.querySelector('#inventory-close').addEventListener('click', () => { hideInventoryTooltip(true); document.querySelector('#inventory-modal').classList.add('hidden'); });
 document.querySelector('#sell-confirm-close').addEventListener('click', closeSellConfirmation);
 document.querySelector('#sell-confirm-modal').addEventListener('click', (event) => {
   if (event.target === event.currentTarget || event.target.closest('[data-cancel-sale]')) { closeSellConfirmation(); return; }
   if (event.target.closest('[data-confirm-sale]')) confirmSelectedEquipmentSale();
 });
 document.querySelector('#inventory-modal').addEventListener('click', (event) => {
-  if (event.target === event.currentTarget) event.currentTarget.classList.add('hidden');
+  if (event.target === event.currentTarget) { hideInventoryTooltip(true); event.currentTarget.classList.add('hidden'); return; }
   if (event.target.closest('[data-open-pre-job-trial]')) { renderPreJobTrialPanel(); return; }
   if (event.target.closest('[data-exchange-trial-cores]')) { exchangePreJobTrialCores(); return; }
   const advanceButton = event.target.closest('[data-first-advance]');
@@ -7778,12 +7840,8 @@ document.querySelector('#inventory-modal').addEventListener('click', (event) => 
   if (event.target.closest('[data-map-region-back]')) { renderMapSelector(); return; }
   const mapButton = event.target.closest('[data-select-map]');
   if (mapButton) { selectAdventureMap(mapButton.dataset.selectMap); return; }
-  const categoryButton = event.target.closest('[data-inventory-category]');
-  if (categoryButton) {
-    inventoryCategory = categoryButton.dataset.inventoryCategory;
-    renderInventory('inventory');
-    return;
-  }
+  const inventoryCard = event.target.closest('[data-inventory-item-id]');
+  if (inventoryCard) { renderInventoryTooltip(inventoryCard.dataset.inventoryItemId, inventoryCard, true); return; }
   if (event.target.closest('[data-select-common-equipment]')) { selectAllCommonEquipment(); return; }
   if (event.target.closest('[data-open-sell-confirm]')) { openSellConfirmation(); return; }
   const equipButton = event.target.closest('[data-equip-id]');
@@ -7797,6 +7855,28 @@ document.querySelector('#inventory-modal').addEventListener('click', (event) => 
   }
   const unequipButton = event.target.closest('[data-unequip-slot]');
   if (unequipButton) { unequipItem(unequipButton.dataset.unequipSlot); return; }
+  if (!event.target.closest('#inventory-shared-tooltip')) hideInventoryTooltip(true);
+});
+document.querySelector('#inventory-modal').addEventListener('mouseover', (event) => {
+  const card = event.target.closest('[data-inventory-item-id]');
+  if (!card || card.contains(event.relatedTarget)) return;
+  renderInventoryTooltip(card.dataset.inventoryItemId, card);
+});
+document.querySelector('#inventory-modal').addEventListener('mouseout', (event) => {
+  const card = event.target.closest('[data-inventory-item-id]');
+  if (!card || card.contains(event.relatedTarget) || event.relatedTarget?.closest?.('#inventory-shared-tooltip')) return;
+  hideInventoryTooltip();
+});
+document.querySelector('#inventory-modal').addEventListener('focusin', (event) => {
+  const card = event.target.closest('[data-inventory-item-id]');
+  if (card) renderInventoryTooltip(card.dataset.inventoryItemId, card);
+});
+document.querySelector('#inventory-modal').addEventListener('focusout', (event) => {
+  if (event.relatedTarget?.closest?.('[data-inventory-item-id], #inventory-shared-tooltip')) return;
+  hideInventoryTooltip();
+});
+document.querySelector('#inventory-modal').addEventListener('keydown', (event) => {
+  if (event.key === 'Escape' && inventoryTooltipPinnedId) { event.preventDefault(); hideInventoryTooltip(true); }
 });
 document.querySelector('#battle-title').addEventListener('click', () => { if (!layoutEditMode) renderMapSelector(); });
 document.querySelector('#battle-title').addEventListener('keydown', (event) => { if (!layoutEditMode && ['Enter', ' '].includes(event.key)) { event.preventDefault(); renderMapSelector(); } });
@@ -7964,10 +8044,20 @@ document.querySelector('#layout-export').addEventListener('click', async () => {
   }
 });
 document.querySelector('#inventory-modal').addEventListener('change', (event) => {
+  const scrapStackCheckbox = event.target.closest('[data-select-scrap-stack]');
+  if (scrapStackCheckbox) {
+    const entry = inventoryTooltipEntries.get(scrapStackCheckbox.dataset.selectScrapStack);
+    (entry?.stackIds || []).forEach((id) => {
+      if (scrapStackCheckbox.checked) scrapSelection.add(id);
+      else scrapSelection.delete(id);
+    });
+    renderInventory('inventory');
+    return;
+  }
   const selectAllCheckbox = event.target.closest('[data-select-all-scrap]');
   if (selectAllCheckbox) {
     const progress = getProgress();
-    progress.inventory.filter((item) => item.kind === 'equipment' && itemCategory(item) === inventoryCategory).forEach((item) => {
+    progress.inventory.filter((item) => item.kind === 'equipment').forEach((item) => {
       if (selectAllCheckbox.checked) scrapSelection.add(item.id);
       else scrapSelection.delete(item.id);
     });
