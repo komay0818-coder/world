@@ -11,7 +11,8 @@ const combat = require('../redrock-wastes-policy.js');
 assert.match(index, /chapter-three-progression-policy\.js[\s\S]*script\.js/);
 assert.equal(maps.getMap('redrock-wastes-entrance').implemented, true);
 assert.equal(maps.getMap('brokenrock-canyon').implemented, true);
-assert.ok(maps.MAPS.slice(2).every((map) => map.implemented === false), '3-3 through 3-6 stay closed');
+assert.equal(maps.getMap('bloodwar-wastes').implemented, true);
+assert.ok(maps.MAPS.slice(3).every((map) => map.implemented === false), '3-4 through 3-6 stay closed');
 assert.deepEqual(combat.getCombatPool(), {
   normal: ['wasteland-hyena', 'redrock-lizard', 'wasteland-vulture', 'skullcrusher-scout'],
   elite: ['redrock-hornbeast'], boss: ['redrock-giant-lizard']

@@ -8,7 +8,7 @@ const maps = require('../chapter-three-map-policy.js');
 const combat = require('../brokenrock-canyon-policy.js');
 
 assert.equal(maps.getMap('brokenrock-canyon').implemented, true);
-assert.equal(maps.getMap('bloodwar-wastes').implemented, false);
+assert.equal(maps.getMap('bloodwar-wastes').implemented, true);
 assert.deepEqual(combat.getCombatPool(), {
   normal: ['wasteland-hyena', 'skullcrusher-scout', 'skullcrusher-spearman', 'skullcrusher-warrior'],
   elite: ['brokenrock-brute'], boss: ['canyon-warlord']
@@ -22,5 +22,5 @@ assert.match(script, /BrokenrockCanyonPolicy\.updateThresholds/);
 assert.match(script, /brokenrockAction\?\.damageMultiplier/);
 assert.match(script, /brokenrockAction\?\.defenseIgnore/);
 assert.match(script, /savedChapterThreePlaytestProgress\?\.requiresMapSelectionAfterDefeat[\s\S]*sessionStorage\.removeItem\(chapterThreePlaytestProgressKey\)/, 'a defeated isolated playtest session resets before auto-entry');
-assert.match(script, /getRequestedMapId\(\) === 'brokenrock-canyon' \? '3-2' : '3-1'/, 'the playtest identity matches the requested chapter-three map');
+assert.match(script, /getRequestedMapId\(\) === 'bloodwar-wastes' \? '3-3'/, 'the playtest identity includes the requested 3-3 map');
 console.log('chapter-three-32-integration: assertions passed');

@@ -650,7 +650,8 @@ const monsterTypes = EquipmentDropPolicy.applyDefaultLootConfigs({
   ...Object.fromEntries(ForestAltarPolicy.MONSTERS.map((entry) => [entry.combatId, ForestAltarPolicy.toCombatMonster(entry)])),
   ...Object.fromEntries(BlackForestDepthsPolicy.MONSTERS.map((entry) => [entry.combatId, BlackForestDepthsPolicy.toCombatMonster(entry)])),
   ...Object.fromEntries(RedrockWastesPolicy.MONSTERS.map((entry) => [entry.id, RedrockWastesPolicy.getCombatMonster(entry.id)])),
-  ...Object.fromEntries(BrokenrockCanyonPolicy.MONSTERS.map((entry) => [entry.id, BrokenrockCanyonPolicy.getCombatMonster(entry.id)]))
+  ...Object.fromEntries(BrokenrockCanyonPolicy.MONSTERS.map((entry) => [entry.id, BrokenrockCanyonPolicy.getCombatMonster(entry.id)])),
+  ...Object.fromEntries(BloodwarWastesPolicy.MONSTERS.map((entry) => [entry.id, BloodwarWastesPolicy.getCombatMonster(entry.id)]))
 });
 // Visual-size categories describe the creature body, not its combat rank.
 // CSS values compensate for the taller enemy image frame; 1.0 means the
@@ -671,10 +672,10 @@ const monsterVisualScaleCorrections = {
   'skullcrusher-scout': .8708175,
   'redrock-hornbeast': 1.04,
   'redrock-giant-lizard': 1.33,
-  'skullcrusher-spearman': 1.05,
-  'skullcrusher-warrior': 1.05,
-  'brokenrock-brute': 1,
-  'canyon-warlord': 1.06,
+  'skullcrusher-spearman': .8708175,
+  'skullcrusher-warrior': .9888785825625,
+  'brokenrock-brute': .97,
+  'canyon-warlord': 1.14639,
   'skullcrusher-berserker': 1.06,
   'skullcrusher-shieldguard': 1.02,
   'skullcrusher-hunter': .94,
@@ -721,6 +722,7 @@ const mapMonsterPools = {
   blackForestDepths: BlackForestDepthsPolicy.getCombatPool(),
   redrockWastes: RedrockWastesPolicy.getCombatPool(),
   brokenrockCanyon: BrokenrockCanyonPolicy.getCombatPool(),
+  bloodwarWastes: BloodwarWastesPolicy.getCombatPool(),
   beginner: { normal: ['plainsRabbit', 'plainsWolfPup', 'plainsSlime', 'plainsGoblinYoung'], rare: ['lostGoblin'], rareChance: .10, elite: [], boss: [] },
   blackForest: BlackForestEntrancePolicy.getCombatPool()
 };
@@ -755,7 +757,8 @@ const dropLookupMapPools = {
   'forest-altar': mapMonsterPools.forestAltar,
   'black-forest-depths': mapMonsterPools.blackForestDepths,
   'redrock-wastes-entrance': mapMonsterPools.redrockWastes,
-  'brokenrock-canyon': mapMonsterPools.brokenrockCanyon
+  'brokenrock-canyon': mapMonsterPools.brokenrockCanyon,
+  'bloodwar-wastes': mapMonsterPools.bloodwarWastes
 };
 
 const potionDropRate = .10;
@@ -2053,6 +2056,7 @@ function getMonsterPool(level = getProgress().level) {
   if (mapId === 'black-forest-depths') return mapMonsterPools.blackForestDepths;
   if (mapId === 'redrock-wastes-entrance') return mapMonsterPools.redrockWastes;
   if (mapId === 'brokenrock-canyon') return mapMonsterPools.brokenrockCanyon;
+  if (mapId === 'bloodwar-wastes') return mapMonsterPools.bloodwarWastes;
   return mapId === 'black-forest' ? mapMonsterPools.blackForest : mapMonsterPools.beginner;
 }
 
@@ -2108,6 +2112,12 @@ function createEnemyTypes(playerLevel = 1) {
     if (forcedCombatId) return [forcedCombatId];
   }
   const activeMapId = getActiveMap(getProgress()).id;
+  if (activeMapId === 'bloodwar-wastes' && ChapterTwoBalancePlaytestPolicy?.getRequestedMapId() === 'bloodwar-wastes') {
+    const requestedRank = new URLSearchParams(window.location.search).get('rank');
+    if (requestedRank === 'elite') return ['skullcrusher-centurion', 'skullcrusher-berserker', 'skullcrusher-shieldguard', 'skullcrusher-hunter'];
+    if (requestedRank === 'boss') return ['skullcrusher-vanguard-commander', 'skullcrusher-berserker', 'skullcrusher-shieldguard', 'skullcrusher-shaman'];
+    return [...mapMonsterPools.bloodwarWastes.normal];
+  }
   const enemyLimit = ChapterOneLevelPolicy.getConcurrentEnemyLimit(activeMapId);
   if (activeMapId === 'plains-entrance') {
     return Array.from({ length: enemyLimit }, () => randomEnemyId(playerLevel));
@@ -2147,6 +2157,7 @@ function getMonsterDefinitionForMap(type, mapId = battle.dungeonId || getActiveM
   if (mapId === 'black-forest-depths') return BlackForestDepthsPolicy.getCombatMonster(type) || monsterTypes.plainsGoblinYoung;
   if (mapId === 'redrock-wastes-entrance') return RedrockWastesPolicy.getCombatMonster(type) || monsterTypes.plainsGoblinYoung;
   if (mapId === 'brokenrock-canyon') return BrokenrockCanyonPolicy.getCombatMonster(type) || monsterTypes.plainsGoblinYoung;
+  if (mapId === 'bloodwar-wastes') return BloodwarWastesPolicy.getCombatMonster(type) || monsterTypes.plainsGoblinYoung;
   const monster = monsterTypes[type] || monsterTypes.plainsGoblinYoung;
   const chapterMonster = ChapterOneLevelPolicy.scaleMonster(monster, mapId, level);
   const dungeonMonster = GoblinCampPolicy.scaleMonster(chapterMonster, mapId === 'goblin-camp');
@@ -2289,6 +2300,10 @@ function getMonsterAttackPower(enemy, progress = getProgress(), currentHp = enem
   const brokenrockMultiplier = BrokenrockCanyonPolicy.getCombatMultipliers(enemy.id, brokenrockState).attack;
   const brokenrockBuffMultiplier = brokenrockState && Date.now() < (brokenrockState.battleCryUntil || 0) ? 1.10 : 1;
   const brokenrockCommandMultiplier = brokenrockState && Date.now() < (brokenrockState.offensiveCommandUntil || 0) ? 1.15 : 1;
+  const bloodwarState = enemy.mapId === 'bloodwar-wastes' ? getBloodwarEnemyStateById(enemy.id, currentHp, enemy.maxHp) : null;
+  const bloodwarMultiplier = BloodwarWastesPolicy.getCombatMultipliers(enemy.id, bloodwarState).attack;
+  const bloodwarTotemMultiplier = bloodwarState && Date.now() < (bloodwarState.warbloodTotemUntil || 0) ? 1.10 : 1;
+  const bloodwarChargeMultiplier = bloodwarState && Date.now() < (bloodwarState.fullArmyChargeUntil || 0) ? 1.15 : 1;
   const strongholdCommandMultiplier = enemy.mapId === 'blackstone-stronghold' && Date.now() < (battle.strongholdCommandUntil || 0)
     ? 1 + BlackstoneStrongholdPolicy.LION_GUARD.roarAttackBonus : 1;
   const strongholdEnrageMultiplier = enemy.mapId === 'blackstone-stronghold'
@@ -2299,7 +2314,7 @@ function getMonsterAttackPower(enemy, progress = getProgress(), currentHp = enem
     ? 1 + BlackForestTrailPolicy.BEASTMASTER.spiderAttackBonus : 1;
   const nestSpiderCommandMultiplier = ['spiderNestBlackstonePoisonSpider', 'venomSpitterSpider', 'webWeaver', 'giantSpider'].includes(enemy.id)
     && Date.now() < (battle.spiderNestCommandUntil || 0) ? 1 + SpiderNestPolicy.BEASTMASTER.spiderAttackBonus : 1;
-  if (enemy.mapId) return Math.max(1, Math.round((enemy.attack || 1) * randomMultiplier * bloodFrenzy * irritable * plainsIrritable * blackForestMultiplier * blackForestTrailMultiplier * spiderNestMultiplier * strongholdMultiplier * forestAltarMultiplier * depthsMultiplier * redrockMultiplier * brokenrockMultiplier * brokenrockBuffMultiplier * brokenrockCommandMultiplier * strongholdCommandMultiplier * strongholdEnrageMultiplier * commandMultiplier * beastCommandMultiplier * nestSpiderCommandMultiplier));
+  if (enemy.mapId) return Math.max(1, Math.round((enemy.attack || 1) * randomMultiplier * bloodFrenzy * irritable * plainsIrritable * blackForestMultiplier * blackForestTrailMultiplier * spiderNestMultiplier * strongholdMultiplier * forestAltarMultiplier * depthsMultiplier * redrockMultiplier * brokenrockMultiplier * brokenrockBuffMultiplier * brokenrockCommandMultiplier * bloodwarMultiplier * bloodwarTotemMultiplier * bloodwarChargeMultiplier * strongholdCommandMultiplier * strongholdEnrageMultiplier * commandMultiplier * beastCommandMultiplier * nestSpiderCommandMultiplier));
   const map = getActiveMap(progress);
   const monsterLevel = Math.min(map.max, Math.max(map.min, progress.level));
   const levelMultiplier = 1 + (monsterLevel - 1) * .10;
@@ -2321,13 +2336,16 @@ function getMonsterAttackInterval(enemy, currentHp = enemy.maxHp) {
   const redrockMultiplier = RedrockWastesPolicy.getCombatMultipliers(enemy.id, redrockState).attackSpeed;
   const brokenrockState = enemy.mapId === 'brokenrock-canyon' ? getBrokenrockEnemyStateById(enemy.id, currentHp, enemy.maxHp) : null;
   const brokenrockCommandMultiplier = brokenrockState && Date.now() < (brokenrockState.offensiveCommandUntil || 0) ? 1.15 : 1;
+  const bloodwarState = enemy.mapId === 'bloodwar-wastes' ? getBloodwarEnemyStateById(enemy.id, currentHp, enemy.maxHp) : null;
+  const bloodwarMultiplier = BloodwarWastesPolicy.getCombatMultipliers(enemy.id, bloodwarState).attackSpeed;
+  const bloodwarChargeMultiplier = bloodwarState && Date.now() < (bloodwarState.fullArmyChargeUntil || 0) ? 1.20 : 1;
   const strongholdEnrageMultiplier = enemy.mapId === 'blackstone-stronghold'
     ? 1 + BlackstoneStrongholdPolicy.getEnrage(battle.blackstoneStrongholdState, Date.now()).attackSpeedBonus : 1;
   const beastCommandMultiplier = enemy.id === 'blackstonePoisonSpider' && Date.now() < (battle.blackstoneSpiderCommandUntil || 0)
     ? 1 + BlackForestTrailPolicy.BEASTMASTER.spiderAttackSpeedBonus : 1;
   const nestSpiderCommandMultiplier = ['spiderNestBlackstonePoisonSpider', 'venomSpitterSpider', 'webWeaver', 'giantSpider'].includes(enemy.id)
     && Date.now() < (battle.spiderNestCommandUntil || 0) ? 1 + SpiderNestPolicy.BEASTMASTER.spiderAttackSpeedBonus : 1;
-  return Math.max(250, (enemy.attackInterval || (1000 / (enemy.attackSpeed || 1))) / bloodFrenzy / irritable / plainsIrritable / blackForestMultiplier / blackForestTrailMultiplier / spiderNestMultiplier / strongholdMultiplier / forestAltarMultiplier / depthsMultiplier / redrockMultiplier / brokenrockCommandMultiplier / strongholdEnrageMultiplier / beastCommandMultiplier / nestSpiderCommandMultiplier);
+  return Math.max(250, (enemy.attackInterval || (1000 / (enemy.attackSpeed || 1))) / bloodFrenzy / irritable / plainsIrritable / blackForestMultiplier / blackForestTrailMultiplier / spiderNestMultiplier / strongholdMultiplier / forestAltarMultiplier / depthsMultiplier / redrockMultiplier / brokenrockCommandMultiplier / bloodwarMultiplier / bloodwarChargeMultiplier / strongholdEnrageMultiplier / beastCommandMultiplier / nestSpiderCommandMultiplier);
 }
 
 function createEnemyAttackSchedule(enemyTypes, startAt = Date.now(), mapId = getActiveMap(getProgress()).id, enemyLevels = []) {
@@ -2424,7 +2442,9 @@ function getCurrentMap(level) {
 }
 
 function getActiveMap(progress = getProgress()) {
-  const selected = mapProgression.find((map) => map.id === progress.selectedMapId && map.implemented
+  const bloodwarVisualPlaytest = ChapterTwoBalancePlaytestPolicy?.isChapterThreeActive()
+    && ChapterTwoBalancePlaytestPolicy.getRequestedMapId() === 'bloodwar-wastes';
+  const selected = mapProgression.find((map) => map.id === progress.selectedMapId && (map.implemented || (bloodwarVisualPlaytest && map.id === 'bloodwar-wastes'))
     && (map.chapter !== 1 || ChapterOneProgressionPolicy.isUnlocked(progress, map.id))
     && (map.chapter !== 2 || (ChapterOneProgressionPolicy.isUnlocked(progress, 'black-forest') && progress.level >= map.min)));
   if (selected?.id === 'beginner-plains') return mapProgression.find((map) => map.id === 'plains-entrance');
@@ -5153,6 +5173,21 @@ function getBrokenrockEnemyStateById(enemyId, currentHp, maxHp) {
   return index >= 0 ? getBrokenrockEnemyState(index, currentHp, maxHp) : BrokenrockCanyonPolicy.createState(Date.now());
 }
 
+function getBloodwarEnemyState(index, currentHp = null, maxHp = null, now = Date.now()) {
+  battle.bloodwarEnemyStates = Array.isArray(battle.bloodwarEnemyStates) ? battle.bloodwarEnemyStates : [];
+  battle.bloodwarEnemyStates[index] = battle.bloodwarEnemyStates[index] || BloodwarWastesPolicy.createState(now);
+  if (currentHp !== null && maxHp !== null) {
+    const events = BloodwarWastesPolicy.updateThresholds(battle.enemyTypes[index], battle.bloodwarEnemyStates[index], currentHp, maxHp, now);
+    battle.bloodwarEnemyStates[index].pendingActions = [...(battle.bloodwarEnemyStates[index].pendingActions || []), ...events];
+  }
+  return battle.bloodwarEnemyStates[index];
+}
+
+function getBloodwarEnemyStateById(enemyId, currentHp, maxHp) {
+  const index = (battle.enemyTypes || []).findIndex((type, candidate) => type === enemyId && battle.enemyHps?.[candidate] > 0);
+  return index >= 0 ? getBloodwarEnemyState(index, currentHp, maxHp) : BloodwarWastesPolicy.createState(Date.now());
+}
+
 function getMageShockKey(member) { return member?.id || member?.character?.id || ''; }
 
 function getMageShockState(index, member) {
@@ -5240,6 +5275,10 @@ function applyDamageToMonster(index, baseDamage, profile, options = {}) {
   const depthsMultipliers = BlackForestDepthsPolicy.getCombatMultipliers(enemy.id, battle.enemyHps[index], enemy.maxHp, getBlackForestDepthsCombatContext());
   const redrockMultipliers = RedrockWastesPolicy.getCombatMultipliers(enemy.id,
     enemy.mapId === 'redrock-wastes-entrance' ? getRedrockEnemyState(index, battle.enemyHps[index], enemy.maxHp) : null);
+  const bloodwarState = enemy.mapId === 'bloodwar-wastes' ? getBloodwarEnemyState(index, battle.enemyHps[index], enemy.maxHp, now) : null;
+  const livingCenturions = enemy.mapId === 'bloodwar-wastes'
+    ? battle.enemyTypes.filter((type, candidate) => type === 'skullcrusher-centurion' && battle.enemyHps[candidate] > 0).length : 0;
+  const bloodwarDefenseMultiplier = BloodwarWastesPolicy.getCenturionAuraDefenseMultiplier(livingCenturions, enemy.id === 'skullcrusher-centurion');
   const armorIgnore = ArmorPenetrationPolicy.getTotalArmorIgnore({
     skillArmorIgnore: options.armorIgnore,
     equipmentArmorPenetration: attackerStats.armorPenetrationPercent + warriorRuntime.armorPenetration,
@@ -5251,7 +5290,8 @@ function applyDamageToMonster(index, baseDamage, profile, options = {}) {
   const rogueDefenseMultiplier = 1 - RogueAdvancementPolicy.getTargetDefenseReduction(battle.enemyDots[index]);
   const defendedEnemy = {
     ...enemy,
-    defense: Math.max(0, Math.round(enemy.defense * armorShatterMultiplier * (1 - armorIgnore) * rogueDefenseMultiplier * (1 - Math.min(.9, (battle.enemyDots[index] || []).filter((dot) => dot.type === 'poison').reduce((total, dot) => total + (dot.defenseReduction || 0), 0))) * trailMultipliers.defense * spiderNestMultipliers.defense * strongholdMultipliers.defense * forestAltarMultipliers.defense * depthsMultipliers.defense * redrockMultipliers.defense)),
+    defense: Math.max(0, Math.round(enemy.defense * armorShatterMultiplier * (1 - armorIgnore) * rogueDefenseMultiplier * (1 - Math.min(.9, (battle.enemyDots[index] || []).filter((dot) => dot.type === 'poison').reduce((total, dot) => total + (dot.defenseReduction || 0), 0))) * trailMultipliers.defense * spiderNestMultipliers.defense * strongholdMultipliers.defense * forestAltarMultipliers.defense * depthsMultipliers.defense * redrockMultipliers.defense * bloodwarDefenseMultiplier)),
+    damageReduction: Math.min(95, (enemy.damageReduction || 0) + (bloodwarState && now < (bloodwarState.shieldWallUntil || 0) ? 20 : 0)),
     evasion: (enemy.evasion || 0) + (trailMultipliers.evasion || 0) + (spiderNestMultipliers.evasion || 0) + (strongholdMultipliers.evasion || 0) + (forestAltarMultipliers.evasion || 0) + (depthsMultipliers.evasion || 0) + (assassinDashActive ? SpiderNestPolicy.ASSASSIN.dashEvasionBonus : 0),
     parry: (enemy.parry || 0) + (captainShieldActive ? BlackForestTrailPolicy.CAPTAIN.shieldParryBonus : 0)
   };
@@ -5316,6 +5356,7 @@ function applyDamageToMonster(index, baseDamage, profile, options = {}) {
   const wasAlive = battle.enemyHps[index] > 0;
   battle.enemyHps[index] -= result.finalDamage;
   if (enemy.mapId === 'brokenrock-canyon') getBrokenrockEnemyState(index, battle.enemyHps[index], enemy.maxHp);
+  if (enemy.mapId === 'bloodwar-wastes') getBloodwarEnemyState(index, battle.enemyHps[index], enemy.maxHp);
   const markOwner = (battle.partyMembers || []).find((member) => member.id === skillState.deathMarkOwner);
   const deathMarkExecuted = battle.enemyHps[index] > 0
     && markOwner === attacker
@@ -7160,6 +7201,52 @@ function enemyAttackTick() {
     if (brokenrockAction?.target === 'lowest-hp-ratio-alive') {
       target = aliveMembers.sort((first, second) => first.currentHp / first.maxHp - second.currentHp / second.maxHp)[0];
     }
+    const bloodwarState = getActiveMap(progress).id === 'bloodwar-wastes'
+      ? getBloodwarEnemyState(enemyIndex, enemyCurrentHp, enemy.maxHp, now) : null;
+    const bloodwarActions = bloodwarState
+      ? [...(bloodwarState.pendingActions || []), ...BloodwarWastesPolicy.resolveScheduledActions(enemy.id, bloodwarState, now, { otherAliveEnemies: Math.max(0, aliveEnemyIndexesByAge().length - 1) })]
+      : [];
+    if (bloodwarState) bloodwarState.pendingActions = [];
+    for (const action of bloodwarActions) {
+      if (action.id === 'shield-wall') {
+        const allies = aliveEnemyIndexesByAge().filter((candidate) => candidate !== enemyIndex);
+        const protectedIndexes = [enemyIndex, ...allies.slice(0, 1)];
+        protectedIndexes.forEach((candidate) => { getBloodwarEnemyState(candidate).shieldWallUntil = now + action.buff.durationMs; });
+        BloodwarWastesPolicy.recordBuffTargets(bloodwarState, action.id, protectedIndexes.length);
+        logBattle(`🛡【${enemy.name}】施放【盾牆】，保護自己與一名友軍！`, 'system');
+      }
+      if (action.id === 'hunting-mark') {
+        target = [...aliveMembers].sort((first, second) => first.currentHp / first.maxHp - second.currentHp / second.maxHp)[0];
+        BloodwarWastesPolicy.applyHuntingMark(bloodwarState, target.id, now);
+        logBattle(`🎯【${enemy.name}】對 ${target.name}施放【獵殺標記】！`, 'system');
+      }
+      if (action.id === 'warblood-totem') {
+        const affected = aliveEnemyIndexesByAge();
+        affected.forEach((candidate) => { getBloodwarEnemyState(candidate).warbloodTotemUntil = now + action.buff.durationMs; });
+        BloodwarWastesPolicy.recordBuffTargets(bloodwarState, action.id, affected.length);
+        logBattle(`🩸【${enemy.name}】召喚【戰血圖騰】，強化全體敵軍！`, 'system');
+      }
+      if (action.id === 'full-army-charge') {
+        const affected = aliveEnemyIndexesByAge().filter((candidate) => candidate !== enemyIndex);
+        affected.forEach((candidate) => { getBloodwarEnemyState(candidate).fullArmyChargeUntil = now + action.buff.durationMs; });
+        BloodwarWastesPolicy.recordBuffTargets(bloodwarState, action.id, affected.length);
+        logBattle(`📣【${enemy.name}】施放【全軍突擊】，其他敵軍攻擊與攻速提高！`, 'system');
+      }
+      if (action.id === 'fight-to-the-end') {
+        const allies = aliveEnemyIndexesByAge().filter((candidate) => candidate !== enemyIndex);
+        let healing = 0;
+        allies.forEach((candidate) => {
+          const ally = getEnemyDefinition(candidate);
+          const restored = Math.min(Math.round(ally.maxHp * action.otherHealRatio), ally.maxHp - battle.enemyHps[candidate]);
+          battle.enemyHps[candidate] += restored;
+          getBloodwarEnemyState(candidate).fightToEnd = true;
+          healing += restored;
+        });
+        BloodwarWastesPolicy.recordFightToEnd(bloodwarState, { healing, aliveTargets: allies.length });
+        logBattle(`🔥【${enemy.name}】發動【血戰到底】！`, 'system');
+      }
+    }
+    const bloodwarAction = bloodwarActions.find((action) => action.damageMultiplier) || null;
     const critical = !dodged && Math.random() < ((enemy.criticalChance ?? (enemy.isBoss ? .15 : enemy.isElite ? .10 : .05)) + (redrockAction?.criticalBonus || 0));
     const blackForestAction = getActiveMap(progress).id === 'black-forest-entrance'
       ? BlackForestEntrancePolicy.resolveAction(enemy.id, Math.random(), target.currentHp / target.maxHp, enemyCurrentHp, enemy.maxHp)
@@ -7282,7 +7369,9 @@ function enemyAttackTick() {
       * ForestAltarPolicy.getDamageMultiplier(forestAltarAction)
       * BlackForestDepthsPolicy.getDamageMultiplier(blackForestDepthsAction)
       * (redrockAction?.damageMultiplier || 1)
-      * (brokenrockAction?.damageMultiplier || 1);
+      * (brokenrockAction?.damageMultiplier || 1)
+      * (bloodwarAction?.damageMultiplier || 1)
+      * (bloodwarState ? BloodwarWastesPolicy.getHunterDamageMultiplier(bloodwarState, target.id, now) : 1);
     const marked = now < (target.blackstoneMarkedUntil || 0);
     const markedHumanBonus = marked && enemy.faction === 'blackstone-bandits'
       ? 1 + BlackForestTrailPolicy.MARK.blackstoneHumanDamageBonus : 1;
@@ -7585,7 +7674,7 @@ function openBattle() {
   const sessionId = ++battleSessionSequence;
   const partyMembers = buildBattlePartyMembers(battleStart);
   const mainMember = partyMembers.find((member) => member.isMain) || partyMembers[0];
-  battle = { enemyTypes, enemyLevels, enemyHps, partyMembers, playerHp: mainMember?.currentHp || getMaxHp(progress.level, progress), playerMana: mainMember?.resourceCurrent || 0, playerArrows: mainMember?.resourceType === 'arrows' ? mainMember.resourceCurrent : 0, playerShield: 0, playerStunnedUntil: 0, playerBleed: null, manaExhausted: false, playerAttackCharge: 0, hunterAttackCount: 0, lastManaRegenAt: battleStart, lastResourceUpdatedAt: battleStart, lastArrowRecoveryAt: battleStart, lastCorruptionTickAt: battleStart, lastStrongholdRegenAt: battleStart, enemyNextAttackAt: createEnemyAttackSchedule(enemyTypes, battleStart, currentMap.id, enemyLevels), enemyBoarEnraged: enemyTypes.map(() => false), enemyTrailSummoned: enemyTypes.map(() => false), enemySummonProfiles: enemyTypes.map(() => null), enemyCaptainShieldUntil: enemyTypes.map(() => 0), enemyAssassinDashUntil: enemyTypes.map(() => 0), enemySpiderNestPhase: enemyTypes.map(() => 1), blackstoneRoarUntil: 0, blackstoneCommandUntil: 0, blackstoneSpiderCommandUntil: 0, spiderNestCommandUntil: 0, strongholdCommandUntil: 0, blackstoneStrongholdState: createBlackstoneStrongholdBattleState(), globalSkillReadyAt: 0, undeadRevived: false, skillCooldowns: {}, enemyRespawns: enemyTypes.map(() => null), enemySpawnedAt: enemyTypes.map((_, index) => battleStart + index), enemyDots: enemyTypes.map(() => []), enemySkillStates: enemyTypes.map(() => null), redrockEnemyStates: enemyTypes.map(() => null), brokenrockEnemyStates: enemyTypes.map(() => null), monsterMoveSpeed: 200, targetIndexes: [], enemyDamages: enemyTypes.map(() => []), damageTimers: [], rewardedEnemyIndexes: new Set(), roundLoot: {}, isDungeon, dungeonId: isDungeon ? currentMap.id : null, dungeonWave: isDungeon ? 1 : 0, dungeonComplete: false, waveTransitioning: false, goblinScoutSummons: 0 };
+  battle = { enemyTypes, enemyLevels, enemyHps, partyMembers, playerHp: mainMember?.currentHp || getMaxHp(progress.level, progress), playerMana: mainMember?.resourceCurrent || 0, playerArrows: mainMember?.resourceType === 'arrows' ? mainMember.resourceCurrent : 0, playerShield: 0, playerStunnedUntil: 0, playerBleed: null, manaExhausted: false, playerAttackCharge: 0, hunterAttackCount: 0, lastManaRegenAt: battleStart, lastResourceUpdatedAt: battleStart, lastArrowRecoveryAt: battleStart, lastCorruptionTickAt: battleStart, lastStrongholdRegenAt: battleStart, enemyNextAttackAt: createEnemyAttackSchedule(enemyTypes, battleStart, currentMap.id, enemyLevels), enemyBoarEnraged: enemyTypes.map(() => false), enemyTrailSummoned: enemyTypes.map(() => false), enemySummonProfiles: enemyTypes.map(() => null), enemyCaptainShieldUntil: enemyTypes.map(() => 0), enemyAssassinDashUntil: enemyTypes.map(() => 0), enemySpiderNestPhase: enemyTypes.map(() => 1), blackstoneRoarUntil: 0, blackstoneCommandUntil: 0, blackstoneSpiderCommandUntil: 0, spiderNestCommandUntil: 0, strongholdCommandUntil: 0, blackstoneStrongholdState: createBlackstoneStrongholdBattleState(), globalSkillReadyAt: 0, undeadRevived: false, skillCooldowns: {}, enemyRespawns: enemyTypes.map(() => null), enemySpawnedAt: enemyTypes.map((_, index) => battleStart + index), enemyDots: enemyTypes.map(() => []), enemySkillStates: enemyTypes.map(() => null), redrockEnemyStates: enemyTypes.map(() => null), brokenrockEnemyStates: enemyTypes.map(() => null), bloodwarEnemyStates: enemyTypes.map(() => null), monsterMoveSpeed: 200, targetIndexes: [], enemyDamages: enemyTypes.map(() => []), damageTimers: [], rewardedEnemyIndexes: new Set(), roundLoot: {}, isDungeon, dungeonId: isDungeon ? currentMap.id : null, dungeonWave: isDungeon ? 1 : 0, dungeonComplete: false, waveTransitioning: false, goblinScoutSummons: 0 };
   battle.enemyAffixes = enemyAffixes;
   battle.sessionId = sessionId;
   clearBattleLog();
@@ -7633,7 +7722,7 @@ if (ChapterTwoBalancePlaytestPolicy?.isChapterThreeActive()) {
   }
 }
 const activePlaytestName = ChapterTwoBalancePlaytestPolicy?.isChapterThreeActive()
-  ? `第三章 ${ChapterTwoBalancePlaytestPolicy.getRequestedMapId() === 'brokenrock-canyon' ? '3-2' : '3-1'} 開發測試`
+  ? `第三章 ${ChapterTwoBalancePlaytestPolicy.getRequestedMapId() === 'bloodwar-wastes' ? '3-3' : ChapterTwoBalancePlaytestPolicy.getRequestedMapId() === 'brokenrock-canyon' ? '3-2' : '3-1'} 開發測試`
   : '';
 const savedName = localStorage.getItem('stardust-player-name');
 if (activePlaytestName || savedName) {

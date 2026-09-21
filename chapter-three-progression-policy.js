@@ -11,11 +11,13 @@
   ]);
   const BOSS_IDS = Object.freeze({
     'redrock-wastes-entrance': 'redrock-giant-lizard',
-    'brokenrock-canyon': 'canyon-warlord'
+    'brokenrock-canyon': 'canyon-warlord',
+    'bloodwar-wastes': 'skullcrusher-vanguard-commander'
   });
   const NEXT_MAP = Object.freeze({
     'redrock-wastes-entrance': 'brokenrock-canyon',
-    'brokenrock-canyon': 'bloodwar-wastes'
+    'brokenrock-canyon': 'bloodwar-wastes',
+    'bloodwar-wastes': 'skullcrusher-war-camp'
   });
 
   function createDefaultState() {
@@ -46,6 +48,7 @@
     }
     if (state.cleared['redrock-wastes-entrance']) state.unlocked['brokenrock-canyon'] = true;
     if (state.cleared['brokenrock-canyon']) state.unlocked['bloodwar-wastes'] = true;
+    if (state.cleared['bloodwar-wastes']) state.unlocked['skullcrusher-war-camp'] = true;
     progress.chapterThreeProgress = state;
     return state;
   }

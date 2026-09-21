@@ -1163,6 +1163,32 @@ body:has(.battle-screen:not(.hidden)) .toast.show {
   --monster-aura-fill: rgba(218, 139, 36, .28);
 }
 
+/* Elite and boss ranks use one image-sized aura only. */
+#enemy-squad .monster-battle-slot.elite .monster-image-frame,
+#enemy-squad .monster-battle-slot.boss .monster-image-frame {
+  filter: none !important;
+}
+
+#enemy-squad .monster-battle-slot.elite .monster-slot-image,
+#enemy-squad .monster-battle-slot.boss .monster-slot-image {
+  filter: drop-shadow(0 8px 5px rgba(0, 0, 0, .55)) !important;
+}
+
+#enemy-squad .monster-battle-slot.elite .monster-image-frame::after,
+#enemy-squad .monster-battle-slot.boss .monster-image-frame::after {
+  right: auto;
+  bottom: 9%;
+  left: 50%;
+  width: 62%;
+  height: 30%;
+  border-width: 2px;
+  background: radial-gradient(ellipse, var(--monster-aura-fill), transparent 68%);
+  box-shadow: 0 0 9px var(--monster-aura-color);
+  filter: none;
+  transform: translateX(-50%) scale(var(--unit-art-correction, 1));
+  transform-origin: center bottom;
+}
+
 /* 0.6.37: compact battlefield composition requested for the combat screen. */
 .battle-screen #layout-toggle,
 .battle-screen .battle-status,

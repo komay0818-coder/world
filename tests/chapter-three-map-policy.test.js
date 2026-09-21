@@ -10,11 +10,13 @@ assert.deepEqual(policy.MAPS.map((map) => map.facilityRequirement), [10, 15, 20,
 assert.equal(policy.MAPS[0].min, 30);
 assert.equal(policy.MAPS[0].max, 30);
 assert.deepEqual([policy.MAPS[1].min, policy.MAPS[1].max], [30, 30]);
-assert.ok(policy.MAPS.slice(2).every((map) => map.min === null && map.max === null));
+assert.deepEqual([policy.MAPS[2].min, policy.MAPS[2].max], [30, 30]);
+assert.ok(policy.MAPS.slice(3).every((map) => map.min === null && map.max === null));
 assert.ok(policy.MAPS.every((map) => map.suppressionValues === null));
 assert.equal(policy.MAPS[0].implemented, true);
 assert.equal(policy.MAPS[1].implemented, true);
-assert.ok(policy.MAPS.slice(2).every((map) => map.implemented === false));
+assert.equal(policy.MAPS[2].implemented, true);
+assert.ok(policy.MAPS.slice(3).every((map) => map.implemented === false));
 const lockedChapter = { unlockedChapter: 2 };
 const unlockedChapter = { unlockedChapter: 3 };
 assert.equal(policy.isChapterUnlocked(lockedChapter), false);

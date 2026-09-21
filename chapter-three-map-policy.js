@@ -102,6 +102,8 @@
       story: Object.freeze({ previousMapId: 'redrock-wastes-entrance', nextMapId: 'bloodwar-wastes' })
     }),
     map('bloodwar-wastes', 3, '血戰荒原', 20, {
+      implemented: true, contentStatus: 'combat-ready',
+      min: 30, max: 30, recommendedLevel: 30,
       skillPolicyId: 'bloodwar-wastes', skillStatus: 'implemented',
       environment: Object.freeze(['破碎攻城器', '燒毀戰車', '斷裂戰旗', '廢棄營帳', '巨獸骨骸', '拒馬', '武器殘骸', '燃燒痕跡']),
       normalEnemyIds: Object.freeze(['skullcrusher-berserker', 'skullcrusher-shieldguard', 'skullcrusher-hunter', 'skullcrusher-shaman']),

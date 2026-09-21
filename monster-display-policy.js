@@ -38,7 +38,7 @@
     'redrock-hornbeast': 'assets/redrock-hornbeast.png?v=20260912-redrock-monsters-v1',
     'redrock-giant-lizard': 'assets/redrock-giant-lizard.png?v=20260912-redrock-monsters-v1',
     'skullcrusher-spearman': 'assets/skullcrusher-spearman.png?v=20260912-brokenrock-monsters-v1',
-    'skullcrusher-warrior': 'assets/skullcrusher-warrior.png?v=20260912-brokenrock-monsters-v1',
+    'skullcrusher-warrior': 'assets/skullcrusher-warrior.png?v=20260922-brokenrock-warrior-v2',
     'brokenrock-brute': 'assets/brokenrock-brute.png?v=20260912-brokenrock-monsters-v1',
     'canyon-warlord': 'assets/canyon-warlord.png?v=20260912-brokenrock-monsters-v1',
     'skullcrusher-berserker': 'assets/skullcrusher-berserker.png?v=20260912-bloodwar-monsters-v1',

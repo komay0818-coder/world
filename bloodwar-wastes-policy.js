@@ -14,6 +14,18 @@
   });
   const ENEMY_SKILLS=Object.freeze({'skullcrusher-berserker':Object.freeze(['blood-rage']),'skullcrusher-shieldguard':Object.freeze(['shield-wall']),'skullcrusher-hunter':Object.freeze(['hunting-mark']),'skullcrusher-shaman':Object.freeze(['warblood-totem']),'skullcrusher-centurion':Object.freeze(['centurion-cleave','battle-formation-command']),'skullcrusher-vanguard-commander':Object.freeze(['vanguard-smash','full-army-charge','fight-to-the-end'])});
   const ACTIVE_SKILLS=Object.freeze({'skullcrusher-shieldguard':['shield-wall'],'skullcrusher-hunter':['hunting-mark'],'skullcrusher-shaman':['warblood-totem'],'skullcrusher-centurion':['centurion-cleave'],'skullcrusher-vanguard-commander':['vanguard-smash','full-army-charge']});
+  const MONSTERS=Object.freeze([
+    Object.freeze({id:'skullcrusher-berserker',name:'碎顱狂戰士',maxHp:1180,attack:111,defense:68,evasion:4,parry:8,damageReduction:10,attackSpeed:.92,xp:0,gold:0}),
+    Object.freeze({id:'skullcrusher-shieldguard',name:'碎顱盾衛',maxHp:1340,attack:91,defense:101,evasion:2,parry:18,damageReduction:20,attackSpeed:.68,xp:0,gold:0}),
+    Object.freeze({id:'skullcrusher-hunter',name:'碎顱獵手',maxHp:1040,attack:105,defense:61,evasion:10,parry:0,damageReduction:8,attackSpeed:1.15,xp:0,gold:0}),
+    Object.freeze({id:'skullcrusher-shaman',name:'碎顱薩滿',maxHp:960,attack:87,defense:58,evasion:5,parry:0,damageReduction:8,attackSpeed:.88,xp:0,gold:0}),
+    Object.freeze({id:'skullcrusher-centurion',name:'碎顱百夫長',maxHp:3650,attack:142,defense:122,evasion:3,parry:20,damageReduction:25,attackSpeed:.80,xp:0,gold:0,isElite:true}),
+    Object.freeze({id:'skullcrusher-vanguard-commander',name:'碎顱先鋒統領',maxHp:17500,attack:170,defense:140,evasion:3,parry:18,damageReduction:27,attackSpeed:.80,xp:0,gold:0,isBoss:true})
+  ]);
+  const MONSTER_BY_ID=Object.freeze(Object.fromEntries(MONSTERS.map((monster)=>[monster.id,monster])));
+  const COMBAT_POOL=Object.freeze({normal:Object.freeze(MONSTERS.slice(0,4).map((monster)=>monster.id)),elite:Object.freeze(['skullcrusher-centurion']),boss:Object.freeze(['skullcrusher-vanguard-commander'])});
+  function getCombatMonster(id){const monster=MONSTER_BY_ID[id];if(!monster)return null;return {...monster,level:30,mapId:MAP_ID,faction:'skullcrusher-tribe',artClass:`monster-image-art ${id}`,image:`assets/${id}.png?v=20260919`,skillIds:getEnemySkills(id)};}
+  function getCombatPool(){return COMBAT_POOL;}
   function freshTelemetry(){return {skillAttempts:{},skillCasts:{},buffTargets:{},markTargets:[],bloodRageTriggers:0,shieldWallProtectedTargets:0,huntingMarkActiveMs:0,warbloodTotemActiveMs:0,warbloodTotemHealing:0,centurionAuraActiveMs:0,healingReductionActiveMs:0,fullArmyChargeTargets:0,fightToEndTriggers:0,fightToEndTriggeredAt:null,fightToEndHealing:0,fightToEndAliveTargets:0};}
   function createState(now=0){return {startedAt:now,nextSkillAt:{},previousHpRatio:1,bloodRage:false,fightToEnd:false,markedTargetId:null,markUntil:0,telemetry:freshTelemetry()};}
   function record(bucket,key,amount=1){bucket[key]=(bucket[key]||0)+amount;} function getSkill(id){return SKILLS[id]||null;} function getEnemySkills(id){return ENEMY_SKILLS[id]||Object.freeze([]);}
@@ -32,5 +44,5 @@
   function recordBuffTargets(state,id,count){const amount=Math.max(0,Math.floor(Number(count)||0));record(state.telemetry.buffTargets,id,amount);if(id==='shield-wall')state.telemetry.shieldWallProtectedTargets+=amount;if(id==='full-army-charge')state.telemetry.fullArmyChargeTargets+=amount;}
   function recordCoverage(state,flags={},elapsedMs=0){const ms=Math.max(0,Number(elapsedMs)||0);if(flags.huntingMark)state.telemetry.huntingMarkActiveMs+=ms;if(flags.warbloodTotem)state.telemetry.warbloodTotemActiveMs+=ms;if(flags.centurionAura)state.telemetry.centurionAuraActiveMs+=ms;if(flags.healingReduction)state.telemetry.healingReductionActiveMs+=ms;}
   function recordTotemHealing(state,amount){state.telemetry.warbloodTotemHealing+=Math.max(0,Number(amount)||0);} function recordFightToEnd(state,{healing=0,aliveTargets=0}={}){state.telemetry.fightToEndHealing+=Math.max(0,Number(healing)||0);state.telemetry.fightToEndAliveTargets+=Math.max(0,Math.floor(Number(aliveTargets)||0));}
-  return Object.freeze({MAP_ID,SKILLS,ENEMY_SKILLS,getSkill,getEnemySkills,createState,initializeSchedule,resolveScheduledActions,updateThresholds,getCombatMultipliers,chooseLowestHpRatio,applyHuntingMark,getHunterDamageMultiplier,getCenturionAuraDefenseMultiplier,getFightToEndAllyAttackMultiplier,recordBuffTargets,recordCoverage,recordTotemHealing,recordFightToEnd});
+  return Object.freeze({MAP_ID,SKILLS,ENEMY_SKILLS,MONSTERS,getSkill,getEnemySkills,getCombatMonster,getCombatPool,createState,initializeSchedule,resolveScheduledActions,updateThresholds,getCombatMultipliers,chooseLowestHpRatio,applyHuntingMark,getHunterDamageMultiplier,getCenturionAuraDefenseMultiplier,getFightToEndAllyAttackMultiplier,recordBuffTargets,recordCoverage,recordTotemHealing,recordFightToEnd});
 });

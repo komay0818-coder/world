@@ -27,11 +27,19 @@ const canyonClear = progression.recordBossKill(completedChapterTwo, 'brokenrock-
 assert.deepEqual(canyonClear, { firstClear: true, mapId: 'brokenrock-canyon', nextMapId: 'bloodwar-wastes' });
 assert.equal(progression.getMapState(completedChapterTwo, 'brokenrock-canyon', true).cleared, true);
 assert.equal(progression.getMapState(completedChapterTwo, 'bloodwar-wastes', false).unlocked, true);
-assert.equal(progression.canEnter(completedChapterTwo, 'bloodwar-wastes', false), false, '3-3 unlocks but remains unimplemented');
+assert.equal(progression.canEnter(completedChapterTwo, 'bloodwar-wastes', true), true, '3-2 clear makes implemented 3-3 enterable');
+assert.equal(progression.getMapState(completedChapterTwo, 'bloodwar-wastes', true).cleared, false, 'living 3-3 boss is not a clear');
+const bloodwarClear = progression.recordBossKill(completedChapterTwo, 'bloodwar-wastes', { id: 'skullcrusher-vanguard-commander', isBoss: true });
+assert.deepEqual(bloodwarClear, { firstClear: true, mapId: 'bloodwar-wastes', nextMapId: 'skullcrusher-war-camp' });
+assert.equal(progression.getMapState(completedChapterTwo, 'bloodwar-wastes', true).cleared, true);
+assert.equal(progression.getMapState(completedChapterTwo, 'skullcrusher-war-camp', false).unlocked, true);
+assert.equal(progression.canEnter(completedChapterTwo, 'skullcrusher-war-camp', false), false, '3-4 unlocks but remains unimplemented');
 
 const reloaded = JSON.parse(JSON.stringify(completedChapterTwo));
 assert.equal(progression.getMapState(reloaded, 'redrock-wastes-entrance', true).cleared, true, 'serialized clear survives reload');
 assert.equal(progression.getMapState(reloaded, 'brokenrock-canyon', false).unlocked, true, 'serialized next-map unlock survives reload');
 assert.equal(progression.getMapState(reloaded, 'brokenrock-canyon', true).cleared, true, 'serialized 3-2 clear survives reload');
 assert.equal(progression.getMapState(reloaded, 'bloodwar-wastes', false).unlocked, true, 'serialized 3-3 unlock survives reload');
+assert.equal(progression.getMapState(reloaded, 'bloodwar-wastes', true).cleared, true, 'serialized 3-3 clear survives reload');
+assert.equal(progression.getMapState(reloaded, 'skullcrusher-war-camp', false).unlocked, true, 'serialized 3-4 unlock survives reload');
 console.log('chapter-three-progression-policy: assertions passed');
