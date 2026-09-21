@@ -581,7 +581,7 @@ function showToast(message) {
 }
 
 function enterMenu(name) {
-  displayName.textContent = name;
+  if (displayName) displayName.textContent = name;
   loginScreen.classList.add('hidden');
   characterScreen.classList.add('hidden');
   battleScreen.classList.add('hidden');
@@ -7746,16 +7746,15 @@ loginForm.addEventListener('submit', (event) => {
   if (!name) return;
   localStorage.setItem('stardust-player-name', name);
   enterMenu(name);
-  showToast(`歡迎回來，${name}！`);
 });
 
-document.querySelector('#profile-button').addEventListener('click', () => { nameInput.value = displayName.textContent; menuScreen.classList.add('hidden'); loginScreen.classList.remove('hidden'); nameInput.focus(); });
-document.querySelector('#reset-button').addEventListener('click', () => { localStorage.removeItem('stardust-player-name'); localStorage.removeItem('stardust-character'); localStorage.removeItem('stardust-progress'); localStorage.removeItem('stardust-character-slots'); localStorage.removeItem('stardust-active-character-slot'); sessionStorage.removeItem(TAB_ACTIVE_CHARACTER_SLOT_KEY); nameInput.value = ''; enterMenu(''); menuScreen.classList.add('hidden'); loginScreen.classList.remove('hidden'); nameInput.focus(); });
+document.querySelector('#profile-button')?.addEventListener('click', () => { nameInput.value = displayName.textContent; menuScreen.classList.add('hidden'); loginScreen.classList.remove('hidden'); nameInput.focus(); });
+document.querySelector('#reset-button')?.addEventListener('click', () => { localStorage.removeItem('stardust-player-name'); localStorage.removeItem('stardust-character'); localStorage.removeItem('stardust-progress'); localStorage.removeItem('stardust-character-slots'); localStorage.removeItem('stardust-active-character-slot'); sessionStorage.removeItem(TAB_ACTIVE_CHARACTER_SLOT_KEY); nameInput.value = ''; enterMenu(''); menuScreen.classList.add('hidden'); loginScreen.classList.remove('hidden'); nameInput.focus(); });
 document.querySelector('#adventure-button').addEventListener('click', () => {
   if (getProgress().requiresMapSelectionAfterDefeat) renderMapSelector();
   else openBattle();
 });
-document.querySelector('#village-menu-button').addEventListener('click', openVillage);
+document.querySelector('#village-menu-button')?.addEventListener('click', openVillage);
 document.querySelectorAll('[data-faction]').forEach((card) => card.addEventListener('click', () => { selection.faction = card.dataset.faction; selection.race = factions[selection.faction][0].id; document.querySelectorAll('[data-faction]').forEach((item) => item.classList.toggle('selected', item === card)); renderCreation(); }));
 raceChoices.addEventListener('click', (event) => { const choice = event.target.closest('[data-race]'); if (choice) { selection.race = choice.dataset.race; if (!canCreateRaceJob(selection.race, selection.job)) selection.job = 'warrior'; renderCreation(); } });
 classChoices.addEventListener('click', (event) => { const choice = event.target.closest('[data-job]'); if (!choice) return; if (!canCreateRaceJob(selection.race, choice.dataset.job)) { showToast(selection.race === 'elf' ? '夜精靈沒有牧師職業。' : '半獸人無法創立牧師職業。'); return; } selection.job = choice.dataset.job; renderCreation(); });

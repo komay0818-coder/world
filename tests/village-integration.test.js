@@ -11,7 +11,7 @@ const css = fs.readFileSync(path.join(root, 'styles', 'village.css'), 'utf8');
   assert.match(script, new RegExp(`function ${name}\\(`), `${name} is available as a dedicated village entry point`);
 });
 assert.match(html, /id="village-screen"/);
-assert.match(html, /id="village-menu-button"/);
+assert.doesNotMatch(html, /id="village-menu-button"/, 'the simplified main menu does not expose the village');
 assert.match(html, /data-menu-action="村莊"/);
 assert.equal((html.match(/id="village-building-modal"/g) || []).length, 1, 'all buildings share one modal');
 assert.match(script, /Object\.values\(VillagePolicy\.BUILDING_DEFINITIONS\)/, 'building cards render from centralized data');
