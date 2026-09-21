@@ -30,7 +30,10 @@ assert.match(inventoryRenderer, /label: '可裝備'/, 'inventory includes the we
 assert.match(inventoryRenderer, /label: '其他職業裝備'/, 'inventory includes the other-job equipment section');
 assert.match(inventoryRenderer, /label: '其他物品'/, 'inventory includes the non-equipment section');
 assert.match(inventoryTooltipRenderer, /equipmentDetailsHtml\(item\)/, 'shared tooltip lazily renders full equipment details');
-assert.match(inventoryTooltipRenderer, /inventory-tooltip-comparison/, 'shared tooltip lazily renders equipped comparison details');
+assert.match(inventoryTooltipRenderer, /inventory-tooltip-equipped/, 'shared tooltip lazily renders equipped comparison details');
+assert.match(inventoryTooltipRenderer, /hasComparison \? 'has-comparison' : 'single-column'/, 'tooltip widens only when an equipped comparison exists');
 assert.match(inventoryGridCss, /grid-template-columns:\s*repeat\(8, minmax\(0, 1fr\)\)/, 'desktop inventory uses eight columns');
+assert.match(inventoryGridCss, /\.inventory-shared-tooltip\.has-comparison \.inventory-tooltip-columns\s*\{[\s\S]*grid-template-columns:\s*repeat\(2, minmax\(0, 1fr\)\)/, 'wide comparison tooltip uses two columns on desktop');
+assert.match(inventoryGridCss, /grid-template-rows:\s*minmax\(0, 1fr\) auto/, 'tooltip keeps its actions outside the scrolling content row');
 
 console.log('inventory-render-performance: assertions passed');

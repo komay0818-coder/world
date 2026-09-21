@@ -252,7 +252,7 @@ let battleLogMode = 'player';
 let battleLogEntries = [];
 let dropLookupCategory = 'all';
 let dropLookupQuery = '';
-let battle = { enemyTypes: ['goblin', 'wolf', 'boar', 'goblin', 'wolf'], enemyHps: [45, 68, 82, 45, 68], playerHp: 100, playerMana: 100, playerShield: 0, manaExhausted: false, playerAttackCharge: 0, globalSkillReadyAt: 0, undeadRevived: false, skillCooldowns: {}, enemyRespawns: [null, null, null, null, null], enemySpawnedAt: [0, 1, 2, 3, 4], enemyNextAttackAt: [0, 0, 0, 0, 0], enemyDots: [[], [], [], [], []], monsterMoveSpeed: 200, targetIndexes: [], enemyDamages: [[], [], [], [], []], damageTimers: [] };
+let battle = { enemyTypes: ['plainsRabbit', 'plainsWolfPup', 'plainsSlime', 'plainsGoblinYoung', 'lostGoblin'], enemyHps: [24, 34, 30, 40, 62], playerHp: 100, playerMana: 100, playerShield: 0, manaExhausted: false, playerAttackCharge: 0, globalSkillReadyAt: 0, undeadRevived: false, skillCooldowns: {}, enemyRespawns: [null, null, null, null, null], enemySpawnedAt: [0, 1, 2, 3, 4], enemyNextAttackAt: [0, 0, 0, 0, 0], enemyDots: [[], [], [], [], []], monsterMoveSpeed: 200, targetIndexes: [], enemyDamages: [[], [], [], [], []], damageTimers: [] };
 
 function addRoundLoot(id, name, quantity = 1, icon = '◆', valuePrefix = '×') {
   if (!battle.roundLoot) battle.roundLoot = {};
@@ -634,7 +634,6 @@ const monsterTypes = EquipmentDropPolicy.applyDefaultLootConfigs({
   forestBoar: { id: 'forestBoar', name: '森林野豬', maxHp: 78, attack: 13, defense: 8, evasion: 2, parry: 0, damageReduction: 5, artClass: 'boar-woods-forest-boar-art', xp: 8, gold: 5, lootSource: 'boar' },
   irritableBoar: { id: 'irritableBoar', name: '暴躁野豬', maxHp: 165, attack: 19, defense: 13, evasion: 2, parry: 0, damageReduction: 7, artClass: 'boar-woods-irritable-boar-art', xp: 20, gold: 12, isElite: true, lootSource: 'boar' },
   boarKing: { id: 'boarKing', name: '巨牙野豬', maxHp: 620, attack: 24, defense: 20, evasion: 1, parry: 0, damageReduction: 10, artClass: 'boar-woods-giant-tusk-boar-art', xp: 95, gold: 58, isBoss: true, lootSource: 'boar' },
-  goblin: { id: 'goblin', name: '哥布林', maxHp: 45, attack: 11, defense: 3, evasion: 2, parry: 5, damageReduction: 0, artClass: 'goblin-art', xp: 10, gold: 3 },
   goblinScout: { id: 'goblinScout', name: '哥布林斥候', maxHp: 48, attack: 10, defense: 2, evasion: 7, parry: 3, damageReduction: 0, artClass: 'goblin-camp-scout-art', xp: 10, gold: 3, lootPending: true },
   goblinWarrior: { id: 'goblinWarrior', name: '哥布林戰士', maxHp: 82, attack: 13, defense: 7, evasion: 2, parry: 20, damageReduction: 3, artClass: 'goblin-camp-warrior-art', xp: 10, gold: 5, lootPending: true },
   goblinSlinger: { id: 'goblinSlinger', name: '哥布林投石者', maxHp: 58, attack: 14, defense: 3, evasion: 5, parry: 0, damageReduction: 1, artClass: 'goblin-camp-slinger-art', xp: 10, gold: 4, lootPending: true },
@@ -643,19 +642,6 @@ const monsterTypes = EquipmentDropPolicy.applyDefaultLootConfigs({
   goblinCaptain: { id: 'goblinCaptain', name: '哥布林隊長', maxHp: 720, attack: 21, defense: 19, evasion: 4, parry: 25, damageReduction: 18, artClass: 'goblin-camp-captain-art', xp: 120, gold: 65, isBoss: true, lootPending: true },
   goblinTreasureChest: { id: 'goblinTreasureChest', name: '哥布林寶箱', maxHp: 210, attack: 1, defense: 18, evasion: 0, parry: 0, damageReduction: 12, artClass: 'goblin-treasure-chest-art', xp: 28, gold: 45, isRare: true, lootPending: true },
   goblinHighChief: { id: 'goblinHighChief', name: '哥布林大酋長', maxHp: 1180, attack: 25, defense: 25, evasion: 4, parry: 15, damageReduction: 11, artClass: 'goblin-camp-high-chief-art', xp: 120, gold: 110, isBoss: true, lootPending: true },
-  wolf: { id: 'wolf', name: '森林狼', maxHp: 68, attack: 14, defense: 2, evasion: 8, parry: 0, damageReduction: 0, artClass: 'wolf-art', xp: 14, gold: 4 },
-  boar: { id: 'boar', name: '野豬', maxHp: 82, attack: 17, defense: 7, evasion: 1, parry: 0, damageReduction: 4, artClass: 'boar-art', xp: 18, gold: 5 },
-  goblinOverlord: { id: 'goblinOverlord', name: '哥布林督軍', maxHp: 320, attack: 14, defense: 14, evasion: 4, parry: 10, damageReduction: 5, artClass: 'goblin-art', xp: 90, gold: 35, isElite: true, lootSource: 'goblin' },
-  wolfAlpha: { id: 'wolfAlpha', name: '霜牙狼王', maxHp: 410, attack: 17, defense: 9, evasion: 12, parry: 0, damageReduction: 5, artClass: 'wolf-art', xp: 120, gold: 48, isElite: true, lootSource: 'wolf' },
-  boarTyrant: { id: 'boarTyrant', name: '獠牙巨獸', maxHp: 520, attack: 20, defense: 20, evasion: 2, parry: 0, damageReduction: 8, artClass: 'boar-art', xp: 150, gold: 62, isElite: true, lootSource: 'boar' },
-  goblinKing: { id: 'goblinKing', name: '赤冠哥布林王', maxHp: 1500, attack: 22, defense: 28, evasion: 6, parry: 15, damageReduction: 12, artClass: 'goblin-king-art', xp: 520, gold: 260, isBoss: true, lootSource: 'boss' },
-  nightGoblin: { id: 'nightGoblin', name: '夜行哥布林', maxHp: 120, attack: 14, defense: 8, evasion: 7, parry: 7, damageReduction: 3, artClass: 'black-forest-goblin black-forest-monster', xp: 5, gold: 7, lootSource: 'blackGoblin' },
-  shadowWolf: { id: 'shadowWolf', name: '幽影森林狼', maxHp: 150, attack: 17, defense: 6, evasion: 12, parry: 0, damageReduction: 3, artClass: 'black-forest-wolf black-forest-monster', xp: 5, gold: 8, lootSource: 'blackWolf' },
-  thornBoar: { id: 'thornBoar', name: '荊棘野豬', maxHp: 185, attack: 20, defense: 16, evasion: 2, parry: 0, damageReduction: 8, artClass: 'black-forest-boar black-forest-monster', xp: 5, gold: 9, lootSource: 'blackBoar' },
-  forestShaman: { id: 'forestShaman', name: '黑林薩滿', maxHp: 540, attack: 18, defense: 12, evasion: 8, parry: 4, damageReduction: 10, artClass: 'black-forest-goblin black-forest-elite', xp: 20, gold: 45, isElite: true, lootSource: 'blackGoblin' },
-  moonfangAlpha: { id: 'moonfangAlpha', name: '月牙狼王', maxHp: 680, attack: 21, defense: 14, evasion: 15, parry: 0, damageReduction: 8, artClass: 'black-forest-wolf black-forest-elite', xp: 20, gold: 55, isElite: true, lootSource: 'blackWolf' },
-  thornbackTyrant: { id: 'thornbackTyrant', name: '棘背暴君', maxHp: 820, attack: 24, defense: 25, evasion: 3, parry: 0, damageReduction: 12, artClass: 'black-forest-boar black-forest-elite', xp: 20, gold: 65, isElite: true, lootSource: 'blackBoar' },
-  forestGuardian: { id: 'forestGuardian', name: '腐月森林守衛', maxHp: 2400, attack: 28, defense: 36, evasion: 5, parry: 8, damageReduction: 15, artClass: 'black-forest-guardian black-forest-boss', xp: 80, gold: 320, isBoss: true, lootSource: 'blackBoss' },
   ...PlainsDepthsPolicy.MONSTER_TYPES,
   ...Object.fromEntries(BlackForestEntrancePolicy.MONSTERS.map((entry) => [entry.combatId, BlackForestEntrancePolicy.toCombatMonster(entry)])),
   ...Object.fromEntries(BlackForestTrailPolicy.MONSTERS.map((entry) => [entry.combatId, BlackForestTrailPolicy.toCombatMonster(entry)])),
@@ -665,17 +651,12 @@ const monsterTypes = EquipmentDropPolicy.applyDefaultLootConfigs({
   ...Object.fromEntries(BlackForestDepthsPolicy.MONSTERS.map((entry) => [entry.combatId, BlackForestDepthsPolicy.toCombatMonster(entry)])),
   ...Object.fromEntries(RedrockWastesPolicy.MONSTERS.map((entry) => [entry.id, RedrockWastesPolicy.getCombatMonster(entry.id)]))
 });
-const normalMonsterIds = ['goblin', 'wolf', 'boar'];
-const eliteMonsterIds = ['goblinOverlord', 'wolfAlpha', 'boarTyrant'];
-const bossMonsterIds = ['goblinKing'];
-
 // Visual-size categories describe the creature body, not its combat rank.
 // CSS values compensate for the taller enemy image frame; 1.0 means the
 // resulting visible body matches a standard humanoid player, not scale: 1.
 const monsterVisualSizeOverrides = {
   plainsRabbit: 'small', plainsWolfPup: 'small', plainsSlime: 'small', plainsGoblinYoung: 'small',
   boarPiglet: 'small', goblinTreasureChest: 'small',
-  boarTyrant: 'large', thornbackTyrant: 'large', forestGuardian: 'large',
 };
 
 // Optional per-asset correction for unusual aspect ratios. Transparent canvas
@@ -738,8 +719,8 @@ const mapMonsterPools = {
   forestAltar: ForestAltarPolicy.getCombatPool(),
   blackForestDepths: BlackForestDepthsPolicy.getCombatPool(),
   redrockWastes: RedrockWastesPolicy.getCombatPool(),
-  beginner: { normal: normalMonsterIds, elite: eliteMonsterIds, boss: bossMonsterIds },
-  blackForest: { normal: ['nightGoblin', 'shadowWolf', 'thornBoar'], elite: ['forestShaman', 'moonfangAlpha', 'thornbackTyrant'], boss: ['forestGuardian'] }
+  beginner: { normal: ['plainsRabbit', 'plainsWolfPup', 'plainsSlime', 'plainsGoblinYoung'], rare: ['lostGoblin'], rareChance: .10, elite: [], boss: [] },
+  blackForest: BlackForestEntrancePolicy.getCombatPool()
 };
 const eliteSpawnChance = .08;
 const bossSpawnChance = .03;
@@ -1894,10 +1875,10 @@ function getOfflineCombatMonsters(map, playerLevel) {
     : [...new Set(getMonsterPool(playerLevel).normal || [])];
   const levels = createEnemyLevels(pool, map.id, () => .5);
   const normalMonsters = pool.map((type, index) => map.chapter === 1
-    ? ChapterOneLevelPolicy.scaleMonster(monsterTypes[type] || monsterTypes.goblin, map.id, levels[index])
+    ? ChapterOneLevelPolicy.scaleMonster(monsterTypes[type] || monsterTypes.plainsGoblinYoung, map.id, levels[index])
     : getMonsterDefinitionForMap(type, map.id, levels[index]))
     .filter((monster) => monster && !monster.isElite && !monster.isBoss);
-  return normalMonsters.length ? normalMonsters : [monsterTypes.goblin];
+  return normalMonsters.length ? normalMonsters : [monsterTypes.plainsGoblinYoung];
 }
 
 function grantCraftingMaterialDrops(progress, map, enemy, options = {}) {
@@ -2149,17 +2130,17 @@ function createDungeonWaveTypes(wave, mapId = battle.dungeonId || getActiveMap(g
 }
 
 function getMonsterDefinitionForMap(type, mapId = battle.dungeonId || getActiveMap(getProgress()).id, level = null) {
-  if (mapId === 'black-forest-entrance') return BlackForestEntrancePolicy.getCombatMonster(type, level) || monsterTypes.goblin;
-  if (mapId === 'black-forest-trail') return BlackForestTrailPolicy.getCombatMonster(type, level) || monsterTypes.goblin;
-  if (mapId === 'spider-nest') return SpiderNestPolicy.getCombatMonster(type, level) || monsterTypes.goblin;
+  if (mapId === 'black-forest-entrance') return BlackForestEntrancePolicy.getCombatMonster(type, level) || monsterTypes.plainsGoblinYoung;
+  if (mapId === 'black-forest-trail') return BlackForestTrailPolicy.getCombatMonster(type, level) || monsterTypes.plainsGoblinYoung;
+  if (mapId === 'spider-nest') return SpiderNestPolicy.getCombatMonster(type, level) || monsterTypes.plainsGoblinYoung;
   if (mapId === 'blackstone-stronghold') {
-    const monster = BlackstoneStrongholdPolicy.getCombatMonster(type) || monsterTypes.goblin;
+    const monster = BlackstoneStrongholdPolicy.getCombatMonster(type) || monsterTypes.plainsGoblinYoung;
     return BlackstoneStrongholdPolicy.applyOutpostEffect(monster, battle.blackstoneStrongholdState?.activeOutpostId);
   }
-  if (mapId === 'forest-altar') return ForestAltarPolicy.getCombatMonster(type) || monsterTypes.goblin;
-  if (mapId === 'black-forest-depths') return BlackForestDepthsPolicy.getCombatMonster(type) || monsterTypes.goblin;
-  if (mapId === 'redrock-wastes-entrance') return RedrockWastesPolicy.getCombatMonster(type) || monsterTypes.goblin;
-  const monster = monsterTypes[type] || monsterTypes.goblin;
+  if (mapId === 'forest-altar') return ForestAltarPolicy.getCombatMonster(type) || monsterTypes.plainsGoblinYoung;
+  if (mapId === 'black-forest-depths') return BlackForestDepthsPolicy.getCombatMonster(type) || monsterTypes.plainsGoblinYoung;
+  if (mapId === 'redrock-wastes-entrance') return RedrockWastesPolicy.getCombatMonster(type) || monsterTypes.plainsGoblinYoung;
+  const monster = monsterTypes[type] || monsterTypes.plainsGoblinYoung;
   const chapterMonster = ChapterOneLevelPolicy.scaleMonster(monster, mapId, level);
   const dungeonMonster = GoblinCampPolicy.scaleMonster(chapterMonster, mapId === 'goblin-camp');
   const wolfMonster = WolfDenPolicy.applyWolfDenPassive(dungeonMonster, mapId);
@@ -2844,23 +2825,32 @@ function renderInventoryTooltip(itemId, anchor = null, pin = false) {
     ? Object.values(RunePolicy.RUNES).filter((rune) => availableRuneIds.has(rune.id)).map((rune) => `<button type="button" data-socket-item="${item.id}" data-socket-rune="${rune.id}">鑲嵌${rune.name}</button>`).join('') : '';
   const comparisonSlots = equipSlots.length ? equipSlots : item.kind === 'equipment' ? [item.slot] : [];
   const comparisonItems = comparisonSlots.map((targetSlot) => [targetSlot, progress.equipment[targetSlot]]).filter(([, equipped]) => equipped);
-  const comparison = item.kind === 'equipment' ? `<section class="inventory-tooltip-comparison"><strong>目前穿戴比較</strong>${comparisonItems.length ? comparisonItems.map(([targetSlot, equipped]) => `<div><span class="compare-item-icon"><img src="${itemImagePath(equipped)}" alt=""></span><p><b>${equipmentSlots[targetSlot]?.label || targetSlot}・${equipped.name}</b><small>${equipmentDetailsHtml(equipped)}</small></p></div>`).join('') : '<p class="compare-empty">可用欄位目前沒有穿戴裝備</p>'}</section>` : '';
+  const hasComparison = comparisonItems.length > 0;
+  const comparison = hasComparison ? `<section class="inventory-tooltip-pane inventory-tooltip-equipped"><h3>目前穿戴裝備</h3>${comparisonItems.map(([targetSlot, equipped]) => `<article data-compare-slot="${targetSlot}"><header><span class="compare-item-icon"><img src="${itemImagePath(equipped)}" alt=""></span><div><b>${equipped.name}</b><small>${equipmentSlots[targetSlot]?.label || targetSlot}・${itemQualityLabel(equipped)}${Number(equipped.requiredLevel) > 0 ? `・需求 Lv${equipped.requiredLevel}` : ''}</small></div></header><section class="inventory-tooltip-details">${equipmentDetailsHtml(equipped)}</section></article>`).join('')}</section>` : '';
   const selectedCount = stackIds.filter((id) => scrapSelection.has(id)).length;
   const saleControl = item.kind === 'equipment' ? `<label class="inventory-tooltip-sale"><input type="checkbox" data-select-scrap-stack="${item.id}" ${selectedCount === stackIds.length ? 'checked' : ''}><span>選取販賣${stackQuantity > 1 ? `（${stackQuantity} 件）` : ''}</span></label>` : '';
-  tooltip.className = `inventory-shared-tooltip ${itemQualityClass(item)} is-visible`;
+  tooltip.className = `inventory-shared-tooltip ${itemQualityClass(item)} ${hasComparison ? 'has-comparison' : 'single-column'} is-visible`;
   tooltip.setAttribute('aria-hidden', 'false');
   tooltip.dataset.itemId = item.id;
-  tooltip.innerHTML = `<header><span class="item-icon">${visual}</span><div><b>${item.name}${stackQuantity > 1 ? ` ×${stackQuantity}` : ''}</b><small>${quality}${slotLabel ? `・${slotLabel}` : ''}${Number(item.requiredLevel) > 0 ? `・需求 Lv${item.requiredLevel}` : ''}</small></div></header><section class="inventory-tooltip-details">${details || '<span>沒有其他詳細資訊。</span>'}</section>${item.kind === 'equipment' ? `<p class="inventory-tooltip-slots">可裝備欄位：${equipSlots.length ? equipSlots.map((slot) => equipmentSlots[slot]?.label || slot).join('、') : '目前角色無可用欄位'}</p>` : ''}${comparison}<footer>${equipControls}${runeButtons}${saleControl}</footer>`;
+  tooltip.innerHTML = `<div class="inventory-tooltip-scroll"><div class="inventory-tooltip-columns"><section class="inventory-tooltip-pane inventory-tooltip-candidate"><h3>${item.kind === 'equipment' ? '背包中的裝備' : '物品詳細'}</h3><header><span class="item-icon">${visual}</span><div><b>${item.name}${stackQuantity > 1 ? ` ×${stackQuantity}` : ''}</b><small>${quality}${slotLabel ? `・${slotLabel}` : ''}${Number(item.requiredLevel) > 0 ? `・需求 Lv${item.requiredLevel}` : ''}</small></div></header><section class="inventory-tooltip-details">${details || '<span>沒有其他詳細資訊。</span>'}</section>${item.kind === 'equipment' ? `<p class="inventory-tooltip-slots">可裝備欄位：${equipSlots.length ? equipSlots.map((slot) => equipmentSlots[slot]?.label || slot).join('、') : '目前角色無可用欄位'}</p>` : ''}</section>${comparison}</div></div><footer>${equipControls}${runeButtons}${saleControl}</footer>`;
   if (pin || inventoryTooltipPinnedId) inventoryTooltipPinnedId = item.id;
   const target = anchor || document.querySelector(`[data-inventory-item-id="${CSS.escape(item.id)}"]`);
   if (target) {
     const rect = target.getBoundingClientRect();
-    const width = Math.min(380, window.innerWidth - 24);
-    const left = Math.min(window.innerWidth - width - 12, Math.max(12, rect.right + 10));
-    const top = Math.min(window.innerHeight - 24, Math.max(12, rect.top));
+    const modalRect = document.querySelector('#inventory-modal .inventory-window')?.getBoundingClientRect();
+    const minimumLeft = Math.max(12, (modalRect?.left || 0) + 12);
+    const maximumRight = Math.min(window.innerWidth - 12, (modalRect?.right || window.innerWidth) - 12);
+    const availableWidth = Math.max(280, maximumRight - minimumLeft);
+    const wantsWideLayout = hasComparison && window.innerWidth > 820;
+    const width = Math.min(wantsWideLayout ? 760 : 380, availableWidth);
+    const left = Math.min(maximumRight - width, Math.max(minimumLeft, rect.right + 10));
+    const minimumTop = Math.max(12, (modalRect?.top || 0) + 12);
+    const maximumBottom = Math.min(window.innerHeight - 12, (modalRect?.bottom || window.innerHeight) - 12);
+    const top = Math.min(Math.max(minimumTop, maximumBottom - 240), Math.max(minimumTop, rect.top));
     tooltip.style.setProperty('--inventory-tooltip-left', `${left}px`);
     tooltip.style.setProperty('--inventory-tooltip-top', `${top}px`);
     tooltip.style.setProperty('--inventory-tooltip-width', `${width}px`);
+    tooltip.style.setProperty('--inventory-tooltip-max-height', `${Math.max(220, maximumBottom - top)}px`);
   }
 }
 
@@ -3291,7 +3281,7 @@ function renderEnemySquad() {
     const focusClass = index === focusIndex ? 'focus-target' : 'support-target';
     const rankBadge = rank.label ? `<span class="monster-rank-badge">${rank.icon} ${rank.label}</span>` : '';
     const affixBadges = (enemy.eliteAffixes || []).map((affix) => `<span class="monster-affix-badge" title="【${affix.name}】${affix.description}">【${affix.name}】</span>`).join('');
-    const imagePath = enemy.image || MonsterDisplayPolicy.MONSTER_IMAGE_BY_TYPE[enemy.id] || MonsterDisplayPolicy.MONSTER_IMAGE_BY_TYPE.goblin;
+    const imagePath = enemy.image || MonsterDisplayPolicy.MONSTER_IMAGE_BY_TYPE[enemy.id] || MonsterDisplayPolicy.MONSTER_IMAGE_BY_TYPE.plainsGoblinYoung;
     const visualSize = getMonsterVisualSize(enemy);
     const visualScaleCorrection = enemy.visualScaleCorrection || monsterVisualScaleCorrections[enemy.id] || 1;
     const hpPercent = Math.max(0, hp / enemy.maxHp * 100);
