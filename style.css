@@ -57,7 +57,7 @@ label,.section-label,.character-name-label{font-size:16px!important}.primary-but
 .login-screen .brand h1{color:#e9ddc4;font-family:"Noto Serif TC","Songti TC",serif;font-weight:900;text-shadow:none}
 .login-screen .brand-subtitle{margin:10px 0 0;color:#e9ddc4;font:700 18px/1.2 "Noto Serif TC","Songti TC",serif;letter-spacing:.5em;text-indent:.5em}
 body:has(#menu-screen:not(.hidden)){background:#080b0e}
-body:has(#menu-screen:not(.hidden)) .sky{background:#080b0e url('assets/black-forest-background.png') center center/cover no-repeat}
+body:has(#menu-screen:not(.hidden)) .sky{background:#080b0e url('assets/main-menu-background.png') center center/cover no-repeat}
 body:has(#menu-screen:not(.hidden)) .sky:before,
 body:has(#menu-screen:not(.hidden)) .sky:after{display:none}
 body:has(#menu-screen:not(.hidden)) .app-shell{width:100%;max-width:none;padding:0}
