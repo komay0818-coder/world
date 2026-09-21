@@ -18,7 +18,7 @@ assert.match(script, /'hunter-shortbow': 'assets\/hunter-shortbow\.png'/, 'hunte
 assert.match(script, /'long-hunting-bow': 'assets\/long-hunting-bow\.png'/, 'long hunting bow artwork migrates into existing items');
 assert.match(script, /'mercenary-greatsword': 'assets\/mercenary-greatsword\.png'/, 'mercenary greatsword artwork migrates into existing items');
 assert.match(script, /'giant-iron-sword': 'assets\/giant-iron-sword\.png'/, 'giant iron sword artwork migrates into existing items');
-assert.match(index, /script\.js\?v=20260920-redrock-31-playable-v1/, 'the live page uses the current local game UI');
+assert.match(index, /script\.js\?v=20260922-brokenrock-32-v1/, 'the live page uses the current local game UI');
 assert.match(index, /skill-upgrade-policy\.js\?v=20260816-divine-tome-v1/, 'skill material policy uses the current cache key');
 assert.match(index, /equipment-policy\.js\?v=20260907-unified-offhand-affixes-v1/, 'the live page loads the unified local offhand catalog');
 assert.match(index, /equipment-policy\.js[\s\S]*equipment-affix-policy\.js[\s\S]*equipment-drop-policy\.js/, 'the offhand templates load before the shared affix and drop systems');

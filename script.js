@@ -649,7 +649,8 @@ const monsterTypes = EquipmentDropPolicy.applyDefaultLootConfigs({
   ...Object.fromEntries(BlackstoneStrongholdPolicy.MONSTERS.map((entry) => [entry.combatId, BlackstoneStrongholdPolicy.toCombatMonster(entry)])),
   ...Object.fromEntries(ForestAltarPolicy.MONSTERS.map((entry) => [entry.combatId, ForestAltarPolicy.toCombatMonster(entry)])),
   ...Object.fromEntries(BlackForestDepthsPolicy.MONSTERS.map((entry) => [entry.combatId, BlackForestDepthsPolicy.toCombatMonster(entry)])),
-  ...Object.fromEntries(RedrockWastesPolicy.MONSTERS.map((entry) => [entry.id, RedrockWastesPolicy.getCombatMonster(entry.id)]))
+  ...Object.fromEntries(RedrockWastesPolicy.MONSTERS.map((entry) => [entry.id, RedrockWastesPolicy.getCombatMonster(entry.id)])),
+  ...Object.fromEntries(BrokenrockCanyonPolicy.MONSTERS.map((entry) => [entry.id, BrokenrockCanyonPolicy.getCombatMonster(entry.id)]))
 });
 // Visual-size categories describe the creature body, not its combat rank.
 // CSS values compensate for the taller enemy image frame; 1.0 means the
@@ -719,6 +720,7 @@ const mapMonsterPools = {
   forestAltar: ForestAltarPolicy.getCombatPool(),
   blackForestDepths: BlackForestDepthsPolicy.getCombatPool(),
   redrockWastes: RedrockWastesPolicy.getCombatPool(),
+  brokenrockCanyon: BrokenrockCanyonPolicy.getCombatPool(),
   beginner: { normal: ['plainsRabbit', 'plainsWolfPup', 'plainsSlime', 'plainsGoblinYoung'], rare: ['lostGoblin'], rareChance: .10, elite: [], boss: [] },
   blackForest: BlackForestEntrancePolicy.getCombatPool()
 };
@@ -752,7 +754,8 @@ const dropLookupMapPools = {
   'blackstone-stronghold': mapMonsterPools.blackstoneStronghold,
   'forest-altar': mapMonsterPools.forestAltar,
   'black-forest-depths': mapMonsterPools.blackForestDepths,
-  'redrock-wastes-entrance': mapMonsterPools.redrockWastes
+  'redrock-wastes-entrance': mapMonsterPools.redrockWastes,
+  'brokenrock-canyon': mapMonsterPools.brokenrockCanyon
 };
 
 const potionDropRate = .10;
@@ -2049,6 +2052,7 @@ function getMonsterPool(level = getProgress().level) {
   if (mapId === 'forest-altar') return mapMonsterPools.forestAltar;
   if (mapId === 'black-forest-depths') return mapMonsterPools.blackForestDepths;
   if (mapId === 'redrock-wastes-entrance') return mapMonsterPools.redrockWastes;
+  if (mapId === 'brokenrock-canyon') return mapMonsterPools.brokenrockCanyon;
   return mapId === 'black-forest' ? mapMonsterPools.blackForest : mapMonsterPools.beginner;
 }
 
@@ -2142,6 +2146,7 @@ function getMonsterDefinitionForMap(type, mapId = battle.dungeonId || getActiveM
   if (mapId === 'forest-altar') return ForestAltarPolicy.getCombatMonster(type) || monsterTypes.plainsGoblinYoung;
   if (mapId === 'black-forest-depths') return BlackForestDepthsPolicy.getCombatMonster(type) || monsterTypes.plainsGoblinYoung;
   if (mapId === 'redrock-wastes-entrance') return RedrockWastesPolicy.getCombatMonster(type) || monsterTypes.plainsGoblinYoung;
+  if (mapId === 'brokenrock-canyon') return BrokenrockCanyonPolicy.getCombatMonster(type) || monsterTypes.plainsGoblinYoung;
   const monster = monsterTypes[type] || monsterTypes.plainsGoblinYoung;
   const chapterMonster = ChapterOneLevelPolicy.scaleMonster(monster, mapId, level);
   const dungeonMonster = GoblinCampPolicy.scaleMonster(chapterMonster, mapId === 'goblin-camp');
@@ -2166,7 +2171,7 @@ function createEnemyLevels(enemyTypes, mapId, random = Math.random) {
           ? ForestAltarPolicy.rollLevel(type)
         : mapId === 'black-forest-depths'
           ? BlackForestDepthsPolicy.rollLevel(type)
-        : mapId === 'redrock-wastes-entrance'
+        : mapId === 'redrock-wastes-entrance' || mapId === 'brokenrock-canyon'
           ? 30
       : ChapterOneLevelPolicy.rollLevel(mapId, type, random()) ?? null);
 }
@@ -2280,6 +2285,10 @@ function getMonsterAttackPower(enemy, progress = getProgress(), currentHp = enem
   const depthsMultiplier = BlackForestDepthsPolicy.getCombatMultipliers(enemy.id, currentHp, enemy.maxHp, getBlackForestDepthsCombatContext()).attack;
   const redrockState = enemy.mapId === 'redrock-wastes-entrance' ? getRedrockEnemyStateById(enemy.id, currentHp, enemy.maxHp) : null;
   const redrockMultiplier = RedrockWastesPolicy.getCombatMultipliers(enemy.id, redrockState).attack;
+  const brokenrockState = enemy.mapId === 'brokenrock-canyon' ? getBrokenrockEnemyStateById(enemy.id, currentHp, enemy.maxHp) : null;
+  const brokenrockMultiplier = BrokenrockCanyonPolicy.getCombatMultipliers(enemy.id, brokenrockState).attack;
+  const brokenrockBuffMultiplier = brokenrockState && Date.now() < (brokenrockState.battleCryUntil || 0) ? 1.10 : 1;
+  const brokenrockCommandMultiplier = brokenrockState && Date.now() < (brokenrockState.offensiveCommandUntil || 0) ? 1.15 : 1;
   const strongholdCommandMultiplier = enemy.mapId === 'blackstone-stronghold' && Date.now() < (battle.strongholdCommandUntil || 0)
     ? 1 + BlackstoneStrongholdPolicy.LION_GUARD.roarAttackBonus : 1;
   const strongholdEnrageMultiplier = enemy.mapId === 'blackstone-stronghold'
@@ -2290,7 +2299,7 @@ function getMonsterAttackPower(enemy, progress = getProgress(), currentHp = enem
     ? 1 + BlackForestTrailPolicy.BEASTMASTER.spiderAttackBonus : 1;
   const nestSpiderCommandMultiplier = ['spiderNestBlackstonePoisonSpider', 'venomSpitterSpider', 'webWeaver', 'giantSpider'].includes(enemy.id)
     && Date.now() < (battle.spiderNestCommandUntil || 0) ? 1 + SpiderNestPolicy.BEASTMASTER.spiderAttackBonus : 1;
-  if (enemy.mapId) return Math.max(1, Math.round((enemy.attack || 1) * randomMultiplier * bloodFrenzy * irritable * plainsIrritable * blackForestMultiplier * blackForestTrailMultiplier * spiderNestMultiplier * strongholdMultiplier * forestAltarMultiplier * depthsMultiplier * redrockMultiplier * strongholdCommandMultiplier * strongholdEnrageMultiplier * commandMultiplier * beastCommandMultiplier * nestSpiderCommandMultiplier));
+  if (enemy.mapId) return Math.max(1, Math.round((enemy.attack || 1) * randomMultiplier * bloodFrenzy * irritable * plainsIrritable * blackForestMultiplier * blackForestTrailMultiplier * spiderNestMultiplier * strongholdMultiplier * forestAltarMultiplier * depthsMultiplier * redrockMultiplier * brokenrockMultiplier * brokenrockBuffMultiplier * brokenrockCommandMultiplier * strongholdCommandMultiplier * strongholdEnrageMultiplier * commandMultiplier * beastCommandMultiplier * nestSpiderCommandMultiplier));
   const map = getActiveMap(progress);
   const monsterLevel = Math.min(map.max, Math.max(map.min, progress.level));
   const levelMultiplier = 1 + (monsterLevel - 1) * .10;
@@ -2310,13 +2319,15 @@ function getMonsterAttackInterval(enemy, currentHp = enemy.maxHp) {
   const depthsMultiplier = BlackForestDepthsPolicy.getCombatMultipliers(enemy.id, currentHp, enemy.maxHp, getBlackForestDepthsCombatContext()).attackSpeed;
   const redrockState = enemy.mapId === 'redrock-wastes-entrance' ? getRedrockEnemyStateById(enemy.id, currentHp, enemy.maxHp) : null;
   const redrockMultiplier = RedrockWastesPolicy.getCombatMultipliers(enemy.id, redrockState).attackSpeed;
+  const brokenrockState = enemy.mapId === 'brokenrock-canyon' ? getBrokenrockEnemyStateById(enemy.id, currentHp, enemy.maxHp) : null;
+  const brokenrockCommandMultiplier = brokenrockState && Date.now() < (brokenrockState.offensiveCommandUntil || 0) ? 1.15 : 1;
   const strongholdEnrageMultiplier = enemy.mapId === 'blackstone-stronghold'
     ? 1 + BlackstoneStrongholdPolicy.getEnrage(battle.blackstoneStrongholdState, Date.now()).attackSpeedBonus : 1;
   const beastCommandMultiplier = enemy.id === 'blackstonePoisonSpider' && Date.now() < (battle.blackstoneSpiderCommandUntil || 0)
     ? 1 + BlackForestTrailPolicy.BEASTMASTER.spiderAttackSpeedBonus : 1;
   const nestSpiderCommandMultiplier = ['spiderNestBlackstonePoisonSpider', 'venomSpitterSpider', 'webWeaver', 'giantSpider'].includes(enemy.id)
     && Date.now() < (battle.spiderNestCommandUntil || 0) ? 1 + SpiderNestPolicy.BEASTMASTER.spiderAttackSpeedBonus : 1;
-  return Math.max(250, (enemy.attackInterval || (1000 / (enemy.attackSpeed || 1))) / bloodFrenzy / irritable / plainsIrritable / blackForestMultiplier / blackForestTrailMultiplier / spiderNestMultiplier / strongholdMultiplier / forestAltarMultiplier / depthsMultiplier / redrockMultiplier / strongholdEnrageMultiplier / beastCommandMultiplier / nestSpiderCommandMultiplier);
+  return Math.max(250, (enemy.attackInterval || (1000 / (enemy.attackSpeed || 1))) / bloodFrenzy / irritable / plainsIrritable / blackForestMultiplier / blackForestTrailMultiplier / spiderNestMultiplier / strongholdMultiplier / forestAltarMultiplier / depthsMultiplier / redrockMultiplier / brokenrockCommandMultiplier / strongholdEnrageMultiplier / beastCommandMultiplier / nestSpiderCommandMultiplier);
 }
 
 function createEnemyAttackSchedule(enemyTypes, startAt = Date.now(), mapId = getActiveMap(getProgress()).id, enemyLevels = []) {
@@ -4840,8 +4851,9 @@ function rewardVictory(index) {
     const chapterThreeResult = ChapterThreeProgressionPolicy.recordBossKill(progress, currentMap.id, enemy);
     if (chapterThreeResult.firstClear) {
       const nextMap = ChapterThreeMapPolicy.getMap(chapterThreeResult.nextMapId);
-      showToast(`${nextMap?.name || chapterThreeResult.nextMapId}已解鎖・尚未開放`);
-      logBattle(`◆ 首次擊敗赤岩巨蜥，${nextMap?.name || chapterThreeResult.nextMapId}已解鎖。`, 'progress');
+      const nextStatus = nextMap?.implemented ? '已解鎖' : '已解鎖・尚未開放';
+      showToast(`${nextMap?.name || chapterThreeResult.nextMapId}${nextStatus}`);
+      logBattle(`◆ 首次擊敗${enemy.name}，${nextMap?.name || chapterThreeResult.nextMapId}已解鎖。`, 'progress');
     }
   }
   addRoundLoot('gold', '金幣', earnedGold, '🪙', '+');
@@ -4973,6 +4985,7 @@ function processEnemyRespawns() {
       applyPendingRoguePlagueSpread(index, battle.enemySpawnedAt[index]);
       if (battle.enemySkillStates) battle.enemySkillStates[index] = null;
       if (battle.redrockEnemyStates) battle.redrockEnemyStates[index] = null;
+      if (battle.brokenrockEnemyStates) battle.brokenrockEnemyStates[index] = null;
       if (battle.enemyBoarEnraged) battle.enemyBoarEnraged[index] = false;
       battle.enemyNextAttackAt[index] = Date.now() + getMonsterAttackInterval(getEnemyDefinition(index));
       if (getEnemyDefinition(index).isBoss) {
@@ -5123,6 +5136,21 @@ function getRedrockEnemyState(index, currentHp = null, maxHp = null) {
 function getRedrockEnemyStateById(enemyId, currentHp, maxHp) {
   const index = (battle.enemyTypes || []).findIndex((type, candidate) => type === enemyId && battle.enemyHps?.[candidate] > 0);
   return index >= 0 ? getRedrockEnemyState(index, currentHp, maxHp) : RedrockWastesPolicy.createState(Date.now());
+}
+
+function getBrokenrockEnemyState(index, currentHp = null, maxHp = null) {
+  battle.brokenrockEnemyStates = Array.isArray(battle.brokenrockEnemyStates) ? battle.brokenrockEnemyStates : [];
+  battle.brokenrockEnemyStates[index] = battle.brokenrockEnemyStates[index] || BrokenrockCanyonPolicy.createState(Date.now());
+  if (currentHp !== null && maxHp !== null) {
+    const events = BrokenrockCanyonPolicy.updateThresholds(battle.enemyTypes[index], battle.brokenrockEnemyStates[index], currentHp, maxHp);
+    battle.brokenrockEnemyStates[index].pendingActions = [...(battle.brokenrockEnemyStates[index].pendingActions || []), ...events.filter((event) => event.damageMultiplier)];
+  }
+  return battle.brokenrockEnemyStates[index];
+}
+
+function getBrokenrockEnemyStateById(enemyId, currentHp, maxHp) {
+  const index = (battle.enemyTypes || []).findIndex((type, candidate) => type === enemyId && battle.enemyHps?.[candidate] > 0);
+  return index >= 0 ? getBrokenrockEnemyState(index, currentHp, maxHp) : BrokenrockCanyonPolicy.createState(Date.now());
 }
 
 function getMageShockKey(member) { return member?.id || member?.character?.id || ''; }
@@ -5287,6 +5315,7 @@ function applyDamageToMonster(index, baseDamage, profile, options = {}) {
     : null;
   const wasAlive = battle.enemyHps[index] > 0;
   battle.enemyHps[index] -= result.finalDamage;
+  if (enemy.mapId === 'brokenrock-canyon') getBrokenrockEnemyState(index, battle.enemyHps[index], enemy.maxHp);
   const markOwner = (battle.partyMembers || []).find((member) => member.id === skillState.deathMarkOwner);
   const deathMarkExecuted = battle.enemyHps[index] > 0
     && markOwner === attacker
@@ -6927,6 +6956,18 @@ function resolveBlackForestLeafStorm(enemy, enemyCurrentHp, now = Date.now()) {
     const damage = Math.max(0, resolvedDamage - absorbed);
     const hpBeforeHit = target.currentHp;
     target.currentHp = Math.max(getPlaytestHpFloor(), target.currentHp - damage);
+    if (!dodged && damage > 0 && brokenrockAction?.id === 'brute-smash') {
+      applyBlackstoneAttackSpeedPenalty(target, brokenrockAction.debuff.value, brokenrockAction.debuff.durationMs, now, brokenrockAction.name);
+    }
+    if (!dodged && damage > 0 && brokenrockAction?.id === 'warlord-slash') {
+      target.redrockDefenseDown = brokenrockAction.debuff.value;
+      target.redrockDefenseDownUntil = now + brokenrockAction.debuff.durationMs;
+    }
+    if (brokenrockAction) {
+      BrokenrockCanyonPolicy.recordSkillDamage(brokenrockState, brokenrockAction.id, damage);
+      if (brokenrockAction.id === 'execution-command') BrokenrockCanyonPolicy.recordExecutionOutcome(brokenrockState, target.currentHp <= 0);
+      logBattle(`⚔【${enemy.name}】施放【${brokenrockAction.name}】！`, 'system');
+    }
     if (target.currentHp <= 0) {
       const holyPriest = targets.find((member) => member.alive && PriestAdvancementPolicy.isAdvanced(member.progress, 'holy-priest') && Number(member.progress.skillLevels?.['priest:prayer-of-life']) >= 6);
       if (holyPriest) PriestAdvancementPolicy.trySacredGuardian(holyPriest, target, battle, now);
@@ -7040,7 +7081,7 @@ function enemyAttackTick() {
     }
 
     const aliveMembers = battle.partyMembers.filter((member) => member.alive);
-    const target = ['blackForestHunter', 'blackstoneCaptain', 'blackstoneCenturion', 'blackstoneVenomHunter', 'blackstoneVenombladeAssassin', 'blackstoneStrongholdCrossbowman', 'blackstoneStrongholdWarlord'].includes(enemy.id)
+    let target = ['blackForestHunter', 'blackstoneCaptain', 'blackstoneCenturion', 'blackstoneVenomHunter', 'blackstoneVenombladeAssassin', 'blackstoneStrongholdCrossbowman', 'blackstoneStrongholdWarlord'].includes(enemy.id)
       ? aliveMembers.sort((first, second) => first.currentHp / first.maxHp - second.currentHp / second.maxHp)[0]
       : PartyPolicy.chooseRandomAliveMember(battle.partyMembers, Math.random);
     if (!target) break;
@@ -7087,6 +7128,38 @@ function enemyAttackTick() {
       ? (RedrockWastesPolicy.resolveScheduledAction(enemy.id, redrockState, now)
         || (enemy.id === 'wasteland-hyena' ? RedrockWastesPolicy.resolveHyenaBasicHit(redrockState, Math.random()) : null))
       : null;
+    const brokenrockState = getActiveMap(progress).id === 'brokenrock-canyon'
+      ? getBrokenrockEnemyState(enemyIndex, enemyCurrentHp, enemy.maxHp) : null;
+    const brokenrockActions = brokenrockState
+      ? [...(brokenrockState.pendingActions || []), ...BrokenrockCanyonPolicy.resolveScheduledActions(enemy.id, brokenrockState, now, { otherAliveEnemies: Math.max(0, aliveEnemyIndexesByAge().length - 1) })]
+      : [];
+    if (brokenrockState) brokenrockState.pendingActions = [];
+    for (const action of brokenrockActions) {
+      if (action.id === 'battle-cry') {
+        let affected = 0;
+        aliveEnemyIndexesByAge().forEach((candidate) => {
+          if (getEnemyDefinition(candidate).faction !== 'skullcrusher-tribe') return;
+          getBrokenrockEnemyState(candidate).battleCryUntil = now + action.buff.durationMs;
+          affected += 1;
+        });
+        BrokenrockCanyonPolicy.recordBuffTargets(brokenrockState, action.id, affected);
+        logBattle(`📣【${enemy.name}】施放【戰鬥怒吼】，碎顱敵軍攻擊提高 10%！`, 'system');
+      }
+      if (action.id === 'offensive-command') {
+        let affected = 0;
+        aliveEnemyIndexesByAge().forEach((candidate) => {
+          if (candidate === enemyIndex) return;
+          getBrokenrockEnemyState(candidate).offensiveCommandUntil = now + action.buff.durationMs;
+          affected += 1;
+        });
+        BrokenrockCanyonPolicy.recordBuffTargets(brokenrockState, action.id, affected);
+        logBattle(`📣【${enemy.name}】施放【進攻號令】，其他敵軍攻擊與攻速提高 15%！`, 'system');
+      }
+    }
+    const brokenrockAction = brokenrockActions.find((action) => action.damageMultiplier) || null;
+    if (brokenrockAction?.target === 'lowest-hp-ratio-alive') {
+      target = aliveMembers.sort((first, second) => first.currentHp / first.maxHp - second.currentHp / second.maxHp)[0];
+    }
     const critical = !dodged && Math.random() < ((enemy.criticalChance ?? (enemy.isBoss ? .15 : enemy.isElite ? .10 : .05)) + (redrockAction?.criticalBonus || 0));
     const blackForestAction = getActiveMap(progress).id === 'black-forest-entrance'
       ? BlackForestEntrancePolicy.resolveAction(enemy.id, Math.random(), target.currentHp / target.maxHp, enemyCurrentHp, enemy.maxHp)
@@ -7208,7 +7281,8 @@ function enemyAttackTick() {
       * BlackstoneStrongholdPolicy.getDamageMultiplier(strongholdAction)
       * ForestAltarPolicy.getDamageMultiplier(forestAltarAction)
       * BlackForestDepthsPolicy.getDamageMultiplier(blackForestDepthsAction)
-      * (redrockAction?.damageMultiplier || 1);
+      * (redrockAction?.damageMultiplier || 1)
+      * (brokenrockAction?.damageMultiplier || 1);
     const marked = now < (target.blackstoneMarkedUntil || 0);
     const markedHumanBonus = marked && enemy.faction === 'blackstone-bandits'
       ? 1 + BlackForestTrailPolicy.MARK.blackstoneHumanDamageBonus : 1;
@@ -7222,7 +7296,8 @@ function enemyAttackTick() {
       ? 1 - BlackForestTrailPolicy.RAIDER.armorBreakPenalty : 1;
     const spiderNestArmorMultiplier = now < (target.spiderNestArmorBreakUntil || 0) ? .90 : 1;
     const piercingMultiplier = (1 - BlackForestTrailPolicy.getDefenseIgnore(blackForestTrailAction))
-      * (1 - BlackstoneStrongholdPolicy.getDefenseIgnore(strongholdAction));
+      * (1 - BlackstoneStrongholdPolicy.getDefenseIgnore(strongholdAction))
+      * (1 - (brokenrockAction?.defenseIgnore || 0));
     const runeIronWallReduction = RunePolicy.hasWord(target.progress.equipment, 'iron-wall') && Math.random() < .15 ? .20 : 0;
     if (RunePolicy.hasWord(target.progress.equipment, 'unyielding') && target.currentHp / target.maxHp < .30 && now >= (target.runeUnyieldingReadyAt || 0)) {
       target.runeUnyieldingUntil = now + 5000;
@@ -7510,7 +7585,7 @@ function openBattle() {
   const sessionId = ++battleSessionSequence;
   const partyMembers = buildBattlePartyMembers(battleStart);
   const mainMember = partyMembers.find((member) => member.isMain) || partyMembers[0];
-  battle = { enemyTypes, enemyLevels, enemyHps, partyMembers, playerHp: mainMember?.currentHp || getMaxHp(progress.level, progress), playerMana: mainMember?.resourceCurrent || 0, playerArrows: mainMember?.resourceType === 'arrows' ? mainMember.resourceCurrent : 0, playerShield: 0, playerStunnedUntil: 0, playerBleed: null, manaExhausted: false, playerAttackCharge: 0, hunterAttackCount: 0, lastManaRegenAt: battleStart, lastResourceUpdatedAt: battleStart, lastArrowRecoveryAt: battleStart, lastCorruptionTickAt: battleStart, lastStrongholdRegenAt: battleStart, enemyNextAttackAt: createEnemyAttackSchedule(enemyTypes, battleStart, currentMap.id, enemyLevels), enemyBoarEnraged: enemyTypes.map(() => false), enemyTrailSummoned: enemyTypes.map(() => false), enemySummonProfiles: enemyTypes.map(() => null), enemyCaptainShieldUntil: enemyTypes.map(() => 0), enemyAssassinDashUntil: enemyTypes.map(() => 0), enemySpiderNestPhase: enemyTypes.map(() => 1), blackstoneRoarUntil: 0, blackstoneCommandUntil: 0, blackstoneSpiderCommandUntil: 0, spiderNestCommandUntil: 0, strongholdCommandUntil: 0, blackstoneStrongholdState: createBlackstoneStrongholdBattleState(), globalSkillReadyAt: 0, undeadRevived: false, skillCooldowns: {}, enemyRespawns: enemyTypes.map(() => null), enemySpawnedAt: enemyTypes.map((_, index) => battleStart + index), enemyDots: enemyTypes.map(() => []), enemySkillStates: enemyTypes.map(() => null), redrockEnemyStates: enemyTypes.map(() => null), monsterMoveSpeed: 200, targetIndexes: [], enemyDamages: enemyTypes.map(() => []), damageTimers: [], rewardedEnemyIndexes: new Set(), roundLoot: {}, isDungeon, dungeonId: isDungeon ? currentMap.id : null, dungeonWave: isDungeon ? 1 : 0, dungeonComplete: false, waveTransitioning: false, goblinScoutSummons: 0 };
+  battle = { enemyTypes, enemyLevels, enemyHps, partyMembers, playerHp: mainMember?.currentHp || getMaxHp(progress.level, progress), playerMana: mainMember?.resourceCurrent || 0, playerArrows: mainMember?.resourceType === 'arrows' ? mainMember.resourceCurrent : 0, playerShield: 0, playerStunnedUntil: 0, playerBleed: null, manaExhausted: false, playerAttackCharge: 0, hunterAttackCount: 0, lastManaRegenAt: battleStart, lastResourceUpdatedAt: battleStart, lastArrowRecoveryAt: battleStart, lastCorruptionTickAt: battleStart, lastStrongholdRegenAt: battleStart, enemyNextAttackAt: createEnemyAttackSchedule(enemyTypes, battleStart, currentMap.id, enemyLevels), enemyBoarEnraged: enemyTypes.map(() => false), enemyTrailSummoned: enemyTypes.map(() => false), enemySummonProfiles: enemyTypes.map(() => null), enemyCaptainShieldUntil: enemyTypes.map(() => 0), enemyAssassinDashUntil: enemyTypes.map(() => 0), enemySpiderNestPhase: enemyTypes.map(() => 1), blackstoneRoarUntil: 0, blackstoneCommandUntil: 0, blackstoneSpiderCommandUntil: 0, spiderNestCommandUntil: 0, strongholdCommandUntil: 0, blackstoneStrongholdState: createBlackstoneStrongholdBattleState(), globalSkillReadyAt: 0, undeadRevived: false, skillCooldowns: {}, enemyRespawns: enemyTypes.map(() => null), enemySpawnedAt: enemyTypes.map((_, index) => battleStart + index), enemyDots: enemyTypes.map(() => []), enemySkillStates: enemyTypes.map(() => null), redrockEnemyStates: enemyTypes.map(() => null), brokenrockEnemyStates: enemyTypes.map(() => null), monsterMoveSpeed: 200, targetIndexes: [], enemyDamages: enemyTypes.map(() => []), damageTimers: [], rewardedEnemyIndexes: new Set(), roundLoot: {}, isDungeon, dungeonId: isDungeon ? currentMap.id : null, dungeonWave: isDungeon ? 1 : 0, dungeonComplete: false, waveTransitioning: false, goblinScoutSummons: 0 };
   battle.enemyAffixes = enemyAffixes;
   battle.sessionId = sessionId;
   clearBattleLog();

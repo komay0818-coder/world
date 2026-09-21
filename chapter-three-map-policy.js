@@ -93,6 +93,8 @@
       story: Object.freeze({ previousMapId: 'black-forest-depths', nextMapId: 'brokenrock-canyon' })
     }),
     map('brokenrock-canyon', 2, '斷岩峽谷', 15, {
+      implemented: true, contentStatus: 'combat-ready',
+      min: 30, max: 30, recommendedLevel: 30,
       skillPolicyId: 'brokenrock-canyon', skillStatus: 'implemented',
       environment: Object.freeze(['紅色峽谷', '狹窄山道', '木製吊橋', '哨塔', '路障', '碎顱旗幟', '簡易營地']),
       normalEnemyIds: Object.freeze(['wasteland-hyena', 'skullcrusher-scout', 'skullcrusher-spearman', 'skullcrusher-warrior']),

@@ -24,6 +24,18 @@
     'canyon-warlord':Object.freeze(['warlord-slash','offensive-command','execution-command'])
   });
   const ACTIVE_SKILLS=Object.freeze({'skullcrusher-spearman':['armor-piercing-spear'],'skullcrusher-warrior':['battle-cry'],'brokenrock-brute':['brute-smash'],'canyon-warlord':['warlord-slash','offensive-command']});
+  const MONSTERS=Object.freeze([
+    RedrockWastesPolicy.getCombatMonster('wasteland-hyena'),
+    RedrockWastesPolicy.getCombatMonster('skullcrusher-scout'),
+    Object.freeze({id:'skullcrusher-spearman',name:'碎顱投矛手',maxHp:990,attack:109,defense:58,evasion:8,parry:0,damageReduction:8,attackSpeed:.95,xp:96,gold:52}),
+    Object.freeze({id:'skullcrusher-warrior',name:'碎顱戰士',maxHp:1217,attack:92,defense:90,evasion:3,parry:10,damageReduction:18,attackSpeed:.72,xp:98,gold:54}),
+    Object.freeze({id:'brokenrock-brute',name:'斷岩蠻兵',maxHp:3350,attack:135,defense:115,evasion:3,parry:20,damageReduction:24,attackSpeed:.82,xp:380,gold:240,isElite:true}),
+    Object.freeze({id:'canyon-warlord',name:'峽谷督軍',maxHp:15500,attack:162,defense:132,evasion:3,parry:18,damageReduction:26,attackSpeed:.82,xp:1650,gold:1000,isBoss:true})
+  ]);
+  const MONSTER_BY_ID=Object.freeze(Object.fromEntries(MONSTERS.map((monster)=>[monster.id,monster])));
+  const COMBAT_POOL=Object.freeze({normal:Object.freeze(['wasteland-hyena','skullcrusher-scout','skullcrusher-spearman','skullcrusher-warrior']),elite:Object.freeze(['brokenrock-brute']),boss:Object.freeze(['canyon-warlord'])});
+  function getCombatMonster(id){const monster=MONSTER_BY_ID[id];if(!monster)return null;return {...monster,level:30,mapId:MAP_ID,faction:id.startsWith('skullcrusher-')||id==='brokenrock-brute'||id==='canyon-warlord'?'skullcrusher-tribe':'redrock-wildlife',artClass:`monster-image-art ${id}`,image:`assets/${id}.png`,skillIds:getEnemySkills(id)};}
+  function getCombatPool(){return COMBAT_POOL;}
   function freshTelemetry(){return {skillAttempts:{},skillCasts:{},skillDamage:{},buffTargets:{},battleCryActiveMs:0,warlordDefenseDownActiveMs:0,bloodlustThresholds:{80:0,60:0,40:0,20:0},executionTriggers:0,executionKills:0};}
   function createState(now=0){return {startedAt:now,nextSkillAt:{},previousHpRatio:1,bloodlustStacks:0,bloodlustTriggered:{},executionTriggered:false,telemetry:freshTelemetry()};}
   function record(bucket,key,amount=1){bucket[key]=(bucket[key]||0)+amount;}
@@ -38,5 +50,5 @@
   function recordSkillDamage(state,id,damage){record(state.telemetry.skillDamage,id,Math.max(0,Number(damage)||0));} function recordBuffTargets(state,id,count){record(state.telemetry.buffTargets,id,Math.max(0,Math.floor(Number(count)||0)));}
   function recordCoverage(state,{battleCry=false,warlordDefenseDown=false}={},elapsedMs=0){if(battleCry)state.telemetry.battleCryActiveMs+=Math.max(0,elapsedMs);if(warlordDefenseDown)state.telemetry.warlordDefenseDownActiveMs+=Math.max(0,elapsedMs);}
   function recordExecutionOutcome(state,killed){if(killed)state.telemetry.executionKills++;}
-  return Object.freeze({MAP_ID,SKILLS,ENEMY_SKILLS,getSkill,getEnemySkills,createState,initializeSchedule,resolveScheduledActions,updateThresholds,getCombatMultipliers,recordSkillDamage,recordBuffTargets,recordCoverage,recordExecutionOutcome});
+  return Object.freeze({MAP_ID,SKILLS,ENEMY_SKILLS,MONSTERS,getSkill,getEnemySkills,getCombatMonster,getCombatPool,createState,initializeSchedule,resolveScheduledActions,updateThresholds,getCombatMultipliers,recordSkillDamage,recordBuffTargets,recordCoverage,recordExecutionOutcome});
 });

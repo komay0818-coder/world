@@ -7,10 +7,13 @@
 
   const PLAYTEST_ID = 'chapter-two-balance';
   const CHAPTER_THREE_PLAYTEST_ID = 'chapter-three-31';
+  const CHAPTER_THREE_32_PLAYTEST_ID = 'chapter-three-32';
   const SLOT_KEY = 'chapter-two-balance-playtest-slots-v1';
   const PROGRESS_KEY = 'chapter-two-balance-playtest-progress-v2';
   const CHAPTER_THREE_SLOT_KEY = 'chapter-three-31-playtest-slots-v1';
   const CHAPTER_THREE_PROGRESS_KEY = 'chapter-three-31-playtest-progress-v1';
+  const CHAPTER_THREE_32_SLOT_KEY = 'chapter-three-32-playtest-slots-v1';
+  const CHAPTER_THREE_32_PROGRESS_KEY = 'chapter-three-32-playtest-progress-v1';
   const CHAPTER_THREE_PLAYTEST_VERSION = 'chapter-three-31-full-lv5-v2';
 
   function isAllowedEnvironment(location) {
@@ -23,7 +26,7 @@
     const location = locationLike || (typeof window !== 'undefined' ? window.location : null);
     if (!location || !isAllowedEnvironment(location)) return '';
     const requested = new URLSearchParams(location.search || '').get('playtest');
-    return [PLAYTEST_ID, CHAPTER_THREE_PLAYTEST_ID].includes(requested) ? requested : '';
+    return [PLAYTEST_ID, CHAPTER_THREE_PLAYTEST_ID, CHAPTER_THREE_32_PLAYTEST_ID].includes(requested) ? requested : '';
   }
 
   function isActive(locationLike) {
@@ -31,15 +34,17 @@
   }
 
   function isChapterThreeActive(locationLike) {
-    return getPlaytestId(locationLike) === CHAPTER_THREE_PLAYTEST_ID;
+    return [CHAPTER_THREE_PLAYTEST_ID, CHAPTER_THREE_32_PLAYTEST_ID].includes(getPlaytestId(locationLike));
   }
 
   function getSlotKey(locationLike) {
-    return isChapterThreeActive(locationLike) ? CHAPTER_THREE_SLOT_KEY : SLOT_KEY;
+    return getPlaytestId(locationLike) === CHAPTER_THREE_32_PLAYTEST_ID ? CHAPTER_THREE_32_SLOT_KEY
+      : isChapterThreeActive(locationLike) ? CHAPTER_THREE_SLOT_KEY : SLOT_KEY;
   }
 
   function getProgressKey(locationLike) {
-    return isChapterThreeActive(locationLike) ? CHAPTER_THREE_PROGRESS_KEY : PROGRESS_KEY;
+    return getPlaytestId(locationLike) === CHAPTER_THREE_32_PLAYTEST_ID ? CHAPTER_THREE_32_PROGRESS_KEY
+      : isChapterThreeActive(locationLike) ? CHAPTER_THREE_PROGRESS_KEY : PROGRESS_KEY;
   }
 
   function getActiveSlotIndex(locationLike) {
@@ -52,6 +57,7 @@
   function getRequestedMapId(locationLike) {
     const allowed = ['black-forest-trail', 'spider-nest', 'black-forest-entrance', 'blackstone-stronghold', 'forest-altar', 'black-forest-depths'];
     if (!isActive(locationLike)) return 'plains-entrance';
+    if (getPlaytestId(locationLike) === CHAPTER_THREE_32_PLAYTEST_ID) return 'brokenrock-canyon';
     if (isChapterThreeActive(locationLike)) return 'redrock-wastes-entrance';
     const location = locationLike || window.location;
     const requested = new URLSearchParams(location.search || '').get('map');
@@ -157,8 +163,9 @@
   function createSlots(dependencies) {
     const chapterThreePlaytest = isChapterThreeActive(dependencies.location);
     const jobs = ['warrior', 'hunter', 'priest'];
-    const names = chapterThreePlaytest ? ['3-1 測試戰士', '3-1 測試獵人', '3-1 測試牧師'] : ['基準戰士', '基準獵人', '基準牧師'];
-    const ids = jobs.map((job) => `${chapterThreePlaytest ? 'chapter-three-31' : 'chapter-two-balance'}-${job}`);
+    const chapterThree32Playtest = getPlaytestId(dependencies.location) === CHAPTER_THREE_32_PLAYTEST_ID;
+    const names = chapterThreePlaytest ? jobs.map((job) => `3-${chapterThree32Playtest ? '2' : '1'} 測試${job === 'warrior' ? '戰士' : job === 'hunter' ? '獵人' : '牧師'}`) : ['基準戰士', '基準獵人', '基準牧師'];
+    const ids = jobs.map((job) => `${chapterThreePlaytest ? (chapterThree32Playtest ? 'chapter-three-32' : 'chapter-three-31') : 'chapter-two-balance'}-${job}`);
     const selectedMapId = getRequestedMapId(dependencies.location);
     return jobs.map((job, index) => ({
       character: { id: ids[index], name: names[index], faction: 'light', race: 'human', job },
@@ -177,8 +184,9 @@
           normalKills: {}, completed: chapterThreePlaytest
         },
         chapterThreeProgress: {
-          unlocked: { 'redrock-wastes-entrance': chapterThreePlaytest, 'brokenrock-canyon': false, 'bloodwar-wastes': false, 'skullcrusher-war-camp': false, 'ancient-altar': false, 'redrock-temple': false },
-          cleared: {}, bossFirstKills: {}
+          unlocked: { 'redrock-wastes-entrance': chapterThreePlaytest, 'brokenrock-canyon': chapterThree32Playtest, 'bloodwar-wastes': false, 'skullcrusher-war-camp': false, 'ancient-altar': false, 'redrock-temple': false },
+          cleared: chapterThree32Playtest ? { 'redrock-wastes-entrance': true } : {},
+          bossFirstKills: chapterThree32Playtest ? { 'redrock-wastes-entrance': true } : {}
         },
         dungeonAdmission: selectedMapId === 'blackstone-stronghold',
         dungeonReturnMapId: 'black-forest-entrance',
@@ -204,8 +212,8 @@
   }
 
   return Object.freeze({
-    PLAYTEST_ID, CHAPTER_THREE_PLAYTEST_ID, SLOT_KEY, PROGRESS_KEY,
-    CHAPTER_THREE_SLOT_KEY, CHAPTER_THREE_PROGRESS_KEY, CHAPTER_THREE_PLAYTEST_VERSION,
+    PLAYTEST_ID, CHAPTER_THREE_PLAYTEST_ID, CHAPTER_THREE_32_PLAYTEST_ID, SLOT_KEY, PROGRESS_KEY,
+    CHAPTER_THREE_SLOT_KEY, CHAPTER_THREE_PROGRESS_KEY, CHAPTER_THREE_32_SLOT_KEY, CHAPTER_THREE_32_PROGRESS_KEY, CHAPTER_THREE_PLAYTEST_VERSION,
     isActive, isChapterThreeActive, getSlotKey, getProgressKey, getActiveSlotIndex,
     getRequestedMapId, getScenario, getRemovedCorruptionLayers, getLoadout, createSlots
   });

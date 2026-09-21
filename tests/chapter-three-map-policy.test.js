@@ -9,10 +9,12 @@ assert.deepEqual(policy.MAPS.map((map) => map.name), ['赤岩荒原', '斷岩峽
 assert.deepEqual(policy.MAPS.map((map) => map.facilityRequirement), [10, 15, 20, 25, 30, 35]);
 assert.equal(policy.MAPS[0].min, 30);
 assert.equal(policy.MAPS[0].max, 30);
-assert.ok(policy.MAPS.slice(1).every((map) => map.min === null && map.max === null));
+assert.deepEqual([policy.MAPS[1].min, policy.MAPS[1].max], [30, 30]);
+assert.ok(policy.MAPS.slice(2).every((map) => map.min === null && map.max === null));
 assert.ok(policy.MAPS.every((map) => map.suppressionValues === null));
 assert.equal(policy.MAPS[0].implemented, true);
-assert.ok(policy.MAPS.slice(1).every((map) => map.implemented === false));
+assert.equal(policy.MAPS[1].implemented, true);
+assert.ok(policy.MAPS.slice(2).every((map) => map.implemented === false));
 const lockedChapter = { unlockedChapter: 2 };
 const unlockedChapter = { unlockedChapter: 3 };
 assert.equal(policy.isChapterUnlocked(lockedChapter), false);

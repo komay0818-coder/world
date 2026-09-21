@@ -16,6 +16,8 @@ assert.equal(BalancePolicy.isActive({ hostname: 'raw.githack.com', pathname: '/k
 assert.equal(BalancePolicy.isChapterThreeActive({ hostname: '127.0.0.1', search: '?playtest=chapter-three-31' }), true);
 assert.equal(BalancePolicy.getSlotKey({ hostname: '127.0.0.1', search: '?playtest=chapter-three-31' }), BalancePolicy.CHAPTER_THREE_SLOT_KEY);
 assert.equal(BalancePolicy.getProgressKey({ hostname: '127.0.0.1', search: '?playtest=chapter-three-31' }), BalancePolicy.CHAPTER_THREE_PROGRESS_KEY);
+assert.equal(BalancePolicy.getRequestedMapId({ hostname: '127.0.0.1', search: '?playtest=chapter-three-32' }), 'brokenrock-canyon');
+assert.equal(BalancePolicy.getSlotKey({ hostname: '127.0.0.1', search: '?playtest=chapter-three-32' }), BalancePolicy.CHAPTER_THREE_32_SLOT_KEY);
 assert.equal(BalancePolicy.getActiveSlotIndex({ hostname: '127.0.0.1', search: '?playtest=chapter-two-balance&main=hunter' }), 1);
 assert.equal(BalancePolicy.getActiveSlotIndex({ hostname: '127.0.0.1', search: '?playtest=chapter-two-balance&main=priest' }), 2);
 assert.equal(BalancePolicy.getRequestedMapId({ hostname: '127.0.0.1', search: '?playtest=chapter-two-balance&map=spider-nest' }), 'spider-nest');
@@ -94,6 +96,15 @@ assert.ok(chapterThreeSlots.every((slot) => slot.progress.chapterTwoProgress.com
 assert.ok(chapterThreeSlots.every((slot) => slot.progress.chapterThreeProgress.unlocked['redrock-wastes-entrance']));
 assert.ok(chapterThreeSlots.every((slot) => !slot.progress.chapterThreeProgress.unlocked['brokenrock-canyon']));
 assert.ok(chapterThreeSlots.every((slot) => !slot.progress.chapterThreeProgress.cleared['redrock-wastes-entrance']));
+
+const chapterThree32Slots = BalancePolicy.createSlots({
+  EquipmentPolicy, EquipmentDropPolicy, CraftingPolicy, ClassSkillPolicy,
+  location: { hostname: 'raw.githack.com', pathname: '/komay0818-coder/world/dev/index.html', search: '?playtest=chapter-three-32' }
+});
+assert.ok(chapterThree32Slots.every((slot) => slot.progress.selectedMapId === 'brokenrock-canyon'));
+assert.ok(chapterThree32Slots.every((slot) => slot.progress.chapterThreeProgress.cleared['redrock-wastes-entrance']));
+assert.ok(chapterThree32Slots.every((slot) => slot.progress.chapterThreeProgress.unlocked['brokenrock-canyon']));
+assert.ok(chapterThree32Slots.every((slot) => !slot.progress.chapterThreeProgress.unlocked['bloodwar-wastes']));
 
 const script = fs.readFileSync(path.join(__dirname, '..', 'script.js'), 'utf8');
 assert.match(script, /getScenario\(\) === 'purified-heart-pressure'[\s\S]*'heartOfTheBlackForest',[\s\S]*'forestSpirit',[\s\S]*'darkSporeBeast',[\s\S]*'corruptedBlackstoneCenturion'/);
