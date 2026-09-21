@@ -79,5 +79,6 @@ assert.ok(chapterThreeSlots.every((slot) => !slot.progress.chapterThreeProgress.
 const script = fs.readFileSync(path.join(__dirname, '..', 'script.js'), 'utf8');
 assert.match(script, /getScenario\(\) === 'purified-heart-pressure'[\s\S]*'heartOfTheBlackForest',[\s\S]*'forestSpirit',[\s\S]*'darkSporeBeast',[\s\S]*'corruptedBlackstoneCenturion'/);
 assert.match(script, /sessionStorage\.setItem\(playtestProgressKey, JSON\.stringify\(progress\)\)/, 'playtest progress is session-only');
+assert.match(script, /isChapterThreeActive\(\)\) setTimeout\(openBattle, 0\)/, 'chapter 3-1 playtest opens the formal battle directly');
 
 console.log('chapter-two balance playtest policy tests passed');
