@@ -2,6 +2,8 @@ const assert = require('node:assert/strict');
 const BalancePolicy = require('../chapter-two-balance-playtest-policy');
 const EquipmentPolicy = require('../equipment-policy');
 const EquipmentDropPolicy = require('../equipment-drop-policy');
+const ClassSkillPolicy = require('../class-skill-policy');
+const CraftingPolicy = require('../crafting-policy');
 const fs = require('node:fs');
 const path = require('node:path');
 
@@ -66,9 +68,26 @@ assert.ok(fullLoadoutSlots.every((slot) => Object.values(slot.progress.equipment
 const chapterThreeSlots = BalancePolicy.createSlots({
   EquipmentPolicy,
   EquipmentDropPolicy,
+  CraftingPolicy,
+  ClassSkillPolicy,
   location: { hostname: 'raw.githack.com', pathname: '/komay0818-coder/world/dev/index.html', search: '?playtest=chapter-three-31' }
 });
 assert.deepEqual(chapterThreeSlots.map((slot) => slot.progress.level), [30, 30, 30]);
+assert.ok(chapterThreeSlots.every((slot) => slot.progress.balancePlaytestLoadout === 'full'));
+assert.deepEqual(
+  chapterThreeSlots.map((slot) => [slot.progress.equipment.gloves.baseItemId, slot.progress.equipment.pants.baseItemId, slot.progress.equipment.boots.baseItemId]),
+  [
+    ['blackstone-corrupted-gauntlets', 'blackstone-corrupted-legguards', 'blackstone-corrupted-warboots'],
+    ['deepwood-hunter-gloves', 'deepwood-hunter-legguards', 'deepwood-hunter-boots'],
+    ['spiritweave-spellgloves', 'spiritweave-pants', 'spiritweave-boots']
+  ]
+);
+assert.ok(chapterThreeSlots.every((slot) => Object.keys(slot.progress.skillLevels).length === ClassSkillPolicy.getSkills(slot.character.job).length));
+assert.ok(chapterThreeSlots.every((slot) => Object.values(slot.progress.skillLevels).every((level) => level === 5)));
+assert.deepEqual(
+  chapterThreeSlots.map((slot) => [slot.progress.equipment.shoulders.baseItemId, slot.progress.equipment.cloak.baseItemId, slot.progress.equipment.wrist.baseItemId]),
+  Array(3).fill(['crafted-blackstone-bullhorn-shoulders', 'crafted-corrupted-centurion-cloak', 'crafted-sturdy-guardian-wrist'])
+);
 assert.ok(chapterThreeSlots.every((slot) => slot.progress.selectedMapId === 'redrock-wastes-entrance'));
 assert.ok(chapterThreeSlots.every((slot) => slot.progress.unlockedChapter === 3));
 assert.ok(chapterThreeSlots.every((slot) => slot.progress.chapterTwoProgress.completed));

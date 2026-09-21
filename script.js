@@ -664,10 +664,10 @@ const monsterVisualSizeOverrides = {
 const monsterVisualScaleCorrections = {
   // Chapter 3 artwork uses mixed portrait and landscape canvases. These values
   // equalize perceived body height while keeping rank from changing art size.
-  'wasteland-hyena': .901,
-  'redrock-lizard': 1.056,
-  'wasteland-vulture': 1.1475,
-  'skullcrusher-scout': .945,
+  'wasteland-hyena': .8302715,
+  'redrock-lizard': .973104,
+  'wasteland-vulture': 1.05742125,
+  'skullcrusher-scout': .8708175,
   'redrock-hornbeast': 1.04,
   'redrock-giant-lizard': 1.33,
   'skullcrusher-spearman': 1.05,
@@ -1290,8 +1290,10 @@ function getCharacterSlots() {
     const playtestSlotKey = ChapterTwoBalancePlaytestPolicy.getSlotKey();
     let testSlots = JSON.parse(sessionStorage.getItem(playtestSlotKey) || 'null');
     const requestedLoadout = ChapterTwoBalancePlaytestPolicy.getLoadout();
-    if (!Array.isArray(testSlots) || testSlots.length !== 3 || testSlots[0]?.progress?.balancePlaytestLoadout !== requestedLoadout) {
-      testSlots = ChapterTwoBalancePlaytestPolicy.createSlots({ EquipmentPolicy, EquipmentDropPolicy, location: window.location });
+    const outdatedChapterThreePlaytest = ChapterTwoBalancePlaytestPolicy.isChapterThreeActive()
+      && testSlots?.[0]?.progress?.chapterThreePlaytestVersion !== ChapterTwoBalancePlaytestPolicy.CHAPTER_THREE_PLAYTEST_VERSION;
+    if (!Array.isArray(testSlots) || testSlots.length !== 3 || testSlots[0]?.progress?.balancePlaytestLoadout !== requestedLoadout || outdatedChapterThreePlaytest) {
+      testSlots = ChapterTwoBalancePlaytestPolicy.createSlots({ EquipmentPolicy, EquipmentDropPolicy, CraftingPolicy, ClassSkillPolicy, location: window.location });
       sessionStorage.setItem(playtestSlotKey, JSON.stringify(testSlots));
       sessionStorage.removeItem(ChapterTwoBalancePlaytestPolicy.getProgressKey());
     }

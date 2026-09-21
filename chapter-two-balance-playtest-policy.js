@@ -11,6 +11,7 @@
   const PROGRESS_KEY = 'chapter-two-balance-playtest-progress-v2';
   const CHAPTER_THREE_SLOT_KEY = 'chapter-three-31-playtest-slots-v1';
   const CHAPTER_THREE_PROGRESS_KEY = 'chapter-three-31-playtest-progress-v1';
+  const CHAPTER_THREE_PLAYTEST_VERSION = 'chapter-three-31-full-lv5-v2';
 
   function isAllowedEnvironment(location) {
     if (['localhost', '127.0.0.1'].includes(location?.hostname)) return true;
@@ -72,8 +73,14 @@
 
   function getLoadout(locationLike) {
     if (!isActive(locationLike)) return 'transition';
+    if (isChapterThreeActive(locationLike)) return 'full';
     const location = locationLike || window.location;
     return new URLSearchParams(location.search || '').get('loadout') === 'full' ? 'full' : 'transition';
+  }
+
+  function makeSkillLevels(job, dependencies) {
+    if (!isChapterThreeActive(dependencies.location)) return {};
+    return Object.fromEntries((dependencies.ClassSkillPolicy?.getSkills(job) || []).map((skill) => [`${job}:${skill.id}`, 5]));
   }
 
   function affix(id, name, stat, value, unit = '%') {
@@ -132,6 +139,18 @@
         slots[slot] = equipment(template, 'uncommon', affixes);
       } else slots[slot] = equipment(template, 'common', []);
     });
+    if (fullLoadout && dependencies.CraftingPolicy) {
+      Object.entries({
+        shoulders: 'chapter2-blackstone-bullhorn-shoulders',
+        wrist: 'chapter2-sturdy-guardian-wrist',
+        cloak: 'chapter2-corrupted-centurion-cloak'
+      }).forEach(([slot, recipeId]) => {
+        slots[slot] = dependencies.CraftingPolicy.generateCraftedEquipment(recipeId, {
+          instanceId: `chapter-three-31-${job}-${slot}`,
+          random: () => .5
+        });
+      });
+    }
     return slots;
   }
 
@@ -147,7 +166,8 @@
         level: chapterThreePlaytest ? 30 : 25, xp: 0, gold: 0, potions: 20, manaPotions: 20, inventory: [],
         balancePlaytestLoadout: getLoadout(dependencies.location),
         selectedMapId, equipment: makeEquipment(job, dependencies),
-        skillLevels: {}, lastActiveAt: Date.now(), unlockedChapter: chapterThreePlaytest ? 3 : 2,
+        skillLevels: makeSkillLevels(job, dependencies), lastActiveAt: Date.now(), unlockedChapter: chapterThreePlaytest ? 3 : 2,
+        chapterThreePlaytestVersion: chapterThreePlaytest ? CHAPTER_THREE_PLAYTEST_VERSION : '',
         mapUnlocked: { 'black-forest': true },
         blackForestCorruption: { initialized: true, removedLayers: getRemovedCorruptionLayers(dependencies.location) },
         chapterTwoProgress: {
@@ -185,7 +205,7 @@
 
   return Object.freeze({
     PLAYTEST_ID, CHAPTER_THREE_PLAYTEST_ID, SLOT_KEY, PROGRESS_KEY,
-    CHAPTER_THREE_SLOT_KEY, CHAPTER_THREE_PROGRESS_KEY,
+    CHAPTER_THREE_SLOT_KEY, CHAPTER_THREE_PROGRESS_KEY, CHAPTER_THREE_PLAYTEST_VERSION,
     isActive, isChapterThreeActive, getSlotKey, getProgressKey, getActiveSlotIndex,
     getRequestedMapId, getScenario, getRemovedCorruptionLayers, getLoadout, createSlots
   });
