@@ -7625,7 +7625,16 @@ function openBattle() {
   });
 }
 
-const activePlaytestName = ChapterTwoBalancePlaytestPolicy?.isChapterThreeActive() ? '第三章 3-1 開發測試' : '';
+if (ChapterTwoBalancePlaytestPolicy?.isChapterThreeActive()) {
+  const chapterThreePlaytestProgressKey = ChapterTwoBalancePlaytestPolicy.getProgressKey();
+  const savedChapterThreePlaytestProgress = JSON.parse(sessionStorage.getItem(chapterThreePlaytestProgressKey) || 'null');
+  if (savedChapterThreePlaytestProgress?.requiresMapSelectionAfterDefeat) {
+    sessionStorage.removeItem(chapterThreePlaytestProgressKey);
+  }
+}
+const activePlaytestName = ChapterTwoBalancePlaytestPolicy?.isChapterThreeActive()
+  ? `第三章 ${ChapterTwoBalancePlaytestPolicy.getRequestedMapId() === 'brokenrock-canyon' ? '3-2' : '3-1'} 開發測試`
+  : '';
 const savedName = localStorage.getItem('stardust-player-name');
 if (activePlaytestName || savedName) {
   enterMenu(activePlaytestName || savedName);

@@ -21,4 +21,6 @@ assert.match(script, /BrokenrockCanyonPolicy\.resolveScheduledActions/);
 assert.match(script, /BrokenrockCanyonPolicy\.updateThresholds/);
 assert.match(script, /brokenrockAction\?\.damageMultiplier/);
 assert.match(script, /brokenrockAction\?\.defenseIgnore/);
+assert.match(script, /savedChapterThreePlaytestProgress\?\.requiresMapSelectionAfterDefeat[\s\S]*sessionStorage\.removeItem\(chapterThreePlaytestProgressKey\)/, 'a defeated isolated playtest session resets before auto-entry');
+assert.match(script, /getRequestedMapId\(\) === 'brokenrock-canyon' \? '3-2' : '3-1'/, 'the playtest identity matches the requested chapter-three map');
 console.log('chapter-three-32-integration: assertions passed');
