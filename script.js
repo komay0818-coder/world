@@ -683,10 +683,10 @@ const monsterVisualSizeOverrides = {
 const monsterVisualScaleCorrections = {
   // Chapter 3 artwork uses mixed portrait and landscape canvases. These values
   // equalize perceived body height while keeping rank from changing art size.
-  'wasteland-hyena': 1.06,
-  'redrock-lizard': 1.32,
-  'wasteland-vulture': 1.35,
-  'skullcrusher-scout': 1.05,
+  'wasteland-hyena': .901,
+  'redrock-lizard': 1.056,
+  'wasteland-vulture': 1.1475,
+  'skullcrusher-scout': .945,
   'redrock-hornbeast': 1.04,
   'redrock-giant-lizard': 1.33,
   'skullcrusher-spearman': 1.05,

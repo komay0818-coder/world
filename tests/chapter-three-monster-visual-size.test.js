@@ -12,8 +12,11 @@ chapterThreeIds.forEach((enemyId) => {
 });
 
 [
-  ['redrock-lizard', '1.32'],
-  ['wasteland-vulture', '1.35'],
+  ['wasteland-hyena', '.901'],
+  ['redrock-lizard', '1.056'],
+  ['wasteland-vulture', '1.1475'],
+  ['skullcrusher-scout', '.945'],
+  ['redrock-hornbeast', '1.04'],
   ['redrock-giant-lizard', '1.33'],
   ['temple-executioner', '1.38'],
   ['skullcrusher-berserker', '1.06'],
