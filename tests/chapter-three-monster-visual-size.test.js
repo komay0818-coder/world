@@ -24,12 +24,12 @@ chapterThreeIds.forEach((enemyId) => {
   ['redrock-hornbeast', '1.04'],
   ['redrock-giant-lizard', '1.33'],
   ['temple-executioner', '1.38'],
-  ['skullcrusher-berserker', '1.007'],
-  ['skullcrusher-shieldguard', '.969'],
+  ['skullcrusher-berserker', '.9063'],
+  ['skullcrusher-shieldguard', '.8721'],
   ['skullcrusher-hunter', '.94'],
-  ['skullcrusher-shaman', '.987'],
-  ['skullcrusher-centurion', '1.092'],
-  ['skullcrusher-vanguard-commander', '1.008']
+  ['skullcrusher-shaman', '1.0857'],
+  ['skullcrusher-centurion', '1.2012'],
+  ['skullcrusher-vanguard-commander', '1.1088']
 ].forEach(([enemyId, expectedScale]) => {
   assert.match(
     script,
