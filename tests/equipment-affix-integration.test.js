@@ -17,7 +17,7 @@ assert.match(html, /direct-hit-health-recovery-policy\.js\?v=20260903-direct-hit
 assert.match(html, /chapter-three-crafted-epic-ability-policy\.js\?v=20260903-chapter3-crafted-epic-v1/, 'crafted epic ability policy loads before the main game script');
 assert.match(html, /chapter-three-epic-weapon-policy\.js\?v=20260903-epic-weapons-v1/, 'chapter-three epic weapon policy loads before the main game script');
 assert.match(html, /control-effect-policy\.js\?v=20260903-control-resistance-v1/, 'the shared player control policy loads before the main game script');
-assert.match(html, /script\.js\?v=20260922-bloodwar-33-v8/, 'the affix UI renderer uses the current local build');
+assert.match(html, /script\.js\?v=20260922-bloodwar-visual-size-v9/, 'the affix UI renderer uses the current local build');
 assert.match(source, /equipmentAffixMigrationVersion !== 'green-affix-v1'/, 'legacy saves receive the affix compatibility migration');
 assert.match(source, /EquipmentAffixPolicy\.normalizeEquipment\(item\)/, 'inventory and equipped items are normalized on load');
 assert.match(source, /EquipmentAffixPolicy\.getEquippedAffixStats\(progress\.equipment\)/, 'stats read only the equipped item collection');
