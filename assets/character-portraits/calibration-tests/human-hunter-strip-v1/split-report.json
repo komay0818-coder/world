@@ -1,0 +1,167 @@
+{
+  "source": "assets\\character-portraits\\calibration-tests\\human-hunter-strip-v1\\source-four-strip.png",
+  "source_canvas": {
+    "width": 1774,
+    "height": 887
+  },
+  "output_canvas": {
+    "width": 579,
+    "height": 943
+  },
+  "alpha_detection_threshold": 15,
+  "segmentation": "four largest 2D Alpha components with low-Alpha fringe propagation",
+  "safety_margin": 40,
+  "target_foot_y": 903,
+  "target_torso_x": 289,
+  "resampling": "none; source pixels copied exactly",
+  "frames": [
+    {
+      "frame": 1,
+      "output": "frame-01.png",
+      "source_visible_bbox": [
+        14,
+        63,
+        466,
+        870
+      ],
+      "source_stable_bbox": [
+        16,
+        159,
+        459,
+        863
+      ],
+      "source_edge_contact": {
+        "left": false,
+        "right": false,
+        "top": false,
+        "bottom": false
+      },
+      "output_offset": [
+        66,
+        103
+      ],
+      "output_bbox": {
+        "left": 66,
+        "top": 103,
+        "right": 518,
+        "bottom": 910,
+        "width": 453,
+        "height": 808,
+        "center_x": 292.0
+      },
+      "foot_y": 903,
+      "torso_center_x": 289.04
+    },
+    {
+      "frame": 2,
+      "output": "frame-02.png",
+      "source_visible_bbox": [
+        432,
+        9,
+        884,
+        871
+      ],
+      "source_stable_bbox": [
+        438,
+        186,
+        876,
+        868
+      ],
+      "source_edge_contact": {
+        "left": false,
+        "right": false,
+        "top": false,
+        "bottom": false
+      },
+      "output_offset": [
+        64,
+        44
+      ],
+      "output_bbox": {
+        "left": 64,
+        "top": 44,
+        "right": 516,
+        "bottom": 906,
+        "width": 453,
+        "height": 863,
+        "center_x": 290.0
+      },
+      "foot_y": 903,
+      "torso_center_x": 289.07
+    },
+    {
+      "frame": 3,
+      "output": "frame-03.png",
+      "source_visible_bbox": [
+        828,
+        29,
+        1291,
+        870
+      ],
+      "source_stable_bbox": [
+        832,
+        109,
+        1287,
+        867
+      ],
+      "source_edge_contact": {
+        "left": false,
+        "right": false,
+        "top": false,
+        "bottom": false
+      },
+      "output_offset": [
+        57,
+        65
+      ],
+      "output_bbox": {
+        "left": 57,
+        "top": 65,
+        "right": 520,
+        "bottom": 906,
+        "width": 464,
+        "height": 842,
+        "center_x": 288.5
+      },
+      "foot_y": 903,
+      "torso_center_x": 288.81
+    },
+    {
+      "frame": 4,
+      "output": "frame-04.png",
+      "source_visible_bbox": [
+        1275,
+        27,
+        1773,
+        872
+      ],
+      "source_stable_bbox": [
+        1280,
+        30,
+        1772,
+        869
+      ],
+      "source_edge_contact": {
+        "left": false,
+        "right": true,
+        "top": false,
+        "bottom": false
+      },
+      "output_offset": [
+        41,
+        61
+      ],
+      "output_bbox": {
+        "left": 41,
+        "top": 61,
+        "right": 539,
+        "bottom": 906,
+        "width": 499,
+        "height": 846,
+        "center_x": 290.0
+      },
+      "foot_y": 903,
+      "torso_center_x": 288.79
+    }
+  ]
+}

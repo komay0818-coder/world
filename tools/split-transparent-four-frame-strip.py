@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import argparse
 import json
+from collections import deque
 from pathlib import Path
 
 import numpy as np
@@ -29,18 +30,79 @@ def bbox(mask: np.ndarray) -> tuple[int, int, int, int]:
     return int(xs.min()), int(ys.min()), int(xs.max()), int(ys.max())
 
 
-def find_partitions(alpha: np.ndarray, count: int = 4, threshold: int = 15) -> list[tuple[int, int]]:
-    runs = contiguous_runs((alpha > threshold).any(axis=0))
-    if len(runs) != count:
-        raise ValueError(f"expected {count} visible horizontal runs, found {len(runs)}: {runs}")
-    boundaries = [0]
-    for left, right in zip(runs, runs[1:]):
-        boundaries.append((left[1] + right[0]) // 2 + 1)
-    boundaries.append(alpha.shape[1])
-    return [(boundaries[index], boundaries[index + 1] - 1) for index in range(count)]
+def connected_components(mask: np.ndarray, minimum_pixels: int = 20) -> list[tuple[int, np.ndarray]]:
+    height, width = mask.shape
+    seen = np.zeros_like(mask, dtype=bool)
+    components: list[tuple[int, np.ndarray]] = []
+    for y in range(height):
+        for x in range(width):
+            if not mask[y, x] or seen[y, x]:
+                continue
+            queue = deque([(y, x)])
+            seen[y, x] = True
+            pixels: list[tuple[int, int]] = []
+            while queue:
+                current_y, current_x = queue.popleft()
+                pixels.append((current_y, current_x))
+                for next_y, next_x in (
+                    (current_y - 1, current_x),
+                    (current_y + 1, current_x),
+                    (current_y, current_x - 1),
+                    (current_y, current_x + 1),
+                ):
+                    if 0 <= next_y < height and 0 <= next_x < width and mask[next_y, next_x] and not seen[next_y, next_x]:
+                        seen[next_y, next_x] = True
+                        queue.append((next_y, next_x))
+            if len(pixels) >= minimum_pixels:
+                component = np.zeros_like(mask, dtype=bool)
+                ys, xs = zip(*pixels)
+                component[np.asarray(ys), np.asarray(xs)] = True
+                components.append((len(pixels), component))
+    return components
 
 
-def torso_center(alpha: np.ndarray, stable_bbox: tuple[int, int, int, int]) -> float:
+def segment_frames(alpha: np.ndarray, count: int = 4, threshold: int = 15) -> list[tuple[np.ndarray, np.ndarray]]:
+    components = sorted(connected_components(alpha > threshold), key=lambda item: item[0], reverse=True)[:count]
+    if len(components) != count:
+        raise ValueError(f"expected {count} large Alpha components, found {len(components)}")
+    components.sort(key=lambda item: bbox(item[1])[0])
+
+    labels = np.zeros(alpha.shape, dtype=np.int16)
+    for label, (_, component) in enumerate(components, 1):
+        labels[component] = label
+
+    # Grow each stable component through the Alpha 1-15 antialias fringe. A
+    # synchronous expansion behaves like a small watershed where poses overlap
+    # in X but remain distinct in two dimensions.
+    visible = alpha > 0
+    for _ in range(64):
+        unassigned = visible & (labels == 0)
+        if not unassigned.any():
+            break
+        expanded = labels.copy()
+        for shifted in (
+            np.pad(labels[:-1], ((1, 0), (0, 0))),
+            np.pad(labels[1:], ((0, 1), (0, 0))),
+            np.pad(labels[:, :-1], ((0, 0), (1, 0))),
+            np.pad(labels[:, 1:], ((0, 0), (0, 1))),
+        ):
+            take = unassigned & (expanded == 0) & (shifted > 0)
+            expanded[take] = shifted[take]
+        if np.array_equal(expanded, labels):
+            break
+        labels = expanded
+
+    # Preserve isolated low-Alpha specks by assigning them to the nearest pose
+    # horizontally instead of deleting source pixels.
+    remaining_y, remaining_x = np.where(visible & (labels == 0))
+    centers = np.asarray([(bbox(component)[0] + bbox(component)[2]) / 2 for _, component in components])
+    for y, x in zip(remaining_y, remaining_x):
+        labels[y, x] = int(np.argmin(np.abs(centers - x))) + 1
+
+    return [(labels == label, component) for label, (_, component) in enumerate(components, 1)]
+
+
+def torso_center(alpha: np.ndarray, visible_mask: np.ndarray, stable_bbox: tuple[int, int, int, int]) -> float:
     left, top, right, bottom = stable_bbox
     width = right - left
     height = bottom - top
@@ -48,27 +110,25 @@ def torso_center(alpha: np.ndarray, stable_bbox: tuple[int, int, int, int]) -> f
     roi_right = round(left + width * 0.78)
     roi_top = round(top + height * 0.24)
     roi_bottom = round(top + height * 0.66)
-    core = alpha[roi_top:roi_bottom + 1, roi_left:roi_right + 1] > 127
+    core = (alpha[roi_top:roi_bottom + 1, roi_left:roi_right + 1] > 127) & visible_mask[roi_top:roi_bottom + 1, roi_left:roi_right + 1]
     _, xs = np.where(core)
     if not len(xs):
         raise ValueError("could not locate opaque torso core")
     return float(xs.mean() + roi_left)
 
 
-def analyze_frame(alpha: np.ndarray, start_x: int, end_x: int) -> dict[str, object]:
-    segment = alpha[:, start_x:end_x + 1]
-    visible = bbox(segment > 0)
-    stable = bbox(segment > 15)
-    center_x = torso_center(segment, stable)
+def analyze_frame(alpha: np.ndarray, visible_mask: np.ndarray, stable_mask: np.ndarray) -> dict[str, object]:
+    visible = bbox(visible_mask)
+    stable = bbox(stable_mask)
+    center_x = torso_center(alpha, visible_mask, stable)
     return {
-        "partition": [start_x, end_x],
         "visible_bbox": list(visible),
         "stable_bbox": list(stable),
         "foot_y": stable[3],
         "torso_center_x": center_x,
         "source_edge_contact": {
-            "left": start_x + visible[0] == 0,
-            "right": start_x + visible[2] == alpha.shape[1] - 1,
+            "left": visible[0] == 0,
+            "right": visible[2] == alpha.shape[1] - 1,
             "top": visible[1] == 0,
             "bottom": visible[3] == alpha.shape[0] - 1,
         },
@@ -95,9 +155,10 @@ def main() -> None:
     args = parser.parse_args()
 
     source = Image.open(args.source).convert("RGBA")
+    source_pixels = np.asarray(source)
     alpha = np.asarray(source.getchannel("A"))
-    partitions = find_partitions(alpha)
-    frames = [analyze_frame(alpha, start, end) for start, end in partitions]
+    masks = segment_frames(alpha)
+    frames = [analyze_frame(alpha, visible_mask, stable_mask) for visible_mask, stable_mask in masks]
 
     safety_margin = 40
     max_width = max(frame["visible_bbox"][2] - frame["visible_bbox"][0] + 1 for frame in frames)
@@ -112,6 +173,7 @@ def main() -> None:
         "source_canvas": {"width": source.width, "height": source.height},
         "output_canvas": {"width": canvas_size[0], "height": canvas_size[1]},
         "alpha_detection_threshold": 15,
+        "segmentation": "four largest 2D Alpha components with low-Alpha fringe propagation",
         "safety_margin": safety_margin,
         "target_foot_y": target_foot_y,
         "target_torso_x": target_torso_x,
@@ -120,10 +182,10 @@ def main() -> None:
     }
     outputs: list[Image.Image] = []
 
-    for index, frame in enumerate(frames, 1):
-        start_x, _ = frame["partition"]
+    for index, (frame, (frame_mask, _)) in enumerate(zip(frames, masks), 1):
         left, top, right, bottom = frame["visible_bbox"]
-        crop = source.crop((start_x + left, top, start_x + right + 1, bottom + 1))
+        isolated_pixels = np.where(frame_mask[:, :, None], source_pixels, 0).astype(np.uint8)
+        crop = Image.fromarray(isolated_pixels, "RGBA").crop((left, top, right + 1, bottom + 1))
         local_torso_x = frame["torso_center_x"] - left
         local_foot_y = frame["foot_y"] - top
         offset_x = round(target_torso_x - local_torso_x)
@@ -136,7 +198,6 @@ def main() -> None:
         report["frames"].append({
             "frame": index,
             "output": output_path.name,
-            "source_partition": frame["partition"],
             "source_visible_bbox": frame["visible_bbox"],
             "source_stable_bbox": frame["stable_bbox"],
             "source_edge_contact": frame["source_edge_contact"],
