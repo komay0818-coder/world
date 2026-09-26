@@ -1,0 +1,182 @@
+{
+  "source": "assets\\character-portraits\\calibration-tests\\human-assassin-strip-v1\\source-four-strip.png",
+  "source_canvas": {
+    "width": 1774,
+    "height": 887
+  },
+  "output_canvas": {
+    "width": 548,
+    "height": 917
+  },
+  "alpha_detection_threshold": 15,
+  "safety_margin": 40,
+  "target_foot_y": 877,
+  "target_torso_x": 274,
+  "resampling": "none; source pixels copied exactly",
+  "frames": [
+    {
+      "frame": 1,
+      "output": "frame-01.png",
+      "source_partition": [
+        0,
+        404
+      ],
+      "source_visible_bbox": [
+        0,
+        32,
+        402,
+        862
+      ],
+      "source_stable_bbox": [
+        1,
+        34,
+        388,
+        856
+      ],
+      "source_edge_contact": {
+        "left": true,
+        "right": false,
+        "top": false,
+        "bottom": false
+      },
+      "output_offset": [
+        94,
+        53
+      ],
+      "output_bbox": {
+        "left": 94,
+        "top": 53,
+        "right": 496,
+        "bottom": 883,
+        "width": 403,
+        "height": 831,
+        "center_x": 295.0
+      },
+      "foot_y": 877,
+      "torso_center_x": 273.98
+    },
+    {
+      "frame": 2,
+      "output": "frame-02.png",
+      "source_partition": [
+        405,
+        863
+      ],
+      "source_visible_bbox": [
+        14,
+        32,
+        452,
+        868
+      ],
+      "source_stable_bbox": [
+        16,
+        34,
+        449,
+        858
+      ],
+      "source_edge_contact": {
+        "left": false,
+        "right": false,
+        "top": false,
+        "bottom": false
+      },
+      "output_offset": [
+        66,
+        51
+      ],
+      "output_bbox": {
+        "left": 66,
+        "top": 51,
+        "right": 504,
+        "bottom": 887,
+        "width": 439,
+        "height": 837,
+        "center_x": 285.0
+      },
+      "foot_y": 877,
+      "torso_center_x": 273.61
+    },
+    {
+      "frame": 3,
+      "output": "frame-03.png",
+      "source_partition": [
+        864,
+        1338
+      ],
+      "source_visible_bbox": [
+        7,
+        33,
+        474,
+        867
+      ],
+      "source_stable_bbox": [
+        8,
+        35,
+        467,
+        857
+      ],
+      "source_edge_contact": {
+        "left": false,
+        "right": false,
+        "top": false,
+        "bottom": false
+      },
+      "output_offset": [
+        52,
+        53
+      ],
+      "output_bbox": {
+        "left": 52,
+        "top": 53,
+        "right": 519,
+        "bottom": 887,
+        "width": 468,
+        "height": 835,
+        "center_x": 285.5
+      },
+      "foot_y": 877,
+      "torso_center_x": 273.89
+    },
+    {
+      "frame": 4,
+      "output": "frame-04.png",
+      "source_partition": [
+        1339,
+        1773
+      ],
+      "source_visible_bbox": [
+        0,
+        34,
+        434,
+        868
+      ],
+      "source_stable_bbox": [
+        7,
+        36,
+        434,
+        858
+      ],
+      "source_edge_contact": {
+        "left": false,
+        "right": true,
+        "top": false,
+        "bottom": false
+      },
+      "output_offset": [
+        58,
+        53
+      ],
+      "output_bbox": {
+        "left": 58,
+        "top": 53,
+        "right": 492,
+        "bottom": 887,
+        "width": 435,
+        "height": 835,
+        "center_x": 275.0
+      },
+      "foot_y": 877,
+      "torso_center_x": 273.99
+    }
+  ]
+}
