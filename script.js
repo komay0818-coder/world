@@ -229,33 +229,9 @@ function getUnlockedChapter(progress) {
   return Math.max(1, Number(progress?.unlockedChapter) || 1);
 }
 let selection = { faction: 'light', race: 'human', job: 'warrior' };
-const characterIdleAnimations = {
-  'human:warrior': {
-    frames: [
-      'assets/character-portraits/human-warrior-idle-01.png?v=2',
-      'assets/character-portraits/human-warrior-idle-02.png?v=2',
-      'assets/character-portraits/human-warrior-idle-03.png?v=2'
-    ],
-    sequence: [0, 1, 2, 1],
-    frameMs: 500,
-    sourceWidth: 1024,
-    // Solid-alpha shoe sole measurements differ between the original frames.
-    bottomOffsets: [0, -8, -34]
-  },
-  'human:mage': {
-    frames: [
-      'assets/character-portraits/human-mage-idle-01.png?v=1',
-      'assets/character-portraits/human-mage-idle-02.png?v=1',
-      'assets/character-portraits/human-mage-idle-03.png?v=1',
-      'assets/character-portraits/human-mage-idle-04.png?v=1'
-    ],
-    frameMs: 500,
-    sourceWidth: 1086
-  }
+const characterIdlePortraits = {
+  'human:mage': 'assets/character-portraits/human-mage-idle-03.png?v=2'
 };
-const characterIdlePreloads = new Map();
-let characterIdleTimer = null;
-let characterIdleRun = 0;
 let toastTimer;
 let battleTimer;
 let skillTimer;
@@ -609,60 +585,26 @@ function showToast(message) {
   toastTimer = setTimeout(() => toast.classList.remove('show'), 2600);
 }
 
-function preloadCharacterIdleFrames(animation) {
-  const key = animation.frames.join('|');
-  if (!characterIdlePreloads.has(key)) {
-    characterIdlePreloads.set(key, Promise.all(animation.frames.map((src) => new Promise((resolve, reject) => {
-      const image = new Image();
-      image.onload = resolve;
-      image.onerror = reject;
-      image.src = src;
-    }))));
-  }
-  return characterIdlePreloads.get(key);
-}
-
 function stopCharacterIdleAnimation() {
-  characterIdleRun += 1;
-  clearInterval(characterIdleTimer);
-  characterIdleTimer = null;
+  characterIdleFrame.classList.remove('is-idle-animated');
   characterIdlePreview.hidden = true;
 }
 
-function showCharacterIdleFrame(animation, frameIndex) {
-  characterIdleFrame.src = animation.frames[frameIndex];
-  const displayScale = characterIdleFrame.getBoundingClientRect().width / animation.sourceWidth;
-  const bottomOffset = animation.bottomOffsets?.[frameIndex] || 0;
-  characterIdleFrame.style.setProperty('--idle-frame-bottom', `${bottomOffset * displayScale}px`);
-}
-
-async function startCharacterIdleAnimation(animationKey) {
+function startCharacterIdleAnimation(animationKey) {
   stopCharacterIdleAnimation();
-  const animation = characterIdleAnimations[animationKey];
-  if (!animation) return;
-  const run = characterIdleRun;
-  try {
-    await preloadCharacterIdleFrames(animation);
-  } catch {
-    return;
-  }
-  if (run !== characterIdleRun || characterScreen.classList.contains('hidden') || `${selection.race}:${selection.job}` !== animationKey) return;
-  const sequence = animation.sequence || animation.frames.map((_, index) => index);
-  let sequenceIndex = 0;
+  const portrait = characterIdlePortraits[animationKey];
+  if (!portrait) return;
   const raceName = factions[selection.faction].find((race) => race.id === selection.race)?.name || '';
   const jobName = classes.find((job) => job.id === selection.job)?.name || '';
+  characterIdleFrame.src = portrait;
   characterIdleFrame.alt = `${raceName}${jobName}待機預覽`;
   characterIdlePreview.hidden = false;
-  showCharacterIdleFrame(animation, sequence[sequenceIndex]);
-  characterIdleTimer = setInterval(() => {
-    sequenceIndex = (sequenceIndex + 1) % sequence.length;
-    showCharacterIdleFrame(animation, sequence[sequenceIndex]);
-  }, animation.frameMs);
+  characterIdleFrame.classList.add('is-idle-animated');
 }
 
 function syncCharacterIdleAnimation() {
   const animationKey = `${selection.race}:${selection.job}`;
-  if (!characterScreen.classList.contains('hidden') && characterIdleAnimations[animationKey]) startCharacterIdleAnimation(animationKey);
+  if (!characterScreen.classList.contains('hidden') && characterIdlePortraits[animationKey]) startCharacterIdleAnimation(animationKey);
   else stopCharacterIdleAnimation();
 }
 
