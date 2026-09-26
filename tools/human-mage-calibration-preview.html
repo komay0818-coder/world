@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>人類法師校正幀播放測試</title>
+  <style>
+    :root{color-scheme:dark;font-family:system-ui,sans-serif}body{margin:0;background:#0a1020;color:#eef2ff}.page{width:min(1100px,calc(100% - 32px));margin:24px auto}.stage{display:grid;place-items:center;min-height:70vh;border:1px solid #33415f;border-radius:16px;background:radial-gradient(circle,#263557,#0a1020 70%);overflow:hidden}.stage img{display:block;width:min(76vw,520px);height:auto}.controls{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin-top:16px}.controls button{padding:9px 14px;border:1px solid #53678f;border-radius:8px;background:#18243d;color:#fff;cursor:pointer}.controls output{margin-left:auto;color:#bfcbee}.note{color:#aab8d6;line-height:1.6}
+  </style>
+</head>
+<body>
+  <main class="page">
+    <h1>人類法師校正幀播放測試</h1>
+    <p class="note">這是獨立測試頁，不會影響正式角色選擇畫面。透過下方按鈕可暫停或逐幀檢查。</p>
+    <section class="stage"><img id="frame" alt="人類法師校正幀"></section>
+    <div class="controls">
+      <button id="previous" type="button">上一幀</button>
+      <button id="toggle" type="button">暫停</button>
+      <button id="next" type="button">下一幀</button>
+      <output id="status"></output>
+    </div>
+  </main>
+  <script>
+    const frames = [1, 2, 3, 4].map((number) => `../assets/character-portraits/calibration-tests/human-mage-v1/human-mage-calibrated-0${number}.png`);
+    const image = document.querySelector('#frame');
+    const status = document.querySelector('#status');
+    const toggle = document.querySelector('#toggle');
+    let index = 0;
+    let timer = null;
+    const render = () => { image.src = frames[index]; status.value = `Frame ${index + 1} / 4`; };
+    const stop = () => { clearInterval(timer); timer = null; toggle.textContent = '播放'; };
+    const play = () => { stop(); timer = setInterval(() => { index = (index + 1) % frames.length; render(); }, 650); toggle.textContent = '暫停'; };
+    document.querySelector('#previous').addEventListener('click', () => { stop(); index = (index + frames.length - 1) % frames.length; render(); });
+    document.querySelector('#next').addEventListener('click', () => { stop(); index = (index + 1) % frames.length; render(); });
+    toggle.addEventListener('click', () => timer ? stop() : play());
+    render();
+    play();
+  </script>
+</body>
+</html>

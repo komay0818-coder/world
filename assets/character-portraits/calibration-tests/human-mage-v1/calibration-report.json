@@ -1,0 +1,153 @@
+{
+  "canvas": {
+    "width": 1408,
+    "height": 1664
+  },
+  "target_foot_y": 1540,
+  "target_torso_x": 704,
+  "frames": [
+    {
+      "frame": 1,
+      "source": "assets/character-portraits/human-mage-idle-01.png",
+      "output": "assets/character-portraits/calibration-tests/human-mage-v1/human-mage-calibrated-01.png",
+      "requested_scale": 1.0,
+      "effective_scale_x": 1.0,
+      "effective_scale_y": 1.0,
+      "offset_x": 120,
+      "offset_y": 124,
+      "source_alpha_bbox": {
+        "left": 30,
+        "top": 0,
+        "right": 1085,
+        "bottom": 1418,
+        "width": 1056,
+        "height": 1419,
+        "center_x": 557.5
+      },
+      "corrected_alpha_bbox": {
+        "left": 150,
+        "top": 124,
+        "right": 1205,
+        "bottom": 1542,
+        "width": 1056,
+        "height": 1419,
+        "center_x": 677.5
+      },
+      "anchored_foot_y": 1540.0,
+      "anchored_torso_x": 704.31
+    },
+    {
+      "frame": 2,
+      "source": "assets/character-portraits/human-mage-idle-02.png",
+      "output": "assets/character-portraits/calibration-tests/human-mage-v1/human-mage-calibrated-02.png",
+      "requested_scale": 1.0166,
+      "effective_scale_x": 1.016575,
+      "effective_scale_y": 1.016575,
+      "offset_x": 109,
+      "offset_y": 98,
+      "source_alpha_bbox": {
+        "left": 41,
+        "top": 31,
+        "right": 1036,
+        "bottom": 1429,
+        "width": 996,
+        "height": 1399,
+        "center_x": 538.5
+      },
+      "corrected_alpha_bbox": {
+        "left": 151,
+        "top": 129,
+        "right": 1162,
+        "bottom": 1551,
+        "width": 1012,
+        "height": 1423,
+        "center_x": 656.5
+      },
+      "anchored_foot_y": 1539.5,
+      "anchored_torso_x": 703.66
+    },
+    {
+      "frame": 3,
+      "source": "assets/character-portraits/human-mage-idle-03.png",
+      "output": "assets/character-portraits/calibration-tests/human-mage-v1/human-mage-calibrated-03.png",
+      "requested_scale": 0.9965,
+      "effective_scale_x": 0.996317,
+      "effective_scale_y": 0.996547,
+      "offset_x": 113,
+      "offset_y": 98,
+      "source_alpha_bbox": {
+        "left": 35,
+        "top": 17,
+        "right": 1085,
+        "bottom": 1447,
+        "width": 1051,
+        "height": 1431,
+        "center_x": 560.0
+      },
+      "corrected_alpha_bbox": {
+        "left": 148,
+        "top": 115,
+        "right": 1194,
+        "bottom": 1540,
+        "width": 1047,
+        "height": 1426,
+        "center_x": 671.0
+      },
+      "anchored_foot_y": 1540.0,
+      "anchored_torso_x": 704.4
+    },
+    {
+      "frame": 4,
+      "source": "assets/character-portraits/human-mage-idle-04.png",
+      "output": "assets/character-portraits/calibration-tests/human-mage-v1/human-mage-calibrated-04.png",
+      "requested_scale": 1.0407,
+      "effective_scale_x": 1.040516,
+      "effective_scale_y": 1.040746,
+      "offset_x": 64,
+      "offset_y": 41,
+      "source_alpha_bbox": {
+        "left": 0,
+        "top": 8,
+        "right": 1085,
+        "bottom": 1447,
+        "width": 1086,
+        "height": 1440,
+        "center_x": 542.5
+      },
+      "corrected_alpha_bbox": {
+        "left": 64,
+        "top": 49,
+        "right": 1193,
+        "bottom": 1547,
+        "width": 1130,
+        "height": 1499,
+        "center_x": 628.5
+      },
+      "anchored_foot_y": 1539.67,
+      "anchored_torso_x": 703.81
+    }
+  ],
+  "comparisons_to_frame_1": [
+    {
+      "frame": 2,
+      "overlay": "assets/character-portraits/calibration-tests/human-mage-v1/overlay-frame-01-vs-02.png",
+      "difference": "assets/character-portraits/calibration-tests/human-mage-v1/difference-frame-01-vs-02.png",
+      "opaque_alpha_iou": 0.8502,
+      "overlap_rgb_mae": 45.98
+    },
+    {
+      "frame": 3,
+      "overlay": "assets/character-portraits/calibration-tests/human-mage-v1/overlay-frame-01-vs-03.png",
+      "difference": "assets/character-portraits/calibration-tests/human-mage-v1/difference-frame-01-vs-03.png",
+      "opaque_alpha_iou": 0.8569,
+      "overlap_rgb_mae": 34.82
+    },
+    {
+      "frame": 4,
+      "overlay": "assets/character-portraits/calibration-tests/human-mage-v1/overlay-frame-01-vs-04.png",
+      "difference": "assets/character-portraits/calibration-tests/human-mage-v1/difference-frame-01-vs-04.png",
+      "opaque_alpha_iou": 0.792,
+      "overlap_rgb_mae": 44.04
+    }
+  ]
+}
