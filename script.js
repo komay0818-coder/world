@@ -10,6 +10,8 @@ const toast = document.querySelector('#toast');
 const raceChoices = document.querySelector('#race-choices');
 const classChoices = document.querySelector('#class-choices');
 const characterName = document.querySelector('#character-name');
+const characterIdlePreview = document.querySelector('#character-idle-preview');
+const characterIdleFrame = document.querySelector('#character-idle-frame');
 const skillTooltip = document.querySelector('#skill-tooltip');
 let skillTooltipTimer;
 let selectedSkillKey = '';
@@ -227,6 +229,33 @@ function getUnlockedChapter(progress) {
   return Math.max(1, Number(progress?.unlockedChapter) || 1);
 }
 let selection = { faction: 'light', race: 'human', job: 'warrior' };
+const characterIdleAnimations = {
+  'human:warrior': {
+    frames: [
+      'assets/character-portraits/human-warrior-idle-01.png?v=2',
+      'assets/character-portraits/human-warrior-idle-02.png?v=2',
+      'assets/character-portraits/human-warrior-idle-03.png?v=2'
+    ],
+    sequence: [0, 1, 2, 1],
+    frameMs: 500,
+    sourceWidth: 1024,
+    // Solid-alpha shoe sole measurements differ between the original frames.
+    bottomOffsets: [0, -8, -34]
+  },
+  'human:mage': {
+    frames: [
+      'assets/character-portraits/human-mage-idle-01.png?v=1',
+      'assets/character-portraits/human-mage-idle-02.png?v=1',
+      'assets/character-portraits/human-mage-idle-03.png?v=1',
+      'assets/character-portraits/human-mage-idle-04.png?v=1'
+    ],
+    frameMs: 500,
+    sourceWidth: 1086
+  }
+};
+const characterIdlePreloads = new Map();
+let characterIdleTimer = null;
+let characterIdleRun = 0;
 let toastTimer;
 let battleTimer;
 let skillTimer;
@@ -580,12 +609,70 @@ function showToast(message) {
   toastTimer = setTimeout(() => toast.classList.remove('show'), 2600);
 }
 
+function preloadCharacterIdleFrames(animation) {
+  const key = animation.frames.join('|');
+  if (!characterIdlePreloads.has(key)) {
+    characterIdlePreloads.set(key, Promise.all(animation.frames.map((src) => new Promise((resolve, reject) => {
+      const image = new Image();
+      image.onload = resolve;
+      image.onerror = reject;
+      image.src = src;
+    }))));
+  }
+  return characterIdlePreloads.get(key);
+}
+
+function stopCharacterIdleAnimation() {
+  characterIdleRun += 1;
+  clearInterval(characterIdleTimer);
+  characterIdleTimer = null;
+  characterIdlePreview.hidden = true;
+}
+
+function showCharacterIdleFrame(animation, frameIndex) {
+  characterIdleFrame.src = animation.frames[frameIndex];
+  const displayScale = characterIdleFrame.getBoundingClientRect().width / animation.sourceWidth;
+  const bottomOffset = animation.bottomOffsets?.[frameIndex] || 0;
+  characterIdleFrame.style.setProperty('--idle-frame-bottom', `${bottomOffset * displayScale}px`);
+}
+
+async function startCharacterIdleAnimation(animationKey) {
+  stopCharacterIdleAnimation();
+  const animation = characterIdleAnimations[animationKey];
+  if (!animation) return;
+  const run = characterIdleRun;
+  try {
+    await preloadCharacterIdleFrames(animation);
+  } catch {
+    return;
+  }
+  if (run !== characterIdleRun || characterScreen.classList.contains('hidden') || `${selection.race}:${selection.job}` !== animationKey) return;
+  const sequence = animation.sequence || animation.frames.map((_, index) => index);
+  let sequenceIndex = 0;
+  const raceName = factions[selection.faction].find((race) => race.id === selection.race)?.name || '';
+  const jobName = classes.find((job) => job.id === selection.job)?.name || '';
+  characterIdleFrame.alt = `${raceName}${jobName}待機預覽`;
+  characterIdlePreview.hidden = false;
+  showCharacterIdleFrame(animation, sequence[sequenceIndex]);
+  characterIdleTimer = setInterval(() => {
+    sequenceIndex = (sequenceIndex + 1) % sequence.length;
+    showCharacterIdleFrame(animation, sequence[sequenceIndex]);
+  }, animation.frameMs);
+}
+
+function syncCharacterIdleAnimation() {
+  const animationKey = `${selection.race}:${selection.job}`;
+  if (!characterScreen.classList.contains('hidden') && characterIdleAnimations[animationKey]) startCharacterIdleAnimation(animationKey);
+  else stopCharacterIdleAnimation();
+}
+
 function enterMenu(name) {
   if (displayName) displayName.textContent = name;
   loginScreen.classList.add('hidden');
   characterScreen.classList.add('hidden');
   battleScreen.classList.add('hidden');
   menuScreen.classList.remove('hidden');
+  stopCharacterIdleAnimation();
 }
 
 function renderCreation() {
@@ -605,6 +692,7 @@ function renderCreation() {
     const unavailable = isJobUnavailableForRace(selection.race, job.id);
     return `<button class="class-choice ${job.id === selection.job ? 'selected' : ''}" type="button" data-job="${job.id}" ${unavailable ? 'disabled aria-disabled="true" title="半獸人無法成為牧師"' : ''}><span class="creation-job-icon" aria-hidden="true">${jobMarks[job.id] || job.icon}</span><small>${job.name}${unavailable ? '（不可選）' : ''}</small></button>`;
   }).join('');
+  syncCharacterIdleAnimation();
 }
 
 function openCreation(slotIndex = 0) {
@@ -7758,14 +7846,14 @@ document.querySelector('#village-menu-button')?.addEventListener('click', openVi
 document.querySelectorAll('[data-faction]').forEach((card) => card.addEventListener('click', () => { selection.faction = card.dataset.faction; selection.race = factions[selection.faction][0].id; document.querySelectorAll('[data-faction]').forEach((item) => item.classList.toggle('selected', item === card)); renderCreation(); }));
 raceChoices.addEventListener('click', (event) => { const choice = event.target.closest('[data-race]'); if (choice) { selection.race = choice.dataset.race; if (!canCreateRaceJob(selection.race, selection.job)) selection.job = 'warrior'; renderCreation(); } });
 classChoices.addEventListener('click', (event) => { const choice = event.target.closest('[data-job]'); if (!choice) return; if (!canCreateRaceJob(selection.race, choice.dataset.job)) { showToast(selection.race === 'elf' ? '夜精靈沒有牧師職業。' : '半獸人無法創立牧師職業。'); return; } selection.job = choice.dataset.job; renderCreation(); });
-document.querySelector('#back-to-menu').addEventListener('click', () => { characterScreen.classList.add('hidden'); menuScreen.classList.remove('hidden'); });
+document.querySelector('#back-to-menu').addEventListener('click', () => { characterScreen.classList.add('hidden'); menuScreen.classList.remove('hidden'); stopCharacterIdleAnimation(); });
 document.querySelector('#create-character').addEventListener('click', (event) => {
   if (canCreateRaceJob(selection.race, selection.job)) return;
   event.preventDefault();
   event.stopImmediatePropagation();
   showToast(selection.race === 'elf' ? '夜精靈沒有牧師職業。' : '半獸人無法創立牧師職業。');
 }, true);
-document.querySelector('#create-character').addEventListener('click', () => { const name = characterName.value.trim(); if (!name) { showToast('請先為角色取名。'); characterName.focus(); return; } const lockedFaction = getLockedFactionForCreation(); if (lockedFaction && selection.faction !== lockedFaction) { selection.faction = lockedFaction; selection.race = factions[lockedFaction][0].id; renderCreation(); showToast('帳號角色必須選擇相同陣營。'); return; } const race = factions[selection.faction].find((item) => item.id === selection.race); const job = classes.find((item) => item.id === selection.job)?.name || selection.job; const character = { ...selection, id: `character-slot-${creationSlotIndex + 1}`, name }; const progress = { level: 1, xp: 0, gold: 0, potions: 5, manaPotions: 0, selectedMapId: 'beginner-plains', inventory: [], equipment: selection.job === 'hunter' ? createStarterEquipment('hunter') : emptyEquipment(), lastActiveAt: Date.now(), ...(selection.job === 'assassin' ? { energy: 100, maxEnergy: 100, energyUpdatedAt: Date.now() } : {}) }; const slots = getCharacterSlots(); slots[creationSlotIndex] = { character, progress }; progress.party = PartyPolicy.normalizeParty(null, { slots, mainSlotIndex: creationSlotIndex, mainCharacter: character, mainProgress: progress }); localStorage.setItem('stardust-character-slots', JSON.stringify(slots)); setActiveCharacterSlotIndex(creationSlotIndex); localStorage.setItem('stardust-character', JSON.stringify(character)); localStorage.setItem('stardust-progress', JSON.stringify(progress)); characterScreen.classList.add('hidden'); menuScreen.classList.remove('hidden'); document.querySelector('#character-title').textContent = '建立你的角色'; showToast(`${race.name}${job}「${name}」已儲存至角色欄位 ${creationSlotIndex + 1}！`); });
+document.querySelector('#create-character').addEventListener('click', () => { const name = characterName.value.trim(); if (!name) { showToast('請先為角色取名。'); characterName.focus(); return; } const lockedFaction = getLockedFactionForCreation(); if (lockedFaction && selection.faction !== lockedFaction) { selection.faction = lockedFaction; selection.race = factions[lockedFaction][0].id; renderCreation(); showToast('帳號角色必須選擇相同陣營。'); return; } const race = factions[selection.faction].find((item) => item.id === selection.race); const job = classes.find((item) => item.id === selection.job)?.name || selection.job; const character = { ...selection, id: `character-slot-${creationSlotIndex + 1}`, name }; const progress = { level: 1, xp: 0, gold: 0, potions: 5, manaPotions: 0, selectedMapId: 'beginner-plains', inventory: [], equipment: selection.job === 'hunter' ? createStarterEquipment('hunter') : emptyEquipment(), lastActiveAt: Date.now(), ...(selection.job === 'assassin' ? { energy: 100, maxEnergy: 100, energyUpdatedAt: Date.now() } : {}) }; const slots = getCharacterSlots(); slots[creationSlotIndex] = { character, progress }; progress.party = PartyPolicy.normalizeParty(null, { slots, mainSlotIndex: creationSlotIndex, mainCharacter: character, mainProgress: progress }); localStorage.setItem('stardust-character-slots', JSON.stringify(slots)); setActiveCharacterSlotIndex(creationSlotIndex); localStorage.setItem('stardust-character', JSON.stringify(character)); localStorage.setItem('stardust-progress', JSON.stringify(progress)); characterScreen.classList.add('hidden'); menuScreen.classList.remove('hidden'); stopCharacterIdleAnimation(); document.querySelector('#character-title').textContent = '建立你的角色'; showToast(`${race.name}${job}「${name}」已儲存至角色欄位 ${creationSlotIndex + 1}！`); });
 document.querySelector('#character-roster-button').addEventListener('click', renderCharacterRoster);
 document.querySelector('#character-roster-close').addEventListener('click', () => document.querySelector('#character-roster-modal').classList.add('hidden'));
 document.querySelector('#character-roster-modal').addEventListener('click', (event) => {

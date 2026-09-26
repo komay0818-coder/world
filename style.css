@@ -4,6 +4,9 @@
 .creation-race-icon.race-human{background-position:0 0}.creation-race-icon.race-elf{background-position:100% 0}.creation-race-icon.race-orc{background-position:0 100%}.creation-race-icon.race-undead{background-position:100% 100%}
 .creation-job-icon{display:grid!important;place-items:center;width:48px;height:48px;margin:0 auto 5px!important;border:1px solid rgba(255,225,128,.3);border-radius:12px;background:linear-gradient(145deg,#304b6d,#18283d);color:#ffe080;font-size:29px!important;line-height:1;text-shadow:0 3px 8px rgba(0,0,0,.55);box-shadow:0 4px 12px rgba(0,0,0,.3)}
 .race-grid .choice-card{min-height:116px}.class-choice{min-height:78px}
+.creation-idle-preview{position:relative;width:100%;height:clamp(260px,52vh,430px);margin:0 0 20px;overflow:hidden;border:1px solid rgba(255,255,255,.12);border-radius:16px;background:radial-gradient(circle at 50% 36%,rgba(70,94,142,.58),rgba(10,17,32,.88) 68%)}
+.creation-idle-preview[hidden]{display:none}.creation-idle-preview img{position:absolute;left:50%;bottom:var(--idle-frame-bottom,0px);display:block;width:min(66%,286px);height:auto;max-width:none;transform:translateX(-50%);transform-origin:center bottom;user-select:none;pointer-events:none}
+@media(max-width:480px){.creation-idle-preview{height:300px}.creation-idle-preview img{width:min(64%,210px)}}
 
 /* 全站可讀性：統一放大重要文字並提高次要文字對比 */
 body{font-size:16px;line-height:1.55;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
