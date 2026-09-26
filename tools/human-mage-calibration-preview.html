@@ -29,7 +29,7 @@
     let timer = null;
     const render = () => { image.src = frames[index]; status.value = `Frame ${index + 1} / 4`; };
     const stop = () => { clearInterval(timer); timer = null; toggle.textContent = '播放'; };
-    const play = () => { stop(); timer = setInterval(() => { index = (index + 1) % frames.length; render(); }, 500); toggle.textContent = '暫停'; };
+    const play = () => { stop(); timer = setInterval(() => { index = (index + 1) % frames.length; render(); }, 437.5); toggle.textContent = '暫停'; };
     document.querySelector('#previous').addEventListener('click', () => { stop(); index = (index + frames.length - 1) % frames.length; render(); });
     document.querySelector('#next').addEventListener('click', () => { stop(); index = (index + 1) % frames.length; render(); });
     toggle.addEventListener('click', () => timer ? stop() : play());
