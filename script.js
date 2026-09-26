@@ -229,9 +229,18 @@ function getUnlockedChapter(progress) {
   return Math.max(1, Number(progress?.unlockedChapter) || 1);
 }
 let selection = { faction: 'light', race: 'human', job: 'warrior' };
-const characterIdlePortraits = {
-  'human:mage': 'assets/character-portraits/human-mage-idle-03.png?v=2'
+const characterIdleAnimations = {
+  'human:mage': { portrait: 'assets/character-portraits/human-mage-idle-03.png?v=2', breathe: true },
+  'elf:hunter': {
+    frames: [1, 2, 3, 4, 5].map((frame) => `assets/character-portraits/calibration-tests/elf-hunter-five-frame-v1/frame-${String(frame).padStart(2, '0')}.png?v=1`),
+    order: [0, 1, 2, 3, 4, 3, 2, 1],
+    frameDurationMs: 175
+  }
 };
+const characterIdlePreloads = new Map();
+const characterIdleReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+let characterIdleTimer = null;
+let characterIdleRequest = 0;
 let toastTimer;
 let battleTimer;
 let skillTimer;
@@ -586,27 +595,58 @@ function showToast(message) {
 }
 
 function stopCharacterIdleAnimation() {
+  characterIdleRequest += 1;
+  clearInterval(characterIdleTimer);
+  characterIdleTimer = null;
   characterIdleFrame.classList.remove('is-idle-animated');
   characterIdlePreview.hidden = true;
 }
 
-function startCharacterIdleAnimation(animationKey) {
+function preloadCharacterIdleFrames(frames) {
+  const cacheKey = frames.join('|');
+  if (!characterIdlePreloads.has(cacheKey)) {
+    characterIdlePreloads.set(cacheKey, Promise.all(frames.map((src) => new Promise((resolve) => {
+      const image = new Image();
+      image.onload = resolve;
+      image.onerror = resolve;
+      image.src = src;
+    }))));
+  }
+  return characterIdlePreloads.get(cacheKey);
+}
+
+async function startCharacterIdleAnimation(animationKey) {
   stopCharacterIdleAnimation();
-  const portrait = characterIdlePortraits[animationKey];
-  if (!portrait) return;
+  const request = characterIdleRequest;
+  const animation = characterIdleAnimations[animationKey];
+  if (!animation) return;
   const raceName = factions[selection.faction].find((race) => race.id === selection.race)?.name || '';
   const jobName = classes.find((job) => job.id === selection.job)?.name || '';
-  characterIdleFrame.src = portrait;
+  const frames = animation.frames || [animation.portrait];
+  await preloadCharacterIdleFrames(frames);
+  if (request !== characterIdleRequest) return;
+  characterIdleFrame.src = frames[0];
   characterIdleFrame.alt = `${raceName}${jobName}待機預覽`;
   characterIdlePreview.hidden = false;
-  characterIdleFrame.classList.add('is-idle-animated');
+  if (animation.breathe) {
+    characterIdleFrame.classList.add('is-idle-animated');
+    return;
+  }
+  if (characterIdleReducedMotion.matches) return;
+  let orderIndex = 0;
+  characterIdleTimer = setInterval(() => {
+    orderIndex = (orderIndex + 1) % animation.order.length;
+    characterIdleFrame.src = frames[animation.order[orderIndex]];
+  }, animation.frameDurationMs);
 }
 
 function syncCharacterIdleAnimation() {
   const animationKey = `${selection.race}:${selection.job}`;
-  if (!characterScreen.classList.contains('hidden') && characterIdlePortraits[animationKey]) startCharacterIdleAnimation(animationKey);
+  if (!characterScreen.classList.contains('hidden') && characterIdleAnimations[animationKey]) startCharacterIdleAnimation(animationKey);
   else stopCharacterIdleAnimation();
 }
+
+characterIdleReducedMotion.addEventListener('change', syncCharacterIdleAnimation);
 
 function enterMenu(name) {
   if (displayName) displayName.textContent = name;
