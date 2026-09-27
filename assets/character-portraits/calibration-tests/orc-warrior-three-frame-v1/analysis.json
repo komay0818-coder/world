@@ -9,7 +9,7 @@
   "target_torso_center_x": 650,
   "scaling_decision": "No scaling; the small height difference follows pose/head redraw rather than global size",
   "playback": {
-    "frame_duration_ms": 325,
+    "frame_duration_ms": 437.5,
     "order": [
       1,
       2,

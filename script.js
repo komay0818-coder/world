@@ -239,7 +239,7 @@ const characterIdleAnimations = {
   'orc:warrior': {
     frames: [1, 2, 3].map((frame) => `assets/character-portraits/calibration-tests/orc-warrior-three-frame-v1/frame-${String(frame).padStart(2, '0')}.png?v=1`),
     order: [0, 1, 2, 1],
-    frameDurationMs: 325
+    frameDurationMs: 437.5
   },
   'elf:hunter': {
     frames: [
