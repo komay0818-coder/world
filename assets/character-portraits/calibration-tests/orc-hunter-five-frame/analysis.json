@@ -12,7 +12,8 @@
   "local_redraw_difference": "Minor AI redraw differences remain in face angle and jaw expression across frames 1-5; body proportions are consistent enough for a translation-only first test",
   "container_check": "Preview stage uses overflow:visible and object-fit:contain, so bow and hair are not clipped",
   "playback": {
-    "frame_duration_ms": 180,
+    "frame_duration_ms": 312.5,
+    "loop_duration_ms": 2500,
     "order": [
       1,
       2,

@@ -171,7 +171,7 @@ def main():
         "alpha_repair": "Frame 4 contained an opaque checkerboard; its alpha and edge pixels were restored from the near-identical frame 3 silhouette without redrawing",
         "local_redraw_difference": "Minor AI redraw differences remain in face angle and jaw expression across frames 1-5; body proportions are consistent enough for a translation-only first test",
         "container_check": "Preview stage uses overflow:visible and object-fit:contain, so bow and hair are not clipped",
-        "playback": {"frame_duration_ms": 180, "order": [1, 2, 3, 4, 5, 4, 3, 2]},
+        "playback": {"frame_duration_ms": 312.5, "loop_duration_ms": 2500, "order": [1, 2, 3, 4, 5, 4, 3, 2]},
         "frames": metrics,
     }
     (OUTPUT / "analysis.json").write_text(json.dumps(report, ensure_ascii=False, indent=2), encoding="utf-8")
