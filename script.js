@@ -246,6 +246,11 @@ const characterIdleAnimations = {
     order: [0, 1, 2, 3, 2, 1],
     frameDurationMs: 1000 / 3
   },
+  'elf:mage': {
+    frames: [1, 2, 3, 4, 5].map((frame) => `assets/character-portraits/calibration-tests/elf-mage-five-frame-v1/frame-${String(frame).padStart(2, '0')}.png?v=1`),
+    order: [0, 1, 2, 3, 4, 3, 2, 1],
+    frameDurationMs: 180
+  },
   'elf:hunter': {
     frames: [
       ...[1, 2, 3, 4].map((frame) => `assets/character-portraits/calibration-tests/elf-hunter-five-frame-v1/frame-${String(frame).padStart(2, '0')}.png?v=2`),
