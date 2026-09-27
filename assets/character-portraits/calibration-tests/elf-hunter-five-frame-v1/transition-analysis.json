@@ -1,0 +1,33 @@
+{
+  "method": "Transition frame only; existing five corrected frames unchanged",
+  "insert_after": "frame-04.png",
+  "insert_before": "frame-05.png",
+  "target_visual_body_height": 1080,
+  "target_foot_y": 1500,
+  "target_torso_center_x": 600,
+  "transition": {
+    "canvas": [
+      1374,
+      1145
+    ],
+    "alpha_bbox": [
+      176,
+      12,
+      1316,
+      1145
+    ],
+    "alpha_width": 1140,
+    "alpha_height": 1133,
+    "visual_head_y": 25,
+    "foot_y": 1144,
+    "visual_body_height": 1120,
+    "torso_center_x": 671.0,
+    "scale": 0.964286,
+    "translation_x": -47,
+    "translation_y": 397,
+    "corrected_visual_body_height": 1080,
+    "corrected_head_y": 421.11,
+    "corrected_foot_y": 1500.14,
+    "corrected_torso_center_x": 600.04
+  }
+}
