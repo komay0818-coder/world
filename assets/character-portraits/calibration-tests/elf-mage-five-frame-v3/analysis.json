@@ -9,7 +9,8 @@
   "target_torso_center_x": 850,
   "minimum_effect_safety_margin": 70,
   "playback": {
-    "frame_duration_ms": 180,
+    "frame_duration_ms": 312.5,
+    "loop_duration_ms": 2500,
     "order": [
       1,
       2,

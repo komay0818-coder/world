@@ -127,7 +127,7 @@ def main():
         "target_foot_y": TARGET_FOOT_Y,
         "target_torso_center_x": TARGET_CENTER_X,
         "minimum_effect_safety_margin": SAFETY_MARGIN,
-        "playback": {"frame_duration_ms": 180, "order": [1, 2, 3, 4, 5, 4, 3, 2]},
+        "playback": {"frame_duration_ms": 312.5, "loop_duration_ms": 2500, "order": [1, 2, 3, 4, 5, 4, 3, 2]},
         "frames": metrics,
     }
     (OUTPUT / "analysis.json").write_text(json.dumps(report, ensure_ascii=False, indent=2), encoding="utf-8")
