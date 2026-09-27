@@ -1,0 +1,97 @@
+{
+  "method": "Shoe baseline + belt/torso center; axe, shield, arms, and hair excluded from center",
+  "canvas": [
+    1300,
+    1600
+  ],
+  "reference_visual_body_height": 1259,
+  "target_foot_y": 1530,
+  "target_torso_center_x": 650,
+  "scaling_decision": "No scaling; the small height difference follows pose/head redraw rather than global size",
+  "playback": {
+    "frame_duration_ms": 180,
+    "order": [
+      1,
+      2,
+      3,
+      2
+    ]
+  },
+  "frames": [
+    {
+      "sha256": "b101c22830d5496b884ece695c699f464ad4893c41aac93a40a44da41fc03e33",
+      "canvas": [
+        1123,
+        1401
+      ],
+      "alpha_bbox": [
+        18,
+        27,
+        1123,
+        1347
+      ],
+      "visual_head_y": 93,
+      "foot_y": 1344,
+      "visual_body_height": 1252,
+      "torso_center_x": 545.0,
+      "scale": 1.0,
+      "translation_x": 105,
+      "translation_y": 186,
+      "corrected_visual_body_height": 1252,
+      "corrected_head_y": 279,
+      "corrected_foot_y": 1530,
+      "corrected_torso_center_x": 650.0,
+      "height_difference_percent": -0.56
+    },
+    {
+      "sha256": "289c8e8fa1ea11b19609139e254ae72d38aab4e28c76a172e9409b711c5e1aa2",
+      "canvas": [
+        1117,
+        1408
+      ],
+      "alpha_bbox": [
+        16,
+        19,
+        1117,
+        1357
+      ],
+      "visual_head_y": 83,
+      "foot_y": 1355,
+      "visual_body_height": 1273,
+      "torso_center_x": 545.0,
+      "scale": 1.0,
+      "translation_x": 105,
+      "translation_y": 175,
+      "corrected_visual_body_height": 1273,
+      "corrected_head_y": 258,
+      "corrected_foot_y": 1530,
+      "corrected_torso_center_x": 650.0,
+      "height_difference_percent": 1.11
+    },
+    {
+      "sha256": "72dde090a5e14bb5c970dd1a3e9bd046a189e682715041a3fec18f58b3b045c4",
+      "canvas": [
+        1110,
+        1417
+      ],
+      "alpha_bbox": [
+        19,
+        30,
+        1110,
+        1360
+      ],
+      "visual_head_y": 100,
+      "foot_y": 1358,
+      "visual_body_height": 1259,
+      "torso_center_x": 552.0,
+      "scale": 1.0,
+      "translation_x": 98,
+      "translation_y": 172,
+      "corrected_visual_body_height": 1259,
+      "corrected_head_y": 272,
+      "corrected_foot_y": 1530,
+      "corrected_torso_center_x": 650.0,
+      "height_difference_percent": 0.0
+    }
+  ]
+}

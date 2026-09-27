@@ -236,6 +236,11 @@ const characterIdleAnimations = {
     order: [0, 1, 2, 3, 4, 3, 2, 1],
     frameDurationMs: 180
   },
+  'orc:warrior': {
+    frames: [1, 2, 3].map((frame) => `assets/character-portraits/calibration-tests/orc-warrior-three-frame-v1/frame-${String(frame).padStart(2, '0')}.png?v=1`),
+    order: [0, 1, 2, 1],
+    frameDurationMs: 180
+  },
   'elf:hunter': {
     frames: [
       ...[1, 2, 3, 4].map((frame) => `assets/character-portraits/calibration-tests/elf-hunter-five-frame-v1/frame-${String(frame).padStart(2, '0')}.png?v=2`),
