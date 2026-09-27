@@ -9,7 +9,7 @@
   "target_torso_center_x": 700,
   "scaling_decision": "Frame 1 scaled up slightly; frames 2-4 keep original size because remaining differences are pose/redraw variation",
   "playback": {
-    "frame_duration_ms": 180,
+    "frame_duration_ms": 333.3333333333333,
     "order": [
       1,
       2,

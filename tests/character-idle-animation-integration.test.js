@@ -27,7 +27,7 @@ assert.match(script, /const characterIdleAnimations\s*=\s*\{/, 'characters use o
 assert.match(script, /'human:mage':\s*\{ portrait: 'assets\/character-portraits\/human-mage-idle-03\.png/, 'human mage keeps its single-PNG pilot');
 assert.match(script, /'human:priest':\s*\{[\s\S]*?order: \[0, 1, 2, 3, 4, 3, 2, 1\],[\s\S]*?frameDurationMs: 180/, 'human priest uses the five-frame ping-pong sequence');
 assert.match(script, /'orc:warrior':\s*\{[\s\S]*?order: \[0, 1, 2, 1\],[\s\S]*?frameDurationMs: 437\.5/, 'orc warrior uses the 1.75-second three-frame ping-pong sequence');
-assert.match(script, /'orc:assassin':\s*\{[\s\S]*?order: \[0, 1, 2, 3, 2, 1\],[\s\S]*?frameDurationMs: 180/, 'orc assassin uses the four-frame ping-pong sequence');
+assert.match(script, /'orc:assassin':\s*\{[\s\S]*?order: \[0, 1, 2, 3, 2, 1\],[\s\S]*?frameDurationMs: 1000 \/ 3/, 'orc assassin uses the two-second four-frame ping-pong sequence');
 assert.match(script, /'elf:hunter':\s*\{[\s\S]*?frame-04-05-transition\.png[\s\S]*?order: \[0, 1, 2, 3, 4, 5, 4, 3, 2, 1\],[\s\S]*?frameDurationMs: 250/, 'only elf hunter uses the 2.5-second six-frame ping-pong sequence');
 assert.doesNotMatch(script, /\.gif/, 'idle previews do not use GIF files');
 assert.match(script, /preloadCharacterIdleFrames\(frames\)/, 'sequence frames are preloaded before playback');

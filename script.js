@@ -244,7 +244,7 @@ const characterIdleAnimations = {
   'orc:assassin': {
     frames: [1, 2, 3, 4].map((frame) => `assets/character-portraits/calibration-tests/orc-assassin-four-frame-v1/frame-${String(frame).padStart(2, '0')}.png?v=1`),
     order: [0, 1, 2, 3, 2, 1],
-    frameDurationMs: 180
+    frameDurationMs: 1000 / 3
   },
   'elf:hunter': {
     frames: [

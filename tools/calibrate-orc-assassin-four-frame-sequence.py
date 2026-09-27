@@ -123,7 +123,7 @@ def main():
         "target_foot_y": TARGET_FOOT_Y,
         "target_torso_center_x": TARGET_CENTER_X,
         "scaling_decision": "Frame 1 scaled up slightly; frames 2-4 keep original size because remaining differences are pose/redraw variation",
-        "playback": {"frame_duration_ms": 180, "order": [1, 2, 3, 4, 3, 2]},
+        "playback": {"frame_duration_ms": 1000 / 3, "order": [1, 2, 3, 4, 3, 2]},
         "frames": metrics,
     }
     (OUTPUT / "analysis.json").write_text(json.dumps(report, ensure_ascii=False, indent=2), encoding="utf-8")
