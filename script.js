@@ -234,7 +234,7 @@ const characterIdleAnimations = {
   'elf:hunter': {
     frames: [
       ...[1, 2, 3, 4].map((frame) => `assets/character-portraits/calibration-tests/elf-hunter-five-frame-v1/frame-${String(frame).padStart(2, '0')}.png?v=2`),
-      'assets/character-portraits/calibration-tests/elf-hunter-five-frame-v1/frame-04-05-transition.png?v=2',
+      'assets/character-portraits/calibration-tests/elf-hunter-five-frame-v1/frame-04-05-transition.png?v=3',
       'assets/character-portraits/calibration-tests/elf-hunter-five-frame-v1/frame-05.png?v=2'
     ],
     order: [0, 1, 2, 3, 4, 5, 4, 3, 2, 1],

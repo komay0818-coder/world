@@ -7,27 +7,27 @@
   "target_torso_center_x": 600,
   "transition": {
     "canvas": [
-      1374,
-      1145
+      1024,
+      1536
     ],
     "alpha_bbox": [
-      176,
-      12,
-      1316,
-      1145
+      41,
+      214,
+      994,
+      1506
     ],
-    "alpha_width": 1140,
-    "alpha_height": 1133,
-    "visual_head_y": 25,
-    "foot_y": 1144,
-    "visual_body_height": 1120,
-    "torso_center_x": 671.0,
-    "scale": 0.964286,
-    "translation_x": -47,
-    "translation_y": 397,
+    "alpha_width": 953,
+    "alpha_height": 1292,
+    "visual_head_y": 229,
+    "foot_y": 1505,
+    "visual_body_height": 1277,
+    "torso_center_x": 515.0,
+    "scale": 0.845732,
+    "translation_x": 164,
+    "translation_y": 227,
     "corrected_visual_body_height": 1080,
-    "corrected_head_y": 421.11,
-    "corrected_foot_y": 1500.14,
-    "corrected_torso_center_x": 600.04
+    "corrected_head_y": 420.67,
+    "corrected_foot_y": 1499.83,
+    "corrected_torso_center_x": 599.55
   }
 }

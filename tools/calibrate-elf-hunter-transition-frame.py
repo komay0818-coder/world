@@ -7,7 +7,7 @@ from PIL import Image, ImageDraw
 
 
 ROOT = Path(__file__).resolve().parents[1]
-SOURCE = Path(r"C:\Users\User\AppData\Local\Temp\codex-clipboard-40166a7f-457c-4b34-94f4-d5ecbe314418.png")
+SOURCE = Path(r"C:\Users\User\AppData\Local\Temp\codex-clipboard-96635b23-fde2-4023-9c22-186a105deb4a.png")
 OUTPUT = ROOT / "assets" / "character-portraits" / "calibration-tests" / "elf-hunter-five-frame-v1"
 FRAME_PATH = OUTPUT / "frame-04-05-transition.png"
 CANVAS = (1200, 1536)
@@ -77,6 +77,12 @@ def main():
     if not SOURCE.exists():
         raise FileNotFoundError(SOURCE)
     OUTPUT.mkdir(parents=True, exist_ok=True)
+    previous_source = OUTPUT / "source-transition-04-05.png"
+    previous_frame = OUTPUT / "frame-04-05-transition.png"
+    if previous_source.exists() and not (OUTPUT / "source-transition-04-05-v1.png").exists():
+        shutil.copy2(previous_source, OUTPUT / "source-transition-04-05-v1.png")
+    if previous_frame.exists() and not (OUTPUT / "frame-04-05-transition-v1.png").exists():
+        shutil.copy2(previous_frame, OUTPUT / "frame-04-05-transition-v1.png")
     shutil.copy2(SOURCE, OUTPUT / "source-transition-04-05.png")
     source = Image.open(SOURCE).convert("RGBA")
     metric = analyze(source)
