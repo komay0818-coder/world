@@ -12,10 +12,14 @@ for (let frame = 1; frame <= 5; frame += 1) {
   assert.ok(fs.existsSync(path.join(root, 'assets', 'character-portraits', 'calibration-tests', 'elf-hunter-five-frame-v1', `frame-${String(frame).padStart(2, '0')}.png`)), `elf hunter frame ${frame} exists`);
 }
 assert.ok(fs.existsSync(path.join(root, 'assets', 'character-portraits', 'calibration-tests', 'elf-hunter-five-frame-v1', 'frame-04-05-transition.png')), 'elf hunter transition frame exists');
+for (let frame = 1; frame <= 5; frame += 1) {
+  assert.ok(fs.existsSync(path.join(root, 'assets', 'character-portraits', 'calibration-tests', 'human-priest-five-frame-v1', `frame-${String(frame).padStart(2, '0')}.png`)), `human priest frame ${frame} exists`);
+}
 assert.match(html, /id="character-idle-preview"[\s\S]*?id="character-idle-frame"/);
 assert.match(html, /human-mage-idle-03\.png/, 'preview starts from the selected single PNG');
 assert.match(script, /const characterIdleAnimations\s*=\s*\{/, 'characters use one shared animation registry');
 assert.match(script, /'human:mage':\s*\{ portrait: 'assets\/character-portraits\/human-mage-idle-03\.png/, 'human mage keeps its single-PNG pilot');
+assert.match(script, /'human:priest':\s*\{[\s\S]*?order: \[0, 1, 2, 3, 4, 3, 2, 1\],[\s\S]*?frameDurationMs: 180/, 'human priest uses the five-frame ping-pong sequence');
 assert.match(script, /'elf:hunter':\s*\{[\s\S]*?frame-04-05-transition\.png[\s\S]*?order: \[0, 1, 2, 3, 4, 5, 4, 3, 2, 1\],[\s\S]*?frameDurationMs: 250/, 'only elf hunter uses the 2.5-second six-frame ping-pong sequence');
 assert.doesNotMatch(script, /\.gif/, 'idle previews do not use GIF files');
 assert.match(script, /preloadCharacterIdleFrames\(frames\)/, 'sequence frames are preloaded before playback');

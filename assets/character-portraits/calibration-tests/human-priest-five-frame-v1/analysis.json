@@ -1,0 +1,161 @@
+{
+  "method": "Core head-to-shoe height; weapon excluded; shoe baseline and torso center alignment",
+  "canvas": [
+    1200,
+    1800
+  ],
+  "target_visual_body_height": 1354,
+  "target_foot_y": 1740,
+  "target_torso_center_x": 600,
+  "duplicate_frames": [
+    [
+      1,
+      2
+    ]
+  ],
+  "playback": {
+    "frame_duration_ms": 180,
+    "order": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      4,
+      3,
+      2
+    ]
+  },
+  "frames": [
+    {
+      "sha256": "1d6335ff40cf9ad114117d3bf1b174f154c835c1b2d0e1045e352a4bc9bbcd75",
+      "canvas": [
+        970,
+        1622
+      ],
+      "alpha_bbox": [
+        21,
+        8,
+        959,
+        1594
+      ],
+      "alpha_width": 938,
+      "alpha_height": 1586,
+      "visual_head_y": 320,
+      "foot_y": 1592,
+      "visual_body_height": 1273,
+      "torso_center_x": 525.0,
+      "scale": 1.063629,
+      "translation_x": 42,
+      "translation_y": 47,
+      "corrected_visual_body_height": 1354.0,
+      "corrected_head_y": 387.36,
+      "corrected_foot_y": 1740.3,
+      "corrected_torso_center_x": 600.41
+    },
+    {
+      "sha256": "1d6335ff40cf9ad114117d3bf1b174f154c835c1b2d0e1045e352a4bc9bbcd75",
+      "canvas": [
+        970,
+        1622
+      ],
+      "alpha_bbox": [
+        21,
+        8,
+        959,
+        1594
+      ],
+      "alpha_width": 938,
+      "alpha_height": 1586,
+      "visual_head_y": 320,
+      "foot_y": 1592,
+      "visual_body_height": 1273,
+      "torso_center_x": 525.0,
+      "scale": 1.063629,
+      "translation_x": 42,
+      "translation_y": 47,
+      "corrected_visual_body_height": 1354.0,
+      "corrected_head_y": 387.36,
+      "corrected_foot_y": 1740.3,
+      "corrected_torso_center_x": 600.41
+    },
+    {
+      "sha256": "196198385cffa29353233f55c9abb845f4fb1381cf74fd55e0d5420aa4a050b1",
+      "canvas": [
+        970,
+        1622
+      ],
+      "alpha_bbox": [
+        28,
+        83,
+        967,
+        1575
+      ],
+      "alpha_width": 939,
+      "alpha_height": 1492,
+      "visual_head_y": 227,
+      "foot_y": 1574,
+      "visual_body_height": 1348,
+      "torso_center_x": 536.0,
+      "scale": 1.0,
+      "translation_x": 64,
+      "translation_y": 166,
+      "corrected_visual_body_height": 1348.0,
+      "corrected_head_y": 393.0,
+      "corrected_foot_y": 1740.0,
+      "corrected_torso_center_x": 600.0
+    },
+    {
+      "sha256": "167afdb7eb86ceb89716c2dc207009e036bae0b6a67e485a313b6d8fa90739a1",
+      "canvas": [
+        969,
+        1622
+      ],
+      "alpha_bbox": [
+        39,
+        167,
+        952,
+        1530
+      ],
+      "alpha_width": 913,
+      "alpha_height": 1363,
+      "visual_head_y": 176,
+      "foot_y": 1529,
+      "visual_body_height": 1354,
+      "torso_center_x": 485.0,
+      "scale": 1.0,
+      "translation_x": 115,
+      "translation_y": 211,
+      "corrected_visual_body_height": 1354.0,
+      "corrected_head_y": 387.0,
+      "corrected_foot_y": 1740.0,
+      "corrected_torso_center_x": 600.0
+    },
+    {
+      "sha256": "fa28bb0f282fa3e3601c676530206c55c5f789e549f72d6fb4e01de8250c6555",
+      "canvas": [
+        970,
+        1622
+      ],
+      "alpha_bbox": [
+        20,
+        199,
+        957,
+        1569
+      ],
+      "alpha_width": 937,
+      "alpha_height": 1370,
+      "visual_head_y": 207,
+      "foot_y": 1568,
+      "visual_body_height": 1362,
+      "torso_center_x": 493.0,
+      "scale": 1.0,
+      "translation_x": 107,
+      "translation_y": 172,
+      "corrected_visual_body_height": 1362.0,
+      "corrected_head_y": 379.0,
+      "corrected_foot_y": 1740.0,
+      "corrected_torso_center_x": 600.0
+    }
+  ]
+}
