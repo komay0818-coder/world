@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>精靈獵人動畫預覽</title>
+  <style>
+    :root { color-scheme: dark; font-family: system-ui, sans-serif; }
+    * { box-sizing: border-box; }
+    body {
+      min-height: 100vh;
+      margin: 0;
+      display: grid;
+      place-items: center;
+      background: radial-gradient(circle at 50% 40%, #24345f 0, #111a35 44%, #080d1d 100%);
+      color: #edf3ff;
+    }
+    main { width: min(92vw, 720px); text-align: center; }
+    .stage {
+      height: min(76vh, 720px);
+      display: grid;
+      place-items: center;
+      overflow: hidden;
+      border: 1px solid #8196d455;
+      border-radius: 22px;
+      background: #070c19aa;
+      box-shadow: 0 24px 70px #0009, inset 0 0 60px #5d79d21b;
+    }
+    img { display: block; width: min(88%, 560px); height: 100%; object-fit: contain; }
+    footer { display: flex; justify-content: center; gap: 12px; align-items: center; padding-top: 14px; }
+    button {
+      border: 1px solid #91a8e477;
+      border-radius: 999px;
+      padding: 8px 18px;
+      background: #263761;
+      color: inherit;
+      cursor: pointer;
+    }
+    output { min-width: 92px; color: #b8c7ee; font-variant-numeric: tabular-nums; }
+  </style>
+</head>
+<body>
+  <main>
+    <section class="stage" aria-label="精靈獵人六幀動畫預覽">
+      <img id="preview" alt="精靈獵人動畫" />
+    </section>
+    <footer>
+      <button id="toggle" type="button">暫停</button>
+      <output id="status">第 1 / 6 幀</output>
+    </footer>
+  </main>
+  <script>
+    const base = 'assets/character-portraits/calibration-tests/elf-hunter-five-frame-v1/';
+    const frames = ['frame-01.png', 'frame-02.png', 'frame-03.png', 'frame-04.png', 'frame-04-05-transition.png', 'frame-05.png'];
+    const order = [0, 1, 2, 3, 4, 5, 4, 3, 2, 1];
+    const frameDurationMs = 175;
+    const preview = document.querySelector('#preview');
+    const toggle = document.querySelector('#toggle');
+    const status = document.querySelector('#status');
+    let orderIndex = 0;
+    let timer = null;
+
+    frames.forEach((filename) => { const image = new Image(); image.src = base + filename; });
+
+    function render() {
+      const frameIndex = order[orderIndex];
+      preview.src = base + frames[frameIndex];
+      status.value = `第 ${frameIndex + 1} / 6 幀`;
+    }
+
+    function play() {
+      clearInterval(timer);
+      timer = setInterval(() => {
+        orderIndex = (orderIndex + 1) % order.length;
+        render();
+      }, frameDurationMs);
+      toggle.textContent = '暫停';
+    }
+
+    toggle.addEventListener('click', () => {
+      if (timer) {
+        clearInterval(timer);
+        timer = null;
+        toggle.textContent = '播放';
+      } else play();
+    });
+
+    render();
+    if (!matchMedia('(prefers-reduced-motion: reduce)').matches) play();
+    else toggle.textContent = '播放';
+  </script>
+</body>
+</html>
