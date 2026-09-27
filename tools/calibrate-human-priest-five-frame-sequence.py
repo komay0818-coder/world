@@ -11,7 +11,7 @@ ROOT = Path(__file__).resolve().parents[1]
 OUTPUT = ROOT / "assets" / "character-portraits" / "calibration-tests" / "human-priest-five-frame-v1"
 SOURCES = [
     Path(r"C:\Users\User\AppData\Local\Temp\codex-clipboard-f97121a0-7668-4753-bee0-70cdd74885c1.png"),
-    Path(r"C:\Users\User\AppData\Local\Temp\codex-clipboard-3d2629cf-9c88-4f50-a0bd-1f2e521ee721.png"),
+    Path(r"C:\Users\User\AppData\Local\Temp\codex-clipboard-5c0b04bc-9793-480d-b5ca-c11605fb1a56.png"),
     Path(r"C:\Users\User\AppData\Local\Temp\codex-clipboard-33b1a5d1-e37f-4ff1-adde-659894cc7181.png"),
     Path(r"C:\Users\User\AppData\Local\Temp\codex-clipboard-f7a08e6b-dffd-4a73-aa41-347d54a20efa.png"),
     Path(r"C:\Users\User\AppData\Local\Temp\codex-clipboard-936cb03d-1ed6-4c2b-a0c1-f1a98fe05e47.png"),
@@ -121,7 +121,7 @@ def main():
         "target_visual_body_height": TARGET_BODY_HEIGHT,
         "target_foot_y": TARGET_FOOT_Y,
         "target_torso_center_x": TARGET_CENTER_X,
-        "duplicate_frames": [[1, 2]],
+        "duplicate_frames": [],
         "playback": {"frame_duration_ms": 180, "order": [1, 2, 3, 4, 5, 4, 3, 2]},
         "frames": metrics,
     }

@@ -7,12 +7,7 @@
   "target_visual_body_height": 1354,
   "target_foot_y": 1740,
   "target_torso_center_x": 600,
-  "duplicate_frames": [
-    [
-      1,
-      2
-    ]
-  ],
+  "duplicate_frames": [],
   "playback": {
     "frame_duration_ms": 180,
     "order": [
@@ -54,30 +49,30 @@
       "corrected_torso_center_x": 600.41
     },
     {
-      "sha256": "1d6335ff40cf9ad114117d3bf1b174f154c835c1b2d0e1045e352a4bc9bbcd75",
+      "sha256": "1c7142cbae94048ebbaeb18095c1f1a5d209a41a435785da6465960f7d24273f",
       "canvas": [
-        970,
-        1622
+        968,
+        1625
       ],
       "alpha_bbox": [
+        20,
         21,
-        8,
-        959,
-        1594
+        966,
+        1590
       ],
-      "alpha_width": 938,
-      "alpha_height": 1586,
-      "visual_head_y": 320,
-      "foot_y": 1592,
-      "visual_body_height": 1273,
-      "torso_center_x": 525.0,
-      "scale": 1.063629,
-      "translation_x": 42,
-      "translation_y": 47,
+      "alpha_width": 946,
+      "alpha_height": 1569,
+      "visual_head_y": 331,
+      "foot_y": 1589,
+      "visual_body_height": 1259,
+      "torso_center_x": 537.0,
+      "scale": 1.075457,
+      "translation_x": 22,
+      "translation_y": 31,
       "corrected_visual_body_height": 1354.0,
-      "corrected_head_y": 387.36,
-      "corrected_foot_y": 1740.3,
-      "corrected_torso_center_x": 600.41
+      "corrected_head_y": 386.98,
+      "corrected_foot_y": 1739.9,
+      "corrected_torso_center_x": 599.52
     },
     {
       "sha256": "196198385cffa29353233f55c9abb845f4fb1381cf74fd55e0d5420aa4a050b1",
