@@ -1,0 +1,124 @@
+{
+  "method": "Shoe baseline + belt/torso center; arms, cape, hair, and daggers excluded from center",
+  "canvas": [
+    1400,
+    1550
+  ],
+  "target_visual_body_height": 1268,
+  "target_foot_y": 1490,
+  "target_torso_center_x": 700,
+  "scaling_decision": "Frame 1 scaled up slightly; frames 2-4 keep original size because remaining differences are pose/redraw variation",
+  "playback": {
+    "frame_duration_ms": 180,
+    "order": [
+      1,
+      2,
+      3,
+      4,
+      3,
+      2
+    ]
+  },
+  "frames": [
+    {
+      "sha256": "c12c41134bc2b8ab97f1aa0bb2494183864751c4dedcbff963dd2b909d024474",
+      "canvas": [
+        1145,
+        1374
+      ],
+      "alpha_bbox": [
+        29,
+        73,
+        1145,
+        1302
+      ],
+      "visual_head_y": 73,
+      "foot_y": 1301,
+      "visual_body_height": 1229,
+      "torso_center_x": 652.0,
+      "scale": 1.031733,
+      "translation_x": 27,
+      "translation_y": 148,
+      "corrected_visual_body_height": 1268.0,
+      "corrected_head_y": 223.32,
+      "corrected_foot_y": 1490.28,
+      "corrected_torso_center_x": 699.69,
+      "height_difference_percent": -3.08
+    },
+    {
+      "sha256": "62c23063dda378638f47042d3db053bcf88a254e45d8190a54e8d06e299db6e3",
+      "canvas": [
+        1145,
+        1374
+      ],
+      "alpha_bbox": [
+        28,
+        57,
+        1145,
+        1325
+      ],
+      "visual_head_y": 57,
+      "foot_y": 1324,
+      "visual_body_height": 1268,
+      "torso_center_x": 646.0,
+      "scale": 1.0,
+      "translation_x": 54,
+      "translation_y": 166,
+      "corrected_visual_body_height": 1268.0,
+      "corrected_head_y": 223.0,
+      "corrected_foot_y": 1490.0,
+      "corrected_torso_center_x": 700.0,
+      "height_difference_percent": 0.0
+    },
+    {
+      "sha256": "e96fd533c0419841c4999c39ef5dd835579bfeb08f147c6fa3bddf14b76f2907",
+      "canvas": [
+        1158,
+        1358
+      ],
+      "alpha_bbox": [
+        14,
+        30,
+        1158,
+        1305
+      ],
+      "visual_head_y": 30,
+      "foot_y": 1304,
+      "visual_body_height": 1275,
+      "torso_center_x": 658.0,
+      "scale": 1.0,
+      "translation_x": 42,
+      "translation_y": 186,
+      "corrected_visual_body_height": 1275.0,
+      "corrected_head_y": 216.0,
+      "corrected_foot_y": 1490.0,
+      "corrected_torso_center_x": 700.0,
+      "height_difference_percent": 0.55
+    },
+    {
+      "sha256": "5eaa328f094dfa3ddcc20b238d35347ed287cae31cdb121e2defb0e8805d0a15",
+      "canvas": [
+        1158,
+        1358
+      ],
+      "alpha_bbox": [
+        13,
+        38,
+        1158,
+        1305
+      ],
+      "visual_head_y": 38,
+      "foot_y": 1304,
+      "visual_body_height": 1267,
+      "torso_center_x": 665.0,
+      "scale": 1.0,
+      "translation_x": 35,
+      "translation_y": 186,
+      "corrected_visual_body_height": 1267.0,
+      "corrected_head_y": 224.0,
+      "corrected_foot_y": 1490.0,
+      "corrected_torso_center_x": 700.0,
+      "height_difference_percent": -0.08
+    }
+  ]
+}
