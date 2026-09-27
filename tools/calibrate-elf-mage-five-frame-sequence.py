@@ -8,13 +8,13 @@ from PIL import Image, ImageDraw
 
 
 ROOT = Path(__file__).resolve().parents[1]
-OUTPUT = ROOT / "assets" / "character-portraits" / "calibration-tests" / "elf-mage-five-frame-v1"
+OUTPUT = ROOT / "assets" / "character-portraits" / "calibration-tests" / "elf-mage-five-frame-v2"
 SOURCES = [
     Path(r"C:\Users\User\AppData\Local\Temp\codex-clipboard-4c24e654-6635-4627-b4f5-10a4c9a8a341.png"),
     Path(r"C:\Users\User\AppData\Local\Temp\codex-clipboard-a4abc59e-2241-4453-add9-c6babb61e9ac.png"),
-    Path(r"C:\Users\User\AppData\Local\Temp\codex-clipboard-fd6c433e-fccd-4525-825c-577d54cf1fec.png"),
     Path(r"C:\Users\User\AppData\Local\Temp\codex-clipboard-b448a060-fe60-42db-8dac-c46d9d43f507.png"),
     Path(r"C:\Users\User\AppData\Local\Temp\codex-clipboard-d07daa79-a39d-49d7-a5c0-5f646096eaaf.png"),
+    Path(r"C:\Users\User\AppData\Local\Temp\codex-clipboard-de2d0a77-4198-4d35-983f-c01a9683301e.png"),
 ]
 CANVAS = (1700, 1900)
 TARGET_BODY_HEIGHT = 1374
@@ -46,8 +46,10 @@ def analyze(image, digest):
         & (grid_x < image.width * 0.78)
     )
     torso_center_x = float(np.median(grid_x[skin]))
-    core_rows = stable[:, max(0, round(torso_center_x - 170)):min(image.width, round(torso_center_x + 170))].sum(axis=1)
-    head_y = next(y for y in range(image.height - 8) if np.count_nonzero(core_rows[y:y + 9] >= 65) >= 8)
+    magic = (rgba[:, :, 2] > 150) & (rgba[:, :, 1] > 100) & (rgba[:, :, 2] > rgba[:, :, 0] * 1.15)
+    body_core = stable & ~magic
+    core_rows = body_core[:, max(0, round(torso_center_x - 150)):min(image.width, round(torso_center_x + 150))].sum(axis=1)
+    head_y = next(y for y in range(image.height - 8) if np.count_nonzero(core_rows[y:y + 9] >= 50) >= 8)
     return {
         "sha256": digest,
         "canvas": [image.width, image.height],
@@ -126,7 +128,7 @@ def main():
         "target_torso_center_x": TARGET_CENTER_X,
         "minimum_effect_safety_margin": SAFETY_MARGIN,
         "scaling_decision": "Frame 1 scaled up to match body height; frames 2-5 retain original size",
-        "duplicate_frames": [[2, 3]],
+        "duplicate_frames": [],
         "container_check": "Main preview uses a fixed-width image with automatic height; the common canvas fits inside both desktop and mobile containers despite overflow:hidden",
         "playback": {"frame_duration_ms": 180, "order": [1, 2, 3, 4, 5, 4, 3, 2]},
         "frames": metrics,

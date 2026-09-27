@@ -18,7 +18,7 @@ for (let frame = 1; frame <= 4; frame += 1) {
   assert.ok(fs.existsSync(path.join(root, 'assets', 'character-portraits', 'calibration-tests', 'orc-assassin-four-frame-v1', `frame-${String(frame).padStart(2, '0')}.png`)), `orc assassin frame ${frame} exists`);
 }
 for (let frame = 1; frame <= 5; frame += 1) {
-  assert.ok(fs.existsSync(path.join(root, 'assets', 'character-portraits', 'calibration-tests', 'elf-mage-five-frame-v1', `frame-${String(frame).padStart(2, '0')}.png`)), `elf mage frame ${frame} exists`);
+  assert.ok(fs.existsSync(path.join(root, 'assets', 'character-portraits', 'calibration-tests', 'elf-mage-five-frame-v2', `frame-${String(frame).padStart(2, '0')}.png`)), `elf mage frame ${frame} exists`);
 }
 assert.ok(fs.existsSync(path.join(root, 'assets', 'character-portraits', 'calibration-tests', 'elf-hunter-five-frame-v1', 'frame-04-05-transition.png')), 'elf hunter transition frame exists');
 for (let frame = 1; frame <= 5; frame += 1) {
