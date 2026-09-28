@@ -7,8 +7,8 @@
   "target_foot_y": 1500,
   "target_torso_center_x": 650,
   "minimum_safety_margin": 70,
-  "scaling_decision": "No scaling; measured body-height spread is about 1.1% and consistent with pose variation",
-  "alpha_repair": "Frame 4 contained an opaque checkerboard; its alpha and edge pixels were restored from the near-identical frame 3 silhouette without redrawing",
+  "scaling_decision": "Replacement frame 3 scaled uniformly to the stable 1358 px body-height reference; frames 1, 2, 4, and 5 remain at 1.0",
+  "alpha_repair": "Frame 4 contained an opaque checkerboard; its alpha was restored using connected-background detection with the same-size frame 5 as a contamination reference",
   "local_redraw_difference": "Minor AI redraw differences remain in face angle and jaw expression across frames 1-5; body proportions are consistent enough for a translation-only first test",
   "container_check": "Preview stage uses overflow:visible and object-fit:contain, so bow and hair are not clipped",
   "playback": {
@@ -45,9 +45,9 @@
       "scale": 1.0,
       "translation_x": 179,
       "translation_y": 132,
-      "corrected_visual_body_height": 1359,
-      "corrected_head_y": 142,
-      "corrected_foot_y": 1500,
+      "corrected_visual_body_height": 1359.0,
+      "corrected_head_y": 142.0,
+      "corrected_foot_y": 1500.0,
       "corrected_torso_center_x": 650.0,
       "corrected_low_alpha_bbox": [
         204,
@@ -62,7 +62,7 @@
         94
       ],
       "effect_safety_margin_pass": true,
-      "height_difference_percent_from_median": 0.89
+      "height_difference_percent_from_median": 0.07
     },
     {
       "sha256": "85687d3c82b7f243486cddf3308f9e5c46a6a9419ac126ed453528a162df2902",
@@ -83,9 +83,9 @@
       "scale": 1.0,
       "translation_x": 183,
       "translation_y": 140,
-      "corrected_visual_body_height": 1347,
-      "corrected_head_y": 154,
-      "corrected_foot_y": 1500,
+      "corrected_visual_body_height": 1347.0,
+      "corrected_head_y": 154.0,
+      "corrected_foot_y": 1500.0,
       "corrected_torso_center_x": 650.0,
       "corrected_low_alpha_bbox": [
         201,
@@ -100,45 +100,45 @@
         96
       ],
       "effect_safety_margin_pass": true,
-      "height_difference_percent_from_median": 0.0
+      "height_difference_percent_from_median": -0.81
     },
     {
-      "sha256": "c7ecef4df6e2a7fe49bc4fb49d2837dd09a64deacab32a8fd4a42ec1f025edd6",
+      "sha256": "17e39dbaca8e822c877b6b604c3baa0550c5e92250de0ae6fde571cf7a50fcc1",
       "canvas": [
-        1145,
-        1374
+        1075,
+        1463
       ],
       "alpha_bbox_low_threshold": [
-        27,
-        13,
-        1145,
-        1374
+        0,
+        0,
+        1075,
+        1417
       ],
-      "visual_head_y": 20,
-      "foot_y": 1363,
-      "visual_body_height": 1344,
-      "torso_center_x": 471.0,
-      "scale": 1.0,
-      "translation_x": 179,
-      "translation_y": 137,
-      "corrected_visual_body_height": 1344,
-      "corrected_head_y": 157,
-      "corrected_foot_y": 1500,
-      "corrected_torso_center_x": 650.0,
+      "visual_head_y": 3,
+      "foot_y": 1413,
+      "visual_body_height": 1411,
+      "torso_center_x": 468.0,
+      "scale": 0.962438,
+      "translation_x": 200,
+      "translation_y": 140,
+      "corrected_visual_body_height": 1358.0,
+      "corrected_head_y": 142.89,
+      "corrected_foot_y": 1499.92,
+      "corrected_torso_center_x": 650.42,
       "corrected_low_alpha_bbox": [
-        206,
-        150,
-        1324,
-        1511
+        200,
+        140,
+        1235,
+        1504
       ],
       "transparent_margins_left_top_right_bottom": [
-        206,
-        150,
-        176,
-        89
+        200,
+        140,
+        265,
+        96
       ],
       "effect_safety_margin_pass": true,
-      "height_difference_percent_from_median": -0.22
+      "height_difference_percent_from_median": 3.9
     },
     {
       "sha256": "7db7b2d97293e959a1bc6e1d84c54a484f354a0a3ae0718d9b8b10091fbcb198",
@@ -159,9 +159,9 @@
       "scale": 1.0,
       "translation_x": 188,
       "translation_y": 141,
-      "corrected_visual_body_height": 1346,
-      "corrected_head_y": 155,
-      "corrected_foot_y": 1500,
+      "corrected_visual_body_height": 1346.0,
+      "corrected_head_y": 155.0,
+      "corrected_foot_y": 1500.0,
       "corrected_torso_center_x": 650.0,
       "corrected_low_alpha_bbox": [
         218,
@@ -176,7 +176,7 @@
         97
       ],
       "effect_safety_margin_pass": true,
-      "height_difference_percent_from_median": -0.07
+      "height_difference_percent_from_median": -0.88
     },
     {
       "sha256": "e0866e6fca4bcb0c01fec3a552d969454c9f1eb5e77e5fa6b967cb1817f562ba",
@@ -197,9 +197,9 @@
       "scale": 1.0,
       "translation_x": 177,
       "translation_y": 135,
-      "corrected_visual_body_height": 1358,
-      "corrected_head_y": 143,
-      "corrected_foot_y": 1500,
+      "corrected_visual_body_height": 1358.0,
+      "corrected_head_y": 143.0,
+      "corrected_foot_y": 1500.0,
       "corrected_torso_center_x": 650.0,
       "corrected_low_alpha_bbox": [
         196,
@@ -214,7 +214,7 @@
         91
       ],
       "effect_safety_margin_pass": true,
-      "height_difference_percent_from_median": 0.82
+      "height_difference_percent_from_median": 0.0
     }
   ]
 }

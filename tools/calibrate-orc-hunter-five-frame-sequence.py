@@ -13,7 +13,7 @@ OUTPUT = ROOT / "assets" / "character-portraits" / "calibration-tests" / "orc-hu
 SOURCES = [
     Path(r"C:\Users\User\AppData\Local\Temp\codex-clipboard-c3d96f4a-677e-48f5-b39d-0d3710b4dc69.png"),
     Path(r"C:\Users\User\AppData\Local\Temp\codex-clipboard-52b4fcb9-381e-4c22-b434-ef66ddd5d6ba.png"),
-    Path(r"C:\Users\User\AppData\Local\Temp\codex-clipboard-ffcbacfa-85e0-417b-9124-22e4368c090b.png"),
+    Path(r"C:\Users\User\AppData\Local\Temp\codex-clipboard-d1cea064-8e12-4a78-9b0a-49a9cf869bc7.png"),
     Path(r"C:\Users\User\AppData\Local\Temp\codex-clipboard-a1e4a6cc-edc1-47dc-be17-17296663a276.png"),
     Path(r"C:\Users\User\AppData\Local\Temp\codex-clipboard-4bb71dab-3e53-4822-8cd4-21def50b4bc6.png"),
 ]
@@ -21,10 +21,11 @@ CANVAS = (1500, 1600)
 TARGET_CENTER_X = 650
 TARGET_FOOT_Y = 1500
 SAFETY_MARGIN = 70
+REFERENCE_BODY_HEIGHT = 1358
 
 
 def repair_fourth_alpha(images):
-    reference = np.asarray(images[2], dtype=np.float32)
+    reference = np.asarray(images[4], dtype=np.float32)
     target = np.asarray(images[3], dtype=np.float32)
     rgb_max = target[:, :, :3].max(axis=2)
     rgb_min = target[:, :, :3].min(axis=2)
@@ -109,6 +110,19 @@ def analyze(image, digest):
     }
 
 
+def resize_premultiplied(image, size):
+    rgba = np.asarray(image.convert("RGBA"), dtype=np.float32)
+    alpha = rgba[:, :, 3:4] / 255.0
+    premultiplied = np.concatenate((rgba[:, :, :3] * alpha, rgba[:, :, 3:4]), axis=2)
+    resized = np.asarray(
+        Image.fromarray(np.clip(premultiplied, 0, 255).astype(np.uint8), "RGBA").resize(size, Image.Resampling.LANCZOS),
+        dtype=np.float32,
+    )
+    out_alpha = resized[:, :, 3:4]
+    rgb = np.divide(resized[:, :, :3] * 255.0, out_alpha, out=np.zeros_like(resized[:, :, :3]), where=out_alpha > 0)
+    return Image.fromarray(np.clip(np.concatenate((rgb, out_alpha), axis=2), 0, 255).astype(np.uint8), "RGBA")
+
+
 def main():
     OUTPUT.mkdir(parents=True, exist_ok=True)
     originals = []
@@ -130,27 +144,33 @@ def main():
     metrics = [analyze(image, digest) for image, digest in zip(originals, digests)]
     corrected = []
     for index, (image, metric) in enumerate(zip(originals, metrics), 1):
-        translation_x = round(TARGET_CENTER_X - metric["torso_center_x"])
-        translation_y = round(TARGET_FOOT_Y - metric["foot_y"])
+        scale = REFERENCE_BODY_HEIGHT / metric["visual_body_height"] if index == 3 else 1.0
+        resized = resize_premultiplied(image, (round(image.width * scale), round(image.height * scale)))
+        translation_x = round(TARGET_CENTER_X - metric["torso_center_x"] * scale)
+        translation_y = round(TARGET_FOOT_Y - metric["foot_y"] * scale)
         canvas = Image.new("RGBA", CANVAS, (0, 0, 0, 0))
-        canvas.alpha_composite(image, (translation_x, translation_y))
-        canvas.save(OUTPUT / f"frame-{index:02d}.png", compress_level=6)
+        canvas.alpha_composite(resized, (translation_x, translation_y))
+        frame_path = OUTPUT / ("frame-03-replacement.png" if index == 3 else f"frame-{index:02d}.png")
+        if index == 3 or not frame_path.exists():
+            canvas.save(frame_path, compress_level=6)
+        else:
+            canvas = Image.open(frame_path).convert("RGBA")
         corrected.append(canvas)
 
         bbox = metric["alpha_bbox_low_threshold"]
         corrected_bbox = [
-            translation_x + bbox[0], translation_y + bbox[1],
-            translation_x + bbox[2], translation_y + bbox[3],
+            round(translation_x + bbox[0] * scale), round(translation_y + bbox[1] * scale),
+            round(translation_x + bbox[2] * scale), round(translation_y + bbox[3] * scale),
         ]
         margins = [corrected_bbox[0], corrected_bbox[1], CANVAS[0] - corrected_bbox[2], CANVAS[1] - corrected_bbox[3]]
         metric.update({
-            "scale": 1.0,
+            "scale": round(scale, 6),
             "translation_x": translation_x,
             "translation_y": translation_y,
-            "corrected_visual_body_height": metric["visual_body_height"],
-            "corrected_head_y": metric["visual_head_y"] + translation_y,
-            "corrected_foot_y": metric["foot_y"] + translation_y,
-            "corrected_torso_center_x": metric["torso_center_x"] + translation_x,
+            "corrected_visual_body_height": round(metric["visual_body_height"] * scale, 2),
+            "corrected_head_y": round(metric["visual_head_y"] * scale + translation_y, 2),
+            "corrected_foot_y": round(metric["foot_y"] * scale + translation_y, 2),
+            "corrected_torso_center_x": round(metric["torso_center_x"] * scale + translation_x, 2),
             "corrected_low_alpha_bbox": corrected_bbox,
             "transparent_margins_left_top_right_bottom": margins,
             "effect_safety_margin_pass": min(margins) >= SAFETY_MARGIN,
@@ -167,8 +187,8 @@ def main():
         "target_foot_y": TARGET_FOOT_Y,
         "target_torso_center_x": TARGET_CENTER_X,
         "minimum_safety_margin": SAFETY_MARGIN,
-        "scaling_decision": "No scaling; measured body-height spread is about 1.1% and consistent with pose variation",
-        "alpha_repair": "Frame 4 contained an opaque checkerboard; its alpha and edge pixels were restored from the near-identical frame 3 silhouette without redrawing",
+        "scaling_decision": "Replacement frame 3 scaled uniformly to the stable 1358 px body-height reference; frames 1, 2, 4, and 5 remain at 1.0",
+        "alpha_repair": "Frame 4 contained an opaque checkerboard; its alpha was restored using connected-background detection with the same-size frame 5 as a contamination reference",
         "local_redraw_difference": "Minor AI redraw differences remain in face angle and jaw expression across frames 1-5; body proportions are consistent enough for a translation-only first test",
         "container_check": "Preview stage uses overflow:visible and object-fit:contain, so bow and hair are not clipped",
         "playback": {"frame_duration_ms": 312.5, "loop_duration_ms": 2500, "order": [1, 2, 3, 4, 5, 4, 3, 2]},
@@ -180,7 +200,7 @@ def main():
     contact = Image.new("RGBA", (1425, 304), (24, 29, 43, 255))
     for index, frame in enumerate(corrected):
         contact.alpha_composite(frame.resize(thumb_size, Image.Resampling.LANCZOS), (index * thumb_size[0], 0))
-    contact.save(OUTPUT / "contact-sheet.png")
+    contact.save(OUTPUT / "contact-sheet-v2.png")
 
     colors = [(255, 80, 80, 78), (80, 200, 255, 78), (130, 255, 120, 78), (255, 210, 80, 78), (220, 110, 255, 78)]
     overlay = Image.new("RGBA", CANVAS, (0, 0, 0, 255))
@@ -191,7 +211,7 @@ def main():
     draw = ImageDraw.Draw(overlay)
     draw.line((0, TARGET_FOOT_Y, CANVAS[0], TARGET_FOOT_Y), fill=(255, 255, 255, 220), width=2)
     draw.line((TARGET_CENTER_X, 0, TARGET_CENTER_X, CANVAS[1]), fill=(255, 255, 255, 160), width=2)
-    overlay.save(OUTPUT / "alignment-overlay.png")
+    overlay.save(OUTPUT / "alignment-overlay-v2.png")
 
 
 if __name__ == "__main__":
