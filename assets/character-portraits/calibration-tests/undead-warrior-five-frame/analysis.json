@@ -12,8 +12,8 @@
   "local_redraw_difference": "Pose and head angle change across the sequence; local face, neck, and shoulder redraw differences were retained rather than forcing non-uniform correction.",
   "container_check": "Preview stage uses overflow:visible and object-fit:contain; sword, shield, hair, and cape remain visible.",
   "playback": {
-    "frame_duration_ms": 180,
-    "loop_duration_ms": 1440,
+    "frame_duration_ms": 312.5,
+    "loop_duration_ms": 2500,
     "order": [
       1,
       2,

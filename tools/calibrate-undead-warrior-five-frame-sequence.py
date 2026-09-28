@@ -129,7 +129,7 @@ def main():
         "scaling_decision": "No frame was scaled. Frame 2's shorter shoe-to-head height comes from the crouched pose; frames 4-5 differ mainly through head tilt and local redraw, not whole-character scale.",
         "local_redraw_difference": "Pose and head angle change across the sequence; local face, neck, and shoulder redraw differences were retained rather than forcing non-uniform correction.",
         "container_check": "Preview stage uses overflow:visible and object-fit:contain; sword, shield, hair, and cape remain visible.",
-        "playback": {"frame_duration_ms": 180, "loop_duration_ms": 1440, "order": [1, 2, 3, 4, 5, 4, 3, 2]},
+        "playback": {"frame_duration_ms": 312.5, "loop_duration_ms": 2500, "order": [1, 2, 3, 4, 5, 4, 3, 2]},
         "frames": metrics,
     }
     (OUTPUT / "analysis.json").write_text(json.dumps(report, ensure_ascii=False, indent=2), encoding="utf-8")
