@@ -12,8 +12,8 @@
   "local_redraw_difference": "Minor AI redraw differences remain in face, chest, shoulder armor, leg anatomy, and hair volume. They were retained rather than forcing non-uniform distortion.",
   "container_check": "Preview stage uses overflow:visible and object-fit:contain; dual blades, hair, limbs, and cape remain visible.",
   "playback": {
-    "frame_duration_ms": 180,
-    "loop_duration_ms": 1440,
+    "frame_duration_ms": 312.5,
+    "loop_duration_ms": 2500,
     "order": [
       1,
       2,
