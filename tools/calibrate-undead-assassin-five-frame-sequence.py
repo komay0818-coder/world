@@ -32,7 +32,7 @@ def main():
         "scaling_decision": "No frame was scaled. The visible height changes are caused by the crouching pose and hair motion rather than a reliable whole-character size change.",
         "local_redraw_difference": "Minor AI redraw differences remain in face, chest, shoulder armor, leg anatomy, and hair volume. They were retained rather than forcing non-uniform distortion.",
         "container_check": "Preview stage uses overflow:visible and object-fit:contain; dual blades, hair, limbs, and cape remain visible.",
-        "playback": {"frame_duration_ms": 833.333333, "loop_duration_ms": 5000, "order": [1, 2, 3, 5, 3, 2], "excluded_frames": [4]},
+        "playback": {"frame_duration_ms": 583.333333, "loop_duration_ms": 3500, "order": [1, 2, 3, 5, 3, 2], "excluded_frames": [4]},
     })
     report_path.write_text(json.dumps(report, ensure_ascii=False, indent=2), encoding="utf-8")
 
