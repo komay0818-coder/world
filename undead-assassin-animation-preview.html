@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>不死族刺客動畫預覽</title>
+  <style>
+    :root { color-scheme: dark; font-family: system-ui, sans-serif; }
+    * { box-sizing: border-box; }
+    body { min-height: 100vh; margin: 0; display: grid; place-items: center; background: radial-gradient(circle at 50% 38%, #49316a 0, #261636 48%, #100916 100%); color: #fbf4ff; }
+    main { width: min(96vw, 900px); text-align: center; }
+    .stage { height: min(78vh, 760px); display: grid; place-items: center; overflow: visible; border: 1px solid #d19aff55; border-radius: 22px; background: #140a20aa; box-shadow: 0 24px 70px #0009, inset 0 0 70px #b150ff1c; }
+    img { display: block; width: 100%; height: 100%; min-width: 0; min-height: 0; object-fit: contain; }
+    footer { display: flex; justify-content: center; gap: 12px; align-items: center; padding-top: 14px; }
+    button { border: 1px solid #ddbaff77; border-radius: 999px; padding: 8px 18px; background: #613b83; color: inherit; cursor: pointer; }
+    output { min-width: 92px; color: #e1c9f1; font-variant-numeric: tabular-nums; }
+  </style>
+</head>
+<body>
+  <main>
+    <section class="stage" aria-label="不死族刺客五幀動畫預覽"><img id="preview" alt="不死族刺客動畫" /></section>
+    <footer><button id="toggle" type="button">暫停</button><output id="status">第 1 / 5 幀</output></footer>
+  </main>
+  <script>
+    const base = 'assets/character-portraits/calibration-tests/undead-assassin-five-frame/';
+    const frames = ['frame-01.png', 'frame-02.png', 'frame-03.png', 'frame-04.png', 'frame-05.png'];
+    const order = [0, 1, 2, 3, 4, 3, 2, 1];
+    const frameDurationMs = 180;
+    const preview = document.querySelector('#preview');
+    const toggle = document.querySelector('#toggle');
+    const status = document.querySelector('#status');
+    let orderIndex = 0;
+    let timer = null;
+    frames.forEach((filename) => { const image = new Image(); image.src = base + filename; });
+    function render() { const frameIndex = order[orderIndex]; preview.src = base + frames[frameIndex]; status.value = `第 ${frameIndex + 1} / 5 幀`; }
+    function play() { clearInterval(timer); timer = setInterval(() => { orderIndex = (orderIndex + 1) % order.length; render(); }, frameDurationMs); toggle.textContent = '暫停'; }
+    toggle.addEventListener('click', () => { if (timer) { clearInterval(timer); timer = null; toggle.textContent = '播放'; } else play(); });
+    render();
+    if (!matchMedia('(prefers-reduced-motion: reduce)').matches) play(); else toggle.textContent = '播放';
+  </script>
+</body>
+</html>
