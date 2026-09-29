@@ -18,21 +18,22 @@
 </head>
 <body>
   <main>
-    <section class="stage" aria-label="不死族刺客五幀動畫預覽"><img id="preview" alt="不死族刺客動畫" /></section>
+    <section class="stage" aria-label="不死族刺客移除第四幀的動畫預覽"><img id="preview" alt="不死族刺客動畫" /></section>
     <footer><button id="toggle" type="button">暫停</button><output id="status">第 1 / 5 幀</output></footer>
   </main>
   <script>
     const base = 'assets/character-portraits/calibration-tests/undead-assassin-five-frame/';
-    const frames = ['frame-01.png', 'frame-02.png', 'frame-03.png', 'frame-04.png', 'frame-05.png'];
-    const order = [0, 1, 2, 3, 4, 3, 2, 1];
-    const frameDurationMs = 625;
+    const frames = ['frame-01.png', 'frame-02.png', 'frame-03.png', 'frame-05.png'];
+    const frameLabels = [1, 2, 3, 5];
+    const order = [0, 1, 2, 3, 2, 1];
+    const frameDurationMs = 5000 / order.length;
     const preview = document.querySelector('#preview');
     const toggle = document.querySelector('#toggle');
     const status = document.querySelector('#status');
     let orderIndex = 0;
     let timer = null;
     frames.forEach((filename) => { const image = new Image(); image.src = base + filename; });
-    function render() { const frameIndex = order[orderIndex]; preview.src = base + frames[frameIndex]; status.value = `第 ${frameIndex + 1} / 5 幀`; }
+    function render() { const frameIndex = order[orderIndex]; preview.src = base + frames[frameIndex]; status.value = `原第 ${frameLabels[frameIndex]} 幀`; }
     function play() { clearInterval(timer); timer = setInterval(() => { orderIndex = (orderIndex + 1) % order.length; render(); }, frameDurationMs); toggle.textContent = '暫停'; }
     toggle.addEventListener('click', () => { if (timer) { clearInterval(timer); timer = null; toggle.textContent = '播放'; } else play(); });
     render();
