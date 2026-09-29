@@ -16,11 +16,11 @@
     "loop_duration_ms": 3500,
     "order": [
       1,
+      5,
       2,
       3,
-      5,
-      3,
-      2
+      2,
+      5
     ],
     "excluded_frames": [
       4
