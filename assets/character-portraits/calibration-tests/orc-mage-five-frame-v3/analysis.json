@@ -12,8 +12,8 @@
   "local_redraw_difference": "Minor AI redraw differences remain in face, hood, shoulder spikes, torso, and leg proportions. They were retained rather than forcing non-uniform distortion.",
   "container_check": "Preview stage uses overflow:visible and object-fit:contain; the spellbook, cape, flames, and low-alpha magic trails remain visible.",
   "playback": {
-    "frame_duration_ms": 312.5,
-    "loop_duration_ms": 2500,
+    "frame_duration_ms": 375,
+    "loop_duration_ms": 3000,
     "order": [
       1,
       2,

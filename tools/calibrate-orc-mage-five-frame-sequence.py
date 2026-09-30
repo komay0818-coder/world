@@ -39,7 +39,7 @@ def main():
         "scaling_decision": "Visual-volume correction keeps frames 1, 2, 4, and 5 near 1170 px while reducing frame 3 from 1.069470 to 1.04 because its thicker torso, hood, and shoulder redraw looked oversized at equal measured height. Shoes and torso centers are realigned after scaling.",
         "local_redraw_difference": "Minor AI redraw differences remain in face, hood, shoulder spikes, torso, and leg proportions. They were retained rather than forcing non-uniform distortion.",
         "container_check": "Preview stage uses overflow:visible and object-fit:contain; the spellbook, cape, flames, and low-alpha magic trails remain visible.",
-        "playback": {"frame_duration_ms": 312.5, "loop_duration_ms": 2500, "order": [1, 2, 3, 4, 5, 4, 3, 2]},
+        "playback": {"frame_duration_ms": 375, "loop_duration_ms": 3000, "order": [1, 2, 3, 4, 5, 4, 3, 2]},
     })
     report_path.write_text(json.dumps(report, ensure_ascii=False, indent=2), encoding="utf-8")
 
