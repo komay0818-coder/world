@@ -20,6 +20,7 @@ CANVAS = (1500, 1600)
 TARGET_CENTER_X = 750
 TARGET_FOOT_Y = 1500
 SAFETY_MARGIN = 55
+SCALE_OVERRIDES = {}
 
 
 def analyze(image, digest):
@@ -90,7 +91,7 @@ def main():
     for index, (image, metric) in enumerate(zip(originals, metrics), 1):
         # Frame 2 is crouched and frames 4-5 tilt the head; those pose changes
         # reduce the shoe-to-head measurement without changing character scale.
-        scale = 1.0
+        scale = SCALE_OVERRIDES.get(index, 1.0)
         resized = resize_premultiplied(image, (round(image.width * scale), round(image.height * scale)))
         translation_x = round(TARGET_CENTER_X - metric["torso_center_x"] * scale)
         translation_y = round(TARGET_FOOT_Y - metric["foot_y"] * scale)
