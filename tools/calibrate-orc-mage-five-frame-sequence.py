@@ -9,7 +9,7 @@ spec = spec_from_file_location("five_frame_sequence_base", base_path)
 base = module_from_spec(spec)
 spec.loader.exec_module(base)
 
-base.OUTPUT = ROOT / "assets" / "character-portraits" / "calibration-tests" / "orc-mage-five-frame"
+base.OUTPUT = ROOT / "assets" / "character-portraits" / "calibration-tests" / "orc-mage-five-frame-v2"
 base.SOURCES = [
     Path(r"C:\Users\User\AppData\Local\Temp\codex-clipboard-5c31579b-043e-42a8-8c7c-e68cdfa127e1.png"),
     Path(r"C:\Users\User\AppData\Local\Temp\codex-clipboard-4a639dbe-3d56-497d-bcab-0a2523f52cf9.png"),
@@ -17,11 +17,17 @@ base.SOURCES = [
     Path(r"C:\Users\User\AppData\Local\Temp\codex-clipboard-4e6c59f1-d631-4a1a-8bf6-1567b820e136.png"),
     Path(r"C:\Users\User\AppData\Local\Temp\codex-clipboard-e8a5d8d7-7bbe-4c6d-b0f4-079a50449926.png"),
 ]
-base.CANVAS = (1500, 1450)
+base.CANVAS = (1510, 1450)
 base.TARGET_CENTER_X = 750
 base.TARGET_FOOT_Y = 1350
 base.SAFETY_MARGIN = 55
-base.SCALE_OVERRIDES = {3: 1.05}
+base.SCALE_OVERRIDES = {
+    1: 0.991525,
+    2: 1.000855,
+    3: 1.069470,
+    4: 0.989848,
+    5: 1.005155,
+}
 
 
 def main():
@@ -30,7 +36,7 @@ def main():
     report = json.loads(report_path.read_text(encoding="utf-8"))
     report.update({
         "method": "Shoe baseline + torso core center; raised arm, spellbook, cape, flames, and low-alpha magic trails excluded from body-scale judgment",
-        "scaling_decision": "Frame 3 was enlarged uniformly by 1.05 because its torso, head, and shoe-to-head body scale were consistently smaller than frames 1, 2, 4, and 5. Other frames remain at 1.0.",
+        "scaling_decision": "Second-pass uniform scaling targets an approximately 1170 px shoe-to-head body height: frame 1 0.991525, frame 2 1.000855, frame 3 1.069470, frame 4 0.989848, and frame 5 1.005155. Shoes and torso centers are realigned after scaling.",
         "local_redraw_difference": "Minor AI redraw differences remain in face, hood, shoulder spikes, torso, and leg proportions. They were retained rather than forcing non-uniform distortion.",
         "container_check": "Preview stage uses overflow:visible and object-fit:contain; the spellbook, cape, flames, and low-alpha magic trails remain visible.",
         "playback": {"frame_duration_ms": 312.5, "loop_duration_ms": 2500, "order": [1, 2, 3, 4, 5, 4, 3, 2]},
