@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>人類戰士連續待機預覽</title>
+  <style>
+    *{box-sizing:border-box}body{min-height:100vh;margin:0;display:grid;place-items:center;background:radial-gradient(circle at 50% 38%,#253857,#090f1b 68%);color:#fff;font-family:system-ui,sans-serif}.preview{width:min(90vw,620px);text-align:center}.stage{position:relative;width:100%;aspect-ratio:1100/1600;overflow:visible}.stage img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain}.status{margin:.7rem 0 0;color:#c9ddff;font-size:.95rem}
+  </style>
+</head>
+<body>
+  <main class="preview">
+    <div class="stage"><img id="actor" alt="人類戰士連續待機動作"></div>
+    <p class="status">單次播放 2 秒・1 → 2 → 3</p>
+  </main>
+  <script>
+    const base = 'assets/character-portraits/calibration-tests/human-warrior-three-frame-v1/';
+    const frames = [1, 2, 3].map((frame) => `${base}frame-${String(frame).padStart(2, '0')}.png?v=1`);
+    const frameDurationMs = 2000 / frames.length;
+    frames.forEach((source) => { const image = new Image(); image.src = source; });
+    const actor = document.querySelector('#actor');
+    let step = 0;
+    const render = () => { actor.src = frames[step]; };
+    render();
+    if (!matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      const timer = setInterval(() => {
+        if (step < frames.length - 1) { step += 1; render(); return; }
+        clearInterval(timer);
+      }, frameDurationMs);
+    }
+  </script>
+</body>
+</html>
