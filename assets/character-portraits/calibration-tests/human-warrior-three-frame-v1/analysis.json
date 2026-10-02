@@ -1,0 +1,84 @@
+{
+  "method": "Alpha analysis; dense silhouette head reference; shoe baseline and torso core alignment",
+  "canvas": [
+    1100,
+    1600
+  ],
+  "target_foot_y": 1540,
+  "target_torso_center_x": 550,
+  "target_visual_body_height": 1461,
+  "frames": [
+    {
+      "canvas": [
+        1024,
+        1536
+      ],
+      "alpha_bbox": [
+        38,
+        19,
+        995,
+        1508
+      ],
+      "alpha_width": 957,
+      "alpha_height": 1489,
+      "visual_head_y": 38,
+      "foot_y": 1500,
+      "visual_body_height": 1463,
+      "torso_center_x": 524.0,
+      "scale": 0.998633,
+      "translation_x": 27,
+      "translation_y": 42,
+      "corrected_head_y": 79.95,
+      "corrected_foot_y": 1539.95,
+      "corrected_torso_center_x": 550.28
+    },
+    {
+      "canvas": [
+        1024,
+        1535
+      ],
+      "alpha_bbox": [
+        38,
+        14,
+        993,
+        1499
+      ],
+      "alpha_width": 955,
+      "alpha_height": 1485,
+      "visual_head_y": 34,
+      "foot_y": 1494,
+      "visual_body_height": 1461,
+      "torso_center_x": 524.0,
+      "scale": 1.0,
+      "translation_x": 26,
+      "translation_y": 46,
+      "corrected_head_y": 80.0,
+      "corrected_foot_y": 1540.0,
+      "corrected_torso_center_x": 550.0
+    },
+    {
+      "canvas": [
+        1024,
+        1536
+      ],
+      "alpha_bbox": [
+        36,
+        0,
+        999,
+        1474
+      ],
+      "alpha_width": 963,
+      "alpha_height": 1474,
+      "visual_head_y": 19,
+      "foot_y": 1465,
+      "visual_body_height": 1447,
+      "torso_center_x": 524.0,
+      "scale": 1.009675,
+      "translation_x": 21,
+      "translation_y": 61,
+      "corrected_head_y": 80.18,
+      "corrected_foot_y": 1540.17,
+      "corrected_torso_center_x": 550.07
+    }
+  ]
+}
