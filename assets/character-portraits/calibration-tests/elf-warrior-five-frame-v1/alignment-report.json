@@ -1,0 +1,210 @@
+{
+  "source": "C:\\Users\\User\\AppData\\Local\\Temp\\codex-clipboard-f03d8961-82ad-4ebc-a1f7-11b516e014a3.png",
+  "source_canvas": {
+    "width": 2172,
+    "height": 724
+  },
+  "output_canvas": {
+    "width": 564,
+    "height": 655
+  },
+  "sequence": [
+    1,
+    2,
+    3,
+    4,
+    5
+  ],
+  "duration_ms": 2500,
+  "frame_duration_ms": 500,
+  "loop": false,
+  "alignment": "opaque torso center X and shoe-sole Y; translation only",
+  "resampling": "none; source pixels copied exactly",
+  "frames": [
+    {
+      "frame": 1,
+      "source_visible_bbox": [
+        0,
+        104,
+        385,
+        628
+      ],
+      "source_stable_bbox": [
+        10,
+        107,
+        375,
+        625
+      ],
+      "source_edge_contact": {
+        "left": true,
+        "right": false,
+        "top": false,
+        "bottom": false
+      },
+      "translation_xy": [
+        89,
+        24
+      ],
+      "scale": 1.0,
+      "aligned_foot_y": 545,
+      "aligned_torso_center_x": 282,
+      "output_bbox": {
+        "left": 89,
+        "top": 24,
+        "right": 474,
+        "bottom": 548,
+        "width": 386,
+        "height": 525,
+        "center_x": 281.5
+      }
+    },
+    {
+      "frame": 2,
+      "source_visible_bbox": [
+        400,
+        134,
+        815,
+        665
+      ],
+      "source_stable_bbox": [
+        403,
+        136,
+        800,
+        630
+      ],
+      "source_edge_contact": {
+        "left": false,
+        "right": false,
+        "top": false,
+        "bottom": false
+      },
+      "translation_xy": [
+        81,
+        49
+      ],
+      "scale": 1.0,
+      "aligned_foot_y": 545,
+      "aligned_torso_center_x": 282,
+      "output_bbox": {
+        "left": 81,
+        "top": 49,
+        "right": 496,
+        "bottom": 580,
+        "width": 416,
+        "height": 532,
+        "center_x": 288.5
+      }
+    },
+    {
+      "frame": 3,
+      "source_visible_bbox": [
+        815,
+        133,
+        1254,
+        691
+      ],
+      "source_stable_bbox": [
+        817,
+        190,
+        1245,
+        629
+      ],
+      "source_edge_contact": {
+        "left": false,
+        "right": false,
+        "top": false,
+        "bottom": false
+      },
+      "translation_xy": [
+        65,
+        49
+      ],
+      "scale": 1.0,
+      "aligned_foot_y": 545,
+      "aligned_torso_center_x": 282,
+      "output_bbox": {
+        "left": 65,
+        "top": 49,
+        "right": 504,
+        "bottom": 607,
+        "width": 440,
+        "height": 559,
+        "center_x": 284.5
+      }
+    },
+    {
+      "frame": 4,
+      "source_visible_bbox": [
+        1257,
+        239,
+        1710,
+        642
+      ],
+      "source_stable_bbox": [
+        1259,
+        241,
+        1701,
+        635
+      ],
+      "source_edge_contact": {
+        "left": false,
+        "right": false,
+        "top": false,
+        "bottom": false
+      },
+      "translation_xy": [
+        56,
+        149
+      ],
+      "scale": 1.0,
+      "aligned_foot_y": 545,
+      "aligned_torso_center_x": 282,
+      "output_bbox": {
+        "left": 56,
+        "top": 149,
+        "right": 509,
+        "bottom": 552,
+        "width": 454,
+        "height": 404,
+        "center_x": 282.5
+      }
+    },
+    {
+      "frame": 5,
+      "source_visible_bbox": [
+        1704,
+        263,
+        2171,
+        655
+      ],
+      "source_stable_bbox": [
+        1706,
+        265,
+        2162,
+        637
+      ],
+      "source_edge_contact": {
+        "left": false,
+        "right": true,
+        "top": false,
+        "bottom": false
+      },
+      "translation_xy": [
+        48,
+        171
+      ],
+      "scale": 1.0,
+      "aligned_foot_y": 545,
+      "aligned_torso_center_x": 282,
+      "output_bbox": {
+        "left": 48,
+        "top": 171,
+        "right": 515,
+        "bottom": 563,
+        "width": 468,
+        "height": 393,
+        "center_x": 281.5
+      }
+    }
+  ]
+}

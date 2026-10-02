@@ -41,6 +41,7 @@ def main() -> None:
     args.output_dir.mkdir(parents=True, exist_ok=True)
     source.save(args.output_dir / "source-strip.png", optimize=True)
     outputs: list[Image.Image] = []
+    cuts: list[Image.Image] = []
     frames: list[dict[str, object]] = []
 
     for index, (analysis, (visible_mask, _)) in enumerate(zip(analyses, masks), 1):
@@ -48,6 +49,7 @@ def main() -> None:
         isolated = np.where(visible_mask[:, :, None], pixels, 0).astype(np.uint8)
         crop = Image.fromarray(isolated, "RGBA").crop((left, top, right + 1, bottom + 1))
         crop.save(args.output_dir / f"cut-{index:02d}.png", optimize=True)
+        cuts.append(crop)
 
         local_torso_x = float(analysis["torso_center_x"]) - left
         local_foot_y = int(analysis["foot_y"]) - top
@@ -68,6 +70,20 @@ def main() -> None:
             "aligned_torso_center_x": target_torso_x,
             "output_bbox": splitter.alpha_metrics(canvas),
         })
+
+    cut_thumb_width = 260
+    cut_thumb_height = 330
+    cut_contact = Image.new("RGBA", (cut_thumb_width * 5, cut_thumb_height + 42), (8, 12, 24, 255))
+    cut_draw = ImageDraw.Draw(cut_contact)
+    for index, image in enumerate(cuts, 1):
+        scale = min(cut_thumb_width / image.width, cut_thumb_height / image.height)
+        size = (round(image.width * scale), round(image.height * scale))
+        preview = image.resize(size, Image.Resampling.LANCZOS)
+        x = (index - 1) * cut_thumb_width + (cut_thumb_width - size[0]) // 2
+        y = cut_thumb_height - size[1]
+        cut_contact.alpha_composite(preview, (x, y))
+        cut_draw.text(((index - 1) * cut_thumb_width + 10, cut_thumb_height + 12), f"Cut {index}", fill=(235, 240, 255, 255))
+    cut_contact.save(args.output_dir / "cut-contact-sheet.png", optimize=True)
 
     thumb_width = 260
     thumb_height = round(thumb_width * canvas_size[1] / canvas_size[0])
