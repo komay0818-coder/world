@@ -256,6 +256,12 @@ const characterIdleAnimations = {
     order: [0, 1, 2, 3, 2, 1],
     frameDurationMs: 1000 / 3
   },
+  'orc:hunter': {
+    frames: ['frame-01.png', 'frame-02.png', 'frame-03-replacement.png', 'frame-04.png', 'frame-05.png']
+      .map((filename) => `assets/character-portraits/calibration-tests/orc-hunter-five-frame/${filename}?v=1`),
+    order: [0, 1, 2, 3, 4],
+    frameDurationMs: 500
+  },
   'orc:mage': {
     frames: [1, 2, 3, 4, 5].map((frame) => `assets/character-portraits/calibration-tests/orc-mage-fire-cast-five-frame-aligned-v3/frame-${String(frame).padStart(2, '0')}.png?v=1`),
     order: [0, 2, 3, 4],
