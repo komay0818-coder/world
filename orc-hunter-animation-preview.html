@@ -17,13 +17,13 @@
 <body>
   <main>
     <section class="stage" aria-label="半獸人獵人五幀動畫預覽"><img id="preview" alt="半獸人獵人動畫" /></section>
-    <p class="status">單次播放 2.5 秒・1 → 2 → 3 → 4 → 5 → 4 → 3 → 2</p>
+    <p class="status">單次播放 2.5 秒・1 → 2 → 3 → 4 → 5</p>
   </main>
   <script>
     const base = 'assets/character-portraits/calibration-tests/orc-hunter-five-frame/';
     const frames = ['frame-01.png', 'frame-02.png', 'frame-03-replacement.png', 'frame-04.png', 'frame-05.png'];
-    const order = [0, 1, 2, 3, 4, 3, 2, 1];
-    const frameDurationMs = 312.5;
+    const order = [0, 1, 2, 3, 4];
+    const frameDurationMs = 500;
     const preview = document.querySelector('#preview');
     let orderIndex = 0;
     frames.forEach((filename) => { const image = new Image(); image.src = base + filename; });
