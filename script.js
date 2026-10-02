@@ -259,6 +259,16 @@ const characterIdleAnimations = {
     ],
     order: [0, 1, 2, 3, 4, 5, 4, 3, 2, 1],
     frameDurationMs: 320
+  },
+  'undead:assassin': {
+    frames: [1, 5, 2, 3].map((frame) => `assets/character-portraits/calibration-tests/undead-assassin-five-frame/frame-${String(frame).padStart(2, '0')}.png?v=1`),
+    order: [0, 1, 2, 3, 2, 1],
+    frameDurationMs: 250
+  },
+  'undead:priest': {
+    frames: [1, 2, 3, 4, 5].map((frame) => `assets/character-portraits/calibration-tests/undead-mage-five-frame-v1/frame-${String(frame).padStart(2, '0')}.png?v=1`),
+    order: [0, 1, 2, 3, 4, 3, 2, 1],
+    frameDurationMs: 312.5
   }
 };
 const characterIdlePreloads = new Map();
