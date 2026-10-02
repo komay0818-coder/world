@@ -14,7 +14,7 @@
     <p class="status">2.5 秒循環・1 → 2 → 3 → 4 → 5 → 4 → 3 → 2</p>
   </main>
   <script>
-    const base = 'assets/character-portraits/calibration-tests/orc-mage-fire-cast-five-frame-aligned-v2/';
+    const base = 'assets/character-portraits/calibration-tests/orc-mage-fire-cast-five-frame-aligned-v3/';
     const frames = [1, 2, 3, 4, 5].map((frame) => `${base}frame-${String(frame).padStart(2, '0')}.png?v=1`);
     const order = [0, 1, 2, 3, 4, 3, 2, 1];
     const frameDurationMs = 2500 / order.length;
