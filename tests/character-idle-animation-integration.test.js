@@ -34,6 +34,9 @@ for (let frame = 1; frame <= 5; frame += 1) {
 }
 assert.ok(fs.existsSync(path.join(root, 'assets', 'character-portraits', 'calibration-tests', 'elf-hunter-five-frame-v1', 'frame-04-05-transition.png')), 'elf hunter transition frame exists');
 for (let frame = 1; frame <= 5; frame += 1) {
+  assert.ok(fs.existsSync(path.join(root, 'assets', 'character-portraits', 'calibration-tests', 'undead-warrior-five-frame', `frame-${String(frame).padStart(2, '0')}.png`)), `undead warrior frame ${frame} exists`);
+}
+for (let frame = 1; frame <= 5; frame += 1) {
   assert.ok(fs.existsSync(path.join(root, 'assets', 'character-portraits', 'calibration-tests', 'human-priest-five-frame-v1', `frame-${String(frame).padStart(2, '0')}.png`)), `human priest frame ${frame} exists`);
 }
 for (const frame of [1, 5, 2, 3]) {
@@ -58,6 +61,7 @@ assert.match(script, /'orc:hunter':\s*\{[\s\S]*?frame-03-replacement\.png[\s\S]*
 assert.match(script, /'orc:mage':\s*\{[\s\S]*?orc-mage-fire-cast-five-frame-aligned-v3[\s\S]*?order: \[0, 2, 3, 4\],[\s\S]*?frameDurationMs: 500/, 'orc mage uses the approved two-second cast sequence without frame two');
 assert.match(script, /'elf:mage':\s*\{[\s\S]*?order: \[0, 1, 2, 3, 4, 3, 2, 1\],[\s\S]*?frameDurationMs: 180/, 'elf mage uses the five-frame ping-pong sequence');
 assert.match(script, /'elf:hunter':\s*\{[\s\S]*?frame-04-05-transition\.png[\s\S]*?order: \[0, 1, 2, 3, 4, 5, 4, 3, 2, 1\],[\s\S]*?frameDurationMs: 320/, 'only elf hunter uses the 3.2-second six-frame ping-pong sequence');
+assert.match(script, /'undead:warrior':\s*\{[\s\S]*?undead-warrior-five-frame[\s\S]*?order: \[0, 1, 2, 3, 4\],[\s\S]*?frameDurationMs: 500/, 'undead warrior uses the approved 2.5-second five-frame sequence');
 assert.match(script, /'undead:assassin':\s*\{[\s\S]*?\[1, 5, 2, 3\][\s\S]*?order: \[0, 1, 2, 3, 2, 1\],[\s\S]*?frameDurationMs: 250/, 'undead assassin uses the approved 1.5-second reordered sequence');
 assert.match(script, /'undead:mage':\s*\{[\s\S]*?undead-mage-cast-four-frame-aligned-v1[\s\S]*?order: \[0, 1, 2, 3, 2, 1\],[\s\S]*?frameDurationMs: 2500 \/ 6/, 'undead mage uses the approved 2.5-second four-frame cast sequence');
 assert.match(script, /'undead:priest':\s*\{[\s\S]*?undead-chain-six-frame-v2[\s\S]*?order: \[0, 1, 2, 3, 4, 5, 4, 3, 2, 1\],[\s\S]*?frameDurationMs: 250/, 'undead priest uses the approved 2.5-second six-frame chain sequence');
