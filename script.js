@@ -277,6 +277,11 @@ const characterIdleAnimations = {
     order: [0, 1, 2, 3, 4],
     frameDurationMs: 500
   },
+  'elf:warrior': {
+    frames: [1, 2, 3, 4, 5].map((frame) => `assets/character-portraits/calibration-tests/elf-warrior-five-frame-v1-hq/frame-${String(frame).padStart(2, '0')}.png?v=1`),
+    order: [0, 1, 2, 3, 4],
+    frameDurationMs: 500
+  },
   'elf:mage': {
     frames: [1, 2, 3, 4, 5].map((frame) => `assets/character-portraits/calibration-tests/elf-mage-five-frame-v2/frame-${String(frame).padStart(2, '0')}.png?v=1`),
     order: [0, 1, 2, 3, 4, 3, 2, 1],
