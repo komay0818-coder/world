@@ -14,6 +14,9 @@ for (let frame = 1; frame <= 3; frame += 1) {
 for (let frame = 1; frame <= 4; frame += 1) {
   assert.ok(fs.existsSync(path.join(root, 'assets', 'character-portraits', 'calibration-tests', 'human-assassin-strip-v1', `frame-${String(frame).padStart(2, '0')}.png`)), `human assassin frame ${frame} exists`);
 }
+for (let frame = 1; frame <= 4; frame += 1) {
+  assert.ok(fs.existsSync(path.join(root, 'assets', 'character-portraits', 'calibration-tests', 'human-hunter-strip-v1', `frame-${String(frame).padStart(2, '0')}.png`)), `human hunter frame ${frame} exists`);
+}
 for (let frame = 1; frame <= 5; frame += 1) {
   assert.ok(fs.existsSync(path.join(root, 'assets', 'character-portraits', 'calibration-tests', 'elf-hunter-five-frame-v1', `frame-${String(frame).padStart(2, '0')}.png`)), `elf hunter frame ${frame} exists`);
 }
@@ -53,6 +56,7 @@ assert.match(html, /human-mage-idle-03\.png/, 'preview starts from the selected 
 assert.match(script, /const characterIdleAnimations\s*=\s*\{/, 'characters use one shared animation registry');
 assert.match(script, /'human:warrior':\s*\{[\s\S]*?human-warrior-three-frame-v1[\s\S]*?order: \[0, 1, 2\],[\s\S]*?frameDurationMs: 2000 \/ 3/, 'human warrior uses the approved two-second three-frame sequence');
 assert.match(script, /'human:assassin':\s*\{[\s\S]*?human-assassin-strip-v1[\s\S]*?order: \[0, 1, 2, 3\],[\s\S]*?frameDurationMs: 500/, 'human assassin uses the approved two-second four-frame sequence');
+assert.match(script, /'human:hunter':\s*\{[\s\S]*?human-hunter-strip-v1[\s\S]*?order: \[0, 1, 2, 3\],[\s\S]*?frameDurationMs: 500/, 'human hunter uses the approved two-second four-frame sequence');
 assert.match(script, /'human:mage':\s*\{ portrait: 'assets\/character-portraits\/human-mage-idle-03\.png/, 'human mage keeps its single-PNG pilot');
 assert.match(script, /'human:priest':\s*\{[\s\S]*?order: \[0, 1, 2, 3, 4, 3, 2, 1\],[\s\S]*?frameDurationMs: 180/, 'human priest uses the five-frame ping-pong sequence');
 assert.match(script, /'orc:warrior':\s*\{[\s\S]*?order: \[0, 1, 2, 1\],[\s\S]*?frameDurationMs: 437\.5/, 'orc warrior uses the 1.75-second three-frame ping-pong sequence');
