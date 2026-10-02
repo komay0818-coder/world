@@ -27,6 +27,9 @@ for (let frame = 1; frame <= 5; frame += 1) {
 for (const frame of [1, 5, 2, 3]) {
   assert.ok(fs.existsSync(path.join(root, 'assets', 'character-portraits', 'calibration-tests', 'undead-assassin-five-frame', `frame-${String(frame).padStart(2, '0')}.png`)), `undead assassin frame ${frame} exists`);
 }
+for (let frame = 1; frame <= 4; frame += 1) {
+  assert.ok(fs.existsSync(path.join(root, 'assets', 'character-portraits', 'calibration-tests', 'undead-mage-cast-four-frame-aligned-v1', `frame-${String(frame).padStart(2, '0')}.png`)), `undead mage frame ${frame} exists`);
+}
 for (let frame = 1; frame <= 6; frame += 1) {
   assert.ok(fs.existsSync(path.join(root, 'assets', 'character-portraits', 'calibration-tests', 'undead-chain-six-frame-v2', `frame-${String(frame).padStart(2, '0')}.png`)), `undead priest frame ${frame} exists`);
 }
@@ -40,6 +43,7 @@ assert.match(script, /'orc:assassin':\s*\{[\s\S]*?order: \[0, 1, 2, 3, 2, 1\],[\
 assert.match(script, /'elf:mage':\s*\{[\s\S]*?order: \[0, 1, 2, 3, 4, 3, 2, 1\],[\s\S]*?frameDurationMs: 180/, 'elf mage uses the five-frame ping-pong sequence');
 assert.match(script, /'elf:hunter':\s*\{[\s\S]*?frame-04-05-transition\.png[\s\S]*?order: \[0, 1, 2, 3, 4, 5, 4, 3, 2, 1\],[\s\S]*?frameDurationMs: 320/, 'only elf hunter uses the 3.2-second six-frame ping-pong sequence');
 assert.match(script, /'undead:assassin':\s*\{[\s\S]*?\[1, 5, 2, 3\][\s\S]*?order: \[0, 1, 2, 3, 2, 1\],[\s\S]*?frameDurationMs: 250/, 'undead assassin uses the approved 1.5-second reordered sequence');
+assert.match(script, /'undead:mage':\s*\{[\s\S]*?undead-mage-cast-four-frame-aligned-v1[\s\S]*?order: \[0, 1, 2, 3, 2, 1\],[\s\S]*?frameDurationMs: 2500 \/ 6/, 'undead mage uses the approved 2.5-second four-frame cast sequence');
 assert.match(script, /'undead:priest':\s*\{[\s\S]*?undead-chain-six-frame-v2[\s\S]*?order: \[0, 1, 2, 3, 4, 5, 4, 3, 2, 1\],[\s\S]*?frameDurationMs: 250/, 'undead priest uses the approved 2.5-second six-frame chain sequence');
 assert.doesNotMatch(script, /\.gif/, 'idle previews do not use GIF files');
 assert.match(script, /preloadCharacterIdleFrames\(frames\)/, 'sequence frames are preloaded before playback');
