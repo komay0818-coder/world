@@ -6,7 +6,7 @@
 .race-grid .choice-card{min-height:116px}.class-choice{min-height:78px}
 .creation-idle-preview{position:relative;width:100%;height:clamp(260px,52vh,430px);margin:0 0 20px;overflow:hidden;border:1px solid rgba(255,255,255,.12);border-radius:16px;background:radial-gradient(circle at 50% 36%,rgba(70,94,142,.58),rgba(10,17,32,.88) 68%)}
 .creation-idle-preview[hidden]{display:none}.creation-idle-preview img{position:absolute;left:50%;bottom:0;display:block;width:min(66%,286px);height:auto;max-width:none;transform:translateX(-50%) scale(1);transform-origin:bottom center;user-select:none;pointer-events:none}
-.creation-idle-preview img.is-idle-animated{animation:character-idle-breathe 3.2s ease-in-out infinite}
+.creation-idle-preview img.is-idle-animated{animation:character-idle-breathe 3.2s ease-in-out 1}
 @keyframes character-idle-breathe{0%,100%{transform:translateX(-50%) scale(1)}50%{transform:translateX(-50%) scale(1.004)}}
 @media(prefers-reduced-motion:reduce){.creation-idle-preview img.is-idle-animated{animation:none}}
 @media(max-width:480px){.creation-idle-preview{height:300px}.creation-idle-preview img{width:min(64%,210px)}}

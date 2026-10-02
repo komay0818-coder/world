@@ -18,6 +18,9 @@ for (let frame = 1; frame <= 4; frame += 1) {
   assert.ok(fs.existsSync(path.join(root, 'assets', 'character-portraits', 'calibration-tests', 'orc-assassin-four-frame-v1', `frame-${String(frame).padStart(2, '0')}.png`)), `orc assassin frame ${frame} exists`);
 }
 for (let frame = 1; frame <= 5; frame += 1) {
+  assert.ok(fs.existsSync(path.join(root, 'assets', 'character-portraits', 'calibration-tests', 'orc-mage-fire-cast-five-frame-aligned-v3', `frame-${String(frame).padStart(2, '0')}.png`)), `orc mage frame ${frame} exists`);
+}
+for (let frame = 1; frame <= 5; frame += 1) {
   assert.ok(fs.existsSync(path.join(root, 'assets', 'character-portraits', 'calibration-tests', 'elf-mage-five-frame-v2', `frame-${String(frame).padStart(2, '0')}.png`)), `elf mage frame ${frame} exists`);
 }
 assert.ok(fs.existsSync(path.join(root, 'assets', 'character-portraits', 'calibration-tests', 'elf-hunter-five-frame-v1', 'frame-04-05-transition.png')), 'elf hunter transition frame exists');
@@ -40,6 +43,7 @@ assert.match(script, /'human:mage':\s*\{ portrait: 'assets\/character-portraits\
 assert.match(script, /'human:priest':\s*\{[\s\S]*?order: \[0, 1, 2, 3, 4, 3, 2, 1\],[\s\S]*?frameDurationMs: 180/, 'human priest uses the five-frame ping-pong sequence');
 assert.match(script, /'orc:warrior':\s*\{[\s\S]*?order: \[0, 1, 2, 1\],[\s\S]*?frameDurationMs: 437\.5/, 'orc warrior uses the 1.75-second three-frame ping-pong sequence');
 assert.match(script, /'orc:assassin':\s*\{[\s\S]*?order: \[0, 1, 2, 3, 2, 1\],[\s\S]*?frameDurationMs: 1000 \/ 3/, 'orc assassin uses the two-second four-frame ping-pong sequence');
+assert.match(script, /'orc:mage':\s*\{[\s\S]*?orc-mage-fire-cast-five-frame-aligned-v3[\s\S]*?order: \[0, 2, 3, 4\],[\s\S]*?frameDurationMs: 500/, 'orc mage uses the approved two-second cast sequence without frame two');
 assert.match(script, /'elf:mage':\s*\{[\s\S]*?order: \[0, 1, 2, 3, 4, 3, 2, 1\],[\s\S]*?frameDurationMs: 180/, 'elf mage uses the five-frame ping-pong sequence');
 assert.match(script, /'elf:hunter':\s*\{[\s\S]*?frame-04-05-transition\.png[\s\S]*?order: \[0, 1, 2, 3, 4, 5, 4, 3, 2, 1\],[\s\S]*?frameDurationMs: 320/, 'only elf hunter uses the 3.2-second six-frame ping-pong sequence');
 assert.match(script, /'undead:assassin':\s*\{[\s\S]*?\[1, 5, 2, 3\][\s\S]*?order: \[0, 1, 2, 3, 2, 1\],[\s\S]*?frameDurationMs: 250/, 'undead assassin uses the approved 1.5-second reordered sequence');
@@ -48,11 +52,13 @@ assert.match(script, /'undead:priest':\s*\{[\s\S]*?undead-chain-six-frame-v2[\s\
 assert.doesNotMatch(script, /\.gif/, 'idle previews do not use GIF files');
 assert.match(script, /preloadCharacterIdleFrames\(frames\)/, 'sequence frames are preloaded before playback');
 assert.match(script, /clearInterval\(characterIdleTimer\)/, 'switching roles stops the prior sequence timer');
+assert.match(script, /if \(orderIndex >= animation\.order\.length - 1\)[\s\S]*?characterIdleTimer = null/, 'idle sequences stop after one complete playback');
+assert.doesNotMatch(script, /orderIndex = \(orderIndex \+ 1\) % animation\.order\.length/, 'idle sequences do not loop');
 assert.match(script, /characterIdleReducedMotion\.matches/, 'reduced-motion mode holds on the first frame');
 assert.match(script, /characterIdleAnimations\[animationKey\]/, 'race and class select the configured shared animation');
 assert.match(script, /stopCharacterIdleAnimation\(\)/, 'animation has an explicit stop path');
 assert.match(css, /\.creation-idle-preview img\{[^}]*bottom:0;[^}]*width:min\(66%,286px\);[^}]*height:auto;[^}]*transform:translateX\(-50%\) scale\(1\);[^}]*transform-origin:bottom center;/, 'portrait keeps its existing size and a bottom-center foot anchor');
 assert.match(css, /@keyframes character-idle-breathe\{0%,100%\{transform:translateX\(-50%\) scale\(1\)\}50%\{transform:translateX\(-50%\) scale\(1\.004\)\}\}/, 'breathing uses only a subtle proportional scale');
-assert.match(css, /animation:character-idle-breathe 3\.2s ease-in-out infinite/, 'breathing loops gently at the requested pace');
+assert.match(css, /animation:character-idle-breathe 3\.2s ease-in-out 1/, 'single-PNG breathing plays only once');
 
 console.log('character-single-png-idle-integration: assertions passed');

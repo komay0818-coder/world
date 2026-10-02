@@ -246,6 +246,11 @@ const characterIdleAnimations = {
     order: [0, 1, 2, 3, 2, 1],
     frameDurationMs: 1000 / 3
   },
+  'orc:mage': {
+    frames: [1, 2, 3, 4, 5].map((frame) => `assets/character-portraits/calibration-tests/orc-mage-fire-cast-five-frame-aligned-v3/frame-${String(frame).padStart(2, '0')}.png?v=1`),
+    order: [0, 2, 3, 4],
+    frameDurationMs: 500
+  },
   'elf:mage': {
     frames: [1, 2, 3, 4, 5].map((frame) => `assets/character-portraits/calibration-tests/elf-mage-five-frame-v2/frame-${String(frame).padStart(2, '0')}.png?v=1`),
     order: [0, 1, 2, 3, 4, 3, 2, 1],
@@ -674,7 +679,12 @@ async function startCharacterIdleAnimation(animationKey) {
   if (characterIdleReducedMotion.matches) return;
   let orderIndex = 0;
   characterIdleTimer = setInterval(() => {
-    orderIndex = (orderIndex + 1) % animation.order.length;
+    if (orderIndex >= animation.order.length - 1) {
+      clearInterval(characterIdleTimer);
+      characterIdleTimer = null;
+      return;
+    }
+    orderIndex += 1;
     characterIdleFrame.src = frames[animation.order[orderIndex]];
   }, animation.frameDurationMs);
 }
