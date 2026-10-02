@@ -11,12 +11,12 @@
 <body>
   <main class="preview">
     <div class="stage"><img id="actor" alt="半獸人法師連續施法動作"></div>
-    <p class="status">單次播放 2.5 秒・1 → 3 → 4 → 5（略過第 2 幀）</p>
+    <p class="status">單次播放 2 秒・1 → 3 → 4 → 5（略過第 2 幀）</p>
   </main>
   <script>
     const base = 'assets/character-portraits/calibration-tests/orc-mage-fire-cast-five-frame-aligned-v3/';
     const frames = [1, 3, 4, 5].map((frame) => `${base}frame-${String(frame).padStart(2, '0')}.png?v=1`);
-    const frameDurationMs = 2500 / frames.length;
+    const frameDurationMs = 2000 / frames.length;
     frames.forEach((source) => { const image = new Image(); image.src = source; });
     const actor = document.querySelector('#actor');
     let step = 0;
