@@ -24,8 +24,13 @@ const factions = {
 };
 const classes = [{ id: 'warrior', icon: '⚔', portrait: 4, name: '戰士' }, { id: 'assassin', icon: '🗡', portrait: 5, name: '刺客' }, { id: 'hunter', icon: '🏹', portrait: 6, name: '獵人' }, { id: 'mage', icon: '✦', portrait: 7, name: '法師' }, { id: 'priest', icon: '✚', portrait: 8, name: '牧師' }];
 const isJobHiddenForRace = (raceId, jobId) => raceId === 'elf' && jobId === 'priest';
-const isJobUnavailableForRace = (raceId, jobId) => raceId === 'orc' && jobId === 'priest';
+const isJobUnavailableForRace = (raceId, jobId) => (raceId === 'orc' && jobId === 'priest') || (raceId === 'undead' && jobId === 'hunter');
 const canCreateRaceJob = (raceId, jobId) => !isJobHiddenForRace(raceId, jobId) && !isJobUnavailableForRace(raceId, jobId);
+const getRaceJobRestrictionMessage = (raceId, jobId) => raceId === 'elf' && jobId === 'priest'
+  ? '夜精靈沒有牧師職業。'
+  : raceId === 'undead' && jobId === 'hunter'
+    ? '不死族無法創立獵人職業。'
+    : '半獸人無法創立牧師職業。';
 const classIcons = Object.fromEntries(classes.map((job) => [job.id, job.icon]));
 const raceTotems = { human: '☀', elf: '❈', orc: '⛧', undead: '☾' };
 const jobMarks = { warrior: '⛨', assassin: '◈', hunter: '➶', mage: '✦', priest: '✥' };
@@ -752,7 +757,7 @@ function renderCreation() {
   raceChoices.innerHTML = factions[selection.faction].map((race) => `<button class="choice-card ${race.id === selection.race ? 'selected' : ''}" type="button" data-race="${race.id}"><span class="creation-race-icon race-${race.id}" aria-hidden="true"></span><strong>${race.name}</strong><small>${race.trait}</small></button>`).join('');
   classChoices.innerHTML = classes.filter((job) => !isJobHiddenForRace(selection.race, job.id)).map((job) => {
     const unavailable = isJobUnavailableForRace(selection.race, job.id);
-    return `<button class="class-choice ${job.id === selection.job ? 'selected' : ''}" type="button" data-job="${job.id}" ${unavailable ? 'disabled aria-disabled="true" title="半獸人無法成為牧師"' : ''}><span class="creation-job-icon" aria-hidden="true">${jobMarks[job.id] || job.icon}</span><small>${job.name}${unavailable ? '（不可選）' : ''}</small></button>`;
+    return `<button class="class-choice ${job.id === selection.job ? 'selected' : ''}" type="button" data-job="${job.id}" ${unavailable ? `disabled aria-disabled="true" title="${getRaceJobRestrictionMessage(selection.race, job.id)}"` : ''}><span class="creation-job-icon" aria-hidden="true">${jobMarks[job.id] || job.icon}</span><small>${job.name}${unavailable ? '（不可選）' : ''}</small></button>`;
   }).join('');
   syncCharacterIdleAnimation();
 }
@@ -7907,13 +7912,13 @@ document.querySelector('#adventure-button').addEventListener('click', () => {
 document.querySelector('#village-menu-button')?.addEventListener('click', openVillage);
 document.querySelectorAll('[data-faction]').forEach((card) => card.addEventListener('click', () => { selection.faction = card.dataset.faction; selection.race = factions[selection.faction][0].id; document.querySelectorAll('[data-faction]').forEach((item) => item.classList.toggle('selected', item === card)); renderCreation(); }));
 raceChoices.addEventListener('click', (event) => { const choice = event.target.closest('[data-race]'); if (choice) { selection.race = choice.dataset.race; if (!canCreateRaceJob(selection.race, selection.job)) selection.job = 'warrior'; renderCreation(); } });
-classChoices.addEventListener('click', (event) => { const choice = event.target.closest('[data-job]'); if (!choice) return; if (!canCreateRaceJob(selection.race, choice.dataset.job)) { showToast(selection.race === 'elf' ? '夜精靈沒有牧師職業。' : '半獸人無法創立牧師職業。'); return; } selection.job = choice.dataset.job; renderCreation(); });
+classChoices.addEventListener('click', (event) => { const choice = event.target.closest('[data-job]'); if (!choice) return; if (!canCreateRaceJob(selection.race, choice.dataset.job)) { showToast(getRaceJobRestrictionMessage(selection.race, choice.dataset.job)); return; } selection.job = choice.dataset.job; renderCreation(); });
 document.querySelector('#back-to-menu').addEventListener('click', () => { characterScreen.classList.add('hidden'); menuScreen.classList.remove('hidden'); stopCharacterIdleAnimation(); });
 document.querySelector('#create-character').addEventListener('click', (event) => {
   if (canCreateRaceJob(selection.race, selection.job)) return;
   event.preventDefault();
   event.stopImmediatePropagation();
-  showToast(selection.race === 'elf' ? '夜精靈沒有牧師職業。' : '半獸人無法創立牧師職業。');
+  showToast(getRaceJobRestrictionMessage(selection.race, selection.job));
 }, true);
 document.querySelector('#create-character').addEventListener('click', () => { const name = characterName.value.trim(); if (!name) { showToast('請先為角色取名。'); characterName.focus(); return; } const lockedFaction = getLockedFactionForCreation(); if (lockedFaction && selection.faction !== lockedFaction) { selection.faction = lockedFaction; selection.race = factions[lockedFaction][0].id; renderCreation(); showToast('帳號角色必須選擇相同陣營。'); return; } const race = factions[selection.faction].find((item) => item.id === selection.race); const job = classes.find((item) => item.id === selection.job)?.name || selection.job; const character = { ...selection, id: `character-slot-${creationSlotIndex + 1}`, name }; const progress = { level: 1, xp: 0, gold: 0, potions: 5, manaPotions: 0, selectedMapId: 'beginner-plains', inventory: [], equipment: selection.job === 'hunter' ? createStarterEquipment('hunter') : emptyEquipment(), lastActiveAt: Date.now(), ...(selection.job === 'assassin' ? { energy: 100, maxEnergy: 100, energyUpdatedAt: Date.now() } : {}) }; const slots = getCharacterSlots(); slots[creationSlotIndex] = { character, progress }; progress.party = PartyPolicy.normalizeParty(null, { slots, mainSlotIndex: creationSlotIndex, mainCharacter: character, mainProgress: progress }); localStorage.setItem('stardust-character-slots', JSON.stringify(slots)); setActiveCharacterSlotIndex(creationSlotIndex); localStorage.setItem('stardust-character', JSON.stringify(character)); localStorage.setItem('stardust-progress', JSON.stringify(progress)); characterScreen.classList.add('hidden'); menuScreen.classList.remove('hidden'); stopCharacterIdleAnimation(); document.querySelector('#character-title').textContent = '建立你的角色'; showToast(`${race.name}${job}「${name}」已儲存至角色欄位 ${creationSlotIndex + 1}！`); });
 document.querySelector('#character-roster-button').addEventListener('click', renderCharacterRoster);
