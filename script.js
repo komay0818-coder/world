@@ -785,7 +785,7 @@ function renderCreation() {
     const factionRaceChoices = document.querySelector(`#${factionId}-race-choices`);
     factionRaceChoices.innerHTML = races.map((race) => {
       const unavailable = factionId !== selection.faction;
-      return `<button class="choice-card ${race.id === selection.race ? 'selected' : ''}" type="button" data-race="${race.id}" ${unavailable ? 'disabled aria-disabled="true"' : ''}><span class="creation-race-icon race-${race.id}" aria-hidden="true"></span><strong>${race.name}</strong><small>${race.trait}</small></button>`;
+      return `<button class="choice-card ${race.id === selection.race ? 'selected' : ''}" type="button" data-race="${race.id}" ${unavailable ? 'disabled aria-disabled="true"' : ''}><strong>${race.name}</strong></button>`;
     }).join('');
   });
   classChoices.innerHTML = classes.filter((job) => !isJobHiddenForRace(selection.race, job.id)).map((job) => {

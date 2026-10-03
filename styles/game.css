@@ -70,6 +70,12 @@
 .battle-field[data-map-id="beginner-plains"] .enemy-unit .enemy-art::after{scale:-1 1!important}
 .battle-field[data-map-id="beginner-plains"] .enemy-unit .goblin-art{scale:1 1!important}
 
+#character-screen .creation-faction-panel{background:rgba(9,16,30,.4);border-color:rgba(255,255,255,.16)}
+#character-screen .faction-title-button{display:block;width:100%;margin:0 0 14px;border:0;padding:2px 8px;background:transparent;color:#fff4d3;font:800 20px/1.3 "Noto Serif TC","Songti TC",serif;text-align:center;letter-spacing:.12em;cursor:pointer;text-shadow:0 2px 5px rgba(0,0,0,.72)}
+#character-screen .faction-title-button:hover,#character-screen .faction-title-button:focus-visible{color:#fff;outline:none}
+#character-screen .faction-title-button.faction-locked{color:#788197;cursor:not-allowed;opacity:.55}
+#character-screen .faction-race-grid .choice-card{min-height:52px;padding:10px 12px;background:rgba(8,15,28,.42)}
+
 /* Desktop character creation stage */
 @media (min-width: 901px) {
   body:has(#character-screen:not(.hidden)){overflow:hidden}
@@ -81,14 +87,16 @@
   #character-screen .creation-character-stage{align-self:center;justify-self:center;width:422px}
   #character-screen .creation-idle-preview{width:422px;height:430px;margin:0;overflow:visible;border-color:rgba(255,255,255,.07);background:radial-gradient(circle at 50% 43%,rgba(42,58,86,.17),rgba(8,13,26,.26) 74%);box-shadow:none}
   #character-screen .creation-idle-preview img{bottom:0;width:min(90%,380px);max-height:calc(100% - 8px);object-fit:contain;object-position:center bottom;filter:drop-shadow(0 13px 10px rgba(0,0,0,.32))}
-  #character-screen .creation-faction-panel{align-self:center;width:100%;padding:16px;border:1px solid rgba(255,255,255,.13);border-radius:16px;background:rgba(12,20,38,.36);backdrop-filter:blur(5px);transition:opacity .2s,border-color .2s,background-color .2s}
-  #character-screen .creation-faction-panel.selected{border-color:rgba(224,205,147,.72);background:rgba(28,36,55,.5)}
-  #character-screen .creation-faction-panel>.section-label:first-child{margin-bottom:9px;color:#fff4d3;font:800 20px/1.3 "Noto Serif TC","Songti TC",serif;text-align:center;letter-spacing:.12em}
-  #character-screen .creation-faction-panel .faction-grid{grid-template-columns:1fr;margin-bottom:14px}
-  #character-screen .creation-faction-panel .faction-grid .choice-card{min-height:82px}
+  #character-screen .creation-faction-panel{align-self:center;width:100%;padding:16px;border:1px solid rgba(255,255,255,.16);border-radius:16px;background:rgba(9,16,30,.34);backdrop-filter:blur(5px);transition:opacity .2s,border-color .2s,background-color .2s}
+  #character-screen .creation-faction-panel.selected{border-color:rgba(224,205,147,.62);background:rgba(14,22,38,.46)}
+  #character-screen .faction-title-button{display:block;width:100%;margin:0 0 14px;border:0;padding:2px 8px;background:transparent;color:#fff4d3;font:800 20px/1.3 "Noto Serif TC","Songti TC",serif;text-align:center;letter-spacing:.12em;cursor:pointer;text-shadow:0 2px 5px rgba(0,0,0,.72)}
+  #character-screen .faction-title-button:hover,#character-screen .faction-title-button:focus-visible{color:#fff;outline:none}
+  #character-screen .faction-title-button.faction-locked{color:#788197;cursor:not-allowed;opacity:.55}
   #character-screen .faction-race-label{margin-bottom:8px;text-align:center}
   #character-screen .faction-race-grid{grid-template-columns:1fr 1fr;gap:8px;margin:0}
-  #character-screen .faction-race-grid .choice-card{min-height:116px;padding:9px 5px}
+  #character-screen .faction-race-grid .choice-card{min-height:52px;padding:10px 12px;border-color:rgba(255,255,255,.14);background:rgba(8,15,28,.42)}
+  #character-screen .faction-race-grid .choice-card strong{font-size:16px;letter-spacing:.08em}
+  #character-screen .faction-race-grid .choice-card.selected{border-color:rgba(213,190,255,.78);background:rgba(91,70,137,.48)}
   #character-screen .faction-race-grid .choice-card:disabled{opacity:.45;filter:grayscale(.65);cursor:not-allowed}
   #character-screen .creation-character-stage .faction-lock-note{margin:10px 0 0;padding:8px 11px;font-size:13px;text-align:center}
   #character-screen .creation-class-section{justify-self:center;width:min(700px,100%)}
