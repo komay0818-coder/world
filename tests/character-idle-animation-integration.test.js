@@ -7,7 +7,9 @@ const html = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
 const script = fs.readFileSync(path.join(root, 'script.js'), 'utf8');
 const css = fs.readFileSync(path.join(root, 'style.css'), 'utf8');
 
-assert.ok(fs.existsSync(path.join(root, 'assets', 'character-portraits', 'human-mage-idle-03.png')), 'single mage portrait exists');
+for (let frame = 1; frame <= 5; frame += 1) {
+  assert.ok(fs.existsSync(path.join(root, 'assets', 'character-portraits', 'calibration-tests', 'human-mage-fire-five-frame-v1', `frame-${String(frame).padStart(2, '0')}.png`)), `human mage fire frame ${frame} exists`);
+}
 for (let frame = 1; frame <= 3; frame += 1) {
   assert.ok(fs.existsSync(path.join(root, 'assets', 'character-portraits', 'calibration-tests', 'human-warrior-three-frame-v1', `frame-${String(frame).padStart(2, '0')}.png`)), `human warrior frame ${frame} exists`);
 }
@@ -52,12 +54,12 @@ for (let frame = 1; frame <= 6; frame += 1) {
   assert.ok(fs.existsSync(path.join(root, 'assets', 'character-portraits', 'calibration-tests', 'undead-chain-six-frame-v2', `frame-${String(frame).padStart(2, '0')}.png`)), `undead priest frame ${frame} exists`);
 }
 assert.match(html, /id="character-idle-preview"[\s\S]*?id="character-idle-frame"/);
-assert.match(html, /human-mage-idle-03\.png/, 'preview starts from the selected single PNG');
+assert.match(html, /human-mage-fire-five-frame-v1\/frame-01\.png/, 'preview starts from the human mage fire sequence');
 assert.match(script, /const characterIdleAnimations\s*=\s*\{/, 'characters use one shared animation registry');
 assert.match(script, /'human:warrior':\s*\{[\s\S]*?human-warrior-three-frame-v1[\s\S]*?order: \[0, 1, 2\],[\s\S]*?frameDurationMs: 2000 \/ 3/, 'human warrior uses the approved two-second three-frame sequence');
 assert.match(script, /'human:assassin':\s*\{[\s\S]*?human-assassin-strip-v1[\s\S]*?order: \[0, 1, 2, 3\],[\s\S]*?frameDurationMs: 500/, 'human assassin uses the approved two-second four-frame sequence');
 assert.match(script, /'human:hunter':\s*\{[\s\S]*?human-hunter-strip-v1[\s\S]*?order: \[0, 1, 2, 3\],[\s\S]*?frameDurationMs: 500/, 'human hunter uses the approved two-second four-frame sequence');
-assert.match(script, /'human:mage':\s*\{ portrait: 'assets\/character-portraits\/human-mage-idle-03\.png/, 'human mage keeps its single-PNG pilot');
+assert.match(script, /'human:mage':\s*\{[\s\S]*?human-mage-fire-five-frame-v1[\s\S]*?order: \[0, 1, 2, 3, 4\],[\s\S]*?frameDurationMs: 500/, 'human mage uses the approved 2.5-second fire-cast sequence');
 assert.match(script, /'human:priest':\s*\{[\s\S]*?order: \[0, 1, 2, 3, 4, 3, 2, 1\],[\s\S]*?frameDurationMs: 180/, 'human priest uses the five-frame ping-pong sequence');
 assert.match(script, /'orc:warrior':\s*\{[\s\S]*?order: \[0, 1, 2, 1\],[\s\S]*?frameDurationMs: 437\.5/, 'orc warrior uses the 1.75-second three-frame ping-pong sequence');
 assert.match(script, /'orc:assassin':\s*\{[\s\S]*?order: \[0, 1, 2, 3, 2, 1\],[\s\S]*?frameDurationMs: 1000 \/ 3/, 'orc assassin uses the two-second four-frame ping-pong sequence');

@@ -267,7 +267,11 @@ const characterIdleAnimations = {
     order: [0, 1, 2, 3],
     frameDurationMs: 500
   },
-  'human:mage': { portrait: 'assets/character-portraits/human-mage-idle-03.png?v=2', breathe: true },
+  'human:mage': {
+    frames: [1, 2, 3, 4, 5].map((frame) => `assets/character-portraits/calibration-tests/human-mage-fire-five-frame-v1/frame-${String(frame).padStart(2, '0')}.png?v=1`),
+    order: [0, 1, 2, 3, 4],
+    frameDurationMs: 500
+  },
   'human:priest': {
     frames: [1, 2, 3, 4, 5].map((frame) => `assets/character-portraits/calibration-tests/human-priest-five-frame-v1/frame-${String(frame).padStart(2, '0')}.png?v=2`),
     order: [0, 1, 2, 3, 4, 3, 2, 1],
