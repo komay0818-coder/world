@@ -79,7 +79,8 @@
   #character-screen .creation-card{display:grid;grid-template-rows:minmax(430px,1fr) 118px 60px;gap:12px;flex:1;min-height:0;width:min(100%,1440px);margin:0 auto;padding:0;border:0;background:transparent;backdrop-filter:none}
   #character-screen .creation-stage{display:grid;grid-template-columns:minmax(240px,300px) minmax(422px,480px) minmax(240px,300px);align-items:center;justify-content:center;gap:clamp(24px,3vw,56px);min-height:0}
   #character-screen .creation-character-stage{align-self:center;justify-self:center;width:422px}
-  #character-screen .creation-idle-preview{width:422px;height:430px;margin:0;background:radial-gradient(circle at 50% 36%,rgba(30,46,77,.48),rgba(8,13,26,.72) 72%)}
+  #character-screen .creation-idle-preview{width:422px;height:430px;margin:0;overflow:visible;border-color:rgba(255,255,255,.07);background:radial-gradient(circle at 50% 43%,rgba(42,58,86,.17),rgba(8,13,26,.26) 74%);box-shadow:none}
+  #character-screen .creation-idle-preview img{bottom:0;width:min(90%,380px);max-height:calc(100% - 8px);object-fit:contain;object-position:center bottom;filter:drop-shadow(0 13px 10px rgba(0,0,0,.32))}
   #character-screen .creation-faction-panel{align-self:center;width:100%;padding:16px;border:1px solid rgba(255,255,255,.13);border-radius:16px;background:rgba(12,20,38,.36);backdrop-filter:blur(5px);transition:opacity .2s,border-color .2s,background-color .2s}
   #character-screen .creation-faction-panel.selected{border-color:rgba(224,205,147,.72);background:rgba(28,36,55,.5)}
   #character-screen .creation-faction-panel>.section-label:first-child{margin-bottom:9px;color:#fff4d3;font:800 20px/1.3 "Noto Serif TC","Songti TC",serif;text-align:center;letter-spacing:.12em}
