@@ -70,6 +70,9 @@
 .battle-field[data-map-id="beginner-plains"] .enemy-unit .enemy-art::after{scale:-1 1!important}
 .battle-field[data-map-id="beginner-plains"] .enemy-unit .goblin-art{scale:1 1!important}
 
+#character-screen .character-name{background:#17243d;color:#f8faff}
+#character-screen .character-name::placeholder{color:#8f9db8;opacity:1}
+#character-screen .character-name:focus{border-color:#aa91e8;box-shadow:0 0 0 3px rgba(169,138,255,.13)}
 #character-screen .creation-faction-panel{background:rgba(9,16,30,.4);border-color:rgba(255,255,255,.16)}
 #character-screen .faction-title-button{display:block;width:100%;margin:0 0 14px;border:0;padding:2px 8px;background:transparent;color:#fff4d3;font:800 20px/1.3 "Noto Serif TC","Songti TC",serif;text-align:center;letter-spacing:.12em;cursor:pointer;text-shadow:0 2px 5px rgba(0,0,0,.72)}
 #character-screen .faction-title-button:hover,#character-screen .faction-title-button:focus-visible{color:#fff;outline:none}
