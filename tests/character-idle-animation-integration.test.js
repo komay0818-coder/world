@@ -65,10 +65,10 @@ assert.match(script, /'orc:warrior':\s*\{[\s\S]*?order: \[0, 1, 2, 1\],[\s\S]*?f
 assert.match(script, /'orc:assassin':\s*\{[\s\S]*?order: \[0, 1, 2, 3, 2, 1\],[\s\S]*?frameDurationMs: 1000 \/ 3/, 'orc assassin uses the two-second four-frame ping-pong sequence');
 assert.match(script, /'orc:hunter':\s*\{[\s\S]*?frame-03-replacement\.png[\s\S]*?order: \[0, 1, 2, 3, 4\],[\s\S]*?frameDurationMs: 500/, 'orc hunter uses the approved 2.5-second five-frame sequence');
 assert.match(script, /'orc:mage':\s*\{[\s\S]*?orc-mage-red-cast-five-frame-v1\/hq[\s\S]*?order: \[0, 1, 2, 3, 4\],[\s\S]*?frameDurationMs: 500/, 'orc mage uses the approved 2.5-second red cast one-shot sequence');
-assert.match(script, /'elf:warrior':\s*\{[\s\S]*?elf-warrior-five-frame-v1-hq[\s\S]*?order: \[0, 1, 2, 3, 4\],[\s\S]*?frameDurationMs: 500/, 'elf warrior uses the approved 2.5-second five-frame one-shot sequence');
+assert.match(script, /'elf:warrior':\s*\{[\s\S]*?elf-warrior-five-frame-v1-hq[\s\S]*?order: \[0, 1, 2, 3, 4\],[\s\S]*?frameDurationMs: 300/, 'elf warrior uses a 1.5-second five-frame one-shot sequence');
 assert.match(script, /'elf:mage':\s*\{[\s\S]*?order: \[0, 1, 2, 3, 4, 3, 2, 1\],[\s\S]*?frameDurationMs: 180/, 'elf mage uses the five-frame ping-pong sequence');
 assert.match(script, /'elf:hunter':\s*\{[\s\S]*?frame-04-05-transition\.png[\s\S]*?order: \[0, 1, 2, 3, 4, 5, 4, 3, 2, 1\],[\s\S]*?frameDurationMs: 320/, 'only elf hunter uses the 3.2-second six-frame ping-pong sequence');
-assert.match(script, /'elf:assassin':\s*\{[\s\S]*?elf-assassin-five-frame-v3-hq[\s\S]*?order: \[0, 1, 2, 3, 4\],[\s\S]*?frameDurationMs: 500/, 'elf assassin uses the approved 2.5-second five-frame one-shot sequence');
+assert.match(script, /'elf:assassin':\s*\{[\s\S]*?elf-assassin-five-frame-v3-hq[\s\S]*?order: \[0, 1, 2, 3, 4\],[\s\S]*?frameDurationMs: 300/, 'elf assassin uses a 1.5-second five-frame one-shot sequence');
 assert.match(script, /'undead:warrior':\s*\{[\s\S]*?undead-warrior-five-frame[\s\S]*?order: \[0, 1, 2, 3, 4\],[\s\S]*?frameDurationMs: 500/, 'undead warrior uses the approved 2.5-second five-frame sequence');
 assert.match(script, /'undead:assassin':\s*\{[\s\S]*?undead-rise-five-frame-v2[\s\S]*?order: \[0, 1, 2, 4, 3, 4, 2, 1\],[\s\S]*?frameDurationMs: 2500 \/ 8/, 'undead assassin uses the approved 2.5-second rise sequence');
 assert.match(script, /'undead:mage':\s*\{[\s\S]*?undead-mage-cast-four-frame-aligned-v1[\s\S]*?order: \[0, 1, 2, 3, 2, 1\],[\s\S]*?frameDurationMs: 2500 \/ 6/, 'undead mage uses the approved 2.5-second four-frame cast sequence');
