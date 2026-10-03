@@ -62,20 +62,38 @@
         <span class="step-count">1 / 3</span>
       </header>
       <div class="creation-card">
-        <figure id="character-idle-preview" class="creation-idle-preview" hidden>
-          <img id="character-idle-frame" src="assets/character-portraits/human-mage-idle-03.png?v=2" alt="人類法師待機預覽" />
-        </figure>
-        <p class="section-label">選擇陣營</p>
-        <div class="choice-grid faction-grid">
-          <button class="choice-card selected" type="button" data-faction="light"><span class="choice-icon">✦</span><strong>光明陣營</strong><small>人類與精靈的盟約</small></button>
-          <button class="choice-card" type="button" data-faction="dark"><span class="choice-icon dark-icon">☾</span><strong>暗影陣營</strong><small>半獸人與不死者的聯盟</small></button>
+        <div id="race-choices" class="creation-stage">
+          <section class="creation-faction-panel creation-faction-light" data-faction-panel="light">
+            <p class="section-label">秩序聯盟</p>
+            <div class="choice-grid faction-grid">
+              <button class="choice-card selected" type="button" data-faction="light"><span class="choice-icon">✦</span><strong>秩序聯盟</strong><small>人類與精靈的盟約</small></button>
+            </div>
+            <p class="section-label faction-race-label">選擇種族</p>
+            <div id="light-race-choices" class="choice-grid race-grid faction-race-grid"></div>
+          </section>
+          <section class="creation-character-stage">
+            <figure id="character-idle-preview" class="creation-idle-preview" hidden>
+              <img id="character-idle-frame" src="assets/character-portraits/human-mage-idle-03.png?v=2" alt="人類法師待機預覽" />
+            </figure>
+            <p id="faction-lock-note" class="faction-lock-note hidden"></p>
+          </section>
+          <section class="creation-faction-panel creation-faction-dark" data-faction-panel="dark">
+            <p class="section-label">自由氏族</p>
+            <div class="choice-grid faction-grid">
+              <button class="choice-card" type="button" data-faction="dark"><span class="choice-icon dark-icon">☾</span><strong>自由氏族</strong><small>半獸人與不死者的聯盟</small></button>
+            </div>
+            <p class="section-label faction-race-label">選擇種族</p>
+            <div id="dark-race-choices" class="choice-grid race-grid faction-race-grid"></div>
+          </section>
         </div>
-        <p id="faction-lock-note" class="faction-lock-note hidden"></p>
-        <p class="section-label">選擇種族</p><div id="race-choices" class="choice-grid race-grid"></div>
-        <p class="section-label">選擇職業</p><div id="class-choices" class="class-list"></div>
-        <label class="character-name-label" for="character-name">角色名稱</label>
-        <input id="character-name" class="character-name" maxlength="12" placeholder="為角色取個名字" />
-        <button id="create-character" class="primary-button" type="button"><span>確認並開始冒險</span><b>→</b></button>
+        <section class="creation-class-section">
+          <p class="section-label">選擇職業</p><div id="class-choices" class="class-list"></div>
+        </section>
+        <div class="creation-action-row">
+          <label class="character-name-label" for="character-name">角色名稱</label>
+          <input id="character-name" class="character-name" maxlength="12" placeholder="為角色取個名字" />
+          <button id="create-character" class="primary-button" type="button"><span>確認並開始冒險</span><b>→</b></button>
+        </div>
       </div>
     </section>
 

@@ -759,7 +759,14 @@ function renderCreation() {
     lockNote.textContent = `陣營已由第一角色鎖定為${lockedFaction === 'light' ? '光明陣營' : '暗影陣營'}，第二角色必須加入相同陣營。`;
     lockNote.classList.remove('hidden');
   } else lockNote.classList.add('hidden');
-  raceChoices.innerHTML = factions[selection.faction].map((race) => `<button class="choice-card ${race.id === selection.race ? 'selected' : ''}" type="button" data-race="${race.id}"><span class="creation-race-icon race-${race.id}" aria-hidden="true"></span><strong>${race.name}</strong><small>${race.trait}</small></button>`).join('');
+  document.querySelectorAll('[data-faction-panel]').forEach((panel) => panel.classList.toggle('selected', panel.dataset.factionPanel === selection.faction));
+  Object.entries(factions).forEach(([factionId, races]) => {
+    const factionRaceChoices = document.querySelector(`#${factionId}-race-choices`);
+    factionRaceChoices.innerHTML = races.map((race) => {
+      const unavailable = factionId !== selection.faction;
+      return `<button class="choice-card ${race.id === selection.race ? 'selected' : ''}" type="button" data-race="${race.id}" ${unavailable ? 'disabled aria-disabled="true"' : ''}><span class="creation-race-icon race-${race.id}" aria-hidden="true"></span><strong>${race.name}</strong><small>${race.trait}</small></button>`;
+    }).join('');
+  });
   classChoices.innerHTML = classes.filter((job) => !isJobHiddenForRace(selection.race, job.id)).map((job) => {
     const unavailable = isJobUnavailableForRace(selection.race, job.id);
     return `<button class="class-choice ${job.id === selection.job ? 'selected' : ''}" type="button" data-job="${job.id}" ${unavailable ? `disabled aria-disabled="true" title="${getRaceJobRestrictionMessage(selection.race, job.id)}"` : ''}><span class="creation-job-icon" aria-hidden="true">${jobMarks[job.id] || job.icon}</span><small>${job.name}${unavailable ? '（不可選）' : ''}</small></button>`;
