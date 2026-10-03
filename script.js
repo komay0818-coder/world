@@ -234,6 +234,23 @@ function getUnlockedChapter(progress) {
   return Math.max(1, Number(progress?.unlockedChapter) || 1);
 }
 let selection = { faction: 'light', race: 'human', job: 'warrior' };
+const characterCreationDisplay = {
+  'human:assassin': { scale: 1.04, offsetX: -10, offsetY: 5 },
+  'human:hunter': { scale: 1.10, offsetX: -1, offsetY: 4 },
+  'human:mage': { scale: .95, offsetX: -5, offsetY: -10 },
+  'human:priest': { scale: 1, offsetX: 10, offsetY: 2 },
+  'elf:warrior': { scale: 1.20, offsetX: 0, offsetY: 63 },
+  'elf:assassin': { scale: 1.12, offsetX: 0, offsetY: 33 },
+  'elf:hunter': { scale: 1.15, offsetX: 3, offsetY: -3 },
+  'elf:mage': { scale: 1.16, offsetX: 5, offsetY: 8 },
+  'orc:warrior': { scale: 1.07, offsetX: -6, offsetY: -7 },
+  'orc:assassin': { scale: 1.07, offsetX: 22, offsetY: -3 },
+  'orc:hunter': { scale: 1.12, offsetX: -3, offsetY: 14 },
+  'orc:mage': { scale: 1.23, offsetX: 0, offsetY: 18 },
+  'undead:warrior': { scale: 1.11, offsetX: 28, offsetY: 15 },
+  'undead:mage': { scale: 1.06, offsetX: 0, offsetY: 5 },
+  'undead:priest': { scale: 1.18, offsetX: 28, offsetY: -3 }
+};
 const characterIdleAnimations = {
   'human:warrior': {
     frames: [1, 2, 3].map((frame) => `assets/character-portraits/calibration-tests/human-warrior-three-frame-v1/frame-${String(frame).padStart(2, '0')}.png?v=1`),
@@ -771,6 +788,10 @@ function renderCreation() {
     const unavailable = isJobUnavailableForRace(selection.race, job.id);
     return `<button class="class-choice ${job.id === selection.job ? 'selected' : ''}" type="button" data-job="${job.id}" ${unavailable ? `disabled aria-disabled="true" title="${getRaceJobRestrictionMessage(selection.race, job.id)}"` : ''}><span class="creation-job-icon" aria-hidden="true">${jobMarks[job.id] || job.icon}</span><small>${job.name}${unavailable ? '（不可選）' : ''}</small></button>`;
   }).join('');
+  const display = characterCreationDisplay[`${selection.race}:${selection.job}`] || { scale: 1, offsetX: 0, offsetY: 0 };
+  characterIdleFrame.style.setProperty('--creation-character-scale', display.scale);
+  characterIdleFrame.style.setProperty('--creation-character-offset-x', `${display.offsetX}px`);
+  characterIdleFrame.style.setProperty('--creation-character-offset-y', `${display.offsetY}px`);
   syncCharacterIdleAnimation();
 }
 

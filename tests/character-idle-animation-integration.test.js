@@ -79,8 +79,8 @@ assert.doesNotMatch(script, /orderIndex = \(orderIndex \+ 1\) % animation\.order
 assert.match(script, /characterIdleReducedMotion\.matches/, 'reduced-motion mode holds on the first frame');
 assert.match(script, /characterIdleAnimations\[animationKey\]/, 'race and class select the configured shared animation');
 assert.match(script, /stopCharacterIdleAnimation\(\)/, 'animation has an explicit stop path');
-assert.match(css, /\.creation-idle-preview img\{[^}]*bottom:0;[^}]*width:min\(66%,286px\);[^}]*height:auto;[^}]*transform:translateX\(-50%\) scale\(1\);[^}]*transform-origin:bottom center;/, 'portrait keeps its existing size and a bottom-center foot anchor');
-assert.match(css, /@keyframes character-idle-breathe\{0%,100%\{transform:translateX\(-50%\) scale\(1\)\}50%\{transform:translateX\(-50%\) scale\(1\.004\)\}\}/, 'breathing uses only a subtle proportional scale');
+assert.match(css, /\.creation-idle-preview img\{[^}]*bottom:0;[^}]*width:min\(66%,286px\);[^}]*height:auto;[^}]*translate\(var\(--creation-character-offset-x,0\),var\(--creation-character-offset-y,0\)\)[^}]*scale\(var\(--creation-character-scale,1\)\);[^}]*transform-origin:bottom center;/, 'portrait keeps its existing size and uses a configurable bottom-center foot anchor');
+assert.match(css, /@keyframes character-idle-breathe\{0%,100%\{[^}]*scale\(var\(--creation-character-scale,1\)\)\}50%\{[^}]*scale\(var\(--creation-character-scale,1\)\) scale\(1\.004\)\}\}/, 'breathing preserves the per-character calibration and adds only a subtle proportional scale');
 assert.match(css, /animation:character-idle-breathe 3\.2s ease-in-out 1/, 'single-PNG breathing plays only once');
 
 console.log('character-single-png-idle-integration: assertions passed');
