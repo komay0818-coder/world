@@ -82,7 +82,7 @@ assert.match(script, /characterIdleReducedMotion\.matches/, 'reduced-motion mode
 assert.match(script, /characterIdleAnimations\[animationKey\]/, 'race and class select the configured shared animation');
 assert.match(script, /stopCharacterIdleAnimation\(\)/, 'animation has an explicit stop path');
 assert.match(script, /'human:assassin': \{ scale: 1\.0712, offsetX: -10, offsetY: 5 \}/, 'human assassin keeps its offsets and receives the second-round scale');
-assert.match(script, /'human:mage': \{ scale: 1\.30815, offsetX: -5, offsetY: -3 \}/, 'human mage keeps its scale and horizontal position while aligning its feet vertically');
+assert.match(script, /'human:mage': \{ scale: 1\.30815, offsetX: -5, offsetY: 41 \}/, 'human mage keeps its scale and horizontal position while aligning its feet to the human warrior baseline');
 assert.match(script, /'elf:hunter': \{ scale: 1\.242, offsetX: 3, offsetY: -3 \}/, 'elf hunter keeps its offsets and receives the second-round scale');
 assert.match(script, /'undead:priest': \{ scale: 1\.2744, offsetX: 28, offsetY: -3 \}/, 'undead priest keeps its offsets and receives the second-round scale');
 assert.doesNotMatch(script, /'undead:assassin': \{ scale:/, 'undead assassin remains excluded from display calibration');
