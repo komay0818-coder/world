@@ -1,0 +1,210 @@
+{
+  "source": "C:\\Users\\User\\AppData\\Local\\Temp\\codex-clipboard-d01b548c-85d5-4a33-9f9f-b91c39a2118e.png",
+  "source_canvas": {
+    "width": 1983,
+    "height": 793
+  },
+  "output_canvas": {
+    "width": 506,
+    "height": 806
+  },
+  "sequence": [
+    1,
+    2,
+    3,
+    4,
+    5
+  ],
+  "duration_ms": 2500,
+  "frame_duration_ms": 500,
+  "loop": false,
+  "alignment": "opaque torso center X and shoe-sole Y; translation only",
+  "resampling": "none; source pixels copied exactly",
+  "frames": [
+    {
+      "frame": 1,
+      "source_visible_bbox": [
+        15,
+        122,
+        400,
+        735
+      ],
+      "source_stable_bbox": [
+        29,
+        216,
+        386,
+        710
+      ],
+      "source_edge_contact": {
+        "left": false,
+        "right": false,
+        "top": false,
+        "bottom": false
+      },
+      "translation_xy": [
+        62,
+        139
+      ],
+      "scale": 1.0,
+      "aligned_foot_y": 727,
+      "aligned_torso_center_x": 253,
+      "output_bbox": {
+        "left": 62,
+        "top": 139,
+        "right": 447,
+        "bottom": 752,
+        "width": 386,
+        "height": 614,
+        "center_x": 254.5
+      }
+    },
+    {
+      "frame": 2,
+      "source_visible_bbox": [
+        402,
+        35,
+        783,
+        744
+      ],
+      "source_stable_bbox": [
+        419,
+        222,
+        771,
+        713
+      ],
+      "source_edge_contact": {
+        "left": false,
+        "right": false,
+        "top": false,
+        "bottom": false
+      },
+      "translation_xy": [
+        62,
+        49
+      ],
+      "scale": 1.0,
+      "aligned_foot_y": 727,
+      "aligned_torso_center_x": 253,
+      "output_bbox": {
+        "left": 62,
+        "top": 49,
+        "right": 443,
+        "bottom": 758,
+        "width": 382,
+        "height": 710,
+        "center_x": 252.5
+      }
+    },
+    {
+      "frame": 3,
+      "source_visible_bbox": [
+        781,
+        37,
+        1162,
+        725
+      ],
+      "source_stable_bbox": [
+        796,
+        222,
+        1147,
+        715
+      ],
+      "source_edge_contact": {
+        "left": false,
+        "right": false,
+        "top": false,
+        "bottom": false
+      },
+      "translation_xy": [
+        62,
+        49
+      ],
+      "scale": 1.0,
+      "aligned_foot_y": 727,
+      "aligned_torso_center_x": 253,
+      "output_bbox": {
+        "left": 62,
+        "top": 49,
+        "right": 443,
+        "bottom": 737,
+        "width": 382,
+        "height": 689,
+        "center_x": 252.5
+      }
+    },
+    {
+      "frame": 4,
+      "source_visible_bbox": [
+        1161,
+        104,
+        1565,
+        737
+      ],
+      "source_stable_bbox": [
+        1176,
+        226,
+        1533,
+        715
+      ],
+      "source_edge_contact": {
+        "left": false,
+        "right": false,
+        "top": false,
+        "bottom": false
+      },
+      "translation_xy": [
+        61,
+        116
+      ],
+      "scale": 1.0,
+      "aligned_foot_y": 727,
+      "aligned_torso_center_x": 253,
+      "output_bbox": {
+        "left": 61,
+        "top": 116,
+        "right": 465,
+        "bottom": 749,
+        "width": 405,
+        "height": 634,
+        "center_x": 263.0
+      }
+    },
+    {
+      "frame": 5,
+      "source_visible_bbox": [
+        1573,
+        23,
+        1982,
+        726
+      ],
+      "source_stable_bbox": [
+        1595,
+        112,
+        1971,
+        716
+      ],
+      "source_edge_contact": {
+        "left": false,
+        "right": true,
+        "top": false,
+        "bottom": false
+      },
+      "translation_xy": [
+        41,
+        34
+      ],
+      "scale": 1.0,
+      "aligned_foot_y": 727,
+      "aligned_torso_center_x": 253,
+      "output_bbox": {
+        "left": 41,
+        "top": 34,
+        "right": 450,
+        "bottom": 737,
+        "width": 410,
+        "height": 704,
+        "center_x": 245.5
+      }
+    }
+  ]
+}
