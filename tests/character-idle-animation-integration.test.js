@@ -81,7 +81,7 @@ assert.doesNotMatch(script, /orderIndex = \(orderIndex \+ 1\) % animation\.order
 assert.match(script, /characterIdleReducedMotion\.matches/, 'reduced-motion mode holds on the first frame');
 assert.match(script, /characterIdleAnimations\[animationKey\]/, 'race and class select the configured shared animation');
 assert.match(script, /stopCharacterIdleAnimation\(\)/, 'animation has an explicit stop path');
-assert.match(script, /'human:assassin': \{ scale: 1\.155, offsetX: -10, offsetY: 5 \}/, 'human assassin matches the human hunter visual scale');
+assert.match(script, /'human:assassin': \{ scale: \.92, offsetX: -10, offsetY: 5 \}/, 'human assassin matches the human hunter body height without copying its numeric scale');
 assert.match(script, /'human:mage': \{ scale: 1\.30815, offsetX: -5, offsetY: 41 \}/, 'human mage keeps its scale and horizontal position while aligning its feet to the human warrior baseline');
 assert.match(script, /'elf:warrior': \{ scale: 1\.20, offsetX: 0, offsetY: 71 \}/, 'elf warrior aligns its feet to the elf mage baseline');
 assert.match(script, /'elf:assassin': \{ scale: 1\.232, offsetX: 0, offsetY: 40 \}/, 'elf assassin aligns its feet to the elf mage baseline');

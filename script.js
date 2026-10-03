@@ -235,7 +235,7 @@ function getUnlockedChapter(progress) {
 }
 let selection = { faction: 'light', race: 'human', job: 'warrior' };
 const characterCreationDisplay = {
-  'human:assassin': { scale: 1.155, offsetX: -10, offsetY: 5 },
+  'human:assassin': { scale: .92, offsetX: -10, offsetY: 5 },
   'human:hunter': { scale: 1.155, offsetX: -1, offsetY: 4 },
   'human:mage': { scale: 1.30815, offsetX: -5, offsetY: 41 },
   'human:priest': { scale: 1.06, offsetX: 10, offsetY: 2 },
