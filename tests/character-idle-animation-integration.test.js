@@ -42,8 +42,8 @@ for (let frame = 1; frame <= 5; frame += 1) {
 for (let frame = 1; frame <= 5; frame += 1) {
   assert.ok(fs.existsSync(path.join(root, 'assets', 'character-portraits', 'calibration-tests', 'human-priest-five-frame-v1', `frame-${String(frame).padStart(2, '0')}.png`)), `human priest frame ${frame} exists`);
 }
-for (const frame of [1, 5, 2, 3]) {
-  assert.ok(fs.existsSync(path.join(root, 'assets', 'character-portraits', 'calibration-tests', 'undead-assassin-five-frame', `frame-${String(frame).padStart(2, '0')}.png`)), `undead assassin frame ${frame} exists`);
+for (let frame = 1; frame <= 5; frame += 1) {
+  assert.ok(fs.existsSync(path.join(root, 'assets', 'character-portraits', 'calibration-tests', 'undead-rise-five-frame-v2', `frame-${String(frame).padStart(2, '0')}.png`)), `undead assassin rise frame ${frame} exists`);
 }
 for (let frame = 1; frame <= 4; frame += 1) {
   assert.ok(fs.existsSync(path.join(root, 'assets', 'character-portraits', 'calibration-tests', 'undead-mage-cast-four-frame-aligned-v1', `frame-${String(frame).padStart(2, '0')}.png`)), `undead mage frame ${frame} exists`);
@@ -68,7 +68,7 @@ assert.match(script, /'elf:mage':\s*\{[\s\S]*?order: \[0, 1, 2, 3, 4, 3, 2, 1\],
 assert.match(script, /'elf:hunter':\s*\{[\s\S]*?frame-04-05-transition\.png[\s\S]*?order: \[0, 1, 2, 3, 4, 5, 4, 3, 2, 1\],[\s\S]*?frameDurationMs: 320/, 'only elf hunter uses the 3.2-second six-frame ping-pong sequence');
 assert.match(script, /'elf:assassin':\s*\{[\s\S]*?elf-assassin-five-frame-v3-hq[\s\S]*?order: \[0, 1, 2, 3, 4\],[\s\S]*?frameDurationMs: 500/, 'elf assassin uses the approved 2.5-second five-frame one-shot sequence');
 assert.match(script, /'undead:warrior':\s*\{[\s\S]*?undead-warrior-five-frame[\s\S]*?order: \[0, 1, 2, 3, 4\],[\s\S]*?frameDurationMs: 500/, 'undead warrior uses the approved 2.5-second five-frame sequence');
-assert.match(script, /'undead:assassin':\s*\{[\s\S]*?\[1, 5, 2, 3\][\s\S]*?order: \[0, 1, 2, 3, 2, 1\],[\s\S]*?frameDurationMs: 250/, 'undead assassin uses the approved 1.5-second reordered sequence');
+assert.match(script, /'undead:assassin':\s*\{[\s\S]*?undead-rise-five-frame-v2[\s\S]*?order: \[0, 1, 2, 4, 3, 4, 2, 1\],[\s\S]*?frameDurationMs: 2500 \/ 8/, 'undead assassin uses the approved 2.5-second rise sequence');
 assert.match(script, /'undead:mage':\s*\{[\s\S]*?undead-mage-cast-four-frame-aligned-v1[\s\S]*?order: \[0, 1, 2, 3, 2, 1\],[\s\S]*?frameDurationMs: 2500 \/ 6/, 'undead mage uses the approved 2.5-second four-frame cast sequence');
 assert.match(script, /'undead:priest':\s*\{[\s\S]*?undead-chain-six-frame-v2[\s\S]*?order: \[0, 1, 2, 3, 4, 5, 4, 3, 2, 1\],[\s\S]*?frameDurationMs: 250/, 'undead priest uses the approved 2.5-second six-frame chain sequence');
 assert.doesNotMatch(script, /\.gif/, 'idle previews do not use GIF files');
