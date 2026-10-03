@@ -67,6 +67,10 @@ body:has(#menu-screen:not(.hidden)) .sky{background:#080b0e url('assets/main-men
 body:has(#menu-screen:not(.hidden)) .sky:before,
 body:has(#menu-screen:not(.hidden)) .sky:after{display:none}
 body:has(#menu-screen:not(.hidden)) .app-shell{width:100%;max-width:none;padding:0}
+body:has(#character-screen:not(.hidden)){background:#8abdf2}
+body:has(#character-screen:not(.hidden)) .sky{background:#8abdf2 url('assets/character-selection-background.png') center center/cover no-repeat}
+body:has(#character-screen:not(.hidden)) .sky:before,
+body:has(#character-screen:not(.hidden)) .sky:after{display:none}
 .menu-screen{min-height:100vh;align-items:flex-end;justify-content:center;padding:clamp(40px,8vh,96px) clamp(28px,8vw,120px)}
 .main-menu-panel{display:flex;flex-direction:column;align-items:stretch;width:min(390px,38vw);color:#f3ead6;transform:translateX(-15vw)}
 .main-menu-title{margin:0 0 38px;text-align:center}
