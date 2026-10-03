@@ -81,9 +81,13 @@ assert.doesNotMatch(script, /orderIndex = \(orderIndex \+ 1\) % animation\.order
 assert.match(script, /characterIdleReducedMotion\.matches/, 'reduced-motion mode holds on the first frame');
 assert.match(script, /characterIdleAnimations\[animationKey\]/, 'race and class select the configured shared animation');
 assert.match(script, /stopCharacterIdleAnimation\(\)/, 'animation has an explicit stop path');
-assert.match(script, /'human:assassin': \{ scale: 1\.0712, offsetX: -10, offsetY: 5 \}/, 'human assassin keeps its offsets and receives the second-round scale');
+assert.match(script, /'human:assassin': \{ scale: 1\.155, offsetX: -10, offsetY: 5 \}/, 'human assassin matches the human hunter visual scale');
 assert.match(script, /'human:mage': \{ scale: 1\.30815, offsetX: -5, offsetY: 41 \}/, 'human mage keeps its scale and horizontal position while aligning its feet to the human warrior baseline');
+assert.match(script, /'elf:warrior': \{ scale: 1\.20, offsetX: 0, offsetY: 71 \}/, 'elf warrior aligns its feet to the elf mage baseline');
+assert.match(script, /'elf:assassin': \{ scale: 1\.232, offsetX: 0, offsetY: 40 \}/, 'elf assassin aligns its feet to the elf mage baseline');
 assert.match(script, /'elf:hunter': \{ scale: 1\.242, offsetX: 3, offsetY: -3 \}/, 'elf hunter keeps its offsets and receives the second-round scale');
+assert.match(script, /'orc:warrior': \{ scale: 1\.1648, offsetX: -6, offsetY: 4 \}/, 'orc warrior matches the orc hunter scale and foot baseline');
+assert.match(script, /'orc:assassin': \{ scale: 1\.07, offsetX: 22, offsetY: 1 \}/, 'orc assassin aligns its feet to the orc hunter baseline');
 assert.match(script, /'undead:priest': \{ scale: 1\.2744, offsetX: 28, offsetY: -3 \}/, 'undead priest keeps its offsets and receives the second-round scale');
 assert.doesNotMatch(script, /'undead:assassin': \{ scale:/, 'undead assassin remains excluded from display calibration');
 assert.match(css, /\.creation-idle-preview img\{[^}]*bottom:0;[^}]*width:min\(66%,286px\);[^}]*height:auto;[^}]*translate\(var\(--creation-character-offset-x,0\),var\(--creation-character-offset-y,0\)\)[^}]*scale\(var\(--creation-character-scale,1\)\);[^}]*transform-origin:bottom center;/, 'portrait keeps its existing size and uses a configurable bottom-center foot anchor');
