@@ -235,21 +235,21 @@ function getUnlockedChapter(progress) {
 }
 let selection = { faction: 'light', race: 'human', job: 'warrior' };
 const characterCreationDisplay = {
-  'human:assassin': { scale: 1.04, offsetX: -10, offsetY: 5 },
-  'human:hunter': { scale: 1.10, offsetX: -1, offsetY: 4 },
+  'human:assassin': { scale: 1.0712, offsetX: -10, offsetY: 5 },
+  'human:hunter': { scale: 1.155, offsetX: -1, offsetY: 4 },
   'human:mage': { scale: .95, offsetX: -5, offsetY: -10 },
-  'human:priest': { scale: 1, offsetX: 10, offsetY: 2 },
+  'human:priest': { scale: 1.06, offsetX: 10, offsetY: 2 },
   'elf:warrior': { scale: 1.20, offsetX: 0, offsetY: 63 },
-  'elf:assassin': { scale: 1.12, offsetX: 0, offsetY: 33 },
-  'elf:hunter': { scale: 1.15, offsetX: 3, offsetY: -3 },
-  'elf:mage': { scale: 1.16, offsetX: 5, offsetY: 8 },
+  'elf:assassin': { scale: 1.232, offsetX: 0, offsetY: 33 },
+  'elf:hunter': { scale: 1.242, offsetX: 3, offsetY: -3 },
+  'elf:mage': { scale: 1.2064, offsetX: 5, offsetY: 8 },
   'orc:warrior': { scale: 1.07, offsetX: -6, offsetY: -7 },
   'orc:assassin': { scale: 1.07, offsetX: 22, offsetY: -3 },
-  'orc:hunter': { scale: 1.12, offsetX: -3, offsetY: 14 },
+  'orc:hunter': { scale: 1.1648, offsetX: -3, offsetY: 14 },
   'orc:mage': { scale: 1.23, offsetX: 0, offsetY: 18 },
-  'undead:warrior': { scale: 1.11, offsetX: 28, offsetY: 15 },
-  'undead:mage': { scale: 1.06, offsetX: 0, offsetY: 5 },
-  'undead:priest': { scale: 1.18, offsetX: 28, offsetY: -3 }
+  'undead:warrior': { scale: 1.1544, offsetX: 28, offsetY: 15 },
+  'undead:mage': { scale: 1.1236, offsetX: 0, offsetY: 5 },
+  'undead:priest': { scale: 1.2744, offsetX: 28, offsetY: -3 }
 };
 const characterIdleAnimations = {
   'human:warrior': {
