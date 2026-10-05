@@ -21,6 +21,19 @@ assert.match(script, /BrokenrockCanyonPolicy\.resolveScheduledActions/);
 assert.match(script, /BrokenrockCanyonPolicy\.updateThresholds/);
 assert.match(script, /brokenrockAction\?\.damageMultiplier/);
 assert.match(script, /brokenrockAction\?\.defenseIgnore/);
-assert.match(script, /savedChapterThreePlaytestProgress\?\.requiresMapSelectionAfterDefeat[\s\S]*sessionStorage\.removeItem\(chapterThreePlaytestProgressKey\)/, 'a defeated isolated playtest session resets before auto-entry');
+assert.match(script, /savedVisualPlaytestProgress\?\.requiresMapSelectionAfterDefeat[\s\S]*sessionStorage\.removeItem\(visualPlaytestProgressKey\)/, 'a defeated isolated playtest session resets before auto-entry');
 assert.match(script, /getRequestedMapId\(\) === 'bloodwar-wastes' \? '3-3'/, 'the playtest identity includes the requested 3-3 map');
+const vm = require('node:vm');
+const resetBlock = script.match(/if \(ChapterTwoBalancePlaytestPolicy\?\.isChapterThreeActive\(\) \|\| ChapterTwoBalancePlaytestPolicy\?\.isChapterOne11Active\(\) \|\| ChapterTwoBalancePlaytestPolicy\?\.isChapterOne12Active\(\)\) \{[\s\S]*?\n\}/)?.[0];
+assert.ok(resetBlock, 'shared playtest reset block exists');
+for (const defeated of [true, false]) {
+  const key = 'isolated-chapter-three-32';
+  const storage = new Map([[key, JSON.stringify({ requiresMapSelectionAfterDefeat: defeated })], ['other-session', 'keep']]);
+  vm.runInNewContext(resetBlock, {
+    ChapterTwoBalancePlaytestPolicy: { isChapterThreeActive: () => true, isChapterOne11Active: () => false, isChapterOne12Active: () => false, getProgressKey: () => key },
+    sessionStorage: { getItem: id => storage.get(id) || null, removeItem: id => storage.delete(id) }
+  });
+  assert.equal(storage.has(key), !defeated, 'only a defeated active playtest save is reset');
+  assert.equal(storage.get('other-session'), 'keep', 'other sessions survive reset');
+}
 console.log('chapter-three-32-integration: assertions passed');

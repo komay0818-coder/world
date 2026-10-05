@@ -15,7 +15,7 @@ assert.match(gameStyle, /\.inventory-item>\.item-icon\{[^}]*flex:0 0 44px[^}]*ov
 assert.match(gameStyle, /\.inventory-item>\.item-icon>\.inventory-item-image\{[^}]*max-width:100%[^}]*max-height:100%[^}]*object-fit:contain/, '裝備圖片不可超過圖示框尺寸');
 assert.match(html, /styles\/game\.css\?v=20260822-inventory-icon-frame-v2/, '頁面應載入包含圖示框修正的目前樣式');
 assert.match(style, /\.drop-result-image\{[^}]*object-fit:contain/, '掉落查詢圖片應完整縮放');
-assert.match(html, /href="style\.css\?v=20260822-inventory-image-containment-v1"/, '背包圖片限制應從目前部署版本載入，不可引用舊版遠端樣式');
+assert.match(html, /href="style\.css\?v=20260926-single-png-idle-v1"/, '背包圖片限制應從目前部署版本載入，不可引用舊版遠端樣式');
 assert.doesNotMatch(html, /raw\.githack\.com\/[^"']+\/style\.css/, '主樣式不可鎖定到舊 commit');
 
 for (const file of ['wolf-fur.png', 'wolf-fang.png', 'hard-hide.png', 'boar-tusk.png', 'iron-ore.png', 'black-ore.png']) {

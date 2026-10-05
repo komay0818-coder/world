@@ -43,7 +43,24 @@ const manaExhaustionBody = script.match(/function updatePartyMemberManaExhaustio
 assert.doesNotMatch(manaExhaustionBody, /enemy|rewardKey|earnedXp|earnedGold|accountDrops/, 'mana state updates cannot throw on unrelated reward variables before normal attacks');
 assert.match(manaExhaustionBody, /!member\.manaExhausted && ratio <= \.15[\s\S]*member\.isMain[\s\S]*useManaPotion\(\)/, 'the main character automatically uses one mana potion when entering mana exhaustion');
 assert.doesNotMatch(manaExhaustionBody, /else if \(member\.manaExhausted[\s\S]*useManaPotion\(\)/, 'an already exhausted character does not repeatedly consume mana potions');
-assert.match(script, /resources: updatePartyMemberResource[\s\S]*partyAttacks: processPartyMemberAttacks/, 'the formal runtime maps resource and attack callbacks into the shared core');
+assert.match(script, /resources: updatePartyMemberResource[\s\S]*partyAttacks: timedVisualShowcase \? \(\) => false : processPartyMemberAttacks/, 'the formal runtime maps resource and attack callbacks into the shared core');
+const runtimeFactory = script.match(/function createBattleTickRuntime\(\) \{[\s\S]*?\n\}/)?.[0];
+assert.ok(runtimeFactory, 'formal runtime factory exists');
+for (const showcase of [false, true]) {
+  let attackCalls = 0;
+  const context = {
+    isTimedChapterThreeVisualShowcase: () => showcase,
+    processPartyMemberAttacks: now => { attackCalls++; assert.equal(now, 1234); return true; },
+    battle: { partyMembers: [], enemyHps: [] }
+  };
+  for (const name of runtimeFactory.match(/\b(?:process\w+|reviveDefeatedTeammates|updatePartyMember\w+|queueDefeatedEnemies|syncLegacyBattleStateFromMain|updateBattleUI)\b/g) || []) {
+    if (!(name in context)) context[name] = () => {};
+  }
+  const runtime = require('node:vm').runInNewContext(`${runtimeFactory}\ncreateBattleTickRuntime()`, context);
+  runtime.partyAttacks(1234);
+  assert.equal(attackCalls, showcase ? 0 : 1, 'showcase pauses attacks while normal combat invokes the original attack callback');
+  assert.equal(runtime.resources, context.updatePartyMemberResource, 'resource callback remains connected');
+}
 assert.match(combatCore, /runtime\.resources\(member, now\)[\s\S]*runtime\.partyAttacks\(now\)/, 'resource updates complete before the independent normal attack pass');
 assert.match(script, /PlainsDepthsPolicy\.resolveActiveSkill/, 'plains depths active skills resolve on monster attack turns');
 assert.match(script, /PlainsDepthsPolicy\.applyBlackstoneAura/, 'alive blackstone monsters feed the shared attack and defense aura');
