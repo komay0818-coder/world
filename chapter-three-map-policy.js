@@ -52,22 +52,22 @@
     skullcrusherShaman: enemy('skullcrusher-shaman', '碎顱薩滿', 'normal', ['warblood-totem'], 'assets/skullcrusher-shaman.png?v=20260919'),
     skullcrusherCenturion: enemy('skullcrusher-centurion', '碎顱百夫長', 'elite', ['centurion-cleave', 'battle-formation-command'], 'assets/skullcrusher-centurion.png?v=20260919'),
     skullcrusherVanguard: enemy('skullcrusher-vanguard-commander', '碎顱先鋒統領', 'boss', ['vanguard-smash', 'full-army-charge', 'fight-to-the-end'], 'assets/skullcrusher-vanguard-commander.png?v=20260919'),
-    skullcrusherHeavyGuard: enemy('skullcrusher-heavy-guard', '碎顱重甲衛士', 'normal', ['heavy-armor-line'], 'assets/skullcrusher-heavy-guard.png'),
-    skullcrusherWolfRider: enemy('skullcrusher-wolf-rider', '碎顱戰狼騎兵', 'normal', ['warwolf-assault'], 'assets/skullcrusher-wolf-rider.png'),
-    skullcrusherChampion: enemy('skullcrusher-champion', '碎顱勇士', 'elite', ['champion-slash', 'unyielding-will'], 'assets/skullcrusher-champion.png'),
-    skullcrusherChieftain: enemy('skullcrusher-great-chieftain', '碎顱大酋長', 'boss', ['chieftain-earthsplitter', 'fallen-warrior-rage', 'skullcrusher-overlord'], 'assets/skullcrusher-great-chieftain.png'),
+    skullcrusherHeavyGuard: enemy('skullcrusher-heavy-guard', '碎顱重甲衛士', 'normal', ['heavy-armor-line'], 'assets/skullcrusher-heavy-guard.png?v=20260926-user-image-v1'),
+    skullcrusherWolfRider: enemy('skullcrusher-wolf-rider', '碎顱戰狼騎兵', 'normal', ['warwolf-assault'], 'assets/skullcrusher-wolf-rider.png?v=20260926-user-image-v1'),
+    skullcrusherChampion: enemy('skullcrusher-champion', '碎顱勇士', 'elite', ['champion-slash', 'unyielding-will'], 'assets/skullcrusher-champion.png?v=20260926-user-image-v1'),
+    skullcrusherChieftain: enemy('skullcrusher-great-chieftain', '碎顱大酋長', 'boss', ['chieftain-earthsplitter', 'fallen-warrior-rage', 'skullcrusher-overlord'], 'assets/skullcrusher-great-chieftain.png?v=20260926-user-image-v1'),
     skullcrusherPriest: enemy('skullcrusher-priest', '碎顱祭司', 'normal', ['fel-prayer'], 'assets/skullcrusher-priest.png'),
     skullcrusherFanatic: enemy('skullcrusher-fanatic', '碎顱狂信者', 'normal', ['death-sacrifice'], 'assets/skullcrusher-fanatic.png'),
-    ancientStoneguard: enemy('ancient-stoneguard', '遠古石衛', 'normal', ['petrified-body'], 'assets/ancient-stoneguard.png'),
+    ancientStoneguard: enemy('ancient-stoneguard', '遠古石衛', 'normal', ['petrified-body'], 'assets/ancient-stoneguard.png?v=20261005-user-image-v1'),
     runeGuard: enemy('rune-guard', '符文守衛', 'normal', ['rune-shield'], 'assets/rune-guard.png'),
-    awakenedGuard: enemy('awakened-guard', '覺醒守衛', 'elite', ['awakened-smash', 'awakened-rune'], 'assets/awakened-guard.png'),
-    fallenHighPriest: enemy('fallen-high-priest', '墮落大祭司', 'boss', ['fallen-flame', 'blood-sacrifice', 'forbidden-ritual'], 'assets/fallen-high-priest.png'),
+    awakenedGuard: enemy('awakened-guard', '覺醒守衛', 'elite', ['awakened-smash', 'awakened-rune'], 'assets/awakened-guard.png?v=20261005-user-image-v1'),
+    fallenHighPriest: enemy('fallen-high-priest', '墮落大祭司', 'boss', ['fallen-flame', 'blood-sacrifice', 'forbidden-ritual'], 'assets/fallen-high-priest.png?v=20261005-user-image-v1'),
     templeStoneguard: enemy('temple-stoneguard', '聖殿石衛', 'normal', ['temple-bulwark'], 'assets/temple-stoneguard.png'),
     runeGolem: enemy('rune-golem', '符文魔像', 'normal', ['rune-overload'], 'assets/rune-golem.png'),
     templeExecutioner: enemy('temple-executioner', '聖殿執行者', 'normal', ['execution'], 'assets/temple-executioner.png'),
-    ancientPriest: enemy('ancient-priest', '遠古祭司', 'normal', ['rune-blessing'], 'assets/ancient-priest.png'),
-    templeGuardian: enemy('temple-guardian', '聖殿守護者', 'elite', ['guardian-smash', 'guardian-rune', 'shield-shatter'], 'assets/temple-guardian.png'),
-    redrockAncientGod: enemy('redrock-ancient-god', '赤岩古神', 'boss', ['ancient-god-smash', 'ancient-rune', 'ancient-awakening', 'redrock-divine-wrath'], 'assets/redrock-ancient-god.png')
+    ancientPriest: enemy('ancient-priest', '遠古祭司', 'normal', ['rune-blessing'], 'assets/ancient-priest.png?v=20261005-user-image-v1'),
+    templeGuardian: enemy('temple-guardian', '聖殿守護者', 'elite', ['guardian-smash', 'guardian-rune', 'shield-shatter'], 'assets/temple-guardian.png?v=20261005-user-image-v1'),
+    redrockAncientGod: enemy('redrock-ancient-god', '赤炎古神', 'boss', ['ancient-god-smash', 'ancient-rune', 'ancient-awakening', 'redrock-divine-wrath'], 'assets/redrock-ancient-god.png')
   });
 
   function map(id, order, name, facilityRequirement, options) {

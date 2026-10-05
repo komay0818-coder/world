@@ -6,6 +6,9 @@
   'use strict';
 
   const PLAYTEST_ID = 'chapter-two-balance';
+  const CHAPTER_ONE_11_PLAYTEST_ID = 'chapter-one-11';
+  const CHAPTER_ONE_12_PLAYTEST_ID = 'chapter-one-12';
+  const CHAPTER_ONE_13_PLAYTEST_ID = 'chapter-one-13';
   const CHAPTER_THREE_PLAYTEST_ID = 'chapter-three-31';
   const CHAPTER_THREE_32_PLAYTEST_ID = 'chapter-three-32';
   const CHAPTER_THREE_33_PLAYTEST_ID = 'chapter-three-33';
@@ -14,6 +17,12 @@
   const CHAPTER_THREE_36_PLAYTEST_ID = 'chapter-three-36';
   const SLOT_KEY = 'chapter-two-balance-playtest-slots-v1';
   const PROGRESS_KEY = 'chapter-two-balance-playtest-progress-v2';
+  const CHAPTER_ONE_11_SLOT_KEY = 'chapter-one-11-playtest-slots-v1';
+  const CHAPTER_ONE_11_PROGRESS_KEY = 'chapter-one-11-playtest-progress-v1';
+  const CHAPTER_ONE_12_SLOT_KEY = 'chapter-one-12-playtest-slots-v2';
+  const CHAPTER_ONE_12_PROGRESS_KEY = 'chapter-one-12-playtest-progress-v2';
+  const CHAPTER_ONE_13_SLOT_KEY = 'chapter-one-13-playtest-slots-v1';
+  const CHAPTER_ONE_13_PROGRESS_KEY = 'chapter-one-13-playtest-progress-v1';
   const CHAPTER_THREE_SLOT_KEY = 'chapter-three-31-playtest-slots-v1';
   const CHAPTER_THREE_PROGRESS_KEY = 'chapter-three-31-playtest-progress-v1';
   const CHAPTER_THREE_32_SLOT_KEY = 'chapter-three-32-playtest-slots-v1';
@@ -38,7 +47,7 @@
     const location = locationLike || (typeof window !== 'undefined' ? window.location : null);
     if (!location || !isAllowedEnvironment(location)) return '';
     const requested = new URLSearchParams(location.search || '').get('playtest');
-    return [PLAYTEST_ID, CHAPTER_THREE_PLAYTEST_ID, CHAPTER_THREE_32_PLAYTEST_ID, CHAPTER_THREE_33_PLAYTEST_ID, CHAPTER_THREE_34_PLAYTEST_ID, CHAPTER_THREE_35_PLAYTEST_ID, CHAPTER_THREE_36_PLAYTEST_ID].includes(requested) ? requested : '';
+    return [PLAYTEST_ID, CHAPTER_ONE_11_PLAYTEST_ID, CHAPTER_ONE_12_PLAYTEST_ID, CHAPTER_ONE_13_PLAYTEST_ID, CHAPTER_THREE_PLAYTEST_ID, CHAPTER_THREE_32_PLAYTEST_ID, CHAPTER_THREE_33_PLAYTEST_ID, CHAPTER_THREE_34_PLAYTEST_ID, CHAPTER_THREE_35_PLAYTEST_ID, CHAPTER_THREE_36_PLAYTEST_ID].includes(requested) ? requested : '';
   }
 
   function isActive(locationLike) {
@@ -49,8 +58,23 @@
     return [CHAPTER_THREE_PLAYTEST_ID, CHAPTER_THREE_32_PLAYTEST_ID, CHAPTER_THREE_33_PLAYTEST_ID, CHAPTER_THREE_34_PLAYTEST_ID, CHAPTER_THREE_35_PLAYTEST_ID, CHAPTER_THREE_36_PLAYTEST_ID].includes(getPlaytestId(locationLike));
   }
 
+  function isChapterOne11Active(locationLike) {
+    return getPlaytestId(locationLike) === CHAPTER_ONE_11_PLAYTEST_ID;
+  }
+
+  function isChapterOne12Active(locationLike) {
+    return getPlaytestId(locationLike) === CHAPTER_ONE_12_PLAYTEST_ID;
+  }
+
+  function isChapterOne13Active(locationLike) {
+    return getPlaytestId(locationLike) === CHAPTER_ONE_13_PLAYTEST_ID;
+  }
+
   function getSlotKey(locationLike) {
-    return getPlaytestId(locationLike) === CHAPTER_THREE_36_PLAYTEST_ID ? CHAPTER_THREE_36_SLOT_KEY
+    return isChapterOne13Active(locationLike) ? CHAPTER_ONE_13_SLOT_KEY
+      : isChapterOne12Active(locationLike) ? CHAPTER_ONE_12_SLOT_KEY
+      : isChapterOne11Active(locationLike) ? CHAPTER_ONE_11_SLOT_KEY
+      : getPlaytestId(locationLike) === CHAPTER_THREE_36_PLAYTEST_ID ? CHAPTER_THREE_36_SLOT_KEY
       : getPlaytestId(locationLike) === CHAPTER_THREE_35_PLAYTEST_ID ? CHAPTER_THREE_35_SLOT_KEY
       : getPlaytestId(locationLike) === CHAPTER_THREE_34_PLAYTEST_ID ? CHAPTER_THREE_34_SLOT_KEY
       : getPlaytestId(locationLike) === CHAPTER_THREE_33_PLAYTEST_ID ? CHAPTER_THREE_33_SLOT_KEY
@@ -59,7 +83,10 @@
   }
 
   function getProgressKey(locationLike) {
-    return getPlaytestId(locationLike) === CHAPTER_THREE_36_PLAYTEST_ID ? CHAPTER_THREE_36_PROGRESS_KEY
+    return isChapterOne13Active(locationLike) ? CHAPTER_ONE_13_PROGRESS_KEY
+      : isChapterOne12Active(locationLike) ? CHAPTER_ONE_12_PROGRESS_KEY
+      : isChapterOne11Active(locationLike) ? CHAPTER_ONE_11_PROGRESS_KEY
+      : getPlaytestId(locationLike) === CHAPTER_THREE_36_PLAYTEST_ID ? CHAPTER_THREE_36_PROGRESS_KEY
       : getPlaytestId(locationLike) === CHAPTER_THREE_35_PLAYTEST_ID ? CHAPTER_THREE_35_PROGRESS_KEY
       : getPlaytestId(locationLike) === CHAPTER_THREE_34_PLAYTEST_ID ? CHAPTER_THREE_34_PROGRESS_KEY
       : getPlaytestId(locationLike) === CHAPTER_THREE_33_PLAYTEST_ID ? CHAPTER_THREE_33_PROGRESS_KEY
@@ -77,6 +104,9 @@
   function getRequestedMapId(locationLike) {
     const allowed = ['black-forest-trail', 'spider-nest', 'black-forest-entrance', 'blackstone-stronghold', 'forest-altar', 'black-forest-depths'];
     if (!isActive(locationLike)) return 'plains-entrance';
+    if (isChapterOne13Active(locationLike)) return 'boar-woods';
+    if (isChapterOne12Active(locationLike)) return 'wolf-den';
+    if (isChapterOne11Active(locationLike)) return 'plains-entrance';
     if (getPlaytestId(locationLike) === CHAPTER_THREE_36_PLAYTEST_ID) return 'redrock-temple';
     if (getPlaytestId(locationLike) === CHAPTER_THREE_35_PLAYTEST_ID) return 'ancient-altar';
     if (getPlaytestId(locationLike) === CHAPTER_THREE_34_PLAYTEST_ID) return 'skullcrusher-war-camp';
@@ -185,6 +215,9 @@
   }
 
   function createSlots(dependencies) {
+    const chapterOne11Playtest = isChapterOne11Active(dependencies.location);
+    const chapterOne12Playtest = isChapterOne12Active(dependencies.location);
+    const chapterOne13Playtest = isChapterOne13Active(dependencies.location);
     const chapterThreePlaytest = isChapterThreeActive(dependencies.location);
     const jobs = ['warrior', 'hunter', 'priest'];
     const chapterThree32Playtest = getPlaytestId(dependencies.location) === CHAPTER_THREE_32_PLAYTEST_ID;
@@ -193,8 +226,11 @@
     const chapterThree35Playtest = getPlaytestId(dependencies.location) === CHAPTER_THREE_35_PLAYTEST_ID;
     const chapterThree36Playtest = getPlaytestId(dependencies.location) === CHAPTER_THREE_36_PLAYTEST_ID;
     const chapterThreeMapNumber = chapterThree36Playtest ? '6' : chapterThree35Playtest ? '5' : chapterThree34Playtest ? '4' : chapterThree33Playtest ? '3' : chapterThree32Playtest ? '2' : '1';
-    const names = chapterThreePlaytest ? jobs.map((job) => `3-${chapterThreeMapNumber} 測試${job === 'warrior' ? '戰士' : job === 'hunter' ? '獵人' : '牧師'}`) : ['基準戰士', '基準獵人', '基準牧師'];
-    const ids = jobs.map((job) => `${chapterThreePlaytest ? `chapter-three-3${chapterThreeMapNumber}` : 'chapter-two-balance'}-${job}`);
+    const chapterOneMapNumber = chapterOne13Playtest ? '3' : chapterOne12Playtest ? '2' : '1';
+    const names = chapterOne11Playtest || chapterOne12Playtest || chapterOne13Playtest
+      ? jobs.map((job) => `1-${chapterOneMapNumber} 測試${job === 'warrior' ? '戰士' : job === 'hunter' ? '獵人' : '牧師'}`)
+      : chapterThreePlaytest ? jobs.map((job) => `3-${chapterThreeMapNumber} 測試${job === 'warrior' ? '戰士' : job === 'hunter' ? '獵人' : '牧師'}`) : ['基準戰士', '基準獵人', '基準牧師'];
+    const ids = jobs.map((job) => `${chapterOne11Playtest || chapterOne12Playtest || chapterOne13Playtest ? `chapter-one-1${chapterOneMapNumber}` : chapterThreePlaytest ? `chapter-three-3${chapterThreeMapNumber}` : 'chapter-two-balance'}-${job}`);
     const selectedMapId = getRequestedMapId(dependencies.location);
     return jobs.map((job, index) => ({
       character: { id: ids[index], name: names[index], faction: 'light', race: 'human', job },
@@ -204,7 +240,7 @@
         selectedMapId, equipment: makeEquipment(job, dependencies),
         skillLevels: makeSkillLevels(job, dependencies), lastActiveAt: Date.now(), unlockedChapter: chapterThreePlaytest ? 3 : 2,
         chapterThreePlaytestVersion: chapterThreePlaytest ? CHAPTER_THREE_PLAYTEST_VERSION : '',
-        mapUnlocked: { 'black-forest': true },
+        mapUnlocked: { 'black-forest': true, 'wolf-den': chapterOne12Playtest || chapterOne13Playtest, 'boar-woods': chapterOne13Playtest },
         blackForestCorruption: { initialized: true, removedLayers: getRemovedCorruptionLayers(dependencies.location) },
         chapterTwoProgress: {
           unlocked: Object.fromEntries(['black-forest-trail', 'spider-nest', 'black-forest-entrance', 'blackstone-stronghold', 'forest-altar', 'black-forest-depths'].map((id) => [id, true])),
@@ -241,9 +277,10 @@
   }
 
   return Object.freeze({
-    PLAYTEST_ID, CHAPTER_THREE_PLAYTEST_ID, CHAPTER_THREE_32_PLAYTEST_ID, CHAPTER_THREE_33_PLAYTEST_ID, CHAPTER_THREE_34_PLAYTEST_ID, CHAPTER_THREE_35_PLAYTEST_ID, CHAPTER_THREE_36_PLAYTEST_ID, SLOT_KEY, PROGRESS_KEY,
+    PLAYTEST_ID, CHAPTER_ONE_11_PLAYTEST_ID, CHAPTER_ONE_12_PLAYTEST_ID, CHAPTER_ONE_13_PLAYTEST_ID, CHAPTER_THREE_PLAYTEST_ID, CHAPTER_THREE_32_PLAYTEST_ID, CHAPTER_THREE_33_PLAYTEST_ID, CHAPTER_THREE_34_PLAYTEST_ID, CHAPTER_THREE_35_PLAYTEST_ID, CHAPTER_THREE_36_PLAYTEST_ID, SLOT_KEY, PROGRESS_KEY,
+    CHAPTER_ONE_11_SLOT_KEY, CHAPTER_ONE_11_PROGRESS_KEY, CHAPTER_ONE_12_SLOT_KEY, CHAPTER_ONE_12_PROGRESS_KEY, CHAPTER_ONE_13_SLOT_KEY, CHAPTER_ONE_13_PROGRESS_KEY,
     CHAPTER_THREE_SLOT_KEY, CHAPTER_THREE_PROGRESS_KEY, CHAPTER_THREE_32_SLOT_KEY, CHAPTER_THREE_32_PROGRESS_KEY, CHAPTER_THREE_33_SLOT_KEY, CHAPTER_THREE_33_PROGRESS_KEY, CHAPTER_THREE_34_SLOT_KEY, CHAPTER_THREE_34_PROGRESS_KEY, CHAPTER_THREE_35_SLOT_KEY, CHAPTER_THREE_35_PROGRESS_KEY, CHAPTER_THREE_36_SLOT_KEY, CHAPTER_THREE_36_PROGRESS_KEY, CHAPTER_THREE_PLAYTEST_VERSION,
-    isActive, isChapterThreeActive, getSlotKey, getProgressKey, getActiveSlotIndex,
+    isActive, isChapterOne11Active, isChapterOne12Active, isChapterOne13Active, isChapterThreeActive, getSlotKey, getProgressKey, getActiveSlotIndex,
     getRequestedMapId, getScenario, getRemovedCorruptionLayers, getLoadout, createSlots
   });
 }));

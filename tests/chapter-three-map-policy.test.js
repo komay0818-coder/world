@@ -49,7 +49,7 @@ assert.equal(policy.getEnemy('redrock-giant-lizard').name, '赤岩巨蜥');
 ].forEach((enemyId) => {
   assert.equal(policy.getEnemy(enemyId).image, `assets/${enemyId}.png`, `${enemyId} has dedicated 3-2 artwork`);
 });
-assert.equal(policy.getEnemy('redrock-ancient-god').name, '赤岩古神');
+assert.equal(policy.getEnemy('redrock-ancient-god').name, '赤炎古神');
 
 const empty = policy.normalizeFacilityProgress();
 assert.deepEqual(empty['redrock-wastes-entrance'], { 'supply-station': 0, armory: 0, 'shaman-altar': 0 });

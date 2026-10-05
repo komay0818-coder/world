@@ -856,6 +856,13 @@ const monsterVisualSizeOverrides = {
 // Optional per-asset correction for unusual aspect ratios. Transparent canvas
 // padding is normalized in the asset itself so rank never changes image size.
 const monsterVisualScaleCorrections = {
+  plainsRabbit: .59616,
+  plainsWolfPup: .6156,
+  plainsSlime: .50864,
+  plainsGoblinYoung: .76,
+  lostGoblin: .9215,
+  ragingWolf: 1.1,
+  greatfangWolf: 1.2,
   // Chapter 3 artwork uses mixed portrait and landscape canvases. These values
   // equalize perceived body height while keeping rank from changing art size.
   'wasteland-hyena': .8302715,
@@ -871,25 +878,25 @@ const monsterVisualScaleCorrections = {
   'skullcrusher-berserker': .9063,
   'skullcrusher-shieldguard': .8721,
   'skullcrusher-hunter': .94,
-  'skullcrusher-shaman': 1.0857,
-  'skullcrusher-centurion': 1.2012,
-  'skullcrusher-vanguard-commander': 1.1088,
-  'skullcrusher-heavy-guard': 1.05,
-  'skullcrusher-wolf-rider': 1.08,
+  'skullcrusher-shaman': 1.14,
+  'skullcrusher-centurion': 1.199,
+  'skullcrusher-vanguard-commander': 1.1875,
+  'skullcrusher-heavy-guard': .91919625,
+  'skullcrusher-wolf-rider': .9747,
   'skullcrusher-champion': 1.08,
-  'skullcrusher-great-chieftain': 1.08,
+  'skullcrusher-great-chieftain': 1.134,
   'skullcrusher-priest': 1.05,
   'skullcrusher-fanatic': 1,
-  'ancient-stoneguard': 1,
-  'rune-guard': 1,
-  'awakened-guard': .98,
-  'fallen-high-priest': .96,
-  'temple-stoneguard': 1.06,
-  'rune-golem': 1.06,
-  'temple-executioner': 1.38,
+  'ancient-stoneguard': 1.05,
+  'rune-guard': 1.05,
+  'awakened-guard': 1.26023688,
+  'fallen-high-priest': 1.1212992,
+  'temple-stoneguard': 1.0282,
+  'rune-golem': 1.059046,
+  'temple-executioner': 1.20612,
   'ancient-priest': 1.06,
-  'temple-guardian': .94,
-  'redrock-ancient-god': .92
+  'temple-guardian': 1.24315,
+  'redrock-ancient-god': 1.3248
 };
 
 function getMonsterVisualSize(enemy = {}) {
@@ -2313,6 +2320,15 @@ function createEnemyTypes(playerLevel = 1) {
     if (forcedCombatId) return [forcedCombatId];
   }
   const activeMapId = getActiveMap(getProgress()).id;
+  if (activeMapId === 'plains-entrance' && ChapterTwoBalancePlaytestPolicy?.isChapterOne11Active()) {
+    return ['plainsRabbit', 'plainsWolfPup', 'plainsSlime', 'plainsGoblinYoung', 'lostGoblin'];
+  }
+  if (activeMapId === 'wolf-den' && ChapterTwoBalancePlaytestPolicy?.isChapterOne12Active()) {
+    return ['greatfangWolf', 'ragingWolf', 'plainsWolfPup', 'denForestWolf', 'lostGoblin'];
+  }
+  if (activeMapId === 'boar-woods' && ChapterTwoBalancePlaytestPolicy?.isChapterOne13Active()) {
+    return ['boarKing', 'irritableBoar', 'boarPiglet', 'forestBoar', 'lostGoblin'];
+  }
   if (activeMapId === 'bloodwar-wastes' && ChapterTwoBalancePlaytestPolicy?.getRequestedMapId() === 'bloodwar-wastes') {
     const requestedRank = new URLSearchParams(window.location.search).get('rank');
     if (requestedRank === 'all') return ['skullcrusher-vanguard-commander', 'skullcrusher-centurion', 'skullcrusher-berserker', 'skullcrusher-shaman'];
@@ -6628,7 +6644,15 @@ function createBlackstoneStrongholdBattleState() {
 }
 
 function isTimedChapterThreeVisualShowcase() {
-  return ['skullcrusher-war-camp', 'ancient-altar', 'redrock-temple'].includes(ChapterTwoBalancePlaytestPolicy?.getRequestedMapId())
+  const requestedMapId = ChapterTwoBalancePlaytestPolicy?.getRequestedMapId();
+  const supportedMap = ChapterTwoBalancePlaytestPolicy?.isChapterOne13Active()
+    ? requestedMapId === 'boar-woods'
+    : ChapterTwoBalancePlaytestPolicy?.isChapterOne12Active()
+    ? requestedMapId === 'wolf-den'
+    : ChapterTwoBalancePlaytestPolicy?.isChapterOne11Active()
+      ? requestedMapId === 'plains-entrance'
+    : ['skullcrusher-war-camp', 'ancient-altar', 'redrock-temple'].includes(requestedMapId);
+  return supportedMap
     && new URLSearchParams(window.location.search).has('showcase');
 }
 
@@ -8040,21 +8064,27 @@ function openBattle() {
   });
 }
 
-if (ChapterTwoBalancePlaytestPolicy?.isChapterThreeActive()) {
+if (ChapterTwoBalancePlaytestPolicy?.isChapterThreeActive() || ChapterTwoBalancePlaytestPolicy?.isChapterOne11Active() || ChapterTwoBalancePlaytestPolicy?.isChapterOne12Active() || ChapterTwoBalancePlaytestPolicy?.isChapterOne13Active()) {
   const visualPlaytestProgressKey = ChapterTwoBalancePlaytestPolicy.getProgressKey();
   const savedVisualPlaytestProgress = JSON.parse(sessionStorage.getItem(visualPlaytestProgressKey) || 'null');
   if (savedVisualPlaytestProgress?.requiresMapSelectionAfterDefeat) {
     sessionStorage.removeItem(visualPlaytestProgressKey);
   }
 }
-const activePlaytestName = ChapterTwoBalancePlaytestPolicy?.isChapterThreeActive()
+const activePlaytestName = ChapterTwoBalancePlaytestPolicy?.isChapterOne13Active()
+  ? '第一章 1-3 開發測試'
+  : ChapterTwoBalancePlaytestPolicy?.isChapterOne12Active()
+  ? '第一章 1-2 開發測試'
+  : ChapterTwoBalancePlaytestPolicy?.isChapterOne11Active()
+  ? '第一章 1-1 開發測試'
+  : ChapterTwoBalancePlaytestPolicy?.isChapterThreeActive()
   ? `第三章 ${ChapterTwoBalancePlaytestPolicy.getRequestedMapId() === 'redrock-temple' ? '3-6' : ChapterTwoBalancePlaytestPolicy.getRequestedMapId() === 'ancient-altar' ? '3-5' : ChapterTwoBalancePlaytestPolicy.getRequestedMapId() === 'skullcrusher-war-camp' ? '3-4' : ChapterTwoBalancePlaytestPolicy.getRequestedMapId() === 'bloodwar-wastes' ? '3-3' : ChapterTwoBalancePlaytestPolicy.getRequestedMapId() === 'brokenrock-canyon' ? '3-2' : '3-1'} 開發測試`
   : '';
 const savedName = localStorage.getItem('stardust-player-name');
 if (activePlaytestName || savedName) {
   enterMenu(activePlaytestName || savedName);
   claimOfflineRewards();
-  if (ChapterTwoBalancePlaytestPolicy?.isChapterThreeActive()) setTimeout(openBattle, 0);
+  if (ChapterTwoBalancePlaytestPolicy?.isChapterThreeActive() || ChapterTwoBalancePlaytestPolicy?.isChapterOne11Active() || ChapterTwoBalancePlaytestPolicy?.isChapterOne12Active() || ChapterTwoBalancePlaytestPolicy?.isChapterOne13Active()) setTimeout(openBattle, 0);
 }
 
 window.addEventListener('beforeunload', markPlayerActive);
