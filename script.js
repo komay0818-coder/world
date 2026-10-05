@@ -863,8 +863,9 @@ const monsterVisualScaleCorrections = {
   lostGoblin: .9215,
   ragingWolf: 1.1,
   greatfangWolf: 1.2,
-  boarPiglet: .8,
-  forestBoar: .9,
+  boarPiglet: .76,
+  forestBoar: .855,
+  irritableBoar: .92,
   boarKing: 1.15,
   // Chapter 3 artwork uses mixed portrait and landscape canvases. These values
   // equalize perceived body height while keeping rank from changing art size.

@@ -175,8 +175,9 @@ assert.match(script, /isChapterThreeActive\(\) \|\| ChapterTwoBalancePlaytestPol
 assert.match(script, /isChapterOne11Active\(\)[\s\S]*?return \['plainsRabbit', 'plainsWolfPup', 'plainsSlime', 'plainsGoblinYoung', 'lostGoblin'\]/, '1-1 visual playtest shows every map monster together');
 assert.match(script, /isChapterOne12Active\(\)[\s\S]*?return \['greatfangWolf', 'ragingWolf', 'plainsWolfPup', 'denForestWolf', 'lostGoblin'\]/, '1-2 visual playtest shows every map monster together');
 assert.match(script, /isChapterOne13Active\(\)[\s\S]*?return \['boarKing', 'irritableBoar', 'boarPiglet', 'forestBoar', 'lostGoblin'\]/, '1-3 visual playtest shows every map monster together');
-assert.match(script, /boarPiglet:\s*\.8,/, '1-3 piglet display size is reduced by 20%');
-assert.match(script, /forestBoar:\s*\.9,/, '1-3 forest boar display size is reduced by 10%');
+assert.match(script, /boarPiglet:\s*\.76,/, '1-3 piglet retains the earlier reduction and is reduced by another 5%');
+assert.match(script, /forestBoar:\s*\.855,/, '1-3 forest boar retains the earlier reduction and is reduced by another 5%');
+assert.match(script, /irritableBoar:\s*\.92,/, '1-3 elite display size is reduced by 8%');
 assert.match(script, /boarKing:\s*1\.15,/, '1-3 boss display size is increased by 15%');
 
 console.log('chapter-two balance playtest policy tests passed');
