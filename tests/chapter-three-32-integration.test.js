@@ -24,7 +24,7 @@ assert.match(script, /brokenrockAction\?\.defenseIgnore/);
 assert.match(script, /savedVisualPlaytestProgress\?\.requiresMapSelectionAfterDefeat[\s\S]*sessionStorage\.removeItem\(visualPlaytestProgressKey\)/, 'a defeated isolated playtest session resets before auto-entry');
 assert.match(script, /getRequestedMapId\(\) === 'bloodwar-wastes' \? '3-3'/, 'the playtest identity includes the requested 3-3 map');
 const vm = require('node:vm');
-const resetBlock = script.match(/if \(ChapterTwoBalancePlaytestPolicy\?\.isChapterThreeActive\(\) \|\| ChapterTwoBalancePlaytestPolicy\?\.isChapterOne11Active\(\) \|\| ChapterTwoBalancePlaytestPolicy\?\.isChapterOne12Active\(\)\) \{[\s\S]*?\n\}/)?.[0];
+const resetBlock = script.match(/if \(ChapterTwoBalancePlaytestPolicy\?\.isChapterThreeActive\(\)[^\n]+\{[\s\S]*?\n\}/)?.[0];
 assert.ok(resetBlock, 'shared playtest reset block exists');
 for (const defeated of [true, false]) {
   const key = 'isolated-chapter-three-32';

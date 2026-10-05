@@ -20,6 +20,12 @@ assert.equal(BalancePolicy.getRequestedMapId({ hostname: '127.0.0.1', search: '?
 assert.equal(BalancePolicy.getSlotKey({ hostname: '127.0.0.1', search: '?playtest=chapter-three-32' }), BalancePolicy.CHAPTER_THREE_32_SLOT_KEY);
 assert.equal(BalancePolicy.getRequestedMapId({ hostname: '127.0.0.1', search: '?playtest=chapter-three-33' }), 'bloodwar-wastes');
 assert.equal(BalancePolicy.getSlotKey({ hostname: '127.0.0.1', search: '?playtest=chapter-three-33' }), BalancePolicy.CHAPTER_THREE_33_SLOT_KEY);
+assert.equal(BalancePolicy.getRequestedMapId({ hostname: '127.0.0.1', search: '?playtest=chapter-three-34' }), 'skullcrusher-war-camp');
+assert.equal(BalancePolicy.getSlotKey({ hostname: '127.0.0.1', search: '?playtest=chapter-three-34' }), BalancePolicy.CHAPTER_THREE_34_SLOT_KEY);
+assert.equal(BalancePolicy.getRequestedMapId({ hostname: '127.0.0.1', search: '?playtest=chapter-three-35' }), 'ancient-altar');
+assert.equal(BalancePolicy.getSlotKey({ hostname: '127.0.0.1', search: '?playtest=chapter-three-35' }), BalancePolicy.CHAPTER_THREE_35_SLOT_KEY);
+assert.equal(BalancePolicy.getRequestedMapId({ hostname: '127.0.0.1', search: '?playtest=chapter-three-36' }), 'redrock-temple');
+assert.equal(BalancePolicy.getSlotKey({ hostname: '127.0.0.1', search: '?playtest=chapter-three-36' }), BalancePolicy.CHAPTER_THREE_36_SLOT_KEY);
 assert.equal(BalancePolicy.getActiveSlotIndex({ hostname: '127.0.0.1', search: '?playtest=chapter-two-balance&main=hunter' }), 1);
 assert.equal(BalancePolicy.getActiveSlotIndex({ hostname: '127.0.0.1', search: '?playtest=chapter-two-balance&main=priest' }), 2);
 assert.equal(BalancePolicy.getRequestedMapId({ hostname: '127.0.0.1', search: '?playtest=chapter-two-balance&map=spider-nest' }), 'spider-nest');
@@ -117,6 +123,15 @@ assert.ok(chapterThree33Slots.every((slot) => slot.progress.chapterThreeProgress
 assert.ok(chapterThree33Slots.every((slot) => slot.progress.chapterThreeProgress.cleared['brokenrock-canyon']));
 assert.ok(chapterThree33Slots.every((slot) => slot.progress.chapterThreeProgress.unlocked['bloodwar-wastes']));
 assert.ok(chapterThree33Slots.every((slot) => !slot.progress.chapterThreeProgress.unlocked['skullcrusher-war-camp']));
+
+const chapterThree36Slots = BalancePolicy.createSlots({
+  EquipmentPolicy, EquipmentDropPolicy, CraftingPolicy, ClassSkillPolicy,
+  location: { hostname: 'raw.githack.com', pathname: '/komay0818-coder/world/dev/index.html', search: '?playtest=chapter-three-36' }
+});
+assert.ok(chapterThree36Slots.every((slot) => slot.progress.selectedMapId === 'redrock-temple'));
+assert.ok(chapterThree36Slots.every((slot) => slot.progress.chapterThreeProgress.cleared['ancient-altar']));
+assert.ok(chapterThree36Slots.every((slot) => slot.progress.chapterThreeProgress.bossFirstKills['ancient-altar']));
+assert.ok(chapterThree36Slots.every((slot) => slot.progress.chapterThreeProgress.unlocked['redrock-temple']));
 
 const script = fs.readFileSync(path.join(__dirname, '..', 'script.js'), 'utf8');
 assert.match(script, /getScenario\(\) === 'purified-heart-pressure'[\s\S]*'heartOfTheBlackForest',[\s\S]*'forestSpirit',[\s\S]*'darkSporeBeast',[\s\S]*'corruptedBlackstoneCenturion'/);

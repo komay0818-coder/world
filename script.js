@@ -103,7 +103,7 @@ const mapProgression = [
   { id: 'goblin-camp', chapter: 1, regionOf: 'beginner-plains', min: 2, max: 5, monsterMin: 8, monsterMax: 12, name: '哥布林營地', background: 'assets/goblin-camp-background.png', implemented: true, dungeon: true, ticketItemId: 'goblin-camp-map', normalXp: 10, eliteXp: 28, bossXp: 120, recommended: { attack: 18, defense: 5, hp: 120 } },
   { id: ChapterTwoMapPolicy.CHAPTER.id, chapter: 2, min: 15, max: 30, chapterLevelRange: [15, 30], name: ChapterTwoMapPolicy.CHAPTER.name, background: ChapterTwoMapPolicy.CHAPTER.background, implemented: true, regionHub: true, contentStatus: 'planned', previousMapId: 'plains-depths', recommended: { attack: 0, defense: 0, hp: 0 } },
   ...ChapterTwoMapPolicy.MAPS,
-  { id: ChapterThreeMapPolicy.CHAPTER.id, chapter: 3, min: 30, max: 45, name: ChapterThreeMapPolicy.CHAPTER.name, background: '', implemented: true, regionHub: true, contentStatus: 'partially-playable', previousMapId: ChapterThreeMapPolicy.CHAPTER.previousMapId, recommended: { attack: 0, defense: 0, hp: 0 } },
+  { id: ChapterThreeMapPolicy.CHAPTER.id, chapter: 3, min: 30, max: 45, name: ChapterThreeMapPolicy.CHAPTER.name, background: '', implemented: true, regionHub: true, contentStatus: 'combat-ready', previousMapId: ChapterThreeMapPolicy.CHAPTER.previousMapId, recommended: { attack: 0, defense: 0, hp: 0 } },
   ...ChapterThreeMapPolicy.MAPS,
   { min: 10, max: 15, name: '石牙山谷', normalXp: 8, eliteXp: 35, bossXp: 140 },
   { min: 15, max: 20, name: '荒蕪沙漠', normalXp: 18, eliteXp: 70, bossXp: 280 },
@@ -915,6 +915,9 @@ const mapMonsterPools = {
   redrockWastes: RedrockWastesPolicy.getCombatPool(),
   brokenrockCanyon: BrokenrockCanyonPolicy.getCombatPool(),
   bloodwarWastes: BloodwarWastesPolicy.getCombatPool(),
+  skullcrusherWarCamp: { normal: ['skullcrusher-berserker', 'skullcrusher-shaman', 'skullcrusher-heavy-guard', 'skullcrusher-wolf-rider'], elite: ['skullcrusher-champion'], boss: ['skullcrusher-great-chieftain'] },
+  ancientAltar: { normal: ['skullcrusher-priest', 'skullcrusher-fanatic', 'ancient-stoneguard', 'rune-guard'], elite: ['awakened-guard'], boss: ['fallen-high-priest'] },
+  redrockTemple: { normal: ['temple-stoneguard', 'rune-golem', 'temple-executioner', 'ancient-priest'], elite: ['temple-guardian'], boss: ['redrock-ancient-god'] },
   beginner: { normal: ['plainsRabbit', 'plainsWolfPup', 'plainsSlime', 'plainsGoblinYoung'], rare: ['lostGoblin'], rareChance: .10, elite: [], boss: [] },
   blackForest: BlackForestEntrancePolicy.getCombatPool()
 };
@@ -950,7 +953,10 @@ const dropLookupMapPools = {
   'black-forest-depths': mapMonsterPools.blackForestDepths,
   'redrock-wastes-entrance': mapMonsterPools.redrockWastes,
   'brokenrock-canyon': mapMonsterPools.brokenrockCanyon,
-  'bloodwar-wastes': mapMonsterPools.bloodwarWastes
+  'bloodwar-wastes': mapMonsterPools.bloodwarWastes,
+  'skullcrusher-war-camp': mapMonsterPools.skullcrusherWarCamp,
+  'ancient-altar': mapMonsterPools.ancientAltar,
+  'redrock-temple': mapMonsterPools.redrockTemple
 };
 
 const potionDropRate = .10;
@@ -2249,6 +2255,9 @@ function getMonsterPool(level = getProgress().level) {
   if (mapId === 'redrock-wastes-entrance') return mapMonsterPools.redrockWastes;
   if (mapId === 'brokenrock-canyon') return mapMonsterPools.brokenrockCanyon;
   if (mapId === 'bloodwar-wastes') return mapMonsterPools.bloodwarWastes;
+  if (mapId === 'skullcrusher-war-camp') return mapMonsterPools.skullcrusherWarCamp;
+  if (mapId === 'ancient-altar') return mapMonsterPools.ancientAltar;
+  if (mapId === 'redrock-temple') return mapMonsterPools.redrockTemple;
   return mapId === 'black-forest' ? mapMonsterPools.blackForest : mapMonsterPools.beginner;
 }
 
@@ -2306,9 +2315,31 @@ function createEnemyTypes(playerLevel = 1) {
   const activeMapId = getActiveMap(getProgress()).id;
   if (activeMapId === 'bloodwar-wastes' && ChapterTwoBalancePlaytestPolicy?.getRequestedMapId() === 'bloodwar-wastes') {
     const requestedRank = new URLSearchParams(window.location.search).get('rank');
+    if (requestedRank === 'all') return ['skullcrusher-vanguard-commander', 'skullcrusher-centurion', 'skullcrusher-berserker', 'skullcrusher-shaman'];
     if (requestedRank === 'elite') return ['skullcrusher-centurion', 'skullcrusher-berserker', 'skullcrusher-shieldguard', 'skullcrusher-hunter'];
     if (requestedRank === 'boss') return ['skullcrusher-vanguard-commander', 'skullcrusher-berserker', 'skullcrusher-shieldguard', 'skullcrusher-shaman'];
     return [...mapMonsterPools.bloodwarWastes.normal];
+  }
+  if (activeMapId === 'skullcrusher-war-camp' && ChapterTwoBalancePlaytestPolicy?.getRequestedMapId() === 'skullcrusher-war-camp') {
+    const requestedRank = new URLSearchParams(window.location.search).get('rank');
+    if (requestedRank === 'all') return ['skullcrusher-great-chieftain', 'skullcrusher-champion', 'skullcrusher-heavy-guard', 'skullcrusher-wolf-rider'];
+    if (requestedRank === 'elite') return ['skullcrusher-champion', 'skullcrusher-berserker', 'skullcrusher-shaman', 'skullcrusher-heavy-guard'];
+    if (requestedRank === 'boss') return ['skullcrusher-great-chieftain', 'skullcrusher-berserker', 'skullcrusher-heavy-guard', 'skullcrusher-wolf-rider'];
+    return [...mapMonsterPools.skullcrusherWarCamp.normal];
+  }
+  if (activeMapId === 'ancient-altar' && ChapterTwoBalancePlaytestPolicy?.getRequestedMapId() === 'ancient-altar') {
+    const requestedRank = new URLSearchParams(window.location.search).get('rank');
+    if (requestedRank === 'all') return ['fallen-high-priest', 'awakened-guard', 'ancient-stoneguard', 'rune-guard'];
+    if (requestedRank === 'elite') return ['awakened-guard', 'skullcrusher-priest', 'skullcrusher-fanatic', 'ancient-stoneguard'];
+    if (requestedRank === 'boss') return ['fallen-high-priest', 'skullcrusher-priest', 'ancient-stoneguard', 'rune-guard'];
+    return [...mapMonsterPools.ancientAltar.normal];
+  }
+  if (activeMapId === 'redrock-temple' && ChapterTwoBalancePlaytestPolicy?.getRequestedMapId() === 'redrock-temple') {
+    const requestedRank = new URLSearchParams(window.location.search).get('rank');
+    if (requestedRank === 'all') return ['redrock-ancient-god', 'temple-guardian', 'temple-stoneguard', 'rune-golem'];
+    if (requestedRank === 'elite') return ['temple-guardian', 'temple-stoneguard', 'rune-golem', 'temple-executioner'];
+    if (requestedRank === 'boss') return ['redrock-ancient-god', 'temple-stoneguard', 'temple-executioner', 'ancient-priest'];
+    return [...mapMonsterPools.redrockTemple.normal];
   }
   const enemyLimit = ChapterOneLevelPolicy.getConcurrentEnemyLimit(activeMapId);
   if (activeMapId === 'plains-entrance') {
@@ -2350,6 +2381,9 @@ function getMonsterDefinitionForMap(type, mapId = battle.dungeonId || getActiveM
   if (mapId === 'redrock-wastes-entrance') return RedrockWastesPolicy.getCombatMonster(type) || monsterTypes.plainsGoblinYoung;
   if (mapId === 'brokenrock-canyon') return BrokenrockCanyonPolicy.getCombatMonster(type) || monsterTypes.plainsGoblinYoung;
   if (mapId === 'bloodwar-wastes') return BloodwarWastesPolicy.getCombatMonster(type) || monsterTypes.plainsGoblinYoung;
+  if (ChapterThreeLateCombatPolicy.isSupported(mapId)) {
+    return ChapterThreeLateCombatPolicy.getMonster(mapId, ChapterThreeMapPolicy.getEnemy(type));
+  }
   const monster = monsterTypes[type] || monsterTypes.plainsGoblinYoung;
   const chapterMonster = ChapterOneLevelPolicy.scaleMonster(monster, mapId, level);
   const dungeonMonster = GoblinCampPolicy.scaleMonster(chapterMonster, mapId === 'goblin-camp');
@@ -2374,7 +2408,7 @@ function createEnemyLevels(enemyTypes, mapId, random = Math.random) {
           ? ForestAltarPolicy.rollLevel(type)
         : mapId === 'black-forest-depths'
           ? BlackForestDepthsPolicy.rollLevel(type)
-        : mapId === 'redrock-wastes-entrance' || mapId === 'brokenrock-canyon'
+        : mapId === 'redrock-wastes-entrance' || mapId === 'brokenrock-canyon' || mapId === 'skullcrusher-war-camp' || mapId === 'ancient-altar' || mapId === 'redrock-temple'
           ? 30
       : ChapterOneLevelPolicy.rollLevel(mapId, type, random()) ?? null);
 }
@@ -2457,7 +2491,7 @@ function getEnemyDefinition(index) {
   const enemy = getMonsterDefinitionForMap(battle.enemyTypes[index], battle.dungeonId || getActiveMap(getProgress()).id, battle.enemyLevels?.[index]);
   const summonProfile = battle.enemySummonProfiles?.[index];
   const summonedEnemy = !summonProfile ? enemy : { ...enemy, name: summonProfile.name || enemy.name, maxHp: Math.max(1, Math.round(enemy.maxHp * summonProfile.hpRatio)), attack: Math.max(1, Math.round(enemy.attack * summonProfile.attackRatio)) };
-  return EliteAffixPolicy.applyAffixes(summonedEnemy, battle.enemyAffixes?.[index] || []);
+  return { ...EliteAffixPolicy.applyAffixes(summonedEnemy, battle.enemyAffixes?.[index] || []), combatIndex: index };
 }
 
 function createEnemyAffixes(enemyTypes, mapId, enemyLevels = [], random = Math.random) {
@@ -2506,7 +2540,7 @@ function getMonsterAttackPower(enemy, progress = getProgress(), currentHp = enem
     ? 1 + BlackForestTrailPolicy.BEASTMASTER.spiderAttackBonus : 1;
   const nestSpiderCommandMultiplier = ['spiderNestBlackstonePoisonSpider', 'venomSpitterSpider', 'webWeaver', 'giantSpider'].includes(enemy.id)
     && Date.now() < (battle.spiderNestCommandUntil || 0) ? 1 + SpiderNestPolicy.BEASTMASTER.spiderAttackBonus : 1;
-  if (enemy.mapId) return Math.max(1, Math.round((enemy.attack || 1) * randomMultiplier * bloodFrenzy * irritable * plainsIrritable * blackForestMultiplier * blackForestTrailMultiplier * spiderNestMultiplier * strongholdMultiplier * forestAltarMultiplier * depthsMultiplier * redrockMultiplier * brokenrockMultiplier * brokenrockBuffMultiplier * brokenrockCommandMultiplier * bloodwarMultiplier * bloodwarTotemMultiplier * bloodwarChargeMultiplier * strongholdCommandMultiplier * strongholdEnrageMultiplier * commandMultiplier * beastCommandMultiplier * nestSpiderCommandMultiplier));
+  if (enemy.mapId) return Math.max(1, Math.round((enemy.attack || 1) * randomMultiplier * getLateChapterMonsterMultiplier(enemy, 'attack') * bloodFrenzy * irritable * plainsIrritable * blackForestMultiplier * blackForestTrailMultiplier * spiderNestMultiplier * strongholdMultiplier * forestAltarMultiplier * depthsMultiplier * redrockMultiplier * brokenrockMultiplier * brokenrockBuffMultiplier * brokenrockCommandMultiplier * bloodwarMultiplier * bloodwarTotemMultiplier * bloodwarChargeMultiplier * strongholdCommandMultiplier * strongholdEnrageMultiplier * commandMultiplier * beastCommandMultiplier * nestSpiderCommandMultiplier));
   const map = getActiveMap(progress);
   const monsterLevel = Math.min(map.max, Math.max(map.min, progress.level));
   const levelMultiplier = 1 + (monsterLevel - 1) * .10;
@@ -2537,7 +2571,7 @@ function getMonsterAttackInterval(enemy, currentHp = enemy.maxHp) {
     ? 1 + BlackForestTrailPolicy.BEASTMASTER.spiderAttackSpeedBonus : 1;
   const nestSpiderCommandMultiplier = ['spiderNestBlackstonePoisonSpider', 'venomSpitterSpider', 'webWeaver', 'giantSpider'].includes(enemy.id)
     && Date.now() < (battle.spiderNestCommandUntil || 0) ? 1 + SpiderNestPolicy.BEASTMASTER.spiderAttackSpeedBonus : 1;
-  return Math.max(250, (enemy.attackInterval || (1000 / (enemy.attackSpeed || 1))) / bloodFrenzy / irritable / plainsIrritable / blackForestMultiplier / blackForestTrailMultiplier / spiderNestMultiplier / strongholdMultiplier / forestAltarMultiplier / depthsMultiplier / redrockMultiplier / brokenrockCommandMultiplier / bloodwarMultiplier / bloodwarChargeMultiplier / strongholdEnrageMultiplier / beastCommandMultiplier / nestSpiderCommandMultiplier);
+  return Math.max(250, (enemy.attackInterval || (1000 / (enemy.attackSpeed || 1))) / getLateChapterMonsterMultiplier(enemy, 'attackSpeed') / bloodFrenzy / irritable / plainsIrritable / blackForestMultiplier / blackForestTrailMultiplier / spiderNestMultiplier / strongholdMultiplier / forestAltarMultiplier / depthsMultiplier / redrockMultiplier / brokenrockCommandMultiplier / bloodwarMultiplier / bloodwarChargeMultiplier / strongholdEnrageMultiplier / beastCommandMultiplier / nestSpiderCommandMultiplier);
 }
 
 function createEnemyAttackSchedule(enemyTypes, startAt = Date.now(), mapId = getActiveMap(getProgress()).id, enemyLevels = []) {
@@ -2634,11 +2668,12 @@ function getCurrentMap(level) {
 }
 
 function getActiveMap(progress = getProgress()) {
-  const bloodwarVisualPlaytest = ChapterTwoBalancePlaytestPolicy?.isChapterThreeActive()
-    && ChapterTwoBalancePlaytestPolicy.getRequestedMapId() === 'bloodwar-wastes';
-  const selected = mapProgression.find((map) => map.id === progress.selectedMapId && (map.implemented || (bloodwarVisualPlaytest && map.id === 'bloodwar-wastes'))
+  const chapterThreeVisualPlaytestMapId = ChapterTwoBalancePlaytestPolicy?.isChapterThreeActive()
+    ? ChapterTwoBalancePlaytestPolicy.getRequestedMapId() : '';
+  const selected = mapProgression.find((map) => map.id === progress.selectedMapId && (map.implemented || map.id === chapterThreeVisualPlaytestMapId)
     && (map.chapter !== 1 || ChapterOneProgressionPolicy.isUnlocked(progress, map.id))
-    && (map.chapter !== 2 || (ChapterOneProgressionPolicy.isUnlocked(progress, 'black-forest') && progress.level >= map.min)));
+    && (map.chapter !== 2 || (ChapterOneProgressionPolicy.isUnlocked(progress, 'black-forest') && progress.level >= map.min))
+    && (map.chapter !== 3 || map.id === chapterThreeVisualPlaytestMapId || ChapterThreeProgressionPolicy.canEnter(progress, map.id, map.implemented)));
   if (selected?.id === 'beginner-plains') return mapProgression.find((map) => map.id === 'plains-entrance');
   if (selected) return selected;
   return mapProgression.find((map) => map.id === 'plains-entrance') || mapProgression[0];
@@ -3143,6 +3178,7 @@ function isDropLookupMapUnlocked(map, progress = getProgress()) {
   if (!map?.implemented) return false;
   if (map.chapter === 1 && !ChapterOneProgressionPolicy.isUnlocked(progress, map.id)) return false;
   if (map.chapter === 2 && (!ChapterOneProgressionPolicy.isUnlocked(progress, 'black-forest') || progress.level < map.min || !ChapterTwoProgressionPolicy.canEnter(progress, map.id, map.implemented))) return false;
+  if (map.chapter === 3 && !map.regionHub && !ChapterThreeProgressionPolicy.canEnter(progress, map.id, map.implemented)) return false;
   if (map.ticketItemId && getInventoryItemQuantity(progress, map.ticketItemId) < 1) return false;
   if (map.dungeon && !map.ticketItemId && map.id !== 'blackstone-stronghold' && (getAccountResources().dungeonKeys?.blackForestAltar || 0) < 1) return false;
   return true;
@@ -3271,7 +3307,7 @@ function renderRedrockWastesRegions() {
           : activeMap.id === region.id && !progress.requiresMapSelectionAfterDefeat
             ? `<em class="current-region">目前區域${status.cleared ? '・已通關' : ''}</em>`
             : `<button type="button" data-select-map="${region.id}">${status.cleared ? '再次進入' : '進入區域'}</button>`;
-      return `<article class="map-region-card ${stateClass}"><span>${String(index + 1).padStart(2, '0')}</span><div><b>${region.name}</b><small>${region.id === 'redrock-wastes-entrance' ? '專屬怪物池・赤岩角獸・赤岩巨蜥' : '尚未開放'}</small></div>${action}</article>`;
+      return `<article class="map-region-card ${stateClass}"><span>${String(index + 1).padStart(2, '0')}</span><div><b>${region.name}</b><small>${`Lv. ${region.min}・${ChapterThreeMapPolicy.getEnemy(region.eliteId)?.name}・${ChapterThreeMapPolicy.getEnemy(region.bossId)?.name}`}</small></div>${action}</article>`;
     }).join('')}</section>`;
   modal.dataset.view = 'redrock-wastes-regions';
   modal.classList.remove('hidden');
@@ -4953,6 +4989,7 @@ function rewardVictory(index) {
   document.querySelector('#battle-player-art')?.classList.toggle('has-charge-buff', mainChargeBuffActive);
   const enemy = getEnemyDefinition(index);
   const currentMap = getActiveMap(progress);
+  recordLateChapterEnemyDeath(index);
   renderStrongholdObjective(currentMap);
   if (currentMap.id === 'blackstone-stronghold' && battle.blackstoneStrongholdState) {
     const previousActive = battle.blackstoneStrongholdState.outpostActive;
@@ -5066,7 +5103,7 @@ function rewardVictory(index) {
       const nextStatus = nextMap?.implemented ? '已解鎖' : '已解鎖・尚未開放';
       const chapterCompleted = progress.chapterThreeProgress.completed;
       showToast(chapterCompleted ? '第三章通關完成！' : `${nextMap?.name || chapterThreeResult.nextMapId}${nextStatus}`);
-      logBattle(chapterCompleted ? '◆ 首次擊敗赤炎古神，第三章通關完成。' : `◆ 首次擊敗${enemy.name}，${nextMap?.name || chapterThreeResult.nextMapId}已解鎖。`, 'progress');
+      logBattle(chapterCompleted ? '◆ 首次擊敗赤岩古神，第三章通關完成。' : `◆ 首次擊敗${enemy.name}，${nextMap?.name || chapterThreeResult.nextMapId}已解鎖。`, 'progress');
     }
   }
   addRoundLoot('gold', '金幣', earnedGold, '🪙', '+');
@@ -5143,7 +5180,7 @@ function useSharedHealingPotionForMember(member) {
   if ((progress.potions || 0) <= 0) return false;
   progress.potions -= 1;
   removePotionItem(progress);
-  member.currentHp = Math.min(member.maxHp, member.currentHp + Math.ceil(member.maxHp * .30));
+  member.currentHp = Math.min(member.maxHp, member.currentHp + Math.ceil(member.maxHp * .30 * ChapterThreeLateCombatPolicy.playerMultiplier(member, 'healing-received-down', Date.now())));
   saveProgress(progress);
   logBattle(`🧪 ${member.name}使用主要角色背包的治癒藥水，恢復 30% 生命。`, 'healing');
   return true;
@@ -5329,6 +5366,63 @@ function getPlayerAttackProfile(character, skill = null) {
   };
 }
 
+function getLateChapterUnits(now = Date.now()) {
+  const mapId = battle.dungeonId || getActiveMap(getProgress()).id;
+  if (!ChapterThreeLateCombatPolicy.isSupported(mapId)) return [];
+  return battle.enemyTypes.map((type, index) => {
+    const definition = getEnemyDefinition(index);
+    const skillState = getEnemySkillState(index);
+    skillState.lateChapter = skillState.lateChapter || ChapterThreeLateCombatPolicy.createState(mapId, battle.enemySpawnedAt[index] || now);
+    return { ...definition, key: `${battle.sessionId}:${index}:${battle.enemySpawnedAt[index]}`, state: skillState.lateChapter,
+      controlled: now < skillState.stunnedUntil || now < skillState.frozenUntil,
+      get currentHp() { return battle.enemyHps[index]; },
+      set currentHp(value) { battle.enemyHps[index] = value; } };
+  });
+}
+
+function emitLateChapterSkill(unit, skill) {
+  logBattle(`◆【${unit.name}】施放【${skill.name}】。`, 'system');
+}
+
+function updateLateChapterThresholds(index, now = Date.now()) {
+  const units = getLateChapterUnits(now);
+  if (units[index]) ChapterThreeLateCombatPolicy.thresholds(units[index].mapId, units[index], now, emitLateChapterSkill);
+}
+
+function recordLateChapterEnemyDeath(index, now = Date.now()) {
+  const units = getLateChapterUnits(now);
+  if (units[index]) ChapterThreeLateCombatPolicy.death(units[index].mapId, units[index], units, now, emitLateChapterSkill);
+}
+
+function getLateChapterMonsterMultiplier(enemy, stat, now = Date.now()) {
+  if (!ChapterThreeLateCombatPolicy.isSupported(enemy.mapId) || !Number.isInteger(enemy.combatIndex)) return 1;
+  const units = getLateChapterUnits(now), unit = units[enemy.combatIndex];
+  return unit ? ChapterThreeLateCombatPolicy.modifiers(enemy.mapId, unit, units, now)[stat] || 1 : 1;
+}
+
+function processLateChapterCombat(now = Date.now()) {
+  const units = getLateChapterUnits(now);
+  if (!units.length) return;
+  ChapterThreeLateCombatPolicy.tick(units[0].mapId, units, battle.partyMembers, now, emitLateChapterSkill);
+  units.forEach((unit, index) => {
+    if (unit.currentHp > 0 && unit.state.pendingActions.length && !unit.controlled) battle.enemyNextAttackAt[index] = Math.min(battle.enemyNextAttackAt[index], now);
+  });
+  for (const member of battle.partyMembers.filter(player => player.alive)) {
+    const burn = member.chapterThreeBurn;
+    if (!burn || burn.ticks <= 0 || now < burn.nextTickAt) continue;
+    const ticks = Math.min(burn.ticks, Math.floor((now - burn.nextTickAt) / burn.tickMs) + 1);
+    burn.ticks -= ticks; burn.nextTickAt += ticks * burn.tickMs;
+    const damage = MonsterDefense.resolvePlayerDamage({ baseDamage: burn.damage * ticks, defense: member.stats.defense, damageReduction: member.stats.damageReduction }).finalDamage;
+    const absorbed = Math.min(member.shield || 0, damage);
+    member.shield = Math.max(0, (member.shield || 0) - absorbed);
+    member.currentHp = Math.max(getPlaytestHpFloor(), member.currentHp - (damage - absorbed));
+    logBattle(`🔥 ${member.name}受到【墮落之火】持續傷害 ${damage - absorbed}。`, 'damage-taken');
+    const caster = units.find(unit => unit.key === burn.sourceKey);
+    if (caster) AncientAltarPolicy.recordFallenBurn(caster.state, 'tick');
+    defeatPartyMember(member, now);
+  }
+}
+
 function getEnemySkillState(index) {
   battle.enemySkillStates = Array.isArray(battle.enemySkillStates) ? battle.enemySkillStates : [];
   battle.enemySkillStates[index] = battle.enemySkillStates[index] || {
@@ -5453,7 +5547,12 @@ function applyDamageToMonster(index, baseDamage, profile, options = {}) {
   const sensitivityMultiplier = typeof getCombatSensitivityDamageMultiplier === 'function' ? Math.max(0,Number(getCombatSensitivityDamageMultiplier(options.sourceSkill||options.attackKind||'',attacker))||0) : 1;
   const arcaneConversionMultiplier = MageAdvancementPolicy.getArcaneDamageMultiplier(attacker, options.sourceSkill);
   magicAdjustedDamage *= sensitivityMultiplier * arcaneConversionMultiplier;
-  const adjustedBaseDamage = magicAdjustedDamage * (1 + warriorRuntime.attack) * (1 + (attackerStats.damageBonus || 0) + warriorAdvancement.damage + warriorRuntime.damage) * rankMultiplier * attackKindMultiplier * conditionalDamageMultiplier * craftedEpicMultiplier * specialEquipmentMultiplier * deathMarkMultiplier * markMultiplier * vulnerabilityMultiplier * controlledMultiplier * statusElementMultiplier * frostResonanceMultiplier * lightningResonanceMultiplier * shockedVulnerabilityMultiplier;
+  const lateUnits = getLateChapterUnits(now);
+  const lateUnit = lateUnits[index];
+  const lateModifiers = lateUnit ? ChapterThreeLateCombatPolicy.modifiers(enemy.mapId, lateUnit, lateUnits, now) : { defense: 1, damageReduction: 0, dotDamage: 1 };
+  const latePlayerMultiplier = lateUnit ? ChapterThreeLateCombatPolicy.playerAttackMultiplier(enemy.mapId, attacker, lateUnits, now) : 1;
+  const lateCriticalMultiplier = lateUnit && enemy.id === 'skullcrusher-heavy-guard' ? SkullcrusherWarCampPolicy.getHeavyGuardCriticalDamageMultiplier(Boolean(options.critical)) : 1;
+  const adjustedBaseDamage = latePlayerMultiplier * lateCriticalMultiplier * (profile.damageType === 'periodic' ? lateModifiers.dotDamage : 1) * magicAdjustedDamage * (1 + warriorRuntime.attack) * (1 + (attackerStats.damageBonus || 0) + warriorAdvancement.damage + warriorRuntime.damage) * rankMultiplier * attackKindMultiplier * conditionalDamageMultiplier * craftedEpicMultiplier * specialEquipmentMultiplier * deathMarkMultiplier * markMultiplier * vulnerabilityMultiplier * controlledMultiplier * statusElementMultiplier * frostResonanceMultiplier * lightningResonanceMultiplier * shockedVulnerabilityMultiplier;
   if (enemy.mapId) {
     const hitChance = ChapterOneLevelPolicy.getPlayerHitChance(progress.level, enemy.level, attackerStats.accuracy, 0);
     if (Math.random() >= hitChance) {
@@ -5483,8 +5582,8 @@ function applyDamageToMonster(index, baseDamage, profile, options = {}) {
   const rogueDefenseMultiplier = 1 - RogueAdvancementPolicy.getTargetDefenseReduction(battle.enemyDots[index]);
   const defendedEnemy = {
     ...enemy,
-    defense: Math.max(0, Math.round(enemy.defense * armorShatterMultiplier * (1 - armorIgnore) * rogueDefenseMultiplier * (1 - Math.min(.9, (battle.enemyDots[index] || []).filter((dot) => dot.type === 'poison').reduce((total, dot) => total + (dot.defenseReduction || 0), 0))) * trailMultipliers.defense * spiderNestMultipliers.defense * strongholdMultipliers.defense * forestAltarMultipliers.defense * depthsMultipliers.defense * redrockMultipliers.defense * bloodwarDefenseMultiplier)),
-    damageReduction: Math.min(95, (enemy.damageReduction || 0) + (bloodwarState && now < (bloodwarState.shieldWallUntil || 0) ? 20 : 0)),
+    defense: Math.max(0, Math.round(enemy.defense * armorShatterMultiplier * (1 - armorIgnore) * rogueDefenseMultiplier * (1 - Math.min(.9, (battle.enemyDots[index] || []).filter((dot) => dot.type === 'poison').reduce((total, dot) => total + (dot.defenseReduction || 0), 0))) * trailMultipliers.defense * spiderNestMultipliers.defense * strongholdMultipliers.defense * forestAltarMultipliers.defense * depthsMultipliers.defense * redrockMultipliers.defense * bloodwarDefenseMultiplier * lateModifiers.defense)),
+    damageReduction: Math.min(95, (enemy.damageReduction || 0) + lateModifiers.damageReduction * 100 + (bloodwarState && now < (bloodwarState.shieldWallUntil || 0) ? 20 : 0)),
     evasion: (enemy.evasion || 0) + (trailMultipliers.evasion || 0) + (spiderNestMultipliers.evasion || 0) + (strongholdMultipliers.evasion || 0) + (forestAltarMultipliers.evasion || 0) + (depthsMultipliers.evasion || 0) + (assassinDashActive ? SpiderNestPolicy.ASSASSIN.dashEvasionBonus : 0),
     parry: (enemy.parry || 0) + (captainShieldActive ? BlackForestTrailPolicy.CAPTAIN.shieldParryBonus : 0)
   };
@@ -5547,7 +5646,13 @@ function applyDamageToMonster(index, baseDamage, profile, options = {}) {
     ? MageAdvancementPolicy.consumeArcaneMark(skillState, attacker, options.sourceSkill || options.attackKind || 'other', now)
     : null;
   const wasAlive = battle.enemyHps[index] > 0;
+  if (ChapterThreeLateCombatPolicy.isSupported(enemy.mapId)) {
+    const units = getLateChapterUnits(now);
+    const unit = units[index];
+    result.finalDamage = ChapterThreeLateCombatPolicy.absorb(enemy.mapId, unit, result.finalDamage, now);
+  }
   battle.enemyHps[index] -= result.finalDamage;
+  updateLateChapterThresholds(index, now);
   if (enemy.mapId === 'brokenrock-canyon') getBrokenrockEnemyState(index, battle.enemyHps[index], enemy.maxHp);
   if (enemy.mapId === 'bloodwar-wastes') getBloodwarEnemyState(index, battle.enemyHps[index], enemy.maxHp);
   const markOwner = (battle.partyMembers || []).find((member) => member.id === skillState.deathMarkOwner);
@@ -5564,7 +5669,7 @@ function applyDamageToMonster(index, baseDamage, profile, options = {}) {
     if (markOwner) RogueAdvancementPolicy.resolveMarkedKill(markOwner, skillState, now, { executed: deathMarkExecuted });
     const poisonSource = (battle.enemyDots[index] || []).find((dot) => dot.type === 'poison' && dot.source)?.source;
     if (poisonSource) RogueAdvancementPolicy.resolvePlagueDeath(poisonSource, battle.enemyDots[index]);
-    const hpRecovery = Math.ceil((attacker.maxHp || 0) * (attackerStats.killHealthRecoveryPercent || 0));
+    const hpRecovery = Math.ceil((attacker.maxHp || 0) * (attackerStats.killHealthRecoveryPercent || 0) * ChapterThreeLateCombatPolicy.playerMultiplier(attacker, 'healing-received-down', now));
     const resourceRecovery = Math.ceil((attacker.resourceMax || 0) * (attackerStats.killResourceRecoveryPercent || 0));
     if (hpRecovery > 0) attacker.currentHp = Math.min(attacker.maxHp, attacker.currentHp + hpRecovery);
     if (resourceRecovery > 0) {
@@ -5779,7 +5884,7 @@ function useAutoSkillForMember(member, now = Date.now()) {
       if (skill.id === 'arcane-missile') {
         const missileCritical = Math.random() < Math.min(.95, stats.crit + runtimeBonuses.crit + primaryRogueBonuses.crit + resonanceBonuses.crit);
         const missileDamage = Math.max(1, Math.ceil(stats.attack * skillEffect.missilePower * (missileCritical ? stats.criticalDamageMultiplier : 1)));
-        const missileResult = applyDamageToMonster(index, missileDamage * getRuneOutgoingMultiplier(member, index), profile, { attacker:member,attackKind:'skill',sourceSkill:'arcane-missile',conditionalDamageMultiplier,craftedEpicExecution,specialEquipmentMultiplier:(epicWeaponExecution.multipliers[targetOrder]||1)*(1+grandmasterSkillBonus),showDamage:true });
+        const missileResult = applyDamageToMonster(index, missileDamage * getRuneOutgoingMultiplier(member, index), profile, { attacker:member,critical:missileCritical,attackKind:'skill',sourceSkill:'arcane-missile',conditionalDamageMultiplier,craftedEpicExecution,specialEquipmentMultiplier:(epicWeaponExecution.multipliers[targetOrder]||1)*(1+grandmasterSkillBonus),showDamage:true });
         if (!missileResult.evaded) {
           MageAdvancementPolicy.recordArcaneMissileHit(member);
           if (battle.enemyHps[index] > 0) MageAdvancementPolicy.addArcaneMark(getEnemySkillState(index), member, skillEffect, now);
@@ -5793,14 +5898,14 @@ function useAutoSkillForMember(member, now = Date.now()) {
           const partResonance = MageAdvancementPolicy.getResonanceBonuses(member, part.element, now);
           const partCritical = Math.random() < Math.min(.95, stats.crit + partResonance.crit);
           const raw = Math.max(1, Math.ceil(stats.attack * part.power * (partCritical ? stats.criticalDamageMultiplier : 1)));
-          const partResult = applyDamageToMonster(index, raw * getRuneOutgoingMultiplier(member, index), { ...profile, element: part.element || '' }, { attacker:member,attackKind:'skill',sourceSkill:'elemental-burst',conditionalDamageMultiplier,craftedEpicExecution,specialEquipmentMultiplier:(epicWeaponExecution.multipliers[targetOrder]||1)*(1+grandmasterSkillBonus)*(1+partResonance.damage),showDamage:true });
+          const partResult = applyDamageToMonster(index, raw * getRuneOutgoingMultiplier(member, index), { ...profile, element: part.element || '' }, { attacker:member,critical:partCritical,attackKind:'skill',sourceSkill:'elemental-burst',conditionalDamageMultiplier,craftedEpicExecution,specialEquipmentMultiplier:(epicWeaponExecution.multipliers[targetOrder]||1)*(1+grandmasterSkillBonus)*(1+partResonance.damage),showDamage:true });
           if (part.element) MageAdvancementPolicy.recordBonusDamage(member, part.element, partResult.finalDamage);
           return partResult;
         });
         return { index, result:{ finalDamage:results.reduce((sum,result)=>sum+result.finalDamage,0),evaded:results.every(result=>result.evaded),parried:results.some(result=>result.parried) } };
       }
       const result = applyDamageToMonster(index, damage * chainMultiplier * piercingMultiplier * getRuneOutgoingMultiplier(member, index), profile, {
-        attacker: member,
+        attacker: member, critical,
         attackKind: 'skill',
         sourceSkill: skill.id,
         isAoe: targets.length > 1,
@@ -5824,7 +5929,7 @@ function useAutoSkillForMember(member, now = Date.now()) {
         const secondBonus = MageAdvancementPolicy.getResonanceBonuses(member, stormElements[1], now);
         const secondCritical = Math.random() < Math.min(.95, stats.crit + secondBonus.crit);
         const secondDamage = Math.max(1, Math.ceil(stats.attack * skillEffect.power * skillEffect.transformPowerMultiplier * (secondCritical ? stats.criticalDamageMultiplier : 1)));
-        const result = applyDamageToMonster(index, secondDamage * stormTargetMultiplier * (1 + secondBonus.damage) * getRuneOutgoingMultiplier(member,index), secondProfile, { attacker:member,attackKind:'skill-followup',sourceSkill:'elemental-storm',canParry:false });
+        const result = applyDamageToMonster(index, secondDamage * stormTargetMultiplier * (1 + secondBonus.damage) * getRuneOutgoingMultiplier(member,index), secondProfile, { attacker:member,critical:secondCritical,attackKind:'skill-followup',sourceSkill:'elemental-storm',canParry:false });
         if (!result.evaded) { applyElementalStormStatus(index, stormElements[1], member, result.finalDamage, now); MageAdvancementPolicy.record(member, 'stormFollowupDamage', result.finalDamage); }
       });
     }
@@ -6099,9 +6204,9 @@ function useAutoSkillForMember(member, now = Date.now()) {
   const prayerHealing = member.job === 'priest' ? PriestAdvancementPolicy.getLifePrayerBonus(member, healTarget) : 0;
   const heal = Math.ceil(stats.attack * (healEffect.healPower || 1.5) * (graceTriggered ? 1 + grace.bonus : 1) * (1 + holyFaithHealing + faithHealing + prayerHealing));
   const missing = healTarget.maxHp - healTarget.currentHp;
-  const actualHeal = Math.min(missing, heal);
+  const actualHeal = Math.min(missing, heal * ChapterThreeLateCombatPolicy.playerMultiplier(healTarget, 'healing-received-down', now));
   const healTargetAnchor = captureBattleAllyAnchor(healTarget);
-  if(member.job==='priest'){PriestAdvancementPolicy.heal(member,healTarget,heal,'heal');PriestAdvancementPolicy.resolveLightEcho(member,battle.partyMembers||[]);}else healTarget.currentHp = Math.min(healTarget.maxHp, healTarget.currentHp + heal);
+  if(member.job==='priest'){PriestAdvancementPolicy.heal(member,healTarget,heal,'heal');PriestAdvancementPolicy.resolveLightEcho(member,battle.partyMembers||[]);}else healTarget.currentHp = Math.min(healTarget.maxHp, healTarget.currentHp + heal * ChapterThreeLateCombatPolicy.playerMultiplier(healTarget, 'healing-received-down', now));
   ChapterThreeEpicWeaponPolicy.createAfterglow(member, healTarget, actualHeal, now);
   const overhealShield=Math.max(0, heal - missing) * (healEffect.overhealShield || 0);if(member.job==='priest')PriestAdvancementPolicy.grantShield(member,healTarget,overhealShield,'heal-overheal',now);else healTarget.shield+=overhealShield;
   if (healTargetAnchor && actualHeal > 0) playBattleSkillEffect('heal', healTargetAnchor, { heal: actualHeal });
@@ -6145,6 +6250,7 @@ function useAutoSkillForMember(member, now = Date.now()) {
 
 function autoSkillTick() {
   if (!fighting) return;
+  if (isTimedChapterThreeVisualShowcase()) return;
   const now = Date.now();
   let casted = false;
   (battle.partyMembers || []).forEach((member) => {
@@ -6212,13 +6318,13 @@ function updatePartyMemberHealthRegeneration(member, now) {
   const elapsedSeconds = Math.max(0, now - member.lastHpRegenerationAt) / 1000;
   member.lastHpRegenerationAt = now;
   if (elapsedSeconds <= 0 || member.currentHp >= member.maxHp) return;
-  member.currentHp = Math.min(member.maxHp, member.currentHp + member.stats.hpRegeneration * elapsedSeconds);
+  member.currentHp = Math.min(member.maxHp, member.currentHp + member.stats.hpRegeneration * elapsedSeconds * ChapterThreeLateCombatPolicy.playerMultiplier(member, 'healing-received-down', now));
 }
 
 function performAssassinOffhandStrike(member, targetIndex, profile, mastery, rogueBonuses, trigger, now = Date.now()) {
   if (!member?.alive || battle.enemyHps[targetIndex] <= 0 || !AssassinOffhandPolicy.isDagger(member.progress.equipment?.offhand)) return false;
   const offhandStrike = AssassinOffhandPolicy.calculateOffhandStrike({ ...member.stats, criticalDamageMultiplier: member.stats.criticalDamageMultiplier + (rogueBonuses?.criticalDamage || 0) }, mastery, Math.random());
-  const offhandResult = applyDamageToMonster(targetIndex, offhandStrike.damage, profile, { attacker: member, attackKind: 'offhand', sourceSkill: 'offhand', canParry: false });
+  const offhandResult = applyDamageToMonster(targetIndex, offhandStrike.damage, profile, { attacker: member, critical: offhandStrike.critical, attackKind: 'offhand', sourceSkill: 'offhand', canParry: false });
   CombatCorePolicy.record(member, 'offhandAttacks');
   CombatCorePolicy.record(member, 'offhandCriticalRolls');
   if (offhandStrike.critical) CombatCorePolicy.record(member, 'offhandCriticalHits');
@@ -6268,7 +6374,7 @@ function processPartyMemberAttacks(now = Date.now()) {
     const hit = Math.max(1, Math.ceil(baseHit * (instinctTriggered ? hunterInstinct.power : 1)));
     const enemy = getEnemyDefinition(targetIndex);
     const profile = getPlayerAttackProfile(member.character);
-    const result = applyDamageToMonster(targetIndex, hit * getRuneOutgoingMultiplier(member, targetIndex), profile, { attacker: member, attackKind: 'basic', sourceSkill:'basic-attack', specialEquipmentMultiplier: specialBasicExecution.damageMultiplier });
+    const result = applyDamageToMonster(targetIndex, hit * getRuneOutgoingMultiplier(member, targetIndex), profile, { attacker: member, critical, attackKind: 'basic', sourceSkill:'basic-attack', specialEquipmentMultiplier: specialBasicExecution.damageMultiplier });
     CombatCorePolicy.record(member, 'basicAttacks');
     CombatCorePolicy.recordEvent(member, 'basicEvents', { atMs: now, targetIndex, damage: result.finalDamage, critical });
     playPartyMemberCombatAnimation(member, [targetIndex], { kind: 'basic' });
@@ -6442,7 +6548,7 @@ function processHunterCompanionAttacks(now = Date.now()) {
           const awakening = now < (pet.wildAwakeningUntil || 0) ? pet.wildAwakeningDamage || 0 : 0;
           const slamCritical = Math.random() < Math.min(.95, member.stats.crit + bonuses.crit);
           const slamKillsBefore = CombatCorePolicy.telemetry(member).kills;
-          const slam = applyDamageToMonster(targetIndex, petAttack * bond.beastSlam * (1 + awakening) * (slamCritical ? member.stats.criticalDamageMultiplier : 1), profile, { attacker: member, attackKind: 'beast-slam', sourceSkill: 'beast-slam', canParry: false });
+          const slam = applyDamageToMonster(targetIndex, petAttack * bond.beastSlam * (1 + awakening) * (slamCritical ? member.stats.criticalDamageMultiplier : 1), profile, { attacker: member, critical: slamCritical, attackKind: 'beast-slam', sourceSkill: 'beast-slam', canParry: false });
           CombatCorePolicy.record(member, 'petCriticalRolls');
           if (slamCritical) CombatCorePolicy.record(member, 'petCriticalHits');
           if (CombatCorePolicy.telemetry(member).kills > slamKillsBefore) CombatCorePolicy.record(member, 'petKills');
@@ -6521,19 +6627,32 @@ function createBlackstoneStrongholdBattleState() {
   return state;
 }
 
+function isTimedChapterThreeVisualShowcase() {
+  return ['skullcrusher-war-camp', 'ancient-altar', 'redrock-temple'].includes(ChapterTwoBalancePlaytestPolicy?.getRequestedMapId())
+    && new URLSearchParams(window.location.search).has('showcase');
+}
+
 function createBattleTickRuntime() {
+  const timedVisualShowcase = isTimedChapterThreeVisualShowcase();
   return {
     isFighting: () => fighting,
     enemyRespawns: processEnemyRespawns,
     enemyDots: processEnemyDots,
-    environment: processBlackForestCorruption,
+    environment: (now) => {
+      processBlackForestCorruption(now);
+      if (timedVisualShowcase) {
+        battle.enemyHps.forEach((hp, index) => {
+          if (hp > 0 && now - (battle.enemySpawnedAt[index] || now) >= 6000) battle.enemyHps[index] = 0;
+        });
+      }
+    },
     outpost: processStrongholdOutpost,
     revive: reviveDefeatedTeammates,
     members: () => battle.partyMembers || [],
     resources: updatePartyMemberResource,
     healthRegen: updatePartyMemberHealthRegeneration,
-    partyAttacks: processPartyMemberAttacks,
-    companions: processHunterCompanionAttacks,
+    partyAttacks: timedVisualShowcase ? () => false : processPartyMemberAttacks,
+    companions: timedVisualShowcase ? () => false : processHunterCompanionAttacks,
     queueDefeated: queueDefeatedEnemies,
     syncLegacy: syncLegacyBattleStateFromMain,
     render: updateBattleUI
@@ -7071,6 +7190,8 @@ function defeatPartyMember(member, now = Date.now()) {
     return false;
   }
   member.currentHp = 0;
+  member.chapterThreeBurn = null;
+  member.chapterThreeDebuffs = {};
   ChapterThreeCraftedEpicAbilityPolicy.clear(member);
   ChapterThreeSpecialEquipmentPolicy.clearCombatState(member);
   ChapterThreeEpicWeaponPolicy.clear(member);
@@ -7249,6 +7370,7 @@ function enemyAttackTick() {
     });
   }
 
+  processLateChapterCombat(now);
   reviveDefeatedTeammates(now);
 
   battle.partyMembers.filter(member => member.alive).forEach(member => {
@@ -7314,10 +7436,13 @@ function enemyAttackTick() {
       if (action === 'summon-scout' && summonGoblinScout(enemyIndex, now)) continue;
     }
 
+    const lateUnit = getLateChapterUnits(now)[enemyIndex];
+    const lateAction = lateUnit?.state.pendingActions.shift() || null;
     const aliveMembers = battle.partyMembers.filter((member) => member.alive);
     let target = ['blackForestHunter', 'blackstoneCaptain', 'blackstoneCenturion', 'blackstoneVenomHunter', 'blackstoneVenombladeAssassin', 'blackstoneStrongholdCrossbowman', 'blackstoneStrongholdWarlord'].includes(enemy.id)
       ? aliveMembers.sort((first, second) => first.currentHp / first.maxHp - second.currentHp / second.maxHp)[0]
       : PartyPolicy.chooseRandomAliveMember(battle.partyMembers, Math.random);
+    if (lateUnit) target = ChapterThreeLateCombatPolicy.selectTarget(enemy.mapId, lateUnit, lateAction, aliveMembers, target);
     if (!target) break;
     logPartyDebug('怪物選擇隊員', {
       attackerId: battle.enemyTypes[enemyIndex],
@@ -7325,10 +7450,11 @@ function enemyAttackTick() {
       targetId: target.id,
       targetName: target.name
     });
-    const baseStats = getCharacterStats(target.level, target.progress, target.character);
+    const baseStats = { ...getCharacterStats(target.level, target.progress, target.character) };
     const stats = now < (target.redrockDefenseDownUntil || 0)
       ? { ...baseStats, defense: Math.max(0, Math.round(baseStats.defense * (1 - (target.redrockDefenseDown || 0)))) }
       : baseStats;
+    if (lateUnit) stats.defense *= ChapterThreeLateCombatPolicy.playerMultiplier(target, 'defense-down', now);
     const lowHealthAssassin = target.job === 'assassin' && target.level >= 20 && target.currentHp / target.maxHp <= .3;
     if (!lowHealthAssassin) target.desperateLowActive = false;
     if (lowHealthAssassin && !target.desperateLowActive) {
@@ -7564,6 +7690,9 @@ function enemyAttackTick() {
       * (redrockAction?.damageMultiplier || 1)
       * (brokenrockAction?.damageMultiplier || 1)
       * (bloodwarAction?.damageMultiplier || 1)
+      * (lateAction?.id === 'execution' ? RedrockTemplePolicy.getExecutionMultiplier(target.currentHp, target.maxHp, lateUnit.state) : lateAction?.damageMultiplier || 1)
+      * (lateUnit ? ChapterThreeLateCombatPolicy.modifiers(enemy.mapId, lateUnit, getLateChapterUnits(now), now).damage : 1)
+      * (lateUnit && enemy.id === RedrockTemplePolicy.FINAL_BOSS_ID ? RedrockTemplePolicy.getAncientMarkDamageMultiplier(lateUnit.state, target.id, enemy.id, now) : 1)
       * (bloodwarState ? BloodwarWastesPolicy.getHunterDamageMultiplier(bloodwarState, target.id, now) : 1);
     const marked = now < (target.blackstoneMarkedUntil || 0);
     const markedHumanBonus = marked && enemy.faction === 'blackstone-bandits'
@@ -7579,7 +7708,8 @@ function enemyAttackTick() {
     const spiderNestArmorMultiplier = now < (target.spiderNestArmorBreakUntil || 0) ? .90 : 1;
     const piercingMultiplier = (1 - BlackForestTrailPolicy.getDefenseIgnore(blackForestTrailAction))
       * (1 - BlackstoneStrongholdPolicy.getDefenseIgnore(strongholdAction))
-      * (1 - (brokenrockAction?.defenseIgnore || 0));
+      * (1 - (brokenrockAction?.defenseIgnore || 0))
+      * (1 - (lateAction?.defenseIgnore || 0));
     const runeIronWallReduction = RunePolicy.hasWord(target.progress.equipment, 'iron-wall') && Math.random() < .15 ? .20 : 0;
     if (RunePolicy.hasWord(target.progress.equipment, 'unyielding') && target.currentHp / target.maxHp < .30 && now >= (target.runeUnyieldingReadyAt || 0)) {
       target.runeUnyieldingUntil = now + 5000;
@@ -7794,6 +7924,7 @@ function enemyAttackTick() {
       logBattle(`⚔【${enemy.name}】施放【${redrockAction.name}】！`, 'system');
     }
 
+    if (!dodged && lateUnit && lateAction) ChapterThreeLateCombatPolicy.hit(enemy.mapId, lateUnit, lateAction, target, getLateChapterUnits(now), now);
     if (dodged) {
       logBattle(`${target.name} 閃避了 ${enemy.name} 的攻擊。`, 'damage-taken');
     } else {
@@ -7848,12 +7979,14 @@ function openBattle() {
   applySavedLayout();
   const progress = getProgress();
   let currentMap = getActiveMap(progress);
-  if (currentMap.dungeon && !progress.dungeonAdmission) {
+  const chapterThreeVisualPlaytest = ChapterTwoBalancePlaytestPolicy?.isChapterThreeActive()
+    && ChapterTwoBalancePlaytestPolicy.getRequestedMapId() === currentMap.id;
+  if (currentMap.dungeon && !progress.dungeonAdmission && !chapterThreeVisualPlaytest) {
     progress.selectedMapId = progress.dungeonReturnMapId || (currentMap.id === 'black-forest-altar' ? 'black-forest' : 'plains-entrance');
     saveProgress(progress);
     currentMap = getActiveMap(progress);
   }
-  const isDungeon = Boolean(currentMap.dungeon);
+  const isDungeon = Boolean(currentMap.dungeon && !chapterThreeVisualPlaytest);
   if (isDungeon) {
     progress.dungeonAdmission = false;
     saveProgress(progress);
@@ -7908,14 +8041,14 @@ function openBattle() {
 }
 
 if (ChapterTwoBalancePlaytestPolicy?.isChapterThreeActive()) {
-  const chapterThreePlaytestProgressKey = ChapterTwoBalancePlaytestPolicy.getProgressKey();
-  const savedChapterThreePlaytestProgress = JSON.parse(sessionStorage.getItem(chapterThreePlaytestProgressKey) || 'null');
-  if (savedChapterThreePlaytestProgress?.requiresMapSelectionAfterDefeat) {
-    sessionStorage.removeItem(chapterThreePlaytestProgressKey);
+  const visualPlaytestProgressKey = ChapterTwoBalancePlaytestPolicy.getProgressKey();
+  const savedVisualPlaytestProgress = JSON.parse(sessionStorage.getItem(visualPlaytestProgressKey) || 'null');
+  if (savedVisualPlaytestProgress?.requiresMapSelectionAfterDefeat) {
+    sessionStorage.removeItem(visualPlaytestProgressKey);
   }
 }
 const activePlaytestName = ChapterTwoBalancePlaytestPolicy?.isChapterThreeActive()
-  ? `第三章 ${ChapterTwoBalancePlaytestPolicy.getRequestedMapId() === 'bloodwar-wastes' ? '3-3' : ChapterTwoBalancePlaytestPolicy.getRequestedMapId() === 'brokenrock-canyon' ? '3-2' : '3-1'} 開發測試`
+  ? `第三章 ${ChapterTwoBalancePlaytestPolicy.getRequestedMapId() === 'redrock-temple' ? '3-6' : ChapterTwoBalancePlaytestPolicy.getRequestedMapId() === 'ancient-altar' ? '3-5' : ChapterTwoBalancePlaytestPolicy.getRequestedMapId() === 'skullcrusher-war-camp' ? '3-4' : ChapterTwoBalancePlaytestPolicy.getRequestedMapId() === 'bloodwar-wastes' ? '3-3' : ChapterTwoBalancePlaytestPolicy.getRequestedMapId() === 'brokenrock-canyon' ? '3-2' : '3-1'} 開發測試`
   : '';
 const savedName = localStorage.getItem('stardust-player-name');
 if (activePlaytestName || savedName) {

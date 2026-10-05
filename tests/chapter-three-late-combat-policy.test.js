@@ -1,0 +1,84 @@
+'use strict';
+const assert = require('node:assert/strict');
+const late = require('../chapter-three-late-combat-policy');
+const maps = require('../chapter-three-map-policy');
+const camp = require('../skullcrusher-war-camp-policy');
+const altar = require('../ancient-altar-policy');
+const temple = require('../redrock-temple-policy');
+function units(mapId) {
+  const map = maps.getMap(mapId);
+  return [...map.normalEnemyIds, map.eliteId, map.bossId].map((id, index) => {
+    const monster = late.getMonster(mapId, maps.getEnemy(id));
+    return { ...monster, key: `${id}:${index}`, currentHp: monster.maxHp, state: late.createState(mapId, 0) };
+  });
+}
+const byId = (entries, id) => entries.find(unit => unit.id === id);
+for (const [mapId, file] of [['skullcrusher-war-camp', '34'], ['ancient-altar', '35'], ['redrock-temple', '36']]) {
+  const expected = require(`./simulations/chapter-three-${file}-rules`);
+  units(mapId).forEach((unit, index) => {
+    const source = [...expected.normals, expected.elite, expected.boss][index];
+    assert.deepEqual([unit.maxHp, unit.attack, unit.defense, unit.attackSpeed, unit.evasion, unit.parry, unit.damageReduction],
+      [source.hp, source.attack, source.defense, source.speed, source.evasion, source.parry, source.dr]);
+    assert.equal('accuracy' in unit, false, 'no second per-monster hit system');
+    assert.ok(unit.skillIds.length);
+  });
+}
+const war = units(camp.MAP_ID), chief = byId(war, 'skullcrusher-great-chieftain'), champion = byId(war, 'skullcrusher-champion');
+champion.currentHp = champion.maxHp * .20;
+late.thresholds(camp.MAP_ID, champion, 1000);
+assert.equal(champion.state.unyieldingStacks, 3);
+late.thresholds(camp.MAP_ID, champion, 2000);
+assert.equal(champion.state.unyieldingStacks, 3);
+chief.currentHp = chief.maxHp * .20;
+late.thresholds(camp.MAP_ID, chief, 1000);
+assert.equal(chief.state.overlord, true);
+const guard = byId(war, 'skullcrusher-heavy-guard');
+assert.equal(late.modifiers(camp.MAP_ID, guard, war, 1000).defense, 1.3);
+guard.currentHp = 0;
+late.death(camp.MAP_ID, guard, war, 1000);
+late.death(camp.MAP_ID, guard, war, 1001);
+assert.equal(chief.state.fallenRageStacks, 1, 'a death is counted once');
+late.tick(camp.MAP_ID, war, [], 12000);
+assert.equal(byId(war, 'skullcrusher-shaman').state.inherited.telemetry.skillCasts['warblood-totem'], 1);
+assert.ok(chief.state.pendingActions.some(action => action.id === 'chieftain-earthsplitter'));
+assert.equal('summon70' in chief.state, false, 'simulation summons are absent');
+const altarUnits = units(altar.MAP_ID), priest = byId(altarUnits, 'skullcrusher-priest'), fanatic = byId(altarUnits, 'skullcrusher-fanatic');
+fanatic.currentHp = 200;
+late.tick(altar.MAP_ID, altarUnits, [], 10000);
+assert.equal(fanatic.currentHp, 326, 'fel prayer heals the lowest HP ratio by 10% max HP');
+assert.equal(priest.state.telemetry.felPrayerHeals, 1);
+const highPriest = byId(altarUnits, 'fallen-high-priest');
+late.tick(altar.MAP_ID, altarUnits, [], 15000);
+assert.equal(fanatic.currentHp, 260.8, 'blood sacrifice spends the selected ally HP');
+assert.equal(altar.hasShield(highPriest.state, 'blood-sacrifice', 15000), true);
+assert.equal(highPriest.currentHp, highPriest.maxHp, 'blood sacrifice preserves caster HP');
+fanatic.currentHp = 0;
+late.death(altar.MAP_ID, fanatic, altarUnits, 16000);
+assert.equal(late.modifiers(altar.MAP_ID, priest, altarUnits, 17000).attack, 1.1);
+assert.equal(late.modifiers(altar.MAP_ID, priest, altarUnits, 22000).attack, 1);
+const awakened = byId(altarUnits, 'awakened-guard');
+awakened.currentHp = awakened.maxHp * .49;
+late.thresholds(altar.MAP_ID, awakened, 17000);
+assert.equal(altar.hasShield(awakened.state, 'awakened-rune', 17000), true);
+assert.equal(late.absorb(altar.MAP_ID, awakened, 100, 17000), 0);
+const templeUnits = units(temple.MAP_ID), guardian = byId(templeUnits, 'temple-guardian'), god = byId(templeUnits, temple.FINAL_BOSS_ID);
+assert.equal(god.name, '赤岩古神');
+guardian.currentHp = guardian.maxHp * .49;
+late.thresholds(temple.MAP_ID, guardian, 1000);
+const before = guardian.currentHp;
+late.absorb(temple.MAP_ID, guardian, guardian.maxHp * .25, 1100);
+assert.equal(before - guardian.currentHp, guardian.maxHp * .05, 'guardian shield break causes formal self damage');
+god.currentHp = god.maxHp * .29;
+late.thresholds(temple.MAP_ID, god, 1000);
+assert.equal(god.state.awakened, true);
+assert.equal(temple.hasShield(god.state, temple.SHIELD_SOURCES.divineWrath, 1000), true);
+late.tick(temple.MAP_ID, templeUnits, [], 12000, () => {}, () => .5);
+assert.equal(god.state.ancientRune.type, 'guardian');
+assert.equal(temple.hasShield(god.state, temple.SHIELD_SOURCES.ancientGuardianRune, 12000), true);
+const player = { id: 'p', job: 'warrior', alive: true, currentHp: 100, maxHp: 100 };
+late.hit(temple.MAP_ID, god, temple.SKILLS['ancient-god-smash'], player, templeUnits, 12000);
+assert.equal(temple.getAncientMarkDamageMultiplier(god.state, player.id, god.id, 12000), 1.05);
+late.hit(camp.MAP_ID, chief, camp.SKILLS['chieftain-earthsplitter'], player, war, 12000);
+assert.equal(late.playerMultiplier(player, 'healing-received-down', 12000), .85);
+assert.equal(late.playerMultiplier(player, 'defense-down', 17000), 1);
+console.log('chapter-three-late-combat-policy: assertions passed');

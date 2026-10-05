@@ -16,8 +16,8 @@
     secondaryFaction: 'ancient-guardians',
     firstJobChangeLevel: 45,
     recommendedLevelRange: null,
-    implemented: false,
-    contentStatus: 'planned',
+    implemented: true,
+    contentStatus: 'combat-ready',
     summary: '穿越赤岩荒原與碎顱部族戰區，追查失控的遠古力量並深入赤岩聖殿。',
     progression: Object.freeze([
       '荒原探索', '發現碎顱部族', '進入敵軍控制區', '正面戰爭',
@@ -67,7 +67,7 @@
     templeExecutioner: enemy('temple-executioner', '聖殿執行者', 'normal', ['execution'], 'assets/temple-executioner.png'),
     ancientPriest: enemy('ancient-priest', '遠古祭司', 'normal', ['rune-blessing'], 'assets/ancient-priest.png'),
     templeGuardian: enemy('temple-guardian', '聖殿守護者', 'elite', ['guardian-smash', 'guardian-rune', 'shield-shatter'], 'assets/temple-guardian.png'),
-    redrockAncientGod: enemy('redrock-ancient-god', '赤岩古神（暫定）', 'boss', ['ancient-god-smash', 'ancient-rune', 'ancient-awakening', 'redrock-divine-wrath'], 'assets/redrock-ancient-god.png')
+    redrockAncientGod: enemy('redrock-ancient-god', '赤岩古神', 'boss', ['ancient-god-smash', 'ancient-rune', 'ancient-awakening', 'redrock-divine-wrath'], 'assets/redrock-ancient-god.png')
   });
 
   function map(id, order, name, facilityRequirement, options) {
@@ -111,14 +111,18 @@
       story: Object.freeze({ previousMapId: 'brokenrock-canyon', nextMapId: 'skullcrusher-war-camp' })
     }),
     map('skullcrusher-war-camp', 4, '碎顱戰爭營地', 25, {
+      implemented: true, contentStatus: 'combat-ready',
+      min: 30, max: 30, recommendedLevel: 30,
       skillPolicyId: 'skullcrusher-war-camp', skillStatus: 'implemented',
-      dungeon: true,
+      dungeon: false,
       environment: Object.freeze(['大型木製城牆', '瞭望塔', '尖刺拒馬', '戰鼓', '獸籠', '武器架', '鍛造區', '大型帳篷', '碎顱旗幟', '巨獸頭骨', '補給箱與戰車']),
       normalEnemyIds: Object.freeze(['skullcrusher-berserker', 'skullcrusher-shaman', 'skullcrusher-heavy-guard', 'skullcrusher-wolf-rider']),
       eliteId: 'skullcrusher-champion', bossId: 'skullcrusher-great-chieftain',
       story: Object.freeze({ previousMapId: 'bloodwar-wastes', nextMapId: 'ancient-altar', unlockClue: '碎顱部族正在挖掘遠古力量' })
     }),
     map('ancient-altar', 5, '遠古祭壇', 30, {
+      implemented: true, contentStatus: 'combat-ready',
+      min: 30, max: 30, recommendedLevel: 30,
       skillPolicyId: 'ancient-altar', skillStatus: 'implemented',
       environment: Object.freeze(['半埋紅土的巨大石柱', '遠古祭壇', '破碎石像', '發光符文', '遠古石板', '挖掘營地', '被摧毀的碎顱營帳', '聖殿入口']),
       sceneIntent: '碎顱部族成功找到遠古祭壇，但遠古力量已逐漸失控。',
@@ -127,6 +131,8 @@
       story: Object.freeze({ previousMapId: 'skullcrusher-war-camp', nextMapId: 'redrock-temple', completion: '祭壇已啟動，聖殿入口無法重新封閉' })
     }),
     map('redrock-temple', 6, '赤岩聖殿', 35, {
+      implemented: true, contentStatus: 'combat-ready',
+      min: 30, max: 30, recommendedLevel: 30,
       skillPolicyId: 'redrock-temple', skillStatus: 'implemented',
       isFinalMap: true,
       environment: Object.freeze(['巨型石造長廊', '超大型守護者雕像', '發光符文牆壁', '巨型石門', '地下祭壇', '發光晶體', '遠古壁畫', '巨型核心裝置', '青藍與紫色符文光源']),
@@ -151,7 +157,7 @@
     const mapEntry = getMap(mapId);
     if (!mapEntry) return null;
     const chapterUnlocked = isChapterUnlocked(progress);
-    const unlocked = chapterUnlocked && mapId === CHAPTER.firstMapId;
+    const unlocked = chapterUnlocked && (mapId === CHAPTER.firstMapId || Boolean(progress.chapterThreeProgress?.unlocked?.[mapId]));
     return Object.freeze({ mapId, chapterUnlocked, unlocked, implemented: Boolean(mapEntry.implemented) });
   }
   function canEnter(progress = {}, mapId) {

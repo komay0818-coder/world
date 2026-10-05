@@ -17,7 +17,7 @@ assert.match(html, /direct-hit-health-recovery-policy\.js\?v=20260903-direct-hit
 assert.match(html, /chapter-three-crafted-epic-ability-policy\.js\?v=20260903-chapter3-crafted-epic-v1/, 'crafted epic ability policy loads before the main game script');
 assert.match(html, /chapter-three-epic-weapon-policy\.js\?v=20260903-epic-weapons-v1/, 'chapter-three epic weapon policy loads before the main game script');
 assert.match(html, /control-effect-policy\.js\?v=20260903-control-resistance-v1/, 'the shared player control policy loads before the main game script');
-assert.match(html, /script\.js\?v=20261005-chapter-one-12-visual-size-v2/, 'the affix UI renderer uses the current local build');
+assert.match(html, /script\.js\?v=20261005-chapter-three-formal-opening-v1/, 'the affix UI renderer uses the current local build');
 assert.match(source, /equipmentAffixMigrationVersion !== 'green-affix-v1'/, 'legacy saves receive the affix compatibility migration');
 assert.match(source, /EquipmentAffixPolicy\.normalizeEquipment\(item\)/, 'inventory and equipped items are normalized on load');
 assert.match(source, /EquipmentAffixPolicy\.getEquippedAffixStats\(progress\.equipment\)/, 'stats read only the equipped item collection');
@@ -49,7 +49,7 @@ assert.match(source, /const conditionalDamageMultiplier = ConditionalDamagePolic
 });
 assert.match(source, /criticalDamageMultiplier: 1\.5 \+ Math\.max\(0, equipment\.criticalDamagePercent \+ passiveTotal/, 'equipment and passive critical damage increase the player critical multiplier');
 assert.match(source, /updatePartyMemberHealthRegeneration\(member, now\)/, 'battle ticks apply equipped health regeneration');
-assert.match(source, /const hpRecovery = Math\.ceil\(\(attacker\.maxHp \|\| 0\) \* \(attackerStats\.killHealthRecoveryPercent \|\| 0\)\)[\s\S]*attacker\.currentHp = Math\.min\(attacker\.maxHp, attacker\.currentHp \+ hpRecovery\)/, 'kill health recovery heals only the living character credited with the kill');
+assert.match(source, /const hpRecovery = Math\.ceil\(\(attacker\.maxHp \|\| 0\) \* \(attackerStats\.killHealthRecoveryPercent \|\| 0\) \* ChapterThreeLateCombatPolicy\.playerMultiplier\(attacker, 'healing-received-down', now\)\)[\s\S]*attacker\.currentHp = Math\.min\(attacker\.maxHp, attacker\.currentHp \+ hpRecovery\)/, 'kill health recovery heals only the living character credited with the kill');
 assert.match(source, /const resourceRecovery = Math\.ceil\(\(attacker\.resourceMax \|\| 0\) \* \(attackerStats\.killResourceRecoveryPercent \|\| 0\)\)/, 'kill resource recovery remains an independent kill trigger');
 assert.match(source, /skill\.id === 'fireball'[\s\S]*hits\.forEach[\s\S]*applyDot\(target\.index, 'burn'/, 'fireball inherently applies burn on hit');
 assert.doesNotMatch(source, /hasEquippedSpecialAbility\(member\.equipment, 'mage_fireball_burn'\)/, 'fireball burn does not depend on equipment');
