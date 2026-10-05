@@ -863,8 +863,8 @@ const monsterVisualScaleCorrections = {
   lostGoblin: .9215,
   ragingWolf: 1.1,
   greatfangWolf: 1.2,
-  boarPiglet: .76,
-  forestBoar: .855,
+  boarPiglet: .722,
+  forestBoar: .81225,
   irritableBoar: .92,
   boarKing: 1.15,
   // Chapter 3 artwork uses mixed portrait and landscape canvases. These values
