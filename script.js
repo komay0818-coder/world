@@ -3267,7 +3267,7 @@ function renderRedrockWastesRegions() {
       const action = !status.implemented
         ? `<em>${status.unlocked ? '已解鎖・尚未開放' : '規劃中／尚未開放'}</em>`
         : !status.unlocked
-          ? '<em>尚未解鎖</em>'
+          ? `<em>${index ? `擊敗${ChapterThreeMapPolicy.getEnemy(ChapterThreeMapPolicy.MAPS[index - 1].bossId)?.name || '上一區首領'}後解鎖` : '完成第二章後解鎖'}</em>`
           : activeMap.id === region.id && !progress.requiresMapSelectionAfterDefeat
             ? `<em class="current-region">目前區域${status.cleared ? '・已通關' : ''}</em>`
             : `<button type="button" data-select-map="${region.id}">${status.cleared ? '再次進入' : '進入區域'}</button>`;
@@ -5064,8 +5064,9 @@ function rewardVictory(index) {
     if (chapterThreeResult.firstClear) {
       const nextMap = ChapterThreeMapPolicy.getMap(chapterThreeResult.nextMapId);
       const nextStatus = nextMap?.implemented ? '已解鎖' : '已解鎖・尚未開放';
-      showToast(`${nextMap?.name || chapterThreeResult.nextMapId}${nextStatus}`);
-      logBattle(`◆ 首次擊敗${enemy.name}，${nextMap?.name || chapterThreeResult.nextMapId}已解鎖。`, 'progress');
+      const chapterCompleted = progress.chapterThreeProgress.completed;
+      showToast(chapterCompleted ? '第三章通關完成！' : `${nextMap?.name || chapterThreeResult.nextMapId}${nextStatus}`);
+      logBattle(chapterCompleted ? '◆ 首次擊敗赤炎古神，第三章通關完成。' : `◆ 首次擊敗${enemy.name}，${nextMap?.name || chapterThreeResult.nextMapId}已解鎖。`, 'progress');
     }
   }
   addRoundLoot('gold', '金幣', earnedGold, '🪙', '+');

@@ -12,16 +12,22 @@
   const BOSS_IDS = Object.freeze({
     'redrock-wastes-entrance': 'redrock-giant-lizard',
     'brokenrock-canyon': 'canyon-warlord',
-    'bloodwar-wastes': 'skullcrusher-vanguard-commander'
+    'bloodwar-wastes': 'skullcrusher-vanguard-commander',
+    'skullcrusher-war-camp': 'skullcrusher-great-chieftain',
+    'ancient-altar': 'fallen-high-priest',
+    'redrock-temple': 'redrock-ancient-god'
   });
   const NEXT_MAP = Object.freeze({
     'redrock-wastes-entrance': 'brokenrock-canyon',
     'brokenrock-canyon': 'bloodwar-wastes',
-    'bloodwar-wastes': 'skullcrusher-war-camp'
+    'bloodwar-wastes': 'skullcrusher-war-camp',
+    'skullcrusher-war-camp': 'ancient-altar',
+    'ancient-altar': 'redrock-temple'
   });
 
   function createDefaultState() {
     return {
+      completed: false,
       unlocked: Object.fromEntries(MAP_ORDER.map((mapId) => [mapId, false])),
       cleared: Object.fromEntries(MAP_ORDER.map((mapId) => [mapId, false])),
       bossFirstKills: Object.fromEntries(MAP_ORDER.map((mapId) => [mapId, false]))
@@ -49,6 +55,9 @@
     if (state.cleared['redrock-wastes-entrance']) state.unlocked['brokenrock-canyon'] = true;
     if (state.cleared['brokenrock-canyon']) state.unlocked['bloodwar-wastes'] = true;
     if (state.cleared['bloodwar-wastes']) state.unlocked['skullcrusher-war-camp'] = true;
+    if (state.cleared['skullcrusher-war-camp']) state.unlocked['ancient-altar'] = true;
+    if (state.cleared['ancient-altar']) state.unlocked['redrock-temple'] = true;
+    state.completed = state.cleared['redrock-temple'];
     progress.chapterThreeProgress = state;
     return state;
   }
@@ -71,7 +80,7 @@
 
   function recordBossKill(progress, mapId, enemy = {}) {
     const state = normalize(progress);
-    if (enemy.id !== BOSS_IDS[mapId] || state.bossFirstKills[mapId]) {
+    if (!BOSS_IDS[mapId] || !state.unlocked[mapId] || enemy.id !== BOSS_IDS[mapId] || state.bossFirstKills[mapId]) {
       return Object.freeze({ firstClear: false, mapId, nextMapId: null });
     }
     state.unlocked[mapId] = true;
@@ -79,6 +88,7 @@
     state.cleared[mapId] = true;
     const nextMapId = NEXT_MAP[mapId] || null;
     if (nextMapId) state.unlocked[nextMapId] = true;
+    state.completed = state.cleared['redrock-temple'];
     return Object.freeze({ firstClear: true, mapId, nextMapId });
   }
 

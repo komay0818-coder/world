@@ -42,4 +42,18 @@ assert.equal(progression.getMapState(reloaded, 'brokenrock-canyon', true).cleare
 assert.equal(progression.getMapState(reloaded, 'bloodwar-wastes', false).unlocked, true, 'serialized 3-3 unlock survives reload');
 assert.equal(progression.getMapState(reloaded, 'bloodwar-wastes', true).cleared, true, 'serialized 3-3 clear survives reload');
 assert.equal(progression.getMapState(reloaded, 'skullcrusher-war-camp', false).unlocked, true, 'serialized 3-4 unlock survives reload');
+assert.equal(progression.recordBossKill({}, 'unknown', {}).firstClear, false);
+assert.equal(progression.recordBossKill({ unlockedChapter: 3 }, 'redrock-temple', { id: 'redrock-ancient-god' }).firstClear, false, 'locked areas cannot be cleared out of order');
+for (const mapId of ['skullcrusher-war-camp', 'ancient-altar', 'redrock-temple']) {
+  assert.equal(progression.recordBossKill(reloaded, mapId, { id: 'wrong-boss' }).firstClear, false);
+  const result = progression.recordBossKill(reloaded, mapId, { id: progression.BOSS_IDS[mapId], isBoss: true });
+  assert.equal(result.firstClear, true);
+  assert.equal(result.nextMapId, progression.NEXT_MAP[mapId] || null);
+  assert.equal(progression.recordBossKill(reloaded, mapId, { id: progression.BOSS_IDS[mapId] }).firstClear, false, 'repeat kills do not repeat first-clear rewards');
+}
+assert.equal(reloaded.chapterThreeProgress.completed, true);
+assert.equal(progression.normalize(JSON.parse(JSON.stringify(reloaded))).completed, true, 'chapter completion survives reload');
+const legacy = { unlockedChapter: 3, chapterThreeProgress: { cleared: { 'skullcrusher-war-camp': true, 'ancient-altar': true } } };
+assert.equal(progression.normalize(legacy).unlocked['redrock-temple'], true, 'existing clears restore subsequent unlocks');
+assert.equal(legacy.chapterThreeProgress.completed, false);
 console.log('chapter-three-progression-policy: assertions passed');
