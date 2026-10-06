@@ -220,6 +220,17 @@ assert.match(script, /function rotateChapterOne15Showcase[\s\S]*?replaceChapterO
 ].forEach(([monsterId, scale]) => {
   assert.match(script, new RegExp(`${monsterId}:\\s*${scale.replace('.', '\\.')},`), `1-4 ${monsterId} keeps its approved independent display scale`);
 });
+[
+  ['highlandWolf', '.9'],
+  ['rockbackBoar', '.9'],
+  ['blackstoneScout', '1.05'],
+  ['grasslandVulture', '.8'],
+  ['blackstoneRaider', '1.15'],
+  ['wanderingBlackKnight', '1.1'],
+  ['blackstoneLeader', '1.2']
+].forEach(([monsterId, scale]) => {
+  assert.match(script, new RegExp(`${monsterId}:\\s*${scale.replace('.', '\\.')},`), `1-5 ${monsterId} keeps its approved independent display scale`);
+});
 assert.match(script, /boarPiglet:\s*\.722,/, '1-3 piglet retains the earlier reductions and is reduced by another 5%');
 assert.match(script, /forestBoar:\s*\.81225,/, '1-3 forest boar retains the earlier reductions and is reduced by another 5%');
 assert.match(script, /irritableBoar:\s*\.92,/, '1-3 elite display size is reduced by 8%');
