@@ -193,11 +193,11 @@ assert.match(script, /chapterOne14ShowcaseGroups = Object\.freeze\([\s\S]*?lengt
 assert.match(script, /function rotateChapterOne14Showcase[\s\S]*?showcaseRoundIndex[\s\S]*?showcaseNextRoundAt = now \+ 6000/, '1-4 unified showcase rotates every six seconds');
 assert.match(script, /if \(rotatingChapterOne14Showcase\) \{\s*rotateChapterOne14Showcase\(now\);\s*\} else if \(timedVisualShowcase\)/, '1-4 rotation does not use normal kill and respawn progression');
 [
-  ['goblinScout', '.855'],
+  ['goblinScout', '.81225'],
   ['goblinWarrior', '.9215'],
   ['goblinSlinger', '.833'],
-  ['goblinShaman', '.9991'],
-  ['goblinGuard', '1.1124'],
+  ['goblinShaman', '1.029073'],
+  ['goblinGuard', '1.145772'],
   ['goblinCaptain', '1.15'],
   ['goblinTreasureChest', '.72'],
   ['goblinHighChief', '1.32']
