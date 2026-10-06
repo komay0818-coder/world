@@ -867,7 +867,7 @@ const monsterVisualScaleCorrections = {
   forestBoar: .81225,
   irritableBoar: .92,
   boarKing: 1.15,
-  goblinScout: .81225,
+  goblinScout: .7716375,
   goblinWarrior: .9215,
   goblinSlinger: .833,
   goblinShaman: 1.029073,
