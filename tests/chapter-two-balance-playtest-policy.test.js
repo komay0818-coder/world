@@ -193,14 +193,14 @@ assert.match(script, /chapterOne14ShowcaseGroups = Object\.freeze\([\s\S]*?lengt
 assert.match(script, /function rotateChapterOne14Showcase[\s\S]*?showcaseRoundIndex[\s\S]*?showcaseNextRoundAt = now \+ 6000/, '1-4 unified showcase rotates every six seconds');
 assert.match(script, /if \(rotatingChapterOne14Showcase\) \{\s*rotateChapterOne14Showcase\(now\);\s*\} else if \(timedVisualShowcase\)/, '1-4 rotation does not use normal kill and respawn progression');
 [
-  ['goblinScout', '.9'],
-  ['goblinWarrior', '.95'],
-  ['goblinSlinger', '.85'],
-  ['goblinShaman', '.97'],
-  ['goblinGuard', '1.08'],
+  ['goblinScout', '.855'],
+  ['goblinWarrior', '.9215'],
+  ['goblinSlinger', '.833'],
+  ['goblinShaman', '.9991'],
+  ['goblinGuard', '1.1124'],
   ['goblinCaptain', '1.15'],
-  ['goblinTreasureChest', '.8'],
-  ['goblinHighChief', '1.2']
+  ['goblinTreasureChest', '.72'],
+  ['goblinHighChief', '1.32']
 ].forEach(([monsterId, scale]) => {
   assert.match(script, new RegExp(`${monsterId}:\\s*${scale.replace('.', '\\.')},`), `1-4 ${monsterId} keeps its approved independent display scale`);
 });
