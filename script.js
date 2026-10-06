@@ -867,6 +867,14 @@ const monsterVisualScaleCorrections = {
   forestBoar: .81225,
   irritableBoar: .92,
   boarKing: 1.15,
+  goblinScout: .9,
+  goblinWarrior: .95,
+  goblinSlinger: .85,
+  goblinShaman: .97,
+  goblinGuard: 1.08,
+  goblinCaptain: 1.15,
+  goblinTreasureChest: .8,
+  goblinHighChief: 1.2,
   // Chapter 3 artwork uses mixed portrait and landscape canvases. These values
   // equalize perceived body height while keeping rank from changing art size.
   'wasteland-hyena': .8302715,

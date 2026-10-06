@@ -192,6 +192,18 @@ assert.match(script, /activeMapId === 'goblin-camp' && ChapterTwoBalancePlaytest
 assert.match(script, /chapterOne14ShowcaseGroups = Object\.freeze\([\s\S]*?length: 7[\s\S]*?getGoblinCampWaveTypes\(index \+ 1\)/, '1-4 unified showcase contains all seven goblin camp waves');
 assert.match(script, /function rotateChapterOne14Showcase[\s\S]*?showcaseRoundIndex[\s\S]*?showcaseNextRoundAt = now \+ 6000/, '1-4 unified showcase rotates every six seconds');
 assert.match(script, /if \(rotatingChapterOne14Showcase\) \{\s*rotateChapterOne14Showcase\(now\);\s*\} else if \(timedVisualShowcase\)/, '1-4 rotation does not use normal kill and respawn progression');
+[
+  ['goblinScout', '.9'],
+  ['goblinWarrior', '.95'],
+  ['goblinSlinger', '.85'],
+  ['goblinShaman', '.97'],
+  ['goblinGuard', '1.08'],
+  ['goblinCaptain', '1.15'],
+  ['goblinTreasureChest', '.8'],
+  ['goblinHighChief', '1.2']
+].forEach(([monsterId, scale]) => {
+  assert.match(script, new RegExp(`${monsterId}:\\s*${scale.replace('.', '\\.')},`), `1-4 ${monsterId} keeps its approved independent display scale`);
+});
 assert.match(script, /boarPiglet:\s*\.722,/, '1-3 piglet retains the earlier reductions and is reduced by another 5%');
 assert.match(script, /forestBoar:\s*\.81225,/, '1-3 forest boar retains the earlier reductions and is reduced by another 5%');
 assert.match(script, /irritableBoar:\s*\.92,/, '1-3 elite display size is reduced by 8%');
