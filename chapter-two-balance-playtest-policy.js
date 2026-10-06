@@ -113,7 +113,7 @@
   function getRequestedMapId(locationLike) {
     const allowed = ['black-forest-trail', 'spider-nest', 'black-forest-entrance', 'blackstone-stronghold', 'forest-altar', 'black-forest-depths'];
     if (!isActive(locationLike)) return 'plains-entrance';
-    if (isChapterOne14Active(locationLike)) return 'plains-depths';
+    if (isChapterOne14Active(locationLike)) return 'goblin-camp';
     if (isChapterOne13Active(locationLike)) return 'boar-woods';
     if (isChapterOne12Active(locationLike)) return 'wolf-den';
     if (isChapterOne11Active(locationLike)) return 'plains-entrance';
@@ -251,7 +251,7 @@
         selectedMapId, equipment: makeEquipment(job, dependencies),
         skillLevels: makeSkillLevels(job, dependencies), lastActiveAt: Date.now(), unlockedChapter: chapterThreePlaytest ? 3 : 2,
         chapterThreePlaytestVersion: chapterThreePlaytest ? CHAPTER_THREE_PLAYTEST_VERSION : '',
-        mapUnlocked: { 'black-forest': true, 'wolf-den': chapterOne12Playtest || chapterOne13Playtest || chapterOne14Playtest, 'boar-woods': chapterOne13Playtest || chapterOne14Playtest, 'goblin-camp': chapterOne14Playtest, 'plains-depths': chapterOne14Playtest },
+        mapUnlocked: { 'black-forest': true, 'wolf-den': chapterOne12Playtest || chapterOne13Playtest || chapterOne14Playtest, 'boar-woods': chapterOne13Playtest || chapterOne14Playtest, 'goblin-camp': chapterOne14Playtest },
         blackForestCorruption: { initialized: true, removedLayers: getRemovedCorruptionLayers(dependencies.location) },
         chapterTwoProgress: {
           unlocked: Object.fromEntries(['black-forest-trail', 'spider-nest', 'black-forest-entrance', 'blackstone-stronghold', 'forest-altar', 'black-forest-depths'].map((id) => [id, true])),

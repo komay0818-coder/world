@@ -24,7 +24,7 @@ assert.equal(BalancePolicy.isChapterOne13Active({ hostname: '127.0.0.1', search:
 assert.equal(BalancePolicy.getRequestedMapId({ hostname: '127.0.0.1', search: '?playtest=chapter-one-13' }), 'boar-woods');
 assert.equal(BalancePolicy.getSlotKey({ hostname: '127.0.0.1', search: '?playtest=chapter-one-13' }), BalancePolicy.CHAPTER_ONE_13_SLOT_KEY);
 assert.equal(BalancePolicy.isChapterOne14Active({ hostname: '127.0.0.1', search: '?playtest=chapter-one-14' }), true);
-assert.equal(BalancePolicy.getRequestedMapId({ hostname: '127.0.0.1', search: '?playtest=chapter-one-14' }), 'plains-depths');
+assert.equal(BalancePolicy.getRequestedMapId({ hostname: '127.0.0.1', search: '?playtest=chapter-one-14' }), 'goblin-camp');
 assert.equal(BalancePolicy.getSlotKey({ hostname: '127.0.0.1', search: '?playtest=chapter-one-14' }), BalancePolicy.CHAPTER_ONE_14_SLOT_KEY);
 assert.equal(BalancePolicy.getSlotKey({ hostname: '127.0.0.1', search: '?playtest=chapter-three-31' }), BalancePolicy.CHAPTER_THREE_SLOT_KEY);
 assert.equal(BalancePolicy.getProgressKey({ hostname: '127.0.0.1', search: '?playtest=chapter-three-31' }), BalancePolicy.CHAPTER_THREE_PROGRESS_KEY);
@@ -85,9 +85,10 @@ const chapterOne14Slots = BalancePolicy.createSlots({
   EquipmentDropPolicy,
   location: { hostname: '127.0.0.1', search: '?playtest=chapter-one-14&showcase=v1' }
 });
-assert.ok(chapterOne14Slots.every((slot) => slot.progress.selectedMapId === 'plains-depths'));
+assert.ok(chapterOne14Slots.every((slot) => slot.progress.selectedMapId === 'goblin-camp'));
 assert.ok(chapterOne14Slots.every((slot) => slot.character.name.startsWith('1-4 測試')));
-assert.ok(chapterOne14Slots.every((slot) => slot.progress.mapUnlocked['plains-depths']));
+assert.ok(chapterOne14Slots.every((slot) => slot.progress.mapUnlocked['goblin-camp']));
+assert.ok(chapterOne14Slots.every((slot) => !slot.progress.mapUnlocked['plains-depths']));
 
 const warrior = slots[0].progress.equipment;
 assert.equal(warrior.weapon.baseItemId, 'forest-guard-longsword');
@@ -187,8 +188,8 @@ assert.match(script, /isChapterThreeActive\(\) \|\| ChapterTwoBalancePlaytestPol
 assert.match(script, /isChapterOne11Active\(\)[\s\S]*?return \['plainsRabbit', 'plainsWolfPup', 'plainsSlime', 'plainsGoblinYoung', 'lostGoblin'\]/, '1-1 visual playtest shows every map monster together');
 assert.match(script, /isChapterOne12Active\(\)[\s\S]*?return \['greatfangWolf', 'ragingWolf', 'plainsWolfPup', 'denForestWolf', 'lostGoblin'\]/, '1-2 visual playtest shows every map monster together');
 assert.match(script, /isChapterOne13Active\(\)[\s\S]*?return \['boarKing', 'irritableBoar', 'boarPiglet', 'forestBoar', 'lostGoblin'\]/, '1-3 visual playtest shows every map monster together');
-assert.match(script, /isChapterOne14Active\(\)[\s\S]*?requestedRank === 'elite'[\s\S]*?requestedRank === 'boss'[\s\S]*?mapMonsterPools\.plainsDepths\.normal/, '1-4 visual playtest exposes normal, elite, and boss groups');
-assert.match(script, /chapterOne14ShowcaseGroups = Object\.freeze\(\[[\s\S]*?'highlandWolf', 'rockbackBoar', 'blackstoneScout', 'grasslandVulture'[\s\S]*?'blackstoneRaider', 'wanderingBlackKnight'[\s\S]*?'blackstoneLeader'/, '1-4 unified showcase contains normal, elite, and boss rounds');
+assert.match(script, /activeMapId === 'goblin-camp' && ChapterTwoBalancePlaytestPolicy\?\.isChapterOne14Active\(\)[\s\S]*?getGoblinCampWaveTypes\(1\)/, '1-4 visual playtest starts with the first goblin camp wave');
+assert.match(script, /chapterOne14ShowcaseGroups = Object\.freeze\([\s\S]*?length: 7[\s\S]*?getGoblinCampWaveTypes\(index \+ 1\)/, '1-4 unified showcase contains all seven goblin camp waves');
 assert.match(script, /function rotateChapterOne14Showcase[\s\S]*?showcaseRoundIndex[\s\S]*?showcaseNextRoundAt = now \+ 6000/, '1-4 unified showcase rotates every six seconds');
 assert.match(script, /if \(rotatingChapterOne14Showcase\) \{\s*rotateChapterOne14Showcase\(now\);\s*\} else if \(timedVisualShowcase\)/, '1-4 rotation does not use normal kill and respawn progression');
 assert.match(script, /boarPiglet:\s*\.722,/, '1-3 piglet retains the earlier reductions and is reduced by another 5%');

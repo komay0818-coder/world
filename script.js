@@ -2333,11 +2333,8 @@ function createEnemyTypes(playerLevel = 1) {
   if (activeMapId === 'boar-woods' && ChapterTwoBalancePlaytestPolicy?.isChapterOne13Active()) {
     return ['boarKing', 'irritableBoar', 'boarPiglet', 'forestBoar', 'lostGoblin'];
   }
-  if (activeMapId === 'plains-depths' && ChapterTwoBalancePlaytestPolicy?.isChapterOne14Active()) {
-    const requestedRank = new URLSearchParams(window.location.search).get('rank');
-    if (requestedRank === 'elite') return ['blackstoneRaider', 'wanderingBlackKnight', 'highlandWolf', 'rockbackBoar'];
-    if (requestedRank === 'boss') return ['blackstoneLeader', 'blackstoneRaider', 'wanderingBlackKnight', 'blackstoneScout'];
-    return [...mapMonsterPools.plainsDepths.normal];
+  if (activeMapId === 'goblin-camp' && ChapterTwoBalancePlaytestPolicy?.isChapterOne14Active()) {
+    return DungeonTicketCycle.getGoblinCampWaveTypes(1);
   }
   if (activeMapId === 'bloodwar-wastes' && ChapterTwoBalancePlaytestPolicy?.getRequestedMapId() === 'bloodwar-wastes') {
     const requestedRank = new URLSearchParams(window.location.search).get('rank');
@@ -6656,7 +6653,7 @@ function createBlackstoneStrongholdBattleState() {
 function isTimedChapterThreeVisualShowcase() {
   const requestedMapId = ChapterTwoBalancePlaytestPolicy?.getRequestedMapId();
   const supportedMap = ChapterTwoBalancePlaytestPolicy?.isChapterOne14Active()
-    ? requestedMapId === 'plains-depths'
+    ? requestedMapId === 'goblin-camp'
     : ChapterTwoBalancePlaytestPolicy?.isChapterOne13Active()
     ? requestedMapId === 'boar-woods'
     : ChapterTwoBalancePlaytestPolicy?.isChapterOne12Active()
@@ -6668,11 +6665,9 @@ function isTimedChapterThreeVisualShowcase() {
     && new URLSearchParams(window.location.search).has('showcase');
 }
 
-const chapterOne14ShowcaseGroups = Object.freeze([
-  Object.freeze(['highlandWolf', 'rockbackBoar', 'blackstoneScout', 'grasslandVulture']),
-  Object.freeze(['blackstoneRaider', 'wanderingBlackKnight']),
-  Object.freeze(['blackstoneLeader'])
-]);
+const chapterOne14ShowcaseGroups = Object.freeze(
+  Array.from({ length: 7 }, (_, index) => Object.freeze(DungeonTicketCycle.getGoblinCampWaveTypes(index + 1)))
+);
 
 function isChapterOne14RotatingShowcase() {
   return ChapterTwoBalancePlaytestPolicy?.isChapterOne14Active()
@@ -6684,7 +6679,7 @@ function rotateChapterOne14Showcase(now = Date.now()) {
   if (now < (battle.showcaseNextRoundAt || 0)) return false;
   battle.showcaseRoundIndex = ((battle.showcaseRoundIndex || 0) + 1) % chapterOne14ShowcaseGroups.length;
   const enemyTypes = [...chapterOne14ShowcaseGroups[battle.showcaseRoundIndex]];
-  const mapId = 'plains-depths';
+  const mapId = 'goblin-camp';
   battle.enemyTypes = enemyTypes;
   battle.enemyLevels = createEnemyLevels(enemyTypes, mapId);
   battle.enemyAffixes = createEnemyAffixes(enemyTypes, mapId, battle.enemyLevels);
@@ -6707,8 +6702,7 @@ function rotateChapterOne14Showcase(now = Date.now()) {
   battle.targetIndexes = [];
   battle.enemyDamages = enemyTypes.map(() => []);
   battle.showcaseNextRoundAt = now + 6000;
-  const roundNames = ['普通怪', '菁英怪', 'Boss'];
-  logBattle(`◆ 1-4 圖片測試：切換至${roundNames[battle.showcaseRoundIndex]}展示。`, 'system');
+  logBattle(`◆ 1-4 圖片測試：切換至第 ${battle.showcaseRoundIndex + 1}／7 輪。`, 'system');
   return true;
 }
 
@@ -8062,7 +8056,7 @@ function openBattle() {
   applySavedLayout();
   const progress = getProgress();
   let currentMap = getActiveMap(progress);
-  const chapterThreeVisualPlaytest = ChapterTwoBalancePlaytestPolicy?.isChapterThreeActive()
+  const chapterThreeVisualPlaytest = (ChapterTwoBalancePlaytestPolicy?.isChapterThreeActive() || ChapterTwoBalancePlaytestPolicy?.isChapterOne14Active())
     && ChapterTwoBalancePlaytestPolicy.getRequestedMapId() === currentMap.id;
   if (currentMap.dungeon && !progress.dungeonAdmission && !chapterThreeVisualPlaytest) {
     progress.selectedMapId = progress.dungeonReturnMapId || (currentMap.id === 'black-forest-altar' ? 'black-forest' : 'plains-entrance');
