@@ -221,10 +221,10 @@ assert.match(script, /function rotateChapterOne15Showcase[\s\S]*?replaceChapterO
   assert.match(script, new RegExp(`${monsterId}:\\s*${scale.replace('.', '\\.')},`), `1-4 ${monsterId} keeps its approved independent display scale`);
 });
 [
-  ['highlandWolf', '.9'],
-  ['rockbackBoar', '.9'],
-  ['blackstoneScout', '1.05'],
-  ['grasslandVulture', '.8'],
+  ['highlandWolf', '.855'],
+  ['rockbackBoar', '.783'],
+  ['blackstoneScout', '1.0815'],
+  ['grasslandVulture', '.704'],
   ['blackstoneRaider', '1.15'],
   ['wanderingBlackKnight', '1.1'],
   ['blackstoneLeader', '1.2']
