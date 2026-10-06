@@ -188,6 +188,9 @@ assert.match(script, /isChapterOne11Active\(\)[\s\S]*?return \['plainsRabbit', '
 assert.match(script, /isChapterOne12Active\(\)[\s\S]*?return \['greatfangWolf', 'ragingWolf', 'plainsWolfPup', 'denForestWolf', 'lostGoblin'\]/, '1-2 visual playtest shows every map monster together');
 assert.match(script, /isChapterOne13Active\(\)[\s\S]*?return \['boarKing', 'irritableBoar', 'boarPiglet', 'forestBoar', 'lostGoblin'\]/, '1-3 visual playtest shows every map monster together');
 assert.match(script, /isChapterOne14Active\(\)[\s\S]*?requestedRank === 'elite'[\s\S]*?requestedRank === 'boss'[\s\S]*?mapMonsterPools\.plainsDepths\.normal/, '1-4 visual playtest exposes normal, elite, and boss groups');
+assert.match(script, /chapterOne14ShowcaseGroups = Object\.freeze\(\[[\s\S]*?'highlandWolf', 'rockbackBoar', 'blackstoneScout', 'grasslandVulture'[\s\S]*?'blackstoneRaider', 'wanderingBlackKnight'[\s\S]*?'blackstoneLeader'/, '1-4 unified showcase contains normal, elite, and boss rounds');
+assert.match(script, /function rotateChapterOne14Showcase[\s\S]*?showcaseRoundIndex[\s\S]*?showcaseNextRoundAt = now \+ 6000/, '1-4 unified showcase rotates every six seconds');
+assert.match(script, /if \(rotatingChapterOne14Showcase\) \{\s*rotateChapterOne14Showcase\(now\);\s*\} else if \(timedVisualShowcase\)/, '1-4 rotation does not use normal kill and respawn progression');
 assert.match(script, /boarPiglet:\s*\.722,/, '1-3 piglet retains the earlier reductions and is reduced by another 5%');
 assert.match(script, /forestBoar:\s*\.81225,/, '1-3 forest boar retains the earlier reductions and is reduced by another 5%');
 assert.match(script, /irritableBoar:\s*\.92,/, '1-3 elite display size is reduced by 8%');

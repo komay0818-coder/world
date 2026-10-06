@@ -6668,15 +6668,62 @@ function isTimedChapterThreeVisualShowcase() {
     && new URLSearchParams(window.location.search).has('showcase');
 }
 
+const chapterOne14ShowcaseGroups = Object.freeze([
+  Object.freeze(['highlandWolf', 'rockbackBoar', 'blackstoneScout', 'grasslandVulture']),
+  Object.freeze(['blackstoneRaider', 'wanderingBlackKnight']),
+  Object.freeze(['blackstoneLeader'])
+]);
+
+function isChapterOne14RotatingShowcase() {
+  return ChapterTwoBalancePlaytestPolicy?.isChapterOne14Active()
+    && new URLSearchParams(window.location.search).has('showcase')
+    && !new URLSearchParams(window.location.search).has('rank');
+}
+
+function rotateChapterOne14Showcase(now = Date.now()) {
+  if (now < (battle.showcaseNextRoundAt || 0)) return false;
+  battle.showcaseRoundIndex = ((battle.showcaseRoundIndex || 0) + 1) % chapterOne14ShowcaseGroups.length;
+  const enemyTypes = [...chapterOne14ShowcaseGroups[battle.showcaseRoundIndex]];
+  const mapId = 'plains-depths';
+  battle.enemyTypes = enemyTypes;
+  battle.enemyLevels = createEnemyLevels(enemyTypes, mapId);
+  battle.enemyAffixes = createEnemyAffixes(enemyTypes, mapId, battle.enemyLevels);
+  battle.enemyHps = enemyTypes.map((type, index) => EliteAffixPolicy.applyAffixes(getMonsterDefinitionForMap(type, mapId, battle.enemyLevels[index]), battle.enemyAffixes[index]).maxHp);
+  battle.enemyRespawns = enemyTypes.map(() => null);
+  battle.enemySpawnedAt = enemyTypes.map((_, index) => now + index);
+  battle.enemyNextAttackAt = createEnemyAttackSchedule(enemyTypes, now, mapId, battle.enemyLevels);
+  battle.enemyDots = enemyTypes.map(() => []);
+  battle.enemySkillStates = enemyTypes.map(() => null);
+  battle.enemyBoarEnraged = enemyTypes.map(() => false);
+  battle.enemyTrailSummoned = enemyTypes.map(() => false);
+  battle.enemySummonProfiles = enemyTypes.map(() => null);
+  battle.enemyCaptainShieldUntil = enemyTypes.map(() => 0);
+  battle.enemyAssassinDashUntil = enemyTypes.map(() => 0);
+  battle.enemySpiderNestPhase = enemyTypes.map(() => 1);
+  battle.redrockEnemyStates = enemyTypes.map(() => null);
+  battle.brokenrockEnemyStates = enemyTypes.map(() => null);
+  battle.bloodwarEnemyStates = enemyTypes.map(() => null);
+  battle.enemyAffixRegenAt = enemyTypes.map(() => now);
+  battle.targetIndexes = [];
+  battle.enemyDamages = enemyTypes.map(() => []);
+  battle.showcaseNextRoundAt = now + 6000;
+  const roundNames = ['普通怪', '菁英怪', 'Boss'];
+  logBattle(`◆ 1-4 圖片測試：切換至${roundNames[battle.showcaseRoundIndex]}展示。`, 'system');
+  return true;
+}
+
 function createBattleTickRuntime() {
   const timedVisualShowcase = isTimedChapterThreeVisualShowcase();
+  const rotatingChapterOne14Showcase = isChapterOne14RotatingShowcase();
   return {
     isFighting: () => fighting,
     enemyRespawns: processEnemyRespawns,
     enemyDots: processEnemyDots,
     environment: (now) => {
       processBlackForestCorruption(now);
-      if (timedVisualShowcase) {
+      if (rotatingChapterOne14Showcase) {
+        rotateChapterOne14Showcase(now);
+      } else if (timedVisualShowcase) {
         battle.enemyHps.forEach((hp, index) => {
           if (hp > 0 && now - (battle.enemySpawnedAt[index] || now) >= 6000) battle.enemyHps[index] = 0;
         });
@@ -8036,7 +8083,7 @@ function openBattle() {
   const sessionId = ++battleSessionSequence;
   const partyMembers = buildBattlePartyMembers(battleStart);
   const mainMember = partyMembers.find((member) => member.isMain) || partyMembers[0];
-  battle = { enemyTypes, enemyLevels, enemyHps, partyMembers, playerHp: mainMember?.currentHp || getMaxHp(progress.level, progress), playerMana: mainMember?.resourceCurrent || 0, playerArrows: mainMember?.resourceType === 'arrows' ? mainMember.resourceCurrent : 0, playerShield: 0, playerStunnedUntil: 0, playerBleed: null, manaExhausted: false, playerAttackCharge: 0, hunterAttackCount: 0, lastManaRegenAt: battleStart, lastResourceUpdatedAt: battleStart, lastArrowRecoveryAt: battleStart, lastCorruptionTickAt: battleStart, lastStrongholdRegenAt: battleStart, enemyNextAttackAt: createEnemyAttackSchedule(enemyTypes, battleStart, currentMap.id, enemyLevels), enemyBoarEnraged: enemyTypes.map(() => false), enemyTrailSummoned: enemyTypes.map(() => false), enemySummonProfiles: enemyTypes.map(() => null), enemyCaptainShieldUntil: enemyTypes.map(() => 0), enemyAssassinDashUntil: enemyTypes.map(() => 0), enemySpiderNestPhase: enemyTypes.map(() => 1), blackstoneRoarUntil: 0, blackstoneCommandUntil: 0, blackstoneSpiderCommandUntil: 0, spiderNestCommandUntil: 0, strongholdCommandUntil: 0, blackstoneStrongholdState: createBlackstoneStrongholdBattleState(), globalSkillReadyAt: 0, undeadRevived: false, skillCooldowns: {}, enemyRespawns: enemyTypes.map(() => null), enemySpawnedAt: enemyTypes.map((_, index) => battleStart + index), enemyDots: enemyTypes.map(() => []), enemySkillStates: enemyTypes.map(() => null), redrockEnemyStates: enemyTypes.map(() => null), brokenrockEnemyStates: enemyTypes.map(() => null), bloodwarEnemyStates: enemyTypes.map(() => null), monsterMoveSpeed: 200, targetIndexes: [], enemyDamages: enemyTypes.map(() => []), damageTimers: [], rewardedEnemyIndexes: new Set(), roundLoot: {}, isDungeon, dungeonId: isDungeon ? currentMap.id : null, dungeonWave: isDungeon ? 1 : 0, dungeonComplete: false, waveTransitioning: false, goblinScoutSummons: 0 };
+  battle = { enemyTypes, enemyLevels, enemyHps, partyMembers, playerHp: mainMember?.currentHp || getMaxHp(progress.level, progress), playerMana: mainMember?.resourceCurrent || 0, playerArrows: mainMember?.resourceType === 'arrows' ? mainMember.resourceCurrent : 0, playerShield: 0, playerStunnedUntil: 0, playerBleed: null, manaExhausted: false, playerAttackCharge: 0, hunterAttackCount: 0, lastManaRegenAt: battleStart, lastResourceUpdatedAt: battleStart, lastArrowRecoveryAt: battleStart, lastCorruptionTickAt: battleStart, lastStrongholdRegenAt: battleStart, enemyNextAttackAt: createEnemyAttackSchedule(enemyTypes, battleStart, currentMap.id, enemyLevels), enemyBoarEnraged: enemyTypes.map(() => false), enemyTrailSummoned: enemyTypes.map(() => false), enemySummonProfiles: enemyTypes.map(() => null), enemyCaptainShieldUntil: enemyTypes.map(() => 0), enemyAssassinDashUntil: enemyTypes.map(() => 0), enemySpiderNestPhase: enemyTypes.map(() => 1), blackstoneRoarUntil: 0, blackstoneCommandUntil: 0, blackstoneSpiderCommandUntil: 0, spiderNestCommandUntil: 0, strongholdCommandUntil: 0, blackstoneStrongholdState: createBlackstoneStrongholdBattleState(), globalSkillReadyAt: 0, undeadRevived: false, skillCooldowns: {}, enemyRespawns: enemyTypes.map(() => null), enemySpawnedAt: enemyTypes.map((_, index) => battleStart + index), enemyDots: enemyTypes.map(() => []), enemySkillStates: enemyTypes.map(() => null), redrockEnemyStates: enemyTypes.map(() => null), brokenrockEnemyStates: enemyTypes.map(() => null), bloodwarEnemyStates: enemyTypes.map(() => null), monsterMoveSpeed: 200, targetIndexes: [], enemyDamages: enemyTypes.map(() => []), damageTimers: [], rewardedEnemyIndexes: new Set(), roundLoot: {}, isDungeon, dungeonId: isDungeon ? currentMap.id : null, dungeonWave: isDungeon ? 1 : 0, dungeonComplete: false, waveTransitioning: false, goblinScoutSummons: 0, showcaseRoundIndex: 0, showcaseNextRoundAt: battleStart + 6000 };
   battle.enemyAffixes = enemyAffixes;
   battle.sessionId = sessionId;
   clearBattleLog();
