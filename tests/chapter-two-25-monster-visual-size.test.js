@@ -6,12 +6,12 @@ const script = fs.readFileSync(path.join(__dirname, '..', 'script.js'), 'utf8');
 
 [
   ['corruptedForestWolf', '1.05'],
-  ['thornDemonVine', '.9'],
+  ['thornDemonVine', '.81'],
   ['corruptedBlackstoneSoldier', '1.08'],
   ['altarGuard', '1.15'],
   ['corruptedBlackstonePriest', '1.03'],
   ['fallenDruid', '1.06'],
-  ['corruptedAltarGuardian', '1.3']
+  ['corruptedAltarGuardian', '1.56']
 ].forEach(([monsterId, scale]) => {
   assert.match(script, new RegExp(`\\b${monsterId}: ${scale.replace('.', '\\.')},`), `${monsterId} keeps its independent 2-5 visual scale`);
 });
