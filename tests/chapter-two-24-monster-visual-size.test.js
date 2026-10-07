@@ -5,7 +5,7 @@ const path = require('node:path');
 const script = fs.readFileSync(path.join(__dirname, '..', 'script.js'), 'utf8');
 const expectedScales = {
   blackstoneStrongholdGuard: '1.05',
-  blackstoneStrongholdCrossbowman: '.8925',
+  blackstoneStrongholdCrossbowman: '.919275',
   blackstoneStrongholdWarhound: '.85',
   blackstoneStrongholdLionGuard: '1.15',
   blackstoneStrongholdBullhornWarrior: '1.15',
