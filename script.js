@@ -866,6 +866,8 @@ const monsterVisualScaleCorrections = {
   blackstoneBeastmaster: 1.08,
   blackstoneCaptain: 1.15,
   blackstoneCenturion: 1.32,
+  spiderNestBlackstonePoisonSpider: .81,
+  spiderNestBlackstoneBeastmaster: 1.08,
   plainsRabbit: .59616,
   plainsWolfPup: .6156,
   plainsSlime: .50864,
