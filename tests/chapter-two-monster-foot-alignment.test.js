@@ -16,7 +16,7 @@ const expectedOffsets = {
 
 const expectedScales = {
   corruptedBoar: 1.1,
-  corruptedTreant: 1.15,
+  corruptedTreant: 1.3225,
   blackForestHunter: 1.1,
   forestGuardianV2: 1.3
 };
