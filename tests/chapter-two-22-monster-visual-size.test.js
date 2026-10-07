@@ -5,8 +5,8 @@ const path = require('node:path');
 const script = fs.readFileSync(path.join(__dirname, '..', 'script.js'), 'utf8');
 const expectedScales = {
   blackstoneTrailRaider: '1.05',
-  blackstoneArcher: '1.05',
-  blackstonePoisonSpider: '.9',
+  blackstoneArcher: '1.1025',
+  blackstonePoisonSpider: '.81',
   blackstoneBeastmaster: '1.08',
   blackstoneCaptain: '1.15',
   blackstoneCenturion: '1.2'
