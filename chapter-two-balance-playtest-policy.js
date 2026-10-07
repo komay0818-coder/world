@@ -95,7 +95,9 @@
       : getPlaytestId(locationLike) === CHAPTER_THREE_34_PLAYTEST_ID ? CHAPTER_THREE_34_SLOT_KEY
       : getPlaytestId(locationLike) === CHAPTER_THREE_33_PLAYTEST_ID ? CHAPTER_THREE_33_SLOT_KEY
       : getPlaytestId(locationLike) === CHAPTER_THREE_32_PLAYTEST_ID ? CHAPTER_THREE_32_SLOT_KEY
-      : isChapterThreeActive(locationLike) ? CHAPTER_THREE_SLOT_KEY : SLOT_KEY;
+      : isChapterThreeActive(locationLike) ? CHAPTER_THREE_SLOT_KEY
+      : getPlaytestId(locationLike) === PLAYTEST_ID ? `${SLOT_KEY}-${getRequestedMapId(locationLike)}`
+      : SLOT_KEY;
   }
 
   function getProgressKey(locationLike) {
@@ -109,7 +111,9 @@
       : getPlaytestId(locationLike) === CHAPTER_THREE_34_PLAYTEST_ID ? CHAPTER_THREE_34_PROGRESS_KEY
       : getPlaytestId(locationLike) === CHAPTER_THREE_33_PLAYTEST_ID ? CHAPTER_THREE_33_PROGRESS_KEY
       : getPlaytestId(locationLike) === CHAPTER_THREE_32_PLAYTEST_ID ? CHAPTER_THREE_32_PROGRESS_KEY
-      : isChapterThreeActive(locationLike) ? CHAPTER_THREE_PROGRESS_KEY : PROGRESS_KEY;
+      : isChapterThreeActive(locationLike) ? CHAPTER_THREE_PROGRESS_KEY
+      : getPlaytestId(locationLike) === PLAYTEST_ID ? `${PROGRESS_KEY}-${getRequestedMapId(locationLike)}`
+      : PROGRESS_KEY;
   }
 
   function getActiveSlotIndex(locationLike) {

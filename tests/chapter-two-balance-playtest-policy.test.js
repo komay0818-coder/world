@@ -44,6 +44,15 @@ assert.equal(BalancePolicy.getSlotKey({ hostname: '127.0.0.1', search: '?playtes
 assert.equal(BalancePolicy.getActiveSlotIndex({ hostname: '127.0.0.1', search: '?playtest=chapter-two-balance&main=hunter' }), 1);
 assert.equal(BalancePolicy.getActiveSlotIndex({ hostname: '127.0.0.1', search: '?playtest=chapter-two-balance&main=priest' }), 2);
 assert.equal(BalancePolicy.getRequestedMapId({ hostname: '127.0.0.1', search: '?playtest=chapter-two-balance&map=spider-nest' }), 'spider-nest');
+assert.equal(BalancePolicy.getSlotKey({ hostname: '127.0.0.1', search: '?playtest=chapter-two-balance&map=black-forest-entrance' }), `${BalancePolicy.SLOT_KEY}-black-forest-entrance`);
+assert.equal(BalancePolicy.getSlotKey({ hostname: '127.0.0.1', search: '?playtest=chapter-two-balance&map=black-forest-trail' }), `${BalancePolicy.SLOT_KEY}-black-forest-trail`);
+assert.equal(BalancePolicy.getProgressKey({ hostname: '127.0.0.1', search: '?playtest=chapter-two-balance&map=black-forest-entrance' }), `${BalancePolicy.PROGRESS_KEY}-black-forest-entrance`);
+assert.equal(BalancePolicy.getProgressKey({ hostname: '127.0.0.1', search: '?playtest=chapter-two-balance&map=black-forest-trail' }), `${BalancePolicy.PROGRESS_KEY}-black-forest-trail`);
+assert.notEqual(
+  BalancePolicy.getProgressKey({ hostname: '127.0.0.1', search: '?playtest=chapter-two-balance&map=black-forest-entrance' }),
+  BalancePolicy.getProgressKey({ hostname: '127.0.0.1', search: '?playtest=chapter-two-balance&map=black-forest-trail' }),
+  'each chapter-two visual map keeps an isolated test save'
+);
 assert.equal(BalancePolicy.getScenario({ hostname: '127.0.0.1', search: '?playtest=chapter-two-balance&scenario=purified-heart-pressure' }), 'purified-heart-pressure');
 assert.equal(BalancePolicy.getRemovedCorruptionLayers({ hostname: '127.0.0.1', search: '?playtest=chapter-two-balance&removedLayers=6' }), 6);
 assert.equal(BalancePolicy.getRemovedCorruptionLayers({ hostname: '127.0.0.1', search: '?playtest=chapter-two-balance&removedLayers=99' }), 6);
