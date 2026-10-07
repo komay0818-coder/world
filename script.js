@@ -857,7 +857,7 @@ const monsterVisualSizeOverrides = {
 // padding is normalized in the asset itself so rank never changes image size.
 const monsterVisualScaleCorrections = {
   corruptedBoar: 1.1,
-  corruptedTreant: 1.3225,
+  witheredTreeWalker: 1.3225,
   blackForestHunter: 1.1,
   forestGuardianV2: 1.3,
   plainsRabbit: .59616,
@@ -928,7 +928,7 @@ const monsterVisualVerticalOffsets = {
   blackForestWolf: '0%',
   corruptedBoar: '10.3613%',
   shadowSpider: '10.6445%',
-  corruptedTreant: '-8.0078%',
+  witheredTreeWalker: '14.0769%',
   blackForestHunter: '-3.2813%',
   forestGuardianV2: '-5.3418%'
 };
