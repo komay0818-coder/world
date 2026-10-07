@@ -2402,6 +2402,9 @@ function createEnemyTypes(playerLevel = 1) {
   if (activeMapId === 'blackstone-stronghold' && isChapterTwo24RotatingShowcase()) {
     return [...mapMonsterPools.blackstoneStronghold.normal];
   }
+  if (activeMapId === 'forest-altar' && isChapterTwo25RotatingShowcase()) {
+    return [...mapMonsterPools.forestAltar.normal];
+  }
   if (activeMapId === 'bloodwar-wastes' && ChapterTwoBalancePlaytestPolicy?.getRequestedMapId() === 'bloodwar-wastes') {
     const requestedRank = new URLSearchParams(window.location.search).get('rank');
     if (requestedRank === 'all') return ['skullcrusher-vanguard-commander', 'skullcrusher-centurion', 'skullcrusher-berserker', 'skullcrusher-shaman'];
@@ -6729,6 +6732,8 @@ function isTimedChapterThreeVisualShowcase() {
     ? requestedMapId === 'spider-nest'
     : isChapterTwo24RotatingShowcase()
     ? requestedMapId === 'blackstone-stronghold'
+    : isChapterTwo25RotatingShowcase()
+    ? requestedMapId === 'forest-altar'
     : ChapterTwoBalancePlaytestPolicy?.isChapterOne15Active()
     ? requestedMapId === 'plains-depths'
     : ChapterTwoBalancePlaytestPolicy?.isChapterOne14Active()
@@ -6772,6 +6777,11 @@ const chapterTwo24ShowcaseGroups = Object.freeze([
   Object.freeze([...mapMonsterPools.blackstoneStronghold.elite]),
   Object.freeze([...mapMonsterPools.blackstoneStronghold.boss])
 ]);
+const chapterTwo25ShowcaseGroups = Object.freeze([
+  Object.freeze([...mapMonsterPools.forestAltar.normal]),
+  Object.freeze([...mapMonsterPools.forestAltar.elite]),
+  Object.freeze([...mapMonsterPools.forestAltar.boss])
+]);
 
 function isChapterOne14RotatingShowcase() {
   return ChapterTwoBalancePlaytestPolicy?.isChapterOne14Active()
@@ -6809,6 +6819,13 @@ function isChapterTwo24RotatingShowcase() {
   const params = new URLSearchParams(window.location.search);
   return params.get('playtest') === 'chapter-two-balance'
     && ChapterTwoBalancePlaytestPolicy?.getRequestedMapId() === 'blackstone-stronghold'
+    && params.has('showcase');
+}
+
+function isChapterTwo25RotatingShowcase() {
+  const params = new URLSearchParams(window.location.search);
+  return params.get('playtest') === 'chapter-two-balance'
+    && ChapterTwoBalancePlaytestPolicy?.getRequestedMapId() === 'forest-altar'
     && params.has('showcase');
 }
 
@@ -6891,6 +6908,15 @@ function rotateChapterTwo24Showcase(now = Date.now()) {
   return true;
 }
 
+function rotateChapterTwo25Showcase(now = Date.now()) {
+  if (now < (battle.showcaseNextRoundAt || 0)) return false;
+  battle.showcaseRoundIndex = ((battle.showcaseRoundIndex || 0) + 1) % chapterTwo25ShowcaseGroups.length;
+  replaceVisualShowcaseEnemies([...chapterTwo25ShowcaseGroups[battle.showcaseRoundIndex]], 'forest-altar', now);
+  const roundNames = ['普通怪', '菁英怪', 'Boss'];
+  logBattle(`◆ 2-5 圖片測試：切換至${roundNames[battle.showcaseRoundIndex]}展示。`, 'system');
+  return true;
+}
+
 function createBattleTickRuntime() {
   const timedVisualShowcase = isTimedChapterThreeVisualShowcase();
   const rotatingChapterOne14Showcase = isChapterOne14RotatingShowcase();
@@ -6899,6 +6925,7 @@ function createBattleTickRuntime() {
   const rotatingChapterTwo22Showcase = isChapterTwo22RotatingShowcase();
   const rotatingChapterTwo23Showcase = isChapterTwo23RotatingShowcase();
   const rotatingChapterTwo24Showcase = isChapterTwo24RotatingShowcase();
+  const rotatingChapterTwo25Showcase = isChapterTwo25RotatingShowcase();
   return {
     isFighting: () => fighting,
     enemyRespawns: processEnemyRespawns,
@@ -6917,6 +6944,8 @@ function createBattleTickRuntime() {
         rotateChapterTwo23Showcase(now);
       } else if (rotatingChapterTwo24Showcase) {
         rotateChapterTwo24Showcase(now);
+      } else if (rotatingChapterTwo25Showcase) {
+        rotateChapterTwo25Showcase(now);
       } else if (timedVisualShowcase) {
         battle.enemyHps.forEach((hp, index) => {
           if (hp > 0 && now - (battle.enemySpawnedAt[index] || now) >= 6000) battle.enemyHps[index] = 0;
@@ -8318,7 +8347,7 @@ function openBattle() {
   });
 }
 
-if (ChapterTwoBalancePlaytestPolicy?.isChapterThreeActive() || ChapterTwoBalancePlaytestPolicy?.isChapterOne11Active() || ChapterTwoBalancePlaytestPolicy?.isChapterOne12Active() || ChapterTwoBalancePlaytestPolicy?.isChapterOne13Active() || ChapterTwoBalancePlaytestPolicy?.isChapterOne14Active() || ChapterTwoBalancePlaytestPolicy?.isChapterOne15Active() || isChapterTwo21RotatingShowcase() || isChapterTwo22RotatingShowcase() || isChapterTwo23RotatingShowcase() || isChapterTwo24RotatingShowcase()) {
+if (ChapterTwoBalancePlaytestPolicy?.isChapterThreeActive() || ChapterTwoBalancePlaytestPolicy?.isChapterOne11Active() || ChapterTwoBalancePlaytestPolicy?.isChapterOne12Active() || ChapterTwoBalancePlaytestPolicy?.isChapterOne13Active() || ChapterTwoBalancePlaytestPolicy?.isChapterOne14Active() || ChapterTwoBalancePlaytestPolicy?.isChapterOne15Active() || isChapterTwo21RotatingShowcase() || isChapterTwo22RotatingShowcase() || isChapterTwo23RotatingShowcase() || isChapterTwo24RotatingShowcase() || isChapterTwo25RotatingShowcase()) {
   const visualPlaytestProgressKey = ChapterTwoBalancePlaytestPolicy.getProgressKey();
   const savedVisualPlaytestProgress = JSON.parse(sessionStorage.getItem(visualPlaytestProgressKey) || 'null');
   if (savedVisualPlaytestProgress?.requiresMapSelectionAfterDefeat) {
@@ -8333,6 +8362,8 @@ const activePlaytestName = isChapterTwo21RotatingShowcase()
   ? '第二章 2-3 開發測試'
   : isChapterTwo24RotatingShowcase()
   ? '第二章 2-4 開發測試'
+  : isChapterTwo25RotatingShowcase()
+  ? '第二章 2-5 開發測試'
   : ChapterTwoBalancePlaytestPolicy?.isChapterOne15Active()
   ? '第一章 1-5 開發測試'
   : ChapterTwoBalancePlaytestPolicy?.isChapterOne14Active()
@@ -8350,7 +8381,7 @@ const savedName = localStorage.getItem('stardust-player-name');
 if (activePlaytestName || savedName) {
   enterMenu(activePlaytestName || savedName);
   claimOfflineRewards();
-  if (ChapterTwoBalancePlaytestPolicy?.isChapterThreeActive() || ChapterTwoBalancePlaytestPolicy?.isChapterOne11Active() || ChapterTwoBalancePlaytestPolicy?.isChapterOne12Active() || ChapterTwoBalancePlaytestPolicy?.isChapterOne13Active() || ChapterTwoBalancePlaytestPolicy?.isChapterOne14Active() || ChapterTwoBalancePlaytestPolicy?.isChapterOne15Active() || isChapterTwo21RotatingShowcase() || isChapterTwo22RotatingShowcase() || isChapterTwo23RotatingShowcase() || isChapterTwo24RotatingShowcase()) setTimeout(openBattle, 0);
+  if (ChapterTwoBalancePlaytestPolicy?.isChapterThreeActive() || ChapterTwoBalancePlaytestPolicy?.isChapterOne11Active() || ChapterTwoBalancePlaytestPolicy?.isChapterOne12Active() || ChapterTwoBalancePlaytestPolicy?.isChapterOne13Active() || ChapterTwoBalancePlaytestPolicy?.isChapterOne14Active() || ChapterTwoBalancePlaytestPolicy?.isChapterOne15Active() || isChapterTwo21RotatingShowcase() || isChapterTwo22RotatingShowcase() || isChapterTwo23RotatingShowcase() || isChapterTwo24RotatingShowcase() || isChapterTwo25RotatingShowcase()) setTimeout(openBattle, 0);
 }
 
 window.addEventListener('beforeunload', markPlayerActive);
