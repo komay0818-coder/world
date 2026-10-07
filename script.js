@@ -856,6 +856,10 @@ const monsterVisualSizeOverrides = {
 // Optional per-asset correction for unusual aspect ratios. Transparent canvas
 // padding is normalized in the asset itself so rank never changes image size.
 const monsterVisualScaleCorrections = {
+  corruptedBoar: 1.1,
+  corruptedTreant: 1.15,
+  blackForestHunter: 1.1,
+  forestGuardianV2: 1.3,
   plainsRabbit: .59616,
   plainsWolfPup: .6156,
   plainsSlime: .50864,
@@ -922,11 +926,11 @@ const monsterVisualScaleCorrections = {
 // Values compensate only for transparent padding inside each 1024px canvas.
 const monsterVisualVerticalOffsets = {
   blackForestWolf: '0%',
-  corruptedBoar: '8.6914%',
+  corruptedBoar: '10.3613%',
   shadowSpider: '10.6445%',
   corruptedTreant: '-8.0078%',
-  blackForestHunter: '3.7109%',
-  forestGuardianV2: '5.957%'
+  blackForestHunter: '-3.2813%',
+  forestGuardianV2: '-5.3418%'
 };
 
 function getMonsterVisualSize(enemy = {}) {

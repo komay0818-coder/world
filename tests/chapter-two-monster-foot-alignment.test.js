@@ -7,15 +7,26 @@ const css = fs.readFileSync(path.join(__dirname, '..', 'styles', 'monster-slots.
 
 const expectedOffsets = {
   blackForestWolf: '0%',
-  corruptedBoar: '8.6914%',
+  corruptedBoar: '10.3613%',
   shadowSpider: '10.6445%',
   corruptedTreant: '-8.0078%',
-  blackForestHunter: '3.7109%',
-  forestGuardianV2: '5.957%'
+  blackForestHunter: '-3.2813%',
+  forestGuardianV2: '-5.3418%'
+};
+
+const expectedScales = {
+  corruptedBoar: 1.1,
+  corruptedTreant: 1.15,
+  blackForestHunter: 1.1,
+  forestGuardianV2: 1.3
 };
 
 for (const [monsterId, offset] of Object.entries(expectedOffsets)) {
   assert.match(script, new RegExp(`${monsterId}: '${offset.replace('.', '\\.')}'`), `${monsterId} has an independent foot alignment offset`);
+}
+
+for (const [monsterId, scale] of Object.entries(expectedScales)) {
+  assert.match(script, new RegExp(`${monsterId}: ${scale}`), `${monsterId} uses the requested 2-1 display scale`);
 }
 
 assert.match(script, /--unit-art-offset-y:\$\{visualVerticalOffset\}/, 'battle markup passes the per-monster offset to CSS');
