@@ -891,7 +891,7 @@ const monsterVisualScaleCorrections = {
   forestSpirit: 1.08,
   corruptedBlackstoneCenturion: 1.1484,
   corruptedFallenDruid: 1.06,
-  heartOfTheBlackForest: 1.35,
+  heartOfTheBlackForest: 1.5525,
   plainsRabbit: .59616,
   plainsWolfPup: .6156,
   plainsSlime: .50864,
