@@ -9,7 +9,7 @@ const expectedScales = {
   blackstonePoisonSpider: '.81',
   blackstoneBeastmaster: '1.08',
   blackstoneCaptain: '1.15',
-  blackstoneCenturion: '1.2'
+  blackstoneCenturion: '1.32'
 };
 
 for (const [monsterId, scale] of Object.entries(expectedScales)) {
