@@ -874,7 +874,7 @@ const monsterVisualScaleCorrections = {
   blackstoneVenombladeAssassin: 1.15,
   giantSpider: 1.43,
   blackstoneStrongholdGuard: 1.05,
-  blackstoneStrongholdCrossbowman: .85,
+  blackstoneStrongholdCrossbowman: .8925,
   blackstoneStrongholdWarhound: .85,
   blackstoneStrongholdLionGuard: 1.15,
   blackstoneStrongholdBullhornWarrior: 1.15,
