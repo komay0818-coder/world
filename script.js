@@ -882,7 +882,7 @@ const monsterVisualScaleCorrections = {
   corruptedForestWolf: 1.05,
   thornDemonVine: .81,
   corruptedBlackstoneSoldier: 1.08,
-  altarGuard: 1.15,
+  altarGuard: 1.288,
   corruptedBlackstonePriest: 1.03,
   fallenDruid: 1.06,
   corruptedAltarGuardian: 1.56,
