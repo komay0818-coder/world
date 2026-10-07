@@ -20,11 +20,11 @@ assert.match(script, /blackstonePoisonSpider: \.81,[\s\S]*?spiderNestBlackstoneP
 assert.match(script, /blackstoneBeastmaster: 1\.08,[\s\S]*?spiderNestBlackstoneBeastmaster: 1\.08,/, 'both blackstone beastmasters use the approved 108% scale');
 
 const expectedMapScales = {
-  venomSpitterSpider: '.9',
+  venomSpitterSpider: '.81',
   webWeaver: '.9',
   blackstoneVenomHunter: '1.1',
   blackstoneVenombladeAssassin: '1.15',
-  giantSpider: '1.3'
+  giantSpider: '1.43'
 };
 
 for (const [monsterId, scale] of Object.entries(expectedMapScales)) {
