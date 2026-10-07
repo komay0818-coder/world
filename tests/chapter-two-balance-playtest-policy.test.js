@@ -65,6 +65,14 @@ const chapterTwo21Slots = BalancePolicy.createSlots({
 assert.ok(chapterTwo21Slots.every((slot) => slot.progress.selectedMapId === 'black-forest-entrance'));
 assert.ok(chapterTwo21Slots.every((slot) => slot.progress.chapterTwoProgress.unlocked['black-forest-entrance']));
 
+const chapterTwo22Slots = BalancePolicy.createSlots({
+  EquipmentPolicy,
+  EquipmentDropPolicy,
+  location: { hostname: 'raw.githack.com', pathname: '/komay0818-coder/world/dev/index.html', search: '?playtest=chapter-two-balance&map=black-forest-trail&showcase=rotation' }
+});
+assert.ok(chapterTwo22Slots.every((slot) => slot.progress.selectedMapId === 'black-forest-trail'));
+assert.ok(chapterTwo22Slots.every((slot) => slot.progress.chapterTwoProgress.unlocked['black-forest-trail']));
+
 const chapterOne11Slots = BalancePolicy.createSlots({
   EquipmentPolicy,
   EquipmentDropPolicy,
@@ -204,7 +212,7 @@ assert.ok(chapterThree36Slots.every((slot) => slot.progress.chapterThreeProgress
 const script = fs.readFileSync(path.join(__dirname, '..', 'script.js'), 'utf8');
 assert.match(script, /getScenario\(\) === 'purified-heart-pressure'[\s\S]*'heartOfTheBlackForest',[\s\S]*'forestSpirit',[\s\S]*'darkSporeBeast',[\s\S]*'corruptedBlackstoneCenturion'/);
 assert.match(script, /sessionStorage\.setItem\(playtestProgressKey, JSON\.stringify\(progress\)\)/, 'playtest progress is session-only');
-assert.match(script, /isChapterThreeActive\(\) \|\| ChapterTwoBalancePlaytestPolicy\?\.isChapterOne11Active\(\) \|\| ChapterTwoBalancePlaytestPolicy\?\.isChapterOne12Active\(\) \|\| ChapterTwoBalancePlaytestPolicy\?\.isChapterOne13Active\(\) \|\| ChapterTwoBalancePlaytestPolicy\?\.isChapterOne14Active\(\) \|\| ChapterTwoBalancePlaytestPolicy\?\.isChapterOne15Active\(\) \|\| isChapterTwo21RotatingShowcase\(\)\) setTimeout\(openBattle, 0\)/, 'visual playtests open the formal battle directly');
+assert.match(script, /isChapterThreeActive\(\) \|\| ChapterTwoBalancePlaytestPolicy\?\.isChapterOne11Active\(\) \|\| ChapterTwoBalancePlaytestPolicy\?\.isChapterOne12Active\(\) \|\| ChapterTwoBalancePlaytestPolicy\?\.isChapterOne13Active\(\) \|\| ChapterTwoBalancePlaytestPolicy\?\.isChapterOne14Active\(\) \|\| ChapterTwoBalancePlaytestPolicy\?\.isChapterOne15Active\(\) \|\| isChapterTwo21RotatingShowcase\(\) \|\| isChapterTwo22RotatingShowcase\(\)\) setTimeout\(openBattle, 0\)/, 'visual playtests open the formal battle directly');
 assert.match(script, /isChapterOne11Active\(\)[\s\S]*?return \['plainsRabbit', 'plainsWolfPup', 'plainsSlime', 'plainsGoblinYoung', 'lostGoblin'\]/, '1-1 visual playtest shows every map monster together');
 assert.match(script, /isChapterOne12Active\(\)[\s\S]*?return \['greatfangWolf', 'ragingWolf', 'plainsWolfPup', 'denForestWolf', 'lostGoblin'\]/, '1-2 visual playtest shows every map monster together');
 assert.match(script, /isChapterOne13Active\(\)[\s\S]*?return \['boarKing', 'irritableBoar', 'boarPiglet', 'forestBoar', 'lostGoblin'\]/, '1-3 visual playtest shows every map monster together');
@@ -218,6 +226,8 @@ assert.match(script, /chapterOne15ShowcaseGroups = Object\.freeze\(\[[\s\S]*?'hi
 assert.match(script, /function rotateChapterOne15Showcase[\s\S]*?replaceVisualShowcaseEnemies\(\[\.\.\.chapterOne15ShowcaseGroups\[battle\.showcaseRoundIndex\]\], 'plains-depths', now\)/, '1-5 unified showcase rotates on the plains depths map');
 assert.match(script, /chapterTwo21ShowcaseGroups = Object\.freeze\(\[[\s\S]*?blackForestEntrance\.normal[\s\S]*?blackForestEntrance\.elite[\s\S]*?blackForestEntrance\.boss/, '2-1 unified showcase contains normal, elite, and boss rounds');
 assert.match(script, /function rotateChapterTwo21Showcase[\s\S]*?replaceVisualShowcaseEnemies\(\[\.\.\.chapterTwo21ShowcaseGroups\[battle\.showcaseRoundIndex\]\], 'black-forest-entrance', now\)/, '2-1 unified showcase rotates on the black forest entrance map');
+assert.match(script, /chapterTwo22ShowcaseGroups = Object\.freeze\(\[[\s\S]*?blackForestTrail\.normal[\s\S]*?blackForestTrail\.elite[\s\S]*?blackForestTrail\.boss/, '2-2 unified showcase contains normal, elite, and boss rounds');
+assert.match(script, /function rotateChapterTwo22Showcase[\s\S]*?replaceVisualShowcaseEnemies\(\[\.\.\.chapterTwo22ShowcaseGroups\[battle\.showcaseRoundIndex\]\], 'black-forest-trail', now\)/, '2-2 unified showcase rotates on the black forest trail map');
 [
   ['goblinScout', '.7716375'],
   ['goblinWarrior', '.9215'],
