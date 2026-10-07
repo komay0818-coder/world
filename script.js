@@ -918,6 +918,17 @@ const monsterVisualScaleCorrections = {
   'redrock-ancient-god': 1.3248
 };
 
+// Align the visible feet of 2-1 artwork to the black-forest wolf baseline.
+// Values compensate only for transparent padding inside each 1024px canvas.
+const monsterVisualVerticalOffsets = {
+  blackForestWolf: '0%',
+  corruptedBoar: '8.6914%',
+  shadowSpider: '10.6445%',
+  corruptedTreant: '-8.0078%',
+  blackForestHunter: '3.7109%',
+  forestGuardianV2: '5.957%'
+};
+
 function getMonsterVisualSize(enemy = {}) {
   if (enemy.visualSize) return enemy.visualSize;
   if (monsterVisualSizeOverrides[enemy.id]) return monsterVisualSizeOverrides[enemy.id];
@@ -1249,7 +1260,9 @@ function getLocalPlaytestProgressKey() {
 }
 
 function getPlaytestHpFloor() {
-  return getBlackForestEntrancePlaytestConfig().invincible || getBlackstoneStrongholdPlaytestConfig().invincible || getForestAltarPlaytestConfig().invincible || getBlackForestDepthsPlaytestConfig().invincible ? 1 : 0;
+  const visualShowcase = ChapterTwoBalancePlaytestPolicy?.isActive()
+    && new URLSearchParams(window.location.search).has('showcase');
+  return visualShowcase || getBlackForestEntrancePlaytestConfig().invincible || getBlackstoneStrongholdPlaytestConfig().invincible || getForestAltarPlaytestConfig().invincible || getBlackForestDepthsPlaytestConfig().invincible ? 1 : 0;
 }
 
 function getProgress(activeCharacterOverride = null) {
@@ -3567,6 +3580,7 @@ function renderEnemySquad() {
     const monsterLevel = enemy.level || MonsterDisplayPolicy.getMonsterLevel(getActiveMap(getProgress()), getProgress().level);
     const damageEvents = (battle.enemyDamages[index] || []).map((event, eventIndex) => `<b class="enemy-damage ${event.type || 'normal'}" style="--damage-offset:${eventIndex * 18}px">-${event.damage}</b>`).join('');
     const rank = MonsterDisplayPolicy.getRankDisplay(enemy);
+    const visualVerticalOffset = monsterVisualVerticalOffsets[enemy.id] || '0%';
     const statusDisplays = MonsterDisplayPolicy.getStatusDisplays(battle.enemyDots[index]);
     const enemySkillState = getEnemySkillState(index);
     const stunned = Date.now() < enemySkillState.stunnedUntil && Date.now() >= (enemySkillState.visualStunAt || 0);
@@ -3590,7 +3604,7 @@ function renderEnemySquad() {
     const visualSize = getMonsterVisualSize(enemy);
     const visualScaleCorrection = enemy.visualScaleCorrection || monsterVisualScaleCorrections[enemy.id] || 1;
     const hpPercent = Math.max(0, hp / enemy.maxHp * 100);
-    return `<article id="enemy-${index}" class="enemy-unit monster-battle-slot visual-size-${visualSize} ${focusClass} ${rank.className} ${battle.targetIndexes.includes(index) ? 'targeted hit' : ''}" data-visual-size="${visualSize}" style="--unit-art-correction:${visualScaleCorrection}" data-display-slot="${displaySlot}" data-enemy-index="${index}" role="gridcell" aria-label="${enemy.name}，等級 ${monsterLevel}">${stunIndicator}${hunterStatusIndicators}<header class="monster-slot-header"><div class="monster-slot-title"><b>${enemy.name}</b><small>Lv. ${monsterLevel}</small></div>${rankBadge}${affixBadges}</header><div class="monster-image-frame"><img class="monster-slot-image" src="${imagePath}" alt="${enemy.name}" draggable="false">${damageEvents}</div><div class="monster-status-row" aria-label="異常狀態">${statusIcons}</div><div class="hp-track enemy-track monster-slot-hp" role="progressbar" aria-label="${enemy.name}生命" aria-valuemin="0" aria-valuemax="${enemy.maxHp}" aria-valuenow="${Math.max(0, hp)}"><i style="width:${hpPercent}%"></i></div></article>`;
+    return `<article id="enemy-${index}" class="enemy-unit monster-battle-slot visual-size-${visualSize} ${focusClass} ${rank.className} ${battle.targetIndexes.includes(index) ? 'targeted hit' : ''}" data-visual-size="${visualSize}" style="--unit-art-correction:${visualScaleCorrection};--unit-art-offset-y:${visualVerticalOffset}" data-display-slot="${displaySlot}" data-enemy-index="${index}" role="gridcell" aria-label="${enemy.name}，等級 ${monsterLevel}">${stunIndicator}${hunterStatusIndicators}<header class="monster-slot-header"><div class="monster-slot-title"><b>${enemy.name}</b><small>Lv. ${monsterLevel}</small></div>${rankBadge}${affixBadges}</header><div class="monster-image-frame"><img class="monster-slot-image" src="${imagePath}" alt="${enemy.name}" draggable="false">${damageEvents}</div><div class="monster-status-row" aria-label="異常狀態">${statusIcons}</div><div class="hp-track enemy-track monster-slot-hp" role="progressbar" aria-label="${enemy.name}生命" aria-valuemin="0" aria-valuemax="${enemy.maxHp}" aria-valuenow="${Math.max(0, hp)}"><i style="width:${hpPercent}%"></i></div></article>`;
   }).join('');
   const reserveLabel = reserveCount > 0
     ? `<div class="reserve-indicator"><b>其餘 ${reserveCount}</b><span>等待顯示</span></div>`
