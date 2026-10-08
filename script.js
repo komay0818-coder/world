@@ -36,26 +36,23 @@ const raceTotems = { human: '☀', elf: '❈', orc: '⛧', undead: '☾' };
 const jobMarks = { warrior: '⛨', assassin: '◈', hunter: '➶', mage: '✦', priest: '✥' };
 const PARTY_DEBUG = false;
 const battleCharacterArt = {
-  'human:warrior': 'assets/character-portraits/human-warrior.png',
-  'human:assassin': 'assets/character-portraits/human-assassin.png',
-  'human:hunter': 'assets/character-portraits/human-hunter.png',
-  'human:mage': 'assets/character-portraits/human-mage.png',
-  'human:priest': 'assets/character-portraits/human-priest.png',
-  'elf:warrior': 'assets/character-portraits/elf-warrior.png',
-  'elf:assassin': 'assets/character-portraits/elf-assassin.png',
-  'elf:hunter': 'assets/character-portraits/elf-hunter.png',
-  'elf:mage': 'assets/character-portraits/elf-mage.png',
-  'elf:priest': 'assets/character-sprites/elf-priest.png',
-  'orc:warrior': 'assets/character-portraits/orc-warrior.png',
-  'orc:assassin': 'assets/character-portraits/orc-assassin.png',
-  'orc:hunter': 'assets/character-portraits/orc-hunter.png',
-  'orc:mage': 'assets/character-portraits/orc-mage.png',
-  'orc:priest': 'assets/character-sprites/orc-priest.png',
-  'undead:warrior': 'assets/character-portraits/undead-warrior.png',
-  'undead:assassin': 'assets/character-portraits/undead-assassin.png',
-  'undead:hunter': 'assets/character-portraits/undead-hunter.png',
-  'undead:mage': 'assets/character-portraits/undead-mage.png',
-  'undead:priest': 'assets/character-portraits/undead-priest.png'
+  'human:warrior': 'assets/character-avatars/human-warrior.png',
+  'human:assassin': 'assets/character-avatars/human-assassin.png',
+  'human:hunter': 'assets/character-avatars/human-hunter.png',
+  'human:mage': 'assets/character-avatars/human-mage.png',
+  'human:priest': 'assets/character-avatars/human-priest.png',
+  'elf:warrior': 'assets/character-avatars/elf-warrior.png',
+  'elf:assassin': 'assets/character-avatars/elf-assassin.png',
+  'elf:hunter': 'assets/character-avatars/elf-hunter.png',
+  'elf:mage': 'assets/character-avatars/elf-mage.png',
+  'orc:warrior': 'assets/character-avatars/orc-warrior.png',
+  'orc:assassin': 'assets/character-avatars/orc-assassin.png',
+  'orc:hunter': 'assets/character-avatars/orc-hunter.png',
+  'orc:mage': 'assets/character-avatars/orc-mage.png',
+  'undead:warrior': 'assets/character-avatars/undead-warrior.png',
+  'undead:assassin': 'assets/character-avatars/undead-assassin.png',
+  'undead:mage': 'assets/character-avatars/undead-mage.png',
+  'undead:priest': 'assets/character-avatars/undead-priest.png'
 };
 const battleCharacterActionArt = (character) => {
   if (!character?.race || !character?.job || !canCreateRaceJob(character.race, character.job)) return '';

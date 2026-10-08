@@ -11,26 +11,21 @@ const layoutCss = fs.readFileSync(path.join(root, 'styles', 'mmorpg-layout.css')
 assert.match(html, /id="player-battle-stage"/, 'party players render on the battlefield');
 assert.match(html, /id="battle-player-art" class="battle-player-art hidden"/, 'main player has a dedicated portrait node');
 assert.match(html, /styles\/monster-slots\.css\?v=20260922-rank-aura-v1/, 'battlefield loads the current local portrait styles');
-assert.match(html, /script\.js\?v=20261005-chapter-three-formal-opening-v1/, 'battlefield loads the current local combat logic');
+assert.match(html, /script\.js\?v=20261008-character-avatars-v1/, 'battlefield loads the current local combat logic');
 assert.match(script, /return battleCharacterArt\[`\$\{character\.race\}:\$\{character\.job\}`\] \|\| '';/, 'battle uses stable front character artwork');
-assert.match(script, /'orc:warrior': 'assets\/character-portraits\/orc-warrior\.png'/, 'orc warrior uses the supplied portrait');
-assert.match(script, /'orc:hunter': 'assets\/character-portraits\/orc-hunter\.png'/, 'orc hunter uses the supplied portrait');
-assert.match(script, /'orc:assassin': 'assets\/character-portraits\/orc-assassin\.png'/, 'orc rogue uses the supplied portrait');
-assert.match(script, /'orc:mage': 'assets\/character-portraits\/orc-mage\.png'/, 'orc mage uses the supplied portrait');
-assert.match(script, /'undead:warrior': 'assets\/character-portraits\/undead-warrior\.png'/, 'undead warrior uses the supplied portrait');
-assert.match(script, /'undead:hunter': 'assets\/character-portraits\/undead-hunter\.png'/, 'undead hunter uses the supplied portrait');
-assert.match(script, /'undead:assassin': 'assets\/character-portraits\/undead-assassin\.png'/, 'undead rogue uses the supplied portrait');
-assert.match(script, /'undead:mage': 'assets\/character-portraits\/undead-mage\.png'/, 'undead mage uses the supplied portrait');
-assert.match(script, /'undead:priest': 'assets\/character-portraits\/undead-priest\.png'/, 'undead priest uses the supplied portrait');
-assert.match(script, /'elf:warrior': 'assets\/character-portraits\/elf-warrior\.png'/, 'night elf warrior uses the supplied portrait');
-assert.match(script, /'elf:hunter': 'assets\/character-portraits\/elf-hunter\.png'/, 'night elf hunter uses the supplied portrait');
-assert.match(script, /'elf:assassin': 'assets\/character-portraits\/elf-assassin\.png'/, 'night elf rogue uses the supplied portrait');
-assert.match(script, /'elf:mage': 'assets\/character-portraits\/elf-mage\.png'/, 'night elf mage uses the supplied portrait');
-assert.match(script, /'human:warrior': 'assets\/character-portraits\/human-warrior\.png'/, 'human warrior uses the supplied portrait');
-assert.match(script, /'human:hunter': 'assets\/character-portraits\/human-hunter\.png'/, 'human hunter uses the supplied portrait');
-assert.match(script, /'human:assassin': 'assets\/character-portraits\/human-assassin\.png'/, 'human rogue uses the supplied portrait');
-assert.match(script, /'human:mage': 'assets\/character-portraits\/human-mage\.png'/, 'human mage uses the supplied portrait');
-assert.match(script, /'human:priest': 'assets\/character-portraits\/human-priest\.png'/, 'human priest uses the supplied portrait');
+const selectableAvatarKeys = [
+  'human:warrior', 'human:assassin', 'human:hunter', 'human:mage', 'human:priest',
+  'elf:warrior', 'elf:assassin', 'elf:hunter', 'elf:mage',
+  'orc:warrior', 'orc:assassin', 'orc:hunter', 'orc:mage',
+  'undead:warrior', 'undead:assassin', 'undead:mage', 'undead:priest'
+];
+selectableAvatarKeys.forEach((key) => {
+  const [race, job] = key.split(':');
+  const pattern = new RegExp(`'${key}': 'assets/character-avatars/${race}-${job}\\.png'`);
+  assert.match(script, pattern, `${key} uses its approved circular avatar`);
+  assert.ok(fs.existsSync(path.join(root, 'assets', 'character-avatars', `${race}-${job}.png`)), `${key} avatar exists`);
+});
+assert.doesNotMatch(script, /'(?:elf|orc):priest': 'assets\/character-avatars|undead:hunter': 'assets\/character-avatars/, 'unavailable race and job pairs have no avatar mapping');
 assert.doesNotMatch(script, /assets\/character-actions/, 'legacy idle and attack action sheets are removed');
 assert.doesNotMatch(script, /character-attack-effect|--attack-travel-x|--basic-lunge-x/, 'shared attack effects are removed');
 assert.doesNotMatch(layoutCss, /character-attack-effect|characterAttackProjectile|attack-effect-/, 'legacy shared attack effect styles are removed');
