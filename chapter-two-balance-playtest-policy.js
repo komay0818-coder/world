@@ -85,6 +85,7 @@
   }
 
   function getSlotKey(locationLike) {
+    if (getLoadout(locationLike) === 'rare-runes-v1') return `${CHAPTER_THREE_36_SLOT_KEY}-rare-runes-v1`;
     return isChapterOne15Active(locationLike) ? CHAPTER_ONE_15_SLOT_KEY
       : isChapterOne14Active(locationLike) ? CHAPTER_ONE_14_SLOT_KEY
       : isChapterOne13Active(locationLike) ? CHAPTER_ONE_13_SLOT_KEY
@@ -101,6 +102,7 @@
   }
 
   function getProgressKey(locationLike) {
+    if (getLoadout(locationLike) === 'rare-runes-v1') return `${CHAPTER_THREE_36_PROGRESS_KEY}-rare-runes-v1`;
     return isChapterOne15Active(locationLike) ? CHAPTER_ONE_15_PROGRESS_KEY
       : isChapterOne14Active(locationLike) ? CHAPTER_ONE_14_PROGRESS_KEY
       : isChapterOne13Active(locationLike) ? CHAPTER_ONE_13_PROGRESS_KEY
@@ -157,6 +159,8 @@
 
   function getLoadout(locationLike) {
     if (!isActive(locationLike)) return 'transition';
+    const selectedLocation = locationLike || window.location;
+    if (getPlaytestId(locationLike) === CHAPTER_THREE_36_PLAYTEST_ID && new URLSearchParams(selectedLocation.search || '').get('loadout') === 'rare-runes-v1') return 'rare-runes-v1';
     if (isChapterThreeActive(locationLike)) return 'full';
     const location = locationLike || window.location;
     return new URLSearchParams(location.search || '').get('loadout') === 'full' ? 'full' : 'transition';
@@ -201,7 +205,8 @@
   }
 
   function makeEquipment(job, dependencies) {
-    const fullLoadout = getLoadout(dependencies.location) === 'full';
+    const selectedLoadout = getLoadout(dependencies.location);
+    const fullLoadout = ['full', 'rare-runes-v1'].includes(selectedLoadout);
     const ids = job === 'warrior'
       ? { weapon: 'forest-guard-longsword', offhand: 'black-iron-guard-round-shield', head: 'blackstone-corrupted-helm', armor: 'blackstone-corrupted-plate', gloves: fullLoadout ? 'blackstone-corrupted-gauntlets' : 'starter-recruit-iron-gauntlets', pants: fullLoadout ? 'blackstone-corrupted-legguards' : 'starter-recruit-iron-legguards', boots: fullLoadout ? 'blackstone-corrupted-warboots' : 'starter-recruit-iron-boots' }
       : job === 'hunter'
@@ -234,6 +239,22 @@
           random: () => .5
         });
       });
+    }
+    if (selectedLoadout === 'rare-runes-v1') {
+      const policy = dependencies.EquipmentAffixPolicy || (typeof module === 'object' && module.exports ? require('./equipment-affix-policy.js') : globalThis.EquipmentAffixPolicy);
+      if (!dependencies.CraftingPolicy || !policy) throw new Error('Rare rune playtest requires formal crafting and affix policies');
+      let seed = { warrior: 304, hunter: 305, priest: 306 }[job];
+      const random = () => ((seed = (Math.imul(seed, 1664525) + 1013904223) >>> 0) / 4294967296);
+      Object.entries(ids).forEach(([slot, id]) => {
+        slots[slot] = policy.createEquipmentInstance(findTemplate(id, dependencies), { quality: 'rare', chapter: 2, jobId: job, uniqueId: 'rare-runes-v1-' + job, random });
+      });
+      Object.entries({ shoulders: 'chapter3-redrock-refined-shoulders', wrist: 'chapter3-wasteland-refined-wrist', cloak: 'chapter3-skullcrusher-warpattern-cloak' }).forEach(([slot, recipeId]) => {
+        slots[slot] = dependencies.CraftingPolicy.generateCraftedEquipment(recipeId, { instanceId: 'rare-runes-v1-' + job + '-' + slot, random });
+      });
+      const weaponRunes = job === 'hunter' ? ['rune-strength', 'rune-fatal'] : job === 'priest' ? ['rune-psionic', 'rune-life'] : ['rune-strength', 'rune-life'];
+      slots.weapon.sockets = 2; slots.weapon.socketedRunes = weaponRunes;
+      slots.armor.sockets = 1; slots.armor.socketedRunes = ['rune-life'];
+      slots.head.sockets = 1; slots.head.socketedRunes = ['rune-guard'];
     }
     return slots;
   }
