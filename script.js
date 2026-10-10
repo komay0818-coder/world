@@ -392,6 +392,38 @@ function getNextAdventureMap(currentMap) {
   return null;
 }
 
+function renderChapterThreeSuppression(progress, currentMap) {
+  const panel = document.querySelector('#chapter-three-suppression');
+  if (!panel) return;
+  panel.hidden = !ChapterThreeFacilityPolicy.supported(currentMap.id);
+  if (panel.hidden) return;
+  const effects = ChapterThreeFacilityPolicy.effects(progress, currentMap.id);
+  const counts = ChapterThreeFacilityPolicy.counts(progress, currentMap.id);
+  const required = ChapterThreeFacilityPolicy.CONFIG[currentMap.id].required;
+  const region = document.querySelector('#suppression-region-name');
+  const rows = document.querySelector('#suppression-rows');
+  const unresolved = document.querySelector('#suppression-unresolved-count');
+  if (region) region.textContent = currentMap.name + '・僅在線戰鬥';
+  if (!rows) return;
+  const format = value => Number(value.toFixed(2));
+  const labels = {
+    'supply-station': '每秒扣血 ' + format(effects.drain) + ' HP',
+    armory: '傷害降低 ' + format((1 - effects.damage) * 100) + '%',
+    'shaman-altar': '防禦降低 ' + format((1 - effects.defense) * 100) + '%'
+  };
+  if (unresolved) {
+    const remaining = ChapterThreeFacilityPolicy.TYPES.filter(id => (counts[id] || 0) < required).length;
+    unresolved.textContent = remaining > 0 ? `${remaining} 項未解除` : '全部解除';
+    unresolved.classList.toggle('is-cleared', remaining === 0);
+  }
+  rows.innerHTML = ChapterThreeFacilityPolicy.TYPES.map(id => {
+    const count = counts[id] || 0;
+    const completed = count >= required;
+    const name = ChapterThreeFacilityPolicy.NAMES[id];
+    return '<div class="suppression-row" data-facility="' + id + '"><div class="suppression-row-head"><b>' + name + '</b><span>' + count + ' / ' + required + '</span></div><progress max="' + required + '" value="' + Math.min(count, required) + '" aria-label="' + name + '解除進度"></progress><small class="' + (completed ? 'is-cleared' : '') + '">' + (completed ? '已解除' : labels[id]) + '</small></div>';
+  }).join('');
+}
+
 function renderBattleAdventureInfo(progress = getProgress()) {
   const currentMap = getActiveMap(progress);
   const requirement = ChapterOneProgressionPolicy.REQUIREMENTS[currentMap.id];
@@ -416,6 +448,7 @@ function renderBattleAdventureInfo(progress = getProgress()) {
     track.classList.toggle('is-open-ended', target <= 0);
   }
   if (next) next.textContent = nextMap?.name || '本章最終區域';
+  renderChapterThreeSuppression(progress, currentMap);
 
   const lootList = document.querySelector('#round-loot-list');
   if (!lootList) return;
@@ -1491,6 +1524,7 @@ function getProgress(activeCharacterOverride = null) {
   ChapterTwoProgressionPolicy.normalize(normalizedProgress);
   ChapterThreeMapPolicy.normalizeChapterUnlock(normalizedProgress);
   ChapterThreeProgressionPolicy.normalize(normalizedProgress);
+  ChapterThreeFacilityPolicy.normalize(normalizedProgress);
   const isBlackForestEntrancePlaytest = Boolean(getBlackForestEntrancePlaytestConfig().partySize);
   if (isBlackForestEntrancePlaytest) {
     normalizedProgress.unlockedChapter = Math.max(2, Number(normalizedProgress.unlockedChapter) || 1);
@@ -1628,6 +1662,7 @@ function saveProgress(progress) {
   progress.village = VillagePolicy.normalizeVillageData(progress.village);
   ChapterTwoProgressionPolicy.normalize(progress);
   ChapterThreeProgressionPolicy.normalize(progress);
+  ChapterThreeFacilityPolicy.normalize(progress);
   const playtestProgressKey = getLocalPlaytestProgressKey();
   if (playtestProgressKey) {
     sessionStorage.setItem(playtestProgressKey, JSON.stringify(progress));
@@ -2474,6 +2509,8 @@ function createDungeonWaveTypes(wave, mapId = battle.dungeonId || getActiveMap(g
 }
 
 function getMonsterDefinitionForMap(type, mapId = battle.dungeonId || getActiveMap(getProgress()).id, level = null) {
+  const facility = ChapterThreeFacilityPolicy.definition(type, mapId);
+  if (facility) return facility;
   if (mapId === 'black-forest-entrance') return BlackForestEntrancePolicy.getCombatMonster(type, level) || monsterTypes.plainsGoblinYoung;
   if (mapId === 'black-forest-trail') return BlackForestTrailPolicy.getCombatMonster(type, level) || monsterTypes.plainsGoblinYoung;
   if (mapId === 'spider-nest') return SpiderNestPolicy.getCombatMonster(type, level) || monsterTypes.plainsGoblinYoung;
@@ -2594,6 +2631,7 @@ function hasAliveBoss(excludeIndex = -1) {
 
 function getEnemyDefinition(index) {
   const enemy = getMonsterDefinitionForMap(battle.enemyTypes[index], battle.dungeonId || getActiveMap(getProgress()).id, battle.enemyLevels?.[index]);
+  if (enemy.isFacility) return { ...enemy, combatIndex: index };
   const summonProfile = battle.enemySummonProfiles?.[index];
   const summonedEnemy = !summonProfile ? enemy : { ...enemy, name: summonProfile.name || enemy.name, maxHp: Math.max(1, Math.round(enemy.maxHp * summonProfile.hpRatio)), attack: Math.max(1, Math.round(enemy.attack * summonProfile.attackRatio)) };
   return { ...EliteAffixPolicy.applyAffixes(summonedEnemy, battle.enemyAffixes?.[index] || []), combatIndex: index };
@@ -3613,8 +3651,46 @@ function confirmSelectedEquipmentSale() {
   renderInventory('inventory');
 }
 
+function getMonsterStatusDisplays(index, now = Date.now()) {
+  const skillState = getEnemySkillState(index);
+  const dots = (battle.enemyDots[index] || []).filter((dot) => dot.remaining > 0);
+  const displays = [];
+  const addStatus = (status) => {
+    if (!status || displays.some((entry) => entry.key === status.key)) return;
+    displays.push(status);
+  };
+  const remainingText = (expiresAt, fallbackSeconds = 0) => {
+    const seconds = expiresAt > now ? Math.max(.1, (expiresAt - now) / 1000) : fallbackSeconds;
+    return seconds > 0 ? `${seconds.toFixed(seconds < 10 ? 1 : 0)} 秒` : '即將結束';
+  };
+  dots.forEach((dot) => {
+    const definition = {
+      burn: { icon: '🔥', name: '燃燒', effect: '持續受到火焰傷害' },
+      poison: { icon: '☠', name: '中毒', effect: '持續受到毒素傷害' },
+      bleed: { icon: '🩸', name: '流血', effect: '持續受到流血傷害' },
+      'earthsplit-wound': { icon: '🩸', name: '裂地創傷', effect: '持續受到創傷傷害' }
+    }[dot.type] || (String(dot.type).startsWith('pet-bleed:') ? { icon: '🩸', name: '流血', effect: '持續受到寵物造成的流血傷害' } : null);
+    if (!definition) return;
+    const fallbackSeconds = dot.tickIntervalMs ? (dot.remaining * dot.tickIntervalMs) / 1000 : dot.remaining;
+    addStatus({ key: String(dot.type).startsWith('pet-bleed:') ? 'bleed' : dot.type, ...definition, remaining: remainingText(dot.expiresAt || 0, fallbackSeconds) });
+  });
+  [
+    ['stun', '★', '暈眩', '無法行動', skillState.stunnedUntil],
+    ['slow', '❄', '緩速', '行動速度降低', skillState.slowedUntil],
+    ['freeze', '🧊', '冰凍', '暫時無法行動', skillState.frozenUntil],
+    ['mark', '◎', '獵殺標記', '受到的傷害提高', skillState.markedUntil],
+    ['magic-vulnerability', '✦', '魔法易傷', '受到的魔法傷害提高', skillState.magicVulnerabilityUntil],
+    ['attack-down', '⚔', '攻擊力下降', '造成的傷害降低', skillState.attackDownUntil],
+    ['paralysis', '⚡', '麻痺', '行動受到麻痺影響', skillState.paralyzedUntil]
+  ].forEach(([key, icon, name, effect, expiresAt]) => {
+    if (expiresAt > now) addStatus({ key, icon, name, effect, remaining: remainingText(expiresAt) });
+  });
+  return displays;
+}
+
 function renderEnemySquad() {
   const squad = document.querySelector('#enemy-squad');
+  const now = Date.now();
   const visibleIndexes = aliveEnemyIndexesByAge().slice(0, 4);
   const focusIndex = visibleIndexes[0] ?? -1;
   const reserveCount = Math.max(0, battle.enemyHps.filter((hp) => hp > 0).length - visibleIndexes.length);
@@ -3629,30 +3705,34 @@ function renderEnemySquad() {
     const damageEvents = (battle.enemyDamages[index] || []).map((event, eventIndex) => `<b class="enemy-damage ${event.type || 'normal'}" style="--damage-offset:${eventIndex * 18}px">-${event.damage}</b>`).join('');
     const rank = MonsterDisplayPolicy.getRankDisplay(enemy);
     const visualVerticalOffset = monsterVisualVerticalOffsets[enemy.id] || '0%';
-    const statusDisplays = MonsterDisplayPolicy.getStatusDisplays(battle.enemyDots[index]);
+    const statusDisplays = getMonsterStatusDisplays(index, now);
     const enemySkillState = getEnemySkillState(index);
-    const stunned = Date.now() < enemySkillState.stunnedUntil && Date.now() >= (enemySkillState.visualStunAt || 0);
+    const stunned = now < enemySkillState.stunnedUntil && now >= (enemySkillState.visualStunAt || 0);
     const stunIndicator = stunned
       ? `<span class="enemy-stun-indicator" role="img" aria-label="暈眩中" style="--stun-remaining:${Math.max(0, enemySkillState.stunnedUntil - Date.now())}ms"><i>★</i><i>★</i><i>★</i></span>`
       : '';
-    const slowed = Date.now() < enemySkillState.slowedUntil && Date.now() >= (enemySkillState.visualSlowAt || 0);
-    const marked = Date.now() < enemySkillState.markedUntil && Date.now() >= (enemySkillState.visualMarkAt || 0);
-    const bleeding = (battle.enemyDots[index] || []).some((dot) => dot.type === 'bleed') && Date.now() >= (enemySkillState.visualBleedAt || 0);
-    const burning = (battle.enemyDots[index] || []).some((dot) => dot.type === 'burn') && Date.now() >= (enemySkillState.visualBurnAt || 0);
-    const paralyzed = Date.now() < (enemySkillState.paralyzedUntil || 0) && Date.now() >= (enemySkillState.visualParalyzedAt || 0);
-    const attackDown = Date.now() < enemySkillState.attackDownUntil && Date.now() >= (enemySkillState.visualAttackDownAt || 0);
+    const slowed = now < enemySkillState.slowedUntil && now >= (enemySkillState.visualSlowAt || 0);
+    const marked = now < enemySkillState.markedUntil && now >= (enemySkillState.visualMarkAt || 0);
+    const bleeding = (battle.enemyDots[index] || []).some((dot) => dot.type === 'bleed') && now >= (enemySkillState.visualBleedAt || 0);
+    const burning = (battle.enemyDots[index] || []).some((dot) => dot.type === 'burn') && now >= (enemySkillState.visualBurnAt || 0);
+    const paralyzed = now < (enemySkillState.paralyzedUntil || 0) && now >= (enemySkillState.visualParalyzedAt || 0);
+    const attackDown = now < enemySkillState.attackDownUntil && now >= (enemySkillState.visualAttackDownAt || 0);
     const hunterStatusIndicators = `${slowed ? '<span class="enemy-slow-indicator" role="img" aria-label="緩速中">❄</span><span class="enemy-slow-airflow"></span>' : ''}${marked ? '<span class="enemy-hunter-mark" role="img" aria-label="獵殺標記">◎</span>' : ''}${bleeding ? '<span class="enemy-bleed-indicator" role="img" aria-label="流血中">🩸</span><span class="enemy-bleed-wound"></span>' : ''}${burning ? '<span class="enemy-burn-flames" role="img" aria-label="燃燒中"><i></i><i></i><i></i></span>' : ''}${paralyzed ? '<span class="enemy-paralysis-indicator" role="img" aria-label="麻痺中">⚡</span><span class="enemy-paralysis-arcs"><i></i><i></i></span>' : ''}${attackDown ? '<span class="enemy-attack-down-indicator" role="img" aria-label="攻擊力下降">⚔<i>↓</i></span>' : ''}`;
-    const statusIcons = statusDisplays.length
-      ? statusDisplays.map((status) => `<span class="monster-status-icon" title="${status.label}" aria-label="${status.label}">${status.icon}</span>`).join('')
-      : '<span class="monster-status-empty">無異常狀態</span>';
+    const activeStatusIcons = statusDisplays.map((status) => {
+      const description = `${status.name}：${status.effect}｜剩餘 ${status.remaining}`;
+      return `<span class="monster-status-icon" title="${description}" aria-label="${description}" tabindex="0">${status.icon}</span>`;
+    }).join('');
+    const affixStatusIcons = (enemy.eliteAffixes || []).map((affix) => {
+      const description = `${affix.name}：${affix.description}`;
+      return `<span class="monster-status-icon monster-affix-badge" title="${description}" aria-label="${description}" tabindex="0">◆</span>`;
+    }).join('');
+    const statusIcons = activeStatusIcons + affixStatusIcons;
     const focusClass = index === focusIndex ? 'focus-target' : 'support-target';
-    const rankBadge = rank.label ? `<span class="monster-rank-badge">${rank.icon} ${rank.label}</span>` : '';
-    const affixBadges = (enemy.eliteAffixes || []).map((affix) => `<span class="monster-affix-badge" title="【${affix.name}】${affix.description}">【${affix.name}】</span>`).join('');
     const imagePath = enemy.image || MonsterDisplayPolicy.MONSTER_IMAGE_BY_TYPE[enemy.id] || MonsterDisplayPolicy.MONSTER_IMAGE_BY_TYPE.plainsGoblinYoung;
     const visualSize = getMonsterVisualSize(enemy);
     const visualScaleCorrection = enemy.visualScaleCorrection || monsterVisualScaleCorrections[enemy.id] || 1;
     const hpPercent = Math.max(0, hp / enemy.maxHp * 100);
-    return `<article id="enemy-${index}" class="enemy-unit monster-battle-slot visual-size-${visualSize} ${focusClass} ${rank.className} ${battle.targetIndexes.includes(index) ? 'targeted hit' : ''}" data-visual-size="${visualSize}" style="--unit-art-correction:${visualScaleCorrection};--unit-art-offset-y:${visualVerticalOffset}" data-display-slot="${displaySlot}" data-enemy-index="${index}" role="gridcell" aria-label="${enemy.name}，等級 ${monsterLevel}">${stunIndicator}${hunterStatusIndicators}<header class="monster-slot-header"><div class="monster-slot-title"><b>${enemy.name}</b><small>Lv. ${monsterLevel}</small></div>${rankBadge}${affixBadges}</header><div class="monster-image-frame"><img class="monster-slot-image" src="${imagePath}" alt="${enemy.name}" draggable="false">${damageEvents}</div><div class="monster-status-row" aria-label="異常狀態">${statusIcons}</div><div class="hp-track enemy-track monster-slot-hp" role="progressbar" aria-label="${enemy.name}生命" aria-valuemin="0" aria-valuemax="${enemy.maxHp}" aria-valuenow="${Math.max(0, hp)}"><i style="width:${hpPercent}%"></i></div></article>`;
+    return `<article id="enemy-${index}" class="enemy-unit monster-battle-slot visual-size-${visualSize} ${focusClass} ${rank.className} ${battle.targetIndexes.includes(index) ? 'targeted hit' : ''}" data-visual-size="${visualSize}" style="--unit-art-correction:${visualScaleCorrection};--unit-art-offset-y:${visualVerticalOffset}" data-display-slot="${displaySlot}" data-enemy-index="${index}" role="gridcell" aria-label="${enemy.name}">${stunIndicator}${hunterStatusIndicators}<div class="monster-image-frame"><img class="monster-slot-image" src="${imagePath}" alt="${enemy.name}" draggable="false">${damageEvents}</div><div class="hp-track enemy-track monster-slot-hp" role="progressbar" aria-label="${enemy.name}生命" aria-valuemin="0" aria-valuemax="${enemy.maxHp}" aria-valuenow="${Math.max(0, hp)}"><i style="width:${hpPercent}%"></i></div><div class="monster-slot-name">${enemy.name}</div><div class="monster-status-row" aria-label="增益與減益狀態">${statusIcons}</div></article>`;
   }).join('');
   const reserveLabel = reserveCount > 0
     ? `<div class="reserve-indicator"><b>其餘 ${reserveCount}</b><span>等待顯示</span></div>`
@@ -5097,6 +5177,7 @@ function rewardVictory(index) {
   const currentMap = getActiveMap(progress);
   recordLateChapterEnemyDeath(index);
   renderStrongholdObjective(currentMap);
+  if (enemy.isFacility) { settleFacilityDestruction(index, progress, enemy, currentMap); return; }
   if (currentMap.id === 'blackstone-stronghold' && battle.blackstoneStrongholdState) {
     const previousActive = battle.blackstoneStrongholdState.outpostActive;
     const killCredit = getBlackstoneStrongholdPlaytestConfig().accelerated
@@ -5322,6 +5403,10 @@ function processEnemyRespawns() {
     battle.enemyTypes[index] = currentMapId === 'plains-entrance'
       ? randomEnemyId(playerLevel)
       : bossAllowed && specialRoll < bossSpawnChance ? randomBossId(playerLevel) : specialRoll < bossSpawnChance + eliteSpawnChance ? randomEliteId(playerLevel) : randomEnemyId(playerLevel);
+      battle.facilityWave = battle.facilityWave || ChapterThreeFacilityPolicy.wave();
+      battle.enemyTypes[index] = ChapterThreeFacilityPolicy.replacement(battle.enemyTypes[index], getProgress(), currentMapId, battle.facilityWave,
+        battle.enemyTypes.some((type, candidate) => candidate !== index && battle.enemyHps[candidate] > 0 && ChapterThreeFacilityPolicy.facilityId(type)),
+        type => getMonsterDefinitionForMap(type, currentMapId));
       battle.enemyRespawns[index] = null;
       if (!battle.enemyLevels) battle.enemyLevels = battle.enemyTypes.map(() => null);
       battle.enemyLevels[index] = createEnemyLevels([battle.enemyTypes[index]], currentMapId)[0];
@@ -5472,6 +5557,48 @@ function getPlayerAttackProfile(character, skill = null) {
   };
 }
 
+function getOnlineFacilityEffects() {
+  if (!fighting) return { drain: 0, damage: 1, defense: 1 };
+  const progress = getProgress();
+  return ChapterThreeFacilityPolicy.effects(progress, battle.dungeonId || getActiveMap(progress).id);
+}
+
+function aliveMonsterIndexesByAge() {
+  return aliveEnemyIndexesByAge().filter(index => !getEnemyDefinition(index).isFacility);
+}
+
+function settleFacilityDestruction(index, progress, enemy, currentMap) {
+  const reward = ChapterThreeFacilityPolicy.destroy(progress, currentMap.id, enemy.facilityId);
+  addRoundLoot('gold', '金幣', reward.gold, '🪙');
+  for (const item of [...reward.recipeDrops, ...reward.fragmentDrops]) {
+    addRoundLoot(item.id, item.name, item.quantity, item.icon);
+    logBattle('🎁 建築掉落：' + item.name + ' ×' + item.quantity, 'loot');
+  }
+  saveProgress(progress);
+  const count = ChapterThreeFacilityPolicy.counts(progress, currentMap.id)[enemy.facilityId];
+  const required = ChapterThreeFacilityPolicy.CONFIG[currentMap.id].required;
+  logBattle('◆ 摧毀【' + enemy.name + '】，解除進度 ' + Math.min(count, required) + '/' + required + '，獲得 ' + reward.gold + ' 金幣。', 'progress');
+  renderBattleAdventureInfo(progress);
+}
+
+function processOnlineFacilityDrain(now) {
+  if (!fighting) return;
+  const previous = battle.lastFacilityDrainAt ?? now;
+  battle.lastFacilityDrainAt = now;
+  const mapId = battle.dungeonId || getActiveMap(getProgress()).id;
+  if (!ChapterThreeFacilityPolicy.supported(mapId)) return;
+  battle.enemyHps.forEach((hp, index) => {
+    if (hp <= 0 && getEnemyDefinition(index).isFacility) rewardVictory(index);
+  });
+  const damage = getOnlineFacilityEffects().drain * Math.max(0, now - previous) / 1000;
+  if (!damage) return;
+  const members = (battle.partyMembers || []).filter(member => member.alive).sort((a,b) => Number(a.isMain) - Number(b.isMain));
+  for (const member of members) {
+    member.currentHp = Math.max(0, member.currentHp - damage);
+    defeatPartyMember(member, now);
+  }
+}
+
 function getLateChapterUnits(now = Date.now()) {
   const mapId = battle.dungeonId || getActiveMap(getProgress()).id;
   if (!ChapterThreeLateCombatPolicy.isSupported(mapId)) return [];
@@ -5518,7 +5645,7 @@ function processLateChapterCombat(now = Date.now()) {
     if (!burn || burn.ticks <= 0 || now < burn.nextTickAt) continue;
     const ticks = Math.min(burn.ticks, Math.floor((now - burn.nextTickAt) / burn.tickMs) + 1);
     burn.ticks -= ticks; burn.nextTickAt += ticks * burn.tickMs;
-    const damage = MonsterDefense.resolvePlayerDamage({ baseDamage: burn.damage * ticks, defense: member.stats.defense, damageReduction: member.stats.damageReduction }).finalDamage;
+    const damage = MonsterDefense.resolvePlayerDamage({ baseDamage: burn.damage * ticks, defense: member.stats.defense * getOnlineFacilityEffects().defense, damageReduction: member.stats.damageReduction }).finalDamage;
     const absorbed = Math.min(member.shield || 0, damage);
     member.shield = Math.max(0, (member.shield || 0) - absorbed);
     member.currentHp = Math.max(getPlaytestHpFloor(), member.currentHp - (damage - absorbed));
@@ -5658,7 +5785,7 @@ function applyDamageToMonster(index, baseDamage, profile, options = {}) {
   const lateModifiers = lateUnit ? ChapterThreeLateCombatPolicy.modifiers(enemy.mapId, lateUnit, lateUnits, now) : { defense: 1, damageReduction: 0, dotDamage: 1 };
   const latePlayerMultiplier = lateUnit ? ChapterThreeLateCombatPolicy.playerAttackMultiplier(enemy.mapId, attacker, lateUnits, now) : 1;
   const lateCriticalMultiplier = lateUnit && enemy.id === 'skullcrusher-heavy-guard' ? SkullcrusherWarCampPolicy.getHeavyGuardCriticalDamageMultiplier(Boolean(options.critical)) : 1;
-  const adjustedBaseDamage = latePlayerMultiplier * lateCriticalMultiplier * (profile.damageType === 'periodic' ? lateModifiers.dotDamage : 1) * magicAdjustedDamage * (1 + warriorRuntime.attack) * (1 + (attackerStats.damageBonus || 0) + warriorAdvancement.damage + warriorRuntime.damage) * rankMultiplier * attackKindMultiplier * conditionalDamageMultiplier * craftedEpicMultiplier * specialEquipmentMultiplier * deathMarkMultiplier * markMultiplier * vulnerabilityMultiplier * controlledMultiplier * statusElementMultiplier * frostResonanceMultiplier * lightningResonanceMultiplier * shockedVulnerabilityMultiplier;
+  const adjustedBaseDamage = getOnlineFacilityEffects().damage * latePlayerMultiplier * lateCriticalMultiplier * (profile.damageType === 'periodic' ? lateModifiers.dotDamage : 1) * magicAdjustedDamage * (1 + warriorRuntime.attack) * (1 + (attackerStats.damageBonus || 0) + warriorAdvancement.damage + warriorRuntime.damage) * rankMultiplier * attackKindMultiplier * conditionalDamageMultiplier * craftedEpicMultiplier * specialEquipmentMultiplier * deathMarkMultiplier * markMultiplier * vulnerabilityMultiplier * controlledMultiplier * statusElementMultiplier * frostResonanceMultiplier * lightningResonanceMultiplier * shockedVulnerabilityMultiplier;
   if (enemy.mapId) {
     const hitChance = ChapterOneLevelPolicy.getPlayerHitChance(progress.level, enemy.level, attackerStats.accuracy, 0);
     if (Math.random() >= hitChance) {
@@ -5673,10 +5800,10 @@ function applyDamageToMonster(index, baseDamage, profile, options = {}) {
   const depthsMultipliers = BlackForestDepthsPolicy.getCombatMultipliers(enemy.id, battle.enemyHps[index], enemy.maxHp, getBlackForestDepthsCombatContext());
   const redrockMultipliers = RedrockWastesPolicy.getCombatMultipliers(enemy.id,
     enemy.mapId === 'redrock-wastes-entrance' ? getRedrockEnemyState(index, battle.enemyHps[index], enemy.maxHp) : null);
-  const bloodwarState = enemy.mapId === 'bloodwar-wastes' ? getBloodwarEnemyState(index, battle.enemyHps[index], enemy.maxHp, now) : null;
+  const bloodwarState = !enemy.isFacility && enemy.mapId === 'bloodwar-wastes' ? getBloodwarEnemyState(index, battle.enemyHps[index], enemy.maxHp, now) : null;
   const livingCenturions = enemy.mapId === 'bloodwar-wastes'
     ? battle.enemyTypes.filter((type, candidate) => type === 'skullcrusher-centurion' && battle.enemyHps[candidate] > 0).length : 0;
-  const bloodwarDefenseMultiplier = BloodwarWastesPolicy.getCenturionAuraDefenseMultiplier(livingCenturions, enemy.id === 'skullcrusher-centurion');
+  const bloodwarDefenseMultiplier = enemy.isFacility ? 1 : BloodwarWastesPolicy.getCenturionAuraDefenseMultiplier(livingCenturions, enemy.id === 'skullcrusher-centurion');
   const armorIgnore = ArmorPenetrationPolicy.getTotalArmorIgnore({
     skillArmorIgnore: options.armorIgnore,
     equipmentArmorPenetration: attackerStats.armorPenetrationPercent + warriorRuntime.armorPenetration,
@@ -5712,7 +5839,7 @@ function applyDamageToMonster(index, baseDamage, profile, options = {}) {
   if (result.parried && enemy.id === 'wanderingBlackKnight' && attacker?.alive) {
     const counterStats = getCharacterStats(attacker.level, attacker.progress, attacker.character);
     const counterRaw = Math.max(1, getMonsterAttackPower(enemy, progress, battle.enemyHps[index]) * PlainsDepthsPolicy.COUNTER_DAMAGE_MULTIPLIER);
-    const counterDamage = MonsterDefense.resolvePlayerDamage({ baseDamage: counterRaw, defense: counterStats.defense, damageReduction: counterStats.damageReduction }).finalDamage;
+    const counterDamage = MonsterDefense.resolvePlayerDamage({ baseDamage: counterRaw, defense: counterStats.defense * getOnlineFacilityEffects().defense, damageReduction: counterStats.damageReduction }).finalDamage;
     const absorbed = Math.min(attacker.shield || 0, counterDamage);
     attacker.shield = Math.max(0, (attacker.shield || 0) - absorbed);
     const actualCounterDamage = counterDamage - absorbed;
@@ -5724,7 +5851,7 @@ function applyDamageToMonster(index, baseDamage, profile, options = {}) {
   if (result.parried && captainShieldActive && attacker?.alive) {
     const counterStats = getCharacterStats(attacker.level, attacker.progress, attacker.character);
     const counterRaw = Math.max(1, getMonsterAttackPower(enemy, progress, battle.enemyHps[index]) * BlackForestTrailPolicy.CAPTAIN.counterDamageMultiplier);
-    const counterDamage = MonsterDefense.resolvePlayerDamage({ baseDamage: counterRaw, defense: counterStats.defense, damageReduction: counterStats.damageReduction }).finalDamage;
+    const counterDamage = MonsterDefense.resolvePlayerDamage({ baseDamage: counterRaw, defense: counterStats.defense * getOnlineFacilityEffects().defense, damageReduction: counterStats.damageReduction }).finalDamage;
     const absorbed = Math.min(attacker.shield || 0, counterDamage);
     attacker.shield = Math.max(0, (attacker.shield || 0) - absorbed);
     const actualCounterDamage = counterDamage - absorbed;
@@ -5752,7 +5879,7 @@ function applyDamageToMonster(index, baseDamage, profile, options = {}) {
     ? MageAdvancementPolicy.consumeArcaneMark(skillState, attacker, options.sourceSkill || options.attackKind || 'other', now)
     : null;
   const wasAlive = battle.enemyHps[index] > 0;
-  if (ChapterThreeLateCombatPolicy.isSupported(enemy.mapId)) {
+  if (!enemy.isFacility && ChapterThreeLateCombatPolicy.isSupported(enemy.mapId)) {
     const units = getLateChapterUnits(now);
     const unit = units[index];
     result.finalDamage = ChapterThreeLateCombatPolicy.absorb(enemy.mapId, unit, result.finalDamage, now);
@@ -5762,14 +5889,14 @@ function applyDamageToMonster(index, baseDamage, profile, options = {}) {
   if (enemy.mapId === 'brokenrock-canyon') getBrokenrockEnemyState(index, battle.enemyHps[index], enemy.maxHp);
   if (enemy.mapId === 'bloodwar-wastes') getBloodwarEnemyState(index, battle.enemyHps[index], enemy.maxHp);
   const markOwner = (battle.partyMembers || []).find((member) => member.id === skillState.deathMarkOwner);
-  const deathMarkExecuted = battle.enemyHps[index] > 0
+  const deathMarkExecuted = !enemy.isFacility && battle.enemyHps[index] > 0
     && markOwner === attacker
     && RogueAdvancementPolicy.shouldExecuteMarkedNormal(markOwner, skillState, battle.enemyHps[index] / enemy.maxHp, enemy, now);
   if (deathMarkExecuted) {
     battle.enemyHps[index] = 0;
     CombatCorePolicy.recordEvent(markOwner, 'assassinationEvents', { atMs: now, action: 'death-mark-execute', targetIndex: index, hpRatio: Math.max(0, battle.enemyHps[index] / enemy.maxHp) });
   }
-  if (wasAlive && battle.enemyHps[index] <= 0 && attacker?.alive) {
+  if (!enemy.isFacility && wasAlive && battle.enemyHps[index] <= 0 && attacker?.alive) {
     CombatCorePolicy.record(attacker, 'kills');
     MageAdvancementPolicy.clearArcaneMarksOnDeath(skillState, battle.partyMembers || []);
     if (markOwner) RogueAdvancementPolicy.resolveMarkedKill(markOwner, skillState, now, { executed: deathMarkExecuted });
@@ -6125,7 +6252,7 @@ function useAutoSkillForMember(member, now = Date.now()) {
     }
     if (skill.id === 'multi-shot' && skillEffect.nextBasicPerTarget) member.nextBasicDamageBonus = Math.min(skillEffect.maxNextBasic, hits.length * skillEffect.nextBasicPerTarget);
     if (skill.id === 'multi-shot' && skillEffect.killCooldownReduction) {
-      const killed = resolvedTargets.filter(({ index, result }) => !result.evaded && battle.enemyHps[index] <= 0).length;
+      const killed = resolvedTargets.filter(({ index, result }) => !getEnemyDefinition(index).isFacility && !result.evaded && battle.enemyHps[index] <= 0).length;
       const reduction = Math.min(skillEffect.maxCooldownReduction, killed * skillEffect.killCooldownReduction) * 1000;
       member.pendingSkillCooldownReduction = reduction;
     }
@@ -6179,7 +6306,7 @@ function useAutoSkillForMember(member, now = Date.now()) {
         logBattle(`◆ ${member.name}觸發【腐化迅捷】，攻擊速度提高 15%！`, 'system');
       }
       hits.forEach((target) => tryApplyThornCorrosion(member, target.index, 'skill', target.result.finalDamage, now));
-      resolvedTargets.filter(({ index, result }) => !result.evaded && battle.enemyHps[index] <= 0).forEach(() => WarriorAdvancementPolicy.resolveKill(member));
+      resolvedTargets.filter(({ index, result }) => !getEnemyDefinition(index).isFacility && !result.evaded && battle.enemyHps[index] <= 0).forEach(() => WarriorAdvancementPolicy.resolveKill(member));
     }
     const echoRecovery = ChapterTwoSpecialEquipmentPolicy.rollDeepForestEcho(member.progress.equipment);
     if (echoRecovery && member.resourceType === 'mana') {
@@ -6564,7 +6691,7 @@ function processPartyMemberAttacks(now = Date.now()) {
         CombatCorePolicy.recordCritical(member, titanCritical);
         applyDamageToMonster(targetIndex, member.stats.attack * titanStrike.power * (titanCritical ? member.stats.criticalDamageMultiplier : 1), profile, { attacker: member, attackKind: 'offhand', canParry: false });
       }
-      if (battle.enemyHps[targetIndex] <= 0) WarriorAdvancementPolicy.resolveKill(member);
+      if (!enemy.isFacility && battle.enemyHps[targetIndex] <= 0) WarriorAdvancementPolicy.resolveKill(member);
     }
     logPartyDebug('普通攻擊', {
       attackerId: member.id,
@@ -6735,7 +6862,25 @@ function createBlackstoneStrongholdBattleState() {
   return state;
 }
 
+function isFacilityVisualPreview() {
+  return ChapterTwoBalancePlaytestPolicy.isChapterThreeActive()
+    && new URLSearchParams(window.location.search || '').get('facility-preview') === '1';
+}
+function setFacilityPreviewWave(index, now = Date.now()) {
+  const mapId = getActiveMap(getProgress()).id;
+  const normals = ChapterThreeMapPolicy.getMap(mapId).normalEnemyIds;
+  battle.showcaseRoundIndex = index;
+  replaceVisualShowcaseEnemies(['facility:' + ChapterThreeFacilityPolicy.TYPES[index], ...Array.from({length:3}, (_, i) => normals[i % normals.length])], mapId, now);
+  battle.showcaseNextRoundAt = now + 5000;
+}
+function rotateFacilityPreview(now = Date.now()) {
+  if (now < battle.showcaseNextRoundAt) return false;
+  setFacilityPreviewWave((battle.showcaseRoundIndex + 1) % 3, now);
+  return true;
+}
+
 function isTimedChapterThreeVisualShowcase() {
+  if (isFacilityVisualPreview()) return true;
   const requestedMapId = ChapterTwoBalancePlaytestPolicy?.getRequestedMapId();
   const supportedMap = isChapterTwo21RotatingShowcase()
     ? requestedMapId === 'black-forest-entrance'
@@ -6963,12 +7108,13 @@ function createBattleTickRuntime() {
   const rotatingChapterTwo24Showcase = isChapterTwo24RotatingShowcase();
   const rotatingChapterTwo25Showcase = isChapterTwo25RotatingShowcase();
   const rotatingChapterTwo26Showcase = isChapterTwo26RotatingShowcase();
-  return {
+  const runtime = {
     isFighting: () => fighting,
     enemyRespawns: processEnemyRespawns,
     enemyDots: processEnemyDots,
     environment: (now) => {
       processBlackForestCorruption(now);
+      processOnlineFacilityDrain(now);
       if (rotatingChapterOne14Showcase) {
         rotateChapterOne14Showcase(now);
       } else if (rotatingChapterOne15Showcase) {
@@ -7002,6 +7148,11 @@ function createBattleTickRuntime() {
     syncLegacy: syncLegacyBattleStateFromMain,
     render: updateBattleUI
   };
+  if (isFacilityVisualPreview()) {
+    const idle = () => false;
+    Object.assign(runtime, {environment: rotateFacilityPreview, enemyRespawns: idle, enemyDots: idle, outpost: idle, revive: idle, resources: idle, healthRegen: idle, partyAttacks: idle, companions: idle, queueDefeated: idle});
+  }
+  return runtime;
 }
 
 function battleTick() {
@@ -7526,6 +7677,12 @@ function endBattleAfterPlayerDefeat(now = Date.now()) {
 
 function defeatPartyMember(member, now = Date.now()) {
   if (member.currentHp > 0 || !member.alive) return false;
+  // Isolated chapter-three preview only: retain ordinary attacks and damage calculations.
+  if (ChapterTwoBalancePlaytestPolicy.isChapterThreeActive()
+      && new URLSearchParams(window.location.search || '').get('immortal') === '1') {
+    member.currentHp = 1;
+    return false;
+  }
   const holyPriest=(battle.partyMembers||[]).find(candidate=>candidate.alive&&PriestAdvancementPolicy.isAdvanced(candidate.progress,'holy-priest')&&Number(candidate.progress.skillLevels?.['priest:prayer-of-life'])>=6);
   if(holyPriest&&PriestAdvancementPolicy.trySacredGuardian(holyPriest,member,battle,now)){logBattle(`✨ ${holyPriest.name}的【神聖守護】阻止 ${member.name}死亡！`,'healing');return false;}
   if (!member.isMain && member.character.race === 'undead' && !member.undeadRevived && Math.random() < .35) {
@@ -7693,7 +7850,7 @@ function enemyAttackTick() {
 
   if (!battle.enemyAffixRegenAt) battle.enemyAffixRegenAt = battle.enemyTypes.map(() => now);
   battle.enemyHps.forEach((hp, index) => {
-    if (hp <= 0) return;
+    if (hp <= 0 || getEnemyDefinition(index).isFacility) return;
     const regeneration = EliteAffixPolicy.getRegeneration(battle.enemyAffixes?.[index] || []);
     if (!regeneration || now - (battle.enemyAffixRegenAt[index] || now) < regeneration.regenerationIntervalMs) return;
     battle.enemyAffixRegenAt[index] = now;
@@ -7732,7 +7889,7 @@ function enemyAttackTick() {
     return;
   }
 
-  for (const enemyIndex of aliveEnemyIndexesByAge()) {
+  for (const enemyIndex of aliveMonsterIndexesByAge()) {
     if (battle.enemyHps[enemyIndex] <= 0) continue;
     const enemy = getEnemyDefinition(enemyIndex);
     const nextAttackAt = battle.enemyNextAttackAt?.[enemyIndex];
@@ -7775,7 +7932,7 @@ function enemyAttackTick() {
         randomValue: Math.random(),
         hasWoundedAlly: getWoundedEnemyIndexes().length > 0,
         canHeal: now >= (getEnemySkillState(enemyIndex).shamanHealReadyAt || 0),
-        canSummon: aliveEnemyIndexesByAge().length < 4 && (battle.goblinScoutSummons || 0) < 2
+        canSummon: aliveMonsterIndexesByAge().length < 4 && (battle.goblinScoutSummons || 0) < 2
       });
       if (action === 'heal' && healGoblinAlly(enemyIndex, now)) continue;
       if (action === 'healing-totem' && useGoblinHealingTotem(enemyIndex)) continue;
@@ -7800,6 +7957,7 @@ function enemyAttackTick() {
     const stats = now < (target.redrockDefenseDownUntil || 0)
       ? { ...baseStats, defense: Math.max(0, Math.round(baseStats.defense * (1 - (target.redrockDefenseDown || 0)))) }
       : baseStats;
+    stats.defense *= getOnlineFacilityEffects().defense;
     if (lateUnit) stats.defense *= ChapterThreeLateCombatPolicy.playerMultiplier(target, 'defense-down', now);
     const lowHealthAssassin = target.job === 'assassin' && target.level >= 20 && target.currentHp / target.maxHp <= .3;
     if (!lowHealthAssassin) target.desperateLowActive = false;
@@ -7837,13 +7995,13 @@ function enemyAttackTick() {
     const brokenrockState = getActiveMap(progress).id === 'brokenrock-canyon'
       ? getBrokenrockEnemyState(enemyIndex, enemyCurrentHp, enemy.maxHp) : null;
     const brokenrockActions = brokenrockState
-      ? [...(brokenrockState.pendingActions || []), ...BrokenrockCanyonPolicy.resolveScheduledActions(enemy.id, brokenrockState, now, { otherAliveEnemies: Math.max(0, aliveEnemyIndexesByAge().length - 1) })]
+      ? [...(brokenrockState.pendingActions || []), ...BrokenrockCanyonPolicy.resolveScheduledActions(enemy.id, brokenrockState, now, { otherAliveEnemies: Math.max(0, aliveMonsterIndexesByAge().length - 1) })]
       : [];
     if (brokenrockState) brokenrockState.pendingActions = [];
     for (const action of brokenrockActions) {
       if (action.id === 'battle-cry') {
         let affected = 0;
-        aliveEnemyIndexesByAge().forEach((candidate) => {
+        aliveMonsterIndexesByAge().forEach((candidate) => {
           if (getEnemyDefinition(candidate).faction !== 'skullcrusher-tribe') return;
           getBrokenrockEnemyState(candidate).battleCryUntil = now + action.buff.durationMs;
           affected += 1;
@@ -7853,7 +8011,7 @@ function enemyAttackTick() {
       }
       if (action.id === 'offensive-command') {
         let affected = 0;
-        aliveEnemyIndexesByAge().forEach((candidate) => {
+        aliveMonsterIndexesByAge().forEach((candidate) => {
           if (candidate === enemyIndex) return;
           getBrokenrockEnemyState(candidate).offensiveCommandUntil = now + action.buff.durationMs;
           affected += 1;
@@ -7869,12 +8027,12 @@ function enemyAttackTick() {
     const bloodwarState = getActiveMap(progress).id === 'bloodwar-wastes'
       ? getBloodwarEnemyState(enemyIndex, enemyCurrentHp, enemy.maxHp, now) : null;
     const bloodwarActions = bloodwarState
-      ? [...(bloodwarState.pendingActions || []), ...BloodwarWastesPolicy.resolveScheduledActions(enemy.id, bloodwarState, now, { otherAliveEnemies: Math.max(0, aliveEnemyIndexesByAge().length - 1) })]
+      ? [...(bloodwarState.pendingActions || []), ...BloodwarWastesPolicy.resolveScheduledActions(enemy.id, bloodwarState, now, { otherAliveEnemies: Math.max(0, aliveMonsterIndexesByAge().length - 1) })]
       : [];
     if (bloodwarState) bloodwarState.pendingActions = [];
     for (const action of bloodwarActions) {
       if (action.id === 'shield-wall') {
-        const allies = aliveEnemyIndexesByAge().filter((candidate) => candidate !== enemyIndex);
+        const allies = aliveMonsterIndexesByAge().filter((candidate) => candidate !== enemyIndex);
         const protectedIndexes = [enemyIndex, ...allies.slice(0, 1)];
         protectedIndexes.forEach((candidate) => { getBloodwarEnemyState(candidate).shieldWallUntil = now + action.buff.durationMs; });
         BloodwarWastesPolicy.recordBuffTargets(bloodwarState, action.id, protectedIndexes.length);
@@ -7886,19 +8044,19 @@ function enemyAttackTick() {
         logBattle(`🎯【${enemy.name}】對 ${target.name}施放【獵殺標記】！`, 'system');
       }
       if (action.id === 'warblood-totem') {
-        const affected = aliveEnemyIndexesByAge();
+        const affected = aliveMonsterIndexesByAge();
         affected.forEach((candidate) => { getBloodwarEnemyState(candidate).warbloodTotemUntil = now + action.buff.durationMs; });
         BloodwarWastesPolicy.recordBuffTargets(bloodwarState, action.id, affected.length);
         logBattle(`🩸【${enemy.name}】召喚【戰血圖騰】，強化全體敵軍！`, 'system');
       }
       if (action.id === 'full-army-charge') {
-        const affected = aliveEnemyIndexesByAge().filter((candidate) => candidate !== enemyIndex);
+        const affected = aliveMonsterIndexesByAge().filter((candidate) => candidate !== enemyIndex);
         affected.forEach((candidate) => { getBloodwarEnemyState(candidate).fullArmyChargeUntil = now + action.buff.durationMs; });
         BloodwarWastesPolicy.recordBuffTargets(bloodwarState, action.id, affected.length);
         logBattle(`📣【${enemy.name}】施放【全軍突擊】，其他敵軍攻擊與攻速提高！`, 'system');
       }
       if (action.id === 'fight-to-the-end') {
-        const allies = aliveEnemyIndexesByAge().filter((candidate) => candidate !== enemyIndex);
+        const allies = aliveMonsterIndexesByAge().filter((candidate) => candidate !== enemyIndex);
         let healing = 0;
         allies.forEach((candidate) => {
           const ally = getEnemyDefinition(candidate);
@@ -8338,7 +8496,14 @@ function openBattle() {
     saveProgress(progress);
   }
   const dungeonDefinition = isDungeon ? getDungeonDefinition(currentMap.id) : null;
-  const enemyTypes = isDungeon ? createDungeonWaveTypes(1, currentMap.id) : createEnemyTypes(progress.level);
+  let enemyTypes = isDungeon ? createDungeonWaveTypes(1, currentMap.id) : createEnemyTypes(progress.level);
+  if (!isDungeon) enemyTypes = ChapterThreeFacilityPolicy.opening(enemyTypes, progress, currentMap.id, type => getMonsterDefinitionForMap(type, currentMap.id));
+  const requestedFacility = ChapterTwoBalancePlaytestPolicy?.isChapterThreeActive() ? new URLSearchParams(window.location.search).get('facility') : null;
+  if (ChapterThreeFacilityPolicy.TYPES.includes(requestedFacility) && ChapterThreeFacilityPolicy.supported(currentMap.id)) {
+    enemyTypes = enemyTypes.map(type => ChapterThreeFacilityPolicy.facilityId(type) ? randomEnemyId(progress.level) : type);
+    const slot = enemyTypes.findIndex(type => { const enemy = getMonsterDefinitionForMap(type, currentMap.id); return !enemy.isBoss && !enemy.isElite; });
+    if (slot >= 0) enemyTypes[slot] = 'facility:' + requestedFacility;
+  }
   const enemyLevels = createEnemyLevels(enemyTypes, currentMap.id);
   const enemyAffixes = createEnemyAffixes(enemyTypes, currentMap.id, enemyLevels);
   const enemyHps = enemyTypes.map((type, index) => EliteAffixPolicy.applyAffixes(getMonsterDefinitionForMap(type, currentMap.id, enemyLevels[index]), enemyAffixes[index]).maxHp);
@@ -8349,6 +8514,7 @@ function openBattle() {
   battle = { enemyTypes, enemyLevels, enemyHps, partyMembers, playerHp: mainMember?.currentHp || getMaxHp(progress.level, progress), playerMana: mainMember?.resourceCurrent || 0, playerArrows: mainMember?.resourceType === 'arrows' ? mainMember.resourceCurrent : 0, playerShield: 0, playerStunnedUntil: 0, playerBleed: null, manaExhausted: false, playerAttackCharge: 0, hunterAttackCount: 0, lastManaRegenAt: battleStart, lastResourceUpdatedAt: battleStart, lastArrowRecoveryAt: battleStart, lastCorruptionTickAt: battleStart, lastStrongholdRegenAt: battleStart, enemyNextAttackAt: createEnemyAttackSchedule(enemyTypes, battleStart, currentMap.id, enemyLevels), enemyBoarEnraged: enemyTypes.map(() => false), enemyTrailSummoned: enemyTypes.map(() => false), enemySummonProfiles: enemyTypes.map(() => null), enemyCaptainShieldUntil: enemyTypes.map(() => 0), enemyAssassinDashUntil: enemyTypes.map(() => 0), enemySpiderNestPhase: enemyTypes.map(() => 1), blackstoneRoarUntil: 0, blackstoneCommandUntil: 0, blackstoneSpiderCommandUntil: 0, spiderNestCommandUntil: 0, strongholdCommandUntil: 0, blackstoneStrongholdState: createBlackstoneStrongholdBattleState(), globalSkillReadyAt: 0, undeadRevived: false, skillCooldowns: {}, enemyRespawns: enemyTypes.map(() => null), enemySpawnedAt: enemyTypes.map((_, index) => battleStart + index), enemyDots: enemyTypes.map(() => []), enemySkillStates: enemyTypes.map(() => null), redrockEnemyStates: enemyTypes.map(() => null), brokenrockEnemyStates: enemyTypes.map(() => null), bloodwarEnemyStates: enemyTypes.map(() => null), monsterMoveSpeed: 200, targetIndexes: [], enemyDamages: enemyTypes.map(() => []), damageTimers: [], rewardedEnemyIndexes: new Set(), roundLoot: {}, isDungeon, dungeonId: isDungeon ? currentMap.id : null, dungeonWave: isDungeon ? 1 : 0, dungeonComplete: false, waveTransitioning: false, goblinScoutSummons: 0, showcaseRoundIndex: 0, showcaseNextRoundAt: battleStart + 6000 };
   battle.enemyAffixes = enemyAffixes;
   battle.sessionId = sessionId;
+  if (isFacilityVisualPreview()) setFacilityPreviewWave(0, battleStart);
   clearBattleLog();
   if (pendingOfflineReport) {
     logBattle(`☾ 離線掛機 ${pendingOfflineReport.duration}${pendingOfflineReport.capped ? '（已達 12 小時上限）' : ''}，擊敗約 ${pendingOfflineReport.defeated} 隻怪物。`, 'system');
@@ -8365,6 +8531,8 @@ function openBattle() {
     ? `◆ 進入${currentMap.name}。清場後若哥布林號角響起，將顯示哥布林撤退或更多哥布林到來。`
     : `◆ 進入${currentMap.name}，第 1／${dungeonDefinition?.waves || 10} 波：${enemyTypes.length} 名敵人來襲。全滅後自動進入下一波。`;
   logBattle(isDungeon ? dungeonOpening : `進入${currentMap.name}，${character.name}開始自動戰鬥。怪物移動速度 200%，重生約 2 秒。`);
+  battle.facilityWave = ChapterThreeFacilityPolicy.wave();
+  battle.lastFacilityDrainAt = battleStart;
   fighting = true;
   document.querySelector('#battle-toggle').textContent = 'Ⅱ 暫停攻擊';
   updateBattleUI();
@@ -8514,6 +8682,7 @@ document.querySelector('#battle-toggle').addEventListener('click', () => {
     persistAssassinEnergy(getProgress(), now);
   }
   fighting = !fighting;
+  battle.lastFacilityDrainAt = Date.now();
   battle.lastManaRegenAt = now;
   battle.lastResourceUpdatedAt = now;
   document.querySelector('#battle-toggle').textContent = fighting ? 'Ⅱ 暫停攻擊' : '▶ 繼續攻擊';

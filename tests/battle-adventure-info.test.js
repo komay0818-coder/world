@@ -9,7 +9,7 @@ const css = fs.readFileSync(path.join(root, 'styles', 'adventure-info.css'), 'ut
 
 assert.match(html, /class="battle-center"[\s\S]*?class="battle-field"[\s\S]*?class="battle-adventure-info"/, 'the compact battlefield and information modules share one center container');
 assert.match(html, /id="region-progress-count"[\s\S]*?id="round-loot-list"/, 'region progress and round loot have dedicated live targets');
-assert.match(html, /adventure-info\.css\?v=20260822-battle-density-v1/, 'the information layout uses a fresh cache key');
+assert.match(html, /adventure-info\.css\?v=20261010-suppression-panel-v4/, 'the information layout uses a fresh cache key');
 assert.match(css, /grid-template-rows:\s*minmax\(310px, 66%\) minmax\(190px, 34%\)/, 'desktop battlefield keeps about two thirds of the former center height');
 assert.doesNotMatch(css, /\.battle-center[\s\S]{0,300}transform:\s*scale/, 'the battlefield is resized through layout rather than transform scaling');
 assert.match(script, /ChapterOneProgressionPolicy\.REQUIREMENTS\[currentMap\.id\]/, 'region progress reads the real map requirement');
@@ -17,5 +17,10 @@ assert.match(script, /progress\.mapKillProgress\?\.\[currentMap\.id\]/, 'region 
 assert.match(script, /roundLoot:\s*\{\}/, 'a new battle entry resets round loot');
 assert.match(script, /addRoundLoot\('gold',[\s\S]*?materialDrops\.forEach[\s\S]*?recipeDrops\.forEach[\s\S]*?equipmentDrop/, 'victory rewards accumulate gold, materials, recipes and equipment');
 assert.match(script, /Object\.values\(battle\.roundLoot \|\| \{\}\)[\s\S]*?slice\(0, 8\)/, 'the loot module remains bounded');
+assert.match(html, /id="suppression-unresolved-count"/, 'collapsed suppression exposes its unresolved count');
+assert.match(css, /\.chapter-three-suppression \{[^}]*background: #07151d;/, 'suppression uses the shared dark-blue treatment');
+assert.match(css, /\.chapter-three-suppression \{[^}]*border: 1px solid rgba\(203,160,70,\.38\)/, 'suppression uses a restrained gold divider');
+assert.match(css, /\.suppression-row \{[\s\S]*?grid-template-columns:[\s\S]*?padding: 8px 10px;/, 'facility rows use one compact shared layout');
+assert.match(css, /#combat-log-lines \{ flex: 1 1 0; min-height: 0;/, 'combat history reclaims available height when suppression is collapsed');
 
 console.log('battle-adventure-info: assertions passed');

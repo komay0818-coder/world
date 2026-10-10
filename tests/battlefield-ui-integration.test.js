@@ -11,7 +11,7 @@ const layoutCss = fs.readFileSync(path.join(root, 'styles', 'mmorpg-layout.css')
 assert.match(html, /id="player-battle-stage"/, 'party players render on the battlefield');
 assert.match(html, /id="battle-player-art" class="battle-player-art hidden"/, 'main player has a dedicated portrait node');
 assert.match(html, /styles\/monster-slots\.css\?v=20260922-rank-aura-v1/, 'battlefield loads the current local portrait styles');
-assert.match(html, /script\.js\?v=20261008-character-avatars-v1/, 'battlefield loads the current local combat logic');
+assert.match(html, /script\.js\?v=20261011-facility-release-v1/, 'battlefield loads the current local combat logic');
 assert.match(script, /return battleCharacterArt\[`\$\{character\.race\}:\$\{character\.job\}`\] \|\| '';/, 'battle uses stable front character artwork');
 const selectableAvatarKeys = [
   'human:warrior', 'human:assassin', 'human:hunter', 'human:mage', 'human:priest',
@@ -70,7 +70,7 @@ assert.match(script, /followTarget[\s\S]*?`#enemy-\$\{targetAnchor\.index\}`[\s\
 assert.match(script, /effect\.remove\(\);[\s\S]*?if \(!layer\.childElementCount\) layer\.remove\(\)/, 'finished skill effects leave no stale effect DOM');
 assert.match(script, /showDamage: !\['heavy-strike', 'whirlwind', 'charge', 'power-shot', 'multi-shot', 'piercing-shot', 'backstab', 'shadow-dance', 'poison-blade', 'fireball', 'blizzard', 'chain-lightning', 'holy-light', 'holy-nova'\]\.includes\(skill\.id\)/, 'skill presets suppress early generic damage numbers when impact timing is custom');
 assert.match(script, /visualStunAt = now \+ 550/, 'stun art waits until the impact animation finishes');
-assert.match(script, /Date\.now\(\) < enemySkillState\.stunnedUntil[\s\S]*?enemySkillState\.visualStunAt/, 'stun stars are driven by the actual stun state');
+assert.match(script, /now < enemySkillState\.stunnedUntil[\s\S]*?enemySkillState\.visualStunAt/, 'stun stars are driven by the actual stun state');
 assert.match(css, /impact-shockwave[\s\S]*?var\(--target-width\) \* 1\.42/, 'single-target shockwave stays proportional to the target');
 assert.match(css, /impact-debris[\s\S]*?heavyDebris/, 'heavy strike has a restrained debris burst');
 assert.match(css, /@keyframes playerHeavyStrikeLunge/, 'heavy strike uses a short portrait lunge and return');
@@ -90,7 +90,7 @@ assert.doesNotMatch(css.match(/\.battle-effect-charge[\s\S]*?@keyframes chargeBu
 assert.match(script, /'power-shot': \{ duration: 760, impactAt: 400, className: 'battle-effect-power-shot' \}/, 'power shot is a reusable short single-target preset');
 assert.match(script, /captureBattleAttackerAnchor[\s\S]*?--arrow-start-x/, 'power shot draws a projectile from the hunter to the resolved target');
 assert.match(script, /visualSlowAt = now \+ 550[\s\S]*?visualMarkAt = now \+ 550/, 'power-shot statuses appear after the impact burst');
-assert.match(script, /Date\.now\(\) < enemySkillState\.slowedUntil[\s\S]*?Date\.now\(\) < enemySkillState\.markedUntil/, 'slow and hunter mark visuals follow their real status timers');
+assert.match(script, /now < enemySkillState\.slowedUntil[\s\S]*?now < enemySkillState\.markedUntil/, 'slow and hunter mark visuals follow their real status timers');
 assert.match(css, /power-shot-arrow::after[\s\S]*?border-left:14px solid/, 'power shot keeps a visible physical arrowhead');
 assert.match(css, /enemy-slow-airflow/, 'power shot shows restrained slow airflow');
 assert.match(css, /enemy-hunter-mark/, 'advanced power shot shows a distinct hunter mark');
@@ -149,7 +149,7 @@ assert.match(script, /'holy-light': \{ duration: 680, impactAt: 300, className: 
 assert.match(script, /skillId === 'holy-light'[\s\S]*?holy-light-mark[\s\S]*?holy-light-beam[\s\S]*?holy-light-ring/, 'holy light stages its mark, vertical beam, and impact ring');
 assert.match(script, /--holy-light-x[\s\S]*?stopShort[\s\S]*?--holy-light-y/, 'priest approaches the target but stops in front of it');
 assert.match(script, /state\.attackDownUntil > now[\s\S]*?visualAttackDownAt = now \+ 480/, 'attack-down icon waits until the holy impact resolves');
-assert.match(script, /Date\.now\(\) < enemySkillState\.attackDownUntil[\s\S]*?enemy-attack-down-indicator/, 'attack-down icon follows the real debuff duration');
+assert.match(script, /now < enemySkillState\.attackDownUntil[\s\S]*?enemy-attack-down-indicator/, 'attack-down icon follows the real debuff duration');
 assert.match(css, /holy-light-ring[\s\S]*?var\(--target-width\)\*1\.13/, 'holy impact ring stays near 113 percent of target width');
 assert.doesNotMatch(css.match(/\.battle-effect-holy-light[\s\S]*?@keyframes holyLightTargetHit/)?.[0] || '', /explosion|fireball|projectile|smoke|debris/, 'holy light avoids explosions, fireball language, projectiles, smoke, and debris');
 assert.match(script, /'holy-nova': \{ duration: 980, impactAt: 300, className: 'battle-effect-holy-nova' \}/, 'holy nova uses a compact radial AoE preset');
@@ -170,7 +170,12 @@ assert.doesNotMatch(css.match(/\.battle-effect-heal[\s\S]*?@keyframes healNumber
 assert.match(script, /class="enemy-unit monster-battle-slot visual-size-\$\{visualSize\}/, 'monsters keep full-body image slots');
 assert.match(css, /monster-battle-slot\.elite,[\s\S]*?monster-battle-slot\.boss \{[\s\S]*?--unit-rank-scale: 1;/, 'elite and boss monsters are not enlarged');
 assert.doesNotMatch(css, /monster-battle-slot\.(?:elite|boss) \.monster-slot-image \{ scale: 1\.(?:0*[1-9]|[1-9])/i, 'legacy rank rules cannot enlarge elite or boss artwork');
-assert.match(css, /monster-battle-slot\.elite \{[\s\S]*?174, 116, 255[\s\S]*?monster-battle-slot\.boss \{[\s\S]*?255, 194, 73/, 'rank auras remain distinct');
+assert.match(script, /monster-image-frame[\s\S]*?monster-slot-hp[\s\S]*?monster-slot-name[\s\S]*?monster-status-row/, 'monster information follows art, HP, name, then status order');
+assert.match(css, /Final monster information cascade[\s\S]*?monster-image-frame \{[\s\S]*?position: absolute !important;[\s\S]*?inset: 27px 4px 8px !important;[\s\S]*?monster-slot-name \{[\s\S]*?top: calc\(100% \+ 2px\)/, 'monster information does not reduce or raise the calibrated artwork area');
+assert.doesNotMatch(script, /monster-slot-title[\s\S]*?Lv\. \$\{monsterLevel\}/, 'monster level and the old title above artwork are removed');
+assert.match(script, /getMonsterStatusDisplays[\s\S]*?remainingText[\s\S]*?status\.effect[\s\S]*?status\.remaining/, 'monster status icons expose effect and remaining time');
+assert.match(css, /Final monster information cascade[\s\S]*?monster-battle-slot\.boss \.monster-image-frame::after \{ display: none !important; content: none !important; \}/, 'elite and boss ground auras are removed');
+assert.match(css, /monster-slot-name \{[\s\S]*?color: #f5f5f2[\s\S]*?monster-battle-slot\.elite \.monster-slot-name \{ color: #c99aff; \}[\s\S]*?monster-battle-slot\.boss \.monster-slot-name \{ color: #ffd66d; \}/, 'normal, elite, and boss names use the requested colors');
+assert.match(css, /Final monster information cascade[\s\S]*?monster-slot-hp i,[\s\S]*?\.elite \.monster-slot-hp i,[\s\S]*?\.boss \.monster-slot-hp i \{ background: linear-gradient\(90deg, #9f2029, #ed4b43\) !important; \}/, 'all monster ranks use the same red HP fill');
 assert.match(css, /prefers-reduced-motion:\s*reduce/, 'decorative effects still respect reduced-motion settings');
-
 console.log('battlefield UI integration: assertions passed');

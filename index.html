@@ -20,7 +20,7 @@
   <link rel="stylesheet" href="styles/mmorpg-layout.css?v=20260822-combat-motion-v43" />
   <link rel="stylesheet" href="styles/monster-slots.css?v=20260922-rank-aura-v1" />
   <link rel="stylesheet" href="styles/village.css?v=20260803-workshop-crafting-v2" />
-  <link rel="stylesheet" href="styles/adventure-info.css?v=20260822-battle-density-v1" />
+  <link rel="stylesheet" href="styles/adventure-info.css?v=20261010-suppression-panel-v4" />
   <link rel="stylesheet" href="styles/monster-audit.css?v=20260920-monster-audit-v1" />
   <link rel="stylesheet" href="styles/inventory-grid.css?v=20260921-inventory-compare-v2" />
 </head>
@@ -180,7 +180,11 @@
       </section>
       </main>
       <div class="battle-bottom">
-        <div class="combat-log"><p>戰鬥紀錄</p><div id="combat-log-lines" aria-live="polite"></div></div>
+        <div class="combat-log"><details id="chapter-three-suppression" class="chapter-three-suppression" hidden>
+            <summary><span>區域壓制</span><strong id="suppression-unresolved-count"></strong></summary>
+            <small id="suppression-region-name"></small>
+            <div id="suppression-rows" class="suppression-rows" aria-live="polite"></div>
+          </details><p>戰鬥紀錄</p><div id="combat-log-lines" aria-live="polite"></div></div>
         <section class="skill-panel" aria-labelledby="skill-panel-title"><div class="skill-panel-head"><strong id="skill-panel-title">技能</strong><small id="skill-resource-status">自動施放</small></div><button id="potion-button" class="potion-button" type="button"><img src="assets/healing-potion.png?v=20260830-user-image-v1" alt="" class="potion-image"><span>治癒藥水</span><b id="potion-count">5</b></button><button id="mana-potion-button" class="potion-button" type="button"><img src="assets/mana-potion.png?v=20260830-user-image-v1" alt="" class="potion-image"><span>魔法藥水</span><b id="mana-potion-count">0</b></button><div id="skill-list" class="skill-list"></div></section>
         <nav class="battle-menu" aria-label="遊戲選單"><button class="battle-menu-button ability-button" type="button" data-menu-action="能力"><span>◆</span><b>能力</b><small>數值</small></button><button class="battle-menu-button" type="button" data-menu-action="背包"><span>🎒</span><b>背包</b><small>道具</small></button><button class="battle-menu-button" type="button" data-menu-action="裝備"><span>⚔</span><b>裝備</b><small>角色</small></button><button class="battle-menu-button" type="button" data-menu-action="隊伍"><span>👥</span><b>隊伍</b><small>編組</small></button><button class="battle-menu-button village-button" type="button" data-menu-action="村莊"><span>⌂</span><b>村莊</b><small>建築</small></button><button class="battle-menu-button drop-lookup-button" type="button" data-menu-action="掉落"><span>⌕</span><b>掉落</b><small>來源</small></button></nav>
       </div>
@@ -249,7 +253,7 @@
   <script src="skullcrusher-war-camp-policy.js?v=20260911-war-camp-skills-v1"></script>
   <script src="ancient-altar-policy.js?v=20260911-altar-skills-v1"></script>
   <script src="redrock-temple-policy.js?v=20260911-temple-skills-v1"></script>
-  <script src="chapter-three-late-combat-policy.js?v=20261005-formal-opening-v1"></script>
+  <script src="chapter-three-late-combat-policy.js?v=20261009-facility-exclusion-v1"></script>
   <script src="chapter-three-material-drop-policy.js?v=20260902-redrock-material-drops-v1"></script>
   <script src="wolf-den-policy.js?v=20260728-wolf-passives-v1"></script>
   <script src="boar-woods-policy.js?v=20260802-thick-hide-v2"></script>
@@ -275,6 +279,7 @@
   <script src="chapter-three-epic-weapon-policy.js?v=20260903-epic-weapons-v1"></script>
   <script src="pre-job-trial-policy.js?v=20260903-pre-job-trial-v1"></script>
   <script src="chapter-three-recipe-drop-policy.js?v=20260903-chapter3-crafted-epic-v1"></script>
+  <script src="chapter-three-facility-policy.js?v=20261010-building-art-v2"></script>
   <script src="chapter-two-special-equipment-policy.js?v=20260830-special-epic-drops-v1"></script>
   <script src="chapter-three-special-equipment-policy.js?v=20260903-special-epic-v1"></script>
   <script src="crafting-policy.js?v=20260903-chapter3-crafted-epic-v1"></script>
@@ -304,7 +309,7 @@
   <script src="village-upgrade-policy.js?v=20260830-chapter-two-material-art-v1"></script>
   <script src="skill-upgrade-policy.js?v=20260816-divine-tome-v1"></script>
   <script src="class-skill-policy.js?v=20260906-chain-paralysis-v2"></script>
-  <script src="script.js?v=20261008-character-avatars-v1"></script>
+  <script src="script.js?v=20261011-facility-release-v1"></script>
   <script src="monster-audit.js?v=20260920-monster-audit-v1"></script>
 </body>
 </html>

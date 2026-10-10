@@ -50,10 +50,12 @@ for (const showcase of [false, true]) {
   let attackCalls = 0;
   const context = {
     isTimedChapterThreeVisualShowcase: () => showcase,
+    fighting: true,
+    isFacilityVisualPreview: () => false,
     processPartyMemberAttacks: now => { attackCalls++; assert.equal(now, 1234); return true; },
     battle: { partyMembers: [], enemyHps: [] }
   };
-  for (const name of runtimeFactory.match(/\b(?:process\w+|reviveDefeatedTeammates|updatePartyMember\w+|queueDefeatedEnemies|syncLegacyBattleStateFromMain|updateBattleUI)\b/g) || []) {
+  for (const name of runtimeFactory.match(/\b(?:isChapter\w+Showcase|rotateChapter\w+Showcase|process\w+|reviveDefeatedTeammates|updatePartyMember\w+|queueDefeatedEnemies|syncLegacyBattleStateFromMain|updateBattleUI)\b/g) || []) {
     if (!(name in context)) context[name] = () => {};
   }
   const runtime = require('node:vm').runInNewContext(`${runtimeFactory}\ncreateBattleTickRuntime()`, context);

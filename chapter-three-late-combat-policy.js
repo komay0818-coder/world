@@ -52,12 +52,12 @@
     state.deathHandled = false;
     return state;
   }
-  function living(units) { return units.filter(unit => unit.currentHp > 0); }
+  function living(units) { return units.filter(unit => !unit.isFacility && unit.currentHp > 0); }
   function shield(unit, skill, now, source = skill.shieldSource) {
     Altar.applySourceShield(unit.state, source, unit.maxHp * skill.shieldMaxHpRatio, now, skill.durationMs);
   }
   function thresholds(mapId, unit, now, emit = () => {}) {
-    if (unit.currentHp <= 0) return;
+    if (unit.isFacility || unit.currentHp <= 0) return;
     const policy = POLICIES[mapId];
     for (const skill of policy.updateThresholds(unit.id, unit.state, unit.currentHp, unit.maxHp, now)) {
       if (skill.shieldMaxHpRatio) shield(unit, skill, now);
@@ -68,7 +68,7 @@
     }
   }
   function death(mapId, unit, units, now, emit = () => {}) {
-    if (unit.state.deathHandled) return;
+    if (unit.isFacility || unit.state.deathHandled) return;
     unit.state.deathHandled = true;
     const others = living(units).filter(other => other.key !== unit.key);
     if (mapId === Camp.MAP_ID && !unit.isBoss) for (const boss of others.filter(other => other.id === 'skullcrusher-great-chieftain')) {
@@ -85,6 +85,7 @@
     const policy = POLICIES[mapId];
     if (!policy) return;
     units.forEach(unit => {
+      if (unit.isFacility) return;
       if (unit.currentHp <= 0) { death(mapId, unit, units, now, emit); return; }
       Altar.expireShields(unit.state, now);
       thresholds(mapId, unit, now, emit);
@@ -133,7 +134,7 @@
   }
   function modifiers(mapId, unit, units, now) {
     const policy = POLICIES[mapId];
-    if (!policy) return { attack: 1, defense: 1, attackSpeed: 1, damage: 1, damageReduction: 0, dotDamage: 1 };
+    if (!policy || unit.isFacility) return { attack: 1, defense: 1, attackSpeed: 1, damage: 1, damageReduction: 0, dotDamage: 1 };
     const values = { attack: 1, defense: 1, attackSpeed: 1, damage: 1, damageReduction: 0, dotDamage: 1,
       ...policy.getCombatMultipliers(unit.id, unit.state, now) };
     if (mapId === Camp.MAP_ID && unit.id === 'skullcrusher-berserker') {

@@ -124,3 +124,30 @@
   .region-progress-track { grid-column: 1; }
   .round-loot-list { grid-template-columns: 1fr; max-height: 180px; }
 }
+/* Compact chapter-three suppression readout inside the combat-log column. */
+.region-progress-card { overflow-y: auto; }
+.chapter-three-suppression { margin: 0 0 6px; overflow: hidden; border: 1px solid rgba(203,160,70,.38); border-radius: 7px; background: #07151d; color: #dce8eb; font-size: 12px; }
+.chapter-three-suppression[hidden] { display: none; }
+.chapter-three-suppression summary { display: flex; min-height: 30px; box-sizing: border-box; align-items: center; justify-content: space-between; gap: 8px; cursor: pointer; padding: 6px 8px; color: #f4dfab; font-weight: 700; list-style-position: inside; }
+.chapter-three-suppression summary::marker { color: #d1a94c; }
+.chapter-three-suppression summary > span { color: #f4dfab !important; font-size: 12px; }
+.chapter-three-suppression summary strong { margin-left: auto; color: #d6b765; font-size: 10px; font-weight: 700; }
+.chapter-three-suppression summary strong.is-cleared { color: #79cf91; }
+#suppression-region-name { display: block; margin: 0 8px 4px; color: #8fa7ad; font-size: 10px; }
+#chapter-three-suppression .suppression-rows { display: grid; height: auto; max-height: none; gap: 0; overflow: visible; padding: 0; border: 0; border-top: 1px solid rgba(203,160,70,.24); border-radius: 0; background: #07151d; box-shadow: none; color: #e4edef; }
+#chapter-three-suppression .suppression-row { display: grid; grid-template-columns: minmax(0,1fr); height: auto; max-height: none; gap: 5px; overflow: visible; padding: 8px 10px; border: 0; border-bottom: 1px solid rgba(203,160,70,.2); border-radius: 0; background: #091a24; box-shadow: none; color: #e4edef; }
+#chapter-three-suppression .suppression-row:last-child { border-bottom: 0; }
+#chapter-three-suppression .suppression-row-head { display: flex; height: auto; max-height: none; align-items: center; justify-content: space-between; gap: 8px; overflow: visible; padding: 0; border: 0; border-radius: 0; background: transparent; box-shadow: none; color: #e4edef; }
+#chapter-three-suppression .suppression-row-head b { color: #f1f6f7; font-size: 11px; }
+#chapter-three-suppression .suppression-row-head span { color: #e2c77a !important; font-variant-numeric: tabular-nums; }
+#chapter-three-suppression .suppression-row progress { display: block; width: 100%; height: 7px; margin: 0; overflow: hidden; appearance: none; border: 0; border-radius: 999px; background: #02090d; accent-color: #d7ad4e; }
+#chapter-three-suppression .suppression-row progress::-webkit-progress-bar { background: #02090d; }
+#chapter-three-suppression .suppression-row progress::-webkit-progress-value { background: linear-gradient(90deg,#9d6f20,#efc95e); }
+#chapter-three-suppression .suppression-row progress::-moz-progress-bar { background: linear-gradient(90deg,#9d6f20,#efc95e); }
+#chapter-three-suppression .suppression-row small { margin: 0; color: #d8e2e5; font-size: 10px; line-height: 1.35; }
+#chapter-three-suppression .suppression-row small.is-cleared { color: #8bd99f; }
+.combat-log > .chapter-three-suppression { flex: 0 0 auto; }
+.combat-log > .chapter-three-suppression[open] { max-height: min(220px,42%); overflow-x: hidden; overflow-y: auto; scrollbar-color: rgba(203,160,70,.52) #07151d; }
+.battle-bottom .combat-log:has(> .chapter-three-suppression) { display: flex; flex-direction: column; }
+.battle-bottom .combat-log:has(> .chapter-three-suppression) .combat-log-head { flex: 0 0 auto; }
+.battle-bottom .combat-log:has(> .chapter-three-suppression) #combat-log-lines { flex: 1 1 0; min-height: 0; height: auto !important; }

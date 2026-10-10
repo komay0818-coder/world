@@ -62,7 +62,7 @@ late.thresholds(altar.MAP_ID, awakened, 17000);
 assert.equal(altar.hasShield(awakened.state, 'awakened-rune', 17000), true);
 assert.equal(late.absorb(altar.MAP_ID, awakened, 100, 17000), 0);
 const templeUnits = units(temple.MAP_ID), guardian = byId(templeUnits, 'temple-guardian'), god = byId(templeUnits, temple.FINAL_BOSS_ID);
-assert.equal(god.name, '赤岩古神');
+assert.equal(god.name, maps.getEnemy(temple.FINAL_BOSS_ID).name);
 guardian.currentHp = guardian.maxHp * .49;
 late.thresholds(temple.MAP_ID, guardian, 1000);
 const before = guardian.currentHp;

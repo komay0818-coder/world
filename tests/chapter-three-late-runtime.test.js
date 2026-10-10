@@ -27,13 +27,13 @@ try {
       queueDefeatedEnemies();
       JSON.stringify({ map:getActiveMap(getProgress()).id, dungeon:battle.isDungeon,
         bossIndex:liveBossIndex${mapId.replaceAll('-', '')}, cleared:getProgress().chapterThreeProgress.cleared['${mapId}'],
-        monsters:battle.enemyTypes.map((_, index) => ({ hp:getEnemyDefinition(index).maxHp, map:getEnemyDefinition(index).mapId })) });
+        monsters:battle.enemyTypes.map((_, index) => ({ hp:getEnemyDefinition(index).maxHp, map:getEnemyDefinition(index).mapId, facility:getEnemyDefinition(index).isFacility })) });
     `));
     assert.equal(result.map, mapId);
     assert.equal(result.dungeon, false);
     assert.ok(result.bossIndex >= 0, 'formal random encounter generates the boss');
     assert.equal(result.cleared, false, 'a living boss never completes the area');
-    assert.ok(result.monsters.every(monster => monster.map === mapId && monster.hp >= 960), 'no beginner monster fallback');
+    assert.ok(result.monsters.every(monster => monster.map === mapId && (monster.facility ? monster.hp === require('../chapter-three-facility-policy').CONFIG[mapId].hp : monster.hp >= 960)), 'no beginner monster fallback');
     const skillChecks = JSON.parse(game.evaluate(`
       lateTestNow += 16000;
       processLateChapterCombat(lateTestNow);
