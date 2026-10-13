@@ -1,0 +1,22 @@
+(async function(){
+'use strict';const r=PermanentPartyRuntime.current,c=window.permanentFarmingCoordinator;if(!c)throw Error('Farming coordinator missing');
+window.permanentFarmingEventIdentity=()=>({mainId:r.mainId,battle});
+const originalOpenBattle=openBattle,originalVillage=openVillage;
+function timers(){clearInterval(battleTimer);clearInterval(skillTimer);clearInterval(enemyAttackTimer);skillTimer=setInterval(autoSkillTick,100);battleTimer=setInterval(battleTick,100);enemyAttackTimer=setInterval(enemyAttackTick,100);}
+function restoreSavedPlayers(){const prior=new Map((battle.partyMembers||[]).map(m=>[m.id,m]));battle.partyMembers=buildBattlePartyMembers(Date.now()).map(fresh=>{const member=PermanentOnlinePolicy.refreshMember(prior.get(fresh.id),fresh);PermanentOnlinePolicy.restoreMember(member,r.getProgress(fresh.id).partyMemberState);return member;});syncLegacyBattleStateFromMain();}
+function mode(){return r.model.parties[r.mainId].memberIds.length>1?'party':'solo';}
+let checkpointQueued=false,lastCheckpoint=0;
+function queueCheckpoint(){if(!fighting||r.busy||r.failure||window.permanentAcceptanceRunning||checkpointQueued||Date.now()-lastCheckpoint<250)return;const identity=window.permanentFarmingEventIdentity(),token=c.tokens()[r.mainId];if(!token)return;checkpointQueued=true;permanentFarmingNativeTimeout(()=>{checkpointQueued=false;const current=window.permanentFarmingEventIdentity();if(!fighting||r.busy||r.failure||current.mainId!==identity.mainId||current.battle!==identity.battle||c.tokens()[r.mainId]!==token)return;try{persistPartyRuntimeState();lastCheckpoint=Date.now();r.flush().catch(e=>showToast('戰鬥保存未完成：'+e.message));}catch(e){showToast('戰鬥保存未完成：'+e.message);}},5);}
+window.queuePermanentFarmingCheckpoint=queueCheckpoint;
+const originalBattleTick=battleTick,originalEnemyTick=enemyAttackTick,originalSkillTick=autoSkillTick;
+battleTick=function(...args){const result=originalBattleTick(...args);queueCheckpoint();return result;};enemyAttackTick=function(...args){const result=originalEnemyTick(...args);queueCheckpoint();return result;};autoSkillTick=function(...args){const result=originalSkillTick(...args);queueCheckpoint();return result;};
+openBattle=async function(){try{const owner=r.getCommitted().farming?.owners[r.mainId];if(owner&&c.tokens()[r.mainId]===owner)await c.stop();await c.start(mode());originalOpenBattle();await r.flush();}catch(e){showToast('掛機未開始：'+e.message);}};
+openVillage=async function(...args){try{await c.stop();originalVillage(...args);}catch(e){showToast('返回村莊未完成：'+e.message);}};
+addPartyMember=async function(id){const running=fighting;try{await c.transition({type:'recruit',mainId:r.mainId,characterId:id});if(running){await c.start(mode());fighting=true;rebuildBattlePartyMembers();await r.flush();timers();}renderParty();}catch(e){showToast('入隊未完成：'+e.message);}};
+removePartyMember=async function(id){const running=fighting;try{await c.transition({type:'leave',mainId:r.mainId,characterId:id});if(running){await c.start(mode());fighting=true;rebuildBattlePartyMembers();await r.flush();timers();}renderParty();}catch(e){showToast('離隊未完成：'+e.message);}};
+let passLeave=false;document.addEventListener('click',event=>{const leaving=event.target?.closest?.('#leave-battle');if(leaving){if(passLeave){passLeave=false;return;}if(layoutEditMode)return;event.preventDefault();event.stopImmediatePropagation();c.stop().then(()=>{passLeave=true;leaving.click();}).catch(e=>showToast('停止掛機未完成：'+e.message));return;}if(!event.target?.closest?.('#battle-toggle')||battle.dungeonComplete)return;event.preventDefault();event.stopImmediatePropagation();(async()=>{if(fighting){await c.stop();document.querySelector('#battle-toggle').textContent='▶ 繼續攻擊';}else{await c.start(mode());if(battle.partyMembers?.length){restoreSavedPlayers();fighting=true;timers();}else originalOpenBattle();}})().catch(e=>showToast('掛機狀態未變更：'+e.message));},true);
+// The base D-2 visibility handler delegates to this coordinator when present.
+window.permanentFarmingVisibility=async()=>{if(document.visibilityState==='hidden'){permanentResumeBattle=fighting;await c.stop({offline:true});}else{await c.recover();await c.settle();if(permanentResumeBattle&&!getProgress().requiresMapSelectionAfterDefeat){await c.start(mode());restoreSavedPlayers();fighting=true;timers();}}};
+window.restorePermanentFarmingPlayers=restoreSavedPlayers;
+window.permanentFarmingReady=true;
+})();

@@ -1,3 +1,16 @@
+function getGameStorage() { return getPermanentPartyRuntime()?.storage || window.localStorage; }
+function getPermanentPartyRuntime() { return typeof PermanentPartyRuntime !== 'undefined' ? PermanentPartyRuntime.current : null; }
+function normalizePermanentRead(progress) {
+  const value = { level: 1, xp: 0, gold: 0, magicCrystals: 0, skillBooks: {}, selectedMapId: 'beginner-plains', unlockedChapter: 1, ...progress };
+  value.equipment = { ...emptyEquipment(), ...(value.equipment || {}) };
+  value.skillLevels = ClassSkillPolicy.normalizeSkillLevels(value.skillLevels);
+  value.blackForestCorruption = BlackForestCorruptionPolicy.normalizeState(value.blackForestCorruption);
+  value.crafting = CraftingPolicy.normalizeCraftingState(value.crafting);
+  value.village = VillagePolicy.normalizeVillageData(value.village);
+  ChapterOneProgressionPolicy.normalize(value); ChapterTwoProgressionPolicy.normalize(value);
+  ChapterThreeMapPolicy.normalizeChapterUnlock(value); ChapterThreeProgressionPolicy.normalize(value); ChapterThreeFacilityPolicy.normalize(value);
+  return value;
+}
 const loginScreen = document.querySelector('#login-screen');
 const menuScreen = document.querySelector('#menu-screen');
 const characterScreen = document.querySelector('#character-screen');
@@ -483,40 +496,40 @@ const defaultBattleLayout = {
 };
 
 function repairCombatLogLayoutOnce() {
-  const saved = JSON.parse(localStorage.getItem('stardust-battle-layout') || '{}');
+  const saved = JSON.parse(getGameStorage().getItem('stardust-battle-layout') || '{}');
   if (saved.combatLogFitVersion === 2) return;
   if (!saved.log || (saved.log.left === 4 && [254, 286].includes(saved.log.top))) {
     saved.log = { ...defaultBattleLayout.log };
   }
   saved.combatLogFitVersion = 2;
-  localStorage.setItem('stardust-battle-layout', JSON.stringify(saved));
+  getGameStorage().setItem('stardust-battle-layout', JSON.stringify(saved));
 }
 
 function repairSkillLayoutOnce() {
-  const saved = JSON.parse(localStorage.getItem('stardust-battle-layout') || '{}');
+  const saved = JSON.parse(getGameStorage().getItem('stardust-battle-layout') || '{}');
   if (saved.skillLayoutVersion === 6) return;
   Object.keys(saved).filter((key) => key === 'skills' || key.startsWith('skill-')).forEach((key) => delete saved[key]);
   saved.skillLayoutVersion = 6;
-  localStorage.setItem('stardust-battle-layout', JSON.stringify(saved));
+  getGameStorage().setItem('stardust-battle-layout', JSON.stringify(saved));
 }
 
 function repairMenuLayoutOnce() {
-  const saved = JSON.parse(localStorage.getItem('stardust-battle-layout') || '{}');
+  const saved = JSON.parse(getGameStorage().getItem('stardust-battle-layout') || '{}');
   if (saved.menuLayoutVersion === 1) return;
   ['menu', 'bag', 'equipment', 'party'].forEach((key) => delete saved[key]);
   saved.menuLayoutVersion = 1;
-  localStorage.setItem('stardust-battle-layout', JSON.stringify(saved));
+  getGameStorage().setItem('stardust-battle-layout', JSON.stringify(saved));
 }
 
 function repairHudLayoutOnce() {
-  const saved = JSON.parse(localStorage.getItem('stardust-battle-layout') || '{}');
+  const saved = JSON.parse(getGameStorage().getItem('stardust-battle-layout') || '{}');
   if (saved.hudLayoutVersion === 3) return;
   if (!saved.hud || saved.hud.height === 250) saved.hud = { ...defaultBattleLayout.hud };
   if (!saved.identity || (saved.identity.left === 17 && saved.identity.top === 69)) {
     saved.identity = { ...defaultBattleLayout.identity };
   }
   saved.hudLayoutVersion = 3;
-  localStorage.setItem('stardust-battle-layout', JSON.stringify(saved));
+  getGameStorage().setItem('stardust-battle-layout', JSON.stringify(saved));
 }
 
 function getLayoutTargetElement(key) {
@@ -589,7 +602,7 @@ function resizeSelectedFont(sizeChange) {
 }
 
 function applySavedLayout() {
-  const saved = { ...defaultBattleLayout, ...JSON.parse(localStorage.getItem('stardust-battle-layout') || '{}') };
+  const saved = { ...defaultBattleLayout, ...JSON.parse(getGameStorage().getItem('stardust-battle-layout') || '{}') };
   layoutTargets.forEach(([key, selector]) => {
     const layout = saved[key];
     const element = document.querySelector(selector);
@@ -629,7 +642,7 @@ function applySavedLayout() {
 }
 
 function saveCurrentLayout() {
-  const saved = JSON.parse(localStorage.getItem('stardust-battle-layout') || '{}');
+  const saved = JSON.parse(getGameStorage().getItem('stardust-battle-layout') || '{}');
   const changedElement = activeLayoutDrag?.element || getLayoutTargetElement(selectedLayoutTarget);
   const changedTarget = layoutTargets.find(([, selector]) => document.querySelector(selector) === changedElement);
   if (!changedElement || !changedTarget) return;
@@ -637,11 +650,11 @@ function saveCurrentLayout() {
   saved[changedTarget[0]] = changedElement.classList.contains('skill-chip')
     ? { modified: true, skillRelative: true, leftOffset: changedElement.style.left || '0px', topOffset: changedElement.style.top || '0px', width: Math.round(rect.width), height: Math.round(rect.height), fontSize: changedElement.style.fontSize || '', skillFontSize: changedElement.style.getPropertyValue('--layout-skill-font-size') || '' }
     : { modified: true, left: Math.round(rect.left), top: Math.round(rect.top), width: Math.round(rect.width), height: Math.round(rect.height), fontSize: changedElement.style.fontSize || '', skillFontSize: changedElement.style.getPropertyValue('--layout-skill-font-size') || '' };
-  localStorage.setItem('stardust-battle-layout', JSON.stringify(saved));
+  getGameStorage().setItem('stardust-battle-layout', JSON.stringify(saved));
 }
 
 function saveVisibleAdjustedLayout() {
-  const saved = JSON.parse(localStorage.getItem('stardust-battle-layout') || '{}');
+  const saved = JSON.parse(getGameStorage().getItem('stardust-battle-layout') || '{}');
   layoutTargets.forEach(([key, selector]) => {
     const element = document.querySelector(selector);
     if (!element) return;
@@ -653,7 +666,7 @@ function saveVisibleAdjustedLayout() {
       ? { modified: true, skillRelative: true, leftOffset: element.style.left || '0px', topOffset: element.style.top || '0px', width: Math.round(rect.width), height: Math.round(rect.height), fontSize: element.style.fontSize || '', skillFontSize: element.style.getPropertyValue('--layout-skill-font-size') || '' }
       : { modified: true, left: Math.round(rect.left), top: Math.round(rect.top), width: Math.round(rect.width), height: Math.round(rect.height), fontSize: element.style.fontSize || '', skillFontSize: element.style.getPropertyValue('--layout-skill-font-size') || '' };
   });
-  localStorage.setItem('stardust-battle-layout', JSON.stringify(saved));
+  getGameStorage().setItem('stardust-battle-layout', JSON.stringify(saved));
 }
 
 function setupLayoutDrag() {
@@ -724,6 +737,7 @@ function setupLayoutDrag() {
 }
 
 function showToast(message) {
+  const runtime=getPermanentPartyRuntime();if(runtime?.busy){(runtime.coordinator?.busy?runtime.coordinator.whenIdle():runtime.flush()).then(()=>showToast(message),()=>showToast("儲存失敗，請重新整理後重試。"));return;}if(runtime?.failure)message="儲存失敗，請重新整理後重試。";
   toast.textContent = message;
   toast.classList.add('show');
   clearTimeout(toastTimer);
@@ -1251,9 +1265,11 @@ function normalizeWearableSeriesName(item) {
 const TAB_ACTIVE_CHARACTER_SLOT_KEY = 'stardust-tab-active-character-slot';
 
 function getActiveCharacterSlotIndex() {
+  const permanent = getPermanentPartyRuntime();
+  if (permanent) return permanent.model.slotOrder.indexOf(permanent.mainId);
   if (ChapterTwoBalancePlaytestPolicy?.isActive()) return ChapterTwoBalancePlaytestPolicy.getActiveSlotIndex();
-  const slots = JSON.parse(localStorage.getItem('stardust-character-slots') || '[]');
-  const legacyIndex = Number(localStorage.getItem('stardust-active-character-slot') || 0);
+  const slots = JSON.parse(getGameStorage().getItem('stardust-character-slots') || '[]');
+  const legacyIndex = Number(getGameStorage().getItem('stardust-active-character-slot') || 0);
   const storedTabIndex = sessionStorage.getItem(TAB_ACTIVE_CHARACTER_SLOT_KEY);
   const tabIndex = storedTabIndex === null ? NaN : Number(storedTabIndex);
   const requestedIndex = Number.isInteger(tabIndex) && tabIndex >= 0 ? tabIndex : legacyIndex;
@@ -1263,14 +1279,16 @@ function getActiveCharacterSlotIndex() {
 function setActiveCharacterSlotIndex(index) {
   if (ChapterTwoBalancePlaytestPolicy?.isActive()) return;
   sessionStorage.setItem(TAB_ACTIVE_CHARACTER_SLOT_KEY, String(index));
-  localStorage.setItem('stardust-active-character-slot', String(index));
+  getGameStorage().setItem('stardust-active-character-slot', String(index));
 }
 
 function getActiveCharacter() {
+  const permanent = getPermanentPartyRuntime();
+  if (permanent) return permanent.model.characters[permanent.mainId]?.character || null;
   if (ChapterTwoBalancePlaytestPolicy?.isActive()) return getCharacterSlots()[getActiveCharacterSlotIndex()]?.character || null;
-  const slots = JSON.parse(localStorage.getItem('stardust-character-slots') || '[]');
+  const slots = JSON.parse(getGameStorage().getItem('stardust-character-slots') || '[]');
   return slots[getActiveCharacterSlotIndex()]?.character
-    || JSON.parse(localStorage.getItem('stardust-character') || 'null');
+    || JSON.parse(getGameStorage().getItem('stardust-character') || 'null');
 }
 
 function getBlackForestEntrancePlaytestConfig() {
@@ -1328,10 +1346,12 @@ function getLocalPlaytestProgressKey() {
 function getPlaytestHpFloor() {
   const visualShowcase = ChapterTwoBalancePlaytestPolicy?.isActive()
     && new URLSearchParams(window.location.search).has('showcase');
-  return visualShowcase || getBlackForestEntrancePlaytestConfig().invincible || getBlackstoneStrongholdPlaytestConfig().invincible || getForestAltarPlaytestConfig().invincible || getBlackForestDepthsPlaytestConfig().invincible ? 1 : 0;
+  return visualShowcase || isMonsterRotationPreview() || getBlackForestEntrancePlaytestConfig().invincible || getBlackstoneStrongholdPlaytestConfig().invincible || getForestAltarPlaytestConfig().invincible || getBlackForestDepthsPlaytestConfig().invincible ? 1 : 0;
 }
 
 function getProgress(activeCharacterOverride = null) {
+  const permanent = getPermanentPartyRuntime();
+  if (permanent) return normalizePermanentRead(permanent.getProgress(activeCharacterOverride?.id || permanent.mainId));
   const resolvedActiveCharacter = activeCharacterOverride || getActiveCharacter();
   const slots = getCharacterSlots();
   const slotProgress = Array.isArray(slots) ? slots[getActiveCharacterSlotIndex()]?.progress : null;
@@ -1339,7 +1359,7 @@ function getProgress(activeCharacterOverride = null) {
   const playtestProgress = playtestProgressKey
     ? JSON.parse(sessionStorage.getItem(playtestProgressKey) || 'null')
     : null;
-  const saved = JSON.parse(JSON.stringify(playtestProgress || slotProgress || JSON.parse(localStorage.getItem('stardust-progress') || '{}')));
+  const saved = JSON.parse(JSON.stringify(playtestProgress || slotProgress || JSON.parse(getGameStorage().getItem('stardust-progress') || '{}')));
   delete saved.collection;
   delete saved.collectibleMigrationVersion;
   if (['black-forest', 'black-forest-altar'].includes(saved.selectedMapId)) {
@@ -1360,7 +1380,7 @@ function getProgress(activeCharacterOverride = null) {
       if (!saved.equipment.armor) saved.equipment.armor = starterEquipment.armor;
     }
     saved.starterGearVersion = 'starter-gear-v1';
-    localStorage.setItem('stardust-progress', JSON.stringify(saved));
+    getGameStorage().setItem('stardust-progress', JSON.stringify(saved));
   }
   if (saved.equipmentRetentionVersion !== 'planned-catalog-and-starter-v2') {
     const character = resolvedActiveCharacter;
@@ -1373,33 +1393,33 @@ function getProgress(activeCharacterOverride = null) {
     if (!saved.equipment.weapon) saved.equipment.weapon = starterEquipment.weapon;
     if (!saved.equipment.armor) saved.equipment.armor = starterEquipment.armor;
     saved.equipmentRetentionVersion = 'planned-catalog-and-starter-v2';
-    localStorage.setItem('stardust-progress', JSON.stringify(saved));
+    getGameStorage().setItem('stardust-progress', JSON.stringify(saved));
   }
   const activeCharacterForQuiver = resolvedActiveCharacter;
   if (HunterArrowPolicy.isHunter(activeCharacterForQuiver?.job)) {
     saved.equipment = HunterArrowPolicy.ensureStarterQuiver({ ...emptyEquipment(), ...(saved.equipment || {}) });
     if (saved.hunterQuiverMigrationVersion !== 'hunter-quiver-resource-v1') {
       saved.hunterQuiverMigrationVersion = 'hunter-quiver-resource-v1';
-      localStorage.setItem('stardust-progress', JSON.stringify(saved));
+      getGameStorage().setItem('stardust-progress', JSON.stringify(saved));
     }
   }
   if (saved.equipmentVisualMigrationVersion !== 'chapter-one-greatsword-images-v17') {
     saved.inventory = (Array.isArray(saved.inventory) ? saved.inventory : []).map(applyEquipmentVisual);
     saved.equipment = Object.fromEntries(Object.entries(saved.equipment || {}).map(([slot, item]) => [slot, applyEquipmentVisual(item)]));
     saved.equipmentVisualMigrationVersion = 'chapter-one-greatsword-images-v17';
-    localStorage.setItem('stardust-progress', JSON.stringify(saved));
+    getGameStorage().setItem('stardust-progress', JSON.stringify(saved));
   }
   if (saved.bowVisualMigrationVersion !== 'hunter-bow-image-v1') {
     saved.inventory = (Array.isArray(saved.inventory) ? saved.inventory : []).map(applyEquipmentVisual);
     saved.equipment = Object.fromEntries(Object.entries(saved.equipment || {}).map(([slot, item]) => [slot, applyEquipmentVisual(item)]));
     saved.bowVisualMigrationVersion = 'hunter-bow-image-v1';
-    localStorage.setItem('stardust-progress', JSON.stringify(saved));
+    getGameStorage().setItem('stardust-progress', JSON.stringify(saved));
   }
   if (saved.quiverVisualMigrationVersion !== 'hunter-quiver-image-v1') {
     saved.inventory = (Array.isArray(saved.inventory) ? saved.inventory : []).map(applyEquipmentVisual);
     saved.equipment = Object.fromEntries(Object.entries(saved.equipment || {}).map(([slot, item]) => [slot, applyEquipmentVisual(item)]));
     saved.quiverVisualMigrationVersion = 'hunter-quiver-image-v1';
-    localStorage.setItem('stardust-progress', JSON.stringify(saved));
+    getGameStorage().setItem('stardust-progress', JSON.stringify(saved));
   }
   if (saved.qualityUnlockMigrationVersion !== 'quality-tier-map-gating-v1') {
     const downgradeLockedQuality = (item) => {
@@ -1409,61 +1429,61 @@ function getProgress(activeCharacterOverride = null) {
     saved.inventory = (Array.isArray(saved.inventory) ? saved.inventory : []).map(downgradeLockedQuality);
     saved.equipment = Object.fromEntries(Object.entries(saved.equipment || {}).map(([slot, item]) => [slot, downgradeLockedQuality(item)]));
     saved.qualityUnlockMigrationVersion = 'quality-tier-map-gating-v1';
-    localStorage.setItem('stardust-progress', JSON.stringify(saved));
+    getGameStorage().setItem('stardust-progress', JSON.stringify(saved));
   }
   if (saved.equipmentAffixMigrationVersion !== 'green-affix-v1') {
     saved.inventory = (Array.isArray(saved.inventory) ? saved.inventory : []).map((item) => RunePolicy.normalizeEquipment(EquipmentAffixPolicy.normalizeEquipment(item)));
     saved.equipment = Object.fromEntries(Object.entries({ ...emptyEquipment(), ...(saved.equipment || {}) })
       .map(([slot, item]) => [slot, RunePolicy.normalizeEquipment(EquipmentAffixPolicy.normalizeEquipment(item))]));
     saved.equipmentAffixMigrationVersion = 'green-affix-v1';
-    localStorage.setItem('stardust-progress', JSON.stringify(saved));
+    getGameStorage().setItem('stardust-progress', JSON.stringify(saved));
   }
   if (saved.offhandAffixMigrationVersion !== 'unified-offhand-affixes-v1') {
     saved.inventory = (Array.isArray(saved.inventory) ? saved.inventory : []).map((item) => EquipmentDropPolicy.migrateLegacyOffhand(item));
     saved.equipment = Object.fromEntries(Object.entries({ ...emptyEquipment(), ...(saved.equipment || {}) })
       .map(([slot, item]) => [slot, EquipmentDropPolicy.migrateLegacyOffhand(item)]));
     saved.offhandAffixMigrationVersion = 'unified-offhand-affixes-v1';
-    localStorage.setItem('stardust-progress', JSON.stringify(saved));
+    getGameStorage().setItem('stardust-progress', JSON.stringify(saved));
   }
   if (saved.chapterTwoCraftedBaseStatsMigrationVersion !== 'chapter2-crafted-base-stats-v1') {
     saved.inventory = (Array.isArray(saved.inventory) ? saved.inventory : []).map(CraftingPolicy.applyCraftedBaseStats);
     saved.equipment = Object.fromEntries(Object.entries(saved.equipment || {})
       .map(([slot, item]) => [slot, CraftingPolicy.applyCraftedBaseStats(item)]));
     saved.chapterTwoCraftedBaseStatsMigrationVersion = 'chapter2-crafted-base-stats-v1';
-    localStorage.setItem('stardust-progress', JSON.stringify(saved));
+    getGameStorage().setItem('stardust-progress', JSON.stringify(saved));
   }
   if (saved.chapterThreeBlueCraftedBaseStatsMigrationVersion !== 'chapter3-blue-crafted-base-stats-v1') {
     saved.inventory = (Array.isArray(saved.inventory) ? saved.inventory : []).map(CraftingPolicy.applyCraftedBaseStats);
     saved.equipment = Object.fromEntries(Object.entries(saved.equipment || {})
       .map(([slot, item]) => [slot, CraftingPolicy.applyCraftedBaseStats(item)]));
     saved.chapterThreeBlueCraftedBaseStatsMigrationVersion = 'chapter3-blue-crafted-base-stats-v1';
-    localStorage.setItem('stardust-progress', JSON.stringify(saved));
+    getGameStorage().setItem('stardust-progress', JSON.stringify(saved));
   }
   if (saved.chapterThreeEpicCraftedTemplateMigrationVersion !== 'chapter3-epic-crafted-template-v1') {
     saved.inventory = (Array.isArray(saved.inventory) ? saved.inventory : []).map(CraftingPolicy.applyCraftedEpicTemplate);
     saved.equipment = Object.fromEntries(Object.entries(saved.equipment || {})
       .map(([slot, item]) => [slot, CraftingPolicy.applyCraftedEpicTemplate(item)]));
     saved.chapterThreeEpicCraftedTemplateMigrationVersion = 'chapter3-epic-crafted-template-v1';
-    localStorage.setItem('stardust-progress', JSON.stringify(saved));
+    getGameStorage().setItem('stardust-progress', JSON.stringify(saved));
   }
   if (saved.chapterThreeSpecialEquipmentTemplateMigrationVersion !== 'chapter3-special-equipment-template-v1') {
     saved.inventory = (Array.isArray(saved.inventory) ? saved.inventory : []).map(ChapterThreeSpecialEquipmentPolicy.upgradeSpecialEquipmentInstance);
     saved.equipment = Object.fromEntries(Object.entries(saved.equipment || {})
       .map(([slot, item]) => [slot, ChapterThreeSpecialEquipmentPolicy.upgradeSpecialEquipmentInstance(item)]));
     saved.chapterThreeSpecialEquipmentTemplateMigrationVersion = 'chapter3-special-equipment-template-v1';
-    localStorage.setItem('stardust-progress', JSON.stringify(saved));
+    getGameStorage().setItem('stardust-progress', JSON.stringify(saved));
   }
   if (saved.equipmentDropMigrationVersion !== 'equipment-drop-v1') {
     saved.inventory = Array.isArray(saved.inventory) ? saved.inventory : [];
     saved.equipmentDropMigrationVersion = 'equipment-drop-v1';
-    localStorage.setItem('stardust-progress', JSON.stringify(saved));
+    getGameStorage().setItem('stardust-progress', JSON.stringify(saved));
   }
   if (saved.sharedCasterWeaponMigrationVersion !== 'mage-priest-weapons-v1') {
     saved.inventory = (Array.isArray(saved.inventory) ? saved.inventory : []).map(normalizeCasterWeaponJobs);
     saved.equipment = Object.fromEntries(Object.entries(saved.equipment || {})
       .map(([slot, item]) => [slot, normalizeCasterWeaponJobs(item)]));
     saved.sharedCasterWeaponMigrationVersion = 'mage-priest-weapons-v1';
-    localStorage.setItem('stardust-progress', JSON.stringify(saved));
+    getGameStorage().setItem('stardust-progress', JSON.stringify(saved));
   }
   if (saved.jobRestrictionMigrationVersion !== 'job-restriction-v1') {
     const character = resolvedActiveCharacter;
@@ -1478,7 +1498,7 @@ function getProgress(activeCharacterOverride = null) {
     saved.inventory = inventoryForRestrictions;
     saved.equipment = equipmentForRestrictions;
     saved.jobRestrictionMigrationVersion = 'job-restriction-v1';
-    localStorage.setItem('stardust-progress', JSON.stringify(saved));
+    getGameStorage().setItem('stardust-progress', JSON.stringify(saved));
   }
   const inventory = SkillUpgradePolicy.normalizeMaterialInventory(SalvagePolicy.normalizeInventory(removeLegacySkillUpgradeMaterials(VillageUpgradePolicy.normalizeMaterialInventory(saved.inventory))))
     .map(normalizeWearableSeriesName);
@@ -1584,18 +1604,20 @@ function getProgress(activeCharacterOverride = null) {
   if (needsInvitationSnapshotMigration) {
     if (playtestProgressKey) sessionStorage.setItem(playtestProgressKey, JSON.stringify(normalizedProgress));
     else {
-      localStorage.setItem('stardust-progress', JSON.stringify(normalizedProgress));
-      if (partySlots[activeSlotIndex]?.character) localStorage.setItem('stardust-character-slots', JSON.stringify(partySlots));
+      getGameStorage().setItem('stardust-progress', JSON.stringify(normalizedProgress));
+      if (partySlots[activeSlotIndex]?.character) getGameStorage().setItem('stardust-character-slots', JSON.stringify(partySlots));
     }
   }
   if (!playtestProgressKey && normalizedProgress.chapterTwoProgress.completed && (Number(saved.unlockedChapter) || 1) < 3) {
-    localStorage.setItem('stardust-progress', JSON.stringify(normalizedProgress));
-    if (partySlots[activeSlotIndex]?.character) localStorage.setItem('stardust-character-slots', JSON.stringify(partySlots));
+    getGameStorage().setItem('stardust-progress', JSON.stringify(normalizedProgress));
+    if (partySlots[activeSlotIndex]?.character) getGameStorage().setItem('stardust-character-slots', JSON.stringify(partySlots));
   }
   return normalizedProgress;
 }
 
 function getCharacterSlots() {
+  const permanent = getPermanentPartyRuntime();
+  if (permanent) return permanent.getSlots();
   if (ChapterTwoBalancePlaytestPolicy?.isActive()) {
     const playtestSlotKey = ChapterTwoBalancePlaytestPolicy.getSlotKey();
     let testSlots = JSON.parse(sessionStorage.getItem(playtestSlotKey) || 'null');
@@ -1609,27 +1631,29 @@ function getCharacterSlots() {
     }
     return testSlots;
   }
-  let slots = JSON.parse(localStorage.getItem('stardust-character-slots') || '[]');
+  let slots = JSON.parse(getGameStorage().getItem('stardust-character-slots') || '[]');
   if (!Array.isArray(slots)) slots = [];
-  const legacyCharacter = JSON.parse(localStorage.getItem('stardust-character') || 'null');
+  const legacyCharacter = JSON.parse(getGameStorage().getItem('stardust-character') || 'null');
   if (!slots.length && legacyCharacter) {
-    slots[0] = { character: legacyCharacter, progress: JSON.parse(localStorage.getItem('stardust-progress') || '{}') };
-    localStorage.setItem('stardust-character-slots', JSON.stringify(slots));
+    slots[0] = { character: legacyCharacter, progress: JSON.parse(getGameStorage().getItem('stardust-progress') || '{}') };
+    getGameStorage().setItem('stardust-character-slots', JSON.stringify(slots));
     setActiveCharacterSlotIndex(0);
   }
   const idsBeforeRepair = slots.map((slot) => slot?.character?.id || '');
   PartyPolicy.ensureUniqueCharacterIds(slots);
   const changed = slots.some((slot, index) => (slot?.character?.id || '') !== idsBeforeRepair[index]);
-  if (changed) localStorage.setItem('stardust-character-slots', JSON.stringify(slots));
+  if (changed) getGameStorage().setItem('stardust-character-slots', JSON.stringify(slots));
   return slots;
 }
 
 function normalizeCurrentParty(progress = getProgress()) {
+  const permanent = getPermanentPartyRuntime();
+  if (permanent) { progress.party = permanent.getParty(); return progress.party; }
   const slots = getCharacterSlots();
   const mainSlotIndex = getActiveCharacterSlotIndex();
   const character = getActiveCharacter();
   if (slots[mainSlotIndex]?.character && character?.id !== slots[mainSlotIndex].character.id) {
-    localStorage.setItem('stardust-character', JSON.stringify(slots[mainSlotIndex].character));
+    getGameStorage().setItem('stardust-character', JSON.stringify(slots[mainSlotIndex].character));
   }
   progress.party = PartyPolicy.normalizeParty(progress.party, {
     slots,
@@ -1649,15 +1673,17 @@ function syncActiveCharacterSlot(progressOverride = null) {
   if (!character) return;
   const activeIndex = getActiveCharacterSlotIndex();
   const slots = getCharacterSlots();
-  slots[activeIndex] = { character, progress: progressOverride || slots[activeIndex]?.progress || JSON.parse(localStorage.getItem('stardust-progress') || '{}') };
+  slots[activeIndex] = { character, progress: progressOverride || slots[activeIndex]?.progress || JSON.parse(getGameStorage().getItem('stardust-progress') || '{}') };
   if (ChapterTwoBalancePlaytestPolicy?.isActive()) {
     sessionStorage.setItem(ChapterTwoBalancePlaytestPolicy.getSlotKey(), JSON.stringify(slots));
     return;
   }
-  localStorage.setItem('stardust-character-slots', JSON.stringify(slots));
+  getGameStorage().setItem('stardust-character-slots', JSON.stringify(slots));
 }
 
 function saveProgress(progress) {
+  const permanent = getPermanentPartyRuntime();
+  if (permanent) { if(fighting&&permanent.singleOfflineEnabled)progress.lastActiveAt=Date.now();permanent.saveProgress(permanent.mainId, progress); const pending=permanent.flush();pending.catch(()=>{});return pending; }
   normalizeCurrentParty(progress);
   progress.village = VillagePolicy.normalizeVillageData(progress.village);
   ChapterTwoProgressionPolicy.normalize(progress);
@@ -1668,12 +1694,13 @@ function saveProgress(progress) {
     sessionStorage.setItem(playtestProgressKey, JSON.stringify(progress));
     return;
   }
-  localStorage.setItem('stardust-progress', JSON.stringify(progress));
+  getGameStorage().setItem('stardust-progress', JSON.stringify(progress));
   syncActiveCharacterSlot(progress);
 }
 
 function getAccountResources() {
-  const storage = ChapterTwoBalancePlaytestPolicy?.isActive() ? sessionStorage : localStorage;
+  if (getPermanentPartyRuntime()) { const resources = JSON.parse(getGameStorage().getItem('stardust-account-resources')); return { ...resources, dungeonKeys: { blackForestAltar: 0, ...(resources.dungeonKeys || {}) } }; }
+  const storage = ChapterTwoBalancePlaytestPolicy?.isActive() ? sessionStorage : getGameStorage();
   const saved = JSON.parse(storage.getItem('stardust-account-resources') || '{}');
   if (Object.prototype.hasOwnProperty.call(saved, 'starIron')) {
     delete saved.starIron;
@@ -1685,7 +1712,8 @@ function getAccountResources() {
 }
 
 function saveAccountResources(resources) {
-  const storage = ChapterTwoBalancePlaytestPolicy?.isActive() ? sessionStorage : localStorage;
+  if (getPermanentPartyRuntime()) { getGameStorage().setItem('stardust-account-resources', JSON.stringify(resources)); return getPermanentPartyRuntime().flush(); }
+  const storage = ChapterTwoBalancePlaytestPolicy?.isActive() ? sessionStorage : getGameStorage();
   const sanitized = { ...(resources || {}) };
   delete sanitized.starIron;
   storage.setItem('stardust-account-resources', JSON.stringify(sanitized));
@@ -1706,13 +1734,24 @@ function effectiveEquipmentStat(item, stat) {
   return baseValue + affixValue;
 }
 
-function activateCharacterSlot(index) {
+async function activateCharacterSlot(index) {
+  const permanent = getPermanentPartyRuntime();
+  if (permanent) {
+    const requestedId = permanent.model.slotOrder[index];
+    if (!requestedId) return;
+    if (fighting) persistPartyRuntimeState();
+    fighting = false; clearInterval(battleTimer); clearInterval(skillTimer); clearInterval(enemyAttackTimer);
+    await permanent.flush(); const id = requestedId;
+    if (!id) return; await permanent.switchMain(id);
+    document.querySelector('#character-roster-modal').classList.add('hidden');
+    showToast('已切換角色：' + getActiveCharacter().name); return;
+  }
   syncActiveCharacterSlot();
   const slot = getCharacterSlots()[index];
   if (!slot) return;
   setActiveCharacterSlotIndex(index);
-  localStorage.setItem('stardust-character', JSON.stringify(slot.character));
-  localStorage.setItem('stardust-progress', JSON.stringify(slot.progress));
+  getGameStorage().setItem('stardust-character', JSON.stringify(slot.character));
+  getGameStorage().setItem('stardust-progress', JSON.stringify(slot.progress));
   document.querySelector('#character-roster-modal').classList.add('hidden');
   claimOfflineRewards();
   showToast(`已切換角色：${slot.character.name}`);
@@ -1796,7 +1835,7 @@ function closeVillage() {
   closeVillageBuilding();
   villageScreen.classList.add('hidden');
   document.querySelector('.app-shell').classList.remove('village-open');
-  if (villageReturnScreen === 'battle' && localStorage.getItem('stardust-character')) battleScreen.classList.remove('hidden');
+  if (villageReturnScreen === 'battle' && getGameStorage().getItem('stardust-character')) battleScreen.classList.remove('hidden');
   else menuScreen.classList.remove('hidden');
 }
 
@@ -2174,7 +2213,7 @@ function formatOfflineDuration(milliseconds) {
 }
 
 function markPlayerActive() {
-  const character = localStorage.getItem('stardust-character');
+  const character = getGameStorage().getItem('stardust-character');
   if (!character) return;
   if (fighting && battle.partyMembers?.length) persistPartyRuntimeState();
   const progress = getProgress();
@@ -2208,17 +2247,12 @@ function grantChapterThreeSpecialEquipmentDrop(progress, map, enemy, options = {
   return ChapterThreeSpecialEquipmentPolicy.grantSpecialDrop(progress, enemy, map.id, options);
 }
 
-function claimOfflineRewards() {
-  const character = getActiveCharacter();
-  if (!character) return null;
-  const progress = getProgress();
-  const now = Date.now();
+function calculateLegacyOfflineRewards(character,progress,now=Date.now(),defenseMultiplier=ChapterThreeSpecialEquipmentPolicy.getDefenseMultiplier(getMainBattleMember(),now)) {
   const lastActiveAt = Number(progress.lastActiveAt || now);
   const offlineMs = Math.min(offlineLimitMs, Math.max(0, now - lastActiveAt));
   progress.lastActiveAt = now;
   if (offlineMs < offlineMinimumMs) {
-    saveProgress(progress);
-    return null;
+    return {progress,report:null};
   }
 
   const stats = getCharacterStats(progress.level, progress, character);
@@ -2232,7 +2266,7 @@ function claimOfflineRewards() {
       maxHp: stats.hp,
       currentHp: Number.isFinite(savedHp) ? Math.max(0, Math.min(stats.hp, savedHp)) : stats.hp,
       attack: stats.attack,
-      defense: Math.round(stats.defense * ChapterThreeSpecialEquipmentPolicy.getDefenseMultiplier(getMainBattleMember(), now)),
+      defense: Math.round(stats.defense * defenseMultiplier),
       damageReduction: stats.damageReduction,
       attackSpeed: stats.attackSpeed,
       hpRegeneration: stats.hpRegeneration,
@@ -2254,8 +2288,7 @@ function claimOfflineRewards() {
       progress.level += 1;
       levelsGained += 1;
     }
-    if (progress.level >= 30) {
-      progress.level = 30;
+    if (progress.level === 30) {
       progress.xp = Math.min(progress.xp, requiredXp(30));
     }
     ChapterOneProgressionPolicy.recordNormalKill(progress, activeMap.id);
@@ -2283,13 +2316,29 @@ function claimOfflineRewards() {
     }
     progress.requiresMapSelectionAfterDefeat = true;
   }
-  saveProgress(progress);
-  pendingOfflineReport = { duration: formatOfflineDuration(simulation.effectiveMs), offlineDuration: formatOfflineDuration(offlineMs), defeated, gainedXp, gainedGold, levelsGained, equipmentFound, capped: now - lastActiveAt > offlineLimitMs, potionsUsed, died: simulation.died };
-  if (simulation.died) {
-    openVillage('menu');
-    showToast(`角色在離線戰鬥中戰敗，本次掛機已結束。有效掛機時間：${pendingOfflineReport.duration}`);
-  } else showToast(`離線掛機 ${pendingOfflineReport.duration}：獲得 ${gainedXp} EXP、${gainedGold} 金幣`);
-  return pendingOfflineReport;
+  const report = { duration: formatOfflineDuration(simulation.effectiveMs), offlineDuration: formatOfflineDuration(offlineMs), defeated, gainedXp, gainedGold, levelsGained, equipmentFound, capped: now - lastActiveAt > offlineLimitMs, potionsUsed, died: simulation.died };
+  return {progress,report};
+}
+
+function presentLegacyOfflineReport(report) {
+  pendingOfflineReport=report;if(!report)return null;
+  if(report.died){openVillage('menu');showToast('角色在離線戰鬥中戰敗，本次掛機已結束。有效掛機時間：'+report.duration);}else showToast('離線掛機 '+report.duration+'：獲得 '+report.gainedXp+' EXP、'+report.gainedGold+' 金幣');
+  return report;
+}
+
+function getLegacyOfflineContext(now=Date.now()){return {defenseMultiplier:ChapterThreeSpecialEquipmentPolicy.getDefenseMultiplier(getMainBattleMember(),now)};}
+function calculatePermanentSingleJob(job){const random=Math.random,clock=Date.now;let seed=job.seed>>>0,gear=0;Math.random=()=>{seed=(Math.imul(seed,1664525)+1013904223)>>>0;return seed/4294967296;};Date.now=()=>job.now;
+  try{const character=job.model.characters[job.characterId].character,progress=normalizePermanentRead(PermanentOnlinePolicy.readProgress(job.model,job.characterId),character);const calculated=calculateLegacyOfflineRewards(character,progress,job.now,job.context?.defenseMultiplier??1);return {model:PermanentOnlinePolicy.putProgress(job.model,job.characterId,calculated.progress,{generate:()=>job.id+':gear:'+(gear++)}),report:calculated.report||{skipped:true}};}finally{Math.random=random;Date.now=clock;}
+}
+async function claimPermanentSingleOffline() {
+ const runtime=getPermanentPartyRuntime();if(!runtime?.singleOfflineEnabled||fighting)return null;const now=Date.now();
+ const result=await runtime.claimSingleOffline(calculatePermanentSingleJob,{now,context:getLegacyOfflineContext(now)});
+ if(!result||result.duplicate||result.report.skipped)return null;return presentLegacyOfflineReport(result.report);
+}
+
+function claimOfflineRewards() {
+ const runtime=getPermanentPartyRuntime();if(runtime)return runtime.singleOfflineEnabled?claimPermanentSingleOffline():null;
+ const character=getActiveCharacter();if(!character)return null;const calculated=calculateLegacyOfflineRewards(character,getProgress(),Date.now());saveProgress(calculated.progress);return presentLegacyOfflineReport(calculated.report);
 }
 
 function getBattleLogType(message) {
@@ -4565,6 +4614,7 @@ function createBattlePartyMember(slot, slotIndex, mainId, now = Date.now()) {
     mageStats.manaAfterBonus = maxResource;
     mageStats.manaBeforeBonus = Math.round(maxResource / (1 + MageAdvancementPolicy.getMaxManaBonus(progress)));
   }
+  if (getPermanentPartyRuntime()) getPermanentPartyRuntime().restoreMember(member, savedState);
   return member;
 }
 
@@ -4580,6 +4630,7 @@ function buildBattlePartyMembers(now = Date.now()) {
     const snapshot = party.memberSnapshots?.[memberId];
     const slot = memberId === mainId
       ? { character: getActiveCharacter(), progress }
+      : getPermanentPartyRuntime() ? { character: { ...liveSlot.character }, progress: normalizePermanentRead(getPermanentPartyRuntime().getProgress(memberId)) }
       : PartyPolicy.createSlotFromInvitationSnapshot(snapshot, liveSlot?.progress?.partyMemberState, progress);
     return createBattlePartyMember(slot, slotIndex, mainId, now);
   }).filter(Boolean);
@@ -4678,19 +4729,23 @@ function persistPartyRuntimeState() {
       defense: member.defense,
       attackSpeed: member.attackSpeed
     };
+    if (getPermanentPartyRuntime()) { Object.assign(state, getPermanentPartyRuntime().captureMember(member)); state.partySharedCooldowns = { sacredGuardianReadyAt: battle.sacredGuardianReadyAt || 0 }; }
     member.progress.partyMemberState = state;
-    if (member.slotIndex === activeIndex) mainProgress.partyMemberState = state;
-    if (slots[member.slotIndex]) slots[member.slotIndex].progress = { ...slots[member.slotIndex].progress, partyMemberState: state };
+    const memberSlotIndex = getPermanentPartyRuntime() ? slots.findIndex(slot => slot?.character?.id === member.id) : member.slotIndex;
+    if (getPermanentPartyRuntime() ? member.id === getPermanentPartyRuntime().mainId : memberSlotIndex === activeIndex) mainProgress.partyMemberState = state;
+    if (slots[memberSlotIndex]) slots[memberSlotIndex].progress = { ...slots[memberSlotIndex].progress, partyMemberState: state };
   });
   if (ChapterTwoBalancePlaytestPolicy?.isActive()) sessionStorage.setItem(ChapterTwoBalancePlaytestPolicy.getSlotKey(), JSON.stringify(slots));
-  else if (!getLocalPlaytestProgressKey()) localStorage.setItem('stardust-character-slots', JSON.stringify(slots));
+  else if (!getLocalPlaytestProgressKey()) getGameStorage().setItem('stardust-character-slots', JSON.stringify(slots));
   saveProgress(mainProgress);
 }
 
 function rebuildBattlePartyMembers() {
   if (!fighting) return;
   persistPartyRuntimeState();
+  const previousMembers = getPermanentPartyRuntime() ? new Map(battle.partyMembers.map(member => [member.id, member])) : null;
   battle.partyMembers = buildBattlePartyMembers(Date.now());
+  if (previousMembers) battle.partyMembers = battle.partyMembers.map(member => getPermanentPartyRuntime().refreshMember(previousMembers.get(member.id), member));
   logPartyDebug('戰鬥隊伍同步', { members: battle.partyMembers.map((member) => `${member.id}:${member.name}`).join(',') });
   syncLegacyBattleStateFromMain();
   updateBattleUI();
@@ -5975,6 +6030,31 @@ function resolveFinishedMageResonance(member, now) {
   MageAdvancementPolicy.recordOverloadDamage(member, totalDamage, targets.length);
 }
 
+function queueClassHealAfterglow(member, healTarget, event) {
+  const farmingIdentity=typeof getPermanentPartyRuntime==='function'&&getPermanentPartyRuntime()?.coordinator?{mainId:getPermanentPartyRuntime().mainId,battle}:null;
+  setTimeout(() => {
+    if(farmingIdentity&&(farmingIdentity.mainId!==getPermanentPartyRuntime()?.mainId||farmingIdentity.battle!==battle))return;
+    const pending = member.pendingClassHeals || [];
+    const index = pending.findIndex(entry => entry.id === event.id);
+    if (index < 0) return;
+    if (Date.now() < event.dueAt) { queueClassHealAfterglow(member, healTarget, event); return; }
+    pending.splice(index, 1);
+    if (!healTarget.alive) return;
+    if (member.job === 'priest') PriestAdvancementPolicy.heal(member, healTarget, event.amount, 'afterglow');
+    else healTarget.currentHp = Math.min(healTarget.maxHp, healTarget.currentHp + event.amount);
+    if (fighting) updateBattleUI();
+  }, Math.max(0, event.dueAt - Date.now()));
+}
+
+function scheduleClassHealAfterglow(member, healTarget, amount, now = Date.now()) {
+  member.classHealSequence = (Number(member.classHealSequence) || 0) + 1;
+  const event = { id: member.classHealSequence,
+    dueAt: now + 3000, targetId: healTarget.id, amount };
+  member.pendingClassHeals = member.pendingClassHeals || [];
+  member.pendingClassHeals.push(event);
+  queueClassHealAfterglow(member, healTarget, event);
+}
+
 function useAutoSkillForMember(member, now = Date.now()) {
   if (member?.job === 'mage') resolveFinishedMageResonance(member, now);
   if (!member?.alive || now < member.stunnedUntil || now < member.globalSkillReadyAt) return false;
@@ -6461,11 +6541,7 @@ function useAutoSkillForMember(member, now = Date.now()) {
   member.globalSkillReadyAt = now + 1000;
   member.skillCooldowns[healSkill.id] = now + (healEffect.cooldown || healSkill.cooldown) * skillCooldownMultiplier * 1000 / stats.cooldownSpeed;
   ChapterThreeEpicWeaponPolicy.resolveRuneCycle(member, actualHealResourceSpent, healSkill.id, now);
-  if (healEffect.afterglow && actualHeal > 0) setTimeout(() => {
-    if (!healTarget.alive) return;
-    if(member.job==='priest')PriestAdvancementPolicy.heal(member,healTarget,Math.ceil(actualHeal*healEffect.afterglow),'afterglow');else healTarget.currentHp = Math.min(healTarget.maxHp, healTarget.currentHp + Math.ceil(actualHeal * healEffect.afterglow));
-    if (fighting) updateBattleUI();
-  }, 3000);
+  if (healEffect.afterglow && actualHeal > 0) scheduleClassHealAfterglow(member, healTarget, Math.ceil(actualHeal * healEffect.afterglow), now);
   logBattle(`✦ ${member.name}施放【${healSkill.name}】，為 ${healTarget.name}恢復 ${actualHeal} 生命。`);
   logPartyDebug('技能施放', {
     attackerId: member.id,
@@ -6482,6 +6558,7 @@ function useAutoSkillForMember(member, now = Date.now()) {
 }
 
 function autoSkillTick() {
+  if (getPermanentPartyRuntime()?.busy || getPermanentPartyRuntime()?.failure) return;
   if (!fighting) return;
   if (isTimedChapterThreeVisualShowcase()) return;
   const now = Date.now();
@@ -7156,6 +7233,7 @@ function createBattleTickRuntime() {
 }
 
 function battleTick() {
+  if (getPermanentPartyRuntime()?.busy || getPermanentPartyRuntime()?.failure) return;
   CombatCorePolicy.runPlayerTick(createBattleTickRuntime(), Date.now());
 }
 
@@ -8512,6 +8590,7 @@ function openBattle() {
   const partyMembers = buildBattlePartyMembers(battleStart);
   const mainMember = partyMembers.find((member) => member.isMain) || partyMembers[0];
   battle = { enemyTypes, enemyLevels, enemyHps, partyMembers, playerHp: mainMember?.currentHp || getMaxHp(progress.level, progress), playerMana: mainMember?.resourceCurrent || 0, playerArrows: mainMember?.resourceType === 'arrows' ? mainMember.resourceCurrent : 0, playerShield: 0, playerStunnedUntil: 0, playerBleed: null, manaExhausted: false, playerAttackCharge: 0, hunterAttackCount: 0, lastManaRegenAt: battleStart, lastResourceUpdatedAt: battleStart, lastArrowRecoveryAt: battleStart, lastCorruptionTickAt: battleStart, lastStrongholdRegenAt: battleStart, enemyNextAttackAt: createEnemyAttackSchedule(enemyTypes, battleStart, currentMap.id, enemyLevels), enemyBoarEnraged: enemyTypes.map(() => false), enemyTrailSummoned: enemyTypes.map(() => false), enemySummonProfiles: enemyTypes.map(() => null), enemyCaptainShieldUntil: enemyTypes.map(() => 0), enemyAssassinDashUntil: enemyTypes.map(() => 0), enemySpiderNestPhase: enemyTypes.map(() => 1), blackstoneRoarUntil: 0, blackstoneCommandUntil: 0, blackstoneSpiderCommandUntil: 0, spiderNestCommandUntil: 0, strongholdCommandUntil: 0, blackstoneStrongholdState: createBlackstoneStrongholdBattleState(), globalSkillReadyAt: 0, undeadRevived: false, skillCooldowns: {}, enemyRespawns: enemyTypes.map(() => null), enemySpawnedAt: enemyTypes.map((_, index) => battleStart + index), enemyDots: enemyTypes.map(() => []), enemySkillStates: enemyTypes.map(() => null), redrockEnemyStates: enemyTypes.map(() => null), brokenrockEnemyStates: enemyTypes.map(() => null), bloodwarEnemyStates: enemyTypes.map(() => null), monsterMoveSpeed: 200, targetIndexes: [], enemyDamages: enemyTypes.map(() => []), damageTimers: [], rewardedEnemyIndexes: new Set(), roundLoot: {}, isDungeon, dungeonId: isDungeon ? currentMap.id : null, dungeonWave: isDungeon ? 1 : 0, dungeonComplete: false, waveTransitioning: false, goblinScoutSummons: 0, showcaseRoundIndex: 0, showcaseNextRoundAt: battleStart + 6000 };
+  if (getPermanentPartyRuntime()) { syncLegacyBattleStateFromMain(); battle.sacredGuardianReadyAt = Math.max(0, ...partyMembers.map(member => Number(member.progress.partyMemberState?.partySharedCooldowns?.sacredGuardianReadyAt) || 0)); }
   battle.enemyAffixes = enemyAffixes;
   battle.sessionId = sessionId;
   if (isFacilityVisualPreview()) setFacilityPreviewWave(0, battleStart);
@@ -8586,32 +8665,40 @@ const activePlaytestName = isChapterTwo21RotatingShowcase()
   : ChapterTwoBalancePlaytestPolicy?.isChapterThreeActive()
   ? `第三章 ${ChapterTwoBalancePlaytestPolicy.getRequestedMapId() === 'redrock-temple' ? '3-6' : ChapterTwoBalancePlaytestPolicy.getRequestedMapId() === 'ancient-altar' ? '3-5' : ChapterTwoBalancePlaytestPolicy.getRequestedMapId() === 'skullcrusher-war-camp' ? '3-4' : ChapterTwoBalancePlaytestPolicy.getRequestedMapId() === 'bloodwar-wastes' ? '3-3' : ChapterTwoBalancePlaytestPolicy.getRequestedMapId() === 'brokenrock-canyon' ? '3-2' : '3-1'} 開發測試`
   : '';
-const savedName = localStorage.getItem('stardust-player-name');
+const savedName = getGameStorage().getItem('stardust-player-name');
 if (activePlaytestName || savedName) {
   enterMenu(activePlaytestName || savedName);
-  claimOfflineRewards();
+  if(!window.permanentFarmingBooting){const startupOffline=claimOfflineRewards();startupOffline?.catch?.(error=>showToast('離線結算未完成：'+error.message));}
   if (ChapterTwoBalancePlaytestPolicy?.isChapterThreeActive() || ChapterTwoBalancePlaytestPolicy?.isChapterOne11Active() || ChapterTwoBalancePlaytestPolicy?.isChapterOne12Active() || ChapterTwoBalancePlaytestPolicy?.isChapterOne13Active() || ChapterTwoBalancePlaytestPolicy?.isChapterOne14Active() || ChapterTwoBalancePlaytestPolicy?.isChapterOne15Active() || isChapterTwo21RotatingShowcase() || isChapterTwo22RotatingShowcase() || isChapterTwo23RotatingShowcase() || isChapterTwo24RotatingShowcase() || isChapterTwo25RotatingShowcase() || isChapterTwo26RotatingShowcase()) setTimeout(openBattle, 0);
 }
 
-window.addEventListener('beforeunload', markPlayerActive);
-document.addEventListener('visibilitychange', () => {
-  if (document.visibilityState === 'hidden') markPlayerActive();
-  else if (document.visibilityState === 'visible') claimOfflineRewards();
+let permanentResumeBattle=false;
+async function suspendPermanentBattle() {
+ const r=getPermanentPartyRuntime();permanentResumeBattle=fighting;fighting=false;clearInterval(battleTimer);clearInterval(skillTimer);clearInterval(enemyAttackTimer);await r.flush();if(battle.partyMembers?.length)persistPartyRuntimeState();const p=getProgress();p.lastActiveAt=Date.now();saveProgress(p);await r.flush();
+}
+window.addEventListener('beforeunload', event => {
+ const r=getPermanentPartyRuntime();if(r?.singleOfflineEnabled){if(r.busy){event.preventDefault();event.returnValue='';}return;}
+ markPlayerActive();
+});
+document.addEventListener('visibilitychange',()=>{
+ const r=getPermanentPartyRuntime();if(r?.coordinator&&window.permanentFarmingVisibility){window.permanentFarmingVisibility().catch(e=>showToast('掛機恢復未完成：'+e.message));return;}if(r?.singleOfflineEnabled){if(document.visibilityState==='hidden')suspendPermanentBattle().catch(()=>showToast('儲存未完成，請重新整理。'));else if(document.visibilityState==='visible')(async()=>{await r.flush();await claimPermanentSingleOffline();if(permanentResumeBattle&&!getProgress().requiresMapSelectionAfterDefeat)openBattle();})().catch(e=>showToast('離線結算未完成：'+e.message));return;}
+ if(document.visibilityState==='hidden'){markPlayerActive();}else if(document.visibilityState==='visible')claimOfflineRewards();
 });
 setInterval(() => {
   if (document.visibilityState === 'visible') markPlayerActive();
 }, 30000);
 
-loginForm.addEventListener('submit', (event) => {
+loginForm.addEventListener('submit', async (event) => {
   event.preventDefault();
   const name = nameInput.value.trim();
   if (!name) return;
-  localStorage.setItem('stardust-player-name', name);
+  const runtime=getPermanentPartyRuntime();if(runtime){try{await runtime.login(name);enterMenu(name);}catch(e){showToast('儲存失敗，登入未完成。');}return;}
+  getGameStorage().setItem('stardust-player-name', name);
   enterMenu(name);
 });
 
-document.querySelector('#profile-button')?.addEventListener('click', () => { nameInput.value = displayName.textContent; menuScreen.classList.add('hidden'); loginScreen.classList.remove('hidden'); nameInput.focus(); });
-document.querySelector('#reset-button')?.addEventListener('click', () => { localStorage.removeItem('stardust-player-name'); localStorage.removeItem('stardust-character'); localStorage.removeItem('stardust-progress'); localStorage.removeItem('stardust-character-slots'); localStorage.removeItem('stardust-active-character-slot'); sessionStorage.removeItem(TAB_ACTIVE_CHARACTER_SLOT_KEY); nameInput.value = ''; enterMenu(''); menuScreen.classList.add('hidden'); loginScreen.classList.remove('hidden'); nameInput.focus(); });
+document.querySelector('#profile-button')?.addEventListener('click', async () => { const runtime=getPermanentPartyRuntime();if(runtime){try{if(fighting)persistPartyRuntimeState();fighting=false;clearInterval(battleTimer);clearInterval(skillTimer);clearInterval(enemyAttackTimer);await runtime.logout();}catch(e){showToast('儲存失敗，登出未完成。');return;}} nameInput.value = displayName.textContent; menuScreen.classList.add('hidden'); loginScreen.classList.remove('hidden'); nameInput.focus(); });
+document.querySelector('#reset-button')?.addEventListener('click', async () => { const runtime=getPermanentPartyRuntime();if(runtime){try{if(fighting)persistPartyRuntimeState();fighting=false;clearInterval(battleTimer);clearInterval(skillTimer);clearInterval(enemyAttackTimer);await runtime.reset();nameInput.value='';menuScreen.classList.add('hidden');loginScreen.classList.remove('hidden');showToast('測試存檔已重設，原資料已封存。');}catch(e){showToast('重設未完成，請重新整理。');}return;} getGameStorage().removeItem('stardust-player-name'); getGameStorage().removeItem('stardust-character'); getGameStorage().removeItem('stardust-progress'); getGameStorage().removeItem('stardust-character-slots'); getGameStorage().removeItem('stardust-active-character-slot'); sessionStorage.removeItem(TAB_ACTIVE_CHARACTER_SLOT_KEY); nameInput.value = ''; enterMenu(''); menuScreen.classList.add('hidden'); loginScreen.classList.remove('hidden'); nameInput.focus(); });
 document.querySelector('#adventure-button').addEventListener('click', () => {
   if (getProgress().requiresMapSelectionAfterDefeat) renderMapSelector();
   else openBattle();
@@ -8627,7 +8714,7 @@ document.querySelector('#create-character').addEventListener('click', (event) =>
   event.stopImmediatePropagation();
   showToast(getRaceJobRestrictionMessage(selection.race, selection.job));
 }, true);
-document.querySelector('#create-character').addEventListener('click', () => { const name = characterName.value.trim(); if (!name) { showToast('請先為角色取名。'); characterName.focus(); return; } const lockedFaction = getLockedFactionForCreation(); if (lockedFaction && selection.faction !== lockedFaction) { selection.faction = lockedFaction; selection.race = factions[lockedFaction][0].id; renderCreation(); showToast('帳號角色必須選擇相同陣營。'); return; } const race = factions[selection.faction].find((item) => item.id === selection.race); const job = classes.find((item) => item.id === selection.job)?.name || selection.job; const character = { ...selection, id: `character-slot-${creationSlotIndex + 1}`, name }; const progress = { level: 1, xp: 0, gold: 0, potions: 5, manaPotions: 0, selectedMapId: 'beginner-plains', inventory: [], equipment: selection.job === 'hunter' ? createStarterEquipment('hunter') : emptyEquipment(), lastActiveAt: Date.now(), ...(selection.job === 'assassin' ? { energy: 100, maxEnergy: 100, energyUpdatedAt: Date.now() } : {}) }; const slots = getCharacterSlots(); slots[creationSlotIndex] = { character, progress }; progress.party = PartyPolicy.normalizeParty(null, { slots, mainSlotIndex: creationSlotIndex, mainCharacter: character, mainProgress: progress }); localStorage.setItem('stardust-character-slots', JSON.stringify(slots)); setActiveCharacterSlotIndex(creationSlotIndex); localStorage.setItem('stardust-character', JSON.stringify(character)); localStorage.setItem('stardust-progress', JSON.stringify(progress)); characterScreen.classList.add('hidden'); menuScreen.classList.remove('hidden'); stopCharacterIdleAnimation(); document.querySelector('#character-title').textContent = '建立你的角色'; showToast(`${race.name}${job}「${name}」已儲存至角色欄位 ${creationSlotIndex + 1}！`); });
+document.querySelector('#create-character').addEventListener('click', async () => { if (getPermanentPartyRuntime() && creationSlotIndex > 3) { showToast('永久角色最多支援四個角色欄位。'); return; } const name = characterName.value.trim(); if (!name) { showToast('請先為角色取名。'); characterName.focus(); return; } const lockedFaction = getLockedFactionForCreation(); if (lockedFaction && selection.faction !== lockedFaction) { selection.faction = lockedFaction; selection.race = factions[lockedFaction][0].id; renderCreation(); showToast('帳號角色必須選擇相同陣營。'); return; } const race = factions[selection.faction].find((item) => item.id === selection.race); const job = classes.find((item) => item.id === selection.job)?.name || selection.job; const character = { ...selection, id: `character-${crypto.randomUUID()}`, name }; const progress = { level: 1, xp: 0, gold: 0, potions: 5, manaPotions: 0, selectedMapId: 'beginner-plains', inventory: [], equipment: selection.job === 'hunter' ? createStarterEquipment('hunter') : emptyEquipment(), lastActiveAt: Date.now(), ...(selection.job === 'assassin' ? { energy: 100, maxEnergy: 100, energyUpdatedAt: Date.now() } : {}) }; const slots = getCharacterSlots(); if (getPermanentPartyRuntime()) { const starter = createStarterEquipment(selection.job); for (const slot of ['weapon', 'armor']) if (!progress.equipment[slot]) progress.equipment[slot] = starter[slot]; try{await getPermanentPartyRuntime().createCharacter(character, progress, creationSlotIndex);}catch(error){showToast('角色未建立：'+error.message);return;} } else { slots[creationSlotIndex] = { character, progress }; progress.party = PartyPolicy.normalizeParty(null, { slots, mainSlotIndex: creationSlotIndex, mainCharacter: character, mainProgress: progress }); getGameStorage().setItem('stardust-character-slots', JSON.stringify(slots)); } if(getPermanentPartyRuntime()?.coordinator)await getPermanentPartyRuntime().switchMain(character.id);else setActiveCharacterSlotIndex(creationSlotIndex); if (!getPermanentPartyRuntime()) { getGameStorage().setItem('stardust-character', JSON.stringify(character)); getGameStorage().setItem('stardust-progress', JSON.stringify(progress)); } characterScreen.classList.add('hidden'); menuScreen.classList.remove('hidden'); stopCharacterIdleAnimation(); document.querySelector('#character-title').textContent = '建立你的角色'; showToast(`${race.name}${job}「${name}」已儲存至角色欄位 ${creationSlotIndex + 1}！`); });
 document.querySelector('#character-roster-button').addEventListener('click', renderCharacterRoster);
 document.querySelector('#character-roster-close').addEventListener('click', () => document.querySelector('#character-roster-modal').classList.add('hidden'));
 document.querySelector('#character-roster-modal').addEventListener('click', (event) => {
@@ -8754,17 +8841,17 @@ document.querySelectorAll('[data-layout-move]').forEach((button) => button.addEv
 document.querySelectorAll('[data-layout-size]').forEach((button) => button.addEventListener('click', () => resizeSelectedLayout(button.dataset.layoutSize, button.dataset.layoutAxis || 'both')));
 document.querySelectorAll('[data-layout-font]').forEach((button) => button.addEventListener('click', () => resizeSelectedFont(button.dataset.layoutFont)));
 document.querySelector('#layout-skills-stack').addEventListener('click', () => {
-  const saved = JSON.parse(localStorage.getItem('stardust-battle-layout') || '{}');
+  const saved = JSON.parse(getGameStorage().getItem('stardust-battle-layout') || '{}');
   Object.keys(saved).filter((key) => key.startsWith('skill-')).forEach((key) => delete saved[key]);
-  localStorage.setItem('stardust-battle-layout', JSON.stringify(saved));
+  getGameStorage().setItem('stardust-battle-layout', JSON.stringify(saved));
   const character = getActiveCharacter();
   if (character) renderSkills(character, getProgress().level);
   showToast('所有技能已統一為由上往下排列。');
 });
 document.querySelector('#layout-reset').addEventListener('click', () => {
-  localStorage.removeItem('stardust-battle-layout');
-  localStorage.removeItem('stardust-battle-columns');
-  localStorage.removeItem('stardust-combat-log-size');
+  getGameStorage().removeItem('stardust-battle-layout');
+  getGameStorage().removeItem('stardust-battle-columns');
+  getGameStorage().removeItem('stardust-combat-log-size');
   window.location.reload();
 });
 setupLayoutDrag();
@@ -8946,11 +9033,11 @@ function applyBattleColumnWidths(left, right, persist = true) {
   layoutRightWidth.value = String(safeRight);
   layoutLeftValue.value = `${limitedLeft}%`;
   layoutRightValue.value = `${safeRight}%`;
-  if (persist) localStorage.setItem(layoutColumnStorageKey, JSON.stringify({ left: limitedLeft, right: safeRight }));
+  if (persist) getGameStorage().setItem(layoutColumnStorageKey, JSON.stringify({ left: limitedLeft, right: safeRight }));
 }
 
 try {
-  const savedColumns = JSON.parse(localStorage.getItem(layoutColumnStorageKey) || '{}');
+  const savedColumns = JSON.parse(getGameStorage().getItem(layoutColumnStorageKey) || '{}');
   applyBattleColumnWidths(savedColumns.left ?? 22, savedColumns.right ?? 15, false);
 } catch {
   applyBattleColumnWidths(22, 15, false);
@@ -8970,16 +9057,16 @@ function applyCombatLogSize(width, height, persist = true) {
   layoutLogHeight.value = String(safeHeight);
   layoutLogWidthValue.value = `${safeWidth}px`;
   layoutLogHeightValue.value = `${safeHeight}px`;
-  if (persist) localStorage.setItem(combatLogSizeStorageKey, JSON.stringify({ width: safeWidth, height: safeHeight }));
+  if (persist) getGameStorage().setItem(combatLogSizeStorageKey, JSON.stringify({ width: safeWidth, height: safeHeight }));
 }
 
 try {
-  const savedCombatLogSize = JSON.parse(localStorage.getItem(combatLogSizeStorageKey) || '{}');
+  const savedCombatLogSize = JSON.parse(getGameStorage().getItem(combatLogSizeStorageKey) || '{}');
   if (savedCombatLogSize.fitVersion !== 1 && (savedCombatLogSize.height == null || savedCombatLogSize.height === 700)) {
     savedCombatLogSize.height = 640;
   }
   savedCombatLogSize.fitVersion = 1;
-  localStorage.setItem(combatLogSizeStorageKey, JSON.stringify(savedCombatLogSize));
+  getGameStorage().setItem(combatLogSizeStorageKey, JSON.stringify(savedCombatLogSize));
   applyCombatLogSize(savedCombatLogSize.width ?? 410, savedCombatLogSize.height ?? 640, false);
 } catch {
   applyCombatLogSize(410, 640, false);
@@ -9011,7 +9098,7 @@ function applyCombatLogPosition(left, top, persist = true) {
   layoutLogXValue.value = `${safeLeft}px`;
   layoutLogYValue.value = `${safeTop}px`;
   if (!persist) return;
-  const saved = JSON.parse(localStorage.getItem('stardust-battle-layout') || '{}');
+  const saved = JSON.parse(getGameStorage().getItem('stardust-battle-layout') || '{}');
   const rect = combatLog.getBoundingClientRect();
   saved.log = {
     ...(saved.log || defaultBattleLayout.log),
@@ -9021,11 +9108,11 @@ function applyCombatLogPosition(left, top, persist = true) {
     width: Math.round(rect.width),
     height: Math.round(rect.height)
   };
-  localStorage.setItem('stardust-battle-layout', JSON.stringify(saved));
+  getGameStorage().setItem('stardust-battle-layout', JSON.stringify(saved));
 }
 
 try {
-  const savedLayoutPosition = JSON.parse(localStorage.getItem('stardust-battle-layout') || '{}').log || defaultBattleLayout.log;
+  const savedLayoutPosition = JSON.parse(getGameStorage().getItem('stardust-battle-layout') || '{}').log || defaultBattleLayout.log;
   applyCombatLogPosition(savedLayoutPosition.left, savedLayoutPosition.top, false);
 } catch {
   applyCombatLogPosition(defaultBattleLayout.log.left, defaultBattleLayout.log.top, false);
@@ -9040,7 +9127,7 @@ function isMobileBattleLayout() {
 
 window.matchMedia('(max-width: 700px)').addEventListener('change', () => {
   try {
-    const savedLayoutPosition = JSON.parse(localStorage.getItem('stardust-battle-layout') || '{}').log || defaultBattleLayout.log;
+    const savedLayoutPosition = JSON.parse(getGameStorage().getItem('stardust-battle-layout') || '{}').log || defaultBattleLayout.log;
     applyCombatLogPosition(savedLayoutPosition.left, savedLayoutPosition.top, false);
   } catch {
     applyCombatLogPosition(defaultBattleLayout.log.left, defaultBattleLayout.log.top, false);
@@ -9051,7 +9138,7 @@ document.querySelector('#layout-export').addEventListener('click', async () => {
   saveVisibleAdjustedLayout();
   const readSavedSetting = (key) => {
     try {
-      return JSON.parse(localStorage.getItem(key) || '{}');
+      return JSON.parse(getGameStorage().getItem(key) || '{}');
     } catch {
       return {};
     }

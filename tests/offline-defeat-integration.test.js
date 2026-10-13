@@ -8,7 +8,7 @@ assert.match(index, /monster-defense\.js[\s\S]*offline-combat-policy\.js[\s\S]*s
 assert.match(script, /const offlineMonsters = getOfflineCombatMonsters\(activeMap, progress\.level\);[\s\S]*OfflineCombatPolicy\.simulate\(\{[\s\S]*durationMs: offlineMs[\s\S]*monsters: offlineMonsters/, 'offline rewards use map monsters and current player stats');
 assert.doesNotMatch(script.match(/function claimOfflineRewards\(\)[\s\S]*?\n}/)?.[0] || '', /killsPerMinute/, 'fixed offline kill speed is no longer the settlement source');
 assert.match(script, /const defeated = simulation\.defeated[\s\S]*for \(let kill = 0; kill < defeated;/, 'only kills completed before death grant rewards and map progress');
-const offlineClaim = script.match(/function claimOfflineRewards\(\)[\s\S]*?\n}/)?.[0] || '';
+const offlineClaim = (script.match(/function calculateLegacyOfflineRewards\([\s\S]*?\n}/)?.[0] || '') + (script.match(/function presentLegacyOfflineReport\([\s\S]*?\n}/)?.[0] || '');
 assert.match(offlineClaim, /healingPotions: progress\.potions[\s\S]*hpRegeneration: stats\.hpRegeneration|hpRegeneration: stats\.hpRegeneration[\s\S]*healingPotions: progress\.potions/, 'offline survival includes automatic potions and passive regeneration');
 assert.match(offlineClaim, /simulation\.died[\s\S]*requiresMapSelectionAfterDefeat = true[\s\S]*openVillage\('menu'\)/, 'a genuine offline defeat still returns to the village');
 assert.match(script, /fighting && battle\.partyMembers\?\.length\) persistPartyRuntimeState\(\)/, 'hiding the page persists the live battle health before offline settlement');

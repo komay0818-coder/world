@@ -11,7 +11,7 @@ const layoutCss = fs.readFileSync(path.join(root, 'styles', 'mmorpg-layout.css')
 assert.match(html, /id="player-battle-stage"/, 'party players render on the battlefield');
 assert.match(html, /id="battle-player-art" class="battle-player-art hidden"/, 'main player has a dedicated portrait node');
 assert.match(html, /styles\/monster-slots\.css\?v=20260922-rank-aura-v1/, 'battlefield loads the current local portrait styles');
-assert.match(html, /script\.js\?v=20261011-facility-release-v1/, 'battlefield loads the current local combat logic');
+assert.match(html, /script\.js\?v=20261014-permanent-ad/, 'battlefield loads the current local combat logic');
 assert.match(script, /return battleCharacterArt\[`\$\{character\.race\}:\$\{character\.job\}`\] \|\| '';/, 'battle uses stable front character artwork');
 const selectableAvatarKeys = [
   'human:warrior', 'human:assassin', 'human:hunter', 'human:mage', 'human:priest',

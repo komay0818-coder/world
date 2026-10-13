@@ -1,0 +1,7 @@
+(function(root,factory){const node=typeof module==='object'&&module.exports;const api=factory(node?require('../equipment-policy'):root.EquipmentPolicy);if(node)module.exports=api;else root.PermanentPartyFixture=api;})(typeof globalThis!=='undefined'?globalThis:this,function(E){
+function create(){const jobs=['warrior','mage','priest'],ids=jobs.map(job=>'character-fixture-'+job);return {activeMainId:ids[0],accountResources:{dungeonKeys:{blackForestAltar:2}},slots:jobs.map((job,i)=>{
+ const template=Object.values(E.WEAPON_CATALOG).find(item=>item.allowedJobs?.includes(job));
+ const equipment={...JSON.parse(JSON.stringify(template)),id:'fixture-equipped-'+i,instanceId:'fixture-equipped-'+i,baseItemId:template.id,runeSockets:[{runeId:'test-rune',locked:false}]};
+ const bagEquipment={...JSON.parse(JSON.stringify(template)),id:'fixture-bag-'+i,instanceId:'fixture-bag-'+i,baseItemId:template.id};
+ return {character:{id:ids[i],name:['隔離戰士','隔離法師','隔離牧師'][i],job,race:'human',faction:'light',gender:'male'},progress:{level:20,xp:12.75,gold:20000+i*100,magicCrystals:3,skillLevels:{},selectedMapId:'beginner-plains',lastActiveAt:Date.now(),potions:20,manaPotions:10,inventory:[{id:'healing-potion',kind:'consumable',name:'治癒藥水',quantity:20},{id:'mana-potion',kind:'consumable',name:'魔法藥水',quantity:10},{id:'black-ore',kind:'material',name:'黑礦',quantity:2+i},bagEquipment],equipment:{weapon:equipment},party:{activeMemberIds:i===0?ids:[ids[i]]}}};})};}
+return {create};});

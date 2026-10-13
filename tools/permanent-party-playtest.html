@@ -1,0 +1,324 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<base href="../">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#10192f" />
+  <title>洛恩大陸：啟程</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&family=Noto+Serif+TC:wght@600;700;900&family=Press+Start+2P&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css?v=20260926-single-png-idle-v1" />
+  <link rel="stylesheet" href="styles/game.css?v=20260822-inventory-icon-frame-v2" />
+  <link rel="stylesheet" href="styles/encounter.css?v=20260727-remove-legacy-character-art-v3" />
+  <link rel="stylesheet" href="styles/classic-hud.css" />
+  <link rel="stylesheet" href="styles/sidebar-v2.css" />
+  <link rel="stylesheet" href="styles/sidebar-layout.css" />
+  <link rel="stylesheet" href="styles/inventory-sale.css?v=20260802-clean-equipment-rows-v2" />
+  <link rel="stylesheet" href="styles/dungeon.css?v=20260802-goblin-camp-transparent-v25" />
+  <link rel="stylesheet" href="styles/mobile.css?v=20260728-mobile-log-flow-v6" />
+  <link rel="stylesheet" href="styles/mmorpg-layout.css?v=20260822-combat-motion-v43" />
+  <link rel="stylesheet" href="styles/monster-slots.css?v=20260922-rank-aura-v1" />
+  <link rel="stylesheet" href="styles/village.css?v=20260803-workshop-crafting-v2" />
+  <link rel="stylesheet" href="styles/adventure-info.css?v=20261010-suppression-panel-v4" />
+  <link rel="stylesheet" href="styles/monster-audit.css?v=20260920-monster-audit-v1" />
+  <link rel="stylesheet" href="styles/inventory-grid.css?v=20260921-inventory-compare-v2" />
+</head>
+<body>
+  <div class="sky" aria-hidden="true"></div>
+  <main class="app-shell">
+    <section id="login-screen" class="screen login-screen" aria-labelledby="game-title">
+      <div class="brand">
+        <h1 id="game-title">洛恩大陸</h1>
+        <p class="brand-subtitle">啟程</p>
+      </div>
+
+      <form id="login-form" class="login-card">
+        <label for="player-name">冒險者名稱</label>
+        <div class="input-wrap"><span>✧</span><input id="player-name" name="playerName" type="text" maxlength="12" placeholder="輸入你的名字" autocomplete="nickname" required /></div>
+        <p class="hint">可隨時從設定中變更</p>
+        <button class="primary-button" type="submit"><span>開始旅程</span><b>→</b></button>
+      </form>
+      <p class="version">VER. 0.6.36　·　離線也會持續累積</p>
+    </section>
+
+    <section id="menu-screen" class="screen menu-screen hidden" aria-labelledby="menu-title">
+      <div class="main-menu-panel">
+        <header class="main-menu-title">
+          <h2 id="menu-title">洛恩大陸</h2>
+          <p>啟程</p>
+        </header>
+        <nav class="menu-grid" aria-label="主選單">
+          <button id="adventure-button" class="menu-card featured" type="button">開始遊戲</button>
+          <button id="character-roster-button" class="menu-card" type="button">我的角色</button>
+        </nav>
+      </div>
+    </section>
+
+    <section id="character-screen" class="screen character-screen hidden" aria-labelledby="character-title">
+      <header class="wizard-header">
+        <button id="back-to-menu" class="back-button" type="button" aria-label="返回主選單">←</button>
+        <div><p class="eyebrow">NEW ADVENTURER</p><h2 id="character-title">建立你的角色</h2></div>
+        <span class="step-count">1 / 3</span>
+      </header>
+      <div class="creation-card">
+        <div id="race-choices" class="creation-stage">
+          <section class="creation-faction-panel creation-faction-light" data-faction-panel="light">
+            <button class="faction-title-button selected" type="button" data-faction="light">秩序聯盟</button>
+            <p class="section-label faction-race-label">選擇種族</p>
+            <div id="light-race-choices" class="choice-grid race-grid faction-race-grid"></div>
+          </section>
+          <section class="creation-character-stage">
+            <figure id="character-idle-preview" class="creation-idle-preview" hidden>
+              <img id="character-idle-frame" src="assets/character-portraits/calibration-tests/human-mage-fire-five-frame-v1/frame-01.png?v=1" alt="人類法師待機預覽" />
+            </figure>
+            <p id="faction-lock-note" class="faction-lock-note hidden"></p>
+          </section>
+          <section class="creation-faction-panel creation-faction-dark" data-faction-panel="dark">
+            <button class="faction-title-button" type="button" data-faction="dark">自由氏族</button>
+            <p class="section-label faction-race-label">選擇種族</p>
+            <div id="dark-race-choices" class="choice-grid race-grid faction-race-grid"></div>
+          </section>
+        </div>
+        <section class="creation-class-section">
+          <p class="section-label">選擇職業</p><div id="class-choices" class="class-list"></div>
+        </section>
+        <div class="creation-action-row">
+          <label class="character-name-label" for="character-name">角色名稱</label>
+          <input id="character-name" class="character-name" maxlength="12" placeholder="為角色取個名字" />
+          <button id="create-character" class="primary-button" type="button"><span>確認並開始冒險</span><b>→</b></button>
+        </div>
+      </div>
+    </section>
+
+    <section id="battle-screen" class="screen battle-screen hidden" aria-labelledby="battle-title">
+      <header class="battle-header">
+        <button id="leave-battle" class="back-button" type="button" aria-label="返回主選單">←</button>
+        <div><p id="map-level-text" class="eyebrow" hidden>怪物等級：Lv. 1–5</p><h2 id="battle-title" class="map-selector-trigger" role="button" tabindex="0" title="點擊選擇地圖">初心者平原</h2><div class="map-identity"><span id="race-totem" class="race-totem" title="種族圖騰" hidden></span><span id="job-mark" class="job-mark" title="職業標記" hidden>⚔</span><div id="player-fighter" class="fighter player-fighter"><div class="player-details"><strong id="battle-player-name">冒險者</strong><small><span id="battle-race">人類</span> · <span id="battle-job">戰士</span><b class="character-level">Lv. <span id="battle-level">1</span></b></small></div><div class="hp-track"><i id="player-hp-bar"></i></div><em id="player-hp-text">100 / 100</em><div class="mana-track"><i id="player-mp-bar"></i></div><em id="player-mp-text" class="mana-text">100 / 100 MP</em><div class="experience-panel"><div><span>經驗值</span><strong id="exp-text">0 / 100</strong></div><div class="xp-track"><i id="xp-bar"></i></div></div></div></div><div id="battle-party-status" class="battle-party-status" aria-label="參戰隊伍"></div></div>
+        <button id="layout-toggle" class="layout-button" type="button" hidden>✥ 調整版面</button><button id="battle-toggle" class="pause-button" type="button" hidden>Ⅱ 暫停</button>
+      </header>
+      <section id="layout-panel" class="layout-panel" aria-label="版面調整工具" hidden>
+        <strong>版面調整</strong>
+        <div class="layout-column-controls">
+          <label for="layout-left-width">左側寬度 <output id="layout-left-value">22%</output></label>
+          <input id="layout-left-width" type="range" min="22" max="38" value="22" step="1">
+          <label for="layout-right-width">右側寬度 <output id="layout-right-value">15%</output></label>
+          <input id="layout-right-width" type="range" min="12" max="26" value="15" step="1">
+          <label for="layout-log-width">戰鬥紀錄寬度 <output id="layout-log-width-value">410px</output></label>
+          <input id="layout-log-width" type="range" min="240" max="600" value="410" step="10">
+          <label for="layout-log-height">戰鬥紀錄高度 <output id="layout-log-height-value">640px</output></label>
+          <input id="layout-log-height" type="range" min="220" max="850" value="640" step="10">
+          <label for="layout-log-x">戰鬥紀錄水平位置 <output id="layout-log-x-value">4px</output></label>
+          <input id="layout-log-x" type="range" min="0" max="1400" value="4" step="1">
+          <label for="layout-log-y">戰鬥紀錄垂直位置 <output id="layout-log-y-value">286px</output></label>
+          <input id="layout-log-y" type="range" min="0" max="900" value="286" step="1">
+          <small>選擇視窗後，可直接拖曳到想要的位置。</small>
+        </div>
+        <div class="layout-targets">
+          <button type="button" class="layout-target selected" data-layout-target="hud">玩家資訊</button>
+          <button type="button" class="layout-target" data-layout-target="map">地圖</button>
+          <button type="button" class="layout-target" data-layout-target="back">返回箭頭</button>
+          <button type="button" class="layout-target" data-layout-target="title">地圖名稱</button>
+          <button type="button" class="layout-target" data-layout-target="monster-level">怪物等級</button>
+          <button type="button" class="layout-target" data-layout-target="identity">角色資訊</button>
+          <button type="button" class="layout-target" data-layout-target="race">種族圖案</button>
+          <button type="button" class="layout-target" data-layout-target="job">職業圖案</button>
+          <button type="button" class="layout-target" data-layout-target="log">戰鬥紀錄</button>
+          <button type="button" class="layout-target" data-layout-target="skills">技能區塊</button>
+          <button type="button" class="layout-target" data-layout-target="menu">功能框</button>
+          <button type="button" class="layout-target" data-layout-target="bag">背包按鈕</button>
+          <button type="button" class="layout-target" data-layout-target="equipment">裝備按鈕</button>
+          <button type="button" class="layout-target" data-layout-target="party">隊伍按鈕</button>
+        </div>
+        <select id="layout-skill-select" class="layout-skill-select" aria-label="選擇單一技能">
+          <option value="skill-0">單一技能：技能一</option><option value="skill-1">單一技能：技能二</option><option value="skill-2">單一技能：技能三</option><option value="skill-3">單一技能：技能四</option><option value="skill-4">單一技能：技能五</option><option value="skill-5">單一技能：技能六</option><option value="skill-6">單一技能：技能七</option>
+        </select>
+        <div class="layout-arrows" aria-label="移動選取區塊">
+          <span></span><button type="button" data-layout-move="up">↑</button><span></span>
+          <button type="button" data-layout-move="left">←</button><button type="button" data-layout-move="down">↓</button><button type="button" data-layout-move="right">→</button>
+        </div>
+        <div class="layout-size"><button type="button" data-layout-size="smaller">－ 等比縮小</button><button type="button" data-layout-size="larger">＋ 等比放大</button><button type="button" data-layout-size="larger" data-layout-axis="width">↔ 加寬</button><button type="button" data-layout-size="smaller" data-layout-axis="width">↔ 變窄</button><button type="button" data-layout-size="larger" data-layout-axis="height">↕ 加高</button><button type="button" data-layout-size="smaller" data-layout-axis="height">↕ 降低</button></div>
+        <div class="layout-size"><button type="button" data-layout-font="smaller">A－ 字體縮小</button><button type="button" data-layout-font="larger">A＋ 字體放大</button></div>
+        <button id="layout-skills-stack" class="layout-reset" type="button">技能統一由上往下排列</button>
+        <button id="layout-export" class="layout-reset layout-export" type="button">匯出版面設定</button>
+        <button id="layout-reset" class="layout-reset" type="button">回復預設位置</button>
+      </section>
+      <main class="battle-center">
+      <div class="battle-field">
+        <div class="world-depth" aria-hidden="true">
+          <div class="world-veil"></div>
+          <div class="world-haze world-haze-far"></div>
+          <div class="world-haze world-haze-mid"></div>
+          <div class="road-perspective"></div>
+          <div class="engagement-ground"></div>
+        </div>
+        <div class="terrain terrain-one"></div><div class="terrain terrain-two"></div>
+        <div class="player-grounding" aria-hidden="true"></div>
+        <div id="damage-float" class="damage-float"></div>
+        <div class="battlefield-zone-label enemy-zone-label" aria-hidden="true">敵方戰場</div>
+        <div id="battle-player-art" class="battle-player-art hidden" aria-label="人類獵人"></div>
+        <div id="player-stage-info" class="player-stage-info" aria-label="玩家戰場資訊"></div>
+        <div id="player-battle-stage" class="player-battle-stage" aria-label="玩家隊伍站場"></div>
+        <div id="battle-companion-icons" class="battle-companion-icons hidden" aria-label="戰鬥隨從"></div>
+        <div id="enemy-squad" class="enemy-squad monster-slot-grid" role="grid" aria-label="敵方戰場"></div>
+        <div class="battle-status"><span><b>⚔</b> 自動戰鬥中 · <strong id="enemy-count">5</strong> 隻敵人</span><span><b>✦</b> <strong id="gold-count">0</strong> 金幣</span></div>
+      </div>
+      <section class="battle-adventure-info" aria-label="冒險資訊">
+        <article class="adventure-info-card region-progress-card">
+          <header><span>🚩</span><h3>區域進度</h3></header>
+          <div class="region-progress-body">
+            <div><strong id="region-progress-name">目前區域</strong><small id="region-progress-chapter">冒險進行中</small></div>
+            <div class="region-kill-summary"><span>擊殺進度</span><b id="region-progress-count">0 / 0</b></div>
+            <div class="region-progress-track" role="progressbar" aria-label="區域擊殺進度" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><i id="region-progress-bar"></i></div>
+            <div class="region-progress-next"><span>下一區域</span><strong id="region-progress-next">—</strong></div>
+          </div>
+        </article>
+        <article class="adventure-info-card round-loot-card">
+          <header><span>🎁</span><h3>本輪戰利品</h3></header>
+          <div id="round-loot-list" class="round-loot-list"><p>尚未獲得戰利品</p></div>
+        </article>
+      </section>
+      </main>
+      <div class="battle-bottom">
+        <div class="combat-log"><details id="chapter-three-suppression" class="chapter-three-suppression" hidden>
+            <summary><span>區域壓制</span><strong id="suppression-unresolved-count"></strong></summary>
+            <small id="suppression-region-name"></small>
+            <div id="suppression-rows" class="suppression-rows" aria-live="polite"></div>
+          </details><p>戰鬥紀錄</p><div id="combat-log-lines" aria-live="polite"></div></div>
+        <section class="skill-panel" aria-labelledby="skill-panel-title"><div class="skill-panel-head"><strong id="skill-panel-title">技能</strong><small id="skill-resource-status">自動施放</small></div><button id="potion-button" class="potion-button" type="button"><img src="assets/healing-potion.png?v=20260830-user-image-v1" alt="" class="potion-image"><span>治癒藥水</span><b id="potion-count">5</b></button><button id="mana-potion-button" class="potion-button" type="button"><img src="assets/mana-potion.png?v=20260830-user-image-v1" alt="" class="potion-image"><span>魔法藥水</span><b id="mana-potion-count">0</b></button><div id="skill-list" class="skill-list"></div></section>
+        <nav class="battle-menu" aria-label="遊戲選單"><button class="battle-menu-button ability-button" type="button" data-menu-action="能力"><span>◆</span><b>能力</b><small>數值</small></button><button class="battle-menu-button" type="button" data-menu-action="背包"><span>🎒</span><b>背包</b><small>道具</small></button><button class="battle-menu-button" type="button" data-menu-action="裝備"><span>⚔</span><b>裝備</b><small>角色</small></button><button class="battle-menu-button" type="button" data-menu-action="隊伍"><span>👥</span><b>隊伍</b><small>編組</small></button><button class="battle-menu-button village-button" type="button" data-menu-action="村莊"><span>⌂</span><b>村莊</b><small>建築</small></button><button class="battle-menu-button drop-lookup-button" type="button" data-menu-action="掉落"><span>⌕</span><b>掉落</b><small>來源</small></button></nav>
+      </div>
+    </section>
+    <section id="village-screen" class="screen village-screen hidden" aria-labelledby="village-title">
+      <header class="village-header"><div><p class="eyebrow">VILLAGE</p><h2 id="village-title">星塵村莊 <span id="village-level" class="village-level">Lv1</span></h2></div><button id="village-return" class="village-return" type="button">返回戰鬥</button></header>
+      <div class="village-main"><p class="village-intro">第一章可將建築升至 Lv2；各建築會顯示需要的專屬材料與金幣。</p><div id="village-building-grid" class="village-building-grid"></div></div>
+    </section>
+  </main>
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <div id="skill-tooltip" class="skill-tooltip" role="tooltip"></div>
+  <div id="skill-detail-modal" class="skill-detail-modal hidden" role="dialog" aria-modal="true" aria-labelledby="skill-detail-title">
+    <section class="skill-detail-window">
+      <button id="skill-detail-close" class="skill-detail-close" type="button" aria-label="關閉技能詳細資料">×</button>
+      <div id="skill-detail-content"></div>
+    </section>
+  </div>
+  <div id="inventory-modal" class="inventory-modal hidden" role="dialog" aria-modal="true" aria-labelledby="inventory-title">
+    <section class="inventory-window">
+      <header><h2 id="inventory-title">背包</h2><button id="inventory-close" type="button" aria-label="關閉背包">×</button></header>
+      <div id="inventory-content"></div>
+    </section>
+  </div>
+  <div id="character-roster-modal" class="inventory-modal hidden" role="dialog" aria-modal="true" aria-labelledby="character-roster-title">
+    <section class="inventory-window character-roster-window">
+      <header><div><p class="eyebrow">CHARACTER SLOTS</p><h2 id="character-roster-title">我的角色</h2></div><button id="character-roster-close" type="button" aria-label="關閉">×</button></header>
+      <div id="character-roster-content" class="character-roster-content"></div>
+    </section>
+  </div>
+  <div id="sell-confirm-modal" class="inventory-modal hidden" role="dialog" aria-modal="true" aria-labelledby="sell-confirm-title">
+    <section class="inventory-window sell-confirm-window">
+      <header><h2 id="sell-confirm-title">確認販賣</h2><button id="sell-confirm-close" type="button" aria-label="取消販賣">×</button></header>
+      <div id="sell-confirm-content"></div>
+    </section>
+  </div>
+  <div id="party-modal" class="inventory-modal hidden" role="dialog" aria-modal="true" aria-labelledby="party-title">
+    <section class="inventory-window party-window">
+      <header><div><p class="eyebrow">PARTY</p><h2 id="party-title">隊伍編組</h2></div><button id="party-close" type="button" aria-label="關閉隊伍">×</button></header>
+      <div id="party-content"></div>
+    </section>
+  </div>
+  <div id="drop-lookup-modal" class="inventory-modal hidden" role="dialog" aria-modal="true" aria-labelledby="drop-lookup-title"><section class="inventory-window drop-lookup-window"><header><div><p class="eyebrow">DROP LOOKUP</p><h2 id="drop-lookup-title">掉落物查詢</h2></div><button id="drop-lookup-close" type="button" aria-label="關閉掉落物查詢">×</button></header><div id="drop-lookup-content"></div></section></div>
+  <div id="village-building-modal" class="inventory-modal hidden" role="dialog" aria-modal="true" aria-labelledby="village-building-title">
+    <section class="inventory-window village-building-window"><header><div><p class="eyebrow">VILLAGE BUILDING</p><h2 id="village-building-title">村莊建築</h2></div><button id="village-building-close" class="village-building-close" type="button" aria-label="關閉建築面板">×</button></header><div id="village-building-content" class="village-building-content"></div></section>
+  </div>
+  <script src="monster-defense.js?v=20260729-defense-balance-v2"></script>
+  <script src="offline-combat-policy.js?v=20260822-offline-survival-v2"></script>
+  <script src="map-exp-policy.js?v=20260821-map-exp-decay-v1"></script>
+  <script src="chapter-one-progression-policy.js?v=20260821-map-progression-v1"></script>
+  <script src="chapter-two-progression-policy.js?v=20260911-map-progression-v1"></script>
+  <script src="chapter-one-level-policy.js?v=20260728-level-distribution-v1"></script>
+  <script src="black-forest-corruption-policy.js?v=20260830-purification-material-art-v1"></script>
+  <script src="blackstone-stronghold-policy.js?v=20260911-stronghold-dungeon-v1"></script>
+  <script src="black-forest-depths-policy.js?v=20260911-depths-complete-v1"></script>
+  <script src="black-forest-entrance-policy.js?v=20260809-entrance-background-v10"></script>
+  <script src="black-forest-trail-policy.js?v=20260809-trail-balance-v10"></script>
+  <script src="spider-nest-policy.js?v=20260809-spider-combat-v9"></script>
+  <script src="forest-altar-policy.js?v=20260911-forest-altar-v1"></script>
+  <script src="elite-affix-policy.js?v=20260816-elite-affix-v1"></script>
+  <script src="chapter-two-map-policy.js?v=20260911-depths-complete-v1"></script>
+  <script src="chapter-three-map-policy.js?v=20261005-redrock-temple-images-v3"></script>
+  <script src="chapter-three-progression-policy.js?v=20261005-chapter-three-unlocks-v1"></script>
+  <script src="redrock-wastes-policy.js?v=20260911-redrock-skills-v1"></script>
+  <script src="brokenrock-canyon-policy.js?v=20260922-brokenrock-32-v1"></script>
+  <script src="bloodwar-wastes-policy.js?v=20260922-bloodwar-visual-playtest-v1"></script>
+  <script src="skullcrusher-war-camp-policy.js?v=20260911-war-camp-skills-v1"></script>
+  <script src="ancient-altar-policy.js?v=20260911-altar-skills-v1"></script>
+  <script src="redrock-temple-policy.js?v=20260911-temple-skills-v1"></script>
+  <script src="chapter-three-late-combat-policy.js?v=20261009-facility-exclusion-v1"></script>
+  <script src="chapter-three-material-drop-policy.js?v=20260902-redrock-material-drops-v1"></script>
+  <script src="wolf-den-policy.js?v=20260728-wolf-passives-v1"></script>
+  <script src="boar-woods-policy.js?v=20260802-thick-hide-v2"></script>
+  <script src="plains-depths-policy.js?v=20260802-monster-skills-v8"></script>
+  <script src="goblin-camp-policy.js?v=20260728-shaman-heal-v2"></script>
+  <script src="equipment-policy.js?v=20260907-unified-offhand-affixes-v1"></script>
+  <script src="equipment-affix-policy.js?v=20260904-kill-heal-v2"></script>
+  <script src="chapter-three-offhand-policy.js?v=20260907-chapter3-offhand-templates-v1"></script>
+  <script src="armor-penetration-policy.js?v=20260903-armor-penetration-v1"></script>
+  <script src="conditional-damage-policy.js?v=20260903-conditional-damage-v1"></script>
+  <script src="critical-resource-recovery-policy.js?v=20260903-critical-resource-recovery-v1"></script>
+<script src="direct-hit-health-recovery-policy.js?v=20260903-direct-hit-health-recovery-v1"></script>
+<script src="chapter-three-crafted-epic-ability-policy.js?v=20260903-chapter3-crafted-epic-v1"></script>
+  <script src="control-effect-policy.js?v=20260903-control-resistance-v1"></script>
+  <script src="rune-policy.js?v=20260830-rune-system-v1"></script>
+  <script src="chapter-two-rune-drop-policy.js?v=20260830-region-rune-drops-v1"></script>
+  <script src="chapter-one-material-drop-policy.js?v=20260815-material-artwork-v1"></script>
+  <script src="chapter-two-material-drop-policy.js?v=20260830-chapter-two-material-art-v1"></script>
+  <script src="recipe-image-policy.js?v=20260830-quality-recipe-art-v1"></script>
+  <script src="chapter-one-recipe-drop-policy.js?v=20260830-chapter-one-blue-drop-v1"></script>
+  <script src="https://raw.githack.com/komay0818-coder/world/67f5ab92db6af0eccead2ff7d5e6db5289fc1adf/chapter-two-recipe-drop-policy.js"></script>
+  <script src="chapter-three-weapon-recipe-fragment-policy.js?v=20260902-redrock-weapon-fragments-v1"></script>
+  <script src="chapter-three-epic-weapon-policy.js?v=20260903-epic-weapons-v1"></script>
+  <script src="pre-job-trial-policy.js?v=20260903-pre-job-trial-v1"></script>
+  <script src="chapter-three-recipe-drop-policy.js?v=20260903-chapter3-crafted-epic-v1"></script>
+  <script src="chapter-three-facility-policy.js?v=20261010-building-art-v2"></script>
+  <script src="chapter-two-special-equipment-policy.js?v=20260830-special-epic-drops-v1"></script>
+  <script src="chapter-three-special-equipment-policy.js?v=20260903-special-epic-v1"></script>
+  <script src="crafting-policy.js?v=20260903-chapter3-crafted-epic-v1"></script>
+  <script src="alchemy-policy.js?v=20260805-random-result-v3"></script>
+  <script src="salvage-policy.js?v=20260815-essence-artwork-v1"></script>
+  <script src="inventory-sale-policy.js?v=20260802-common-selection-v2"></script>
+  <script src="equipment-drop-policy.js?v=20260830-rune-system-v1"></script>
+  <script src="chapter-boss-drop-policy.js?v=20260830-chapter-one-blue-drop-v1"></script>
+  <script src="drop-lookup-policy.js?v=20260830-special-epic-drops-v1"></script>
+  <script src="mana-regen-policy.js?v=20260728-time-based-regen-v1"></script>
+  <script src="warrior-resource-policy.js?v=20260729-warrior-rage-halved-v2"></script>
+  <script src="warrior-advancement-policy.js?v=20260905-warrior-advancement-v1"></script>
+  <script src="assassin-energy-policy.js?v=20260728-assassin-energy-v1"></script>
+  <script src="assassin-offhand-policy.js?v=20260830-dual-dagger-v1"></script>
+  <script src="rogue-advancement-policy.js?v=20260905-rogue-advancement-v1"></script>
+  <script src="hunter-arrow-policy.js?v=20260729-rough-quiver-v2"></script>
+  <script src="hunter-advancement-policy.js?v=20260905-hunter-advancement-v1"></script>
+  <script src="mage-advancement-policy.js?v=20260906-mage-advancement-v1"></script>
+  <script src="combat-core-policy.js?v=20260906-headless-core-v1"></script>
+  <script src="priest-advancement-policy.js?v=20261005-late-chapter-healing-v1"></script>
+  <script src="monster-display-policy.js?v=20260922-brokenrock-warrior-v2"></script>
+  <script src="dungeon-ticket.js?v=20260727-goblin-camp-wave-roster-v4"></script>
+  <script src="party-policy.js?v=20260904-warrior-threat-v1"></script>
+  <script src="chapter-two-balance-playtest-policy.js?v=20261009-36-rare-runes-v1"></script>
+  <script src="https://raw.githack.com/komay0818-coder/world/0ecf19b/village-policy.js"></script>
+  <script src="https://raw.githack.com/komay0818-coder/world/0ecf19b/magic-tower-policy.js"></script>
+  <script src="village-upgrade-policy.js?v=20260830-chapter-two-material-art-v1"></script>
+  <script src="skill-upgrade-policy.js?v=20260816-divine-tome-v1"></script>
+  <script src="class-skill-policy.js?v=20260906-chain-paralysis-v2"></script>
+  <script src="offline-settlement-store.js?v=20261014-permanent-ad"></script>
+<script src="permanent-party-policy.js?v=20261014-permanent-ad"></script>
+<script src="permanent-cutover-policy.js?v=20261014-permanent-ad"></script>
+<script src="permanent-farming-policy.js?v=20261014-permanent-ad"></script>
+<script src="permanent-farming-policy.js?v=20261014-d4-complete"></script><script src="permanent-party-store.js?v=20261014-permanent-ad"></script>
+<script src="permanent-online-policy.js?v=20261012-phase-b"></script>
+<script src="permanent-party-runtime.js?v=20261014-d4-complete"></script>
+<script src="tools/permanent-party-fixture.js"></script>
+<script src="tools/permanent-party-playtest-bootstrap.js?v=20261014-d4-complete"></script>
+  <script src="monster-audit.js?v=20260920-monster-audit-v1"></script>
+</body>
+</html>
