@@ -1,4 +1,4 @@
-(function(root,factory){const node=typeof module==='object'&&module.exports;const api=factory(node?require('./permanent-online-policy'):root.PermanentOnlinePolicy,node?require('./permanent-party-policy'):root.PermanentPartyPolicy);if(node)module.exports=api;else root.PermanentPartyRuntime=api;})(typeof globalThis!=='undefined'?globalThis:this,function(Online,Policy){
+(function(root,factory){const node=typeof module==='object'&&module.exports;const api=factory(node?require('./permanent-online-policy'):root.PermanentOnlinePolicy,node?require('./permanent-party-policy'):root.PermanentPartyPolicy,node?require('./party-experience-policy'):root.PartyExperiencePolicy);if(node)module.exports=api;else root.PermanentPartyRuntime=api;})(typeof globalThis!=='undefined'?globalThis:this,function(Online,Policy,Experience){
 'use strict';let active=null;
 function create({store,account,onFailure=()=>{},onCommitted=()=>{},generate=()=>crypto.randomUUID(),legacyOffline=false}){
  let coordinator=null;
@@ -23,6 +23,21 @@ function create({store,account,onFailure=()=>{},onCommitted=()=>{},generate=()=>
   getSlots:()=>draft.slotOrder.map(id=>id?{character:Online.copy(draft.characters[id].character),progress:read(id)}:null),getProgress:id=>read(id||api.mainId),getParty:id=>Online.party(draft,id||api.mainId),
   view:id=>Policy.selectedCharacter(draft,{mainId:api.mainId,viewedId:id}),
   saveProgress:(id,value)=>change(m=>Online.putProgress(m,id,merge(m,id,value),{generate})),
+  beginExperienceBattle(sessionId){if(!sessionId)throw Error('Battle identity required');change(m=>{const progress=m.characters[api.mainId].progress;if(progress.partyExperienceBattle?.sessionId!==sessionId)progress.partyExperienceBattle={sessionId,slots:{}};return m;});},
+  canRewardExperience(sessionId,index,spawnedAt){const ledger=draft.characters[api.mainId]?.progress.partyExperienceBattle;return ledger?.sessionId===sessionId&&Number.isInteger(index)&&index>=0&&Number.isFinite(spawnedAt)&&spawnedAt>(ledger.slots[index]??-Infinity);},
+  saveExperienceReward(value,event){let awards=[];if(!api.canRewardExperience(event.sessionId,event.index,event.spawnedAt))return {duplicate:true,awards};
+   change(m=>{const party=m.parties[api.mainId].memberIds;
+    if(!Array.isArray(event.members)||event.members.length>3||new Set(event.members.map(x=>x.id)).size!==event.members.length||event.members.some(x=>!party.includes(x.id)||!m.characters[x.id]))throw Error('Experience participant identity mismatch');
+    const main=event.members.find(x=>x.id===api.mainId);if(!main||main.alive===false||!(main.currentHp>0))throw Error('Main character cannot earn after defeat');
+    const shares=Experience.distribute(event.baseXp,event.members.map(x=>({...x,level:m.characters[x.id].progress.level})),event.map);
+    awards=shares.map(x=>({...x,...Experience.grow(m.characters[x.id].progress,x.actualExp)}));
+    const merged=merge(m,api.mainId,value);const expected=awards.find(x=>x.id===api.mainId);
+    if(merged.level!==expected.level||Math.abs(merged.xp-expected.xp)>.000001)throw Error('Main experience calculation mismatch');
+    m=Online.putProgress(m,api.mainId,merged,{generate});
+    for(const award of awards){m.characters[award.id].progress.level=award.level;m.characters[award.id].progress.xp=award.xp;}
+    m.characters[api.mainId].progress.partyExperienceBattle.slots[event.index]=event.spawnedAt;return m;
+   });const saved=api.flush();saved.catch(()=>{});return {duplicate:false,awards,saved};
+  },
   get coordinator(){return coordinator;},bindCoordinator(value){if(coordinator)throw Error('Coordinator already bound');coordinator=value;},
   command:command=>{if(coordinator&&['recruit','leave','delete','switch-main','move-slot'].includes(command.type))throw Error('Use asynchronous farming coordinator');return change(m=>Policy.apply(m,command));},
   buildCharacter(m,character,value,slotIndex){

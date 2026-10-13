@@ -4697,13 +4697,14 @@ function syncMainBattleMemberFromLegacy() {
   main.alive = main.currentHp > 0;
 }
 
-function syncMainBattleMemberProgression(character, progress) {
-  const main = getMainBattleMember();
+function syncMainBattleMemberProgression(character, progress, member = null) {
+  const main = member || getMainBattleMember();
   if (!main || !character || !progress) return;
   const stats = getCharacterStats(progress.level, progress, character);
   const maxResource = getMaxCombatResourceForMember(character, progress);
   main.level = progress.level;
   main.progress.level = progress.level;
+  main.progress.xp = progress.xp;
   main.stats = stats;
   main.attack = stats.attack;
   main.defense = stats.defense;
@@ -4712,7 +4713,7 @@ function syncMainBattleMemberProgression(character, progress) {
   main.currentHp = Math.min(main.currentHp, main.maxHp);
   main.resourceMax = maxResource;
   main.resourceCurrent = Math.min(main.resourceCurrent, main.resourceMax);
-  syncLegacyBattleStateFromMain();
+  if (main.isMain) syncLegacyBattleStateFromMain();
 }
 
 function persistPartyRuntimeState() {
@@ -5216,6 +5217,8 @@ function floatDamage(value) {
 }
 
 function rewardVictory(index) {
+  const experienceRuntime = getPermanentPartyRuntime();
+  if (experienceRuntime && (!fighting || battle.enemyHps[index] > 0 || !experienceRuntime.canRewardExperience(battle.experienceSessionId, index, battle.enemySpawnedAt?.[index]))) return;
   if (!battle.rewardedEnemyIndexes) battle.rewardedEnemyIndexes = new Set();
   const rewardClaim = PartyPolicy.claimEnemyReward(battle.rewardedEnemyIndexes, index, battle.enemySpawnedAt?.[index]);
   const rewardKey = rewardClaim.rewardKey;
@@ -5248,9 +5251,13 @@ function rewardVictory(index) {
     }
   }
   const baseXp = enemy.mapId ? enemy.xp : enemy.isBoss ? currentMap.bossXp : enemy.isElite ? currentMap.eliteXp : currentMap.normalXp;
-  const expReward = MapExpPolicy.calculate(baseXp, progress.level, currentMap);
+  const experienceEvent = experienceRuntime ? {sessionId: battle.experienceSessionId, index, spawnedAt: battle.enemySpawnedAt[index], baseXp, map: currentMap, members: battle.partyMembers.map(member => ({id: member.id, alive: member.alive, currentHp: member.currentHp}))} : null;
+  const expReward = experienceRuntime
+    ? PartyExperiencePolicy.distribute(baseXp, experienceEvent.members.map(member => ({...member, level: experienceRuntime.model.characters[member.id]?.progress.level})), currentMap).find(award => award.id === experienceRuntime.mainId)
+    : MapExpPolicy.calculate(baseXp, progress.level, currentMap);
+  if (!expReward) return;
   const earnedXp = expReward.actualExp;
-  if (ChapterTwoBalancePlaytestPolicy?.isActive()) progress.balancePlaytestEarnedXp = (Number(progress.balancePlaytestEarnedXp) || 0) + earnedXp;
+  if (!experienceRuntime && ChapterTwoBalancePlaytestPolicy?.isActive()) progress.balancePlaytestEarnedXp = (Number(progress.balancePlaytestEarnedXp) || 0) + earnedXp;
   else progress.xp += earnedXp;
   const earnedGold = Math.max(1, Math.floor(enemy.gold * .55));
   progress.gold += earnedGold;
@@ -5360,7 +5367,17 @@ function rewardVictory(index) {
   if (specialEquipmentDrop) addRoundLoot(`equipment:${specialEquipmentDrop.name}`, specialEquipmentDrop.name, 1, '🟣');
   if (offhandDrop) addRoundLoot(`equipment:${offhandDrop.name}`, offhandDrop.name, 1, '🛡');
   if (goblinCampMapDropped) addRoundLoot('goblin-camp-map', '哥布林營地地圖', 1, '🗺️');
-  saveProgress(progress);
+  if (experienceRuntime) {
+    const result = experienceRuntime.saveExperienceReward(progress, experienceEvent);
+    for (const award of result.awards) {
+      const member = battle.partyMembers.find(value => value.id === award.id);
+      if (!member) continue;
+      member.progress.xp = award.xp;
+      if (award.levels.length) syncMainBattleMemberProgression(member.character, experienceRuntime.getProgress(award.id), member);
+      else member.progress.level = award.level;
+      if (!member.isMain) logBattle('✦ ' + member.name + '獲得 ' + award.actualExp + ' EXP' + (award.levels.length ? '，升至 Lv. ' + award.level : ''), 'reward');
+    }
+  } else saveProgress(progress);
   renderBattleAdventureInfo(progress);
   logBattle(`✦ 擊敗${enemy.name}！獲得 ${earnedXp} EXP、${earnedGold} 金幣`, 'reward');
   if (loot) logBattle(`🎁 掉落【${loot.name}】${loot.quantity ? ` ×${loot.quantity}` : ''}`);
@@ -8590,6 +8607,7 @@ function openBattle() {
   const partyMembers = buildBattlePartyMembers(battleStart);
   const mainMember = partyMembers.find((member) => member.isMain) || partyMembers[0];
   battle = { enemyTypes, enemyLevels, enemyHps, partyMembers, playerHp: mainMember?.currentHp || getMaxHp(progress.level, progress), playerMana: mainMember?.resourceCurrent || 0, playerArrows: mainMember?.resourceType === 'arrows' ? mainMember.resourceCurrent : 0, playerShield: 0, playerStunnedUntil: 0, playerBleed: null, manaExhausted: false, playerAttackCharge: 0, hunterAttackCount: 0, lastManaRegenAt: battleStart, lastResourceUpdatedAt: battleStart, lastArrowRecoveryAt: battleStart, lastCorruptionTickAt: battleStart, lastStrongholdRegenAt: battleStart, enemyNextAttackAt: createEnemyAttackSchedule(enemyTypes, battleStart, currentMap.id, enemyLevels), enemyBoarEnraged: enemyTypes.map(() => false), enemyTrailSummoned: enemyTypes.map(() => false), enemySummonProfiles: enemyTypes.map(() => null), enemyCaptainShieldUntil: enemyTypes.map(() => 0), enemyAssassinDashUntil: enemyTypes.map(() => 0), enemySpiderNestPhase: enemyTypes.map(() => 1), blackstoneRoarUntil: 0, blackstoneCommandUntil: 0, blackstoneSpiderCommandUntil: 0, spiderNestCommandUntil: 0, strongholdCommandUntil: 0, blackstoneStrongholdState: createBlackstoneStrongholdBattleState(), globalSkillReadyAt: 0, undeadRevived: false, skillCooldowns: {}, enemyRespawns: enemyTypes.map(() => null), enemySpawnedAt: enemyTypes.map((_, index) => battleStart + index), enemyDots: enemyTypes.map(() => []), enemySkillStates: enemyTypes.map(() => null), redrockEnemyStates: enemyTypes.map(() => null), brokenrockEnemyStates: enemyTypes.map(() => null), bloodwarEnemyStates: enemyTypes.map(() => null), monsterMoveSpeed: 200, targetIndexes: [], enemyDamages: enemyTypes.map(() => []), damageTimers: [], rewardedEnemyIndexes: new Set(), roundLoot: {}, isDungeon, dungeonId: isDungeon ? currentMap.id : null, dungeonWave: isDungeon ? 1 : 0, dungeonComplete: false, waveTransitioning: false, goblinScoutSummons: 0, showcaseRoundIndex: 0, showcaseNextRoundAt: battleStart + 6000 };
+  if (getPermanentPartyRuntime()) { battle.experienceSessionId = crypto.randomUUID(); getPermanentPartyRuntime().beginExperienceBattle(battle.experienceSessionId); }
   if (getPermanentPartyRuntime()) { syncLegacyBattleStateFromMain(); battle.sacredGuardianReadyAt = Math.max(0, ...partyMembers.map(member => Number(member.progress.partyMemberState?.partySharedCooldowns?.sacredGuardianReadyAt) || 0)); }
   battle.enemyAffixes = enemyAffixes;
   battle.sessionId = sessionId;

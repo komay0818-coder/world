@@ -27,7 +27,7 @@
   if(runtime.singleOfflineEnabled){const nativeTimeout=window.setTimeout.bind(window);if(query.get('d3')==='1')window.permanentFarmingNativeTimeout=nativeTimeout;window.setTimeout=(callback,ms,...args)=>{const identity=query.get('d3')==='1'?window.permanentFarmingEventIdentity?.():null;return nativeTimeout(function run(){const current=window.permanentFarmingEventIdentity?.();if(identity&&identity.mainId!==current?.mainId)return;if(runtime.busy||document.visibilityState==='hidden'){nativeTimeout(run,20);return;}if(!runtime.failure)callback(...args);},ms);};}
   if(query.get('d3')==='1'){const nativeFrame=window.requestAnimationFrame.bind(window);window.requestAnimationFrame=callback=>{const identity=window.permanentFarmingEventIdentity?.(),combatFrame=callback===window.autoSkillTick;return nativeFrame(function run(timestamp){const current=window.permanentFarmingEventIdentity?.();if(identity&&(identity.mainId!==current?.mainId||(combatFrame&&identity.battle!==current?.battle)))return;if(runtime.busy){nativeFrame(run);return;}if(!runtime.failure)callback(timestamp);});};}
   window.addEventListener('beforeunload',event=>{if(runtime.busy){event.preventDefault();event.returnValue='';}});
-  const main=document.createElement('script');main.src='../script.js?v=20261013-d3-final-9';await new Promise((resolve,reject)=>{main.onload=resolve;main.onerror=reject;document.body.append(main);});
+  const main=document.createElement('script');main.src='../script.js?v=20261014-party-experience';await new Promise((resolve,reject)=>{main.onload=resolve;main.onerror=reject;document.body.append(main);});
   if(query.get('d3')==='1'){
    const loadScript=src=>new Promise((resolve,reject)=>{const el=document.createElement('script');el.src=src;el.onload=resolve;el.onerror=reject;document.body.append(el);});
    await loadScript('../permanent-farming-policy.js?v=20261013-d3-final-9');await loadScript('../permanent-farming-coordinator.js?v=20261013-d3-final-9');
@@ -77,8 +77,51 @@
    const persisted=await store.read(accountId);assert(JSON.stringify(persisted.permanent)===JSON.stringify(runtime.model),'one persisted authority');assert(!('slots'in persisted),'no legacy authority');assert(persisted.permanent.characters[leader].progress.partyMemberState.partySharedCooldowns.sacredGuardianReadyAt===sharedCooldown,'shared guardian cooldown saved by participating role');openBattle();await runtime.flush();fighting=false;clearInterval(battleTimer);clearInterval(skillTimer);clearInterval(enemyAttackTimer);assert(battle.sacredGuardianReadyAt===sharedCooldown,'new online battle cannot reset shared guardian cooldown');
    return {passed,failed:0,revision:persisted.revision,accountId};
   };
-  window.runPermanentRuntimeRace=async(kind='gold')=>{window.permanentAcceptanceRunning=true;await runtime.flush();await runtime.refresh();const p=getProgress();p.gold+=1;await new Promise(resolve=>setTimeout(resolve,1500));try{if(kind==='gear')equipItem('fixture-bag-0','weapon');else saveProgress(p);await runtime.flush();const model=runtime.model;return {status:'committed',kind,revision:runtime.revision,equipmentInstances:Object.keys(model.equipmentOwners).length,equippedId:model.characters[runtime.mainId].progress.equipment.weapon?.instanceId};}catch(error){return {status:'rejected',reason:error.message};}};
+  window.runPermanentRuntimeRace=async(kind='gold')=>{window.permanentAcceptanceRunning=true;await runtime.flush();await runtime.refresh();if(kind==='experience'){
+ const ids=runtime.model.parties[runtime.mainId].memberIds,p=runtime.getProgress(),event={sessionId:p.partyExperienceBattle.sessionId,index:0,spawnedAt:200,baseXp:1,map:{chapter:3,recommendedMaxLevel:45},members:ids.map(id=>({id,alive:true,currentHp:40}))};
+ const gain=PartyExperiencePolicy.distribute(1,ids.map(id=>({id,level:runtime.getProgress(id).level,alive:true,currentHp:40})),event.map).find(x=>x.id===runtime.mainId),growth=PartyExperiencePolicy.grow(p,gain.actualExp);p.level=growth.level;p.xp=growth.xp;
+ const channel=new BroadcastChannel('experience-race:'+accountId);await new Promise(resolve=>{channel.onmessage=e=>{if(e.data==='ready'){channel.postMessage('ack');resolve();}if(e.data==='ack')resolve();};channel.postMessage('ready');});channel.close();
+ try{await runtime.saveExperienceReward(p,event).saved;return {status:'committed',kind,revision:runtime.revision,xp:ids.map(id=>runtime.getProgress(id).xp)};}catch(error){return {status:'rejected',kind,reason:error.message};}
+ }const p=getProgress();p.gold+=1;await new Promise(resolve=>setTimeout(resolve,1500));try{if(kind==='gear')equipItem('fixture-bag-0','weapon');else saveProgress(p);await runtime.flush();const model=runtime.model;return {status:'committed',kind,revision:runtime.revision,equipmentInstances:Object.keys(model.equipmentOwners).length,equippedId:model.characters[runtime.mainId].progress.equipment.weapon?.instanceId};}catch(error){return {status:'rejected',reason:error.message};}};
   window.runD2ActualReward=async()=>{openBattle();await runtime.flush();const before=getProgress().gold;battle.enemyHps[0]=0;rewardVictory(0);await runtime.flush();const first=runtime.model;rewardVictory(0);await runtime.flush();const result={earned:getProgress().gold-before,duplicateBlocked:JSON.stringify(first)===JSON.stringify(runtime.model),cutoff:getProgress().lastActiveAt};fighting=false;clearInterval(battleTimer);clearInterval(skillTimer);clearInterval(enemyAttackTimer);return result;};
+  window.runPartyExperienceAcceptance=async()=>{
+   let passed=0;const assert=(v,m)=>{if(!v)throw Error(m);passed++;},equal=(a,b,m)=>assert(JSON.stringify(a)===JSON.stringify(b),m+" actual="+JSON.stringify(a)+" expected="+JSON.stringify(b));
+   const r=runtime,ids=r.model.parties[r.mainId].memberIds,originalMap=getActiveMap,originalEnemy=getEnemyDefinition;
+   const fourth='character-'+crypto.randomUUID();fighting=false;window.permanentAcceptanceRunning=true;
+   await r.createCharacter({...r.model.characters[r.mainId].character,id:fourth,name:'未入隊驗收'}, {level:20,xp:0,equipment:{},inventory:[],potions:0,manaPotions:0},3);
+   const fourthBefore=JSON.stringify(r.model.characters[fourth]);
+   getActiveMap=()=>ChapterThreeMapPolicy.MAPS.find(m=>m.id==='redrock-temple');
+   getEnemyDefinition=index=>({...originalEnemy(index),mapId:'redrock-temple',xp:90});
+   const trial=async(levels,dead=[],nearLevel=false)=>{
+    fighting=false;for(let i=0;i<ids.length;i++){const p=r.getProgress(ids[i]);p.level=levels[i];p.xp=nearLevel?requiredXp(levels[i])-1:0;r.saveProgress(ids[i],p);}await r.flush();
+    openBattle();await r.flush();for(const member of battle.partyMembers){member.alive=!dead.includes(member.id);member.currentHp=member.alive?40:0;member.shield=17;member.skillCooldowns.probe=Date.now()+60000;}
+    const states=battle.partyMembers.map(m=>({id:m.id,hp:m.currentHp,alive:m.alive,shield:m.shield,cooldown:m.skillCooldowns.probe}));
+    battle.enemyHps[0]=0;rewardVictory(0);await r.flush();return states;
+   };
+   try{
+    await trial([30,33,36]);equal(ids.map(id=>r.getProgress(id).xp),[30,21,12],'three divide before personal decay');
+    await trial([30,33,36],[ids[1]]);equal(ids.map(id=>r.getProgress(id).xp),[45,0,18],'two alive divide by two');
+    await trial([30,33,36],[ids[1],ids[2]]);equal(ids.map(id=>r.getProgress(id).xp),[90,0,0],'sole survivor receives base');
+    equal(JSON.stringify(r.model.characters[fourth]),fourthBefore,'fourth never earns');
+    const states=await trial([20,20,20],[],true);
+    for(const state of states){const p=r.getProgress(state.id),member=battle.partyMembers.find(m=>m.id===state.id);assert(p.level===21&&p.xp===29,'independent level and XP');assert(member.level===21,'live level');assert(member.currentHp===state.hp&&member.alive===state.alive,'no healing/revival');assert(member.shield===17&&member.skillCooldowns.probe===state.cooldown,'shield/cooldown preserved');}
+    const snapshot=JSON.stringify(r.model);battle.rewardedEnemyIndexes=new Set();rewardVictory(0);await r.flush();equal(JSON.stringify(r.model),snapshot,'duplicate callback even without memory receipt');
+    fighting=false;const before=r.getProgress(ids[1]);removePartyMember(ids[1]);await r.flush();addPartyMember(ids[1]);await r.flush();equal([r.getProgress(ids[1]).level,r.getProgress(ids[1]).xp],[before.level,before.xp],'leave rejoin');
+    await activateCharacterSlot(1);equal([getProgress().level,getProgress().xp],[21,29],'main switch');await activateCharacterSlot(0);
+    const account=await store.read(accountId),peer=PermanentPartyRuntime.create({store,account});peer.beginExperienceBattle('browser-race');await peer.flush();await r.refresh();
+    const commit=(rt,spawn)=>{const event={sessionId:'browser-race',index:0,spawnedAt:spawn,baseXp:1,map:{chapter:3,recommendedMaxLevel:45},members:ids.map(id=>({id,alive:true,currentHp:40}))},p=rt.getProgress();const grow=PartyExperiencePolicy.grow(p,PartyExperiencePolicy.distribute(1,ids.map(id=>({id,level:rt.getProgress(id).level,alive:true,currentHp:40})),event.map).find(a=>a.id===rt.mainId).actualExp);p.level=grow.level;p.xp=grow.xp;return rt.saveExperienceReward(p,event).saved;};
+    const race=await Promise.allSettled([commit(r,100),commit(peer,100)]);assert(race.filter(v=>v.status==='fulfilled').length===1&&race.filter(v=>v.status==='rejected').length===1,'two writers one CAS winner');
+    const latest=await store.read(accountId),safe=PermanentPartyRuntime.create({store,account:latest});assert(!safe.canRewardExperience('browser-race',0,100),'database receipt survives race');
+    for(const id of ids)assert(safe.getProgress(id).xp===29.33,'two-decimal gain once');
+    const originalCommit=store.commitOnline;store.commitOnline=(...args)=>{args[5]={...args[5],failAt:'after-account'};return originalCommit(...args);};
+    try{await commit(safe,101);throw Error('Expected storage abort');}catch(error){assert(error.message.includes('Injected after account'),'real IndexedDB abort');}finally{store.commitOnline=originalCommit;}
+    equal((await store.read(accountId)).permanent,latest.permanent,'failure leaves all roles bag receipt atomic');
+    return {passed,failed:0,accountId,expected:ids.map(id=>({id,level:latest.permanent.characters[id].progress.level,xp:latest.permanent.characters[id].progress.xp})),session:'browser-race'};
+   }finally{fighting=false;clearInterval(battleTimer);clearInterval(skillTimer);clearInterval(enemyAttackTimer);getActiveMap=originalMap;getEnemyDefinition=originalEnemy;}
+  };
   window.permanentRuntimeReady=true;releaseBoot?.();
  }catch(error){releaseBoot?.();status('隔離接線未啟用：'+error.message);window.permanentRuntimeBootFailure=error.message||'Script loading failed';}
 })();
+
+
+
