@@ -44,7 +44,7 @@ function create({store,account,onFailure=()=>{},onCommitted=()=>{},generate=()=>
    const clean=Online.copy(value);clean.equipment={};delete clean.inventory;delete clean.party;delete clean.potions;delete clean.manaPotions;
    m=Policy.apply(m,{type:'create',id:character.id,character,progress:clean,slotIndex});
    const newItems=Online.copy(value.inventory||[]);
-   for(const [counter,itemId]of [['potions','healing-potion'],['manaPotions','mana-potion']])if(value[counter]>0&&!newItems.some(i=>i.id===itemId)){const template=m.bag.items.find(i=>i.id===itemId);newItems.push({...Online.copy(template||{id:itemId,kind:'consumable'}),quantity:value[counter]});}
+   for(const [counter,itemId,name]of [['potions','healing-potion','治癒藥水'],['manaPotions','mana-potion','魔法藥水']])if(value[counter]>0&&!newItems.some(i=>i.id===itemId)){const template=m.bag.items.find(i=>i.id===itemId);newItems.push({...Online.copy(template||{id:itemId,kind:'consumable',name}),quantity:value[counter]});}
    m.bag.items=m.bag.items.concat(newItems);m=Online.putProgress(m,character.id,value,{bag:false,generate});return Online.compactModel(m);
   },
   createCharacter(character,value,slotIndex){if(coordinator)return coordinator.create(character,value,slotIndex);change(m=>api.buildCharacter(m,character,value,slotIndex));const saved=api.flush();saved.catch(()=>{});return saved;},
