@@ -1,0 +1,72 @@
+{
+  "source": "assets\\character-portraits\\calibration-tests\\elf-assassin-selection-five-frame-v5",
+  "canvas": [
+    572,
+    760
+  ],
+  "foot_y": 677,
+  "scale": 1.0,
+  "method": "shared canvas, centered X, fixed foot baseline; no resampling",
+  "frames": [
+    {
+      "frame": 1,
+      "source_size": [
+        372,
+        627
+      ],
+      "translation_xy": [
+        100,
+        50
+      ],
+      "aligned_foot_y": 677
+    },
+    {
+      "frame": 2,
+      "source_size": [
+        359,
+        636
+      ],
+      "translation_xy": [
+        106,
+        41
+      ],
+      "aligned_foot_y": 677
+    },
+    {
+      "frame": 3,
+      "source_size": [
+        364,
+        623
+      ],
+      "translation_xy": [
+        104,
+        54
+      ],
+      "aligned_foot_y": 677
+    },
+    {
+      "frame": 4,
+      "source_size": [
+        357,
+        628
+      ],
+      "translation_xy": [
+        107,
+        49
+      ],
+      "aligned_foot_y": 677
+    },
+    {
+      "frame": 5,
+      "source_size": [
+        347,
+        630
+      ],
+      "translation_xy": [
+        112,
+        47
+      ],
+      "aligned_foot_y": 677
+    }
+  ]
+}

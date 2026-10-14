@@ -257,7 +257,7 @@ const characterCreationDisplay = {
   'human:hunter': { scale: 1.155, offsetX: -1, offsetY: 4 },
   'human:mage': { scale: 1.30815, offsetX: -5, offsetY: 41 },
   'human:priest': { scale: 1.06, offsetX: 10, offsetY: 2 },
-  'elf:warrior': { scale: 1.20, offsetX: 0, offsetY: 71 },
+  'elf:warrior': { scale: 1.016, offsetX: 0, offsetY: 15 },
   'elf:assassin': { scale: 1.232, offsetX: 0, offsetY: 40 },
   'elf:hunter': { scale: 1.242, offsetX: 3, offsetY: -3 },
   'elf:mage': { scale: 1.2064, offsetX: 5, offsetY: 8 },
@@ -317,9 +317,9 @@ const characterIdleAnimations = {
     frameDurationMs: 500
   },
   'elf:warrior': {
-    frames: [1, 2, 3, 4, 5].map((frame) => `assets/character-portraits/calibration-tests/elf-warrior-five-frame-v1-hq/frame-${String(frame).padStart(2, '0')}.png?v=1`),
-    order: [0, 1, 2, 3, 4],
-    frameDurationMs: 300
+    frames: [1, 2, 3, 4].map((frame) => `assets/character-portraits/calibration-tests/elf-warrior-selection-four-frame-v1/frame-${String(frame).padStart(2, '0')}.png?v=1`),
+    order: [0, 1, 2, 3],
+    frameDurationMs: 1800 / 4
   },
   'elf:mage': {
     frames: [1, 2, 3, 4, 5].map((frame) => `assets/character-portraits/calibration-tests/elf-mage-five-frame-v2/frame-${String(frame).padStart(2, '0')}.png?v=1`),
@@ -327,9 +327,9 @@ const characterIdleAnimations = {
     frameDurationMs: 180
   },
   'elf:assassin': {
-    frames: [1, 2, 3, 4, 5].map((frame) => `assets/character-portraits/calibration-tests/elf-assassin-five-frame-v3-hq/frame-${String(frame).padStart(2, '0')}.png?v=1`),
+    frames: [1, 2, 3, 4, 5].map((frame) => `assets/character-portraits/calibration-tests/elf-assassin-selection-five-frame-v6-aligned/frame-${String(frame).padStart(2, '0')}.png?v=1`),
     order: [0, 1, 2, 3, 4],
-    frameDurationMs: 300
+    frameDurationMs: 2000 / 5
   },
   'elf:hunter': {
     frames: [
