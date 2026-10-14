@@ -120,6 +120,14 @@ const mapProgression = [
   { min: 20, max: 25, name: '冰霜高原', normalXp: 35, eliteXp: 140, bossXp: 560 },
   { min: 25, max: 30, name: '熔岩要塞', normalXp: 70, eliteXp: 280, bossXp: 1050 }
 ];
+const adventureAreaDefinitions = Object.freeze([
+  { id: 'plains', chapter: 1, name: '平原' },
+  { id: 'black-forest', chapter: 2, name: '黑森林' },
+  { id: 'redrock-wastes', chapter: 3, name: '赤岩荒原' }
+]);
+let pendingAdventureAreaId = '';
+let pendingAdventureMapId = '';
+let mapTravelInProgress = false;
 const beginnerPlainsRegions = [
   { id: 'plains-entrance', name: '平原入口' },
   { id: 'wolf-den', name: '狼穴' },
@@ -2859,16 +2867,157 @@ function getCurrentMap(level) {
   return mapProgression.find((map) => map.id === 'beginner-plains' && level >= map.min) || mapProgression[0];
 }
 
+function isMapTravelPlaytestMode() {
+  return new URLSearchParams(window.location.search).has('playtest');
+}
+
 function getActiveMap(progress = getProgress()) {
   const chapterThreeVisualPlaytestMapId = ChapterTwoBalancePlaytestPolicy?.isChapterThreeActive()
     ? ChapterTwoBalancePlaytestPolicy.getRequestedMapId() : '';
+  const unrestrictedPlaytestTravel = isMapTravelPlaytestMode();
   const selected = mapProgression.find((map) => map.id === progress.selectedMapId && (map.implemented || map.id === chapterThreeVisualPlaytestMapId)
-    && (map.chapter !== 1 || ChapterOneProgressionPolicy.isUnlocked(progress, map.id))
-    && (map.chapter !== 2 || (ChapterOneProgressionPolicy.isUnlocked(progress, 'black-forest') && progress.level >= map.min))
-    && (map.chapter !== 3 || map.id === chapterThreeVisualPlaytestMapId || ChapterThreeProgressionPolicy.canEnter(progress, map.id, map.implemented)));
+    && (unrestrictedPlaytestTravel || map.chapter !== 1 || ChapterOneProgressionPolicy.isUnlocked(progress, map.id))
+    && (unrestrictedPlaytestTravel || map.chapter !== 2 || (ChapterOneProgressionPolicy.isUnlocked(progress, 'black-forest') && progress.level >= map.min))
+    && (unrestrictedPlaytestTravel || map.chapter !== 3 || map.id === chapterThreeVisualPlaytestMapId || ChapterThreeProgressionPolicy.canEnter(progress, map.id, map.implemented)));
   if (selected?.id === 'beginner-plains') return mapProgression.find((map) => map.id === 'plains-entrance');
   if (selected) return selected;
   return mapProgression.find((map) => map.id === 'plains-entrance') || mapProgression[0];
+}
+
+function getAdventureAreaMaps(areaId) {
+  const area = adventureAreaDefinitions.find((entry) => entry.id === areaId);
+  if (!area) return [];
+  return mapProgression.filter((map) => map.id && map.chapter === area.chapter && map.regionOf && map.implemented);
+}
+
+function getAdventureAreaForMap(map) {
+  return adventureAreaDefinitions.find((entry) => entry.chapter === map?.chapter) || adventureAreaDefinitions[0];
+}
+
+function getAdventureMapAvailability(map, progress = getProgress()) {
+  if (!map?.implemented) return { unlocked: false, reason: '尚未開放' };
+  if (isMapTravelPlaytestMode()) return { unlocked: true, reason: '' };
+  if (map.chapter === 1 && !ChapterOneProgressionPolicy.isUnlocked(progress, map.id)) return { unlocked: false, reason: '尚未解鎖' };
+  if (map.chapter === 2 && (!ChapterOneProgressionPolicy.isUnlocked(progress, 'black-forest') || progress.level < map.min || !ChapterTwoProgressionPolicy.canEnter(progress, map.id, map.implemented))) return { unlocked: false, reason: '尚未解鎖' };
+  if (map.chapter === 3 && !ChapterThreeProgressionPolicy.canEnter(progress, map.id, map.implemented)) return { unlocked: false, reason: '尚未解鎖' };
+  if (map.ticketItemId && getInventoryItemQuantity(progress, map.ticketItemId) < 1) return { unlocked: false, reason: '缺少入場地圖' };
+  if (map.dungeon && !map.ticketItemId && map.id !== 'blackstone-stronghold' && (getAccountResources().dungeonKeys?.blackForestAltar || 0) < 1) return { unlocked: false, reason: '缺少祭壇鑰匙' };
+  return { unlocked: true, reason: '' };
+}
+
+function updateMapTravelButton(progress = getProgress()) {
+  const button = document.querySelector('#map-travel-button');
+  const map = mapProgression.find((entry) => entry.id === pendingAdventureMapId);
+  if (!button || !map) return;
+  const activeMap = getActiveMap(progress);
+  const availability = getAdventureMapAvailability(map, progress);
+  const isCurrent = map.id === activeMap.id;
+  button.disabled = mapTravelInProgress || isCurrent || !availability.unlocked;
+  button.textContent = isCurrent ? '目前所在地' : availability.unlocked ? '前往地圖' : availability.reason;
+}
+
+function renderAdventureMapOptions(progress = getProgress(), preserveMap = true) {
+  const select = document.querySelector('#adventure-map-select');
+  if (!select) return;
+  const activeMap = getActiveMap(progress);
+  const maps = getAdventureAreaMaps(pendingAdventureAreaId);
+  const previous = preserveMap ? pendingAdventureMapId : '';
+  select.innerHTML = maps.map((map) => {
+    const availability = getAdventureMapAvailability(map, progress);
+    return `<option value="${map.id}" ${availability.unlocked ? '' : 'disabled'}>${availability.unlocked ? '' : '🔒 '}${map.name}${availability.reason ? `（${availability.reason}）` : ''}</option>`;
+  }).join('');
+  const preferred = maps.find((map) => map.id === previous)
+    || maps.find((map) => map.id === activeMap.id)
+    || maps.find((map) => getAdventureMapAvailability(map, progress).unlocked)
+    || maps[0];
+  pendingAdventureMapId = preferred?.id || '';
+  select.value = pendingAdventureMapId;
+  syncAdventureCustomSelect(select);
+  updateMapTravelButton(progress);
+}
+
+function renderMapTravelPanel(progress = getProgress(), resetSelection = false) {
+  const regionSelect = document.querySelector('#adventure-region-select');
+  if (!regionSelect) return;
+  const activeMap = getActiveMap(progress);
+  const activeArea = getAdventureAreaForMap(activeMap);
+  if (resetSelection || !adventureAreaDefinitions.some((area) => area.id === pendingAdventureAreaId)) {
+    pendingAdventureAreaId = activeArea.id;
+    pendingAdventureMapId = activeMap.id;
+  }
+  regionSelect.innerHTML = adventureAreaDefinitions.map((area) => `<option value="${area.id}">${area.name}</option>`).join('');
+  regionSelect.value = pendingAdventureAreaId;
+  syncAdventureCustomSelect(regionSelect);
+  renderAdventureMapOptions(progress, !resetSelection);
+}
+
+let mapSelectInteractionActive = false;
+
+function beginMapSelectInteraction() {
+  if (mapSelectInteractionActive) return;
+  mapSelectInteractionActive = true;
+}
+
+function endMapSelectInteraction() {
+  requestAnimationFrame(() => {
+    if (!mapSelectInteractionActive) return;
+    mapSelectInteractionActive = false;
+    if (fighting) updateBattleUI();
+  });
+}
+
+function syncAdventureCustomSelect(select) {
+  const control = select?.closest('.map-select-control');
+  if (!control) return;
+  const trigger = control.querySelector('.map-select-trigger');
+  const options = control.querySelector('.map-select-options');
+  const selected = select.options[select.selectedIndex];
+  trigger.textContent = selected?.textContent || '';
+  options.innerHTML = Array.from(select.options).map((option) => `<button type="button" role="option" data-value="${option.value}" aria-selected="${option.selected}" ${option.disabled ? 'disabled' : ''}>${option.textContent}</button>`).join('');
+}
+
+function closeAdventureCustomSelect(control, refresh = true) {
+  if (!control?.classList.contains('is-open')) return;
+  control.classList.remove('is-open');
+  control.querySelector('.map-select-trigger')?.setAttribute('aria-expanded', 'false');
+  if (refresh) endMapSelectInteraction();
+}
+
+function initializeAdventureCustomSelect(select) {
+  if (!select || select.closest('.map-select-control')) return;
+  const control = document.createElement('div');
+  control.className = 'map-select-control';
+  const trigger = document.createElement('button');
+  trigger.type = 'button';
+  trigger.className = 'map-select-trigger';
+  trigger.setAttribute('aria-haspopup', 'listbox');
+  trigger.setAttribute('aria-expanded', 'false');
+  const options = document.createElement('div');
+  options.className = 'map-select-options';
+  options.setAttribute('role', 'listbox');
+  select.parentNode.insertBefore(control, select);
+  control.append(select, trigger, options);
+  select.classList.add('map-native-select');
+  trigger.addEventListener('click', () => {
+    const opening = !control.classList.contains('is-open');
+    document.querySelectorAll('.map-select-control.is-open').forEach((other) => closeAdventureCustomSelect(other, false));
+    if (opening) {
+      beginMapSelectInteraction();
+      syncAdventureCustomSelect(select);
+      control.classList.add('is-open');
+      trigger.setAttribute('aria-expanded', 'true');
+    } else closeAdventureCustomSelect(control);
+  });
+  options.addEventListener('click', (event) => {
+    const option = event.target.closest('[data-value]');
+    if (!option || option.disabled) return;
+    select.value = option.dataset.value;
+    select.dispatchEvent(new Event('change', { bubbles: true }));
+    syncAdventureCustomSelect(select);
+    closeAdventureCustomSelect(control);
+    trigger.focus();
+  });
+  syncAdventureCustomSelect(select);
 }
 
 function getUnlockedPassiveEffects(level, progress, character) {
@@ -3509,31 +3658,46 @@ function selectAdventureMap(mapId) {
   const progress = getProgress();
   const map = mapProgression.find((item) => item.id === mapId && item.implemented);
   if (!map) return;
-  if (map.chapter === 1 && !ChapterOneProgressionPolicy.isUnlocked(progress, map.id)) {
+  const unrestrictedPlaytestTravel = isMapTravelPlaytestMode();
+  if (mapTravelInProgress || getActiveMap(progress).id === map.id) {
+    updateMapTravelButton(progress);
+    return;
+  }
+  if (!unrestrictedPlaytestTravel && map.chapter === 1 && !ChapterOneProgressionPolicy.isUnlocked(progress, map.id)) {
     const status = ChapterOneProgressionPolicy.getUnlockStatus(progress, map.id).completion;
     if (status) showToast(`${map.name}尚未解鎖：Lv${status.level}/${status.requirement.level}・壓制 ${status.normalKills}/${status.requirement.normalKills}・Boss ${status.bossCleared ? '完成' : '未完成'}`);
     return;
   }
-  if (map.chapter === 2 && (!ChapterOneProgressionPolicy.isUnlocked(progress, 'black-forest') || progress.level < map.min || !ChapterTwoProgressionPolicy.canEnter(progress, map.id, map.implemented))) return;
-  if (map.chapter === 3 && !ChapterThreeProgressionPolicy.canEnter(progress, map.id, map.implemented)) return;
-  if (map.chapter === 2) BlackForestCorruptionPolicy.enterChapter(progress);
+  if (!unrestrictedPlaytestTravel && map.chapter === 2 && (!ChapterOneProgressionPolicy.isUnlocked(progress, 'black-forest') || progress.level < map.min || !ChapterTwoProgressionPolicy.canEnter(progress, map.id, map.implemented))) return;
+  if (!unrestrictedPlaytestTravel && map.chapter === 3 && !ChapterThreeProgressionPolicy.canEnter(progress, map.id, map.implemented)) return;
+  if (!unrestrictedPlaytestTravel && map.chapter === 2) BlackForestCorruptionPolicy.enterChapter(progress);
   if (map.dungeon) {
     if (map.ticketItemId) {
-      if (getInventoryItemQuantity(progress, map.ticketItemId) < 1) { showToast('需要哥布林營地地圖才能進入。'); return; }
+      if (!unrestrictedPlaytestTravel && getInventoryItemQuantity(progress, map.ticketItemId) < 1) { showToast('需要哥布林營地地圖才能進入。'); return; }
     } else if (map.id !== 'blackstone-stronghold') {
       const resources = getAccountResources();
       const keys = resources.dungeonKeys?.blackForestAltar || 0;
-      if (keys < 1) { showToast('需要黑森林祭壇鑰匙才能進入。'); return; }
-      resources.dungeonKeys.blackForestAltar = keys - 1;
-      saveAccountResources(resources);
+      if (!unrestrictedPlaytestTravel && keys < 1) { showToast('需要黑森林祭壇鑰匙才能進入。'); return; }
+      if (!unrestrictedPlaytestTravel) {
+        resources.dungeonKeys.blackForestAltar = keys - 1;
+        saveAccountResources(resources);
+      }
     }
     const activeMap = getActiveMap(progress);
     if (!activeMap.dungeon) progress.dungeonReturnMapId = activeMap.id;
     progress.dungeonAdmission = true;
   }
+  mapTravelInProgress = true;
+  updateMapTravelButton(progress);
+  syncMainBattleMemberFromLegacy();
+  persistPartyRuntimeState();
+  clearInterval(battleTimer);
+  clearInterval(skillTimer);
+  clearInterval(enemyAttackTimer);
+  fighting = false;
   progress.selectedMapId = map.id;
   progress.requiresMapSelectionAfterDefeat = false;
-  progress.unlockedChapter = Math.max(getUnlockedChapter(progress), Number(map.chapter) || 1);
+  if (!unrestrictedPlaytestTravel) progress.unlockedChapter = Math.max(getUnlockedChapter(progress), Number(map.chapter) || 1);
   saveProgress(progress);
   if (!document.querySelector('#drop-lookup-modal')?.classList.contains('hidden')) renderDropLookup();
   document.querySelector('#inventory-modal').classList.add('hidden');
@@ -3543,6 +3707,13 @@ function selectAdventureMap(mapId) {
       ? map.ticketItemId ? `持有地圖，進入：${map.name}` : `已消耗 1 把鑰匙，進入：${map.name}`
       : `已前往：${map.name}`);
   openBattle();
+  pendingAdventureAreaId = getAdventureAreaForMap(map).id;
+  pendingAdventureMapId = map.id;
+  renderMapTravelPanel(getProgress(), true);
+  window.setTimeout(() => {
+    mapTravelInProgress = false;
+    updateMapTravelButton(getProgress());
+  }, 350);
 }
 
 function equipItem(itemId, preferredSlot = null) {
@@ -4970,14 +5141,55 @@ function renderBattlePartyStatus() {
       const resourceMax = Math.max(1, getMaxCombatResourceForMember(member.character, member.progress));
       const resourcePercent = Math.max(0, Math.min(100, member.resourceCurrent / resourceMax * 100));
       const art = battleCharacterActionArt(member.character, 'idle') || battleCharacterArt[`${member.character.race}:${member.character.job}`] || '';
-      const jobName = classes.find((job) => job.id === member.character.job)?.name || member.character.job;
       const chargeBuffClass = Date.now() < (member.skillHasteUntil || 0) ? ' has-charge-buff' : '';
       const poisonBlade = getPoisonBladeVisualState(member);
       const poisonBladeClass = poisonBlade.active ? ` has-poison-blade${poisonBlade.activating ? ' is-poison-blade-cast' : ''}` : '';
       const poisonBladeIndicator = poisonBlade.active ? `<span class="poison-blade-aura" aria-hidden="true"><i></i><i></i><i></i></span><span class="poison-blade-indicator" role="img" aria-label="毒刃效果${poisonBlade.stacks > 1 ? `，${poisonBlade.stacks} 層` : ''}"><i>🗡</i>${poisonBlade.stacks > 1 ? `<b>×${poisonBlade.stacks}</b>` : ''}</span>` : '';
-      return `<article class="player-stage-unit ${member.alive ? '' : 'is-dead'}${chargeBuffClass}${poisonBladeClass}" data-party-slot="${index + 2}" data-visual-size="humanoid" data-member-id="${member.id}" data-job="${member.character.job}"><div class="player-stage-floating"><b>${member.name}</b><small>${jobName}・Lv.${member.level}</small><span class="player-stage-hp"><i style="width:${hpPercent}%"></i></span><span class="player-stage-resource"><i style="width:${resourcePercent}%"></i></span></div><div class="player-stage-art" style="background-image:url('${art}')" aria-label="${member.name}"></div>${poisonBladeIndicator}</article>`;
+      const resourceLabel = getCombatResourceUnit(member.character.job);
+      const statusIcons = renderPlayerStatusIcons(member);
+      const experience = getPlayerExperienceDisplay(member.progress);
+      return `<article class="player-stage-unit ${member.alive ? '' : 'is-dead'}${chargeBuffClass}${poisonBladeClass}" data-party-slot="${index + 2}" data-visual-size="humanoid" data-member-id="${member.id}" data-job="${member.character.job}"><div class="player-stage-floating"><b>${member.name}</b><span class="player-stage-meter-copy"><em>HP</em><strong>${Math.max(0, Math.round(member.currentHp))} / ${Math.round(member.maxHp)}</strong></span><span class="player-stage-hp"><i style="width:${hpPercent}%"></i></span><span class="player-stage-meter-copy"><em>${resourceLabel}</em><strong>${Math.max(0, Math.round(member.resourceCurrent))} / ${Math.round(resourceMax)}</strong></span><span class="player-stage-resource"><i style="width:${resourcePercent}%"></i></span><span class="player-stage-experience-copy"><em>Lv${experience.level}</em><strong>${experience.percent}%</strong></span><span class="player-stage-experience" role="progressbar" aria-label="${member.name}經驗值" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${experience.percent}"><i style="width:${experience.percent}%"></i></span><span class="player-status-row" aria-label="增益與減益狀態">${statusIcons}</span></div><div class="player-stage-art" style="background-image:url('${art}')" aria-label="${member.name}"></div>${poisonBladeIndicator}</article>`;
     }).join('');
   }
+}
+
+function getPlayerExperienceDisplay(progress) {
+  const level = Math.max(1, Math.min(30, Math.floor(Number(progress?.level) || 1)));
+  const requirement = Math.max(1, requiredXp(level));
+  const currentXp = Math.max(0, Number(progress?.xp) || 0);
+  return { level, percent: Math.max(0, Math.min(100, Math.round(currentXp / requirement * 100))) };
+}
+
+function getPlayerStatusDisplays(member, now = Date.now()) {
+  if (!member) return [];
+  const statuses = [];
+  const addTimed = (key, icon, name, effect, expiresAt) => {
+    if (!(expiresAt > now) || statuses.some((status) => status.key === key)) return;
+    const seconds = Math.max(.1, (expiresAt - now) / 1000);
+    statuses.push({ key, icon, name, effect, remaining: `${seconds.toFixed(seconds < 10 ? 1 : 0)} 秒` });
+  };
+  if ((member.shield || 0) > 0) statuses.push({ key: 'shield', icon: '🛡', name: '護盾', effect: `吸收 ${Math.ceil(member.shield)} 點傷害`, remaining: '護盾耗盡前' });
+  const poisonBlade = getPoisonBladeVisualState(member, now);
+  if (poisonBlade.active) statuses.push({ key: 'poison-blade', icon: '🗡', name: '毒刃', effect: `攻擊附加中毒${poisonBlade.stacks > 1 ? `，目前 ${poisonBlade.stacks} 層` : ''}`, remaining: '效果結束前' });
+  if (member.bleed?.expiresAt > now) addTimed('bleed', '🩸', '流血', '持續受到流血傷害', member.bleed.expiresAt);
+  if (member.chapterThreeBurn?.expiresAt > now) addTimed('burn', '🔥', '燃燒', '持續受到火焰傷害', member.chapterThreeBurn.expiresAt);
+  addTimed('stun', '★', '暈眩', '暫時無法行動', member.stunnedUntil);
+  addTimed('bound', '⛓', '束縛', '暫時無法行動', member.boundUntil);
+  addTimed('haste', '⚡', '戰鬥加速', '攻擊速度提高', member.skillHasteUntil);
+  addTimed('light-grace', '✦', '光之恩典', '攻擊與技能速度提高', member.lightGraceUntil);
+  addTimed('sanctuary', '☀', '神聖庇護', '受到的傷害降低', member.sanctuaryUntil);
+  addTimed('holy-storm', '✧', '神聖風暴', '攻擊速度提高', member.holyStormHasteUntil);
+  addTimed('marked', '◎', '黑石標記', '受到敵人鎖定', member.blackstoneMarkedUntil);
+  addTimed('armor-break', '◇', '破甲', '防禦力降低', Math.max(member.blackstoneArmorBreakUntil || 0, member.spiderNestArmorBreakUntil || 0));
+  addTimed('attack-slow', '❄', '攻擊減速', '攻擊速度降低', member.blackstoneAttackSpeedPenaltyUntil);
+  return statuses;
+}
+
+function renderPlayerStatusIcons(member, now = Date.now()) {
+  return getPlayerStatusDisplays(member, now).map((status) => {
+    const description = `${status.name}：${status.effect}｜剩餘 ${status.remaining}`;
+    return `<span class="player-status-icon" title="${description}" aria-label="${description}" tabindex="0">${status.icon}</span>`;
+  }).join('');
 }
 
 function getPoisonBladeVisualState(member, now = Date.now()) {
@@ -5051,6 +5263,10 @@ function renderStrongholdObjective(currentMap = getActiveMap(getProgress())) {
 }
 
 function updateBattleUI() {
+  // Native select menus share the browser main thread with combat rendering.
+  // Keep combat simulation running, but avoid rebuilding the large battlefield
+  // DOM while either map selector is being opened or changed.
+  if (mapSelectInteractionActive) return;
   syncLegacyBattleStateFromMain();
   const character = getActiveCharacter();
   const progress = getProgress();
@@ -5078,7 +5294,10 @@ function updateBattleUI() {
     const hpPercent = Math.max(0, Math.min(100, battle.playerHp / maxHp * 100));
     const resourceCurrent = usesArrows ? battle.playerArrows : battle.playerMana;
     const resourcePercent = Math.max(0, Math.min(100, resourceCurrent / Math.max(1, maxMana) * 100));
-    playerStageInfo.innerHTML = `<b>${character.name}</b><small>${classes.find((job) => job.id === character.job)?.name || character.job}・Lv.${progress.level}</small><span class="player-stage-hp"><i style="width:${hpPercent}%"></i></span><span class="player-stage-resource"><i style="width:${resourcePercent}%"></i></span>`;
+    const resourceLabel = getCombatResourceUnit(character.job);
+    const mainMember = getMainBattleMember();
+    const experience = getPlayerExperienceDisplay(progress);
+    playerStageInfo.innerHTML = `<b>${character.name}</b><span class="player-stage-meter-copy"><em>HP</em><strong>${Math.max(0, Math.round(battle.playerHp))} / ${Math.round(maxHp)}</strong></span><span class="player-stage-hp"><i style="width:${hpPercent}%"></i></span><span class="player-stage-meter-copy"><em>${resourceLabel}</em><strong>${Math.max(0, Math.round(resourceCurrent))} / ${Math.round(maxMana)}</strong></span><span class="player-stage-resource"><i style="width:${resourcePercent}%"></i></span><span class="player-stage-experience-copy"><em>Lv${experience.level}</em><strong>${experience.percent}%</strong></span><span class="player-stage-experience" role="progressbar" aria-label="${character.name}經驗值" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${experience.percent}"><i style="width:${experience.percent}%"></i></span><span class="player-status-row" aria-label="增益與減益狀態">${renderPlayerStatusIcons(mainMember)}</span>`;
   }
   const currentMap = getActiveMap(progress);
   const mapName = document.querySelector('#battle-title');
@@ -8634,6 +8853,7 @@ function openBattle() {
   document.querySelector('#battle-toggle').textContent = 'Ⅱ 暫停攻擊';
   updateBattleUI();
   renderBattleAdventureInfo(progress);
+  renderMapTravelPanel(progress, true);
   clearInterval(battleTimer);
   clearInterval(skillTimer);
   clearInterval(enemyAttackTimer);
@@ -9017,8 +9237,29 @@ document.querySelector('#inventory-modal').addEventListener('focusout', (event) 
 document.querySelector('#inventory-modal').addEventListener('keydown', (event) => {
   if (event.key === 'Escape' && inventoryTooltipPinnedId) { event.preventDefault(); hideInventoryTooltip(true); }
 });
-document.querySelector('#battle-title').addEventListener('click', () => { if (!layoutEditMode) renderMapSelector(); });
-document.querySelector('#battle-title').addEventListener('keydown', (event) => { if (!layoutEditMode && ['Enter', ' '].includes(event.key)) { event.preventDefault(); renderMapSelector(); } });
+const adventureRegionSelect = document.querySelector('#adventure-region-select');
+const adventureMapSelect = document.querySelector('#adventure-map-select');
+[adventureRegionSelect, adventureMapSelect].forEach(initializeAdventureCustomSelect);
+adventureRegionSelect.addEventListener('change', (event) => {
+  pendingAdventureAreaId = event.target.value;
+  pendingAdventureMapId = '';
+  renderAdventureMapOptions(getProgress(), false);
+  endMapSelectInteraction();
+});
+adventureMapSelect.addEventListener('change', (event) => {
+  pendingAdventureMapId = event.target.value;
+  updateMapTravelButton(getProgress());
+  endMapSelectInteraction();
+});
+document.addEventListener('pointerdown', (event) => {
+  document.querySelectorAll('.map-select-control.is-open').forEach((control) => {
+    if (!control.contains(event.target)) closeAdventureCustomSelect(control);
+  });
+});
+document.querySelector('#map-travel-button').addEventListener('click', () => {
+  if (!pendingAdventureMapId || mapTravelInProgress) return;
+  selectAdventureMap(pendingAdventureMapId);
+});
 
 const layoutColumnStorageKey = 'stardust-battle-columns';
 const layoutLeftWidth = document.querySelector('#layout-left-width');

@@ -7,11 +7,14 @@ const html = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
 const script = fs.readFileSync(path.join(root, 'script.js'), 'utf8');
 const css = fs.readFileSync(path.join(root, 'styles', 'monster-slots.css'), 'utf8');
 const layoutCss = fs.readFileSync(path.join(root, 'styles', 'mmorpg-layout.css'), 'utf8');
+const phaseTwoCss = fs.readFileSync(path.join(root, 'styles', 'battle-phase-two.css'), 'utf8');
 
 assert.match(html, /id="player-battle-stage"/, 'party players render on the battlefield');
 assert.match(html, /id="battle-player-art" class="battle-player-art hidden"/, 'main player has a dedicated portrait node');
-assert.match(html, /styles\/monster-slots\.css\?v=20260922-rank-aura-v1/, 'battlefield loads the current local portrait styles');
-assert.match(html, /script\.js\?v=20261014-permanent-ad/, 'battlefield loads the current local combat logic');
+assert.match(html, /styles\/monster-slots\.css\?v=20261011-enemy-frame-v1/, 'battlefield loads the current local portrait styles');
+assert.doesNotMatch(html, />敵方戰場<\//, 'the visible enemy battlefield capsule label is removed');
+assert.match(css, /\.battle-field::before\s*\{[\s\S]*?top:\s*max\(0px, calc\(2% - 16px\)\) !important;[\s\S]*?bottom:\s*calc\(64% - 24px\) !important;/, 'the enemy frame extends about 40px upward without clipping and preserves its bottom edge');
+assert.match(html, /script\.js\?v=20261014-battle-interface-v1/, 'battlefield loads the current local combat logic');
 assert.match(script, /return battleCharacterArt\[`\$\{character\.race\}:\$\{character\.job\}`\] \|\| '';/, 'battle uses stable front character artwork');
 const selectableAvatarKeys = [
   'human:warrior', 'human:assassin', 'human:hunter', 'human:mage', 'human:priest',
@@ -178,4 +181,36 @@ assert.match(css, /Final monster information cascade[\s\S]*?monster-battle-slot\
 assert.match(css, /monster-slot-name \{[\s\S]*?color: #f5f5f2[\s\S]*?monster-battle-slot\.elite \.monster-slot-name \{ color: #c99aff; \}[\s\S]*?monster-battle-slot\.boss \.monster-slot-name \{ color: #ffd66d; \}/, 'normal, elite, and boss names use the requested colors');
 assert.match(css, /Final monster information cascade[\s\S]*?monster-slot-hp i,[\s\S]*?\.elite \.monster-slot-hp i,[\s\S]*?\.boss \.monster-slot-hp i \{ background: linear-gradient\(90deg, #9f2029, #ed4b43\) !important; \}/, 'all monster ranks use the same red HP fill');
 assert.match(css, /prefers-reduced-motion:\s*reduce/, 'decorative effects still respect reduced-motion settings');
+assert.match(html, /styles\/battle-phase-two\.css/, 'phase-two battlefield layout stylesheet is loaded');
+assert.match(phaseTwoCss, /\.battle-adventure-info\s*\{\s*display:\s*none !important;/, 'region progress and round loot panels are removed without deleting their data nodes');
+assert.match(phaseTwoCss, /\.battle-center\s*\{\s*grid-template-rows:\s*minmax\(0, 1fr\) !important;/, 'the center battlefield reclaims the released vertical space');
+assert.match(phaseTwoCss, /--enemy-formation-height:\s*29%/, 'the taller battlefield compensates the monster formation height instead of enlarging monster art');
+assert.match(phaseTwoCss, /\.battle-header \.map-identity,[\s\S]*?#battle-party-status\s*\{\s*display:\s*none !important;/, 'the legacy header party information is not duplicated');
+assert.match(phaseTwoCss, /\.battle-field \.player-stage-info,[\s\S]*?\.player-stage-floating\s*\{\s*display:\s*block !important;/, 'live player vitals are visible inside the battlefield');
+assert.match(script, /player-stage-meter-copy[\s\S]*?member\.currentHp[\s\S]*?member\.resourceCurrent/, 'teammate battlefield cards render live HP and resource values');
+assert.match(script, /player-stage-meter-copy[\s\S]*?battle\.playerHp[\s\S]*?resourceCurrent/, 'main character battlefield card renders live HP and resource values');
+assert.match(phaseTwoCss, /phase three:[\s\S]*?--player-portrait-size:\s*clamp\(79px, 8\.9vw, 114px\)/, 'phase-three refinement enlarges the already enlarged portraits by another ten percent');
+assert.match(phaseTwoCss, /phase three:[\s\S]*?player-stage-info,[\s\S]*?background:\s*none !important;[\s\S]*?box-shadow:\s*none !important;/, 'player information no longer uses dark card backgrounds');
+assert.match(phaseTwoCss, /player-stage-info\s*\{[\s\S]*?top:\s*calc\(100% - var\(--player-unit-ground-line\) \+ 8px\)/, 'main player information is positioned below the portrait');
+assert.match(phaseTwoCss, /player-stage-floating\s*\{[\s\S]*?top:\s*calc\(100% \+ 8px\)/, 'teammate information is positioned below each portrait');
+assert.doesNotMatch(script.match(/playerStageInfo\.innerHTML = `[^`]+`/)?.[0] || '', /classes\.find|Lv\./, 'the battlefield main player label uses the custom name instead of a class label');
+assert.match(script, /function getPlayerStatusDisplays[\s\S]*?shield[\s\S]*?bleed[\s\S]*?stun[\s\S]*?armor-break/, 'player status icons reuse live combat state');
+assert.match(script, /player-status-row[\s\S]*?renderPlayerStatusIcons/, 'each player information block includes its live status icon row');
+assert.match(phaseTwoCss, /\.player-status-row:empty\s*\{\s*display:\s*none;/, 'empty player status rows do not leave placeholders');
+assert.match(phaseTwoCss, /player-stage-info,[\s\S]*?width:\s*clamp\(165px, 14\.3vw, 202px\)/, 'player HP and resource tracks gain ten percent width without changing formation positions');
+assert.match(phaseTwoCss, /\.player-status-icon\s*\{[\s\S]*?width:\s*24px;[\s\S]*?height:\s*24px;/, 'player status icons use the requested test size');
+assert.match(script, /Math\.round\(member\.currentHp\)[\s\S]*?Math\.round\(member\.resourceCurrent\)/, 'teammate HP and resource text is rounded for display only');
+assert.match(script, /Math\.round\(battle\.playerHp\)[\s\S]*?Math\.round\(resourceCurrent\)/, 'main HP and resource text is rounded for display only');
+assert.match(script, /const hpPercent = Math\.max\(0, Math\.min\(100, member\.currentHp \/ member\.maxHp \* 100\)\)/, 'teammate bars retain actual unrounded combat precision');
+assert.match(script, /const hpPercent = Math\.max\(0, Math\.min\(100, battle\.playerHp \/ maxHp \* 100\)\)/, 'main HP bar retains actual unrounded combat precision');
+assert.match(script, /function getPlayerExperienceDisplay\(progress\)[\s\S]*?requiredXp\(level\)[\s\S]*?Math\.min\(100, Math\.round\(currentXp \/ requirement \* 100\)\)/, 'player experience uses the shared current-level requirement and clamps its integer percentage');
+assert.match(script, /getPlayerExperienceDisplay\(member\.progress\)[\s\S]*?Lv\$\{experience\.level\}[\s\S]*?\$\{experience\.percent\}%[\s\S]*?player-stage-experience/, 'each teammate renders independent level and experience data');
+assert.match(script, /getPlayerExperienceDisplay\(progress\)[\s\S]*?Lv\$\{experience\.level\}[\s\S]*?player-stage-experience/, 'the main character renders live level and experience data');
+assert.match(phaseTwoCss, /\.player-stage-experience\s*\{[\s\S]*?height:\s*7px;[\s\S]*?background:\s*rgba\(12, 18, 24, \.88\)/, 'experience tracks match the resource-track thickness and use a dark remainder');
+assert.match(phaseTwoCss, /\.player-stage-experience > i\s*\{[\s\S]*?background:\s*#f2c94c;/, 'experience progress uses the requested yellow fill');
+assert.match(phaseTwoCss, /--player-portrait-size:\s*clamp\(79px, 8\.9vw, 114px\);[\s\S]*?--player-unit-ground-line:\s*22%/, 'adding experience keeps portrait size unchanged and raises the group for safe footer clearance');
+assert.match(phaseTwoCss, /data-player-party-size="1"[\s\S]*?inset:\s*auto auto var\(--player-unit-ground-line\) 50% !important;/, 'solo main portrait follows the raised information baseline');
+assert.match(phaseTwoCss, /data-player-party-size="2"[\s\S]*?inset:\s*auto auto var\(--player-unit-ground-line\) 25% !important;/, 'two-role main portrait follows the raised information baseline');
+assert.match(phaseTwoCss, /max-width:\s*1400px[\s\S]*?player-stage-floating[\s\S]*?width:\s*180px !important;[\s\S]*?#player-stage-info\[data-party-slot="1"\][\s\S]*?translate:\s*-40% 0/, 'narrow desktop keeps all three information columns separate and clears the combat log without moving portrait slots');
+
 console.log('battlefield UI integration: assertions passed');

@@ -1,6 +1,13 @@
 const assert=require('node:assert/strict');
 const {loadGame}=require('../tools/headless-game-runtime.js');
 const game=loadGame();
+const parent=game.context.document.createElement('div'),a=game.context.document.createElement('span'),b=game.context.document.createElement('button');
+parent.appendChild(a);parent.insertBefore(b,a);
+assert.deepEqual(parent.children,[b,a],'insertBefore preserves sibling order');
+assert.equal(b.parentNode,parent,'inserted node owns a usable parent');
+const other=game.context.document.createElement('div');other.append(b);
+assert.deepEqual(parent.children,[a],'append moves the existing node');
+assert.equal(b.parentNode,other);
 assert.equal(game.evaluate('typeof battleTick'),'function');
 assert.equal(game.evaluate('typeof useAutoSkillForMember'),'function');
 assert.equal(game.evaluate('typeof CombatCorePolicy.runPlayerTick'),'function');

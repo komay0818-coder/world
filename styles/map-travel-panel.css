@@ -1,0 +1,177 @@
+/* Desktop battle map travel panel: selection is staged until the travel button is pressed. */
+@media (min-width: 701px) {
+  #battle-screen .map-travel-panel {
+    box-sizing: border-box;
+    display: grid;
+    gap: 7px;
+    width: 100%;
+    padding: 10px;
+    border: 1px solid rgba(202, 161, 74, .5);
+    border-radius: 11px;
+    background: rgba(4, 20, 29, .88);
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .025);
+  }
+
+  #battle-screen .map-travel-panel label,
+  #battle-screen .map-current-location {
+    display: grid;
+    gap: 4px;
+    min-width: 0;
+  }
+
+  #battle-screen .map-travel-panel label > span,
+  #battle-screen .map-current-location > span {
+    color: #cfb46e;
+    font-size: 15px;
+    font-weight: 700;
+    line-height: 1.3;
+  }
+
+  #battle-screen .map-travel-panel select {
+    box-sizing: border-box;
+    width: 100%;
+    min-width: 0;
+    height: 36px;
+    padding: 0 34px 0 10px;
+    border: 1px solid rgba(197, 164, 86, .48);
+    border-radius: 8px;
+    background: #0c2733;
+    color: #f0f5f7;
+    font: 700 15px/1.3 "Noto Sans TC", sans-serif;
+    cursor: pointer;
+  }
+
+  #battle-screen .map-travel-panel select:focus-visible,
+  #battle-screen #map-travel-button:focus-visible {
+    outline: 2px solid #dfbf68;
+    outline-offset: 2px;
+  }
+
+  #battle-screen .map-travel-panel option:disabled { color: #7d8c93; }
+
+  #battle-screen .map-current-location {
+    padding-top: 2px;
+    border-top: 1px solid rgba(202, 161, 74, .22);
+  }
+
+  #battle-screen #battle-title {
+    overflow: hidden;
+    margin: 0 !important;
+    color: #fff !important;
+    font-size: 20px !important;
+    font-weight: 800;
+    line-height: 1.3 !important;
+    text-overflow: ellipsis;
+    text-shadow: 0 2px 5px rgba(0, 0, 0, .55);
+    white-space: nowrap;
+  }
+
+  #battle-screen #map-travel-button {
+    min-height: 38px;
+    border: 1px solid #cfa94f;
+    border-radius: 8px;
+    background: linear-gradient(180deg, #8a6829, #634719);
+    color: #fff6d1;
+    font: 800 15px/1.2 "Noto Sans TC", sans-serif;
+    cursor: pointer;
+  }
+
+  #battle-screen #map-travel-button:hover:not(:disabled) { filter: brightness(1.12); }
+  #battle-screen #map-travel-button:disabled {
+    border-color: rgba(139, 155, 163, .28);
+    background: #172b33;
+    color: #819098;
+    cursor: default;
+  }
+
+  #battle-screen .battle-header #map-level-text { margin-top: 10px !important; }
+}
+.map-native-select {
+  position: absolute;
+  inline-size: 1px;
+  block-size: 1px;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.map-select-control {
+  position: relative;
+  width: 100%;
+}
+
+#battle-screen .map-select-trigger {
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+  height: 36px;
+  padding: 0 10px;
+  border: 1px solid rgba(197, 164, 86, .48);
+  border-radius: 8px;
+  background: #0c2733;
+  color: #f0f5f7;
+  font: 700 15px/1.3 "Noto Sans TC", sans-serif;
+  text-align: left;
+  cursor: pointer;
+}
+
+.map-select-trigger::after {
+  content: '▾';
+  float: right;
+  color: #d7b65b;
+}
+
+#battle-screen .map-select-options {
+  display: none;
+  position: absolute;
+  z-index: 80;
+  top: calc(100% + 3px);
+  left: 0;
+  right: 0;
+  max-height: min(240px, calc(100vh - 16px));
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 4px;
+  border: 1px solid rgba(202, 161, 74, .72);
+  border-radius: 6px;
+  background: #071923;
+  box-shadow: 0 8px 18px rgba(0, 0, 0, .45);
+}
+
+#battle-screen .battle-header:has(.map-select-control.is-open) {
+  z-index: 90 !important;
+  overflow: visible !important;
+}
+
+#battle-screen .map-select-control.is-open .map-select-options {
+  display: grid;
+  gap: 2px;
+}
+
+#battle-screen .map-select-options button {
+  width: 100%;
+  padding: 7px 9px;
+  border: 0;
+  border-radius: 4px;
+  color: #eef5f7;
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+}
+
+#battle-screen .map-select-options button[aria-selected="true"] {
+  color: #fff5c7;
+  background: rgba(202, 161, 74, .12);
+}
+
+#battle-screen .map-select-options button:hover,
+#battle-screen .map-select-options button:focus-visible {
+  color: #fff5c7;
+  background: rgba(202, 161, 74, .3);
+  outline: none;
+}
+
+.map-select-options button:disabled {
+  color: rgba(220, 229, 232, .45);
+  cursor: not-allowed;
+}

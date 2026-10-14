@@ -1,0 +1,268 @@
+/* Battle interface phase two: reclaim the center column and move party vitals onto the battlefield. */
+@media (min-width: 701px) {
+  .battle-center {
+    grid-template-rows: minmax(0, 1fr) !important;
+  }
+
+  .battle-center > .battle-field {
+    grid-row: 1 !important;
+    height: 100% !important;
+  }
+
+  .battle-adventure-info {
+    display: none !important;
+  }
+
+  .battle-field {
+    --enemy-formation-top: 7%;
+    --enemy-formation-height: 29%;
+  }
+
+  .battle-header .map-identity,
+  .battle-header #battle-party-status {
+    display: none !important;
+  }
+
+  .battle-field .player-stage-info,
+  .battle-field .player-stage-floating {
+    display: block !important;
+    box-sizing: border-box;
+    width: clamp(142px, 12vw, 176px) !important;
+    padding: 7px 9px !important;
+    border: 1px solid rgba(144, 175, 196, .38);
+    border-radius: 8px;
+    background: linear-gradient(145deg, rgba(5, 17, 25, .9), rgba(8, 23, 34, .72));
+    box-shadow: 0 6px 14px rgba(0, 0, 0, .24);
+    color: #f4f8fa;
+    text-shadow: 0 1px 3px #000;
+  }
+
+  .battle-field .player-stage-info {
+    position: absolute;
+    z-index: 13;
+    bottom: calc(var(--player-unit-ground-line) + var(--player-portrait-size) + 8px) !important;
+    translate: -50% 0;
+  }
+
+  .battle-field .player-stage-floating {
+    top: auto !important;
+    right: auto !important;
+    bottom: calc(100% + 8px) !important;
+    left: 50% !important;
+    translate: -50% 0;
+  }
+
+  .battle-field .player-stage-info b,
+  .battle-field .player-stage-floating b {
+    display: block;
+    overflow: hidden;
+    font-size: 12px !important;
+    line-height: 1.3;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .battle-field .player-stage-info small,
+  .battle-field .player-stage-floating small {
+    display: block;
+    margin: 2px 0 5px;
+    color: #c8d6df;
+    font-size: 10px !important;
+    line-height: 1.3;
+  }
+
+  .player-stage-meter-copy {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    margin-top: 4px;
+    font-size: 9px;
+    line-height: 1.2;
+  }
+
+  .player-stage-meter-copy em {
+    color: #b9c8d1;
+    font-style: normal;
+    font-weight: 800;
+  }
+
+  .player-stage-meter-copy strong {
+    color: #f5f8fa;
+    font-size: 9px;
+    white-space: nowrap;
+  }
+
+  .battle-field .player-stage-hp,
+  .battle-field .player-stage-resource {
+    height: 5px;
+    margin-top: 2px;
+  }
+}
+
+@media (max-width: 700px) {
+  .battle-adventure-info { display: none !important; }
+  .battle-center { grid-template-rows: minmax(280px, 58dvh) !important; }
+}
+
+/* Battle interface phase three: portrait-first player formation. */
+@media (min-width: 701px) {
+  .battle-field {
+    --player-portrait-size: clamp(79px, 8.9vw, 114px);
+    --player-unit-ground-line: 22%;
+  }
+
+  #battle-screen .battle-field[data-player-party-size="1"]:has(#player-battle-stage) #battle-player-art[aria-label] {
+    inset: auto auto var(--player-unit-ground-line) 50% !important;
+  }
+
+  #battle-screen .battle-field[data-player-party-size="2"]:has(#player-battle-stage) #battle-player-art[aria-label] {
+    inset: auto auto var(--player-unit-ground-line) 25% !important;
+  }
+
+  #battle-screen .battle-field[data-player-party-size="3"] #battle-player-art[aria-label],
+  #battle-screen .battle-field[data-player-party-size="3"] #player-stage-info[data-party-slot="1"] {
+    left: 25% !important;
+  }
+
+  #battle-screen .battle-field[data-player-party-size="3"]:has(#player-battle-stage) #battle-player-art[aria-label] {
+    inset: auto auto var(--player-unit-ground-line) 25% !important;
+  }
+
+  #battle-screen .battle-field[data-player-party-size="3"] .player-stage-unit[data-party-slot="2"] {
+    left: 50% !important;
+  }
+
+  #battle-screen .battle-field[data-player-party-size="3"] .player-stage-unit[data-party-slot="3"] {
+    left: 75% !important;
+  }
+
+  .battle-field .player-stage-info,
+  .battle-field .player-stage-floating {
+    width: clamp(165px, 14.3vw, 202px) !important;
+    padding: 0 !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: none !important;
+    box-shadow: none !important;
+    text-align: center;
+  }
+
+  .battle-field .player-stage-info {
+    bottom: auto !important;
+    top: calc(100% - var(--player-unit-ground-line) + 8px) !important;
+  }
+
+  .battle-field .player-stage-floating {
+    top: calc(100% + 8px) !important;
+    bottom: auto !important;
+  }
+
+  .battle-field .player-stage-info b,
+  .battle-field .player-stage-floating b {
+    font-size: 15px !important;
+    line-height: 1.35;
+    color: #fff;
+  }
+
+  .battle-field .player-stage-info small,
+  .battle-field .player-stage-floating small {
+    display: none !important;
+  }
+
+  .battle-field .player-stage-hp,
+  .battle-field .player-stage-resource {
+    width: 100%;
+    height: 7px;
+  }
+
+  .battle-field .player-stage-meter-copy {
+    margin-top: 4px;
+    font-size: 12px;
+  }
+
+  .battle-field .player-stage-meter-copy strong {
+    font-size: 12px;
+  }
+
+  .player-stage-experience-copy {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    margin-top: 5px;
+    color: #f5d86b;
+    font-size: 11px;
+    font-weight: 800;
+    line-height: 1.2;
+  }
+
+  .player-stage-experience-copy em {
+    font-style: normal;
+  }
+
+  .player-stage-experience-copy strong {
+    font-size: 11px;
+  }
+
+  .player-stage-experience {
+    display: block;
+    overflow: hidden;
+    width: 100%;
+    height: 7px;
+    margin-top: 2px;
+    border-radius: 999px;
+    background: rgba(12, 18, 24, .88);
+  }
+
+  .player-stage-experience > i {
+    display: block;
+    width: 0;
+    height: 100%;
+    border-radius: inherit;
+    background: #f2c94c;
+  }
+
+  .player-status-row {
+    display: flex;
+    min-height: 0;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    margin-top: 5px;
+  }
+
+  .player-status-row:empty {
+    display: none;
+  }
+
+  .player-status-icon {
+    display: grid;
+    width: 24px;
+    height: 24px;
+    place-items: center;
+    border: 1px solid rgba(220, 232, 239, .52);
+    border-radius: 50%;
+    background: rgba(7, 18, 27, .86);
+    color: #f8fbff;
+    font-size: 14px;
+    line-height: 1;
+    cursor: help;
+  }
+}
+
+@media (min-width: 701px) and (max-width: 1400px) {
+  .battle-field .player-stage-info,
+  .battle-field .player-stage-floating {
+    width: 180px !important;
+  }
+
+  #battle-screen .battle-field[data-player-party-size="3"] #player-stage-info[data-party-slot="1"] {
+    translate: -40% 0;
+  }
+
+  #battle-screen .battle-field[data-player-party-size="3"] #player-stage-info[data-party-slot="1"] > b {
+    position: relative;
+    left: -10%;
+  }
+}

@@ -1200,7 +1200,7 @@ body:has(.battle-screen:not(.hidden)) .toast.show {
 .battle-field::after { display: none !important; }
 
 .battle-field::before {
-  top: calc(2% + 24px) !important;
+  top: max(0px, calc(2% - 16px)) !important;
   right: 2.5% !important;
   bottom: calc(64% - 24px) !important;
   left: 2.5% !important;

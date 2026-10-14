@@ -1,0 +1,162 @@
+/* Desktop battle typography V2. Component sizes are explicit; the interface is never globally scaled. */
+@media (min-width: 701px) {
+  #battle-screen {
+    --battle-font-map-title: 20px;
+    --battle-font-panel-title: 18px;
+    --battle-font-player-name: 17px;
+    --battle-font-monster-name: 16px;
+    --battle-font-section-title: 16px;
+    --battle-font-skill-name: 15px;
+    --battle-font-player-value: 15px;
+    --battle-font-label: 14px;
+    --battle-font-secondary: 13px;
+  }
+
+  #battle-screen #battle-title { font-size: var(--battle-font-map-title) !important; line-height: 1.3 !important; }
+  #battle-screen .skill-panel-head strong { font-size: var(--battle-font-panel-title) !important; line-height: 1.3 !important; }
+
+  #battle-screen .battle-field .player-stage-info,
+  #battle-screen .battle-field .player-stage-floating { width: 200px !important; }
+
+  #battle-screen .battle-field .player-stage-info > b,
+  #battle-screen .battle-field .player-stage-floating > b {
+    font-size: var(--battle-font-player-name) !important;
+    font-weight: 600 !important;
+    line-height: 1.35 !important;
+  }
+
+  #battle-screen .player-stage-meter-copy,
+  #battle-screen .player-stage-experience-copy { font-size: var(--battle-font-label) !important; line-height: 1.25 !important; }
+
+  #battle-screen .player-stage-meter-copy strong,
+  #battle-screen .player-stage-experience-copy em,
+  #battle-screen .player-stage-experience-copy strong {
+    font-size: var(--battle-font-player-value) !important;
+    font-weight: 700 !important;
+    line-height: 1.25 !important;
+  }
+
+  #battle-screen .battle-field .player-stage-hp,
+  #battle-screen .battle-field .player-stage-resource,
+  #battle-screen .player-stage-experience { height: 12px !important; }
+
+  #battle-screen #enemy-squad .monster-slot-name {
+    box-sizing: border-box;
+    max-width: 100%;
+    overflow: hidden;
+    font-size: var(--battle-font-monster-name) !important;
+    font-weight: 600 !important;
+    line-height: 1.25 !important;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  #battle-screen .chapter-three-suppression summary > span {
+    font-size: 17px !important;
+    font-weight: 600 !important;
+    line-height: 1.3 !important;
+  }
+
+  #battle-screen .chapter-three-suppression summary strong,
+  #battle-screen .suppression-row-head span { font-size: 15px !important; line-height: 1.3 !important; }
+  #battle-screen .suppression-row-head b { font-size: 16px !important; font-weight: 600 !important; line-height: 1.3 !important; }
+
+  #battle-screen #suppression-region-name,
+  #battle-screen .suppression-row small { font-size: 15px !important; line-height: 1.4 !important; }
+
+  #battle-screen .combat-log-head p {
+    font-size: 18px !important;
+    font-weight: 700 !important;
+    line-height: 1.3 !important;
+  }
+
+  #battle-screen .battle-bottom #combat-log-lines .combat-log-entry {
+    font-size: 16px !important;
+    font-weight: 600 !important;
+    line-height: 1.45 !important;
+    overflow-wrap: anywhere;
+  }
+
+  #battle-screen .combat-log-head button { font-size: 15px !important; line-height: 1.3 !important; }
+  #battle-screen .combat-log-entry time { font-size: 12px !important; line-height: 1.3 !important; }
+  #battle-screen .skill-panel-head small { font-size: var(--battle-font-secondary) !important; line-height: 1.3 !important; }
+
+  #battle-screen .battle-bottom #combat-log-lines { min-height: 0; overflow-y: auto !important; }
+
+  #battle-screen .skill-list .skill-group h3,
+  #battle-screen .race-talent-group h3 { font-size: var(--battle-font-label) !important; line-height: 1.3 !important; }
+
+  #battle-screen #skill-list .skill-chip.compact-skill { min-width: 0 !important; gap: 7px !important; }
+
+  #battle-screen #skill-list .skill-chip.compact-skill b,
+  #battle-screen .race-talent-card b {
+    min-width: 0;
+    overflow: hidden;
+    font-size: var(--battle-font-skill-name) !important;
+    font-weight: 600 !important;
+    line-height: 1.25 !important;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  #battle-screen #skill-list .skill-chip.compact-skill small,
+  #battle-screen #skill-list .skill-chip.compact-skill .skill-cooldown,
+  #battle-screen .race-talent-card small,
+  #battle-screen .race-talent-card em {
+    flex: 0 0 auto;
+    font-size: var(--battle-font-secondary) !important;
+    line-height: 1.3 !important;
+    white-space: nowrap;
+  }
+
+  #battle-screen .race-talent-card small { overflow: hidden; text-overflow: ellipsis; }
+
+  #battle-screen .battle-menu-button b {
+    font-size: var(--battle-font-skill-name) !important;
+    font-weight: 700 !important;
+    line-height: 1.25 !important;
+  }
+
+  #battle-screen .battle-menu-button small { font-size: var(--battle-font-secondary) !important; line-height: 1.2 !important; }
+}
+
+/* Preserve the three-column rhythm at 1280px without changing portraits or combat animation. */
+@media (min-width: 701px) and (max-width: 1400px) {
+  #battle-screen .battle-field .player-stage-info,
+  #battle-screen .battle-field .player-stage-floating { width: 180px !important; }
+
+  #battle-screen #skill-list .skill-chip.compact-skill {
+    display: grid !important;
+    grid-template-columns: 27px minmax(0,1fr) auto !important;
+    grid-template-areas: "icon name cooldown" "icon meta cooldown" !important;
+    gap: 1px 5px !important;
+    padding-inline: 5px !important;
+  }
+
+  #battle-screen #skill-list .skill-chip.compact-skill .skill-icon { grid-area: icon; }
+  #battle-screen #skill-list .skill-chip.compact-skill b { grid-area: name; }
+  #battle-screen #skill-list .skill-chip.compact-skill small { grid-area: meta; }
+  #battle-screen #skill-list .skill-chip.compact-skill .skill-cooldown { grid-area: cooldown; align-self: center; }
+
+  #battle-screen .race-talent-card {
+    grid-template-columns: 38px minmax(0,1fr) !important;
+    grid-template-areas: "talent-icon talent-copy" "talent-state talent-state" !important;
+  }
+
+  #battle-screen .race-talent-card > span { grid-area: talent-icon; }
+  #battle-screen .race-talent-card > div { grid-area: talent-copy; }
+  #battle-screen .race-talent-card > em { grid-area: talent-state; justify-self: end; }
+  #battle-screen .race-talent-card b,
+  #battle-screen .race-talent-card small { overflow: visible; text-overflow: clip; white-space: normal; }
+
+  #battle-screen .battle-field[data-player-party-size="3"] #player-stage-info[data-party-slot="1"] { translate: -50% 0 !important; }
+  #battle-screen .battle-field[data-player-party-size="3"] #player-stage-info[data-party-slot="1"] > b { left: 0 !important; }
+}
+
+@media (min-width: 1101px) and (max-width: 1700px) {
+  #battle-screen .battle-bottom .combat-log {
+    width: calc(var(--battle-left-column, 22%) - 8px) !important;
+    height: calc(100dvh - 310px) !important;
+  }
+  #battle-screen .battle-bottom .skill-panel { width: 100% !important; }
+}
