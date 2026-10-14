@@ -1,0 +1,86 @@
+{
+  "source": "assets\\character-portraits\\calibration-tests\\elf-assassin-selection-five-frame-v4",
+  "method": "geodesic pose separation with manual removal of verified neighboring left-edge fragments",
+  "frames": [
+    {
+      "frame": 1,
+      "size": [
+        372,
+        627
+      ],
+      "foreign_edge_cleanup": []
+    },
+    {
+      "frame": 2,
+      "size": [
+        359,
+        636
+      ],
+      "foreign_edge_cleanup": [
+        [
+          0,
+          560,
+          22,
+          636
+        ]
+      ]
+    },
+    {
+      "frame": 3,
+      "size": [
+        364,
+        623
+      ],
+      "foreign_edge_cleanup": [
+        [
+          0,
+          0,
+          22,
+          260
+        ],
+        [
+          0,
+          550,
+          32,
+          623
+        ]
+      ]
+    },
+    {
+      "frame": 4,
+      "size": [
+        357,
+        628
+      ],
+      "foreign_edge_cleanup": [
+        [
+          0,
+          0,
+          20,
+          290
+        ],
+        [
+          0,
+          550,
+          34,
+          628
+        ]
+      ]
+    },
+    {
+      "frame": 5,
+      "size": [
+        347,
+        630
+      ],
+      "foreign_edge_cleanup": [
+        [
+          0,
+          550,
+          34,
+          630
+        ]
+      ]
+    }
+  ]
+}
