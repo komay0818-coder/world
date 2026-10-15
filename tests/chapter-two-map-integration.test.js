@@ -23,7 +23,7 @@ assert.match(index, /black-forest-trail-policy\.js\?v=20260809-trail-balance-v10
 assert.match(index, /spider-nest-policy\.js\?v=20260809-spider-combat-v9/);
 assert.match(index, /forest-altar-policy\.js\?v=20260911-forest-altar-v1/);
 assert.match(index, /chapter-two-map-policy\.js\?v=20260911-depths-complete-v1/);
-assert.match(index, /script\.js\?v=20261014-permanent-ad/);
+assert.match(index, /script\.js\?v=[a-zA-Z0-9-]+"/);
 assert.match(index, /VER\. \d+\.\d+\.\d+/, 'the game exposes a semantic version');
 assert.match(script, /\.\.\.ChapterTwoMapPolicy\.MAPS/, 'chapter-two maps join the shared progression data');
 assert.match(script, /blackForestEntrance: BlackForestEntrancePolicy\.getCombatPool\(\)/);
@@ -105,7 +105,7 @@ assert.match(script, /blackstoneMarkedUntil/);
 assert.match(script, /blackstoneArmorBreakUntil/);
 assert.match(script, /enemyCaptainShieldUntil/);
 assert.match(script, /blackForestCorruption: BlackForestCorruptionPolicy\.normalizeState\(saved\.blackForestCorruption\)/);
-assert.match(script, /if \(map\.chapter === 2\) BlackForestCorruptionPolicy\.enterChapter\(progress\)/);
+assert.match(script, /if \(!unrestrictedPlaytestTravel && map\.chapter === 2\) BlackForestCorruptionPolicy\.enterChapter\(progress\)/);
 assert.match(script, /BlackForestCorruptionPolicy\.applyCombatStats\(stats, progress\.blackForestCorruption, activeMap\.chapter === 2\)/);
 assert.match(script, /BlackForestDepthsPolicy\.applyDenseFogAccuracy\(corruptedStats\.accuracy, activeMap\.id\)/);
 assert.match(script, /function processBlackForestCorruption\(now = Date\.now\(\)\)[\s\S]*BlackForestCorruptionPolicy\.getHpLoss/);

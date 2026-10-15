@@ -1354,7 +1354,7 @@ function getLocalPlaytestProgressKey() {
 function getPlaytestHpFloor() {
   const visualShowcase = ChapterTwoBalancePlaytestPolicy?.isActive()
     && new URLSearchParams(window.location.search).has('showcase');
-  return visualShowcase || isMonsterRotationPreview() || getBlackForestEntrancePlaytestConfig().invincible || getBlackstoneStrongholdPlaytestConfig().invincible || getForestAltarPlaytestConfig().invincible || getBlackForestDepthsPlaytestConfig().invincible ? 1 : 0;
+  return visualShowcase || getBlackForestEntrancePlaytestConfig().invincible || getBlackstoneStrongholdPlaytestConfig().invincible || getForestAltarPlaytestConfig().invincible || getBlackForestDepthsPlaytestConfig().invincible ? 1 : 0;
 }
 
 function getProgress(activeCharacterOverride = null) {
