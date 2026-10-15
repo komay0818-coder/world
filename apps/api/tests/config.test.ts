@@ -5,12 +5,18 @@ const base = {
   APP_ENV: 'dev', HOST: '127.0.0.1', PORT: '3000', LOG_LEVEL: 'info',
   DATABASE_URL: 'postgresql://user:password@db.dev.internal:5432/lorn_dev',
   DATABASE_ALLOWED_HOSTS: 'db.dev.internal', DATABASE_SSL: 'true',
+  DATABASE_CA_CERT_PATH: 'C:\\certs\\dev-ca.crt',
   SUPABASE_URL: 'https://dev-project.supabase.co', SUPABASE_JWT_AUDIENCE: 'authenticated'
 };
 
 describe('loadConfig', () => {
   it('accepts an explicitly allow-listed Dev database', () => {
     expect(loadConfig(base).appEnv).toBe('dev');
+  });
+
+  it('requires a CA certificate path when database TLS is enabled', () => {
+    const { DATABASE_CA_CERT_PATH: _, ...withoutCa } = base;
+    expect(() => loadConfig(withoutCa)).toThrow(/DATABASE_CA_CERT_PATH/);
   });
 
   it('stops when required Dev configuration is absent', () => {

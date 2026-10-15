@@ -18,6 +18,8 @@ export const testConfig = {
   logLevel: 'silent' as const,
   databaseUrl: 'postgresql://test:test@127.0.0.1:5432/lorn_dev',
   databaseSsl: false,
+  databaseCaCertPath: null,
+  lornDevSupabaseProjectRef: null,
   supabaseUrl: 'https://dev-example.supabase.co',
   supabaseJwtAudience: 'authenticated'
 };

@@ -8,6 +8,8 @@ const environmentSchema = z.object({
   DATABASE_URL: z.string().url(),
   DATABASE_ALLOWED_HOSTS: z.string().min(1),
   DATABASE_SSL: z.enum(['true', 'false']).default('false'),
+  DATABASE_CA_CERT_PATH: z.string().optional(),
+  LORN_DEV_SUPABASE_PROJECT_REF: z.string().regex(/^[a-z0-9]+$/).optional(),
   SUPABASE_URL: z.string().url(),
   SUPABASE_JWT_AUDIENCE: z.string().min(1).default('authenticated')
 });
@@ -19,6 +21,8 @@ export type AppConfig = {
   logLevel: 'fatal' | 'error' | 'warn' | 'info' | 'debug' | 'trace' | 'silent';
   databaseUrl: string;
   databaseSsl: boolean;
+  databaseCaCertPath: string | null;
+  lornDevSupabaseProjectRef: string | null;
   supabaseUrl: string;
   supabaseJwtAudience: string;
 };
@@ -40,13 +44,21 @@ export function loadConfig(source: NodeJS.ProcessEnv = process.env): AppConfig {
     throw new Error('Production-like or missing database name is blocked in backend phase 1A');
   }
 
+  const databaseSsl = parsed.data.DATABASE_SSL === 'true';
+  const databaseCaCertPath = parsed.data.DATABASE_CA_CERT_PATH?.trim() || null;
+  if (databaseSsl && !databaseCaCertPath) {
+    throw new Error('DATABASE_CA_CERT_PATH is required when DATABASE_SSL=true');
+  }
+
   return {
     appEnv: parsed.data.APP_ENV,
     host: parsed.data.HOST,
     port: parsed.data.PORT,
     logLevel: parsed.data.LOG_LEVEL,
     databaseUrl: parsed.data.DATABASE_URL,
-    databaseSsl: parsed.data.DATABASE_SSL === 'true',
+    databaseSsl,
+    databaseCaCertPath,
+    lornDevSupabaseProjectRef: parsed.data.LORN_DEV_SUPABASE_PROJECT_REF ?? null,
     supabaseUrl: parsed.data.SUPABASE_URL.replace(/\/$/, ''),
     supabaseJwtAudience: parsed.data.SUPABASE_JWT_AUDIENCE
   };

@@ -4,10 +4,13 @@ import { fileURLToPath } from 'node:url';
 import path from 'node:path';
 import pg from 'pg';
 import { loadConfig } from '../src/config.js';
+import { createDatabaseSslConfig } from '../src/database.js';
+import { assertLornDevMigrationTarget } from '../src/migration-safety.js';
 
 const config = loadConfig();
+assertLornDevMigrationTarget(config);
 const migrationsDirectory = fileURLToPath(new URL('../migrations', import.meta.url));
-const client = new pg.Client({ connectionString: config.databaseUrl, ssl: config.databaseSsl ? { rejectUnauthorized: true } : false });
+const client = new pg.Client({ connectionString: config.databaseUrl, ssl: createDatabaseSslConfig(config) });
 
 try {
   await client.connect();

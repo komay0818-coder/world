@@ -1,3 +1,5 @@
+import { X509Certificate } from 'node:crypto';
+import { readFileSync } from 'node:fs';
 import pg from 'pg';
 import type { AppConfig } from './config.js';
 
@@ -8,10 +10,32 @@ export interface Database {
   close(): Promise<void>;
 }
 
+function readTrustedDatabaseCa(certificatePath: string): Buffer {
+  const certificate = readFileSync(certificatePath);
+  const parsed = new X509Certificate(certificate);
+  const now = Date.now();
+  if (!parsed.ca) throw new Error('Configured database certificate is not a CA certificate');
+  if (now < Date.parse(parsed.validFrom) || now > Date.parse(parsed.validTo)) {
+    throw new Error('Configured database CA certificate is not currently valid');
+  }
+  return certificate;
+}
+
+export function createDatabaseSslConfig(config: AppConfig): false | { rejectUnauthorized: true; ca: Buffer } {
+  if (!config.databaseSsl) return false;
+  if (!config.databaseCaCertPath) {
+    throw new Error('Database CA certificate path is required when TLS is enabled');
+  }
+  return {
+    rejectUnauthorized: true,
+    ca: readTrustedDatabaseCa(config.databaseCaCertPath)
+  };
+}
+
 export function createDatabase(config: AppConfig): Database {
   const pool = new pg.Pool({
     connectionString: config.databaseUrl,
-    ssl: config.databaseSsl ? { rejectUnauthorized: true } : false,
+    ssl: createDatabaseSslConfig(config),
     max: 10,
     idleTimeoutMillis: 30_000,
     connectionTimeoutMillis: 5_000,
