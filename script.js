@@ -2150,7 +2150,6 @@ function getPartyMemberDisplayStats(memberRecord, slots = getCharacterSlots(), s
 function renderParty() {
   const progress = getProgress();
   const party = normalizeCurrentParty(progress);
-  saveProgress(progress);
   const slots = getCharacterSlots();
   const activeMembers = party.activeMemberIds
     .map((id) => party.members.find((member) => member.id === id))
