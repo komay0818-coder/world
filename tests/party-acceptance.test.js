@@ -97,7 +97,7 @@ verify(12, 'rear replacement and target reselection', () => {
 
 verify(13, 'party configuration saved and restored', () => {
   assert.match(script, /progress\.party = PartyPolicy\.normalizeParty/);
-  assert.match(script, /localStorage\.setItem\('stardust-progress', JSON\.stringify\(progress\)\)/);
+  assert.match(script, /getGameStorage\(\)\.setItem\('stardust-progress', JSON\.stringify\(progress\)\)/);
   const slots = makeSlots();
   const normalized = party.normalizeParty(
     { activeMemberIds: ['member-1', 'member-2', 'member-3', 'member-4'] },
