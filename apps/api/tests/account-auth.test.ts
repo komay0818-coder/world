@@ -36,10 +36,10 @@ describe('GET /v1/account', () => {
   it('cannot select another account through request parameters', async () => {
     let queriedSubject: unknown;
     const database = fakeDatabase((_text, values) => { queriedSubject = values?.[0]; return []; });
-    const app = buildApp({ config: testConfig, database, tokenVerifier: async () => ({ id: 'verified-user', claims: {} }), logger: false });
+    const app = buildApp({ config: testConfig, database, tokenVerifier: async () => ({ id: 'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb', claims: {} }), logger: false });
     const response = await app.inject({ method: 'GET', url: '/v1/account?accountId=other-user', headers: { authorization: 'Bearer valid' } });
     expect(response.statusCode).toBe(404);
-    expect(queriedSubject).toBe('verified-user');
+    expect(queriedSubject).toBe('bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb');
     await app.close();
   });
 });

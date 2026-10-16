@@ -39,6 +39,10 @@ describe('Supabase JWT verification policy', () => {
     await expect(verifier(await sign({ expiresIn: '-1s' }))).rejects.toThrow();
   });
 
+  it('rejects a token with a non-UUID subject', async () => {
+    await expect(verifier(await sign({ subject: 'not-a-uuid' }))).rejects.toThrow(/valid UUID/);
+  });
+
   it('rejects a token without a subject', async () => {
     const { publicKey, privateKey } = await generateKeyPair('ES256');
     const publicJwk = await exportJWK(publicKey);

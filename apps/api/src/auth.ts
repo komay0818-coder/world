@@ -1,9 +1,17 @@
 import { createRemoteJWKSet, jwtVerify, type JWTPayload, type JWTVerifyGetKey } from 'jose';
 import type { FastifyReply, FastifyRequest } from 'fastify';
+import { z } from 'zod';
 import type { AppConfig } from './config.js';
 
 export type AuthenticatedUser = { id: string; claims: JWTPayload };
 export type TokenVerifier = (token: string) => Promise<AuthenticatedUser>;
+
+const authUserIdSchema = z.string().uuid();
+
+function requireValidAuthUser(user: AuthenticatedUser): AuthenticatedUser {
+  if (!authUserIdSchema.safeParse(user.id).success) throw new Error('Token subject is not a valid UUID');
+  return user;
+}
 
 export function createTokenVerifier(issuer: string, audience: string, jwks: JWTVerifyGetKey): TokenVerifier {
   return async (token) => {
@@ -12,7 +20,7 @@ export function createTokenVerifier(issuer: string, audience: string, jwks: JWTV
       audience
     });
     if (!payload.sub) throw new Error('Token has no subject');
-    return { id: payload.sub, claims: payload };
+    return requireValidAuthUser({ id: payload.sub, claims: payload });
   };
 }
 
@@ -29,7 +37,7 @@ export function authenticate(verifier: TokenVerifier) {
       return;
     }
     try {
-      request.authUser = await verifier(header.slice(7));
+      request.authUser = requireValidAuthUser(await verifier(header.slice(7)));
     } catch {
       await reply.code(401).send({ error: { code: 'INVALID_TOKEN', message: 'The access token is invalid or expired', requestId: request.id } });
     }

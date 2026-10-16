@@ -2,7 +2,7 @@ import Fastify, { type FastifyBaseLogger } from 'fastify';
 import type { AppConfig } from './config.js';
 import { authenticate, createSupabaseTokenVerifier, type TokenVerifier } from './auth.js';
 import { checkDatabase, type Database } from './database.js';
-import { findAccountByAuthUserId } from './account-repository.js';
+import { findAccountByAuthUserId, initializeAccountByAuthUserId } from './account-repository.js';
 
 type BuildOptions = {
   config: AppConfig;
@@ -14,6 +14,7 @@ type BuildOptions = {
 export function buildApp(options: BuildOptions) {
   const app = Fastify({ logger: options.logger ?? { level: options.config.logLevel } });
   const verifyToken = options.tokenVerifier ?? createSupabaseTokenVerifier(options.config);
+  const requireAuth = authenticate(verifyToken);
 
   app.get('/health/live', async () => ({ status: 'ok' }));
 
@@ -27,10 +28,15 @@ export function buildApp(options: BuildOptions) {
     }
   });
 
-  app.get('/v1/account', { preHandler: authenticate(verifyToken) }, async (request, reply) => {
+  app.get('/v1/account', { preHandler: requireAuth }, async (request, reply) => {
     const account = await findAccountByAuthUserId(options.database, request.authUser!.id);
     if (!account) return reply.code(404).send({ error: { code: 'ACCOUNT_NOT_FOUND', message: 'Player account has not been created', requestId: request.id } });
     return { account };
+  });
+
+  app.post('/v1/account/initialize', { preHandler: requireAuth }, async (request, reply) => {
+    const result = await initializeAccountByAuthUserId(options.database, request.authUser!.id);
+    return reply.code(result.created ? 201 : 200).send({ account: result.account });
   });
 
   app.setErrorHandler((error, request, reply) => {
