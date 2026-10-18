@@ -89,8 +89,8 @@ assert.match(script, /characterIdleAnimations\[animationKey\]/, 'race and class 
 assert.match(script, /stopCharacterIdleAnimation\(\)/, 'animation has an explicit stop path');
 assert.match(script, /'human:assassin': \{ scale: \.92, offsetX: -10, offsetY: 5 \}/, 'human assassin matches the human hunter body height without copying its numeric scale');
 assert.match(script, /'human:mage': \{ scale: 1\.30815, offsetX: -5, offsetY: 41 \}/, 'human mage keeps its scale and horizontal position while aligning its feet to the human warrior baseline');
-assert.match(script, /'elf:warrior': \{ scale: 1\.004, offsetX: 0, offsetY: 7 \}/, 'elf warrior matches the shared body height and foot baseline');
-assert.match(script, /'elf:assassin': \{ scale: \.9, offsetX: 0, offsetY: 20 \}/, 'elf assassin action frames match the shared body height and foot baseline');
+assert.match(script, /'elf:warrior': \{ scale: 1\.06, offsetX: 0, offsetY: 8 \}/, 'elf warrior matches the shared visual body height and foot baseline');
+assert.match(script, /'elf:assassin': \{ scale: 1\.07, offsetX: 0, offsetY: 25 \}/, 'elf assassin action frames match the shared visual body height and foot baseline');
 assert.match(script, /'elf:hunter': \{ scale: 1\.242, offsetX: 3, offsetY: -3 \}/, 'elf hunter keeps its offsets and receives the second-round scale');
 assert.match(script, /'orc:warrior': \{ scale: 1\.1648, offsetX: -6, offsetY: 4 \}/, 'orc warrior matches the orc hunter scale and foot baseline');
 assert.match(script, /'orc:assassin': \{ scale: 1\.07, offsetX: 22, offsetY: 1 \}/, 'orc assassin aligns its feet to the orc hunter baseline');
