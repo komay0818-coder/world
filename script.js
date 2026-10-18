@@ -257,8 +257,8 @@ const characterCreationDisplay = {
   'human:hunter': { scale: 1.155, offsetX: -1, offsetY: 4 },
   'human:mage': { scale: 1.30815, offsetX: -5, offsetY: 41 },
   'human:priest': { scale: 1.06, offsetX: 10, offsetY: 2 },
-  'elf:warrior': { scale: 1.016, offsetX: 0, offsetY: 15 },
-  'elf:assassin': { scale: 1.232, offsetX: 0, offsetY: 40 },
+  'elf:warrior': { scale: 1.004, offsetX: 0, offsetY: 7 },
+  'elf:assassin': { scale: .9, offsetX: 0, offsetY: 20 },
   'elf:hunter': { scale: 1.242, offsetX: 3, offsetY: -3 },
   'elf:mage': { scale: 1.2064, offsetX: 5, offsetY: 8 },
   'orc:warrior': { scale: 1.1648, offsetX: -6, offsetY: 4 },
@@ -327,7 +327,7 @@ const characterIdleAnimations = {
     frameDurationMs: 180
   },
   'elf:assassin': {
-    frames: [1, 2, 3, 4, 5].map((frame) => `assets/character-portraits/calibration-tests/elf-assassin-selection-five-frame-v6-aligned/frame-${String(frame).padStart(2, '0')}.png?v=1`),
+    frames: [1, 2, 3, 4, 5].map((frame) => `assets/character-portraits/calibration-tests/elf-assassin-action-five-frame-v1/frame-${String(frame).padStart(2, '0')}.png?v=1`),
     order: [0, 1, 2, 3, 4],
     frameDurationMs: 2000 / 5
   },
