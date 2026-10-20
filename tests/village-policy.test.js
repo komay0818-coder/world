@@ -1,8 +1,8 @@
 const assert = require('node:assert/strict');
 const VillagePolicy = require('../village-policy.js');
 
-const buildingIds = ['furnace', 'alchemy', 'workshop', 'blacksmith', 'rune', 'storage', 'shop'];
-assert.deepEqual(Object.keys(VillagePolicy.BUILDING_DEFINITIONS), buildingIds, 'V1 exposes exactly the seven requested buildings');
+const buildingIds = ['furnace', 'alchemy', 'workshop', 'blacksmith', 'rune'];
+assert.deepEqual(Object.keys(VillagePolicy.BUILDING_DEFINITIONS), buildingIds, 'the village exposes exactly the five active buildings');
 
 const defaults = VillagePolicy.createDefaultVillageData();
 assert.equal(defaults.version, 1);
@@ -20,6 +20,8 @@ const repaired = VillagePolicy.normalizeVillageData({
   buildings: {
     furnace: { level: 999, futureCost: { gold: 50 } },
     alchemy: { level: 0, unlocked: false },
+    storage: { level: 4 },
+    shop: { level: 3 },
     unknownBuilding: { level: 8 }
   }
 });
@@ -28,7 +30,8 @@ assert.equal(repaired.level, 1, 'invalid village level is repaired');
 assert.equal(repaired.buildings.furnace.level, 10, 'building level is capped by its definition');
 assert.deepEqual(repaired.buildings.furnace.futureCost, { gold: 50 }, 'known building state keeps future extension fields');
 assert.equal(repaired.buildings.alchemy.unlocked, false, 'saved unlock state is retained');
-assert.equal(repaired.buildings.shop.level, 1, 'missing buildings are added automatically');
+assert.equal(repaired.buildings.storage, undefined, 'removed storage data does not re-enter the active roster');
+assert.equal(repaired.buildings.shop, undefined, 'removed shop data does not re-enter the active roster');
 assert.equal(repaired.buildings.unknownBuilding, undefined, 'unknown building ids do not enter the active V1 roster');
 assert.deepEqual(repaired.futureVillageField, { retained: true }, 'future village metadata is retained');
 
