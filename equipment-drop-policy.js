@@ -45,7 +45,9 @@
   ]);
   const EQUIPMENT_POOLS = Object.freeze({
     plains_common_weapons: Object.freeze([
-      'short-iron-sword', 'logging-hatchet', 'hunter-shortbow', 'rusty-dagger', 'apprentice-staff'
+      'short-iron-sword', 'mercenary-greatsword', 'giant-iron-sword',
+      'logging-hatchet', 'battle-greataxe', 'rockbreaker-greataxe',
+      'hunter-shortbow', 'rusty-dagger', 'apprentice-staff'
     ]),
     plains_common_armor: Object.freeze([
       'starter-recruit-plate-armor', 'leather-vest', 'apprentice-robe',
