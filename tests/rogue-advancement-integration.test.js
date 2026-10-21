@@ -3,6 +3,7 @@ const fs = require('node:fs');
 const path = require('node:path');
 const source = fs.readFileSync(path.join(__dirname, '..', 'script.js'), 'utf8');
 const html = fs.readFileSync(path.join(__dirname, '..', 'index.html'), 'utf8');
+const skillDescriptions = fs.readFileSync(path.join(__dirname, '..', 'skill-description-policy.js'), 'utf8');
 
 assert.match(html, /assassin-offhand-policy\.js[\s\S]*rogue-advancement-policy\.js[\s\S]*script\.js/);
 assert.match(source, /character\.job === 'assassin' \? RogueAdvancementPolicy/);
@@ -23,7 +24,7 @@ assert.match(source, /skill\.id === 'corrosive-strike'[\s\S]*applyCoating/);
 assert.match(source, /getAutoSkillPriority\(progress, unlocked\)/, 'advanced rogues use their formal specialization priority');
 assert.match(source, /getCoatingExecution[\s\S]*coating-poison[\s\S]*applyRoguePoison/, 'coating bonus uses pre-hit stacks before adding one poison layer');
 assert.match(source, /applyRoguePoison[\s\S]*poisonStacks[\s\S]*performAssassinOffhandStrike[\s\S]*'venom-coating'/, 'coating checks post-application poison stacks and uses the formal offhand strike once');
-assert.match(source, /skill\.id === 'blood-venom-rend'[\s\S]*bleedDuration[\s\S]*bleedTickInterval/);
+assert.match(skillDescriptions, /bleedTick[\s\S]*bleedTickInterval[\s\S]*bleedStacks[\s\S]*poisonedBonusStacks/, 'blood venom rend details are rendered by the shared skill description policy');
 assert.match(source, /function applyBloodVenomBleed[\s\S]*const nextTickAt = existing\.length \? Math\.min/, 'stacking bleed preserves the existing next tick');
 assert.match(source, /resolveSymbiosisSettlement[\s\S]*consumeSymbiosisLayers/, 'direct critical settlement resolves damage before consuming layers');
 assert.match(source, /resolveBloodVenomBurst[\s\S]*sourceSkill: 'blood-venom-burst'/, 'formal ticks can produce one separately sourced blood venom burst');
