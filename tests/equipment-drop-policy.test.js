@@ -30,9 +30,14 @@ const chapterOnePants = [
   'starter-recruit-iron-legguards', 'guard-legguards', 'leather-pants',
   'hunting-legguards', 'apprentice-cloth-pants', 'novice-priest-pants'
 ];
+const chapterOneTwoHandedWeapons = [
+  'mercenary-greatsword', 'giant-iron-sword', 'battle-greataxe', 'rockbreaker-greataxe'
+];
 
 assert.ok(chapterOnePants.every((id) => dropPolicy.EQUIPMENT_POOLS.plains_common_armor.includes(id)), 'all chapter-one pants can drop from the plains armor pool');
 assert.ok(chapterOnePants.every((id) => dropPolicy.getTemplatesFromPools(['plains_common_armor']).some((template) => template.id === id && template.slot === 'pants')), 'all chapter-one pants resolve to wearable drop templates');
+assert.ok(chapterOneTwoHandedWeapons.every((id) => dropPolicy.EQUIPMENT_POOLS.plains_common_weapons.includes(id)), 'all chapter-one two-handed weapons can drop from the plains weapon pool');
+assert.ok(chapterOneTwoHandedWeapons.every((id) => dropPolicy.getTemplatesFromPools(['plains_common_weapons']).some((template) => template.id === id && template.slot === 'weapon' && template.weaponType.startsWith('two-handed-'))), 'all chapter-one two-handed weapon drops resolve to their weapon templates');
 
 assert.equal(normalEnemy.lootConfig.equipmentDropRate, .25);
 assert.deepEqual(normalEnemy.lootConfig.rarityWeights, { common: 60, uncommon: 40 });
