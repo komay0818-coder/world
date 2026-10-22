@@ -9,6 +9,7 @@
   const CHAPTER_ONE_BLUE_DROP_RATES = Object.freeze({
     normal: 0,
     elite: .03,
+    lostGoblin: .05,
     goblinTreasureChest: .05,
     goblinHighChief: .07,
     wanderingBlackKnight: .07,

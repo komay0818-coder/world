@@ -13,12 +13,14 @@ const RuneDropPolicy = require('../chapter-two-rune-drop-policy.js');
 const normalLoot = { equipmentDropRate: .25, rarityWeights: { common: 60, uncommon: 40 } };
 const bossLoot = { equipmentDropRate: 1, rarityWeights: { common: 20, uncommon: 80 } };
 const maps = [
+  { id: 'plains-entrance', name: '平原入口', chapter: 1, regionOf: 'beginner-plains', implemented: true },
   { id: 'wolf-den', name: '狼穴', chapter: 1, regionOf: 'beginner-plains', implemented: true },
   { id: 'plains-depths', name: '平原深處', chapter: 1, regionOf: 'beginner-plains', implemented: true },
   { id: 'black-forest-trail', name: '黑森林小徑', chapter: 2, regionOf: 'black-forest', implemented: true },
   { id: 'forest-altar', name: '森林祭壇', chapter: 2, regionOf: 'black-forest', implemented: true }
 ];
 const monsters = {
+  lostGoblin: { id: 'lostGoblin', name: '迷路的哥布林', isRare: true, lootConfig: normalLoot },
   denForestWolf: { id: 'denForestWolf', name: '森林狼', lootConfig: normalLoot },
   greatfangWolf: { id: 'greatfangWolf', name: '巨牙狼', isBoss: true, lootConfig: bossLoot },
   blackstoneLeader: { id: 'blackstoneLeader', name: '黑石首領', isBoss: true, lootConfig: bossLoot },
@@ -29,6 +31,7 @@ const monsters = {
   fallenDruid: { id: 'fallenDruid', name: '墮落德魯伊', isElite: true, lootConfig: normalLoot }
 };
 const mapPools = {
+  'plains-entrance': { rare: ['lostGoblin'] },
   'wolf-den': { normal: ['denForestWolf'], boss: ['greatfangWolf'] },
   'plains-depths': { elite: ['wanderingBlackKnight'], boss: ['blackstoneLeader'] },
   'black-forest-trail': { normal: ['trailWolf', 'blackstoneTrailScout'], boss: ['blackstoneCenturion'] },
@@ -46,6 +49,7 @@ assert.strictEqual(greenRecipe.sources[0].rate, 1 / 3, 'Boss 必掉三選一配�
 const rareRecipe = items.find((item) => item.id === 'recipe-black-knight-rare-shoulders');
 assert.strictEqual(rareRecipe.sources[0].rate, .10);
 const chapterOneBlue = items.find((item) => item.id === 'chapter-1-blue-equipment');
+assert(chapterOneBlue.sources.some((source) => source.mapId === 'plains-entrance' && source.monsterId === 'lostGoblin' && source.rate === .05));
 assert(chapterOneBlue.sources.some((source) => source.monsterId === 'wanderingBlackKnight' && source.rate === .07));
 assert(chapterOneBlue.sources.some((source) => source.monsterId === 'blackstoneLeader' && source.rate === .10));
 
