@@ -8,6 +8,7 @@
   const EARLY_SOLO_ENEMY_LIMIT = 3;
   const DEFAULT_ENEMY_LIMIT = 5;
   const EARLY_SOLO_ATTACK_MULTIPLIER = .90;
+  const PLAINS_ENTRANCE_ATTACK_MULTIPLIER = EARLY_SOLO_ATTACK_MULTIPLIER * .50;
   const GROWTH = Object.freeze({ hpPerLevel: .12, attackPerLevel: .08, defensePerLevel: .07, expPerLevel: .10 });
   const HIT = Object.freeze({
     playerPenaltyPerLevel: .075,
@@ -124,6 +125,7 @@
   }
 
   function getAttackMultiplier(mapId) {
+    if (mapId === 'plains-entrance') return PLAINS_ENTRANCE_ATTACK_MULTIPLIER;
     return EARLY_SOLO_MAP_IDS.includes(mapId) ? EARLY_SOLO_ATTACK_MULTIPLIER : 1;
   }
 
@@ -148,6 +150,7 @@
     EARLY_SOLO_ENEMY_LIMIT,
     DEFAULT_ENEMY_LIMIT,
     EARLY_SOLO_ATTACK_MULTIPLIER,
+    PLAINS_ENTRANCE_ATTACK_MULTIPLIER,
     GROWTH,
     HIT,
     MONSTER_PROFILES,
