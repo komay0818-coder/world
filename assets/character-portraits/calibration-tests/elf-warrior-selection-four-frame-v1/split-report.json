@@ -1,0 +1,167 @@
+{
+  "source": "C:\\Users\\User\\AppData\\Local\\Temp\\codex-clipboard-7e2090e7-eac1-4209-a0fb-9329de2c7745.png",
+  "source_canvas": {
+    "width": 2172,
+    "height": 724
+  },
+  "output_canvas": {
+    "width": 588,
+    "height": 733
+  },
+  "alpha_detection_threshold": 15,
+  "segmentation": "four largest 2D Alpha components with low-Alpha fringe propagation",
+  "safety_margin": 40,
+  "target_foot_y": 693,
+  "target_torso_x": 294,
+  "resampling": "none; source pixels copied exactly",
+  "frames": [
+    {
+      "frame": 1,
+      "output": "frame-01.png",
+      "source_visible_bbox": [
+        17,
+        61,
+        524,
+        691
+      ],
+      "source_stable_bbox": [
+        21,
+        92,
+        478,
+        682
+      ],
+      "source_edge_contact": {
+        "left": false,
+        "right": false,
+        "top": false,
+        "bottom": false
+      },
+      "output_offset": [
+        66,
+        72
+      ],
+      "output_bbox": {
+        "left": 66,
+        "top": 72,
+        "right": 573,
+        "bottom": 702,
+        "width": 508,
+        "height": 631,
+        "center_x": 319.5
+      },
+      "foot_y": 693,
+      "torso_center_x": 294.37
+    },
+    {
+      "frame": 2,
+      "output": "frame-02.png",
+      "source_visible_bbox": [
+        580,
+        90,
+        1055,
+        689
+      ],
+      "source_stable_bbox": [
+        582,
+        93,
+        1049,
+        681
+      ],
+      "source_edge_contact": {
+        "left": false,
+        "right": false,
+        "top": false,
+        "bottom": false
+      },
+      "output_offset": [
+        62,
+        102
+      ],
+      "output_bbox": {
+        "left": 62,
+        "top": 102,
+        "right": 537,
+        "bottom": 701,
+        "width": 476,
+        "height": 600,
+        "center_x": 299.5
+      },
+      "foot_y": 693,
+      "torso_center_x": 293.66
+    },
+    {
+      "frame": 3,
+      "output": "frame-03.png",
+      "source_visible_bbox": [
+        1138,
+        39,
+        1620,
+        690
+      ],
+      "source_stable_bbox": [
+        1140,
+        93,
+        1590,
+        682
+      ],
+      "source_edge_contact": {
+        "left": false,
+        "right": false,
+        "top": false,
+        "bottom": false
+      },
+      "output_offset": [
+        67,
+        50
+      ],
+      "output_bbox": {
+        "left": 67,
+        "top": 50,
+        "right": 549,
+        "bottom": 701,
+        "width": 483,
+        "height": 652,
+        "center_x": 308.0
+      },
+      "foot_y": 693,
+      "torso_center_x": 293.5
+    },
+    {
+      "frame": 4,
+      "output": "frame-04.png",
+      "source_visible_bbox": [
+        1648,
+        41,
+        2142,
+        693
+      ],
+      "source_stable_bbox": [
+        1696,
+        93,
+        2140,
+        683
+      ],
+      "source_edge_contact": {
+        "left": false,
+        "right": false,
+        "top": false,
+        "bottom": false
+      },
+      "output_offset": [
+        24,
+        51
+      ],
+      "output_bbox": {
+        "left": 24,
+        "top": 51,
+        "right": 518,
+        "bottom": 703,
+        "width": 495,
+        "height": 653,
+        "center_x": 271.0
+      },
+      "foot_y": 693,
+      "torso_center_x": 293.78
+    }
+  ]
+}

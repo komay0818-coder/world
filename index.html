@@ -8,42 +8,108 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&family=Noto+Serif+TC:wght@600;700;900&family=Press+Start+2P&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="style.css?v=20260926-single-png-idle-v1" />
+  <link rel="stylesheet" href="style.css?v=20261023-ability-avatar-v1" />
   <link rel="stylesheet" href="styles/game.css?v=20260822-inventory-icon-frame-v2" />
   <link rel="stylesheet" href="styles/encounter.css?v=20260727-remove-legacy-character-art-v3" />
   <link rel="stylesheet" href="styles/classic-hud.css" />
   <link rel="stylesheet" href="styles/sidebar-v2.css" />
   <link rel="stylesheet" href="styles/sidebar-layout.css" />
   <link rel="stylesheet" href="styles/inventory-sale.css?v=20260802-clean-equipment-rows-v2" />
-  <link rel="stylesheet" href="styles/dungeon.css?v=20260802-goblin-camp-transparent-v25" />
+  <link rel="stylesheet" href="styles/dungeon.css?v=20261018-shared-map-cards-v1" />
   <link rel="stylesheet" href="styles/mobile.css?v=20260728-mobile-log-flow-v6" />
   <link rel="stylesheet" href="styles/mmorpg-layout.css?v=20260822-combat-motion-v43" />
   <link rel="stylesheet" href="styles/monster-slots.css?v=20261011-enemy-frame-v1" />
-  <link rel="stylesheet" href="styles/village.css?v=20260803-workshop-crafting-v2" />
+  <link rel="stylesheet" href="styles/village.css?v=20261025-mobile-village-fixed-window-v3" />
   <link rel="stylesheet" href="styles/adventure-info.css?v=20261010-suppression-panel-v4" />
   <link rel="stylesheet" href="styles/battle-phase-two.css?v=20261014-player-status-layout-v3" />
   <link rel="stylesheet" href="styles/monster-audit.css?v=20260920-monster-audit-v1" />
   <link rel="stylesheet" href="styles/inventory-grid.css?v=20260921-inventory-compare-v2" />
   <link rel="stylesheet" href="styles/battle-typography.css?v=20261010-left-rail-v3" />
   <link rel="stylesheet" href="styles/map-travel-panel.css?v=20261011-map-list-visibility-v1" />
-  <link rel="stylesheet" href="styles/party-inventory-preview.css?v=20261014-permanent-entry-v1" />
+  <link rel="stylesheet" href="styles/party-inventory-preview.css?v=20261023-mobile-equipment-tabs-v1" />
+  <link rel="stylesheet" href="styles/account-auth.css?v=20261017-account-ui-v1" />
+  <link rel="stylesheet" href="styles/mobile-battle-portrait.css?v=20261023-mobile-loot-toast-v1" />
 </head>
 <body>
   <div class="sky" aria-hidden="true"></div>
   <main class="app-shell">
     <section id="login-screen" class="screen login-screen" aria-labelledby="game-title">
-      <div class="brand">
-        <h1 id="game-title">洛恩大陸</h1>
-        <p class="brand-subtitle">啟程</p>
+      <div id="legacy-login-content" class="legacy-login-content">
+        <div class="brand">
+          <h1 id="game-title">洛恩大陸</h1>
+          <p class="brand-subtitle">啟程</p>
+        </div>
+
+        <form id="login-form" class="login-card">
+          <label for="player-name">冒險者名稱</label>
+          <div class="input-wrap"><span>✧</span><input id="player-name" name="playerName" type="text" maxlength="12" placeholder="輸入你的名字" autocomplete="nickname" required /></div>
+          <p class="hint">可隨時從設定中變更</p>
+          <button class="primary-button" type="submit"><span>開始旅程</span><b>→</b></button>
+        </form>
+        <p class="version">VER. 0.6.36　·　離線也會持續累積</p>
       </div>
 
-      <form id="login-form" class="login-card">
-        <label for="player-name">冒險者名稱</label>
-        <div class="input-wrap"><span>✧</span><input id="player-name" name="playerName" type="text" maxlength="12" placeholder="輸入你的名字" autocomplete="nickname" required /></div>
-        <p class="hint">可隨時從設定中變更</p>
-        <button class="primary-button" type="submit"><span>開始旅程</span><b>→</b></button>
-      </form>
-      <p class="version">VER. 0.6.36　·　離線也會持續累積</p>
+      <div id="account-auth-shell" class="account-auth-shell" hidden>
+        <header class="account-auth-brand" aria-label="洛恩大陸：啟程">
+          <h1>洛恩大陸</h1>
+          <p>啟程</p>
+        </header>
+
+        <section class="account-auth-panel" aria-live="polite">
+          <form id="account-register-form" class="account-auth-form" novalidate>
+            <h2>建立帳號</h2>
+            <label for="register-email">電子郵件</label>
+            <div class="account-field"><span aria-hidden="true">✉</span><input id="register-email" name="email" type="email" autocomplete="email" inputmode="email" placeholder="請輸入電子郵件地址" required /></div>
+            <p class="account-field-error" data-error-for="register-email"></p>
+
+            <label for="register-password">密碼</label>
+            <div class="account-field"><span aria-hidden="true">◆</span><input id="register-password" name="password" type="password" autocomplete="new-password" placeholder="請輸入密碼" required /><button class="password-toggle" type="button" data-password-toggle="register-password" aria-label="顯示密碼" aria-pressed="false">顯示</button></div>
+            <p class="account-password-hint">至少 8 個字元，包含英文字母與數字</p>
+            <p class="account-field-error" data-error-for="register-password"></p>
+
+            <label for="register-password-confirm">確認密碼</label>
+            <div class="account-field"><span aria-hidden="true">◆</span><input id="register-password-confirm" name="passwordConfirm" type="password" autocomplete="new-password" placeholder="請再次輸入密碼" required /><button class="password-toggle" type="button" data-password-toggle="register-password-confirm" aria-label="顯示確認密碼" aria-pressed="false">顯示</button></div>
+            <p class="account-field-error" data-error-for="register-password-confirm"></p>
+
+            <button class="account-submit" type="submit"><span>建立帳號</span><b aria-hidden="true">→</b></button>
+            <p class="account-auth-switch">已有帳號？ <button type="button" data-auth-mode="login">前往登入</button></p>
+          </form>
+
+          <form id="account-login-form" class="account-auth-form" novalidate hidden>
+            <h2>登入</h2>
+            <label for="account-login-email">電子郵件</label>
+            <div class="account-field"><span aria-hidden="true">✉</span><input id="account-login-email" name="email" type="email" autocomplete="email" inputmode="email" placeholder="請輸入電子郵件地址" required /></div>
+            <p class="account-field-error" data-error-for="account-login-email"></p>
+
+            <label for="account-login-password">密碼</label>
+            <div class="account-field"><span aria-hidden="true">◆</span><input id="account-login-password" name="password" type="password" autocomplete="current-password" placeholder="請輸入密碼" required /><button class="password-toggle" type="button" data-password-toggle="account-login-password" aria-label="顯示密碼" aria-pressed="false">顯示</button></div>
+            <p class="account-field-error" data-error-for="account-login-password"></p>
+
+            <button class="account-submit" type="submit"><span>登入</span><b aria-hidden="true">→</b></button>
+            <button id="account-forgot-password" class="account-forgot-password" type="button">忘記密碼</button>
+            <p class="account-auth-switch">沒有帳號？ <button type="button" data-auth-mode="register">建立帳號</button></p>
+          </form>
+
+          <section id="farming-recovery-panel" class="shared-gold-migration-panel" hidden>
+            <h2>需要先恢復掛機收益</h2>
+            <p>偵測到先前中斷的單人掛機。請先核對角色與預估收益，確認後才會依原有離線規則安全結算。</p>
+            <div id="farming-recovery-characters" class="shared-gold-migration-characters"></div>
+            <p class="account-password-hint">恢復與金幣轉換是兩個獨立步驟；本步驟不會自動轉換金幣。</p>
+            <button id="farming-recovery-confirm" class="account-submit" type="button"><span>確認恢復並結算</span><b aria-hidden="true">→</b></button>
+          </section>
+
+          <section id="shared-gold-migration-panel" class="shared-gold-migration-panel" hidden>
+            <h2>需要轉換金幣資料</h2>
+            <p>舊角色持有的金幣將合併為帳號共用金幣。確認前不會修改角色或背包資料。</p>
+            <div id="shared-gold-migration-characters" class="shared-gold-migration-characters"></div>
+            <p class="shared-gold-migration-total">預計共用金幣：<strong id="shared-gold-migration-total">—</strong></p>
+            <p class="account-password-hint">已建立並驗證轉換前備份。此操作只會執行一次。</p>
+            <button id="shared-gold-migration-confirm" class="account-submit" type="button"><span>確認轉換並進入遊戲</span><b aria-hidden="true">→</b></button>
+          </section>
+
+          <output id="account-auth-message" class="account-auth-message" aria-live="polite"></output>
+        </section>
+      </div>
     </section>
 
     <section id="menu-screen" class="screen menu-screen hidden" aria-labelledby="menu-title">
@@ -182,6 +248,21 @@
         </article>
       </section>
       </main>
+      <section id="mobile-battle-info" class="mobile-battle-info" aria-label="戰鬥資訊" hidden>
+        <header class="mobile-battle-info-head">
+          <div class="mobile-battle-info-tabs" role="tablist" aria-label="戰鬥資訊切換">
+            <button id="mobile-battle-log-tab" type="button" role="tab" aria-selected="true" aria-controls="mobile-battle-log-panel" data-mobile-info-tab="log">戰鬥紀錄</button>
+            <button id="mobile-battle-loot-tab" type="button" role="tab" aria-selected="false" aria-controls="mobile-battle-loot-panel" data-mobile-info-tab="loot">戰利品</button>
+          </div>
+          <button class="mobile-battle-info-toggle" type="button" aria-label="收合戰鬥資訊" aria-expanded="true" data-mobile-info-toggle>⌃</button>
+        </header>
+        <div class="mobile-battle-info-body">
+          <div id="mobile-battle-log-panel" class="mobile-battle-info-panel" role="tabpanel" aria-labelledby="mobile-battle-log-tab" data-mobile-info-panel="log"></div>
+          <div id="mobile-battle-loot-panel" class="mobile-battle-info-panel" role="tabpanel" aria-labelledby="mobile-battle-loot-tab" data-mobile-info-panel="loot" hidden>
+            <div id="mobile-drop-history" class="mobile-drop-history" aria-live="polite"><p>尚未獲得戰利品</p></div>
+          </div>
+        </div>
+      </section>
       <div class="battle-bottom">
         <div class="combat-log"><details id="chapter-three-suppression" class="chapter-three-suppression" hidden>
             <summary><span>區域壓制</span><strong id="suppression-unresolved-count"></strong></summary>
@@ -189,12 +270,23 @@
             <div id="suppression-rows" class="suppression-rows" aria-live="polite"></div>
           </details><p>戰鬥紀錄</p><div id="combat-log-lines" aria-live="polite"></div></div>
         <section class="skill-panel" aria-labelledby="skill-panel-title"><div class="skill-panel-head"><strong id="skill-panel-title">技能</strong><small id="skill-resource-status">自動施放</small></div><button id="potion-button" class="potion-button" type="button"><img src="assets/healing-potion.png?v=20260830-user-image-v1" alt="" class="potion-image"><span>治癒藥水</span><b id="potion-count">5</b></button><button id="mana-potion-button" class="potion-button" type="button"><img src="assets/mana-potion.png?v=20260830-user-image-v1" alt="" class="potion-image"><span>魔法藥水</span><b id="mana-potion-count">0</b></button><div id="skill-list" class="skill-list"></div></section>
-        <nav class="battle-menu" aria-label="遊戲選單"><button class="battle-menu-button ability-button" type="button" data-menu-action="能力"><span>◆</span><b>能力</b><small>數值</small></button><button class="battle-menu-button" type="button" data-menu-action="背包"><span>🎒</span><b>背包</b><small>道具</small></button><button class="battle-menu-button" type="button" data-menu-action="裝備"><span>⚔</span><b>裝備</b><small>角色</small></button><button class="battle-menu-button" type="button" data-menu-action="隊伍"><span>👥</span><b>隊伍</b><small>編組</small></button><button class="battle-menu-button village-button" type="button" data-menu-action="村莊"><span>⌂</span><b>村莊</b><small>建築</small></button><button class="battle-menu-button drop-lookup-button" type="button" data-menu-action="掉落"><span>⌕</span><b>掉落</b><small>來源</small></button></nav>
+        <nav class="battle-menu" aria-label="遊戲選單" data-mobile-page="1">
+          <button class="battle-menu-button ability-button" type="button" data-menu-action="能力" data-mobile-menu-page="1"><span>◆</span><b>能力</b><small>數值</small></button>
+          <button class="battle-menu-button" type="button" data-menu-action="背包" data-mobile-menu-page="1"><span>🎒</span><b>背包</b><small>道具</small></button>
+          <button class="battle-menu-button" type="button" data-menu-action="裝備" data-mobile-menu-page="1"><span>⚔</span><b>裝備</b><small>角色</small></button>
+          <button class="battle-menu-button" type="button" data-menu-action="隊伍" data-mobile-menu-page="1"><span>👥</span><b>隊伍</b><small>編組</small></button>
+          <button class="battle-menu-button mobile-menu-switch" type="button" data-mobile-menu-page="1" data-mobile-menu-target="2" aria-label="下一頁"><span>→</span><b>下一頁</b><small>更多</small></button>
+          <button class="battle-menu-button mobile-skill-button" type="button" data-mobile-menu-page="2"><span>✦</span><b>技能</b><small>資訊</small></button>
+          <button class="battle-menu-button village-button" type="button" data-menu-action="村莊" data-mobile-menu-page="2"><span>⌂</span><b>村莊</b><small>建築</small></button>
+          <button class="battle-menu-button drop-lookup-button" type="button" data-menu-action="掉落" data-mobile-menu-page="2"><span>⌕</span><b>掉落</b><small>來源</small></button>
+          <button id="profile-button" class="battle-menu-button logout-button" type="button" data-mobile-menu-page="2"><span>↪</span><b>登出</b><small>帳號</small></button>
+          <button class="battle-menu-button mobile-menu-switch" type="button" data-mobile-menu-page="2" data-mobile-menu-target="1" aria-label="上一頁"><span>←</span><b>上一頁</b><small>返回</small></button>
+        </nav>
       </div>
     </section>
     <section id="village-screen" class="screen village-screen hidden" aria-labelledby="village-title">
       <header class="village-header"><div><p class="eyebrow">VILLAGE</p><h2 id="village-title">星塵村莊 <span id="village-level" class="village-level">Lv1</span></h2></div><button id="village-return" class="village-return" type="button">返回戰鬥</button></header>
-      <div class="village-main"><p class="village-intro">第一章可將建築升至 Lv2；各建築會顯示需要的專屬材料與金幣。</p><div id="village-building-grid" class="village-building-grid"></div></div>
+      <div class="village-main"><p class="village-intro"><span class="village-intro-desktop">第一章可將建築升至 Lv2；各建築會顯示需要的專屬材料與金幣。</span><span class="village-intro-mobile">升級建築可解鎖更多村莊功能。</span></p><div id="village-building-grid" class="village-building-grid"></div></div>
     </section>
   </main>
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
@@ -230,6 +322,12 @@
     </section>
   </div>
   <div id="drop-lookup-modal" class="inventory-modal hidden" role="dialog" aria-modal="true" aria-labelledby="drop-lookup-title"><section class="inventory-window drop-lookup-window"><header><div><p class="eyebrow">DROP LOOKUP</p><h2 id="drop-lookup-title">掉落物查詢</h2></div><button id="drop-lookup-close" type="button" aria-label="關閉掉落物查詢">×</button></header><div id="drop-lookup-content"></div></section></div>
+  <div id="mobile-skill-modal" class="inventory-modal mobile-skill-modal hidden" role="dialog" aria-modal="true" aria-labelledby="mobile-skill-title">
+    <section class="inventory-window mobile-skill-window">
+      <header><h2 id="mobile-skill-title">技能</h2><button id="mobile-skill-close" type="button" aria-label="關閉技能">×</button></header>
+      <div id="mobile-skill-content" class="mobile-skill-content"></div>
+    </section>
+  </div>
   <div id="village-building-modal" class="inventory-modal hidden" role="dialog" aria-modal="true" aria-labelledby="village-building-title">
     <section class="inventory-window village-building-window"><header><div><p class="eyebrow">VILLAGE BUILDING</p><h2 id="village-building-title">村莊建築</h2></div><button id="village-building-close" class="village-building-close" type="button" aria-label="關閉建築面板">×</button></header><div id="village-building-content" class="village-building-content"></div></section>
   </div>
@@ -287,8 +385,7 @@
   <script src="chapter-three-special-equipment-policy.js?v=20260903-special-epic-v1"></script>
   <script src="crafting-policy.js?v=20260903-chapter3-crafted-epic-v1"></script>
   <script src="alchemy-policy.js?v=20260805-random-result-v3"></script>
-  <script src="salvage-policy.js?v=20260815-essence-artwork-v1"></script>
-  <script src="inventory-sale-policy.js?v=20260802-common-selection-v2"></script>
+  <script src="salvage-policy.js?v=20261024-furnace-batch-v1"></script>
   <script src="equipment-drop-policy.js?v=20260830-rune-system-v1"></script>
   <script src="chapter-boss-drop-policy.js?v=20260830-chapter-one-blue-drop-v1"></script>
   <script src="drop-lookup-policy.js?v=20260830-special-epic-drops-v1"></script>
@@ -307,22 +404,31 @@
   <script src="dungeon-ticket.js?v=20260727-goblin-camp-wave-roster-v4"></script>
   <script src="party-policy.js?v=20260904-warrior-threat-v1"></script>
   <script src="chapter-two-balance-playtest-policy.js?v=20261009-36-rare-runes-v1"></script>
-  <script src="https://raw.githack.com/komay0818-coder/world/0ecf19b/village-policy.js"></script>
+  <script src="village-policy.js?v=20261023-five-active-buildings-v1"></script>
   <script src="https://raw.githack.com/komay0818-coder/world/0ecf19b/magic-tower-policy.js"></script>
   <script src="village-upgrade-policy.js?v=20260830-chapter-two-material-art-v1"></script>
   <script src="skill-upgrade-policy.js?v=20260816-divine-tome-v1"></script>
+  <script src="item-rarity-policy.js?v=20261019-shared-catalog-v1"></script>
+  <script src="inventory-sale-policy.js?v=20261022-starter-discard-v1"></script>
   <script src="class-skill-policy.js?v=20260906-chain-paralysis-v2"></script>
   <script src="skill-description-policy.js?v=20261022-complete-skill-copy-v1"></script>
   <script src="offline-settlement-store.js?v=20261014-d4-complete"></script>
   <script src="party-experience-policy.js?v=20261014-party-experience"></script>
-  <script src="permanent-party-policy.js?v=20261014-d4-complete"></script>
+  <script src="permanent-party-policy.js?v=20261022-cloud-owner-order-v1"></script>
   <script src="permanent-cutover-policy.js?v=20261014-d4-complete"></script>
   <script src="permanent-farming-policy.js?v=20261014-d4-complete"></script>
-  <script src="permanent-party-store.js?v=20261014-d4-complete"></script>
+  <script src="permanent-party-store.js?v=20261022-starter-discard-v1"></script>
   <script src="permanent-online-policy.js?v=20261014-permanent-entry-v1"></script>
-  <script src="permanent-party-runtime.js?v=20261014-permanent-entry-v2"></script>
-  <script src="permanent-farming-coordinator.js?v=20261014-permanent-entry-v1"></script>
-  <script type="application/x-stardust-deferred" data-loaded-by="permanent-entry-bootstrap" src="script.js?v=20261014-battle-interface-v1"></script>
-  <script src="permanent-entry-bootstrap.js?v=20261014-battle-interface-v1"></script>
+  <script src="permanent-party-runtime.js?v=20261022-starter-discard-v1"></script>
+  <script src="permanent-farming-coordinator.js?v=20261021-farming-recovery-v1"></script>
+  <script src="account-auth-view.js?v=20261021-farming-recovery-v1"></script>
+  <script src="account-api-contract.js?v=20261022-account-api-v2"></script>
+  <script src="account-session-controller.js?v=20261022-account-api-v2"></script>
+  <script src="play-lease-client.js?v=20261022-cross-device-lease-v1"></script>
+  <script src="cloud-save-sync.js?v=20261022-cross-device-lease-v1"></script>
+  <script src="permanent-entry-bootstrap.js?v=20261022-cross-device-lease-v1"></script>
+  <script src="mobile-battle-ui.js?v=20261023-mobile-loot-toast-v1"></script>
+  <script src="account-auth-entry.js?v=20261022-cross-device-lease-v1"></script>
+  <script type="application/x-stardust-deferred" data-loaded-by="permanent-entry-bootstrap" src="script.js?v=20261025-mobile-village-fixed-window-v3"></script>
 </body>
 </html>

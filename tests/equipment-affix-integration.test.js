@@ -8,7 +8,7 @@ const gameCss = fs.readFileSync(path.join(__dirname, '..', 'styles', 'game.css')
 const appCss = fs.readFileSync(path.join(__dirname, '..', 'style.css'), 'utf8');
 
 assert.match(html, /equipment-affix-policy\.js/, 'affix policy loads before the main game script');
-assert.match(html, /href="style\.css\?v=20260926-single-png-idle-v1"/, 'the affix UI stylesheet loads from the same deployed revision');
+assert.match(html, /href="style\.css\?v=20261023-ability-avatar-v1"/, 'the affix UI stylesheet loads from the same deployed revision');
 assert.match(html, /equipment-affix-policy\.js\?v=20260904-kill-heal-v2/, 'the affix formatter uses the current local build');
 assert.match(html, /armor-penetration-policy\.js\?v=20260903-armor-penetration-v1/, 'armor penetration policy loads before the main game script');
 assert.match(html, /conditional-damage-policy\.js\?v=20260903-conditional-damage-v1/, 'conditional damage policy loads before the main game script');

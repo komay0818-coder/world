@@ -8,7 +8,7 @@ const source = fs.readFileSync(path.join(root, 'script.js'), 'utf8');
 const css = fs.readFileSync(path.join(root, 'styles', 'map-travel-panel.css'), 'utf8');
 
 assert.match(html, /id="adventure-region-select"[\s\S]*id="adventure-map-select"[\s\S]*id="battle-title"[\s\S]*id="map-travel-button"/, 'the left rail exposes area, map, current location, and travel controls in order');
-assert.match(html, /script\.js\?v=20261014-battle-interface-v1/, 'the interactive map controls load a fresh script cache key');
+assert.match(html, /script\.js\?v=20261025-mobile-village-fixed-window-v3/, 'the interactive map controls load a fresh script cache key');
 assert.match(html, /map-travel-panel\.css\?v=20261011-map-list-visibility-v1/, 'the custom map selector styles use a fresh cache key');
 assert.match(source, /adventureAreaDefinitions[\s\S]*name: '平原'[\s\S]*name: '黑森林'[\s\S]*name: '赤岩荒原'/, 'the three requested adventure areas are available');
 assert.match(source, /function getAdventureAreaMaps[\s\S]*mapProgression\.filter/, 'the second selector derives its maps from the existing map progression data');
@@ -23,7 +23,7 @@ assert.match(source, /function getAdventureMapAvailability[\s\S]*isMapTravelPlay
 assert.match(source, /function selectAdventureMap[\s\S]*unrestrictedPlaytestTravel[\s\S]*!unrestrictedPlaytestTravel && map\.chapter === 1[\s\S]*!unrestrictedPlaytestTravel && map\.chapter === 2[\s\S]*!unrestrictedPlaytestTravel && map\.chapter === 3/, 'formal unlock guards remain active outside playtest');
 assert.match(source, /if \(!unrestrictedPlaytestTravel\) progress\.unlockedChapter = Math\.max/, 'playtest travel does not write formal chapter unlock progress');
 assert.match(source, /function selectAdventureMap[\s\S]*mapTravelInProgress[\s\S]*syncMainBattleMemberFromLegacy\(\)[\s\S]*persistPartyRuntimeState\(\)[\s\S]*clearInterval\(battleTimer\)[\s\S]*openBattle\(\)/, 'travel preserves runtime state, stops old timers, and uses the established battle initialization');
-assert.match(source, /getActiveMap\(progress\)\.id === map\.id[\s\S]*return/, 'the current location cannot be restarted through travel');
+assert.match(source, /selectingCurrentMapAfterDefeat[\s\S]*progress\.requiresMapSelectionAfterDefeat[\s\S]*!selectingCurrentMapAfterDefeat[\s\S]*return/, 'the current location cannot be restarted through ordinary travel but can be re-entered after defeat');
 assert.match(source, /mapTravelInProgress = true[\s\S]*window\.setTimeout\(\(\) => \{[\s\S]*mapTravelInProgress = false/, 'rapid travel clicks are guarded during reinitialization');
 assert.match(css, /\.map-travel-panel[\s\S]*border:\s*1px solid rgba\(202, 161, 74, \.5\)[\s\S]*background:\s*rgba\(4, 20, 29, \.88\)/, 'the selector uses the requested dark blue-black and restrained gold treatment');
 assert.match(css, /\.map-travel-panel\s*\{[\s\S]*?width:\s*100%/, 'the map panel stays within the existing left-column width');

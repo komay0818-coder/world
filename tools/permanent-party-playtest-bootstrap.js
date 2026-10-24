@@ -1,13 +1,31 @@
 (async function(){
  'use strict';let releaseBoot;const status=message=>{let node=document.getElementById('permanent-save-status');if(!node){node=document.createElement('output');node.id='permanent-save-status';node.style.cssText='position:fixed;bottom:0;left:0;z-index:999999;background:#222;color:#fff;padding:6px;font-size:12px';document.body.append(node);}node.textContent=message;};
+ const escape=value=>String(value??'').replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
+ async function confirmSharedGoldMigration(store,account,accountId){
+  const state=PermanentPartyPolicy.sharedGoldState(account.permanent);if(state.status==='ready')return account;if(state.status!=='legacy')throw Error('隔離帳號金幣資料異常，已停止啟動');
+  if(!navigator.locks?.request)throw Error('瀏覽器不支援安全金幣轉換');
+  const lock='stardust-permanent-cutover:'+accountId;
+  const prepared=await navigator.locks.request(lock,{mode:'exclusive'},async()=>{const current=await store.read(accountId),currentState=PermanentPartyPolicy.sharedGoldState(current.permanent);if(currentState.status==='ready')return {status:'ready',account:current};if(currentState.status!=='legacy')throw Error('隔離帳號金幣資料異常，已停止啟動');return store.prepareSharedGoldMigration(accountId,current.revision);});
+  if(prepared.status==='ready')return prepared.account;
+  const expected=prepared.preview.total,rows=prepared.preview.characters.map(role=>`<li><span>${escape(role.name)}</span><b>${role.gold.toLocaleString('zh-TW')} 金幣</b></li>`).join('');
+  const panel=document.createElement('section');panel.id='isolated-gold-migration';panel.setAttribute('role','dialog');panel.setAttribute('aria-modal','true');panel.innerHTML=`<div><small>隔離測試帳號</small><h2>需要轉換金幣資料</h2><p>這是合成測試存檔。按下確認前不會轉換金幣，也不會啟動遊戲。</p><ul>${rows}</ul><p class="isolated-gold-total"><span>預計共用金幣</span><b>${expected.toLocaleString('zh-TW')}</b></p><output aria-live="polite">轉換前備份已建立並驗證。</output><button type="button">確認轉換並進入遊戲</button></div>`;
+  const style=document.createElement('style');style.textContent='#isolated-gold-migration{position:fixed;inset:0;z-index:1000000;display:grid;place-items:center;background:rgba(1,8,16,.9);font-family:"Noto Sans TC",sans-serif;color:#f4ead5}#isolated-gold-migration>div{width:min(520px,calc(100vw - 32px));padding:28px;border:1px solid #c99b42;border-radius:14px;background:#0b1720;box-shadow:0 20px 70px #000}#isolated-gold-migration small{color:#75cee8}#isolated-gold-migration h2{margin:6px 0 10px;color:#f4d28b}#isolated-gold-migration p{line-height:1.6;color:#c9d5d9}#isolated-gold-migration ul{list-style:none;padding:0;margin:18px 0;border-block:1px solid #29414b}#isolated-gold-migration li,#isolated-gold-migration .isolated-gold-total{display:flex;justify-content:space-between;gap:20px;padding:10px 4px;margin:0}#isolated-gold-migration output{display:block;min-height:24px;margin:12px 0;color:#9fd9b6}#isolated-gold-migration button{width:100%;padding:13px;border:1px solid #e5bb62;border-radius:8px;background:#124d73;color:#fff;font-weight:700;cursor:pointer}#isolated-gold-migration button:disabled{opacity:.55;cursor:wait}';document.head.append(style);document.body.append(panel);
+  status('隔離測試：等待玩家確認金幣轉換');
+  return new Promise(resolve=>{const button=panel.querySelector('button'),output=panel.querySelector('output');let busy=false;button.addEventListener('click',async()=>{if(busy)return;busy=true;button.disabled=true;output.textContent='正在核對備份並執行單次轉換…';try{const migrated=await navigator.locks.request(lock,{mode:'exclusive'},async()=>{const current=await store.read(accountId),currentState=PermanentPartyPolicy.sharedGoldState(current.permanent);if(currentState.status==='ready')return {account:current,audit:current.permanent.accountResources.goldMigrationAudit,duplicate:true};return store.migrateSharedGold(accountId,current.revision,{backupFingerprint:prepared.backup.fingerprint});});const verified=await store.read(accountId),verifiedState=PermanentPartyPolicy.sharedGoldState(verified.permanent),audit=verified.permanent.accountResources.goldMigrationAudit;if(verifiedState.status!=='ready'||verifiedState.gold!==expected||audit?.after?.accountGold!==expected)throw Error('轉換後金幣核對失敗');panel.remove();style.remove();status('隔離測試：共用金幣 '+expected.toLocaleString('zh-TW')+'，已安全啟動');window.sharedGoldAcceptance={accountId,database:'stardust-shared-gold-browser-acceptance-v1',expectedGold:expected,migrated:!migrated.duplicate};resolve(verified);}catch(error){output.textContent='轉換失敗：'+error.message;button.disabled=false;busy=false;}}, {once:false});});
+ }
  try{
   if(!['127.0.0.1','localhost'].includes(location.hostname)||!location.pathname.endsWith('/tools/permanent-party-playtest.html'))throw Error('Permanent runtime is restricted to isolated localhost entry');
-  const query=new URLSearchParams(location.search),accountId=query.get('account')||'manual-test';if(!/^[a-zA-Z0-9_-]{1,80}$/.test(accountId))throw Error('Invalid isolated account');
+  const query=new URLSearchParams(location.search),accountId=query.get('account')||'supabase:00000000-0000-4000-8000-000000000001';if(!/^supabase:[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/.test(accountId))throw Error('Invalid isolated account');
+  const goldAcceptance=query.get('goldAcceptance')==='1',database=goldAcceptance?'stardust-shared-gold-browser-acceptance-v1':'stardust-permanent-stage-b-isolated';
   if(query.get('d3')==='1'){if(!navigator.locks?.request)throw Error('Web Locks required for D-3');const hold=new Promise(resolve=>releaseBoot=resolve);await new Promise((resolve,reject)=>navigator.locks.request('permanent-farming-bootstrap:'+accountId,async()=>{resolve();await hold;}).catch(reject));}
-  window.permanentAcceptanceRunning=query.get('check')==='1';window.permanentFarmingBooting=query.get('d3')==='1';if(window.permanentFarmingBooting)window.permanentAcceptanceRunning=true;
-  const store=await PermanentPartyStore.open({name:'stardust-permanent-stage-b-isolated'});
+  window.permanentAcceptanceRunning=goldAcceptance||query.get('check')==='1';window.permanentFarmingBooting=query.get('d3')==='1';if(window.permanentFarmingBooting)window.permanentAcceptanceRunning=true;
+  const store=await PermanentPartyStore.open({name:database});
   const existing=await store.read(accountId),source=existing?.permanent?null:existing?.migrationBackup?.source|| (existing?.slots?{slots:existing.slots,activeMainId:existing.slots.find(Boolean)?.character.id}:PermanentPartyFixture.create());
-  const account=existing?.permanent?existing:(await store.migrate(accountId,source,{prepareModel:PermanentOnlinePolicy.compactModel})).account;
+  let account=existing?.permanent?existing:(await store.migrate(accountId,source,{prepareModel:PermanentOnlinePolicy.compactModel})).account;
+  if(PermanentPartyPolicy.sharedGoldState(account.permanent).status==='legacy'){
+   if(!goldAcceptance)throw Object.assign(new Error('Shared gold migration requires player confirmation in the account entry flow'),{code:'SHARED_GOLD_MIGRATION_REQUIRED'});
+   account=await confirmSharedGoldMigration(store,account,accountId);
+  }
   if(account.cutover&&account.cutover.status!=='active'){store.close();throw Error('帳號尚在安全回復中，請完成隔離回復核對後再開啟戰鬥');}
   const runtime=PermanentPartyRuntime.activate(PermanentPartyRuntime.create({store,account,legacyOffline:query.get('legacyOffline')==='1'||query.get('d3')==='1',onFailure:error=>status('儲存已停止，請重新整理：'+error.message),onCommitted:(before,after)=>{if(typeof rebuildBattlePartyMembers!=='function'||typeof fighting==='undefined'||!fighting)return;const fields=['level','equipment','skillLevels','advancedClass'];if(JSON.stringify(before.permanent.slotOrder)!==JSON.stringify(after.permanent.slotOrder)||JSON.stringify(before.permanent.parties)!==JSON.stringify(after.permanent.parties)||Object.keys(after.permanent.characters).some(id=>fields.some(key=>JSON.stringify(before.permanent.characters[id]?.progress[key])!==JSON.stringify(after.permanent.characters[id]?.progress[key]))))rebuildBattlePartyMembers();}}));
   window.permanentIsolatedStore=store;
@@ -45,7 +63,7 @@
    window.runD3DelayedAcceptance=async nextId=>{let invoked=false;const gold=runtime.getProgress(nextId).gold;setTimeout(()=>{invoked=true;const p=getProgress();p.gold+=500;saveProgress(p);},150);await runtime.switchMain(nextId);await new Promise(resolve=>setTimeout(resolve,250));await runtime.flush();return {discarded:!invoked,goldUnchanged:runtime.getProgress(nextId).gold===gold};};
    window.runD3CheckpointAcceptance=async()=>{await openBattle();await runtime.flush();const main=getMainBattleMember(),target=Math.floor(main.maxHp*.8);main.currentHp=target;syncLegacyBattleStateFromMain();window.permanentAcceptanceRunning=false;queuePermanentFarmingCheckpoint();window.permanentAcceptanceRunning=true;await new Promise(resolve=>permanentFarmingNativeTimeout(resolve,30));await runtime.flush();const matched=runtime.getProgress().partyMemberState.currentHp===target;await window.permanentFarmingCoordinator.stop();return matched;};
   }
-  status('隔離永久存檔已啟用；正式存檔未遷移');
+  status(goldAcceptance?'共用金幣隔離驗收已啟用；正式帳號未受影響':'隔離永久存檔已啟用；正式存檔未遷移');
   window.runPermanentRuntimeAcceptance=async()=>{
    window.permanentAcceptanceRunning=true;let passed=0;const assert=(value,label)=>{if(!value)throw Error(label);passed++;};const current=()=>runtime.model;const leader=runtime.mainId,partner=current().slotOrder[1];
    await runtime.flush();const equippedBefore=getProgress().equipment.weapon?.instanceId;
@@ -119,10 +137,8 @@
     return {passed,failed:0,accountId,expected:ids.map(id=>({id,level:latest.permanent.characters[id].progress.level,xp:latest.permanent.characters[id].progress.xp})),session:'browser-race'};
    }finally{fighting=false;clearInterval(battleTimer);clearInterval(skillTimer);clearInterval(enemyAttackTimer);getActiveMap=originalMap;getEnemyDefinition=originalEnemy;}
   };
-  if(matchMedia('(min-width: 1200px)').matches){
-   const style=document.createElement('link');style.rel='stylesheet';style.href='styles/party-inventory-preview.css?v=20261014-inventory-view-5';document.head.append(style);
-   const view=document.createElement('script');view.src='party-inventory-view.js?v=20261014-inventory-view-5';await new Promise((resolve,reject)=>{view.onload=resolve;view.onerror=reject;document.body.append(view);});
-  }
+  const style=document.createElement('link');style.rel='stylesheet';style.href='styles/party-inventory-preview.css?v=20261023-mobile-equipment-tabs-v1';document.head.append(style);
+  const view=document.createElement('script');view.src='party-inventory-view.js?v=20261023-mobile-equipment-tabs-v1';await new Promise((resolve,reject)=>{view.onload=resolve;view.onerror=reject;document.body.append(view);});
   window.runPartyInventoryAcceptance=async()=>{
    if(!matchMedia('(min-width:1200px)').matches)throw Error('Desktop viewport required');let passed=0;const assert=(v,label)=>{if(!v)throw Error(label);passed++;};
    fighting=false;clearInterval(battleTimer);clearInterval(skillTimer);clearInterval(enemyAttackTimer);await runtime.flush();const ids=runtime.model.parties[runtime.mainId].memberIds;

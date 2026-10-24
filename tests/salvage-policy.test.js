@@ -58,6 +58,35 @@ assert.equal(policy.salvage(duplicateProgress, 'once', { random: () => 0 }).ok, 
 assert.equal(policy.salvage(duplicateProgress, 'once', { random: () => 0 }).code, 'missing-item', 'same id cannot grant twice');
 assert.equal(policy.getMaterialQuantity(duplicateProgress.inventory, 'green_essence_stone'), 1);
 
+const batchProgress = {
+  inventory: [equipment('batch-green-1', 'uncommon'), equipment('batch-blue-1', 'rare'), equipment('batch-green-2', 'uncommon')],
+  equipment: {}
+};
+const rolls = [.1, .8, .2];
+const batch = policy.salvageBatch(batchProgress, ['batch-green-1', 'batch-blue-1', 'batch-green-2'], { furnaceLevel: 1, random: () => rolls.shift() });
+assert.equal(batch.ok, true);
+assert.equal(batch.total, 3);
+assert.equal(batch.successCount, 2);
+assert.equal(batch.failureCount, 1);
+assert.deepEqual(batch.materials, { green_essence_stone: 2 });
+assert.equal(batchProgress.inventory.filter((item) => item.kind === 'equipment').length, 0, 'batch consumes every selected equipment regardless of result');
+assert.equal(policy.getMaterialQuantity(batchProgress.inventory, 'green_essence_stone'), 2);
+assert.equal(policy.getMaterialQuantity(batchProgress.inventory, 'blue_essence_stone'), 0);
+
+const rejectedBatchProgress = { inventory: [equipment('valid-green', 'uncommon'), equipment('blocked-purple', 'epic')], equipment: {} };
+const rejectedBatchBefore = JSON.stringify(rejectedBatchProgress);
+assert.equal(policy.salvageBatch(rejectedBatchProgress, ['valid-green', 'blocked-purple'], { random: () => 0 }).code, 'unsupported-quality');
+assert.equal(JSON.stringify(rejectedBatchProgress), rejectedBatchBefore, 'invalid batch is rejected before any mutation');
+assert.equal(policy.salvageBatch(rejectedBatchProgress, ['valid-green', 'valid-green'], { random: () => 0 }).code, 'duplicate-selection');
+
+const hundred = Array.from({ length: 100 }, (_, index) => equipment(`bulk-${index}`, index % 2 ? 'rare' : 'uncommon'));
+const hundredProgress = { inventory: hundred, equipment: {} };
+const hundredBatch = policy.salvageBatch(hundredProgress, hundred.map(policy.getItemId), { furnaceLevel: 1, random: () => 0 });
+assert.equal(hundredBatch.total, 100);
+assert.equal(hundredBatch.successCount, 100);
+assert.equal(policy.getMaterialQuantity(hundredProgress.inventory, 'green_essence_stone'), 50);
+assert.equal(policy.getMaterialQuantity(hundredProgress.inventory, 'blue_essence_stone'), 50);
+
 const normalized = policy.normalizeInventory([{ id: 'green_essence_stone', kind: 'material', quantity: 'bad' }]);
 assert.equal(normalized[0].quantity, 0);
 assert.equal(normalized[0].name, '綠色精華石');

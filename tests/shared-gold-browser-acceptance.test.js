@@ -1,0 +1,11 @@
+const fs=require('fs'),path=require('path'),assert=require('assert');
+const source=fs.readFileSync(path.join(__dirname,'..','tools','permanent-party-playtest-bootstrap.js'),'utf8');
+assert.match(source,/goldAcceptance\?['"]stardust-shared-gold-browser-acceptance-v1['"]:/,'gold acceptance uses a separate IndexedDB database');
+assert.match(source,/if\(!goldAcceptance\)throw Object\.assign/,'normal isolated playtest cannot auto-migrate legacy gold');
+assert.match(source,/button\.addEventListener\(['"]click['"],async/,'migration only runs from an explicit player click');
+assert.match(source,/prepareSharedGoldMigration\(accountId,current\.revision\)/,'acceptance creates the verified backup before confirmation');
+assert.match(source,/migrateSharedGold\(accountId,current\.revision,\{backupFingerprint:prepared\.backup\.fingerprint\}\)/,'confirmation uses the verified backup fingerprint');
+assert.match(source,/verifiedState\.gold!==expected\|\|audit\?\.after\?\.accountGold!==expected/,'post-migration total and audit are verified before startup');
+assert.match(source,/permanentAcceptanceRunning=goldAcceptance\|\|/,'acceptance freezes combat rewards so the expected migration total remains inspectable');
+assert.doesNotMatch(source,/deleteDatabase|localStorage\.(?:clear|removeItem)/,'acceptance never clears databases or local storage');
+console.log('Shared gold browser acceptance: 8 checks passed');

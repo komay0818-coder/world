@@ -1,6 +1,6 @@
 (function(root){
   'use strict';
-  const copy=x=>JSON.parse(JSON.stringify(x));
+  const copy=x=>x===undefined?undefined:JSON.parse(JSON.stringify(x));
   function guardAuthority(account,clientVersion=1,{maintenance=false}={}){
     if(!account.cutover)return;
     if(account.cutover.version!==1||clientVersion<(account.cutover.minimumClientVersion||2))throw Error('Outdated save client; reload before writing');
@@ -14,7 +14,7 @@
     return Array.from(new Uint8Array(digest),b=>b.toString(16).padStart(2,'0')).join('');
   }
   const fingerprint=payload=>hashSerialized(JSON.stringify(payload));
-  const pinned=id=>id==='permanent-migration-v1'||id.startsWith('backup:')||id.startsWith('migration-review:');
+  const pinned=id=>id==='permanent-migration-v1'||id.startsWith('backup:')||id.startsWith('migration-review:')||id.startsWith('shared-gold-backup-v1:');
   function compactReceipts(commands,floor=0){
     const next={...commands},completed=Object.entries(next).filter(([id,r])=>!pinned(id)&&(!r.metadataOnly||id.startsWith('recovery-'))).sort((a,b)=>a[1].revision-b[1].revision);
     for(const [id,r]of completed.slice(0,Math.max(0,completed.length-RECEIPT_LIMIT))){floor=Math.max(floor,r.revision);delete next[id];}
@@ -22,8 +22,8 @@
   }
   function accountSizes(account){
     const bytes=x=>new TextEncoder().encode(JSON.stringify(x)).length,active=copy(account);
-    const backups={migrationBackup:active.migrationBackup,backupHistory:active.backupHistory,originalSource:active.permanent?.migration?.backup};
-    delete active.commands;delete active.migrationBackup;delete active.backupHistory;
+    const backups={migrationBackup:active.migrationBackup,backupHistory:active.backupHistory,sharedGoldMigrationBackup:active.sharedGoldMigrationBackup,originalSource:active.permanent?.migration?.backup};
+    delete active.commands;delete active.migrationBackup;delete active.backupHistory;delete active.sharedGoldMigrationBackup;
     if(active.permanent?.migration)delete active.permanent.migration.backup;
     return {accountBytes:bytes(account),activeBytes:bytes(active),backupBytes:bytes(backups),commandHistoryBytes:bytes(account.commands||{}),receiptCount:Object.keys(account.commands||{}).length,receiptLimit:RECEIPT_LIMIT};
   }
@@ -128,10 +128,66 @@
         if(req.result){set(req.result);return;}
         try{const account={id:accountId,revision:0,slots:copy(slots)};accounts.add(account);set(account);}catch(e){abort(e);}
       };});},
+      initializePermanentAccount(account,preferences,{failAt}={}){
+        const candidate=copy(account),preference=copy(preferences);
+        return transaction(({accounts,set,abort})=>{const req=accounts.get(candidate.id);req.onsuccess=()=>{try{
+          const existing=req.result,pref=accounts.get(preference.id);pref.onsuccess=()=>{try{
+            if(existing){if(!pref.result)throw Error('Permanent account preferences missing');set({account:existing,preferences:pref.result,created:false});return;}
+            if(pref.result)throw Error('Orphaned account preferences require review');
+            accounts.add(candidate);if(failAt==='after-account')throw Error('Injected after permanent account write');
+            accounts.add(preference);if(failAt==='after-preferences')throw Error('Injected after permanent preferences write');
+            set({account:candidate,preferences:preference,created:true});
+          }catch(e){abort(e);}};
+        }catch(e){abort(e);}};});
+      },
       read(accountId){return transaction(({accounts,set})=>{const req=accounts.get(accountId);req.onsuccess=()=>set(req.result);},'readonly');},
       async readPreferences(accountId){
         return transaction(({accounts,set})=>{const req=accounts.get('preferences:'+accountId);req.onsuccess=()=>set(req.result);},'readonly');
       },
+      exportCloudBundle(accountId){return transaction(({accounts,runs,set,abort})=>{
+        const account=accounts.get(accountId),preferences=accounts.get('preferences:'+accountId),allRuns=runs.getAll();let ready=0;
+        const finish=()=>{if(++ready!==3)return;try{if(!account.result)throw Error('Unknown account');if(!preferences.result)throw Error('Permanent account preferences missing');set({account:copy(account.result),preferences:copy(preferences.result),runs:copy(allRuns.result.filter(record=>record.job?.accountId===accountId))});}catch(error){abort(error);}};
+        account.onsuccess=finish;preferences.onsuccess=finish;allRuns.onsuccess=finish;
+      },'readonly');},
+      readCloudSyncState(accountId){return transaction(({accounts,set})=>{const req=accounts.get('cloud-sync:'+accountId);req.onsuccess=()=>set(req.result);},'readonly');},
+      prepareCloudUpload(accountId,{localRevision,localPreferencesRevision,snapshotHash,baseRevision,cloudContentHash,commandId}){return transaction(({accounts,set,abort})=>{
+        const account=accounts.get(accountId),preferences=accounts.get('preferences:'+accountId);let ready=0;const loaded=()=>{if(++ready!==2)return;const state=accounts.get('cloud-sync:'+accountId);state.onsuccess=()=>{try{
+          if(!account.result||account.result.revision!==localRevision)throw Error('Local save changed before cloud upload');
+          if(!preferences.result||preferences.result.revision!==localPreferencesRevision)throw Error('Local preferences changed before cloud upload');
+          const previous=state.result?.pending;
+          if(previous){
+            if(previous.localRevision!==localRevision||(previous.localPreferencesRevision??0)!==localPreferencesRevision||previous.snapshotHash!==snapshotHash||previous.baseRevision!==baseRevision||previous.cloudContentHash!==cloudContentHash)throw Error('Cloud upload reconciliation required');
+            set(copy(state.result));return;
+          }
+          const next={...(state.result||{}),id:'cloud-sync:'+accountId,kind:'cloud-sync',ownerId:accountId,pending:{commandId,localRevision,localPreferencesRevision,snapshotHash,baseRevision,cloudContentHash,createdAt:Date.now()}};
+          accounts.put(next);set(copy(next));
+        }catch(error){abort(error);}};};account.onsuccess=loaded;preferences.onsuccess=loaded;
+      });},
+      completeCloudUpload(accountId,{commandId,localRevision,localPreferencesRevision,snapshotHash,cloudRevision,cloudContentHash,updatedAt}){return transaction(({accounts,set,abort})=>{
+        const account=accounts.get(accountId),preferences=accounts.get('preferences:'+accountId);let ready=0;const loaded=()=>{if(++ready!==2)return;const state=accounts.get('cloud-sync:'+accountId);state.onsuccess=()=>{try{
+          if(!account.result||account.result.revision<localRevision)throw Error('Local save moved behind cloud upload receipt');
+          if(!preferences.result||preferences.result.revision<localPreferencesRevision)throw Error('Local preferences moved behind cloud upload receipt');
+          if(!state.result?.pending||state.result.pending.commandId!==commandId)throw Error('Cloud upload receipt mismatch');
+          const pending=state.result.pending;if(pending.localRevision!==localRevision||(pending.localPreferencesRevision??0)!==localPreferencesRevision||pending.snapshotHash!==snapshotHash)throw Error('Cloud upload snapshot receipt mismatch');
+          const next={id:'cloud-sync:'+accountId,kind:'cloud-sync',ownerId:accountId,cloudRevision,cloudContentHash,localRevision,localPreferencesRevision,snapshotHash,updatedAt,pending:null};accounts.put(next);set(copy(next));
+        }catch(error){abort(error);}};};account.onsuccess=loaded;preferences.onsuccess=loaded;
+      });},
+      acknowledgeCloudSnapshot(accountId,{localRevision,localPreferencesRevision,snapshotHash,cloudRevision,cloudContentHash,updatedAt}){return transaction(({accounts,set,abort})=>{
+        const account=accounts.get(accountId),preferences=accounts.get('preferences:'+accountId);let ready=0;const loaded=()=>{if(++ready!==2)return;try{if(!account.result||account.result.revision!==localRevision)throw Error('Local save changed before cloud acknowledgement');if(!preferences.result||preferences.result.revision!==localPreferencesRevision)throw Error('Local preferences changed before cloud acknowledgement');const next={id:'cloud-sync:'+accountId,kind:'cloud-sync',ownerId:accountId,cloudRevision,cloudContentHash,localRevision,localPreferencesRevision,snapshotHash,updatedAt,pending:null};accounts.put(next);set(copy(next));}catch(error){abort(error);}};account.onsuccess=loaded;preferences.onsuccess=loaded;
+      });},
+      restoreCloudBundle(accountId,bundle,checkpoint,{failAt,canReplace=()=>false}={}){const candidate=copy(bundle.account),preferences=copy(bundle.preferences),incomingRuns=copy(bundle.runs||[]),cloud=copy(checkpoint);return transaction(({accounts,runs,set,abort})=>{
+        const account=accounts.get(accountId),preference=accounts.get('preferences:'+accountId),allRuns=runs.getAll(),sync=accounts.get('cloud-sync:'+accountId);let ready=0;
+        const finish=()=>{if(++ready!==4)return;try{
+          const ownRuns=allRuns.result.filter(record=>record.job?.accountId===accountId);
+          if(account.result&&!canReplace(copy(account.result),copy(preference.result),copy(ownRuns),copy(sync.result)))throw Error('Local save is not safe to replace');
+          for(const record of incomingRuns){if(!record?.id||record.job?.accountId!==accountId)throw Error('Cloud offline work ownership mismatch');const collision=allRuns.result.find(existing=>existing.id===record.id&&existing.job?.accountId!==accountId);if(collision)throw Error('Cloud offline work identity conflict');}
+          if(candidate.id!==accountId||preferences.id!=='preferences:'+accountId||preferences.ownerId!==accountId||cloud.id!=='cloud-sync:'+accountId||cloud.ownerId!==accountId)throw Error('Cloud bundle ownership mismatch');
+          accounts.put(candidate);if(failAt==='after-account')throw Error('Injected cloud restore account failure');accounts.put(preferences);
+          for(const record of ownRuns)runs.delete(record.id);for(const record of incomingRuns)runs.put(record);if(failAt==='after-runs')throw Error('Injected cloud restore runs failure');
+          accounts.put(cloud);if(failAt==='after-checkpoint')throw Error('Injected cloud restore checkpoint failure');set({account:copy(candidate),preferences:copy(preferences),runs:copy(incomingRuns),checkpoint:copy(cloud)});
+        }catch(error){abort(error);}};
+        account.onsuccess=finish;preference.onsuccess=finish;allRuns.onsuccess=finish;sync.onsuccess=finish;
+      });},
       async savePreferences(accountId,revision,values,options){
         const id='preferences:'+accountId;await this.initialize(id,[]);const snapshot=copy(values);
         return this.transactAccount(id,revision,'preferences-v2:'+revision+':'+root.crypto.randomUUID(),{values:snapshot},a=>{delete a.slots;a.kind='preferences';a.ownerId=accountId;a.values=snapshot;return a;},options);
