@@ -9,7 +9,6 @@ services:
     startCommand: pnpm start
     healthCheckPath: /health/ready
     autoDeployTrigger: off
-    maxShutdownDelaySeconds: 30
     envVars:
       - key: APP_ENV
         value: dev
