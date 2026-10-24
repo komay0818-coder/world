@@ -2484,7 +2484,6 @@ function getPartyMemberDisplayStats(memberRecord, slots = getCharacterSlots(), s
 function renderParty() {
   const progress = getProgress();
   const party = normalizeCurrentParty(progress);
-  saveProgress(progress);
   const slots = getCharacterSlots();
   const activeMembers = party.activeMemberIds
     .map((id) => party.members.find((member) => member.id === id))
@@ -5469,20 +5468,7 @@ function getSkillEffectPercent(skill, upgradeLevel = 1) {
 function getSkillDescription(job, skill) {
   const level = getSkillUpgradeLevel(getProgress(), job, skill);
   const effect = ClassSkillPolicy.getEffect(job, skill.id, level) || WarriorAdvancementPolicy.getEffect(skill.id, level) || RogueAdvancementPolicy.getEffect(skill.id, level) || HunterAdvancementPolicy.getEffect(skill.id, level) || MageAdvancementPolicy.getEffect(skill.id, level) || PriestAdvancementPolicy.getEffect(skill.id, level) || {};
-  const parts = [];
-  if (skill.id === 'corrosive-strike') parts.push(`淬毒 ${effect.duration} 秒；主手普攻施加中毒${effect.poisonBonusPerStack ? `，並依命中前毒層造成每層 ${Math.round(effect.poisonBonusPerStack * 100)}% ATK 毒傷` : ''}`);
-  if (skill.id === 'blood-venom-rend') parts.push(`施加 ${effect.bleedStacks} 層流血（中毒目標再 +${effect.poisonedBonusStacks} 層），持續 ${effect.bleedDuration} 秒；每層每 ${effect.bleedTickInterval} 秒造成 ${effect.bleedTick * 100}% ATK 傷害`);
-  if (skill.id === 'venom-mastery') parts.push(`中毒／流血上限 ${effect.poisonMaxStacks}／${effect.bleedMaxStacks} 層；中毒／流血傷害 +${Math.round(effect.bloodDotDamage * 100)}%`);
-  if (effect.power) parts.push(`造成 ${Math.round(effect.power * 100)}% 傷害`);
-  if (effect.healPower) parts.push(`治療量為魔法攻擊 ${Math.round(effect.healPower * 100)}%`);
-  if (effect.targets) parts.push(`最多 ${effect.targets} 個目標`);
-  if (effect.stun) parts.push(`曈眩 ${effect.stun} 秒`);
-  if (effect.slow) parts.push(`緩速 ${Math.round(effect.slow * 100)}%`);
-  if (effect.attackDown) parts.push(`降低攻擊 ${Math.round(effect.attackDown * 100)}%`);
-  if (effect.paralysis) parts.push(`命中後麻痺 ${effect.paralysisDuration || 4} 秒`);
-  if (effect.shockedVulnerability) parts.push(`感電易傷 ${effect.shockedDuration || 4} 秒：施法者本人後續所有傷害 ×${1 + effect.shockedVulnerability}`);
-  if (effect.breakthrough) parts.push(`Lv6 突破：${effect.breakthrough}`);
-  return parts.join('；') || getPassiveSkillDetail(job, skill) || skill.detail;
+  return SkillDescriptionPolicy.format(job, skill, effect);
 }
 
 function closeSkillDetailModal() {

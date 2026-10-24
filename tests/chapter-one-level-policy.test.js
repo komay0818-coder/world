@@ -40,7 +40,7 @@ check(policy.rollLevel('boar-woods', 'forestBoar', .999), 8);
 check(policy.getConcurrentEnemyLimit('plains-entrance'), 3);
 check(policy.getConcurrentEnemyLimit('wolf-den'), 3);
 check(policy.getConcurrentEnemyLimit('boar-woods'), 5);
-check(policy.getAttackMultiplier('plains-entrance'), .90);
+check(policy.getAttackMultiplier('plains-entrance'), .45);
 check(policy.getAttackMultiplier('wolf-den'), .90);
 check(policy.getAttackMultiplier('boar-woods'), 1);
 
@@ -54,7 +54,7 @@ ok(forestBoar8.xp > forestBoar7.xp, 'higher level raises EXP');
 
 const entranceWolf = policy.scaleMonster({ id: 'plainsWolfPup' }, 'plains-entrance', 1);
 const unadjustedEntranceAttack = Math.max(1, Math.round(policy.getProfile('plains-entrance', 'plainsWolfPup').baseAttack * policy.getGrowthMultiplier(1, policy.GROWTH.attackPerLevel)));
-check(entranceWolf.attack, Math.max(1, Math.round(unadjustedEntranceAttack * .90)), 'plains entrance applies the approved attack multiplier');
+check(entranceWolf.attack, Math.max(1, Math.round(unadjustedEntranceAttack * .45)), 'plains entrance halves the previous beginner attack damage');
 const denWolf = policy.scaleMonster({ id: 'denForestWolf' }, 'wolf-den', 5);
 const unadjustedDenAttack = policy.getProfile('wolf-den', 'denForestWolf').baseAttack * policy.getGrowthMultiplier(5, policy.GROWTH.attackPerLevel);
 check(denWolf.attack, Math.max(1, Math.round(unadjustedDenAttack * .90)), 'wolf den applies the approved attack multiplier');

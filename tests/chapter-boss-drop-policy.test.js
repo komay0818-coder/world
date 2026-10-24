@@ -9,6 +9,7 @@ assert.deepEqual(policy.CHAPTER_BLUE_ITEM_DROP_RATES, { 1: .10, 2: .05, 3: .08 }
 assert.deepEqual(policy.CHAPTER_ONE_BLUE_DROP_RATES, {
   normal: 0,
   elite: .03,
+  lostGoblin: .05,
   goblinTreasureChest: .05,
   goblinHighChief: .07,
   wanderingBlackKnight: .07,
@@ -17,6 +18,7 @@ assert.deepEqual(policy.CHAPTER_ONE_BLUE_DROP_RATES, {
 assert.deepEqual(policy.CHAPTER_ONE_EQUIPMENT_POOLS, ['plains_common_weapons', 'plains_common_armor']);
 
 assert.equal(policy.getChapterOneBlueDropRate({ id: 'forestBoar' }, { chapter: 1 }), 0);
+assert.equal(policy.getChapterOneBlueDropRate({ id: 'lostGoblin', isRare: true }, { chapter: 1 }), .05);
 assert.equal(policy.getChapterOneBlueDropRate({ id: 'ragingWolf', isElite: true }, { chapter: 1 }), .03);
 assert.equal(policy.getChapterOneBlueDropRate({ id: 'goblinTreasureChest' }, { chapter: 1 }), .05);
 assert.equal(policy.getChapterOneBlueDropRate({ id: 'goblinHighChief', isBoss: true }, { chapter: 1 }), .07);
@@ -33,6 +35,14 @@ assert.deepEqual(missed.inventory, []);
 const normal = { inventory: [] };
 assert.equal(policy.grantChapterOneBlueDrop(normal, { id: 'forestBoar' }, { chapter: 1 }, { random: sequence([0]) }), null);
 assert.deepEqual(normal.inventory, []);
+
+const rareGoblinProgress = { inventory: [] };
+const rareGoblinBlue = policy.grantChapterOneBlueDrop(rareGoblinProgress, { id: 'lostGoblin', isRare: true }, { chapter: 1 }, {
+  random: sequence([.049, 0, 0, .999]), instanceIdFactory: () => 'blue-lost-goblin-1', obtainedAt: 100
+});
+assert.ok(rareGoblinBlue);
+assert.equal(rareGoblinBlue.quality, 'rare');
+assert.equal(rareGoblinBlue.obtainedFrom, 'lostGoblin');
 
 const progress = { inventory: [] };
 const eliteBlue = policy.grantChapterOneBlueDrop(progress, { id: 'ragingWolf', isElite: true }, { chapter: 1 }, {
