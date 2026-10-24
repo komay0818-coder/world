@@ -38,7 +38,7 @@ export function buildApp(options: BuildOptions) {
     expectedProjectRef: options.config.lornDevSupabaseProjectRef,
     supabaseUrl: options.config.supabaseUrl,
     publishableKey: options.config.supabasePublishableKey,
-    apiBaseUrl: `http://${options.config.host}:${options.config.port}`,
+    apiBaseUrl: options.config.publicApiBaseUrl,
     apiContractVersion: API_CONTRACT_VERSION,
     apiCapabilities: API_CAPABILITIES
   }));

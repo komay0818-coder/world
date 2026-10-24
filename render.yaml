@@ -1,0 +1,37 @@
+services:
+  - type: web
+    name: lorn-api-dev
+    runtime: node
+    plan: free
+    branch: dev
+    rootDir: apps/api
+    buildCommand: corepack enable && pnpm install --frozen-lockfile && pnpm build
+    startCommand: pnpm start
+    healthCheckPath: /health/ready
+    autoDeployTrigger: off
+    maxShutdownDelaySeconds: 30
+    envVars:
+      - key: APP_ENV
+        value: dev
+      - key: HOST
+        value: 0.0.0.0
+      - key: LOG_LEVEL
+        value: info
+      - key: DATABASE_SSL
+        value: "true"
+      - key: DATABASE_CA_CERT_PATH
+        value: /etc/secrets/supabase-ca.crt
+      - key: SUPABASE_JWT_AUDIENCE
+        value: authenticated
+      - key: DATABASE_URL
+        sync: false
+      - key: DATABASE_ALLOWED_HOSTS
+        sync: false
+      - key: LORN_DEV_SUPABASE_PROJECT_REF
+        sync: false
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_PUBLISHABLE_KEY
+        sync: false
+      - key: FRONTEND_ALLOWED_ORIGINS
+        sync: false

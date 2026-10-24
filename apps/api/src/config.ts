@@ -13,7 +13,9 @@ const environmentSchema = z.object({
   SUPABASE_URL: z.string().url(),
   SUPABASE_JWT_AUDIENCE: z.string().min(1).default('authenticated'),
   SUPABASE_PUBLISHABLE_KEY: z.string().regex(/^sb_publishable_[A-Za-z0-9_-]+$/),
-  FRONTEND_ALLOWED_ORIGINS: z.string().min(1).default('http://127.0.0.1:8771,http://localhost:8771')
+  FRONTEND_ALLOWED_ORIGINS: z.string().min(1).default('http://127.0.0.1:8771,http://localhost:8771'),
+  PUBLIC_API_BASE_URL: z.string().optional(),
+  RENDER_EXTERNAL_URL: z.string().optional()
 });
 
 export type AppConfig = {
@@ -29,7 +31,17 @@ export type AppConfig = {
   supabaseJwtAudience: string;
   supabasePublishableKey: string;
   frontendAllowedOrigins: string[];
+  publicApiBaseUrl: string;
 };
+
+function exactHttpOrigin(value: string, label: string): string {
+  const origin = new URL(value);
+  const isLoopbackHttp = origin.protocol === 'http:' && ['127.0.0.1', 'localhost', '[::1]'].includes(origin.hostname);
+  if ((!isLoopbackHttp && origin.protocol !== 'https:') || origin.origin !== value) {
+    throw new Error(`${label} must contain exact HTTPS origins or loopback HTTP origins`);
+  }
+  return origin.origin;
+}
 
 export function loadConfig(source: NodeJS.ProcessEnv = process.env): AppConfig {
   const parsed = environmentSchema.safeParse(source);
@@ -55,11 +67,13 @@ export function loadConfig(source: NodeJS.ProcessEnv = process.env): AppConfig {
   }
   const frontendAllowedOrigins = parsed.data.FRONTEND_ALLOWED_ORIGINS.split(',').map((value) => value.trim()).filter(Boolean);
   for (const value of frontendAllowedOrigins) {
-    const origin = new URL(value);
-    if (origin.protocol !== 'http:' || !['127.0.0.1', 'localhost', '[::1]'].includes(origin.hostname) || origin.origin !== value) {
-      throw new Error('FRONTEND_ALLOWED_ORIGINS must contain exact loopback HTTP origins');
-    }
+    exactHttpOrigin(value, 'FRONTEND_ALLOWED_ORIGINS');
   }
+  const fallbackApiBaseUrl = `http://${parsed.data.HOST}:${parsed.data.PORT}`;
+  const publicApiBaseUrl = exactHttpOrigin(
+    parsed.data.PUBLIC_API_BASE_URL?.trim() || parsed.data.RENDER_EXTERNAL_URL?.trim() || fallbackApiBaseUrl,
+    'PUBLIC_API_BASE_URL'
+  );
 
   return {
     appEnv: parsed.data.APP_ENV,
@@ -73,6 +87,7 @@ export function loadConfig(source: NodeJS.ProcessEnv = process.env): AppConfig {
     supabaseUrl: parsed.data.SUPABASE_URL.replace(/\/$/, ''),
     supabaseJwtAudience: parsed.data.SUPABASE_JWT_AUDIENCE,
     supabasePublishableKey: parsed.data.SUPABASE_PUBLISHABLE_KEY,
-    frontendAllowedOrigins
+    frontendAllowedOrigins,
+    publicApiBaseUrl
   };
 }

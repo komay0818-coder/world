@@ -15,15 +15,19 @@ function databaseProjectRef(databaseUrl: string): string | null {
   return hostnameRef ?? usernameRef;
 }
 
-export function assertLornDevMigrationTarget(config: AppConfig): void {
-  if (config.appEnv !== 'dev') throw new Error('Migrations are restricted to APP_ENV=dev');
-  if (!config.databaseSsl) throw new Error('Migrations require verified database TLS');
-  if (!config.lornDevSupabaseProjectRef) throw new Error('LORN_DEV_SUPABASE_PROJECT_REF is required for migrations');
+export function assertLornDevRuntimeTarget(config: AppConfig): void {
+  if (config.appEnv !== 'dev') throw new Error('Hosted API is restricted to APP_ENV=dev');
+  if (!config.databaseSsl) throw new Error('Hosted API requires verified database TLS');
+  if (!config.lornDevSupabaseProjectRef) throw new Error('LORN_DEV_SUPABASE_PROJECT_REF is required for the hosted API');
 
   const apiRef = apiProjectRef(config.supabaseUrl);
   const databaseRef = databaseProjectRef(config.databaseUrl);
-  if (!apiRef || !databaseRef) throw new Error('Unable to identify the Supabase project for migration');
+  if (!apiRef || !databaseRef) throw new Error('Unable to identify the Supabase project for the hosted API');
   if (apiRef !== databaseRef || apiRef !== config.lornDevSupabaseProjectRef) {
-    throw new Error('Migration target does not match the pinned lorn-dev Supabase project');
+    throw new Error('Hosted API target does not match the pinned lorn-dev Supabase project');
   }
+}
+
+export function assertLornDevMigrationTarget(config: AppConfig): void {
+  assertLornDevRuntimeTarget(config);
 }

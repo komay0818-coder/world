@@ -14,6 +14,23 @@ describe('loadConfig', () => {
     expect(loadConfig(base).appEnv).toBe('dev');
   });
 
+  it('accepts exact HTTPS frontend and Render API origins', () => {
+    const config = loadConfig({
+      ...base,
+      HOST: '0.0.0.0',
+      PORT: '10000',
+      FRONTEND_ALLOWED_ORIGINS: 'https://komay0818-coder.github.io',
+      RENDER_EXTERNAL_URL: 'https://lorn-api-dev.onrender.com'
+    });
+    expect(config.frontendAllowedOrigins).toEqual(['https://komay0818-coder.github.io']);
+    expect(config.publicApiBaseUrl).toBe('https://lorn-api-dev.onrender.com');
+  });
+
+  it('rejects insecure non-loopback HTTP origins', () => {
+    expect(() => loadConfig({ ...base, FRONTEND_ALLOWED_ORIGINS: 'http://example.com' })).toThrow(/exact HTTPS/);
+    expect(() => loadConfig({ ...base, PUBLIC_API_BASE_URL: 'http://api.example.com' })).toThrow(/exact HTTPS/);
+  });
+
   it('requires a CA certificate path when database TLS is enabled', () => {
     const { DATABASE_CA_CERT_PATH: _, ...withoutCa } = base;
     expect(() => loadConfig(withoutCa)).toThrow(/DATABASE_CA_CERT_PATH/);
