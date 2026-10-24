@@ -7,6 +7,7 @@ export function fakeDatabase(handler: (text: string, values?: readonly unknown[]
       const rows = handler(text, values) as Row[];
       return { command: 'SELECT', rowCount: rows.length, oid: 0, fields: [], rows } as QueryResult<Row>;
     },
+    async transaction(work) { return work(this); },
     async close() {}
   };
 }
@@ -21,5 +22,7 @@ export const testConfig = {
   databaseCaCertPath: null,
   lornDevSupabaseProjectRef: null,
   supabaseUrl: 'https://dev-example.supabase.co',
-  supabaseJwtAudience: 'authenticated'
+  supabaseJwtAudience: 'authenticated',
+  supabasePublishableKey: 'sb_publishable_test_key',
+  frontendAllowedOrigins: ['http://127.0.0.1:8771', 'http://localhost:8771']
 };

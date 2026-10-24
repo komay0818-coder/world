@@ -12,7 +12,9 @@ const safeConfig: AppConfig = {
   databaseCaCertPath: 'C:\\certs\\dev-ca.crt',
   lornDevSupabaseProjectRef: 'devproject',
   supabaseUrl: 'https://devproject.supabase.co',
-  supabaseJwtAudience: 'authenticated'
+  supabaseJwtAudience: 'authenticated',
+  supabasePublishableKey: 'sb_publishable_test_key',
+  frontendAllowedOrigins: ['http://127.0.0.1:8771']
 };
 
 describe('assertLornDevMigrationTarget', () => {

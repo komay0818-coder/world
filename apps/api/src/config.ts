@@ -11,7 +11,9 @@ const environmentSchema = z.object({
   DATABASE_CA_CERT_PATH: z.string().optional(),
   LORN_DEV_SUPABASE_PROJECT_REF: z.string().regex(/^[a-z0-9]+$/).optional(),
   SUPABASE_URL: z.string().url(),
-  SUPABASE_JWT_AUDIENCE: z.string().min(1).default('authenticated')
+  SUPABASE_JWT_AUDIENCE: z.string().min(1).default('authenticated'),
+  SUPABASE_PUBLISHABLE_KEY: z.string().regex(/^sb_publishable_[A-Za-z0-9_-]+$/),
+  FRONTEND_ALLOWED_ORIGINS: z.string().min(1).default('http://127.0.0.1:8771,http://localhost:8771')
 });
 
 export type AppConfig = {
@@ -25,6 +27,8 @@ export type AppConfig = {
   lornDevSupabaseProjectRef: string | null;
   supabaseUrl: string;
   supabaseJwtAudience: string;
+  supabasePublishableKey: string;
+  frontendAllowedOrigins: string[];
 };
 
 export function loadConfig(source: NodeJS.ProcessEnv = process.env): AppConfig {
@@ -49,6 +53,13 @@ export function loadConfig(source: NodeJS.ProcessEnv = process.env): AppConfig {
   if (databaseSsl && !databaseCaCertPath) {
     throw new Error('DATABASE_CA_CERT_PATH is required when DATABASE_SSL=true');
   }
+  const frontendAllowedOrigins = parsed.data.FRONTEND_ALLOWED_ORIGINS.split(',').map((value) => value.trim()).filter(Boolean);
+  for (const value of frontendAllowedOrigins) {
+    const origin = new URL(value);
+    if (origin.protocol !== 'http:' || !['127.0.0.1', 'localhost', '[::1]'].includes(origin.hostname) || origin.origin !== value) {
+      throw new Error('FRONTEND_ALLOWED_ORIGINS must contain exact loopback HTTP origins');
+    }
+  }
 
   return {
     appEnv: parsed.data.APP_ENV,
@@ -60,6 +71,8 @@ export function loadConfig(source: NodeJS.ProcessEnv = process.env): AppConfig {
     databaseCaCertPath,
     lornDevSupabaseProjectRef: parsed.data.LORN_DEV_SUPABASE_PROJECT_REF ?? null,
     supabaseUrl: parsed.data.SUPABASE_URL.replace(/\/$/, ''),
-    supabaseJwtAudience: parsed.data.SUPABASE_JWT_AUDIENCE
+    supabaseJwtAudience: parsed.data.SUPABASE_JWT_AUDIENCE,
+    supabasePublishableKey: parsed.data.SUPABASE_PUBLISHABLE_KEY,
+    frontendAllowedOrigins
   };
 }

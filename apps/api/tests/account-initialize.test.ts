@@ -49,6 +49,7 @@ function createAccountDatabase(initialRows: StoredRow[] = []) {
       }
       throw new Error('Unexpected query in account initialization test');
     },
+    async transaction(work) { return work(this); },
     async close() {}
   };
   return { database, rows };

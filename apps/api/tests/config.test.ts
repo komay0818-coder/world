@@ -6,7 +6,7 @@ const base = {
   DATABASE_URL: 'postgresql://user:password@db.dev.internal:5432/lorn_dev',
   DATABASE_ALLOWED_HOSTS: 'db.dev.internal', DATABASE_SSL: 'true',
   DATABASE_CA_CERT_PATH: 'C:\\certs\\dev-ca.crt',
-  SUPABASE_URL: 'https://dev-project.supabase.co', SUPABASE_JWT_AUDIENCE: 'authenticated'
+  SUPABASE_URL: 'https://dev-project.supabase.co', SUPABASE_JWT_AUDIENCE: 'authenticated', SUPABASE_PUBLISHABLE_KEY: 'sb_publishable_test_key'
 };
 
 describe('loadConfig', () => {

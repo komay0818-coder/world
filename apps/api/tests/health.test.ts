@@ -16,7 +16,7 @@ describe('health endpoints', () => {
     expect((await ready.inject({ method: 'GET', url: '/health/ready' })).statusCode).toBe(200);
     await ready.close();
 
-    const unavailable = buildApp({ config: testConfig, database: { query: async () => { throw new Error('offline'); }, close: async () => {} }, tokenVerifier: async () => ({ id: 'unused', claims: {} }), logger: false });
+    const unavailable = buildApp({ config: testConfig, database: { query: async () => { throw new Error('offline'); }, transaction: async () => { throw new Error('offline'); }, close: async () => {} }, tokenVerifier: async () => ({ id: 'unused', claims: {} }), logger: false });
     expect((await unavailable.inject({ method: 'GET', url: '/health/ready' })).statusCode).toBe(503);
     await unavailable.close();
   });

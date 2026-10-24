@@ -1,0 +1,68 @@
+#account-auth-shell[hidden],
+#legacy-login-content[hidden],
+.account-auth-form[hidden]{display:none!important}
+
+body.account-auth-preview{background:#05080c}
+body.account-auth-preview .sky{background:#05080c url('../assets/main-menu-background.png') center center/cover no-repeat}
+body.account-auth-preview .sky::before{display:block;background:linear-gradient(90deg,rgba(2,5,8,.34),rgba(2,5,8,.08) 40%,rgba(2,5,8,.24));opacity:1}
+body.account-auth-preview .sky::after{display:block;background:linear-gradient(180deg,rgba(0,0,0,.12),transparent 38%,rgba(0,0,0,.42));opacity:1}
+body.account-auth-preview .app-shell{width:100%;max-width:none;padding:0}
+body.account-auth-preview .login-screen{min-height:100dvh;align-items:center;justify-content:center;padding:clamp(22px,3.2vh,42px) 24px;color:#eee3cf;text-align:center}
+
+.account-auth-shell{position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;width:min(100%,550px);max-height:calc(100dvh - 36px)}
+.account-auth-brand{flex:0 0 auto;margin:0 0 clamp(18px,2.8vh,32px);font-family:"Noto Serif TC","Songti TC",serif;text-align:center;text-shadow:0 4px 12px #000,0 0 26px rgba(211,169,92,.2)}
+.account-auth-brand h1{margin:0;color:#ead8b5;font-size:clamp(48px,4.1vw,76px);font-weight:900;line-height:1.05;letter-spacing:.16em;text-indent:.16em}
+.account-auth-brand p{margin:12px 0 0;color:#e6d0a8;font-size:clamp(20px,1.6vw,29px);font-weight:700;letter-spacing:.62em;text-indent:.62em}
+
+.account-auth-panel{width:100%;overflow-y:auto;padding:clamp(22px,2.4vw,34px) clamp(24px,2.7vw,38px);border:2px solid #927443;border-radius:5px;background:linear-gradient(145deg,rgba(12,18,24,.97),rgba(6,10,15,.95));box-shadow:0 0 0 1px rgba(238,203,132,.18) inset,0 18px 52px rgba(0,0,0,.62);scrollbar-width:thin;scrollbar-color:#8a6b3c #111820}
+.account-auth-panel h2{margin:0 0 24px;color:#ead9ba;font:900 clamp(25px,1.8vw,31px)/1.2 "Noto Serif TC","Songti TC",serif;letter-spacing:.08em;text-align:center}
+.account-auth-form label{margin:0 0 7px;color:#dfd2bc;font:700 14px/1.4 "Noto Sans TC",sans-serif;text-align:left}
+.account-field{display:grid;grid-template-columns:20px minmax(0,1fr) auto;align-items:center;gap:9px;min-height:46px;border:1px solid rgba(215,205,185,.4);border-radius:7px;background:rgba(5,10,15,.72);transition:border-color .18s,box-shadow .18s}
+.account-field:focus-within{border-color:#d5ae63;box-shadow:0 0 0 3px rgba(196,151,70,.16)}
+.account-field>span{padding-left:12px;color:#d8c4a2;font-size:15px}
+.account-field input{min-width:0;padding:11px 5px;color:#f7f1e7;font-size:15px}
+.account-field input::placeholder{color:#777c84}
+.account-field input[aria-invalid="true"]{color:#ffd7d0}
+.password-toggle{height:32px;margin-right:7px;border:0;border-radius:5px;padding:0 8px;background:transparent;color:#bfb49e;font-size:12px;cursor:pointer}
+.password-toggle:hover,.password-toggle:focus-visible{background:rgba(220,190,130,.12);color:#f5dfb4;outline:1px solid rgba(218,180,107,.5)}
+.account-password-hint{margin:7px 0 0;color:#aaa79f;font-size:12px;text-align:left}
+.account-field-error{min-height:18px;margin:4px 0 7px;color:#ffb2a7;font-size:12px;text-align:left}
+
+.account-submit{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;width:100%;min-height:56px;margin-top:8px;border:1px solid #d0a657;border-radius:4px;padding:0 20px;background:linear-gradient(180deg,#13517a,#073052);box-shadow:0 0 0 2px rgba(7,21,34,.8) inset,0 6px 17px rgba(0,0,0,.42);color:#f5e4c4;font:900 19px/1 "Noto Serif TC","Songti TC",serif;letter-spacing:.08em;cursor:pointer}
+.account-submit span{grid-column:2}
+.account-submit b{grid-column:3;justify-self:end;font-size:24px}
+.account-submit:hover,.account-submit:focus-visible{border-color:#f0ce88;background:linear-gradient(180deg,#17618f,#083b63);outline:none;filter:brightness(1.06)}
+.account-auth-switch{display:flex;align-items:center;justify-content:center;gap:7px;margin:19px 0 0;color:#aaa79f;font-size:13px}
+.account-auth-switch::before,.account-auth-switch::after{content:"";width:54px;height:1px;background:linear-gradient(90deg,transparent,#7f6b49)}
+.account-auth-switch::after{background:linear-gradient(90deg,#7f6b49,transparent)}
+.account-auth-switch button,.account-forgot-password{border:0;padding:3px;background:none;color:#78bce8;font:inherit;font-weight:700;cursor:pointer}
+.account-auth-switch button:hover,.account-auth-switch button:focus-visible,.account-forgot-password:hover,.account-forgot-password:focus-visible{color:#b7ddf6;text-decoration:underline;outline:none}
+.account-forgot-password{display:block;margin:12px auto 0;font-size:13px}
+.account-auth-message{display:block;min-height:20px;margin-top:12px;color:#e5c783;font-size:12px;text-align:center}
+.account-auth-message[data-state="error"]{color:#ffb2a7}
+.shared-gold-migration-panel h2{margin:0 0 14px;text-align:center;color:#f0dfb4}
+.shared-gold-migration-panel>p{margin:8px 0;color:#d6d7d9;font-size:13px;line-height:1.55}
+.shared-gold-migration-characters{margin:14px 0;padding:10px 12px;border:1px solid #705b32;border-radius:6px;background:#070d13;color:#e7dcc0;font-size:13px;line-height:1.8;white-space:pre-line}
+.shared-gold-migration-total{display:flex;justify-content:space-between;gap:12px;border-top:1px solid #705b32;padding-top:12px}.shared-gold-migration-total strong{color:#f3c75b;font-variant-numeric:tabular-nums}
+
+@media(max-width:700px){
+  body.account-auth-preview .sky{background-position:30% center}
+  body.account-auth-preview .login-screen{justify-content:flex-start;overflow:auto;padding:max(22px,env(safe-area-inset-top)) 16px max(22px,env(safe-area-inset-bottom))}
+  .account-auth-shell{width:100%;max-height:none;margin:auto 0}
+  .account-auth-brand{margin-bottom:18px}
+  .account-auth-brand h1{font-size:clamp(39px,12vw,54px)}
+  .account-auth-brand p{margin-top:8px;font-size:19px}
+  .account-auth-panel{overflow:visible;padding:22px 20px;border-width:1px}
+  .account-auth-panel h2{margin-bottom:20px;font-size:25px}
+  .account-field{min-height:48px}
+  .account-submit{min-height:52px}
+  .account-auth-switch::before,.account-auth-switch::after{width:28px}
+}
+
+@media(max-height:780px) and (min-width:701px){
+  .account-auth-brand{margin-bottom:14px}
+  .account-auth-brand h1{font-size:46px}
+  .account-auth-brand p{margin-top:7px;font-size:19px}
+  .account-auth-panel{padding-top:20px;padding-bottom:20px}
+  .account-auth-panel h2{margin-bottom:17px}
+}

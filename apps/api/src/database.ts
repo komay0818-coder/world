@@ -5,8 +5,12 @@ import type { AppConfig } from './config.js';
 
 export type QueryResult<Row extends pg.QueryResultRow = pg.QueryResultRow> = pg.QueryResult<Row>;
 
-export interface Database {
+export interface DatabaseTransaction {
   query<Row extends pg.QueryResultRow = pg.QueryResultRow>(text: string, values?: readonly unknown[]): Promise<QueryResult<Row>>;
+}
+
+export interface Database extends DatabaseTransaction {
+  transaction<Result>(work: (transaction: DatabaseTransaction) => Promise<Result>): Promise<Result>;
   close(): Promise<void>;
 }
 
@@ -44,6 +48,20 @@ export function createDatabase(config: AppConfig): Database {
 
   return {
     query: (text, values) => pool.query(text, values as unknown[] | undefined),
+    async transaction(work) {
+      const client = await pool.connect();
+      try {
+        await client.query('begin');
+        const result = await work({ query: (text, values) => client.query(text, values as unknown[] | undefined) });
+        await client.query('commit');
+        return result;
+      } catch (error) {
+        await client.query('rollback');
+        throw error;
+      } finally {
+        client.release();
+      }
+    },
     close: () => pool.end()
   };
 }
