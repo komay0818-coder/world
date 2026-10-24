@@ -1,0 +1,688 @@
+/* Mobile portrait battle composition. Desktop keeps the existing three-column layout. */
+.mobile-battle-info,
+.mobile-menu-switch,
+.mobile-skill-button,
+.mobile-skill-modal {
+  display: none;
+}
+
+@media (max-width: 700px) and (orientation: portrait) {
+  html,
+  body {
+    width: 100%;
+    min-width: 0;
+    overflow-x: hidden;
+  }
+
+  #battle-screen.battle-screen:not(.hidden) {
+    display: flex !important;
+    flex-direction: column !important;
+    height: 100dvh !important;
+    min-height: 100dvh !important;
+    padding: 0 0 calc(64px + env(safe-area-inset-bottom)) !important;
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+    background: #071721 !important;
+  }
+
+  /* Top navigation: chapter and map stay side by side. */
+  #battle-screen .battle-header {
+    position: relative !important;
+    z-index: 30 !important;
+    flex: 0 0 auto !important;
+    width: 100% !important;
+    min-height: 0 !important;
+    padding: calc(6px + env(safe-area-inset-top)) 8px 7px 44px !important;
+    border: 0 !important;
+    border-bottom: 1px solid rgba(126, 207, 235, .25) !important;
+    background: linear-gradient(180deg, #09232f, #071a24) !important;
+  }
+
+  #battle-screen .battle-header > div {
+    display: block !important;
+    width: 100% !important;
+  }
+
+  #battle-screen #leave-battle {
+    position: absolute !important;
+    top: calc(24px + env(safe-area-inset-top)) !important;
+    left: 7px !important;
+    z-index: 2 !important;
+    display: grid !important;
+    width: 31px !important;
+    min-width: 31px !important;
+    height: 31px !important;
+    min-height: 31px !important;
+    padding: 0 !important;
+    place-items: center;
+  }
+
+  #battle-screen #map-travel-panel {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 5px 7px !important;
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
+    background: transparent !important;
+  }
+
+  #battle-screen #map-travel-panel > label {
+    display: grid !important;
+    min-width: 0 !important;
+    gap: 2px !important;
+    margin: 0 !important;
+  }
+
+  #battle-screen #map-travel-panel > label > span {
+    font-size: 9px !important;
+    line-height: 1.2 !important;
+  }
+
+  #battle-screen #map-travel-panel select {
+    width: 100% !important;
+    min-width: 0 !important;
+    height: 32px !important;
+    padding: 4px 23px 4px 7px !important;
+    font-size: 12px !important;
+  }
+
+  #battle-screen #map-travel-button {
+    grid-column: 1 / -1 !important;
+    width: 100% !important;
+    min-height: 28px !important;
+    margin: 0 !important;
+    padding: 4px 8px !important;
+    font-size: 11px !important;
+  }
+
+  #battle-screen .map-current-location,
+  #battle-screen .map-identity,
+  #battle-screen #battle-party-status,
+  #battle-screen #map-level-text,
+  #battle-screen #layout-toggle,
+  #battle-screen #battle-toggle {
+    display: none !important;
+  }
+
+  /* Give the battlefield a real flex height; previous grid rules left the parent at 0px. */
+  #battle-screen .battle-center {
+    display: flex !important;
+    flex: 0 0 auto !important;
+    flex-direction: column !important;
+    grid-template-rows: none !important;
+    width: 100% !important;
+    height: auto !important;
+    min-height: 0 !important;
+    overflow: visible !important;
+  }
+
+  #battle-screen .battle-center > .battle-field {
+    --player-portrait-size: clamp(54px, 15.5vw, 64px);
+    position: relative !important;
+    display: block !important;
+    flex: 0 0 clamp(365px, 47dvh, 410px) !important;
+    width: 100% !important;
+    height: clamp(365px, 47dvh, 410px) !important;
+    min-height: 365px !important;
+    margin: 0 !important;
+    overflow: hidden !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    background-position: center 54% !important;
+  }
+
+  #battle-screen .battle-adventure-info,
+  #battle-screen .battle-status {
+    display: none !important;
+  }
+
+  /* Up to four enemies share one readable row. */
+  #battle-screen .battle-field #enemy-squad.monster-slot-grid {
+    position: absolute !important;
+    top: 8px !important;
+    right: 5px !important;
+    left: 5px !important;
+    display: grid !important;
+    grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+    grid-template-rows: minmax(0, 1fr) !important;
+    width: auto !important;
+    height: 150px !important;
+    min-height: 150px !important;
+    gap: 3px !important;
+    transform: none !important;
+  }
+
+  #battle-screen #enemy-squad .monster-battle-slot {
+    position: relative !important;
+    inset: auto !important;
+    display: block !important;
+    width: auto !important;
+    min-width: 0 !important;
+    height: 132px !important;
+    min-height: 132px !important;
+    padding: 0 2px !important;
+    transform: none !important;
+  }
+
+  #battle-screen #enemy-squad .monster-image-frame {
+    position: absolute !important;
+    inset: 0 1px 28px !important;
+    display: grid !important;
+    min-width: 0 !important;
+    min-height: 96px !important;
+    place-items: end center !important;
+    overflow: visible !important;
+  }
+
+  #battle-screen #enemy-squad .monster-slot-image {
+    display: block !important;
+    width: 100% !important;
+    max-width: 88px !important;
+    height: 96px !important;
+    max-height: 96px !important;
+    object-fit: contain !important;
+    object-position: center bottom !important;
+    scale: 1 !important;
+  }
+
+  #battle-screen #enemy-squad .monster-slot-hp,
+  #battle-screen #enemy-squad .monster-battle-slot.elite .monster-slot-hp,
+  #battle-screen #enemy-squad .monster-battle-slot.boss .monster-slot-hp {
+    right: 4px !important;
+    bottom: 20px !important;
+    left: 4px !important;
+    height: 6px !important;
+  }
+
+  #battle-screen #enemy-squad .monster-slot-name {
+    top: auto !important;
+    right: 1px !important;
+    bottom: 0 !important;
+    left: 1px !important;
+    font-size: 10px !important;
+    line-height: 17px !important;
+  }
+
+  #battle-screen #enemy-squad .monster-status-row {
+    top: 2px !important;
+    right: 2px !important;
+    left: auto !important;
+    min-height: 0 !important;
+  }
+
+  /* Three fixed party columns: portrait above, vitals directly below. */
+  #battle-screen .battle-field #battle-player-art[aria-label],
+  #battle-screen .battle-field .player-stage-art {
+    width: var(--player-portrait-size) !important;
+    height: var(--player-portrait-size) !important;
+    border-width: 2px !important;
+  }
+
+  #battle-screen .battle-field #battle-player-art[aria-label] {
+    z-index: 12 !important;
+    inset: auto auto 112px 50% !important;
+    translate: -50% 0 !important;
+  }
+
+  #battle-screen .battle-field .player-battle-stage {
+    position: absolute !important;
+    z-index: 12 !important;
+    inset: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    pointer-events: none;
+  }
+
+  #battle-screen .battle-field .player-stage-unit {
+    position: absolute !important;
+    top: auto !important;
+    bottom: 112px !important;
+    width: var(--player-portrait-size) !important;
+    height: var(--player-portrait-size) !important;
+    translate: -50% 0 !important;
+  }
+
+  #battle-screen .battle-field[data-player-party-size="1"] #battle-player-art[aria-label],
+  #battle-screen .battle-field[data-player-party-size="1"] #player-stage-info[data-party-slot="1"] {
+    left: 50% !important;
+  }
+
+  #battle-screen .battle-field[data-player-party-size="1"]:has(#player-battle-stage) #battle-player-art[aria-label] {
+    inset: auto auto 112px 50% !important;
+  }
+
+  #battle-screen .battle-field[data-player-party-size="2"] #battle-player-art[aria-label],
+  #battle-screen .battle-field[data-player-party-size="2"] #player-stage-info[data-party-slot="1"] {
+    left: 28% !important;
+  }
+
+  #battle-screen .battle-field[data-player-party-size="2"]:has(#player-battle-stage) #battle-player-art[aria-label] {
+    inset: auto auto 112px 28% !important;
+  }
+
+  #battle-screen .battle-field[data-player-party-size="2"] .player-stage-unit[data-party-slot="2"] {
+    left: 72% !important;
+  }
+
+  #battle-screen .battle-field[data-player-party-size="3"] #battle-player-art[aria-label],
+  #battle-screen .battle-field[data-player-party-size="3"] #player-stage-info[data-party-slot="1"] {
+    left: 17% !important;
+  }
+
+  #battle-screen .battle-field[data-player-party-size="3"]:has(#player-battle-stage) #battle-player-art[aria-label] {
+    inset: auto auto 112px 17% !important;
+  }
+
+  #battle-screen .battle-field[data-player-party-size="3"] .player-stage-unit[data-party-slot="2"] {
+    left: 50% !important;
+  }
+
+  #battle-screen .battle-field[data-player-party-size="3"] .player-stage-unit[data-party-slot="3"] {
+    left: 83% !important;
+  }
+
+  #battle-screen .battle-field .player-stage-info,
+  #battle-screen .battle-field .player-stage-floating {
+    box-sizing: border-box !important;
+    display: grid !important;
+    grid-template-rows: 12px 10px 4px 10px 4px 10px 4px !important;
+    align-content: start !important;
+    width: clamp(104px, 29vw, 118px) !important;
+    height: 76px !important;
+    padding: 5px 6px !important;
+    border: 1px solid rgba(137, 194, 220, .48) !important;
+    border-radius: 7px !important;
+    background: rgba(4, 17, 25, .9) !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, .34) !important;
+    color: #f6fbff !important;
+    text-align: left !important;
+  }
+
+  #battle-screen .battle-field .player-stage-info {
+    position: absolute !important;
+    z-index: 13 !important;
+    top: auto !important;
+    bottom: 7px !important;
+    translate: -50% 0 !important;
+  }
+
+  #battle-screen .battle-field .player-stage-floating {
+    position: absolute !important;
+    top: calc(100% + 29px) !important;
+    right: auto !important;
+    bottom: auto !important;
+    left: 50% !important;
+    translate: -50% 0 !important;
+  }
+
+  #battle-screen .player-stage-info b,
+  #battle-screen .player-stage-floating b {
+    display: block !important;
+    overflow: hidden;
+    font-size: 10px !important;
+    line-height: 1.2 !important;
+    text-align: center !important;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  #battle-screen .player-stage-meter-copy,
+  #battle-screen .player-stage-experience-copy {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    gap: 3px !important;
+    margin-top: 3px !important;
+    font-size: 8px !important;
+    line-height: 1.1 !important;
+  }
+
+  #battle-screen .player-stage-meter-copy strong,
+  #battle-screen .player-stage-experience-copy strong {
+    font-size: 8px !important;
+  }
+
+  #battle-screen .player-stage-hp,
+  #battle-screen .player-stage-resource,
+  #battle-screen .player-stage-experience {
+    display: block !important;
+    width: 100% !important;
+    height: 4px !important;
+    margin-top: 1px !important;
+    overflow: hidden !important;
+    border-radius: 999px !important;
+  }
+
+  #battle-screen .player-status-row {
+    display: none !important;
+  }
+
+  /* Shared, bounded information panel beneath the battlefield. */
+  #mobile-battle-info.mobile-battle-info {
+    display: flex !important;
+    flex: 1 1 auto !important;
+    flex-direction: column !important;
+    width: calc(100% - 12px) !important;
+    min-height: 155px !important;
+    margin: 6px 6px 5px !important;
+    overflow: hidden !important;
+    border: 1px solid rgba(113, 199, 230, .38) !important;
+    border-radius: 10px !important;
+    background: #091e29 !important;
+  }
+
+  #mobile-battle-info[hidden] {
+    display: none !important;
+  }
+
+  .mobile-battle-info-head {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 38px;
+    border-bottom: 1px solid rgba(113, 199, 230, .2);
+  }
+
+  .mobile-battle-info-tabs {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .mobile-battle-info-tabs button,
+  .mobile-battle-info-toggle {
+    min-height: 36px;
+    border: 0;
+    background: transparent;
+    color: #a9c5d3;
+    font: inherit;
+    font-size: 12px;
+    font-weight: 800;
+  }
+
+  .mobile-battle-info-tabs button[aria-selected="true"] {
+    background: rgba(48, 130, 164, .28);
+    color: #fff2b2;
+    box-shadow: inset 0 -2px #d7ad45;
+  }
+
+  .mobile-battle-info-toggle {
+    border-left: 1px solid rgba(113, 199, 230, .2);
+    font-size: 18px;
+  }
+
+  .mobile-battle-info-body {
+    flex: 1 1 auto;
+    height: auto;
+    min-height: 0;
+  }
+
+  .mobile-battle-info.is-collapsed {
+    flex: 0 0 auto !important;
+    min-height: 0 !important;
+  }
+
+  .mobile-battle-info.is-collapsed .mobile-battle-info-body {
+    display: none;
+  }
+
+  .mobile-battle-info-panel {
+    height: 100%;
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  .mobile-battle-info-panel[hidden] {
+    display: none !important;
+  }
+
+  #mobile-battle-info .combat-log,
+  #mobile-battle-info .round-loot-card {
+    position: static !important;
+    inset: auto !important;
+    box-sizing: border-box !important;
+    width: 100% !important;
+    height: 100% !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    margin: 0 !important;
+    padding: 7px 8px !important;
+    overflow: hidden !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+  }
+
+  #mobile-battle-info .combat-log > p,
+  #mobile-battle-info .round-loot-card > header {
+    display: none !important;
+  }
+
+  #mobile-battle-info .combat-log-head {
+    min-height: 26px !important;
+    margin-bottom: 4px !important;
+  }
+
+  #mobile-battle-info #combat-log-lines {
+    height: calc(100% - 30px) !important;
+    max-height: none !important;
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+  }
+
+  #mobile-battle-info #mobile-drop-history {
+    height: 100% !important;
+    max-height: none !important;
+    padding: 8px !important;
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+  }
+
+  .mobile-drop-history > p {
+    margin: 28px 0 0;
+    color: #849ba0;
+    font-size: 12px;
+    text-align: center;
+  }
+
+  .mobile-drop-record {
+    display: flex;
+    align-items: baseline;
+    min-width: 0;
+    gap: 4px;
+    padding: 7px 5px;
+    border-bottom: 1px solid rgba(132, 169, 183, .18);
+    font-size: 12px;
+    line-height: 1.3;
+    white-space: nowrap;
+  }
+
+  .mobile-drop-record + .mobile-drop-record {
+    margin-top: 0;
+  }
+
+  .mobile-drop-monster {
+    flex: 0 1 auto;
+    min-width: 0;
+    overflow: hidden;
+    color: #d7e8ef;
+    font-weight: 800;
+    text-overflow: ellipsis;
+  }
+
+  .mobile-drop-verb {
+    flex: 0 0 auto;
+    color: #89a9b7;
+  }
+
+  .mobile-drop-item {
+    flex: 0 1 auto;
+    min-width: 0;
+    overflow: hidden;
+    font-weight: 900;
+    text-overflow: ellipsis;
+  }
+
+  .mobile-drop-item.quality-normal {
+    color: #eef8fc;
+  }
+
+  .mobile-drop-item.quality-excellent {
+    color: #83e5a7;
+  }
+
+  .mobile-drop-item.quality-rare {
+    color: #75b5ff;
+  }
+
+  .mobile-drop-item.quality-epic {
+    color: #d59aff;
+  }
+
+  .mobile-drop-item.quality-gold {
+    color: #f3d36c;
+  }
+
+  .mobile-drop-quantity {
+    flex: 0 0 auto;
+    color: #f3e5bd;
+    font-weight: 900;
+  }
+
+  /* Existing bottom container now only owns the fixed navigation. */
+  #battle-screen .battle-bottom {
+    display: block !important;
+    flex: 0 0 0 !important;
+    width: 100% !important;
+    min-height: 0 !important;
+    padding: 0 !important;
+    overflow: visible !important;
+    background: transparent !important;
+  }
+
+  #battle-screen .battle-menu {
+    position: fixed !important;
+    z-index: 9000 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    display: grid !important;
+    grid-template-columns: repeat(5, minmax(0, 1fr)) !important;
+    width: 100% !important;
+    height: auto !important;
+    margin: 0 !important;
+    padding: 5px 5px calc(5px + env(safe-area-inset-bottom)) !important;
+    gap: 4px !important;
+    overflow: hidden !important;
+    border: 0 !important;
+    border-top: 1px solid rgba(136, 220, 244, .42) !important;
+    border-radius: 0 !important;
+    background: rgba(5, 20, 30, .98) !important;
+    box-shadow: 0 -7px 22px rgba(0, 0, 0, .44) !important;
+  }
+
+  #battle-screen .battle-menu[data-mobile-page="1"] [data-mobile-menu-page="2"],
+  #battle-screen .battle-menu[data-mobile-page="2"] [data-mobile-menu-page="1"] {
+    display: none !important;
+  }
+
+  #battle-screen .battle-menu .mobile-menu-switch,
+  #battle-screen .battle-menu .mobile-skill-button {
+    display: flex !important;
+  }
+
+  #battle-screen .battle-menu-button {
+    box-sizing: border-box !important;
+    min-width: 0 !important;
+    min-height: 52px !important;
+    padding: 4px 1px !important;
+    gap: 1px !important;
+  }
+
+  #battle-screen .battle-menu-button span {
+    font-size: 18px !important;
+  }
+
+  #battle-screen .battle-menu-button b {
+    font-size: 10px !important;
+  }
+
+  #battle-screen .battle-menu-button small {
+    display: none !important;
+  }
+
+  /* Skills only appear after tapping the second-page skill action. */
+  #mobile-skill-modal.mobile-skill-modal:not(.hidden) {
+    display: flex !important;
+    z-index: 9500 !important;
+    align-items: flex-end !important;
+    padding: 0 !important;
+  }
+
+  #mobile-skill-modal .mobile-skill-window {
+    width: 100% !important;
+    max-width: none !important;
+    max-height: min(76dvh, 640px) !important;
+    padding: 12px 10px calc(14px + env(safe-area-inset-bottom)) !important;
+    overflow: hidden !important;
+    border-width: 1px 0 0 !important;
+    border-radius: 16px 16px 0 0 !important;
+  }
+
+  #mobile-skill-content {
+    max-height: calc(min(76dvh, 640px) - 58px);
+    overflow-y: auto;
+  }
+
+  #mobile-skill-content .skill-panel {
+    position: static !important;
+    inset: auto !important;
+    box-sizing: border-box !important;
+    width: 100% !important;
+    max-width: none !important;
+    height: auto !important;
+    min-height: 0 !important;
+    margin: 0 !important;
+    padding: 8px 0 !important;
+    overflow: visible !important;
+    border: 0 !important;
+    background: transparent !important;
+  }
+
+  /* Mobile skills only: potion controls stay in the backpack/automatic battle flow. */
+  #mobile-skill-content .potion-button {
+    display: none !important;
+  }
+
+  /* Loot remains available in the dedicated tab without duplicate notices over other mobile screens. */
+  #toast.mobile-battle-loot-notice {
+    display: none !important;
+  }
+}
+
+@media (max-width: 390px) and (orientation: portrait) {
+  #battle-screen .battle-center > .battle-field {
+    flex-basis: clamp(410px, 52dvh, 440px) !important;
+    height: clamp(410px, 52dvh, 440px) !important;
+    min-height: 410px !important;
+  }
+
+  #battle-screen .battle-field #enemy-squad.monster-slot-grid {
+    height: 138px !important;
+    min-height: 138px !important;
+  }
+
+  #battle-screen #enemy-squad .monster-battle-slot {
+    height: 124px !important;
+    min-height: 124px !important;
+  }
+
+  #battle-screen #enemy-squad .monster-image-frame {
+    min-height: 88px !important;
+  }
+
+  #battle-screen #enemy-squad .monster-slot-image {
+    height: 88px !important;
+    max-height: 88px !important;
+  }
+
+}

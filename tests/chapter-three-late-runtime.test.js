@@ -21,7 +21,9 @@ try {
   for (const mapId of ['skullcrusher-war-camp', 'ancient-altar', 'redrock-temple']) {
     const result = JSON.parse(game.evaluate(`
       Math.random = () => 0;
+      mapTravelInProgress = false;
       selectAdventureMap('${mapId}');
+      openBattle();
       Math.random = () => .5;
       const liveBossIndex${mapId.replaceAll('-', '')} = battle.enemyTypes.findIndex((_, index) => getEnemyDefinition(index).isBoss);
       queueDefeatedEnemies();

@@ -1,5 +1,25 @@
-function getGameStorage() { return getPermanentPartyRuntime()?.storage || window.localStorage; }
 function getPermanentPartyRuntime() { return typeof PermanentPartyRuntime !== 'undefined' ? PermanentPartyRuntime.current : null; }
+function getPermanentRuntimeAccountId(runtime = getPermanentPartyRuntime()) {
+  try { return runtime?.getCommitted?.().id || ''; } catch (_) { return ''; }
+}
+function isSupabaseEntryMode(runtime = getPermanentPartyRuntime()) {
+  return getPermanentRuntimeAccountId(runtime).startsWith('supabase:') || window.accountAuthPreviewEnabled === true;
+}
+const blockedSupabaseStorage = Object.freeze({
+  getItem() { return null; },
+  setItem() { throw Error('Permanent account runtime is not ready'); },
+  removeItem() { throw Error('Permanent account runtime is not ready'); },
+  clear() { throw Error('Permanent account runtime is not ready'); }
+});
+function getGameStorage() {
+  const runtime = getPermanentPartyRuntime();
+  if (runtime) return runtime.storage;
+  return isSupabaseEntryMode(runtime) ? blockedSupabaseStorage : window.localStorage;
+}
+function isPermanentGameplayReady() {
+  const runtime = getPermanentPartyRuntime();
+  return !isSupabaseEntryMode(runtime) || Boolean(runtime?.readyForGameplay);
+}
 function normalizePermanentRead(progress) {
   const value = { level: 1, xp: 0, gold: 0, magicCrystals: 0, skillBooks: {}, selectedMapId: 'beginner-plains', unlockedChapter: 1, ...progress };
   value.equipment = { ...emptyEquipment(), ...(value.equipment || {}) };
@@ -379,13 +399,22 @@ let inventoryTooltipPinnedId = '';
 let inventoryTooltipProgress = null;
 let workshopQuality = 'uncommon';
 let workshopSlot = 'all';
+let workshopPreview = null;
+let workshopCraftBusy = false;
+let blacksmithPreviewItemId = null;
 let furnaceSelectedItemId = null;
+let furnaceSelectedItemIds = new Set();
 let furnaceResult = null;
 let furnaceBusy = false;
+let magicSynthesisBusy = false;
+let magicPreviewRecipeId = null;
+let weaponRecipeAssemblyBusy = false;
 let alchemyInputItemIds = [null, null];
 let alchemyCandidates = [];
 let selectedAlchemyCandidate = null;
 let alchemyBusy = false;
+let alchemyPreviewItemId = null;
+let alchemyPendingSlotIndex = null;
 let battleLogMode = 'player';
 let battleLogEntries = [];
 let dropLookupCategory = 'all';
@@ -401,6 +430,38 @@ function addRoundLoot(id, name, quantity = 1, icon = '◆', valuePrefix = '×') 
   current.valuePrefix = valuePrefix;
   current.updatedAt = Date.now();
   battle.roundLoot[key] = current;
+}
+
+function recordMobileDropHistory(enemy, rewardKey, drops) {
+  const entries = (Array.isArray(drops) ? drops : []).filter((drop) => drop?.name && Number(drop.quantity) > 0);
+  if (!entries.length) return;
+  if (!Array.isArray(battle.mobileDropHistory)) battle.mobileDropHistory = [];
+  battle.mobileDropSequence = Math.max(0, Number(battle.mobileDropSequence) || 0) + 1;
+  const occurredAt = Date.now();
+  const killId = String(rewardKey || `${enemy?.id || 'monster'}:${occurredAt}`);
+  const killSequence = battle.mobileDropSequence;
+  const batch = entries.map((drop, index) => ({
+      killId,
+      killSequence,
+      monsterName: String(enemy?.name || '未知怪物'),
+      itemName: String(drop.name),
+      quantity: Math.max(1, Math.floor(Number(drop.quantity) || 1)),
+      qualityClass: ['quality-normal', 'quality-excellent', 'quality-rare', 'quality-epic', 'quality-gold'].includes(drop.qualityClass) ? drop.qualityClass : 'quality-normal',
+      showQuantity: drop.stackable !== false,
+      occurredAt,
+      sameKill: index > 0
+    }));
+  battle.mobileDropHistory = [...batch, ...battle.mobileDropHistory].slice(0, 80);
+}
+
+function renderMobileDropHistory() {
+  const list = document.querySelector('#mobile-drop-history');
+  if (!list) return;
+  const entries = Array.isArray(battle.mobileDropHistory) ? battle.mobileDropHistory : [];
+  list.innerHTML = entries.length ? entries.map((entry) => {
+    const quantity = entry.showQuantity && entry.quantity > 1 ? ` <span class="mobile-drop-quantity">(${entry.quantity.toLocaleString('zh-TW')})</span>` : '';
+    return `<div class="mobile-drop-record" data-kill-id="${escapeBattleLogText(entry.killId)}"><span class="mobile-drop-monster">${escapeBattleLogText(entry.monsterName)}</span><span class="mobile-drop-verb">給你</span><span class="mobile-drop-item ${entry.qualityClass || 'quality-normal'}">${escapeBattleLogText(entry.itemName)}</span>${quantity}</div>`;
+  }).join('') : '<p>尚未獲得戰利品</p>';
 }
 
 function getNextAdventureMap(currentMap) {
@@ -475,6 +536,7 @@ function renderBattleAdventureInfo(progress = getProgress()) {
   if (!lootList) return;
   const entries = Object.values(battle.roundLoot || {}).sort((a, b) => (a.id === 'gold' ? -1 : b.id === 'gold' ? 1 : b.updatedAt - a.updatedAt)).slice(0, 8);
   lootList.innerHTML = entries.length ? entries.map((entry) => `<div class="round-loot-item"><span>${escapeBattleLogText(entry.icon)}</span><b>${escapeBattleLogText(entry.name)}</b><em>${entry.valuePrefix}${Math.floor(entry.quantity).toLocaleString('zh-TW')}</em></div>`).join('') : '<p>尚未獲得戰利品</p>';
+  renderMobileDropHistory();
 }
 let layoutEditMode = false;
 let activeLayoutDrag = null;
@@ -1275,6 +1337,7 @@ const TAB_ACTIVE_CHARACTER_SLOT_KEY = 'stardust-tab-active-character-slot';
 function getActiveCharacterSlotIndex() {
   const permanent = getPermanentPartyRuntime();
   if (permanent) return permanent.model.slotOrder.indexOf(permanent.mainId);
+  if (isSupabaseEntryMode(permanent)) return 0;
   if (ChapterTwoBalancePlaytestPolicy?.isActive()) return ChapterTwoBalancePlaytestPolicy.getActiveSlotIndex();
   const slots = JSON.parse(getGameStorage().getItem('stardust-character-slots') || '[]');
   const legacyIndex = Number(getGameStorage().getItem('stardust-active-character-slot') || 0);
@@ -1286,6 +1349,7 @@ function getActiveCharacterSlotIndex() {
 
 function setActiveCharacterSlotIndex(index) {
   if (ChapterTwoBalancePlaytestPolicy?.isActive()) return;
+  if (getPermanentPartyRuntime() || isSupabaseEntryMode()) return;
   sessionStorage.setItem(TAB_ACTIVE_CHARACTER_SLOT_KEY, String(index));
   getGameStorage().setItem('stardust-active-character-slot', String(index));
 }
@@ -1354,7 +1418,7 @@ function getLocalPlaytestProgressKey() {
 function getPlaytestHpFloor() {
   const visualShowcase = ChapterTwoBalancePlaytestPolicy?.isActive()
     && new URLSearchParams(window.location.search).has('showcase');
-  return visualShowcase || isMonsterRotationPreview() || getBlackForestEntrancePlaytestConfig().invincible || getBlackstoneStrongholdPlaytestConfig().invincible || getForestAltarPlaytestConfig().invincible || getBlackForestDepthsPlaytestConfig().invincible ? 1 : 0;
+  return visualShowcase || getBlackForestEntrancePlaytestConfig().invincible || getBlackstoneStrongholdPlaytestConfig().invincible || getForestAltarPlaytestConfig().invincible || getBlackForestDepthsPlaytestConfig().invincible ? 1 : 0;
 }
 
 function getProgress(activeCharacterOverride = null) {
@@ -1706,6 +1770,33 @@ function saveProgress(progress) {
   syncActiveCharacterSlot(progress);
 }
 
+let economyOperationInFlight = false;
+async function commitEconomyProgress(label, mutate) {
+  if (economyOperationInFlight) {
+    showToast('交易處理中，請稍候。');
+    return { ok: false, code: 'busy' };
+  }
+  economyOperationInFlight = true;
+  try {
+    const runtime = getPermanentPartyRuntime();
+    if (runtime) {
+      if (!runtime.active) throw Error('帳號存檔已停止');
+      await runtime.flush();
+      if (!runtime.active) throw Error('帳號存檔已停止');
+    }
+    const progress = getProgress();
+    const result = mutate(progress);
+    if (!result?.ok) return result || { ok: false, code: 'invalid-operation' };
+    await Promise.resolve(saveProgress(progress));
+    return { ...result, progress };
+  } catch (error) {
+    showToast(`${label}未完成：資料未成功保存，請重新整理後安全重試。`);
+    return { ok: false, code: 'save-failed', error };
+  } finally {
+    economyOperationInFlight = false;
+  }
+}
+
 function getAccountResources() {
   if (getPermanentPartyRuntime()) { const resources = JSON.parse(getGameStorage().getItem('stardust-account-resources')); return { ...resources, dungeonKeys: { blackForestAltar: 0, ...(resources.dungeonKeys || {}) } }; }
   const storage = ChapterTwoBalancePlaytestPolicy?.isActive() ? sessionStorage : getGameStorage();
@@ -1819,10 +1910,15 @@ function renderVillage() {
       ? `<ul class="village-upgrade-cost">${costs}<li class="${(Number(progress.gold) || 0) < requirement.gold ? 'village-upgrade-insufficient' : ''}"><span>金幣</span><b>${Number(progress.gold) || 0} / ${requirement.gold}</b></li></ul>`
       : supportsUpgrade ? (building.level >= 3 ? '<p class="village-upgrade-status">已達第二章上限 Lv3。</p>' : '<p class="village-upgrade-status">已達第一章上限；Lv3 將於第二章開放。</p>') : '<p class="village-upgrade-status">建築功能尚未開放。</p>';
     const upgradeLabel = requirement ? `升級至 Lv${requirement.targetLevel}` : supportsUpgrade ? `章節上限 Lv${displayedCap}` : '尚未開放';
+    const levelLabel = requirement ? `Lv${building.level} → Lv${requirement.targetLevel}` : `Lv${building.level} / 上限 Lv${displayedCap}`;
+    const upgradePanelId = `village-upgrade-panel-${building.id}`;
     return `<article class="village-building-card" data-village-building="${building.id}">
       <div class="village-building-icon" aria-hidden="true">${building.icon}</div>
-      <div class="village-building-copy"><h3>${building.name}</h3><small>Lv${building.level} / 目前上限 Lv${displayedCap}</small><p>${building.description}</p></div>
-      ${upgradePanel}
+      <div class="village-building-copy"><h3><span>${building.name}</span><small class="village-building-level">${levelLabel}</small></h3><p>${building.description}</p></div>
+      <section class="village-upgrade-section">
+        <button class="village-upgrade-toggle" type="button" data-village-upgrade-toggle aria-expanded="false" aria-controls="${upgradePanelId}"><span>升級材料</span><b aria-hidden="true">⌄</b></button>
+        <div id="${upgradePanelId}" class="village-upgrade-panel">${upgradePanel}</div>
+      </section>
       <div class="village-building-actions"><button class="village-enter" type="button" data-open-village-building="${building.id}">進入</button><button class="village-upgrade" type="button" data-upgrade-village-building="${building.id}" ${validation.ok ? '' : 'disabled'}>${upgradeLabel}</button></div>
     </article>`;
   }).join('');
@@ -1852,68 +1948,147 @@ function openVillageBuilding(buildingId) {
   if (!building || !building.unlocked) return;
   document.querySelector('#village-building-title').textContent = building.name;
   if (buildingId === 'furnace') renderFurnace(building);
-  else if (buildingId === 'workshop') renderWorkshop(building);
+  else if (buildingId === 'workshop') { workshopPreview = null; renderWorkshop(building); }
   else if (buildingId === 'alchemy') renderAlchemy(building);
   else if (buildingId === 'rune') renderMagicTower(building);
-  else if (buildingId === 'blacksmith') renderBlacksmith(building);
+  else if (buildingId === 'blacksmith') { blacksmithPreviewItemId = null; renderBlacksmith(building); }
   else document.querySelector('#village-building-content').innerHTML = `<div class="village-building-icon" aria-hidden="true">${building.icon}</div><h3>${building.name}</h3><small>建築等級 Lv${building.level} / ${building.maxLevel}</small><p>${building.description}</p><p class="village-placeholder">${building.name}功能尚未完成，將於後續版本加入。</p>`;
   document.querySelector('#village-building-modal').classList.remove('hidden');
 }
 
+function isMobileBlacksmithLayout() {
+  return Boolean(window.matchMedia?.('(max-width: 700px) and (orientation: portrait)').matches);
+}
+
+function getBlacksmithItem(progress, itemId) {
+  return (progress?.inventory || []).find((item) => item?.kind === 'equipment' && (item.instanceId || item.id) === itemId) || null;
+}
+
+function blacksmithEligibilityText(validation) {
+  if (validation?.ok) return '符合增加插槽條件。';
+  if (validation?.reason === 'max') return '此裝備已達插槽上限。';
+  if (validation?.reason === 'price-pending') return '打洞材料與金幣費用尚未設定，暫時不能增加插槽。';
+  return '目前不符合增加插槽條件。';
+}
+
 function renderBlacksmith(building = getVillageBuildingData('blacksmith')) {
-  const equipment = getProgress().inventory.filter((item) => item.kind === 'equipment');
+  const progress = getProgress();
+  const equipment = progress.inventory.filter((item) => item.kind === 'equipment');
   const cards = equipment.map((item) => {
     const max = RunePolicy.getMaxSockets(item), current = Number(item.sockets) || 0;
     return `<article class="furnace-slot filled"><h4>${item.name}</h4><p>目前插槽：${current} / ${max}</p><button type="button" data-add-rune-socket="${item.id}" ${current >= max ? 'disabled' : ''}>${current >= max ? '已達上限' : '增加 1 個插槽（價格待定）'}</button></article>`;
   }).join('');
-  document.querySelector('#village-building-content').innerHTML = `<div class="workshop-title"><div class="village-building-icon">${building.icon}</div><div><h3>${building.name}</h3><small>武器最多 3 孔・防具最多 2 孔</small></div></div><p>打洞價格仍待第二章經濟平衡確認，目前保留完整功能入口但不會扣除金幣或改動裝備。</p><section class="furnace-layout">${cards || '<p class="village-placeholder">背包內沒有裝備。</p>'}</section>`;
+  if (!isMobileBlacksmithLayout()) {
+    document.querySelector('#village-building-content').innerHTML = `<div class="workshop-title"><div class="village-building-icon">${building.icon}</div><div><h3>${building.name}</h3><small>武器最多 3 孔・防具最多 2 孔</small></div></div><p>打洞價格仍待第二章經濟平衡確認，目前保留完整功能入口但不會扣除金幣或改動裝備。</p><section class="furnace-layout blacksmith-desktop-grid">${cards || '<p class="village-placeholder">背包內沒有裝備。</p>'}</section>`;
+    return;
+  }
+  const grid = equipment.map((item) => {
+    const max = RunePolicy.getMaxSockets(item), current = Math.min(max, Math.max(0, Number(item.sockets) || 0));
+    return `<button type="button" class="blacksmith-equipment-tile ${itemQualityClass(item)}" data-view-blacksmith-item="${item.instanceId || item.id}"><span class="item-icon"><img src="${itemImagePath(item)}" alt=""></span><b title="${item.name}">${item.name}</b><small>${itemQualityLabel(item)}</small><mark>${current} / ${max} 孔</mark></button>`;
+  }).join('');
+  const previewItem = getBlacksmithItem(progress, blacksmithPreviewItemId);
+  const detail = previewItem ? (() => {
+    const max = RunePolicy.getMaxSockets(previewItem), current = Math.min(max, Math.max(0, Number(previewItem.sockets) || 0));
+    const validation = RunePolicy.requestSocket(previewItem);
+    const eligibility = blacksmithEligibilityText(validation);
+    return `<section class="blacksmith-detail-backdrop" role="dialog" aria-modal="true" aria-label="裝備打洞詳細資料"><article class="blacksmith-detail ${itemQualityClass(previewItem)}"><header><span class="item-icon"><img src="${itemImagePath(previewItem)}" alt=""></span><div><h4>${previewItem.name}</h4><small>${equipmentSlots[previewItem.slot]?.label || previewItem.slot}・${itemQualityLabel(previewItem)}</small></div></header><section class="inventory-tooltip-details">${equipmentDetailsHtml(previewItem) || '<span>沒有其他詳細資訊。</span>'}</section><section class="blacksmith-socket-state"><b>符文插槽</b><span>${current} / ${max}</span><small>${eligibility}</small></section><section class="blacksmith-socket-cost"><b>打洞費用</b><span>材料與金幣尚未設定</span></section><footer><button type="button" data-confirm-blacksmith-socket="${previewItem.instanceId || previewItem.id}" ${validation.ok ? '' : 'disabled'}>確認打洞</button><button type="button" data-cancel-blacksmith-detail>取消</button></footer></article></section>`;
+  })() : '';
+  document.querySelector('#village-building-content').innerHTML = `<div class="workshop-title"><div class="village-building-icon">${building.icon}</div><div><h3>${building.name}</h3><small>武器最多 3 孔・防具最多 2 孔</small></div></div><p>選擇裝備可查看能力與插槽狀態。打洞費用尚未設定，目前不會扣除資源或增加插槽。</p><section class="blacksmith-equipment-grid">${grid || '<p class="village-placeholder">背包內沒有裝備。</p>'}</section>${detail}`;
 }
 
 function renderMagicTower(building = getVillageBuildingData('rune'), message = '') {
   const progress = getProgress();
-  const recipes = MagicTowerPolicy.getAvailableRecipes(building.level);
+  const isMobile = Boolean(window.matchMedia?.('(max-width: 700px) and (orientation: portrait)').matches);
+  const recipes = isMobile
+    ? Object.values(MagicTowerPolicy.RECIPES).filter((recipe) => {
+      const page = SkillUpgradePolicy.MATERIALS[recipe.pageMaterialId];
+      const book = SkillUpgradePolicy.MATERIALS[recipe.bookMaterialId];
+      return page?.implemented !== false && book?.implemented !== false;
+    })
+    : MagicTowerPolicy.getAvailableRecipes(building.level);
   const recipeCards = recipes.map((recipe) => {
     const page = SkillUpgradePolicy.MATERIALS[recipe.pageMaterialId];
     const book = SkillUpgradePolicy.MATERIALS[recipe.bookMaterialId];
     const validation = MagicTowerPolicy.canSynthesize(progress, recipe.id, building.level);
-    return `<article class="furnace-slot filled"><span class="item-icon">${page.icon}</span><h4>${page.name}</h4><p>持有：${validation.owned} / 需要：10</p><p>成功取得：${book.icon} ${book.name} ×1</p><strong>實際成功率：40%</strong><button type="button" data-synthesize-magic="${recipe.id}" ${validation.ok ? '' : 'disabled'}>${validation.ok ? `合成${book.name}` : `還缺 ${validation.missing} 個${page.name}`}</button></article>`;
+    if (isMobile) {
+      const status = validation.ok ? '可合成' : validation.reason === 'tower-level' ? `魔法塔 Lv${recipe.requiredTowerLevel} 解鎖` : `持有 ${validation.owned || 0} / ${MagicTowerPolicy.CONFIG.pageCost}`;
+      return `<button type="button" class="magic-recipe-tile ${validation.ok ? 'ready' : 'blocked'}" data-view-magic-recipe="${recipe.id}"><img src="${page.image}" alt=""><b title="${page.name}">${page.name}</b><small>${page.rank}</small><span>${validation.owned || 0}</span><mark>${status}</mark></button>`;
+    }
+    return `<article class="furnace-slot filled"><span class="item-icon">${page.icon}</span><h4>${page.name}</h4><p>持有：${validation.owned} / 需要：10</p><p>成功取得：${book.icon} ${book.name} ×1</p><strong>實際成功率：40%</strong><button type="button" data-synthesize-magic="${recipe.id}" ${magicSynthesisBusy || !validation.ok ? 'disabled' : ''}>${magicSynthesisBusy ? '合成處理中…' : validation.ok ? `合成${book.name}` : `還缺 ${validation.missing} 個${page.name}`}</button></article>`;
   }).join('');
+  const previewRecipe = recipes.find((recipe) => recipe.id === magicPreviewRecipeId);
+  const detail = isMobile && previewRecipe ? (() => {
+    const page = SkillUpgradePolicy.MATERIALS[previewRecipe.pageMaterialId];
+    const book = SkillUpgradePolicy.MATERIALS[previewRecipe.bookMaterialId];
+    const validation = MagicTowerPolicy.canSynthesize(progress, previewRecipe.id, building.level);
+    const owned = MagicTowerPolicy.getQuantity(progress.inventory, previewRecipe.pageMaterialId);
+    const eligibility = validation.ok
+      ? '數量與魔法塔等級皆符合，可以合成。'
+      : validation.reason === 'tower-level'
+        ? `需要魔法塔 Lv${previewRecipe.requiredTowerLevel}，目前為 Lv${building.level}。`
+        : `技能殘頁不足，尚缺 ${Math.max(0, MagicTowerPolicy.CONFIG.pageCost - owned)} 個。`;
+    return `<section class="magic-detail-backdrop" role="dialog" aria-modal="true" aria-label="技能殘頁合成詳細資料"><article class="magic-detail"><header><img src="${page.image}" alt=""><div><h4>${page.name}</h4><small>${page.rank}技能殘頁</small></div></header><dl><div><dt>目前持有</dt><dd>${owned}</dd></div><div><dt>合成需要</dt><dd>${MagicTowerPolicy.CONFIG.pageCost}</dd></div><div><dt>可能取得</dt><dd><img src="${book.image}" alt="">${book.name} ×${MagicTowerPolicy.CONFIG.rewardAmount}</dd></div><div><dt>魔法塔</dt><dd>Lv${building.level} / 需要 Lv${previewRecipe.requiredTowerLevel}</dd></div><div><dt>成功率</dt><dd>${Math.round(MagicTowerPolicy.CONFIG.successChance * 100)}%</dd></div></dl><p class="magic-detail-eligibility ${validation.ok ? 'ready' : 'blocked'}">${eligibility}</p><footer><button type="button" data-synthesize-magic="${previewRecipe.id}" ${magicSynthesisBusy || !validation.ok ? 'disabled' : ''}>${magicSynthesisBusy ? '合成處理中…' : '確認合成'}</button><button type="button" data-cancel-magic-detail ${magicSynthesisBusy ? 'disabled' : ''}>取消</button></footer></article></section>`;
+  })() : '';
   document.querySelector('#village-building-content').innerHTML = `<div class="workshop-title"><div class="village-building-icon" aria-hidden="true">${building.icon}</div><div><h3>${building.name}</h3><small>建築 Lv${building.level}・成功率 40%</small></div></div>
     <p>每次消耗 10 個技能殘頁，成功時獲得 1 本同階技能書。合成失敗仍會消耗技能殘頁；魔法塔 Lv2 解鎖中級合成。</p>
     ${message ? `<p class="alchemy-message">${message}</p>` : ''}
-    <section class="furnace-layout">${recipeCards}</section>`;
+    <section class="${isMobile ? 'magic-recipe-grid' : 'furnace-layout'}">${recipeCards || '<p class="village-placeholder">目前沒有已開放的技能殘頁。</p>'}</section>${detail}`;
 }
 
-function synthesizeSkillBook(recipeId) {
-  const progress = getProgress();
+async function synthesizeSkillBook(recipeId) {
+  if (magicSynthesisBusy) return { ok: false, code: 'busy' };
   const building = getVillageBuildingData('rune');
-  const result = MagicTowerPolicy.synthesize(progress, recipeId, building.level, { materialDefinitions: SkillUpgradePolicy.MATERIALS });
-  if (!result.ok) { renderMagicTower(building, result.reason === 'tower-level' ? '魔法塔等級不足。' : '技能殘頁不足，無法合成。'); return; }
-  saveProgress(progress);
+  magicSynthesisBusy = true;
+  renderMagicTower(building);
+  const result = await commitEconomyProgress('技能書合成', progress => MagicTowerPolicy.synthesize(progress, recipeId, building.level, { materialDefinitions: SkillUpgradePolicy.MATERIALS }));
+  magicSynthesisBusy = false;
+  if (result.code === 'save-failed' || result.code === 'busy') { renderMagicTower(building, result.code === 'save-failed' ? '合成未完成，物品未被消耗，請安全重試。' : '其他交易正在處理，請稍候。'); return result; }
+  if (!result.ok) { renderMagicTower(building, result.reason === 'tower-level' ? '魔法塔等級不足。' : '技能殘頁不足，無法合成。'); return result; }
   const book = SkillUpgradePolicy.MATERIALS[result.recipe.bookMaterialId];
+  magicPreviewRecipeId = null;
   renderMagicTower(building, result.success ? `合成成功！獲得${book.name} ×1。` : '合成失敗，技能殘頁已消耗。');
+  return result;
 }
 
-function resetFurnaceState() { furnaceSelectedItemId = null; furnaceResult = null; furnaceBusy = false; }
+function resetFurnaceState() { furnaceSelectedItemId = null; furnaceSelectedItemIds = new Set(); furnaceResult = null; furnaceBusy = false; }
+
+function isMobileFurnaceLayout() {
+  return Boolean(window.matchMedia?.('(max-width: 700px) and (orientation: portrait)').matches);
+}
+
+function getSelectedFurnaceIds(equipment) {
+  if (!furnaceSelectedItemIds.size && furnaceSelectedItemId) furnaceSelectedItemIds.add(furnaceSelectedItemId);
+  const eligibleIds = new Set(equipment.map(SalvagePolicy.getItemId));
+  furnaceSelectedItemIds = new Set([...furnaceSelectedItemIds].filter((id) => eligibleIds.has(id)));
+  if (furnaceSelectedItemId && !eligibleIds.has(furnaceSelectedItemId)) furnaceSelectedItemId = null;
+  if (!furnaceSelectedItemId && furnaceSelectedItemIds.size) furnaceSelectedItemId = [...furnaceSelectedItemIds][0];
+  return [...furnaceSelectedItemIds];
+}
 
 function renderFurnace(building = getVillageBuildingData('furnace'), message = '') {
   const progress = getProgress();
   const equipment = SalvagePolicy.getEligibleEquipment(progress);
-  let selected = equipment.find((item) => SalvagePolicy.getItemId(item) === furnaceSelectedItemId) || null;
-  if (furnaceSelectedItemId && !selected) { furnaceSelectedItemId = null; selected = null; message = message || '原先選擇的裝備已不存在或不可分解，請重新選擇。'; }
+  const selectedIds = getSelectedFurnaceIds(equipment);
+  const selectedSet = new Set(selectedIds);
+  let selected = equipment.find((item) => SalvagePolicy.getItemId(item) === furnaceSelectedItemId) || equipment.find((item) => selectedSet.has(SalvagePolicy.getItemId(item))) || null;
   const cards = equipment.map((item) => {
     const id = SalvagePolicy.getItemId(item);
     const quality = SalvagePolicy.normalizeQuality(item);
     const locked = SalvagePolicy.isProtected(item);
-    return `<button type="button" class="furnace-item quality-${quality} ${id === furnaceSelectedItemId ? 'selected' : ''}" data-select-furnace-item="${id}" ${furnaceBusy ? 'disabled' : ''}><span class="item-icon"><img src="${itemImagePath(item)}" alt=""></span><span><b>${item.name}</b><small>${equipmentSlots[item.slot]?.label || item.slot}・${EquipmentAffixPolicy.getQualityLabel(item)}</small><em>${itemStatsText(item)}</em></span><mark>${locked ? '已鎖定' : '可分解'}</mark></button>`;
+    return `<button type="button" class="furnace-item quality-${quality} ${selectedSet.has(id) ? 'selected' : ''}" data-select-furnace-item="${id}" ${furnaceBusy ? 'disabled' : ''} aria-pressed="${selectedSet.has(id)}"><span class="furnace-check" aria-hidden="true">${selectedSet.has(id) ? '✓' : ''}</span><span class="item-icon"><img src="${itemImagePath(item)}" alt=""></span><span class="furnace-item-copy"><b>${item.name}</b><small>${equipmentSlots[item.slot]?.label || item.slot}・${EquipmentAffixPolicy.getQualityLabel(item)}</small><em>${itemStatsText(item)}</em></span><mark>${locked ? '已鎖定' : '可分解'}</mark></button>`;
   }).join('');
   const rule = selected ? SalvagePolicy.getRule(selected) : null;
   const material = rule ? SalvagePolicy.getMaterial(rule.materialId) : null;
   const chance = selected ? SalvagePolicy.getChance(selected, building.level) : 0;
-  const selectedPanel = selected ? `<article class="furnace-slot filled"><span class="item-icon"><img src="${itemImagePath(selected)}" alt=""></span><h4>${selected.name}</h4><p>品質：${EquipmentAffixPolicy.getQualityLabel(selected)}</p><p>${itemStatsText(selected)}</p><hr><p>可能取得：${material.icon} ${material.name} ×${rule.amount}</p><p>目前熔爐：Lv${building.level}</p><strong>實際成功率：${Math.round(chance * 100)}%</strong><button type="button" data-confirm-furnace ${furnaceBusy ? 'disabled' : ''}>${furnaceBusy ? '分解處理中…' : '分解裝備'}</button></article>` : '<article class="furnace-slot"><b>尚未選擇裝備</b><p>請從左側選擇一件綠色或藍色裝備。</p></article>';
-  const resultPanel = furnaceResult ? `<article class="furnace-result ${furnaceResult.success ? 'success' : 'empty'}"><h4>分解完成</h4><p>${furnaceResult.success ? `取得：${furnaceResult.material.icon} ${furnaceResult.material.name} ×${furnaceResult.amount}` : '未取得精華石'}</p><small>「${furnaceResult.item.name}」已永久消耗。</small></article>` : '<article class="furnace-result"><b>等待分解結果</b><p>完成後會在這裡顯示是否取得精華石。</p></article>';
-  const materialSummary = Object.values(SalvagePolicy.MATERIALS).map((entry) => `${entry.icon} ${entry.name} ${SalvagePolicy.getMaterialQuantity(progress.inventory, entry.id)}`).join('　');
-  document.querySelector('#village-building-content').innerHTML = `<div class="workshop-title"><div class="village-building-icon" aria-hidden="true">${building.icon}</div><div><h3>${building.name}</h3><small>建築 Lv${building.level}・可分解裝備 ${equipment.length} 件</small></div></div><p>綠色與藍色裝備分解後必定消失，並依熔爐等級機率取得對應精華石。白色、紫色以上、已穿戴與鎖定裝備不會列出。</p><p class="furnace-material-summary">${materialSummary}</p>${message ? `<p class="alchemy-message">${message}</p>` : ''}<section class="furnace-layout"><section class="furnace-column"><h4>可分解裝備</h4><div class="furnace-items">${cards || '<p class="village-placeholder">目前沒有符合條件的裝備。</p>'}</div></section><section class="furnace-column"><h4>分解槽</h4>${selectedPanel}</section><section class="furnace-column"><h4>結果</h4>${resultPanel}</section></section>`;
+  const selectedPanel = selected ? `<article class="furnace-slot filled"><span class="item-icon"><img src="${itemImagePath(selected)}" alt=""></span><h4>${selected.name}</h4><p>品質：${EquipmentAffixPolicy.getQualityLabel(selected)}</p><p>${itemStatsText(selected)}</p><hr><p>可能取得：${material.icon} ${material.name} ×${rule.amount}</p><p>目前熔爐：Lv${building.level}</p><strong>實際成功率：${Math.round(chance * 100)}%</strong><button type="button" data-confirm-furnace ${furnaceBusy ? 'disabled' : ''}>${furnaceBusy ? '分解處理中…' : selectedIds.length > 1 ? `批次分解 ${selectedIds.length} 件` : '分解裝備'}</button></article>` : '<article class="furnace-slot"><b>尚未選擇裝備</b><p>請選擇一件或多件綠色、藍色裝備。</p></article>';
+  const greenCount = Number(furnaceResult?.materials?.green_essence_stone || 0);
+  const blueCount = Number(furnaceResult?.materials?.blue_essence_stone || 0);
+  const resultPanel = furnaceResult ? `<article class="furnace-result ${furnaceResult.successCount ? 'success' : 'empty'}"><h4>批次分解完成</h4><p>分解總件數：${furnaceResult.total}</p><p>成功 ${furnaceResult.successCount} 件・失敗 ${furnaceResult.failureCount} 件</p><p>🟢 綠色精華石 ×${greenCount}</p><p>🔵 藍色精華石 ×${blueCount}</p></article>` : '<article class="furnace-result"><b>等待分解結果</b><p>完成後會顯示實際成功、失敗與精華石數量。</p></article>';
+  const materialEntries = Object.values(SalvagePolicy.MATERIALS).map((entry) => ({ ...entry, owned: SalvagePolicy.getMaterialQuantity(progress.inventory, entry.id) }));
+  const materialSummary = materialEntries.map((entry) => `${entry.icon} ${entry.name} ${entry.owned}`).join('　');
+  const materialCards = materialEntries.map((entry) => `<article class="furnace-material-card quality-${entry.quality}"><span class="furnace-material-icon" aria-hidden="true">${entry.icon}</span><span><b>${entry.name}</b><small>持有 ${entry.owned}</small></span></article>`).join('');
+  const batchToolbar = `<div class="furnace-batch-toolbar"><strong>已選 ${selectedIds.length} 件</strong><button type="button" data-furnace-select-all ${furnaceBusy || !equipment.length ? 'disabled' : ''}>全選可分解裝備</button><button type="button" data-furnace-clear-all ${furnaceBusy || !selectedIds.length ? 'disabled' : ''}>取消全選</button><button type="button" class="primary" data-confirm-furnace ${furnaceBusy || !selectedIds.length ? 'disabled' : ''}>${furnaceBusy ? '分解處理中…' : '批次分解'}</button></div>`;
+  document.querySelector('#village-building-content').innerHTML = `<div class="workshop-title"><div class="village-building-icon" aria-hidden="true">${building.icon}</div><div><h3>${building.name}</h3><small>建築 Lv${building.level}・可分解裝備 ${equipment.length} 件</small></div></div><p>綠色與藍色裝備分解後必定消失，並依熔爐等級機率取得對應精華石。白色、紫色以上、已穿戴與鎖定裝備不會列出。</p><p class="furnace-material-summary">${materialSummary}</p><div class="furnace-material-grid" aria-label="精華石持有數量">${materialCards}</div>${message ? `<p class="alchemy-message">${message}</p>` : ''}<section class="furnace-layout"><section class="furnace-column furnace-equipment-column"><div class="furnace-equipment-heading"><h4>可分解裝備</h4><span>${selectedIds.length} / ${equipment.length}</span></div>${batchToolbar}<div class="furnace-items">${cards || '<p class="village-placeholder">目前沒有符合條件的裝備。</p>'}</div></section><section class="furnace-column furnace-selection-column"><h4>分解槽</h4>${selectedPanel}</section><section class="furnace-column furnace-result-column"><h4>結果</h4>${resultPanel}</section></section>`;
 }
 
 function selectFurnaceItem(itemId) {
@@ -1921,31 +2096,57 @@ function selectFurnaceItem(itemId) {
   const progress = getProgress();
   const validation = SalvagePolicy.validate(progress, itemId);
   if (!validation.ok) { furnaceSelectedItemId = null; renderFurnace(undefined, validation.reason); return; }
-  furnaceSelectedItemId = validation.itemId;
+  if (isMobileFurnaceLayout()) {
+    if (furnaceSelectedItemIds.has(validation.itemId)) furnaceSelectedItemIds.delete(validation.itemId);
+    else furnaceSelectedItemIds.add(validation.itemId);
+    furnaceSelectedItemId = furnaceSelectedItemIds.has(validation.itemId) ? validation.itemId : [...furnaceSelectedItemIds][0] || null;
+  } else {
+    furnaceSelectedItemIds = new Set([validation.itemId]);
+    furnaceSelectedItemId = validation.itemId;
+  }
   furnaceResult = null;
   renderFurnace();
 }
 
-function confirmFurnaceSalvage() {
-  if (furnaceBusy || !furnaceSelectedItemId) return;
+function selectAllFurnaceItems() {
+  if (furnaceBusy) return;
+  const equipment = SalvagePolicy.getEligibleEquipment(getProgress());
+  furnaceSelectedItemIds = new Set(equipment.map(SalvagePolicy.getItemId));
+  furnaceSelectedItemId = equipment.length ? SalvagePolicy.getItemId(equipment[0]) : null;
+  furnaceResult = null;
+  renderFurnace();
+}
+
+function clearFurnaceSelection() {
+  if (furnaceBusy) return;
+  furnaceSelectedItemIds.clear();
+  furnaceSelectedItemId = null;
+  renderFurnace();
+}
+
+async function confirmFurnaceSalvage() {
+  if (furnaceBusy) return { ok: false, code: 'busy' };
   const progress = getProgress();
   const building = getVillageBuildingData('furnace');
-  const validation = SalvagePolicy.validate(progress, furnaceSelectedItemId);
-  if (!validation.ok) { furnaceSelectedItemId = null; renderFurnace(building, validation.reason); return; }
-  const rule = validation.rule;
-  const material = SalvagePolicy.getMaterial(rule.materialId);
-  const chance = SalvagePolicy.getChance(validation.item, building.level);
-  if (!window.confirm(`確定要分解「${validation.item.name}」嗎？\n\n分解後裝備將永久消失。\n取得${material.name}的機率為 ${Math.round(chance * 100)}%。`)) return;
+  const equipment = SalvagePolicy.getEligibleEquipment(progress);
+  const selectedIds = getSelectedFurnaceIds(equipment);
+  if (!selectedIds.length) return { ok: false, code: 'empty-selection' };
+  const validations = selectedIds.map((itemId) => SalvagePolicy.validate(progress, itemId));
+  const invalid = validations.find((entry) => !entry.ok);
+  if (invalid) { renderFurnace(building, invalid.reason); return invalid; }
+  if (!window.confirm(`即將分解 ${selectedIds.length} 件裝備，每件獨立計算成功率，無論成功或失敗都會消失。`)) return { ok: false, code: 'cancelled' };
   furnaceBusy = true;
   renderFurnace(building);
-  const result = SalvagePolicy.salvage(progress, furnaceSelectedItemId, { furnaceLevel: building.level });
-  if (!result.ok) { furnaceBusy = false; furnaceSelectedItemId = null; renderFurnace(building, result.reason); return; }
-  saveProgress(progress);
+  const result = await commitEconomyProgress('熔爐拆解', current => SalvagePolicy.salvageBatch(current, selectedIds, { furnaceLevel: building.level }));
+  if (result.code === 'save-failed' || result.code === 'busy') { furnaceBusy = false; renderFurnace(building, result.code === 'save-failed' ? '分解未完成，裝備與材料均未變更，請安全重試。' : '其他交易正在處理，請稍候。'); return result; }
+  if (!result.ok) { furnaceBusy = false; furnaceSelectedItemIds.clear(); furnaceSelectedItemId = null; renderFurnace(building, result.reason); return result; }
   furnaceResult = result;
+  furnaceSelectedItemIds.clear();
   furnaceSelectedItemId = null;
   furnaceBusy = false;
   renderFurnace(building);
-  showToast(result.success ? `分解完成：取得 ${result.material.name} ×${result.amount}` : '分解完成：未取得精華石');
+  showToast(`分解完成：成功 ${result.successCount} 件，失敗 ${result.failureCount} 件`);
+  return result;
 }
 
 function alchemyItemDescription(item) {
@@ -1958,6 +2159,55 @@ function resetAlchemyState() {
   alchemyCandidates = [];
   selectedAlchemyCandidate = null;
   alchemyBusy = false;
+  alchemyPreviewItemId = null;
+  alchemyPendingSlotIndex = null;
+}
+
+function isMobileAlchemyLayout() {
+  return Boolean(window.matchMedia?.('(max-width: 700px) and (orientation: portrait)').matches);
+}
+
+function getAlchemyItem(progress, itemId) {
+  return (progress?.inventory || []).find((entry) => AlchemyPolicy.getItemId(entry) === String(itemId || '')) || null;
+}
+
+function openAlchemyItemDetail(itemId, slotIndex = null) {
+  if (alchemyCandidates.length || alchemyBusy) return;
+  const progress = getProgress();
+  const item = getAlchemyItem(progress, itemId);
+  if (!AlchemyPolicy.isEligibleInput(item, progress)) { renderAlchemy(undefined, '此裝備已不存在、已穿戴或受保護，請重新選擇。'); return; }
+  const selectedIndex = alchemyInputItemIds.indexOf(String(itemId));
+  const targetIndex = Number.isInteger(slotIndex) ? slotIndex
+    : Number.isInteger(alchemyPendingSlotIndex) ? alchemyPendingSlotIndex
+      : selectedIndex >= 0 ? selectedIndex : !alchemyInputItemIds[0] ? 0 : 1;
+  const otherId = alchemyInputItemIds[targetIndex === 0 ? 1 : 0];
+  const other = getAlchemyItem(progress, otherId);
+  if (otherId === String(itemId)) { renderAlchemy(undefined, '同一件裝備不能重複放入兩個材料槽。'); return; }
+  if (other && other.slot !== item.slot) { renderAlchemy(undefined, `材料必須同為「${equipmentSlots[other.slot]?.label || other.slot}」，請先移除另一個材料。`); return; }
+  alchemyPreviewItemId = String(itemId);
+  alchemyPendingSlotIndex = targetIndex;
+  renderAlchemy();
+}
+
+function confirmAlchemyInput() {
+  if (alchemyBusy || alchemyCandidates.length || !alchemyPreviewItemId || !Number.isInteger(alchemyPendingSlotIndex)) return;
+  const progress = getProgress();
+  const item = getAlchemyItem(progress, alchemyPreviewItemId);
+  if (!AlchemyPolicy.isEligibleInput(item, progress)) { alchemyPreviewItemId = null; alchemyPendingSlotIndex = null; renderAlchemy(undefined, '裝備狀態已變更，未放入材料槽。'); return; }
+  const otherIndex = alchemyPendingSlotIndex === 0 ? 1 : 0;
+  const other = getAlchemyItem(progress, alchemyInputItemIds[otherIndex]);
+  if (AlchemyPolicy.getItemId(other) === alchemyPreviewItemId) { renderAlchemy(undefined, '同一件裝備不能重複放入兩個材料槽。'); return; }
+  if (other && other.slot !== item.slot) { renderAlchemy(undefined, '兩件裝備必須是相同部位。'); return; }
+  alchemyInputItemIds[alchemyPendingSlotIndex] = alchemyPreviewItemId;
+  alchemyPreviewItemId = null;
+  alchemyPendingSlotIndex = null;
+  renderAlchemy();
+}
+
+function closeAlchemyItemDetail() {
+  alchemyPreviewItemId = null;
+  alchemyPendingSlotIndex = null;
+  renderAlchemy();
 }
 
 function renderAlchemy(building = getVillageBuildingData('alchemy'), message = '') {
@@ -1969,12 +2219,12 @@ function renderAlchemy(building = getVillageBuildingData('alchemy'), message = '
   const available = eligible.map((item) => {
     const id = AlchemyPolicy.getItemId(item);
     const selectedSlot = alchemyInputItemIds.indexOf(id);
-    return `<button type="button" class="alchemy-inventory-item ${selectedSlot >= 0 ? 'selected' : ''}" data-alchemy-item="${id}">
+    return `<button type="button" class="alchemy-inventory-item ${itemQualityClass(item)} ${selectedSlot >= 0 ? 'selected' : ''}" data-alchemy-item="${id}">
       <span class="item-icon"><img src="${itemImagePath(item)}" alt=""></span><span><b>${item.name}</b><small>${alchemyItemDescription(item)}</small></span>
     </button>`;
   }).join('');
-  const slots = selectedItems.map((item, index) => `<article class="alchemy-input ${item ? 'filled' : ''}">
-    <small>材料 ${index + 1}</small>${item ? `<b>${item.name}</b><span>${alchemyItemDescription(item)}</span><button type="button" data-clear-alchemy-input="${index}">移除</button>` : '<b>尚未放入裝備</b><span>請從下方選擇綠色裝備</span>'}
+  const slots = selectedItems.map((item, index) => `<article class="alchemy-input ${item ? 'filled' : ''}" ${item ? `data-view-alchemy-slot="${index}" tabindex="0"` : ''}>
+    <small>材料 ${index + 1}</small>${item ? `<span class="alchemy-input-item"><span class="item-icon"><img src="${itemImagePath(item)}" alt=""></span><span><b>${item.name}</b><span>${alchemyItemDescription(item)}</span></span></span><button type="button" data-clear-alchemy-input="${index}">移除</button>` : '<b>尚未放入裝備</b><span>請從下方選擇綠色裝備</span>'}
   </article>`).join('');
   const validation = AlchemyPolicy.validateInputs(progress, alchemyInputItemIds);
   const candidates = alchemyCandidates.map((item) => {
@@ -1986,16 +2236,20 @@ function renderAlchemy(building = getVillageBuildingData('alchemy'), message = '
   const helper = message || (alchemyCandidates.length
     ? '請選擇一件結果；確認後其餘候選裝備會消失。'
     : validation.ok ? '材料符合規則，可以開始煉金。' : validation.reason);
+  const previewItem = isMobileAlchemyLayout() ? getAlchemyItem(progress, alchemyPreviewItemId) : null;
+  const previewSelectedIndex = previewItem ? alchemyInputItemIds.indexOf(AlchemyPolicy.getItemId(previewItem)) : -1;
+  const preview = previewItem ? `<section class="alchemy-item-detail-backdrop" role="dialog" aria-modal="true" aria-label="裝備詳細資料"><article class="alchemy-item-detail ${itemQualityClass(previewItem)}"><header><span class="item-icon"><img src="${itemImagePath(previewItem)}" alt=""></span><div><h4>${previewItem.name}</h4><small>${equipmentSlots[previewItem.slot]?.label || previewItem.slot}・${itemQualityLabel(previewItem)}</small></div></header><section class="inventory-tooltip-details">${equipmentDetailsHtml(previewItem) || '<span>沒有其他詳細資訊。</span>'}</section><footer><button type="button" data-confirm-alchemy-input>確認放入材料 ${Number(alchemyPendingSlotIndex) + 1}</button>${previewSelectedIndex >= 0 ? `<button type="button" data-clear-alchemy-input="${previewSelectedIndex}">移除材料</button>` : ''}<button type="button" data-cancel-alchemy-input>取消</button></footer></article></section>` : '';
   document.querySelector('#village-building-content').innerHTML = `<div class="workshop-title"><div class="village-building-icon" aria-hidden="true">${building.icon}</div><div><h3>${building.name}</h3><small>建築 Lv${building.level}・產生 ${AlchemyPolicy.getCandidateCount(building.level)} 件候選裝備</small></div></div>
     <p>消耗兩件相同部位的綠色裝備，重新產生一件相同部位的綠色裝備。詞綴、數值與插槽不會繼承。</p>
     <p class="alchemy-gold-cost">煉金費用：<b>${AlchemyPolicy.ALCHEMY_RULES.goldCost} 金幣</b>・目前持有 ${Number(progress.gold) || 0} 金幣</p>
     <section class="alchemy-inputs">${slots}</section><p class="alchemy-message ${validation.ok || alchemyCandidates.length ? 'ok' : ''}">${helper}</p>
     <div class="alchemy-actions"><button type="button" data-start-alchemy ${validation.ok && !alchemyCandidates.length && !alchemyBusy ? '' : 'disabled'}>開始煉金</button><button type="button" data-confirm-alchemy ${selectedAlchemyCandidate && !alchemyBusy ? '' : 'disabled'}>確認選擇</button><button type="button" data-return-alchemy>返回村莊</button></div>
-    ${alchemyCandidates.length ? `<section class="alchemy-results"><h4>煉金結果候選</h4><div>${candidates}</div></section>` : `<section class="alchemy-available"><h4>${selectingSecond ? `可用的第二件材料（${equipmentSlots[selectedItems[0].slot]?.label || selectedItems[0].slot}）` : '可使用裝備'}</h4><div>${available || '<p>目前沒有符合條件的綠色裝備。</p>'}</div></section>`}`;
+    ${alchemyCandidates.length ? `<section class="alchemy-results"><h4>煉金結果候選</h4><div>${candidates}</div></section>` : `<section class="alchemy-available"><h4>${selectingSecond ? `可用的同部位材料（${equipmentSlots[selectedItems[0].slot]?.label || selectedItems[0].slot}）` : '可使用裝備'}</h4><div>${available || '<p>目前沒有符合條件的綠色裝備。</p>'}</div></section>`}${preview}`;
 }
 
 function selectAlchemyInput(itemId) {
   if (alchemyCandidates.length || alchemyBusy) return;
+  if (isMobileAlchemyLayout()) { openAlchemyItemDetail(itemId); return; }
   const progress = getProgress();
   const item = progress.inventory.find((entry) => AlchemyPolicy.getItemId(entry) === itemId);
   if (!AlchemyPolicy.isEligibleInput(item, progress)) { renderAlchemy(undefined, '此裝備已不存在、已穿戴或受保護，請重新選擇。'); return; }
@@ -2009,7 +2263,10 @@ function startAlchemy() {
   const progress = getProgress();
   const validation = AlchemyPolicy.validateInputs(progress, alchemyInputItemIds);
   if (!validation.ok) { renderAlchemy(undefined, validation.reason); return; }
-  if (!window.confirm(`煉金將消耗這兩件裝備，完成時扣除 ${AlchemyPolicy.ALCHEMY_RULES.goldCost} 金幣，是否繼續？`)) return;
+  const confirmation = isMobileAlchemyLayout()
+    ? `煉金將永久消耗以下兩件裝備：\n\n1. ${validation.items[0].name}\n2. ${validation.items[1].name}\n\n完成時扣除 ${AlchemyPolicy.ALCHEMY_RULES.goldCost} 金幣，是否繼續？`
+    : `煉金將消耗這兩件裝備，完成時扣除 ${AlchemyPolicy.ALCHEMY_RULES.goldCost} 金幣，是否繼續？`;
+  if (!window.confirm(confirmation)) return;
   alchemyBusy = true;
   const building = getVillageBuildingData('alchemy');
   const character = getActiveCharacter();
@@ -2022,19 +2279,58 @@ function startAlchemy() {
   renderAlchemy(building);
 }
 
-function confirmAlchemy() {
+async function confirmAlchemy() {
   if (alchemyBusy || !selectedAlchemyCandidate || !alchemyCandidates.length) return;
   if (!window.confirm('確定選擇這件裝備嗎？其餘煉金結果將會消失。')) return;
   alchemyBusy = true;
-  const progress = getProgress();
   const session = { inputIds: [...alchemyInputItemIds], candidates: alchemyCandidates, goldCost: AlchemyPolicy.ALCHEMY_RULES.goldCost };
-  const result = AlchemyPolicy.confirmAlchemy(progress, session, selectedAlchemyCandidate);
-  if (!result.ok) { alchemyBusy = false; resetAlchemyState(); renderAlchemy(undefined, result.reason); return; }
-  saveProgress(progress);
+  const result = await commitEconomyProgress('煉金', progress => AlchemyPolicy.confirmAlchemy(progress, session, selectedAlchemyCandidate));
+  if (!result.ok) { alchemyBusy = false; if (result.code !== 'busy') resetAlchemyState(); renderAlchemy(undefined, result.code === 'save-failed' ? '煉金未保存，背包與金幣保持原狀。' : result.reason); return; }
   const item = result.item;
   resetAlchemyState();
   renderAlchemy(undefined, `煉金完成：${item.name} 已放入背包，消耗 ${result.goldCost} 金幣。`);
   showToast(`煉金完成：${item.name}，消耗 ${result.goldCost} 金幣。`);
+}
+
+function isMobileWorkshopLayout() {
+  return window.matchMedia('(max-width: 700px) and (orientation: portrait)').matches;
+}
+
+function getWorkshopRecipeStatus(known, eligibility) {
+  if (!known) return { label: '未解鎖', className: 'locked' };
+  if (eligibility.ok) return { label: '可製作', className: 'ready' };
+  return { label: eligibility.code === 'workshop-level' ? eligibility.reason : '材料不足', className: 'insufficient' };
+}
+
+function renderWorkshopRecipeDetail(progress, building, materialName, quantity) {
+  if (!isMobileWorkshopLayout() || !workshopPreview) return '';
+  if (workshopPreview.kind === 'weapon') {
+    const weapon = ChapterThreeEpicWeaponPolicy.WEAPON_BY_ID.get(workshopPreview.id);
+    if (!weapon) return '';
+    const fragmentPolicy = ChapterThreeWeaponRecipeFragmentPolicy;
+    const core = Object.values(ChapterThreeEpicWeaponPolicy.WEAPON_CORES).find((entry) => entry.id === weapon.coreId);
+    const required = { [fragmentPolicy.FORGING_RECIPE.id]: 1, [weapon.coreId]: 1, ...ChapterThreeEpicWeaponPolicy.COMMON_MATERIALS };
+    const rows = Object.entries(required).map(([id, amount]) => {
+      const owned = quantity(id);
+      const name = id === fragmentPolicy.FORGING_RECIPE.id ? fragmentPolicy.FORGING_RECIPE.name : id === weapon.coreId ? core.name : materialName(id);
+      return `<li class="${owned >= amount ? 'workshop-requirement-ready' : 'workshop-insufficient'}"><span>${name}</span><b>${owned} / ${amount}</b></li>`;
+    }).join('');
+    const gold = Number(progress.gold) || 0;
+    const ready = Object.entries(required).every(([id, amount]) => quantity(id) >= amount) && gold >= ChapterThreeEpicWeaponPolicy.GOLD_COST;
+    return `<section class="workshop-detail-backdrop" role="dialog" aria-modal="true" aria-label="配方詳細資料"><article class="workshop-detail quality-epic"><header><img src="${itemImagePath(weapon)}" alt="" class="workshop-detail-image"><div><h4>${weapon.name}</h4><small>紫色・${equipmentSlots.weapon.label}・${weapon.series}</small></div></header><section class="workshop-detail-result"><b>製作成品</b><span>${weapon.name}・${weapon.attackMin}～${weapon.attackMax} 傷害</span></section><ul>${rows}<li class="${gold >= ChapterThreeEpicWeaponPolicy.GOLD_COST ? 'workshop-requirement-ready' : 'workshop-insufficient'}"><span>金幣</span><b>${gold.toLocaleString()} / ${ChapterThreeEpicWeaponPolicy.GOLD_COST.toLocaleString()}</b></li></ul><p class="workshop-detail-eligibility ${ready ? 'ready' : 'blocked'}">${ready ? '材料與資格皆符合，可以製作。' : '材料或金幣不足，暫時無法製作。'}</p><footer><button type="button" data-confirm-workshop-weapon="${weapon.id}" ${workshopCraftBusy || !ready ? 'disabled' : ''}>${workshopCraftBusy ? '製作處理中…' : '確定製作'}</button><button type="button" data-cancel-workshop-detail ${workshopCraftBusy ? 'disabled' : ''}>取消</button></footer></article></section>`;
+  }
+  const recipe = CraftingPolicy.RECIPES[workshopPreview.id];
+  if (!recipe) return '';
+  const rarity = CraftingPolicy.RARITIES[recipe.quality];
+  const recipeQuantity = CraftingPolicy.getRecipeQuantity(progress, recipe.recipeId);
+  const eligibility = CraftingPolicy.canCraft(progress, recipe.recipeId, building.level);
+  const rows = [`<li class="${recipeQuantity >= 1 ? 'workshop-requirement-ready' : 'workshop-insufficient'}"><span>${recipe.name}</span><b>${recipeQuantity} / 1</b></li>`, ...Object.entries(recipe.materials).map(([id, amount]) => {
+    const owned = quantity(id);
+    return `<li class="${owned >= amount ? 'workshop-requirement-ready' : 'workshop-insufficient'}"><span>${materialName(id)}</span><b>${owned} / ${amount}</b></li>`;
+  })].join('');
+  const gold = Number(progress.gold) || 0;
+  const primaryOptions = CraftingPolicy.PRIMARY_STAT_POOLS[recipe.equipmentSlot].map((stat) => CraftingPolicy.STAT_DEFINITIONS[stat].label).join('、');
+  return `<section class="workshop-detail-backdrop" role="dialog" aria-modal="true" aria-label="配方詳細資料"><article class="workshop-detail quality-${recipe.quality}"><header><img src="${RecipeImagePolicy.getImage(recipe.quality)}" alt="" class="workshop-detail-image"><div><h4>${recipe.name}</h4><small>${rarity.label}・${equipmentSlots[recipe.equipmentSlot].label}</small></div></header><section class="workshop-detail-result"><b>製作成品</b><span>${recipe.resultName}</span><small>可能屬性：${primaryOptions}</small></section><ul>${rows}<li class="${gold >= recipe.goldCost ? 'workshop-requirement-ready' : 'workshop-insufficient'}"><span>金幣</span><b>${gold.toLocaleString()} / ${recipe.goldCost.toLocaleString()}</b></li></ul><p class="workshop-detail-eligibility ${eligibility.ok ? 'ready' : 'blocked'}">${eligibility.ok ? '材料與資格皆符合，可以製作。' : eligibility.reason}</p><footer><button type="button" data-confirm-workshop-craft="${recipe.recipeId}" ${workshopCraftBusy || !eligibility.ok ? 'disabled' : ''}>${workshopCraftBusy ? '製作處理中…' : '確定製作'}</button><button type="button" data-cancel-workshop-detail ${workshopCraftBusy ? 'disabled' : ''}>取消</button></footer></article></section>`;
 }
 
 function renderWorkshop(building = getVillageBuildingData('workshop'), craftedItem = null) {
@@ -2044,7 +2340,7 @@ function renderWorkshop(building = getVillageBuildingData('workshop'), craftedIt
   const quantity = (id) => CraftingPolicy.getItemQuantity(inventory, id);
   const visibleRecipes = Object.values(CraftingPolicy.RECIPES).filter((recipe) => recipe.quality === workshopQuality
     && (workshopSlot === 'all' || recipe.equipmentSlot === workshopSlot));
-  const cards = visibleRecipes.map((recipe) => {
+  const desktopCards = visibleRecipes.map((recipe) => {
     const rarity = CraftingPolicy.RARITIES[recipe.quality];
     const recipeQuantity = CraftingPolicy.getRecipeQuantity(progress, recipe.recipeId);
     const known = recipeQuantity > 0;
@@ -2060,59 +2356,93 @@ function renderWorkshop(building = getVillageBuildingData('workshop'), craftedIt
       <ul><li class="${known ? '' : 'workshop-insufficient'}"><span>${recipe.name}</span><b>${recipeQuantity} / 1</b></li>${materials}</ul>
       <p class="workshop-gold ${goldEnough ? '' : 'workshop-insufficient'}"><span>所需金幣</span><b>${Number(progress.gold) || 0} / ${recipe.goldCost}</b></p>
       <p><b>固定詞綴：</b>${rarity.fixedAffixCount} 條</p><p><b>隨機詞綴：</b>${rarity.randomAffixCount} 條（種類隨機、數值固定）</p>
-      <button type="button" data-craft-recipe="${recipe.recipeId}" ${eligibility.ok ? '' : 'disabled'}>${eligibility.ok ? '製作裝備' : eligibility.reason}</button>
+      <button type="button" data-craft-recipe="${recipe.recipeId}" ${workshopCraftBusy || !eligibility.ok ? 'disabled' : ''}>${workshopCraftBusy ? '製作處理中…' : eligibility.ok ? '製作裝備' : eligibility.reason}</button>
     </article>`;
+  }).join('');
+  const mobileCards = visibleRecipes.filter((recipe) => CraftingPolicy.getRecipeQuantity(progress, recipe.recipeId) > 0).map((recipe) => {
+    const known = true;
+    const eligibility = CraftingPolicy.canCraft(progress, recipe.recipeId, building.level);
+    const status = getWorkshopRecipeStatus(known, eligibility);
+    return `<button type="button" class="workshop-recipe-tile quality-${recipe.quality} ${known ? '' : 'workshop-locked'}" data-view-workshop-recipe="${recipe.recipeId}"><img src="${RecipeImagePolicy.getImage(recipe.quality)}" alt=""><b title="${recipe.name}">${recipe.name}</b><small>${CraftingPolicy.RARITIES[recipe.quality].label}・${equipmentSlots[recipe.equipmentSlot].label}</small><span class="workshop-recipe-status ${status.className}">${status.label}</span></button>`;
   }).join('');
   const result = craftedItem ? `<section class="workshop-result"><h4>製作完成：${craftedItem.name}</h4>${craftedItem.affixes.map((entry) => `<p><b>${entry.source === 'fixed' ? '固定詞綴' : '隨機詞綴'}</b>　${EquipmentAffixPolicy.formatAffix(entry)}</p>`).join('')}</section>` : '';
   const fragmentPolicy = ChapterThreeWeaponRecipeFragmentPolicy;
   const fragmentCount = fragmentPolicy.getQuantity(inventory, fragmentPolicy.FRAGMENT.id);
   const forgingRecipeCount = fragmentPolicy.getQuantity(inventory, fragmentPolicy.FORGING_RECIPE.id);
   const fragmentAssembly = fragmentPolicy.canAssemble(progress);
-  const weaponFragmentPanel = `<section class="workshop-result"><h4>${fragmentPolicy.FRAGMENT.name}</h4><p>持有殘頁：${fragmentCount} / ${fragmentPolicy.FRAGMENTS_PER_RECIPE}</p><p>持有${fragmentPolicy.FORGING_RECIPE.name}：${forgingRecipeCount}</p><button type="button" data-assemble-weapon-recipe ${fragmentAssembly.ok ? '' : 'disabled'}>${fragmentAssembly.ok ? `合成${fragmentPolicy.FORGING_RECIPE.name}` : fragmentAssembly.reason}</button></section>`;
-  const weaponCards = workshopQuality === 'epic' && workshopSlot === 'all' ? Object.values(ChapterThreeEpicWeaponPolicy.WEAPONS).map((weapon) => {
+  const weaponFragmentPanel = `<section class="workshop-result"><h4>${fragmentPolicy.FRAGMENT.name}</h4><p>持有殘頁：${fragmentCount} / ${fragmentPolicy.FRAGMENTS_PER_RECIPE}</p><p>持有${fragmentPolicy.FORGING_RECIPE.name}：${forgingRecipeCount}</p><button type="button" data-assemble-weapon-recipe ${weaponRecipeAssemblyBusy || !fragmentAssembly.ok ? 'disabled' : ''}>${weaponRecipeAssemblyBusy ? '合成處理中…' : fragmentAssembly.ok ? `合成${fragmentPolicy.FORGING_RECIPE.name}` : fragmentAssembly.reason}</button></section>`;
+  const desktopWeaponCards = workshopQuality === 'epic' && workshopSlot === 'all' ? Object.values(ChapterThreeEpicWeaponPolicy.WEAPONS).map((weapon) => {
     const core = Object.values(ChapterThreeEpicWeaponPolicy.WEAPON_CORES).find((entry) => entry.id === weapon.coreId);
     const required = { [fragmentPolicy.FORGING_RECIPE.id]: 1, [weapon.coreId]: 1, ...ChapterThreeEpicWeaponPolicy.COMMON_MATERIALS };
     const ready = Object.entries(required).every(([id, amount]) => quantity(id) >= amount) && Number(progress.gold) >= ChapterThreeEpicWeaponPolicy.GOLD_COST;
-    return `<article class="workshop-recipe quality-epic"><div class="workshop-recipe-head"><div><h4>${weapon.name}</h4><small>${weapon.series}・${weapon.attackMin}～${weapon.attackMax} 傷害</small></div></div><p>需要：紫色武器鍛造配方 ×1、${core.name} ×1、共通材料、75,000 金幣</p><button type="button" data-craft-epic-weapon="${weapon.id}" ${ready ? '' : 'disabled'}>${ready ? '鍛造武器' : '材料或金幣不足'}</button></article>`;
+    return `<article class="workshop-recipe quality-epic"><div class="workshop-recipe-head"><div><h4>${weapon.name}</h4><small>${weapon.series}・${weapon.attackMin}～${weapon.attackMax} 傷害</small></div></div><p>需要：紫色武器鍛造配方 ×1、${core.name} ×1、共通材料、75,000 金幣</p><button type="button" data-craft-epic-weapon="${weapon.id}" ${workshopCraftBusy || !ready ? 'disabled' : ''}>${workshopCraftBusy ? '製作處理中…' : ready ? '鍛造武器' : '材料或金幣不足'}</button></article>`;
   }).join('') : '';
+  const mobileWeaponCards = workshopQuality === 'epic' && workshopSlot === 'all' && forgingRecipeCount > 0 ? Object.values(ChapterThreeEpicWeaponPolicy.WEAPONS).map((weapon) => {
+    const required = { [fragmentPolicy.FORGING_RECIPE.id]: 1, [weapon.coreId]: 1, ...ChapterThreeEpicWeaponPolicy.COMMON_MATERIALS };
+    const known = forgingRecipeCount > 0;
+    const ready = known && Object.entries(required).every(([id, amount]) => quantity(id) >= amount) && Number(progress.gold) >= ChapterThreeEpicWeaponPolicy.GOLD_COST;
+    const status = getWorkshopRecipeStatus(known, { ok: ready, code: 'missing-material' });
+    return `<button type="button" class="workshop-recipe-tile quality-epic ${known ? '' : 'workshop-locked'}" data-view-workshop-weapon="${weapon.id}"><img src="${itemImagePath(weapon)}" alt=""><b title="${weapon.name}">${weapon.name}</b><small>紫色・武器</small><span class="workshop-recipe-status ${status.className}">${status.label}</span></button>`;
+  }).join('') : '';
+  const recipeList = isMobileWorkshopLayout() ? `${mobileWeaponCards}${mobileCards}` : `${desktopWeaponCards}${desktopCards}`;
+  const emptyRecipeMessage = isMobileWorkshopLayout() ? '目前沒有符合條件的配方。' : '此分類目前沒有可製作配方。';
+  const detail = renderWorkshopRecipeDetail(progress, building, materialName, quantity);
   document.querySelector('#village-building-content').innerHTML = `<div class="workshop-title"><div class="village-building-icon" aria-hidden="true">${building.icon}</div><div><h3>${building.name}</h3><small>第一至三章裝備製作・背包 ${inventory.length} / ${CraftingPolicy.INVENTORY_CAPACITY}</small></div></div><p>製作前只顯示可能能力；實際能力與數值會在製作成功時生成並永久保存。</p>
     <div class="workshop-filters"><div><b>品質</b><button type="button" data-workshop-quality="uncommon" class="${workshopQuality === 'uncommon' ? 'selected' : ''}">綠色</button><button type="button" data-workshop-quality="rare" class="${workshopQuality === 'rare' ? 'selected' : ''}">藍色</button><button type="button" data-workshop-quality="epic" class="${workshopQuality === 'epic' ? 'selected' : ''}">紫色</button></div><div><b>部位</b><button type="button" data-workshop-slot="all" class="${workshopSlot === 'all' ? 'selected' : ''}">全部</button><button type="button" data-workshop-slot="wrist" class="${workshopSlot === 'wrist' ? 'selected' : ''}">護腕</button><button type="button" data-workshop-slot="cloak" class="${workshopSlot === 'cloak' ? 'selected' : ''}">斗篷</button><button type="button" data-workshop-slot="shoulders" class="${workshopSlot === 'shoulders' ? 'selected' : ''}">肩甲</button></div></div>
-    ${weaponFragmentPanel}${result}<section class="workshop-recipes">${weaponCards}${cards || (!weaponCards ? '<p class="village-placeholder">此分類目前沒有可製作配方。</p>' : '')}</section>`;
+    ${weaponFragmentPanel}${result}<section class="workshop-recipes">${recipeList || `<p class="village-placeholder">${emptyRecipeMessage}</p>`}</section>${detail}`;
 }
 
-function craftChapterThreeEpicWeapon(weaponId) {
-  const progress = getProgress();
-  const result = ChapterThreeEpicWeaponPolicy.craftWeapon(progress, weaponId);
-  if (!result.ok) { showToast('缺少紫色武器配方、武器之核、材料或金幣。'); renderWorkshop(); return; }
-  saveProgress(progress); renderWorkshop(undefined, result.item); showToast(`鍛造完成：${result.item.name}`);
+async function craftChapterThreeEpicWeapon(weaponId) {
+  if (workshopCraftBusy) return { ok: false, code: 'busy' };
+  workshopCraftBusy = true;
+  renderWorkshop();
+  const result = await commitEconomyProgress('史詩武器鍛造', progress => ChapterThreeEpicWeaponPolicy.craftWeapon(progress, weaponId));
+  workshopCraftBusy = false;
+  if (result.code === 'save-failed' || result.code === 'busy') { renderWorkshop(); return result; }
+  if (!result.ok) { showToast('缺少紫色武器配方、武器之核、材料或金幣。'); renderWorkshop(); return result; }
+  workshopPreview = null;
+  renderWorkshop(undefined, result.item); showToast(`鍛造完成：${result.item.name}`);
+  return result;
 }
 
-function assembleWeaponForgingRecipe() {
-  const progress = getProgress();
-  const result = ChapterThreeWeaponRecipeFragmentPolicy.assembleForgingRecipe(progress);
-  if (!result.ok) { renderWorkshop(); return; }
-  saveProgress(progress);
+async function assembleWeaponForgingRecipe() {
+  if (weaponRecipeAssemblyBusy) return { ok: false, code: 'busy' };
+  weaponRecipeAssemblyBusy = true;
+  renderWorkshop();
+  const result = await commitEconomyProgress('武器配方合成', progress => ChapterThreeWeaponRecipeFragmentPolicy.assembleForgingRecipe(progress));
+  weaponRecipeAssemblyBusy = false;
+  if (result.code === 'save-failed' || result.code === 'busy') { renderWorkshop(); return result; }
+  if (!result.ok) { renderWorkshop(); return result; }
   renderWorkshop();
   showToast(`合成成功：${ChapterThreeWeaponRecipeFragmentPolicy.FORGING_RECIPE.name} ×1`);
+  return result;
 }
 
-function craftWorkshopEquipment(recipeId) {
-  const progress = getProgress();
+async function craftWorkshopEquipment(recipeId) {
+  if (workshopCraftBusy) return { ok: false, code: 'busy' };
+  workshopCraftBusy = true;
   const workshop = getVillageBuildingData('workshop');
-  const result = CraftingPolicy.craftEquipment(progress, recipeId, { workshopLevel: workshop.level });
-  if (!result.ok) { showToast(result.reason); renderWorkshop(workshop); return; }
-  saveProgress(progress);
+  renderWorkshop(workshop);
+  const result = await commitEconomyProgress('裝備製作', progress => CraftingPolicy.craftEquipment(progress, recipeId, { workshopLevel: workshop.level }));
+  workshopCraftBusy = false;
+  if (result.code === 'save-failed' || result.code === 'busy') { renderWorkshop(workshop); return result; }
+  if (!result.ok) { showToast(result.reason); renderWorkshop(workshop); return result; }
+  workshopPreview = null;
   renderWorkshop(workshop, result.item);
   showToast(`製作完成：${result.item.name}，已放入背包。`);
+  return result;
 }
 
 function closeVillageBuilding() {
+  workshopPreview = null;
+  blacksmithPreviewItemId = null;
+  magicPreviewRecipeId = null;
   resetFurnaceState();
   resetAlchemyState();
   document.querySelector('#village-building-modal')?.classList.add('hidden');
 }
 
-function upgradeVillageBuilding(buildingId) {
+async function upgradeVillageBuilding(buildingId) {
   const building = getVillageBuildingData(buildingId);
   if (!building) return;
   const progress = getProgress();
@@ -2120,11 +2450,15 @@ function upgradeVillageBuilding(buildingId) {
   if (!validation.ok) { showToast(validation.reason); return; }
   const materialText = Object.entries(validation.requirement.materials).map(([materialId, amount]) => `${VillageUpgradePolicy.getMaterial(materialId).name} ×${amount}`).join('、');
   if (!window.confirm(`確定將${building.name}升級至 Lv2？\n\n需要：${materialText}、金幣 ×${validation.requirement.gold}`)) return;
-  const result = VillageUpgradePolicy.upgrade(progress, villageData, buildingId);
+  const nextVillage = VillagePolicy.normalizeVillageData(JSON.parse(JSON.stringify(villageData)));
+  const result = await commitEconomyProgress('村莊建築升級', current => {
+    const upgraded = VillageUpgradePolicy.upgrade(current, nextVillage, buildingId);
+    if (upgraded.ok) current.village = VillagePolicy.normalizeVillageData(nextVillage);
+    return upgraded;
+  });
+  if (result.code === 'save-failed' || result.code === 'busy') { renderVillage(); return; }
   if (!result.ok) { showToast(result.reason); return; }
-  progress.village = VillagePolicy.normalizeVillageData(villageData);
-  villageData = progress.village;
-  saveProgress(progress);
+  villageData = VillagePolicy.normalizeVillageData(result.progress.village);
   renderVillage();
   showToast(`${building.name}已升級至 Lv${result.level}！`);
 }
@@ -2221,6 +2555,7 @@ function formatOfflineDuration(milliseconds) {
 }
 
 function markPlayerActive() {
+  if (!isPermanentGameplayReady()) return;
   const character = getGameStorage().getItem('stardust-character');
   if (!character) return;
   if (fighting && battle.partyMembers?.length) persistPartyRuntimeState();
@@ -2345,7 +2680,7 @@ async function claimPermanentSingleOffline() {
 }
 
 function claimOfflineRewards() {
- const runtime=getPermanentPartyRuntime();if(runtime)return runtime.singleOfflineEnabled?claimPermanentSingleOffline():null;
+ const runtime=getPermanentPartyRuntime();if(isSupabaseEntryMode(runtime)&&!runtime?.readyForGameplay)return null;if(runtime)return runtime.singleOfflineEnabled?claimPermanentSingleOffline():null;
  const character=getActiveCharacter();if(!character)return null;const calculated=calculateLegacyOfflineRewards(character,getProgress(),Date.now());saveProgress(calculated.progress);return presentLegacyOfflineReport(calculated.report);
 }
 
@@ -3472,6 +3807,7 @@ function renderCharacterAbilities() {
   const equipment = getEquipmentStats(progress, character);
   const race = Object.values(factions).flat().find((item) => item.id === character.race);
   const job = classes.find((item) => item.id === character.job);
+  const avatar = battleCharacterActionArt(character);
   const usesRage = WarriorResourcePolicy.isWarrior(character.job);
   const usesEnergy = AssassinEnergyPolicy.isAssassin(character.job);
   const advancementPolicy = character.job === 'warrior' ? WarriorAdvancementPolicy : character.job === 'assassin' ? RogueAdvancementPolicy : character.job === 'hunter' ? HunterAdvancementPolicy : character.job === 'mage' ? MageAdvancementPolicy : character.job === 'priest' ? PriestAdvancementPolicy : null;
@@ -3479,7 +3815,7 @@ function renderCharacterAbilities() {
   document.querySelector('#inventory-title').textContent = '角色能力';
   document.querySelector('#inventory-content').innerHTML = `
     <section class="ability-summary">
-      <div class="ability-identity"><span class="creation-race-icon race-${character.race}" aria-hidden="true"></span><div><h3>${character.name}</h3><p>${race?.name || character.race}・${progress.advancedClass ? [...Object.values(WarriorAdvancementPolicy.ADVANCED_CLASSES), ...Object.values(RogueAdvancementPolicy.ADVANCED_CLASSES), ...Object.values(HunterAdvancementPolicy.ADVANCED_CLASSES), ...Object.values(MageAdvancementPolicy.ADVANCED_CLASSES), ...Object.values(PriestAdvancementPolicy.ADVANCED_CLASSES)].find((entry) => entry.id === progress.advancedClass)?.name : job?.name || character.job}・Lv. ${progress.level}</p><small>${race?.trait || ''}</small></div></div>
+      <div class="ability-identity">${avatar ? `<img class="ability-character-avatar" src="${avatar}" alt="${escapeBattleLogText(character.name)}的角色頭像">` : '<span class="ability-character-avatar ability-character-avatar-fallback" aria-hidden="true"></span>'}<div><h3>${character.name}</h3><p>${race?.name || character.race}・${progress.advancedClass ? [...Object.values(WarriorAdvancementPolicy.ADVANCED_CLASSES), ...Object.values(RogueAdvancementPolicy.ADVANCED_CLASSES), ...Object.values(HunterAdvancementPolicy.ADVANCED_CLASSES), ...Object.values(MageAdvancementPolicy.ADVANCED_CLASSES), ...Object.values(PriestAdvancementPolicy.ADVANCED_CLASSES)].find((entry) => entry.id === progress.advancedClass)?.name : job?.name || character.job}・Lv. ${progress.level}</p><small>${race?.trait || ''}</small></div></div>
       <div class="ability-grid">
         <article><small>最大生命</small><b>${stats.hp}</b><em>裝備 +${equipment.hp}</em></article>
         <article><small>${usesRage ? '最大怒氣' : usesEnergy ? '最大能量' : '最大魔力'}</small><b>${usesRage ? WarriorResourcePolicy.MAX_RAGE : usesEnergy ? AssassinEnergyPolicy.MAX_ENERGY : stats.mana}</b><em>${usesRage ? '攻擊與受到攻擊時取得' : usesEnergy ? `固定恢復 ${AssassinEnergyPolicy.ENERGY_REGEN_PER_SECOND}／秒` : `裝備 +${equipment.mana}`}</em></article>
@@ -3590,6 +3926,67 @@ function renderMapSelector() {
   modal.classList.remove('hidden');
 }
 
+function getMapRegionPoolStats(mapId) {
+  const pool = dropLookupMapPools[mapId] || { normal: [], rare: [], elite: [], boss: [] };
+  const monsterIds = [...new Set(['normal', 'rare', 'elite', 'boss'].flatMap((rank) => Array.isArray(pool[rank]) ? pool[rank] : []))];
+  return {
+    count: monsterIds.length,
+    rareChance: Number.isFinite(Number(pool.rareChance)) ? Number(pool.rareChance) : null,
+    bossId: Array.isArray(pool.boss) ? pool.boss[0] : null
+  };
+}
+
+function getMapRegionBossName(mapId) {
+  const bossId = getMapRegionPoolStats(mapId).bossId;
+  if (!bossId) return '無 Boss';
+  try {
+    return getMonsterDefinitionForMap(bossId, mapId)?.name || bossId;
+  } catch {
+    return bossId;
+  }
+}
+
+function renderMapRegionCard({
+  number,
+  region,
+  stateClass = '',
+  statusLabel,
+  statusTone = 'locked',
+  requirementLevel,
+  suppressionLabel = '—',
+  bossLabel,
+  unlockFacts = [],
+  note = '',
+  actionHtml = ''
+}) {
+  const pool = getMapRegionPoolStats(region.id);
+  const rareChance = pool.rareChance === null ? '未設定' : `${Math.round(pool.rareChance * 100)}%`;
+  const facts = [
+    ['怪物數量', pool.count ? `${pool.count} 種` : '尚未設定'],
+    ['稀有機率', rareChance],
+    ['需求等級', Number.isFinite(Number(requirementLevel)) ? `Lv.${Number(requirementLevel)}` : '未設定'],
+    ['區域壓制', suppressionLabel],
+    ['Boss', bossLabel || getMapRegionBossName(region.id)]
+  ];
+  const unlockPanel = unlockFacts.length ? `
+    <section class="map-region-unlock" aria-label="解鎖條件">
+      <strong>解鎖條件</strong>
+      <dl>${unlockFacts.map(([label, value]) => `<div><dt>${label}</dt><dd>${value}</dd></div>`).join('')}</dl>
+    </section>` : '';
+  return `
+    <article class="map-region-card ${stateClass}" data-map-region-card="${region.id}">
+      <header class="map-region-card-header">
+        <span class="map-region-number">${String(number).padStart(2, '0')}</span>
+        <b class="map-region-name">${region.dungeon ? '◆ ' : ''}${region.name}</b>
+        <small class="map-region-status ${statusTone}">${statusLabel}</small>
+      </header>
+      <dl class="map-region-facts">${facts.map(([label, value]) => `<div><dt>${label}</dt><dd>${value}</dd></div>`).join('')}</dl>
+      ${note ? `<p class="map-region-note">${note}</p>` : ''}
+      ${unlockPanel}
+      <footer class="map-region-action">${actionHtml}</footer>
+    </article>`;
+}
+
 function renderBeginnerPlainsRegions() {
   const progress = getProgress();
   const activeMap = getActiveMap(progress);
@@ -3609,18 +4006,22 @@ function renderBeginnerPlainsRegions() {
       const condition = unlockStatus.completion;
       const isGoblinCamp = region.id === 'goblin-camp';
       const goblinMaps = getInventoryItemQuantity(progress, GOBLIN_CAMP_TICKET_ID);
-      const regionDetail = isGoblinCamp
-        ? `號角將決定是否繼續深入・哥布林營地地圖 ${goblinMaps} 張`
-        : region.id === 'plains-depths' ? '怪物 7 種・已完成圖片 7 種' : available ? '怪物 5 種・稀有怪物機率 10%' : '怪物與掉落物：尚未設定';
-      const lockedDetail = condition ? `<div class="map-unlock-progress"><b>${region.name}－尚未解鎖</b><small>角色等級：Lv${condition.level} / Lv${condition.requirement.level}</small><small>區域壓制：${Math.min(condition.normalKills, condition.requirement.normalKills)} / ${condition.requirement.normalKills}</small><small>Boss（${condition.requirement.bossName}）：${condition.bossCleared ? '已擊敗' : '尚未擊敗'}</small></div>` : '';
-      return `
-      <article class="map-region-card ${available ? 'available' : 'pending'} ${unlocked ? '' : 'locked'} ${activeMap.id === region.id ? 'selected' : ''}">
-        <span>${String(index + 1).padStart(2, '0')}</span>
-        <div><b>${region.name}</b><small>${regionDetail}</small>${unlocked ? '' : lockedDetail}</div>
-        ${available
-          ? !unlocked ? '<em>完成前一區域三項條件後解鎖</em>' : activeMap.id === region.id && !progress.requiresMapSelectionAfterDefeat ? '<em class="current-region">目前區域</em>' : `<button type="button" data-select-map="${region.id}" ${isGoblinCamp && goblinMaps < 1 ? 'disabled' : ''}>${isGoblinCamp ? goblinMaps > 0 ? '使用地圖進入副本' : '需要哥布林營地地圖' : progress.requiresMapSelectionAfterDefeat ? '重新進入區域' : '進入區域'}</button>`
-          : '<em>準備中</em>'}
-      </article>`;
+      const current = activeMap.id === region.id && !progress.requiresMapSelectionAfterDefeat;
+      const action = available
+        ? !unlocked ? '<em>完成前一區域三項條件後解鎖</em>' : current ? '<em class="current-region">目前區域</em>' : `<button type="button" data-select-map="${region.id}" ${isGoblinCamp && goblinMaps < 1 ? 'disabled' : ''}>${isGoblinCamp ? goblinMaps > 0 ? '使用地圖進入副本' : '需要哥布林營地地圖' : progress.requiresMapSelectionAfterDefeat ? '重新進入區域' : '進入區域'}</button>`
+        : '<em>準備中</em>';
+      return renderMapRegionCard({
+        number: index + 1,
+        region: regionMap || region,
+        stateClass: `${available ? 'available' : 'pending'} ${unlocked ? '' : 'locked'} ${activeMap.id === region.id ? 'selected' : ''}`,
+        statusLabel: !available ? '準備中' : current ? '目前地圖' : unlocked ? '已解鎖' : '未解鎖',
+        statusTone: !available ? 'pending' : current ? 'current' : unlocked ? 'unlocked' : 'locked',
+        requirementLevel: regionMap?.min,
+        suppressionLabel: condition ? `${Math.min(condition.normalKills, condition.requirement.normalKills)} / ${condition.requirement.normalKills}` : '—',
+        bossLabel: condition ? `${condition.requirement.bossName}・${condition.bossCleared ? '已擊敗' : '尚未擊敗'}` : '—',
+        note: isGoblinCamp ? `哥布林營地地圖 ${goblinMaps} 張` : '',
+        actionHtml: action
+      });
     }).join('')}
     </section>`;
   modal.dataset.view = 'map-regions';
@@ -3641,14 +4042,29 @@ function renderRedrockWastesRegions() {
     <section class="map-region-grid">${ChapterThreeMapPolicy.MAPS.map((region, index) => {
       const status = ChapterThreeProgressionPolicy.getMapState(progress, region.id, region.implemented);
       const stateClass = !status.implemented ? 'pending locked' : status.unlocked ? 'available' : 'locked';
+      const current = activeMap.id === region.id && !progress.requiresMapSelectionAfterDefeat;
       const action = !status.implemented
         ? `<em>${status.unlocked ? '已解鎖・尚未開放' : '規劃中／尚未開放'}</em>`
         : !status.unlocked
           ? `<em>${index ? `擊敗${ChapterThreeMapPolicy.getEnemy(ChapterThreeMapPolicy.MAPS[index - 1].bossId)?.name || '上一區首領'}後解鎖` : '完成第二章後解鎖'}</em>`
-          : activeMap.id === region.id && !progress.requiresMapSelectionAfterDefeat
+          : current
             ? `<em class="current-region">目前區域${status.cleared ? '・已通關' : ''}</em>`
             : `<button type="button" data-select-map="${region.id}">${status.cleared ? '再次進入' : '進入區域'}</button>`;
-      return `<article class="map-region-card ${stateClass}"><span>${String(index + 1).padStart(2, '0')}</span><div><b>${region.name}</b><small>${`Lv. ${region.min}・${ChapterThreeMapPolicy.getEnemy(region.eliteId)?.name}・${ChapterThreeMapPolicy.getEnemy(region.bossId)?.name}`}</small></div>${action}</article>`;
+      const facilityCounts = ChapterThreeFacilityPolicy.counts(progress, region.id);
+      const facilityProgress = Math.min(...ChapterThreeFacilityPolicy.TYPES.map((id) => Number(facilityCounts[id]) || 0));
+      const previousBossName = index ? ChapterThreeMapPolicy.getEnemy(ChapterThreeMapPolicy.MAPS[index - 1].bossId)?.name || '上一區首領' : '';
+      return renderMapRegionCard({
+        number: index + 1,
+        region,
+        stateClass,
+        statusLabel: !status.implemented ? '尚未開放' : current ? '目前地圖' : status.cleared ? '已通關' : status.unlocked ? '已解鎖' : '未解鎖',
+        statusTone: !status.implemented ? 'pending' : current ? 'current' : status.unlocked ? 'unlocked' : 'locked',
+        requirementLevel: region.min,
+        suppressionLabel: `${Math.min(facilityProgress, region.facilityRequirement)} / ${region.facilityRequirement}（各建築）`,
+        bossLabel: `${ChapterThreeMapPolicy.getEnemy(region.bossId)?.name || 'Boss'}・${status.bossFirstKilled ? '已擊敗' : '尚未擊敗'}`,
+        unlockFacts: !status.unlocked ? [['解鎖條件', index ? `擊敗 ${previousBossName}` : '完成第二章']] : [],
+        actionHtml: action
+      });
     }).join('')}</section>`;
   modal.dataset.view = 'redrock-wastes-regions';
   modal.classList.remove('hidden');
@@ -3659,7 +4075,9 @@ function selectAdventureMap(mapId) {
   const map = mapProgression.find((item) => item.id === mapId && item.implemented);
   if (!map) return;
   const unrestrictedPlaytestTravel = isMapTravelPlaytestMode();
-  if (mapTravelInProgress || getActiveMap(progress).id === map.id) {
+  const selectingCurrentMapAfterDefeat = getActiveMap(progress).id === map.id
+    && progress.requiresMapSelectionAfterDefeat;
+  if (mapTravelInProgress || (getActiveMap(progress).id === map.id && !selectingCurrentMapAfterDefeat)) {
     updateMapTravelButton(progress);
     return;
   }
@@ -3816,23 +4234,30 @@ function renderBlackForestRegions() {
       const region = blackForestRegions.find((entry) => entry.id === mapId);
       const status = ChapterTwoProgressionPolicy.getMapState(progress, region.id, region.implemented);
       const dungeon = region.dungeon ? ChapterTwoMapPolicy.getDungeon(region.id) : null;
-      const detail = region.id === 'blackstone-stronghold'
-        ? `副本骨架・${dungeon.primaryFaction === 'blackstone-bandits' ? '黑石山賊' : dungeon.primaryFaction}與哥布林合作勢力`
-        : region.isFinalMap ? '第二章最終地圖' : '怪物、Boss、掉落、材料、事件與環境效果待後續設定';
       const stateClass = !status.implemented ? 'pending locked' : status.unlocked ? 'available' : 'locked';
+      const current = activeMap.id === region.id && !progress.requiresMapSelectionAfterDefeat;
       const action = !status.implemented
         ? '<em>規劃中／尚未開放</em>'
         : !status.unlocked
           ? '<em>尚未解鎖</em>'
-          : activeMap.id === region.id && !progress.requiresMapSelectionAfterDefeat
+          : current
             ? `<em class="current-region">目前區域${status.cleared ? '・已通關' : ''}</em>`
             : `<button type="button" data-select-map="${region.id}">${progress.requiresMapSelectionAfterDefeat ? '重新進入區域' : status.cleared ? '再次進入' : '進入區域'}</button>`;
-      return `
-      <article class="map-region-card ${stateClass} ${region.dungeon ? 'dungeon-card' : ''}">
-        <span>${String(index + 1).padStart(2, '0')}</span>
-        <div><b>${region.dungeon ? '◆ ' : ''}${region.name}</b><small>${detail}</small></div>
-        ${action}
-      </article>`;
+      const previousRegion = index ? blackForestRegions[index - 1] : null;
+      const previousBoss = previousRegion ? getMapRegionBossName(previousRegion.id) : '';
+      return renderMapRegionCard({
+        number: index + 1,
+        region,
+        stateClass: `${stateClass} ${region.dungeon ? 'dungeon-card' : ''}`,
+        statusLabel: !status.implemented ? '尚未開放' : current ? '目前地圖' : status.cleared ? '已通關' : status.unlocked ? '已解鎖' : '未解鎖',
+        statusTone: !status.implemented ? 'pending' : current ? 'current' : status.unlocked ? 'unlocked' : 'locked',
+        requirementLevel: region.min,
+        suppressionLabel: status.normalKills ? `${status.normalKills} 次擊殺` : '尚未開始',
+        bossLabel: `${getMapRegionBossName(region.id)}・${status.bossFirstKilled ? '已擊敗' : '尚未擊敗'}`,
+        unlockFacts: !status.unlocked ? [['解鎖條件', previousRegion ? `擊敗 ${previousBoss}` : '完成第一章']] : [],
+        note: region.dungeon && dungeon ? `${dungeon.objectiveCount || 5} 座據點攻城` : region.isFinalMap ? '第二章最終地圖' : '',
+        actionHtml: action
+      });
     }).join('')}
     </section>`;
   modal.dataset.view = 'black-forest-regions';
@@ -5355,28 +5780,44 @@ function updateBattleUI() {
   refreshSkills(character, progress.level);
 }
 
+let autoPotionPurchasePromise = null;
+
 function autoBuyPotions() {
-  const progress = getProgress();
+  if (autoPotionPurchasePromise) return autoPotionPurchasePromise;
+  const runtime = getPermanentPartyRuntime();
+  if (runtime && !runtime.active) return Promise.resolve({ ok: false, code: 'stopped' });
   const purchaseAmount = AUTO_HEALING_POTION_PURCHASE_AMOUNT;
   const purchaseCost = AUTO_HEALING_POTION_PURCHASE_COST;
-  if (progress.gold < purchaseCost) return false;
-  progress.gold -= purchaseCost;
-  progress.potions += purchaseAmount;
-  addPotionItem(progress, purchaseAmount);
-  saveProgress(progress);
-  logBattle(`🛒 自動購買 ${purchaseAmount} 瓶補血罐，花費 ${purchaseCost} 金幣。`);
-  return true;
+  const pending = commitEconomyProgress('自動購買治癒藥水', progress => {
+    if (progress.gold < purchaseCost) return { ok: false, code: 'insufficient-gold' };
+    progress.gold -= purchaseCost;
+    progress.potions += purchaseAmount;
+    addPotionItem(progress, purchaseAmount);
+    return { ok: true, purchaseAmount, purchaseCost };
+  }).then(result => {
+    if (result.ok && (!runtime || runtime.active)) {
+      logBattle(`🛒 自動購買 ${purchaseAmount} 瓶補血罐，花費 ${purchaseCost} 金幣。`);
+      updateBattleUI();
+    }
+    return result;
+  });
+  const wrapped = pending.finally(() => {
+    if (autoPotionPurchasePromise === wrapped) autoPotionPurchasePromise = null;
+  });
+  autoPotionPurchasePromise = wrapped;
+  return wrapped;
 }
 
 function usePotion(manual = false) {
   let progress = getProgress();
   const maxHp = getMaxHp(progress.level, progress);
   if (progress.potions <= 0) {
-    if (!autoBuyPotions()) {
-      if (manual) showToast('補血罐與金幣都不足。');
-      return false;
-    }
-    progress = getProgress();
+    const purchase = autoBuyPotions();
+    if (manual) purchase.then(result => {
+      if (result.code === 'insufficient-gold') showToast('補血罐與金幣都不足。');
+      else if (result.ok) showToast('治癒藥水已補充，請再次使用。');
+    });
+    return false;
   }
   if (battle.playerHp >= maxHp) {
     if (manual) showToast('生命值已滿。');
@@ -5586,6 +6027,21 @@ function rewardVictory(index) {
   if (specialEquipmentDrop) addRoundLoot(`equipment:${specialEquipmentDrop.name}`, specialEquipmentDrop.name, 1, '🟣');
   if (offhandDrop) addRoundLoot(`equipment:${offhandDrop.name}`, offhandDrop.name, 1, '🛡');
   if (goblinCampMapDropped) addRoundLoot('goblin-camp-map', '哥布林營地地圖', 1, '🗺️');
+  recordMobileDropHistory(enemy, rewardKey, [
+    { name: '金幣', quantity: earnedGold, qualityClass: 'quality-gold', stackable: true },
+    ...(loot ? [{ name: loot.name, quantity: loot.quantity || 1, qualityClass: itemQualityClass(loot), stackable: loot.kind !== 'equipment' }] : []),
+    ...materialDrops.map((material) => ({ name: material.name, quantity: material.quantity || 1, qualityClass: itemQualityClass(material), stackable: true })),
+    ...(purificationDrop ? [{ name: purificationDrop.name, quantity: purificationDrop.quantity || 1, qualityClass: itemQualityClass(purificationDrop), stackable: true }] : []),
+    ...skillMaterialDrops.map((material) => ({ name: material.name, quantity: material.quantity || 1, qualityClass: itemQualityClass(material), stackable: true })),
+    ...recipeDrops.map((recipe) => ({ name: recipe.name, quantity: recipe.quantity || 1, qualityClass: itemQualityClass(recipe), stackable: true })),
+    ...(runeDrop ? [{ name: runeDrop.name, quantity: 1, qualityClass: itemQualityClass(runeDrop), stackable: true }] : []),
+    ...(equipmentDrop ? [{ name: equipmentDrop.name, quantity: 1, qualityClass: itemQualityClass(equipmentDrop), stackable: false }] : []),
+    ...(blueEquipmentDrop ? [{ name: blueEquipmentDrop.name, quantity: 1, qualityClass: itemQualityClass(blueEquipmentDrop), stackable: false }] : []),
+    ...(specialEquipmentDrop ? [{ name: specialEquipmentDrop.name, quantity: 1, qualityClass: itemQualityClass(specialEquipmentDrop), stackable: false }] : []),
+    ...(chapterThreeSpecialEquipmentDrop ? [{ name: chapterThreeSpecialEquipmentDrop.name, quantity: 1, qualityClass: itemQualityClass(chapterThreeSpecialEquipmentDrop), stackable: false }] : []),
+    ...(offhandDrop ? [{ name: offhandDrop.name, quantity: 1, qualityClass: itemQualityClass(offhandDrop), stackable: false }] : []),
+    ...(goblinCampMapDropped ? [{ name: '哥布林營地地圖', quantity: 1, qualityClass: 'quality-rare', stackable: true }] : [])
+  ]);
   if (experienceRuntime) {
     const result = experienceRuntime.saveExperienceReward(progress, experienceEvent);
     for (const award of result.awards) {
@@ -8775,6 +9231,7 @@ function enemyAttackTick() {
 }
 
 function openBattle() {
+  if (!isPermanentGameplayReady()) { showToast('角色資料尚未準備完成，暫時無法開始戰鬥。'); return; }
   const character = getActiveCharacter();
   if (!character) { openCreation(); return; }
   const battlePlayerArt = document.querySelector('#battle-player-art');
@@ -8903,12 +9360,27 @@ const activePlaytestName = isChapterTwo21RotatingShowcase()
   : ChapterTwoBalancePlaytestPolicy?.isChapterThreeActive()
   ? `第三章 ${ChapterTwoBalancePlaytestPolicy.getRequestedMapId() === 'redrock-temple' ? '3-6' : ChapterTwoBalancePlaytestPolicy.getRequestedMapId() === 'ancient-altar' ? '3-5' : ChapterTwoBalancePlaytestPolicy.getRequestedMapId() === 'skullcrusher-war-camp' ? '3-4' : ChapterTwoBalancePlaytestPolicy.getRequestedMapId() === 'bloodwar-wastes' ? '3-3' : ChapterTwoBalancePlaytestPolicy.getRequestedMapId() === 'brokenrock-canyon' ? '3-2' : '3-1'} 開發測試`
   : '';
+function initializePermanentGameEntry(){
+const startupPermanentRuntime = getPermanentPartyRuntime();
 const savedName = getGameStorage().getItem('stardust-player-name');
-if (activePlaytestName || savedName) {
+if (startupPermanentRuntime && isSupabaseEntryMode(startupPermanentRuntime)) {
+  if (startupPermanentRuntime.readyForGameplay) {
+    const activeCharacter = getActiveCharacter();
+    enterMenu(savedName || activeCharacter?.name || '冒險者');
+    if(!window.permanentFarmingBooting){const startupOffline=claimOfflineRewards();startupOffline?.catch?.(error=>showToast('離線結算未完成：'+error.message));}
+  } else if (!startupPermanentRuntime.hasCharacters) {
+    enterMenu('');
+    const firstEmptySlot = startupPermanentRuntime.getSlots().findIndex((slot) => !slot);
+    openCreation(firstEmptySlot < 0 ? 0 : firstEmptySlot);
+  } else showToast('角色資料尚未完成，遊戲已停止啟動。');
+} else if (!window.accountAuthPreviewEnabled && (activePlaytestName || savedName)) {
   enterMenu(activePlaytestName || savedName);
   if(!window.permanentFarmingBooting){const startupOffline=claimOfflineRewards();startupOffline?.catch?.(error=>showToast('離線結算未完成：'+error.message));}
   if (ChapterTwoBalancePlaytestPolicy?.isChapterThreeActive() || ChapterTwoBalancePlaytestPolicy?.isChapterOne11Active() || ChapterTwoBalancePlaytestPolicy?.isChapterOne12Active() || ChapterTwoBalancePlaytestPolicy?.isChapterOne13Active() || ChapterTwoBalancePlaytestPolicy?.isChapterOne14Active() || ChapterTwoBalancePlaytestPolicy?.isChapterOne15Active() || isChapterTwo21RotatingShowcase() || isChapterTwo22RotatingShowcase() || isChapterTwo23RotatingShowcase() || isChapterTwo24RotatingShowcase() || isChapterTwo25RotatingShowcase() || isChapterTwo26RotatingShowcase()) setTimeout(openBattle, 0);
 }
+}
+window.initializePermanentGameEntry=initializePermanentGameEntry;
+if(!window.permanentEntryMaintenance)initializePermanentGameEntry();
 
 let permanentResumeBattle=false;
 async function suspendPermanentBattle() {
@@ -8952,7 +9424,7 @@ document.querySelector('#create-character').addEventListener('click', (event) =>
   event.stopImmediatePropagation();
   showToast(getRaceJobRestrictionMessage(selection.race, selection.job));
 }, true);
-document.querySelector('#create-character').addEventListener('click', async () => { if (getPermanentPartyRuntime() && creationSlotIndex > 3) { showToast('永久角色最多支援四個角色欄位。'); return; } const name = characterName.value.trim(); if (!name) { showToast('請先為角色取名。'); characterName.focus(); return; } const lockedFaction = getLockedFactionForCreation(); if (lockedFaction && selection.faction !== lockedFaction) { selection.faction = lockedFaction; selection.race = factions[lockedFaction][0].id; renderCreation(); showToast('帳號角色必須選擇相同陣營。'); return; } const race = factions[selection.faction].find((item) => item.id === selection.race); const job = classes.find((item) => item.id === selection.job)?.name || selection.job; const character = { ...selection, id: `character-${crypto.randomUUID()}`, name }; const progress = { level: 1, xp: 0, gold: 0, potions: 5, manaPotions: 0, selectedMapId: 'beginner-plains', inventory: [], equipment: selection.job === 'hunter' ? createStarterEquipment('hunter') : emptyEquipment(), lastActiveAt: Date.now(), ...(selection.job === 'assassin' ? { energy: 100, maxEnergy: 100, energyUpdatedAt: Date.now() } : {}) }; const slots = getCharacterSlots(); if (getPermanentPartyRuntime()) { const starter = createStarterEquipment(selection.job); for (const slot of ['weapon', 'armor']) if (!progress.equipment[slot]) progress.equipment[slot] = starter[slot]; try{await getPermanentPartyRuntime().createCharacter(character, progress, creationSlotIndex);}catch(error){showToast('角色未建立：'+error.message);return;} } else { slots[creationSlotIndex] = { character, progress }; progress.party = PartyPolicy.normalizeParty(null, { slots, mainSlotIndex: creationSlotIndex, mainCharacter: character, mainProgress: progress }); getGameStorage().setItem('stardust-character-slots', JSON.stringify(slots)); } if(getPermanentPartyRuntime()?.coordinator)await getPermanentPartyRuntime().switchMain(character.id);else setActiveCharacterSlotIndex(creationSlotIndex); if (!getPermanentPartyRuntime()) { getGameStorage().setItem('stardust-character', JSON.stringify(character)); getGameStorage().setItem('stardust-progress', JSON.stringify(progress)); } characterScreen.classList.add('hidden'); menuScreen.classList.remove('hidden'); stopCharacterIdleAnimation(); document.querySelector('#character-title').textContent = '建立你的角色'; showToast(`${race.name}${job}「${name}」已儲存至角色欄位 ${creationSlotIndex + 1}！`); });
+document.querySelector('#create-character').addEventListener('click', async () => { const runtime = getPermanentPartyRuntime(); if (isSupabaseEntryMode(runtime) && !runtime) { showToast('帳號資料尚未準備完成，角色未建立。'); return; } if (runtime && creationSlotIndex > 3) { showToast('永久角色最多支援四個角色欄位。'); return; } const name = characterName.value.trim(); if (!name) { showToast('請先為角色取名。'); characterName.focus(); return; } const lockedFaction = getLockedFactionForCreation(); if (lockedFaction && selection.faction !== lockedFaction) { selection.faction = lockedFaction; selection.race = factions[lockedFaction][0].id; renderCreation(); showToast('帳號角色必須選擇相同陣營。'); return; } const race = factions[selection.faction].find((item) => item.id === selection.race); const job = classes.find((item) => item.id === selection.job)?.name || selection.job; const character = { ...selection, id: `character-${crypto.randomUUID()}`, name }; const progress = { level: 1, xp: 0, gold: 0, potions: 5, manaPotions: 0, selectedMapId: 'beginner-plains', inventory: [], equipment: selection.job === 'hunter' ? createStarterEquipment('hunter') : emptyEquipment(), lastActiveAt: Date.now(), ...(selection.job === 'assassin' ? { energy: 100, maxEnergy: 100, energyUpdatedAt: Date.now() } : {}) }; const slots = getCharacterSlots(); if (runtime) { const starter = createStarterEquipment(selection.job); for (const slot of ['weapon', 'armor']) if (!progress.equipment[slot]) progress.equipment[slot] = starter[slot]; try{await runtime.createCharacter(character, progress, creationSlotIndex);if(runtime.mainId!==character.id)await runtime.switchMain(character.id);}catch(error){showToast('角色未建立：'+error.message);return;} } else { slots[creationSlotIndex] = { character, progress }; progress.party = PartyPolicy.normalizeParty(null, { slots, mainSlotIndex: creationSlotIndex, mainCharacter: character, mainProgress: progress }); getGameStorage().setItem('stardust-character-slots', JSON.stringify(slots)); setActiveCharacterSlotIndex(creationSlotIndex); getGameStorage().setItem('stardust-character', JSON.stringify(character)); getGameStorage().setItem('stardust-progress', JSON.stringify(progress)); } if (runtime) { if (!runtime.readyForGameplay) { showToast('角色資料尚未準備完成，遊戲已停止啟動。'); return; } if (displayName) displayName.textContent = character.name; } characterScreen.classList.add('hidden'); menuScreen.classList.remove('hidden'); stopCharacterIdleAnimation(); document.querySelector('#character-title').textContent = '建立你的角色'; showToast(`${race.name}${job}「${name}」已儲存至角色欄位 ${creationSlotIndex + 1}！`); });
 document.querySelector('#character-roster-button').addEventListener('click', renderCharacterRoster);
 document.querySelector('#character-roster-close').addEventListener('click', () => document.querySelector('#character-roster-modal').classList.add('hidden'));
 document.querySelector('#character-roster-modal').addEventListener('click', (event) => {
@@ -9027,7 +9499,7 @@ document.querySelector('#skill-detail-close').addEventListener('click', closeSki
 document.querySelector('#skill-detail-modal').addEventListener('click', (event) => {
   if (event.target === event.currentTarget) closeSkillDetailModal();
 });
-document.querySelector('#skill-detail-modal').addEventListener('click', (event) => {
+document.querySelector('#skill-detail-modal').addEventListener('click', async (event) => {
   const button = event.target.closest('#skill-detail-upgrade');
   if (!button || button.disabled) return;
   button.disabled = true;
@@ -9036,7 +9508,6 @@ document.querySelector('#skill-detail-modal').addEventListener('click', (event) 
   const skill = getKnownSkills(character?.job, progress.level, progress).find((entry) => getSkillKey(character.job, entry) === selectedSkillKey);
   if (!skill || progress.level < skill.level) return;
   if (WarriorAdvancementPolicy.getSkill(skill.id) || RogueAdvancementPolicy.getSkill(skill.id) || HunterAdvancementPolicy.getSkill(skill.id) || MageAdvancementPolicy.getSkill(skill.id) || PriestAdvancementPolicy.getSkill(skill.id)) { showToast('進階技能升級需求尚未設定。'); renderSkillDetailModal(); return; }
-  progress.unlockedChapter = getUnlockedChapter(progress);
   const currentLevel = getSkillUpgradeLevel(progress, character.job, skill);
   const specialization = currentLevel === 5 ? ClassSkillPolicy.canSpecialize(progress.skillLevels, character.job, skill.id) : { ok: true };
   if (!specialization.ok) {
@@ -9044,16 +9515,17 @@ document.querySelector('#skill-detail-modal').addEventListener('click', (event) 
     renderSkillDetailModal();
     return;
   }
-  const result = SkillUpgradePolicy.attemptUpgrade(progress, currentLevel);
+  const result = await commitEconomyProgress('技能升級', current => {
+    current.unlockedChapter = getUnlockedChapter(current);
+    const upgraded = SkillUpgradePolicy.attemptUpgrade(current, currentLevel);
+    if (upgraded.ok && upgraded.succeeded) current.skillLevels = { ...(current.skillLevels || {}), [getSkillKey(character.job, skill)]: upgraded.level };
+    return upgraded;
+  });
   if (!result.ok) {
     renderSkillDetailModal();
     return;
   }
-  if (result.succeeded) {
-    progress.skillLevels = { ...(progress.skillLevels || {}), [getSkillKey(character.job, skill)]: result.level };
-  }
-  saveProgress(progress);
-  renderSkills(character, progress.level);
+  renderSkills(character, result.progress.level);
   renderSkillDetailModal();
   showToast(result.succeeded ? `${skill.name} 升級至 Lv${result.level}！` : `${skill.name} 升級失敗，材料與金幣已消耗。`);
   logBattle(result.succeeded ? `✦ 技能【${skill.name}】升級至 Lv${result.level}` : `◇ 技能【${skill.name}】升級失敗`, 'progress');
@@ -9104,6 +9576,15 @@ document.querySelectorAll('[data-menu-action]').forEach((button) => button.addEv
 }));
 document.querySelector('#village-return').addEventListener('click', closeVillage);
 document.querySelector('#village-building-grid').addEventListener('click', (event) => {
+  const materialToggle = event.target.closest('[data-village-upgrade-toggle]');
+  if (materialToggle) {
+    const panel = document.querySelector(`#${materialToggle.getAttribute('aria-controls')}`);
+    if (!panel) return;
+    const expanded = panel.classList.toggle('is-expanded');
+    materialToggle.setAttribute('aria-expanded', String(expanded));
+    materialToggle.querySelector('b').textContent = expanded ? '⌃' : '⌄';
+    return;
+  }
   const openButton = event.target.closest('[data-open-village-building]');
   if (openButton) { openVillageBuilding(openButton.dataset.openVillageBuilding); return; }
   const upgradeButton = event.target.closest('[data-upgrade-village-building]');
@@ -9112,29 +9593,60 @@ document.querySelector('#village-building-grid').addEventListener('click', (even
 document.querySelector('#village-building-close').addEventListener('click', closeVillageBuilding);
 document.querySelector('#village-building-modal').addEventListener('click', (event) => {
   if (event.target === event.currentTarget) closeVillageBuilding();
+  if (event.target.classList.contains('workshop-detail-backdrop')) { workshopPreview = null; renderWorkshop(); return; }
+  if (event.target.classList.contains('blacksmith-detail-backdrop')) { blacksmithPreviewItemId = null; renderBlacksmith(); return; }
+  if (event.target.classList.contains('magic-detail-backdrop')) { magicPreviewRecipeId = null; renderMagicTower(); return; }
   const qualityButton = event.target.closest('[data-workshop-quality]');
-  if (qualityButton) { workshopQuality = qualityButton.dataset.workshopQuality; renderWorkshop(); return; }
+  if (qualityButton) { workshopQuality = qualityButton.dataset.workshopQuality; workshopPreview = null; renderWorkshop(); return; }
   const slotButton = event.target.closest('[data-workshop-slot]');
-  if (slotButton) { workshopSlot = slotButton.dataset.workshopSlot; renderWorkshop(); return; }
+  if (slotButton) { workshopSlot = slotButton.dataset.workshopSlot; workshopPreview = null; renderWorkshop(); return; }
+  const viewWorkshopRecipe = event.target.closest('[data-view-workshop-recipe]');
+  if (viewWorkshopRecipe) { workshopPreview = { kind: 'recipe', id: viewWorkshopRecipe.dataset.viewWorkshopRecipe }; renderWorkshop(); return; }
+  const viewWorkshopWeapon = event.target.closest('[data-view-workshop-weapon]');
+  if (viewWorkshopWeapon) { workshopPreview = { kind: 'weapon', id: viewWorkshopWeapon.dataset.viewWorkshopWeapon }; renderWorkshop(); return; }
+  if (event.target.closest('[data-cancel-workshop-detail]')) { workshopPreview = null; renderWorkshop(); return; }
+  const confirmWorkshopCraft = event.target.closest('[data-confirm-workshop-craft]');
+  if (confirmWorkshopCraft) { craftWorkshopEquipment(confirmWorkshopCraft.dataset.confirmWorkshopCraft); return; }
+  const confirmWorkshopWeapon = event.target.closest('[data-confirm-workshop-weapon]');
+  if (confirmWorkshopWeapon) { craftChapterThreeEpicWeapon(confirmWorkshopWeapon.dataset.confirmWorkshopWeapon); return; }
   const craftButton = event.target.closest('[data-craft-recipe]');
   const assembleWeaponRecipeButton = event.target.closest('[data-assemble-weapon-recipe]');
   const epicWeaponButton = event.target.closest('[data-craft-epic-weapon]');
   if (assembleWeaponRecipeButton) { assembleWeaponForgingRecipe(); return; }
   if (epicWeaponButton) { craftChapterThreeEpicWeapon(epicWeaponButton.dataset.craftEpicWeapon); return; }
   if (craftButton) craftWorkshopEquipment(craftButton.dataset.craftRecipe);
+  const viewBlacksmithItem = event.target.closest('[data-view-blacksmith-item]');
+  if (viewBlacksmithItem) { blacksmithPreviewItemId = viewBlacksmithItem.dataset.viewBlacksmithItem; renderBlacksmith(); return; }
+  if (event.target.closest('[data-cancel-blacksmith-detail]')) { blacksmithPreviewItemId = null; renderBlacksmith(); return; }
+  const confirmBlacksmithSocket = event.target.closest('[data-confirm-blacksmith-socket]');
+  if (confirmBlacksmithSocket) {
+    const item = getBlacksmithItem(getProgress(), confirmBlacksmithSocket.dataset.confirmBlacksmithSocket);
+    const validation = item ? RunePolicy.requestSocket(item) : { ok: false, reason: 'missing' };
+    if (!validation.ok) { showToast(blacksmithEligibilityText(validation)); renderBlacksmith(); }
+    return;
+  }
   const furnaceItem = event.target.closest('[data-select-furnace-item]');
   if (furnaceItem) { selectFurnaceItem(furnaceItem.dataset.selectFurnaceItem); return; }
+  if (event.target.closest('[data-furnace-select-all]')) { selectAllFurnaceItems(); return; }
+  if (event.target.closest('[data-furnace-clear-all]')) { clearFurnaceSelection(); return; }
   if (event.target.closest('[data-confirm-furnace]')) { confirmFurnaceSalvage(); return; }
   const alchemyItem = event.target.closest('[data-alchemy-item]');
   if (alchemyItem) { selectAlchemyInput(alchemyItem.dataset.alchemyItem); return; }
   const clearAlchemyInput = event.target.closest('[data-clear-alchemy-input]');
-  if (clearAlchemyInput && !alchemyCandidates.length) { const index = Number(clearAlchemyInput.dataset.clearAlchemyInput); alchemyInputItemIds[index] = null; if (index === 0) alchemyInputItemIds[1] = null; renderAlchemy(); return; }
+  if (clearAlchemyInput && !alchemyCandidates.length) { const index = Number(clearAlchemyInput.dataset.clearAlchemyInput); alchemyInputItemIds[index] = null; if (index === 0) alchemyInputItemIds[1] = null; alchemyPreviewItemId = null; alchemyPendingSlotIndex = null; renderAlchemy(); return; }
+  const viewAlchemySlot = event.target.closest('[data-view-alchemy-slot]');
+  if (viewAlchemySlot) { const index = Number(viewAlchemySlot.dataset.viewAlchemySlot); openAlchemyItemDetail(alchemyInputItemIds[index], index); return; }
+  if (event.target.closest('[data-confirm-alchemy-input]')) { confirmAlchemyInput(); return; }
+  if (event.target.closest('[data-cancel-alchemy-input]')) { closeAlchemyItemDetail(); return; }
   const candidate = event.target.closest('[data-select-alchemy-candidate]');
   if (candidate) { selectedAlchemyCandidate = candidate.dataset.selectAlchemyCandidate; renderAlchemy(); return; }
   if (event.target.closest('[data-start-alchemy]')) { startAlchemy(); return; }
   if (event.target.closest('[data-confirm-alchemy]')) { confirmAlchemy(); return; }
   const magicSynthesis = event.target.closest('[data-synthesize-magic]');
   if (magicSynthesis) { synthesizeSkillBook(magicSynthesis.dataset.synthesizeMagic); return; }
+  const viewMagicRecipe = event.target.closest('[data-view-magic-recipe]');
+  if (viewMagicRecipe) { magicPreviewRecipeId = viewMagicRecipe.dataset.viewMagicRecipe; renderMagicTower(); return; }
+  if (event.target.closest('[data-cancel-magic-detail]')) { magicPreviewRecipeId = null; renderMagicTower(); return; }
   const socketButton = event.target.closest('[data-add-rune-socket]');
   if (socketButton) { showToast('打洞價格尚未設定，暫時不會消耗金幣或增加插槽。'); return; }
   if (event.target.closest('[data-return-alchemy]')) closeVillageBuilding();
@@ -9148,16 +9660,15 @@ document.querySelector('#party-modal').addEventListener('click', (event) => {
   if (removeButton) removePartyMember(removeButton.dataset.partyRemove);
 });
 document.querySelector('#drop-lookup-close').addEventListener('click', () => document.querySelector('#drop-lookup-modal').classList.add('hidden'));
-document.querySelector('#drop-lookup-modal').addEventListener('click', (event) => {
+document.querySelector('#drop-lookup-modal').addEventListener('click', async (event) => {
   if (event.target === event.currentTarget) { event.currentTarget.classList.add('hidden'); return; }
   const category = event.target.closest('[data-drop-category]');
   if (category) { dropLookupCategory = category.dataset.dropCategory; renderDropLookup(); }
   const purificationButton = event.target.closest('[data-attempt-purification]');
   if (purificationButton) {
-    const progress = getProgress();
-    const result = BlackForestCorruptionPolicy.purify(progress, purificationButton.dataset.attemptPurification);
+    const result = await commitEconomyProgress('黑森林淨化', progress => BlackForestCorruptionPolicy.purify(progress, purificationButton.dataset.attemptPurification));
+    if (result.code === 'save-failed' || result.code === 'busy') { renderDropLookup(); return; }
     if (!result.ok) { showToast('解除條件不足，請確認材料、金幣與 Debuff 層數。'); return; }
-    saveProgress(progress);
     showToast(result.success ? `淨化成功！Debuff 降至 ${result.effect.level} 層。` : '淨化失敗，材料與金幣已消耗。');
     renderDropLookup();
   }

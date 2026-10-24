@@ -23,7 +23,7 @@ assert.match(index, /black-forest-trail-policy\.js\?v=20260809-trail-balance-v10
 assert.match(index, /spider-nest-policy\.js\?v=20260809-spider-combat-v9/);
 assert.match(index, /forest-altar-policy\.js\?v=20260911-forest-altar-v1/);
 assert.match(index, /chapter-two-map-policy\.js\?v=20260911-depths-complete-v1/);
-assert.match(index, /script\.js\?v=20261014-permanent-ad/);
+assert.match(index, /script\.js\?v=20261025-mobile-village-fixed-window-v3/);
 assert.match(index, /VER\. \d+\.\d+\.\d+/, 'the game exposes a semantic version');
 assert.match(script, /\.\.\.ChapterTwoMapPolicy\.MAPS/, 'chapter-two maps join the shared progression data');
 assert.match(script, /blackForestEntrance: BlackForestEntrancePolicy\.getCombatPool\(\)/);
@@ -105,7 +105,7 @@ assert.match(script, /blackstoneMarkedUntil/);
 assert.match(script, /blackstoneArmorBreakUntil/);
 assert.match(script, /enemyCaptainShieldUntil/);
 assert.match(script, /blackForestCorruption: BlackForestCorruptionPolicy\.normalizeState\(saved\.blackForestCorruption\)/);
-assert.match(script, /if \(map\.chapter === 2\) BlackForestCorruptionPolicy\.enterChapter\(progress\)/);
+assert.match(script, /if \(!unrestrictedPlaytestTravel && map\.chapter === 2\) BlackForestCorruptionPolicy\.enterChapter\(progress\)/);
 assert.match(script, /BlackForestCorruptionPolicy\.applyCombatStats\(stats, progress\.blackForestCorruption, activeMap\.chapter === 2\)/);
 assert.match(script, /BlackForestDepthsPolicy\.applyDenseFogAccuracy\(corruptedStats\.accuracy, activeMap\.id\)/);
 assert.match(script, /function processBlackForestCorruption\(now = Date\.now\(\)\)[\s\S]*BlackForestCorruptionPolicy\.getHpLoss/);
@@ -115,7 +115,7 @@ assert.match(script, /previousMapId: 'plains-depths'/, 'chapter two connects fro
 assert.match(script, /function renderBlackForestRegions\(/, 'black forest has a chapter region view');
 assert.match(blackForestRenderer, /ChapterTwoMapPolicy\.getDungeon\(region\.id\)/, 'the stronghold preview reads the dungeon foundation');
 assert.match(blackForestRenderer, /<em>規劃中／尚未開放<\/em>/, 'unfinished maps are visibly marked as planned and unavailable');
-assert.match(blackForestRenderer, /!status\.implemented[\s\S]*data-select-map=/, 'only implemented and unlocked chapter-two cards expose entry controls');
+assert.match(blackForestRenderer, /!status\.implemented[\s\S]*data-select-map=[\s\S]*renderMapRegionCard/, 'only implemented and unlocked chapter-two cards expose entry controls through the shared renderer');
 assert.match(script, /if \(regionHubButton\.dataset\.openMapRegion === 'black-forest'\) renderBlackForestRegions\(\)/,
   'the shared region action opens the second chapter view');
 

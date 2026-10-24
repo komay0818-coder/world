@@ -25,6 +25,5 @@ for(const member of output.newStats){
  assert.ok(member.stats.skillDamagePercent > 0);
  assert.equal(member.equipment.weapon.sockets,2);assert.equal(member.runes.defensePercent,.03);
 }
-const fs=require('fs');fs.mkdirSync('tmp',{recursive:true});fs.writeFileSync('tmp/rare-rune-stats.json',JSON.stringify(output,null,2));
 console.log('chapter-three-36-rare-rune-playtest: assertions passed');
 
