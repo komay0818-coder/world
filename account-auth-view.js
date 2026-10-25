@@ -13,9 +13,11 @@ else{
 const EMAIL_PATTERN=/^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 function isPreviewEnabled(location){
- const local=['127.0.0.1','localhost'].includes(String(location?.hostname||'').toLowerCase());
- if(!local)return false;
- return new URLSearchParams(location?.search||'').get('accountUi')==='1';
+ const hostname=String(location?.hostname||'').toLowerCase(),protocol=String(location?.protocol||''),pathname=String(location?.pathname||'/');
+ const production=protocol==='https:'&&hostname==='komay0818-coder.github.io'&&(pathname==='/world'||pathname.startsWith('/world/'));
+ if(production)return true;
+ const local=['127.0.0.1','localhost'].includes(hostname);
+ return local&&new URLSearchParams(location?.search||'').get('accountUi')==='1';
 }
 
 function validateRegistration(values){
@@ -35,12 +37,20 @@ function validateLogin(values){
  return errors;
 }
 
+function validatePasswordReset(values){
+ const password=String(values?.password||''),confirmation=String(values?.passwordConfirm||''),errors={};
+if(!password)errors.password='請輸入新密碼。';else if(password.length<8||!/[A-Za-z]/.test(password)||!/\d/.test(password))errors.password='密碼至少需要 8 個字元，並包含英文字母與數字。';
+ if(!confirmation)errors.passwordConfirm='請再次輸入新密碼。';else if(confirmation!==password)errors.passwordConfirm='兩次輸入的密碼不一致。';
+ return errors;
+}
+
 function setMode(shell,mode){
- const normalized=mode==='login'?'login':'register';
+ const normalized=['login','reset'].includes(mode)?mode:'register';
  shell.dataset.mode=normalized;
- const register=shell.querySelector('#account-register-form'),login=shell.querySelector('#account-login-form');
+ const register=shell.querySelector('#account-register-form'),login=shell.querySelector('#account-login-form'),reset=shell.querySelector('#account-reset-password-form');
  if(register)register.hidden=normalized!=='register';
  if(login)login.hidden=normalized!=='login';
+ if(reset)reset.hidden=normalized!=='reset';
  return normalized;
 }
 
@@ -68,7 +78,7 @@ function mount(document,enabled){
  if(!enabled)return null;
 
  const message=shell.querySelector('#account-auth-message');
- const register=shell.querySelector('#account-register-form'),login=shell.querySelector('#account-login-form');
+ const register=shell.querySelector('#account-register-form'),login=shell.querySelector('#account-login-form'),reset=shell.querySelector('#account-reset-password-form');
  const recovery=shell.querySelector('#farming-recovery-panel'),recoveryCharacters=shell.querySelector('#farming-recovery-characters'),recoveryConfirm=shell.querySelector('#farming-recovery-confirm');
  const migration=shell.querySelector('#shared-gold-migration-panel'),migrationCharacters=shell.querySelector('#shared-gold-migration-characters'),migrationTotal=shell.querySelector('#shared-gold-migration-total'),migrationConfirm=shell.querySelector('#shared-gold-migration-confirm');
  const announce=(text,state='info')=>{if(message){message.textContent=text;message.dataset.state=state;}};
@@ -82,10 +92,15 @@ function mount(document,enabled){
   }else{
    if(register)register.hidden=true;
    if(login)login.hidden=true;
+   if(reset)reset.hidden=true;
    setBusy(true);
   }
   if(options.message!==undefined)announce(options.message,options.messageState||'info');
   return normalized;
+ };
+ const showPasswordReset=(messageText='請設定新的登入密碼。')=>{
+  if(!reset)throw Error('密碼重設介面尚未載入');
+  mode='reset';setMode(shell,'reset');shell.dataset.authState='password-reset';setBusy(false);announce(messageText,'info');
  };
  const showFarmingRecovery=(preview,onConfirm)=>{
   if(!recovery||!recoveryConfirm||typeof onConfirm!=='function')throw Error('掛機恢復確認介面尚未載入');
@@ -143,9 +158,17 @@ function mount(document,enabled){
   if(Object.keys(errors).length){showFormErrors(login,errors,{email:'account-login-email',password:'account-login-password'});announce('請修正標示的欄位。','error');return;}
   clearFormErrors(login);void invoke('login',{email:values.email.trim(),password:values.password});
  });
+ reset?.addEventListener('submit',async event=>{
+  event.preventDefault();const values={password:reset.elements.password.value,passwordConfirm:reset.elements.passwordConfirm.value};const errors=validatePasswordReset(values);
+  if(Object.keys(errors).length){showFormErrors(reset,errors,{password:'reset-password',passwordConfirm:'reset-password-confirm'});announce('請修正標示的欄位。','error');return;}
+  clearFormErrors(reset);setBusy(true);announce('正在更新密碼…');
+  try{await handlers.resetPassword?.({password:values.password});}
+  catch(error){showPasswordReset(error?.userMessage||'密碼更新失敗，請重新開啟重設連結。');announce(error?.userMessage||'密碼更新失敗，請重新開啟重設連結。','error');}
+ });
  shell.querySelector('#account-forgot-password')?.addEventListener('click',()=>void invoke('forgotPassword',{email:String(login?.elements.email.value||'').trim()}));
- return {announce,setBusy,setAuthState,showFarmingRecovery,hideFarmingRecovery,showGoldMigration,hideGoldMigration,setHandlers(next){handlers={...next};},setMode(next){mode=setMode(shell,next);return mode;}};
+ shell.querySelector('#account-reset-cancel')?.addEventListener('click',()=>void handlers.cancelPasswordReset?.());
+ return {announce,setBusy,setAuthState,showPasswordReset,showFarmingRecovery,hideFarmingRecovery,showGoldMigration,hideGoldMigration,setHandlers(next){handlers={...next};},setMode(next){mode=setMode(shell,next);return mode;}};
 }
 
-return {isPreviewEnabled,validateRegistration,validateLogin,setMode,mount};
+return {isPreviewEnabled,validateRegistration,validateLogin,validatePasswordReset,setMode,mount};
 });

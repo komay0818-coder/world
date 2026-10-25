@@ -24,5 +24,6 @@ export const testConfig = {
   supabaseUrl: 'https://dev-example.supabase.co',
   supabaseJwtAudience: 'authenticated',
   supabasePublishableKey: 'sb_publishable_test_key',
-  frontendAllowedOrigins: ['http://127.0.0.1:8771', 'http://localhost:8771']
+  frontendAllowedOrigins: ['http://127.0.0.1:8771', 'http://localhost:8771'],
+  publicApiBaseUrl: 'http://127.0.0.1:3000'
 };

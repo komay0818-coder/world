@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { AppConfig } from '../src/config.js';
-import { assertLornDevMigrationTarget } from '../src/migration-safety.js';
+import { assertLornDevMigrationTarget, assertLornDevRuntimeTarget } from '../src/migration-safety.js';
 
 const safeConfig: AppConfig = {
   appEnv: 'dev',
@@ -14,12 +14,14 @@ const safeConfig: AppConfig = {
   supabaseUrl: 'https://devproject.supabase.co',
   supabaseJwtAudience: 'authenticated',
   supabasePublishableKey: 'sb_publishable_test_key',
-  frontendAllowedOrigins: ['http://127.0.0.1:8771']
+  frontendAllowedOrigins: ['http://127.0.0.1:8771'],
+  publicApiBaseUrl: 'http://127.0.0.1:3000'
 };
 
 describe('assertLornDevMigrationTarget', () => {
   it('accepts the pinned lorn-dev project when API and database identifiers match', () => {
     expect(() => assertLornDevMigrationTarget(safeConfig)).not.toThrow();
+    expect(() => assertLornDevRuntimeTarget(safeConfig)).not.toThrow();
   });
 
   it('rejects a database from a different Supabase project', () => {
