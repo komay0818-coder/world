@@ -5,6 +5,7 @@ function assertSupabaseAccountId(id){if(typeof id!=='string'||!SUPABASE_ACCOUNT.
 function assertGoldTransactionId(id){if(typeof id!=='string'||!/^[A-Za-z0-9][A-Za-z0-9:_-]{7,127}$/.test(id))throw Error('Valid unique gold transaction identity required');return id;}
 function assertDiscardTransactionId(id){if(typeof id!=='string'||!/^[A-Za-z0-9][A-Za-z0-9:_-]{7,127}$/.test(id))throw Error('Valid unique discard transaction identity required');return id;}
 function assertCloudOwner(accountId,authUserId){assertSupabaseAccountId(accountId);const expected=accountId.slice('supabase:'.length);if(typeof authUserId!=='string'||authUserId.toLowerCase()!==expected)throw Error('Cloud save identity mismatch');return expected;}
+function cloudRecoveryRuns(runs){return (runs||[]).filter(record=>record?.status==='prepared').map(copy);}
 function emptySupabaseAccount(account,preferences,runs=[]){
  const model=account?.permanent,farming=account?.farming;if(!model||account.revision!==0)return false;
  return preferences?.revision===0&&Object.keys(preferences?.values||{}).length===0&&Object.keys(model.characters||{}).length===0&&model.slotOrder?.every(id=>id===null)&&!model.activeMainId&&Object.keys(model.parties||{}).length===0&&(model.bag?.items||[]).length===0&&Object.keys(model.equipmentOwners||{}).length===0&&Object.keys(account.commands||{}).length===0&&Object.keys(farming?.owners||{}).length===0&&Object.keys(farming?.sessions||{}).length===0&&Object.keys(farming?.legacyDebts||{}).length===0&&Object.keys(farming?.teamOffline||{}).length===0&&runs.length===0;
@@ -36,7 +37,7 @@ function wrap(store){
  close:()=>store.close(),async read(id){const a=await store.read(id);if(!a)return a;const prefs=await store.readPreferences(id);return {...a,settings:prefs?.values||a.settings||{},settingsRevision:prefs?.revision||0};},recover:id=>store.recover(id),compactHistory:(id,options)=>store.compactHistory(id,options),storageStats:id=>store.storageStats(id),
  async exportCloudSnapshot(accountId,authUserId){
   const owner=assertCloudOwner(accountId,authUserId),bundle=await store.exportCloudBundle(accountId);validateInitializedAccount(bundle.account,bundle.preferences,accountId);for(const run of bundle.runs)if(run.job?.accountId!==accountId)throw Error('Cloud offline work ownership mismatch');
-  const snapshot={...copy(bundle.account),cloudEnvelopeVersion:1,owner:{kind:'supabase-user',accountId,authUserId:owner},preferences:copy(bundle.preferences),offlineRuns:copy(bundle.runs)};return {snapshot,localRevision:bundle.account.revision,localPreferencesRevision:bundle.preferences.revision};
+  const snapshot={...copy(bundle.account),cloudEnvelopeVersion:1,owner:{kind:'supabase-user',accountId,authUserId:owner},preferences:copy(bundle.preferences),offlineRuns:cloudRecoveryRuns(bundle.runs)};return {snapshot,localRevision:bundle.account.revision,localPreferencesRevision:bundle.preferences.revision};
  },
  cloudSyncState:accountId=>{assertSupabaseAccountId(accountId);return store.readCloudSyncState(accountId);},
  prepareCloudUpload(accountId,details){assertSupabaseAccountId(accountId);return store.prepareCloudUpload(accountId,details);},
@@ -47,9 +48,10 @@ function wrap(store){
   const {cloudEnvelopeVersion,owner:ignoredOwner,preferences,offlineRuns,...account}=copy(snapshot);void cloudEnvelopeVersion;void ignoredOwner;
   if(!preferences||preferences.id!=='preferences:'+accountId||preferences.ownerId!==accountId||!Array.isArray(offlineRuns))throw Error('Cloud save bundle is incomplete');
   validateInitializedAccount(account,preferences,accountId);for(const run of offlineRuns)if(run.job?.accountId!==accountId)throw Error('Cloud offline work ownership mismatch');
+  const recoveryRuns=cloudRecoveryRuns(offlineRuns);
   if(!Number.isInteger(cloud?.revision)||cloud.revision<1||typeof cloud.contentHash!=='string'||!/^[0-9a-f]{64}$/.test(cloud.contentHash))throw Error('Cloud save checkpoint is invalid');
   const checkpoint={id:'cloud-sync:'+accountId,kind:'cloud-sync',ownerId:accountId,cloudRevision:cloud.revision,cloudContentHash:cloud.contentHash,localRevision:account.revision,localPreferencesRevision:preferences.revision,snapshotHash:cloud.contentHash,updatedAt:cloud.updatedAt,pending:null};
-  return store.restoreCloudBundle(accountId,{account,preferences,runs:offlineRuns},checkpoint,{failAt,canReplace:(existing,existingPreferences,runs,state)=>{
+  return store.restoreCloudBundle(accountId,{account,preferences,runs:recoveryRuns},checkpoint,{failAt,canReplace:(existing,existingPreferences,runs,state)=>{
    if(state?.cloudRevision===cloud.revision&&state.cloudContentHash===cloud.contentHash&&existing?.revision===account.revision)return true;
    if(expectedLocal&&existing?.revision===expectedLocal.localRevision&&existingPreferences?.revision===expectedLocal.localPreferencesRevision&&!state?.pending&&state?.cloudRevision===expectedLocal.cloudRevision&&state?.cloudContentHash===expectedLocal.cloudContentHash&&state?.snapshotHash===expectedLocal.snapshotHash)return true;
    if(existing&&!existingPreferences)return false;return !existing||emptySupabaseAccount(existing,existingPreferences,runs);
