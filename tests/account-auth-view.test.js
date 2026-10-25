@@ -4,9 +4,11 @@ function check(value,message){if(!value)throw Error(message);}
 function equal(actual,expected,message){if(JSON.stringify(actual)!==JSON.stringify(expected))throw Error(message+`\nexpected ${JSON.stringify(expected)}\nactual ${JSON.stringify(actual)}`);}
 
 (async()=>{
-check(AccountAuthView.isPreviewEnabled({hostname:'127.0.0.1',search:'?accountUi=1'}),'local preview flag should enable account UI');
-check(AccountAuthView.isPreviewEnabled({hostname:'localhost',search:'?accountUi=1'}),'localhost preview flag should enable account UI');
-check(!AccountAuthView.isPreviewEnabled({hostname:'komay0818-coder.github.io',search:'?accountUi=1'}),'production hostname must retain legacy entry');
+check(AccountAuthView.isPreviewEnabled({protocol:'http:',hostname:'127.0.0.1',pathname:'/index.html',search:'?accountUi=1'}),'local preview flag should enable account UI');
+check(AccountAuthView.isPreviewEnabled({protocol:'http:',hostname:'localhost',pathname:'/index.html',search:'?accountUi=1'}),'localhost preview flag should enable account UI');
+check(AccountAuthView.isPreviewEnabled({protocol:'https:',hostname:'komay0818-coder.github.io',pathname:'/world/',search:''}),'the exact production GitHub Pages project enables account UI');
+check(!AccountAuthView.isPreviewEnabled({protocol:'https:',hostname:'komay0818-coder.github.io',pathname:'/other/',search:'?accountUi=1'}),'another project path cannot enable the account UI');
+check(!AccountAuthView.isPreviewEnabled({protocol:'https:',hostname:'example.github.io',pathname:'/world/',search:'?accountUi=1'}),'an untrusted GitHub Pages host cannot enable the account UI');
 check(!AccountAuthView.isPreviewEnabled({hostname:'127.0.0.1',search:''}),'local entry without flag must retain legacy entry');
 
 equal(AccountAuthView.validateRegistration({email:'player@example.com',password:'Sword1234',passwordConfirm:'Sword1234'}),{},'valid registration should pass');
@@ -15,6 +17,8 @@ check(AccountAuthView.validateRegistration({email:'player@example.com',password:
 check(AccountAuthView.validateRegistration({email:'player@example.com',password:'Sword1234',passwordConfirm:'Sword1235'}).passwordConfirm,'password mismatch should be reported');
 equal(AccountAuthView.validateLogin({email:'player@example.com',password:'anything'}),{},'valid login fields should pass');
 check(AccountAuthView.validateLogin({email:'',password:''}).email,'missing login email should be reported');
+equal(AccountAuthView.validatePasswordReset({password:'Sword1234',passwordConfirm:'Sword1234'}),{},'valid replacement password should pass');
+check(AccountAuthView.validatePasswordReset({password:'short',passwordConfirm:'short'}).password,'weak replacement password should be rejected');
 
 function element(){return {hidden:false,disabled:false,dataset:{},querySelector(){return null;},querySelectorAll(){return [];},addEventListener(){},removeAttribute(){},setAttribute(){},focus(){}};}
 const register=element(),login=element(),shell={dataset:{},querySelector(selector){return selector==='#account-register-form'?register:selector==='#account-login-form'?login:null;}};
@@ -39,7 +43,7 @@ let recovered=0,releaseRecovery;mounted.showFarmingRecovery({characters:[{name:'
 let confirmed=0,releaseConfirmation;mounted.showGoldMigration({characters:[{name:'角色甲',gold:1200},{name:'角色乙',gold:30}],total:1230},async()=>{confirmed++;await new Promise(resolve=>releaseConfirmation=resolve);});check(!migration.hidden&&!migrationConfirm.disabled&&migrationCharacters.textContent.includes('角色甲')&&migrationTotal.textContent==='1,230','legacy gold preview shows each role and the verified total');const firstConfirmation=migrationClick(),duplicateConfirmation=migrationClick();check(confirmed===1&&migrationConfirm.disabled,'rapid confirmation clicks invoke migration only once');releaseConfirmation();await Promise.all([firstConfirmation,duplicateConfirmation]);check(confirmed===1&&migration.hidden,'successful explicit confirmation closes the prompt');
 
 const root=path.resolve(__dirname,'..'),html=fs.readFileSync(path.join(root,'index.html'),'utf8'),css=fs.readFileSync(path.join(root,'styles/account-auth.css'),'utf8'),script=fs.readFileSync(path.join(root,'script.js'),'utf8');
-for(const id of ['legacy-login-content','account-auth-shell','account-register-form','register-email','register-password','register-password-confirm','account-login-form','account-login-email','account-login-password','account-forgot-password','farming-recovery-panel','farming-recovery-confirm','shared-gold-migration-panel','shared-gold-migration-confirm'])check(html.includes(`id="${id}"`),`missing account UI element ${id}`);
+for(const id of ['legacy-login-content','account-auth-shell','account-register-form','register-email','register-password','register-password-confirm','account-login-form','account-login-email','account-login-password','account-forgot-password','account-reset-password-form','reset-password','reset-password-confirm','account-reset-cancel','farming-recovery-panel','farming-recovery-confirm','shared-gold-migration-panel','shared-gold-migration-confirm'])check(html.includes(`id="${id}"`),`missing account UI element ${id}`);
 check(html.includes('assets/main-menu-background.png')||css.includes("../assets/main-menu-background.png"),'account UI should use confirmed camp background');
 check(css.includes('@media(max-width:700px)'),'account UI should include portrait mobile layout');
 check(html.includes('id="login-form"')&&html.includes('id="player-name"'),'legacy entry markup must remain available');
@@ -47,5 +51,5 @@ check(script.includes('!window.accountAuthPreviewEnabled && (activePlaytestName 
 check(!fs.readFileSync(path.join(root,'account-auth-view.js'),'utf8').includes('supabase.co/auth'),'phase one must not call Supabase Auth');
 check(html.includes('account-session-controller.js')&&html.includes('account-auth-entry.js'),'account UI loads the isolated Auth controller without changing the form layout');
 
-console.log('Account auth interface tests passed: 23');
+console.log('Account auth interface tests passed');
 })().catch(error=>{console.error(error);process.exitCode=1;});

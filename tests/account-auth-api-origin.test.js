@@ -1,0 +1,21 @@
+'use strict';
+const assert=require('node:assert/strict'),Entry=require('../account-auth-entry.js');
+let passed=0;const check=(value,label)=>{assert(value,label);passed++;};
+(async()=>{
+check(Entry.resolveApiBaseUrl({href:'http://127.0.0.1:8771/index.html?accountUi=1'})==='https://lorn-api-dev.onrender.com','development preview defaults to the verified Render API');
+check(Entry.resolveApiBaseUrl({href:'https://komay0818-coder.github.io/world/?accountUi=1'})==='https://lorn-api-dev.onrender.com','HTTPS preview uses the verified Render API');
+check(Entry.resolvePasswordResetRedirect({href:'https://komay0818-coder.github.io/world/'})==='https://komay0818-coder.github.io/world/?passwordReset=1','production password recovery returns only to the trusted GitHub Pages project');
+check(Entry.resolvePasswordResetRedirect({href:'http://127.0.0.1:8771/index.html?accountUi=1'})==='http://127.0.0.1:8771/index.html?accountUi=1&passwordReset=1','local password recovery remains available in explicit preview mode');
+assert.throws(()=>Entry.resolvePasswordResetRedirect({href:'https://evil.example/world/'}),/不在允許清單/);passed++;
+check(Entry.resolveEmailConfirmationRedirect({href:'https://komay0818-coder.github.io/world/'})==='https://komay0818-coder.github.io/world/','production email confirmation returns to the trusted project root');
+check(Entry.resolveEmailConfirmationRedirect({href:'http://127.0.0.1:8771/index.html?accountUi=1'})==='http://127.0.0.1:8771/index.html?accountUi=1','local email confirmation preserves explicit preview mode');
+assert.throws(()=>Entry.resolveEmailConfirmationRedirect({href:'https://evil.example/world/'}),/不在允許清單/);passed++;
+check(Entry.resolveApiBaseUrl({href:'http://127.0.0.1:8771/index.html?accountUi=1&accountApi=local'})==='http://127.0.0.1:3000','loopback preview can explicitly use the local API');
+assert.throws(()=>Entry.resolveApiBaseUrl({href:'https://komay0818-coder.github.io/world/?accountApi=local'}),/本機 API 模式/);passed++;
+assert.throws(()=>Entry.resolveApiBaseUrl({href:'http://127.0.0.1:8771/?accountApi=https%3A%2F%2Fevil.example'}),/不受允許/);passed++;
+let calls=0,retries=0;const recovered=await Entry.fetchPublicConfig('https://lorn-api-dev.onrender.com',{fetcher:async()=>{calls++;if(calls===1)throw Object.assign(Error('timed out'),{name:'AbortError'});return {ok:true,status:200};},onRetry:()=>retries++,timeoutSignal:()=>undefined});
+check(recovered.ok&&calls===2&&retries===1,'a sleeping Render service is retried once without changing the trusted API origin');
+calls=0;const forbidden=await Entry.fetchPublicConfig('https://lorn-api-dev.onrender.com',{fetcher:async()=>{calls++;return {ok:false,status:403};},timeoutSignal:()=>undefined});
+check(!forbidden.ok&&forbidden.status===403&&calls===1,'non-transient API rejection is not retried');
+console.log('Account API origin selection: '+passed+' checks passed');
+})().catch(error=>{console.error(error);process.exitCode=1;});

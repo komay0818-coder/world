@@ -90,6 +90,21 @@
             <p class="account-auth-switch">沒有帳號？ <button type="button" data-auth-mode="register">建立帳號</button></p>
           </form>
 
+          <form id="account-reset-password-form" class="account-auth-form" novalidate hidden>
+            <h2>設定新密碼</h2>
+            <label for="reset-password">新密碼</label>
+            <div class="account-field"><span aria-hidden="true">◆</span><input id="reset-password" name="password" type="password" autocomplete="new-password" placeholder="請輸入新密碼" required /><button class="password-toggle" type="button" data-password-toggle="reset-password" aria-label="顯示密碼" aria-pressed="false">顯示</button></div>
+            <p class="account-password-hint">至少 8 個字元，包含英文字母與數字</p>
+            <p class="account-field-error" data-error-for="reset-password"></p>
+
+            <label for="reset-password-confirm">確認新密碼</label>
+            <div class="account-field"><span aria-hidden="true">◆</span><input id="reset-password-confirm" name="passwordConfirm" type="password" autocomplete="new-password" placeholder="請再次輸入新密碼" required /><button class="password-toggle" type="button" data-password-toggle="reset-password-confirm" aria-label="顯示確認密碼" aria-pressed="false">顯示</button></div>
+            <p class="account-field-error" data-error-for="reset-password-confirm"></p>
+
+            <button class="account-submit" type="submit"><span>更新密碼</span><b aria-hidden="true">→</b></button>
+            <button id="account-reset-cancel" class="account-forgot-password" type="button">取消並返回登入</button>
+          </form>
+
           <section id="farming-recovery-panel" class="shared-gold-migration-panel" hidden>
             <h2>需要先恢復掛機收益</h2>
             <p>偵測到先前中斷的單人掛機。請先核對角色與預估收益，確認後才會依原有離線規則安全結算。</p>
@@ -421,14 +436,14 @@
   <script src="permanent-online-policy.js?v=20261014-permanent-entry-v1"></script>
   <script src="permanent-party-runtime.js?v=20261022-starter-discard-v1"></script>
   <script src="permanent-farming-coordinator.js?v=20261021-farming-recovery-v1"></script>
-  <script src="account-auth-view.js?v=20261021-farming-recovery-v1"></script>
+  <script src="account-auth-view.js?v=20261025-production-account-v1"></script>
   <script src="account-api-contract.js?v=20261022-account-api-v2"></script>
-  <script src="account-session-controller.js?v=20261022-account-api-v2"></script>
+  <script src="account-session-controller.js?v=20261025-production-account-v1"></script>
   <script src="play-lease-client.js?v=20261022-cross-device-lease-v1"></script>
   <script src="cloud-save-sync.js?v=20261022-cross-device-lease-v1"></script>
   <script src="permanent-entry-bootstrap.js?v=20261022-cross-device-lease-v1"></script>
   <script src="mobile-battle-ui.js?v=20261023-mobile-loot-toast-v1"></script>
-  <script src="account-auth-entry.js?v=20261022-cross-device-lease-v1"></script>
+  <script src="account-auth-entry.js?v=20261025-production-account-v1"></script>
   <script type="application/x-stardust-deferred" data-loaded-by="permanent-entry-bootstrap" src="script.js?v=20261025-mobile-village-fixed-window-v3"></script>
   <script src="legacy-entry-loader.js?v=20261025-production-entry-v1"></script>
 </body>

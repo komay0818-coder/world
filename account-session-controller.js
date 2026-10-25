@@ -5,21 +5,24 @@ const api=factory(root);if(typeof module==='object'&&module.exports)module.expor
 'use strict';
 const contract=root?.AccountApiContract||(typeof require==='function'?require('./account-api-contract.js'):null);if(!contract)throw Error('帳號 API 契約尚未載入');
 const UUID_PATTERN=/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+const LORN_DEV_PROJECT_REF='iluizanzirwapoxiaxly';
+const TRUSTED_API_ORIGINS=new Set(['https://lorn-api-dev.onrender.com','http://127.0.0.1:3000','http://localhost:3000']);
 const issuedVerifications=new WeakMap();
 function userError(message,code){const error=Error(message);error.userMessage=message;if(code)error.code=code;return error;}
-function validateConfig(input){
+function validateConfig(input,{expectedApiBaseUrl}={}){
  contract.validateServer(input);
  if(input?.environment!=='dev')throw Error('帳號功能只允許使用開發環境');
- const ref=String(input.expectedProjectRef||'').trim();if(!/^[a-z0-9]+$/.test(ref))throw Error('lorn-dev 專案識別未設定');
+ const ref=String(input.expectedProjectRef||'').trim();if(ref!==LORN_DEV_PROJECT_REF)throw Error('lorn-dev 專案識別不正確');
  const supabaseUrl=new URL(String(input.supabaseUrl||''));if(supabaseUrl.protocol!=='https:'||supabaseUrl.hostname!==ref+'.supabase.co'||supabaseUrl.pathname!=='/'||supabaseUrl.username||supabaseUrl.password)throw Error('Supabase URL 與 lorn-dev 專案不一致');
  const publishableKey=String(input.publishableKey||'');if(!/^sb_publishable_[A-Za-z0-9_-]+$/.test(publishableKey)||/service[_-]?role/i.test(publishableKey))throw Error('前端 Publishable Key 設定不正確');
- const api=new URL(String(input.apiBaseUrl||''));if(api.protocol!=='http:'||!['127.0.0.1','localhost','[::1]'].includes(api.hostname)||api.username||api.password||api.pathname!=='/')throw Error('開發 API 必須使用本機 HTTP origin');
+ const api=new URL(String(input.apiBaseUrl||''));if(!TRUSTED_API_ORIGINS.has(api.origin)||api.username||api.password||api.pathname!=='/'||api.search||api.hash)throw Error('開發 API 來源不在允許清單');
+ if(expectedApiBaseUrl&&api.origin!==new URL(String(expectedApiBaseUrl)).origin)throw Error('公開設定回報的 API 來源不一致');
  return {environment:'dev',expectedProjectRef:ref,supabaseUrl:supabaseUrl.origin,publishableKey,apiBaseUrl:api.origin,apiContractVersion:input.apiContractVersion,apiCapabilities:[...input.apiCapabilities]};
 }
 async function responseJson(response,label){try{return await response.json();}catch{throw userError(label+'回傳格式不正確。');}}
 function create(options){
  const auth=options.supabaseClient?.auth,fetcher=options.fetcher||fetch,view=options.view,schedule=options.schedule||((fn)=>setTimeout(fn,0));if(!auth||!view)throw Error('帳號 Session 控制器缺少必要依賴');let controllerApi;
- const apiBaseUrl=options.apiBaseUrl,lifecycleListeners=new Set();let generation=0,inFlight=null,lastVerified=null,activeVerification=null,subscription=null;
+ const apiBaseUrl=options.apiBaseUrl,emailConfirmationRedirectTo=options.emailConfirmationRedirectTo,passwordResetRedirectTo=options.passwordResetRedirectTo,passwordRecoveryRequested=Boolean(options.passwordRecoveryRequested),lifecycleListeners=new Set();let generation=0,inFlight=null,lastVerified=null,activeVerification=null,subscription=null,recoverySession=null;
  const setViewState=(state,message,messageState='info')=>{
   if(typeof view.setAuthState==='function')view.setAuthState(state,{message,messageState});
   else if(message!==undefined)view.announce(message,messageState);
@@ -59,12 +62,12 @@ function create(options){
     if(initialized.account.authUserId.toLowerCase()!==userId||found.account.authUserId.toLowerCase()!==userId||initialized.account.id!==found.account.id)throw userError('後端帳號與 Supabase 登入身分不一致。');
     let result;result=Object.freeze({kind:'lorn-auth-verification-v1',generation:attempt,userId,account:Object.freeze({...found.account}),initializeStatus:initialized.status,isCurrent:()=>activeVerification===result&&generation===attempt});issuedVerifications.set(result,controllerApi);
     ensureCurrent(attempt);if(previous&&previous.userId!==userId)emitLifecycle('invalidated',{reason:'account-changed',verification:previous});
-    activeVerification=result;lastVerified={token,result};setViewState('authenticated','登入及後端帳號驗證成功；永久角色系統尚未啟動。','success');emitLifecycle(previous?.userId===userId?'refreshed':'authenticated',{verification:result});return result;
+    activeVerification=result;lastVerified={token,result};setViewState('authenticated','帳號驗證成功，正在啟動角色系統…','success');emitLifecycle(previous?.userId===userId?'refreshed':'authenticated',{verification:result});return result;
   })();
    inFlight={token,promise};try{return await promise;}catch(error){if(!error?.stale&&generation===attempt)invalidate(error?.code||'verification-failed');throw error;}finally{if(inFlight?.promise===promise)inFlight=null;}
  }
  async function register({email,password}){
-  invalidate('registration-started');const result=await auth.signUp({email,password});if(result.error)throw userError(result.error.message||'建立帳號失敗。');
+  invalidate('registration-started');if(!emailConfirmationRedirectTo)throw userError('電子郵件驗證網址尚未設定。');const result=await auth.signUp({email,password,options:{emailRedirectTo:emailConfirmationRedirectTo}});if(result.error)throw userError(result.error.message||'建立帳號失敗。');
   if(result.data?.session)return verifySession(result.data.session);view.announce('帳號已建立，請先完成電子郵件驗證後再登入。','success');return {confirmationRequired:true};
  }
  async function login({email,password}){invalidate('login-started');const result=await auth.signInWithPassword({email,password});if(result.error||!result.data?.session)throw userError('電子郵件或密碼不正確。');return verifySession(result.data.session);}
@@ -74,7 +77,17 @@ function create(options){
   if(result?.error){setViewState(activeVerification?'authenticated':'anonymous','登出失敗，請稍後再試。','error');throw userError('登出失敗，請稍後再試。');}
   invalidate('signed-out');setViewState('anonymous','登入狀態已結束，請重新登入。');return {signedOut:true};
  }
- async function forgotPassword({email}){if(!email)throw userError('請先輸入電子郵件。');const result=await auth.resetPasswordForEmail(email);if(result.error)throw userError('無法寄送密碼重設信，請稍後再試。');view.announce('密碼重設信已寄出，請檢查電子郵件。','success');}
+ async function forgotPassword({email}){if(!email)throw userError('請先輸入電子郵件。');if(!passwordResetRedirectTo)throw userError('密碼重設網址尚未設定。');const result=await auth.resetPasswordForEmail(email,{redirectTo:passwordResetRedirectTo});if(result.error)throw userError('無法寄送密碼重設信，請稍後再試。');view.announce('密碼重設信已寄出，請檢查電子郵件。','success');}
+ function enterPasswordRecovery(session){
+  if(!session?.access_token){recoverySession=null;setViewState('anonymous','密碼重設連結已失效，請重新申請。','error');return null;}
+  if(activeVerification||lastVerified)invalidate('password-recovery');recoverySession=session;view.showPasswordReset?.('身分已確認，請設定新的登入密碼。');return session;
+ }
+ async function completePasswordReset({password}){
+  if(!recoverySession?.access_token)throw userError('密碼重設連結已失效，請重新申請。','invalid-session');
+  const result=await auth.updateUser({password});if(result?.error)throw userError('密碼更新失敗，請重新開啟重設連結。');
+  recoverySession=null;const signedOut=await auth.signOut();if(signedOut?.error)throw userError('密碼已更新，請關閉此頁後重新登入。');invalidate('password-reset-complete');setViewState('anonymous','密碼已更新，請使用新密碼登入。','success');return {updated:true};
+ }
+ async function cancelPasswordReset(){recoverySession=null;await auth.signOut();invalidate('password-reset-cancelled');setViewState('anonymous','已取消密碼重設，請重新登入。');return {cancelled:true};}
  function handleFailure(error){
   if(error?.stale)return;
    invalidate(error?.code||'verification-failed');
@@ -84,6 +97,7 @@ function create(options){
  async function restore(){
   setViewState('checking','正在檢查登入狀態…');
   const result=await auth.getSession();if(result.error)throw userError('無法恢復登入狀態。','verification-unavailable');
+   if(passwordRecoveryRequested){if(result.data?.session)return enterPasswordRecovery(result.data.session);setViewState('anonymous','密碼重設連結已失效，請重新申請。','error');return null;}
    if(!result.data?.session){invalidate('missing-session');setViewState('anonymous','請登入帳號。');return null;}
   return verifySession(result.data.session);
  }
@@ -91,13 +105,15 @@ function create(options){
   setViewState('checking','正在檢查登入狀態…');
   const listener=auth.onAuthStateChange((event,session)=>{
     if(event==='SIGNED_OUT'){invalidate('signed-out');setViewState('anonymous','登入狀態已結束，請重新登入。','error');return;}
+    if(event==='PASSWORD_RECOVERY'){enterPasswordRecovery(session);return;}
+    if(passwordRecoveryRequested){if((event==='INITIAL_SESSION'||event==='SIGNED_IN')&&session)enterPasswordRecovery(session);else if(event==='TOKEN_REFRESHED'&&session)recoverySession=session;return;}
     if(event==='INITIAL_SESSION'&&!session){if(!inFlight&&!lastVerified){invalidate('missing-session');setViewState('anonymous','請登入帳號。');}return;}
    if((event==='INITIAL_SESSION'||event==='TOKEN_REFRESHED'||event==='SIGNED_IN')&&session)schedule(()=>verifySession(session).catch(handleFailure));
   });
   subscription=listener.data?.subscription||null;return restore().catch(error=>{handleFailure(error);return null;});
  }
  function stop(){invalidate('controller-stopped');subscription?.unsubscribe?.();subscription=null;lifecycleListeners.clear();}
- controllerApi={start,stop,register,login,logout,forgotPassword,restore,verifySession,current,isCurrent,subscribeLifecycle,requestApi,get verification(){return activeVerification?.isCurrent()?activeVerification:null;}};return controllerApi;
+ controllerApi={start,stop,register,login,logout,forgotPassword,completePasswordReset,cancelPasswordReset,restore,verifySession,current,isCurrent,subscribeLifecycle,requestApi,get verification(){return activeVerification?.isCurrent()?activeVerification:null;}};return controllerApi;
 }
 return {validateConfig,create,isIssuedVerification:(value,controller)=>Boolean(value&&typeof value==='object'&&issuedVerifications.has(value)&&(controller===undefined||issuedVerifications.get(value)===controller))};
 });
