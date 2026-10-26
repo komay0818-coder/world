@@ -25,5 +25,5 @@ assert.match(script, /ChapterThreeProgressionPolicy\.canEnter\(progress, map\.id
 assert.match(script, /mapId === 'redrock-wastes-entrance'\) return mapMonsterPools\.redrockWastes/);
 assert.match(script, /mapId === 'redrock-wastes-entrance'\) return RedrockWastesPolicy\.getCombatMonster/);
 assert.match(script, /currentMap\.chapter === 3 && enemy\.isBoss[\s\S]*ChapterThreeProgressionPolicy\.recordBossKill/);
-assert.match(script, /ChapterThreeProgressionPolicy\.normalize\(progress\)[\s\S]*localStorage\.setItem\('stardust-progress'/, 'saveProgress persists normalized chapter-three progress');
+assert.match(script, /ChapterThreeProgressionPolicy\.normalize\(progress\)[\s\S]*getGameStorage\(\)\.setItem\('stardust-progress'/, 'saveProgress persists normalized chapter-three progress');
 console.log('chapter-three-31-integration: assertions passed');

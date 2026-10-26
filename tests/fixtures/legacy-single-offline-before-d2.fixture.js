@@ -1,5 +1,6 @@
 function baselineSingleOfflineRewards() {
   if (getPermanentPartyRuntime()) return null; // Stage B isolated online integration: no new offline rewards.
+  if (isOfflinePartyFoundationPreview()) return resumeOfflinePartyPreview();
   const character = getActiveCharacter();
   if (!character) return null;
   const progress = getProgress();

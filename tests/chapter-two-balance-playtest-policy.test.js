@@ -281,8 +281,8 @@ assert.match(script, /chapterTwo25ShowcaseGroups = Object\.freeze\(\[[\s\S]*?for
 assert.match(script, /function rotateChapterTwo25Showcase[\s\S]*?replaceVisualShowcaseEnemies\(\[\.\.\.chapterTwo25ShowcaseGroups\[battle\.showcaseRoundIndex\]\], 'forest-altar', now\)/, '2-5 unified showcase rotates on the forest altar map');
 assert.match(script, /chapterTwo26ShowcaseGroups = Object\.freeze\(\[[\s\S]*?blackForestDepths\.normal[\s\S]*?blackForestDepths\.elite[\s\S]*?blackForestDepths\.boss/, '2-6 unified showcase contains normal, elite, and boss rounds');
 assert.match(script, /function rotateChapterTwo26Showcase[\s\S]*?replaceVisualShowcaseEnemies\(\[\.\.\.chapterTwo26ShowcaseGroups\[battle\.showcaseRoundIndex\]\], 'black-forest-depths', now\)/, '2-6 unified showcase rotates on the black forest depths map');
-assert.match(script, /function enemyAttackTick\(\) \{[\s\S]*?if \(isTimedChapterThreeVisualShowcase\(\)\) return;/, 'visual showcase characters take no monster damage');
-assert.match(script, /function processBlackForestCorruption[\s\S]*?if \(isTimedChapterThreeVisualShowcase\(\)\) return;/, 'visual showcase characters take no chapter-two corruption damage');
+assert.match(script, /function enemyAttackTick\(\) \{[\s\S]*?if \(isTimedChapterThreeVisualShowcase\(\) \|\| isMonsterRotationPreview\(\)\) return;/, 'visual showcase characters take no monster damage');
+assert.match(script, /function processBlackForestCorruption[\s\S]*?if \(isTimedChapterThreeVisualShowcase\(\) \|\| isMonsterRotationPreview\(\)\) return;/, 'visual showcase characters take no chapter-two corruption damage');
 [
   ['goblinScout', '.7716375'],
   ['goblinWarrior', '.9215'],

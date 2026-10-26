@@ -21,13 +21,17 @@ try {
   for (const mapId of ['skullcrusher-war-camp', 'ancient-altar', 'redrock-temple']) {
     const result = JSON.parse(game.evaluate(`
       Math.random = () => 0;
+      // The fixture does not run UI timers. Complete the prior 350 ms travel
+      // animation before the next entry, and explicitly open an already selected map.
+      mapTravelInProgress = false;
       selectAdventureMap('${mapId}');
+      if (!fighting) openBattle();
       Math.random = () => .5;
-      const liveBossIndex${mapId.replaceAll('-', '')} = battle.enemyTypes.findIndex((_, index) => getEnemyDefinition(index).isBoss);
+      const liveBossIndex${mapId.replaceAll('-', '')} = battle.enemyTypes.findIndex((type, index) => type && getEnemyDefinition(index).isBoss);
       queueDefeatedEnemies();
       JSON.stringify({ map:getActiveMap(getProgress()).id, dungeon:battle.isDungeon,
         bossIndex:liveBossIndex${mapId.replaceAll('-', '')}, cleared:getProgress().chapterThreeProgress.cleared['${mapId}'],
-        monsters:battle.enemyTypes.map((_, index) => ({ hp:getEnemyDefinition(index).maxHp, map:getEnemyDefinition(index).mapId, facility:getEnemyDefinition(index).isFacility })) });
+        monsters:battle.enemyTypes.flatMap((type, index) => type ? [{ hp:getEnemyDefinition(index).maxHp, map:getEnemyDefinition(index).mapId, facility:getEnemyDefinition(index).isFacility }] : []) });
     `));
     assert.equal(result.map, mapId);
     assert.equal(result.dungeon, false);
@@ -45,7 +49,7 @@ try {
     game.evaluate(`battle.partyMembers.forEach(member => { member.currentHp = member.maxHp * 100; }); enemyAttackTick();`);
     assert.equal(game.evaluate(`getProgress().chapterThreeProgress.cleared['${mapId}']`), false);
     game.evaluate(`
-      var defeatedBossIndex = battle.enemyTypes.findIndex((_, index) => getEnemyDefinition(index).isBoss);
+      var defeatedBossIndex = battle.enemyTypes.findIndex((type, index) => type && getEnemyDefinition(index).isBoss);
       applyDamageToMonster(defeatedBossIndex, 10000000, { damageType:'physical', attackRange:'ranged' },
         { attacker:getMainBattleMember(), canEvade:false, canParry:false });
       queueDefeatedEnemies();

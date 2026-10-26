@@ -257,8 +257,8 @@ const characterCreationDisplay = {
   'human:hunter': { scale: 1.155, offsetX: -1, offsetY: 4 },
   'human:mage': { scale: 1.30815, offsetX: -5, offsetY: 41 },
   'human:priest': { scale: 1.06, offsetX: 10, offsetY: 2 },
-  'elf:warrior': { scale: 1.06, offsetX: 0, offsetY: 8 },
-  'elf:assassin': { scale: 1.07, offsetX: 0, offsetY: 25 },
+  'elf:warrior': { scale: 1.14, offsetX: 0, offsetY: 20 },
+  'elf:assassin': { scale: 1.14, offsetX: 0, offsetY: 11 },
   'elf:hunter': { scale: 1.242, offsetX: 3, offsetY: -3 },
   'elf:mage': { scale: 1.2064, offsetX: 5, offsetY: 8 },
   'orc:warrior': { scale: 1.1648, offsetX: -6, offsetY: 4 },
@@ -327,7 +327,7 @@ const characterIdleAnimations = {
     frameDurationMs: 180
   },
   'elf:assassin': {
-    frames: [1, 2, 3, 4, 5].map((frame) => `assets/character-portraits/calibration-tests/elf-assassin-action-five-frame-v1/frame-${String(frame).padStart(2, '0')}.png?v=1`),
+    frames: [1, 2, 3, 4, 5].map((frame) => `assets/character-portraits/calibration-tests/elf-assassin-selection-five-frame-v4/frame-${String(frame).padStart(2, '0')}.png?v=4`),
     order: [0, 1, 2, 3, 4],
     frameDurationMs: 2000 / 5
   },
@@ -2220,6 +2220,68 @@ function formatOfflineDuration(milliseconds) {
   return hours ? `${hours} 小時 ${minutes} 分鐘` : `${minutes} 分鐘`;
 }
 
+// Stage A is deliberately opt-in until skills and atomic rewards are implemented.
+function isOfflinePartyFoundationPreview() {
+  return ['localhost', '127.0.0.1'].includes(window.location.hostname)
+    && new URLSearchParams(window.location.search || '').get('offlinePartyStageA') === '1';
+}
+let offlinePartyPreviewPausedAt = null;
+let offlinePartyPreviewWasFighting = false;
+function suspendOfflinePartyPreview(now = Date.now()) {
+  if (!isOfflinePartyFoundationPreview() || offlinePartyPreviewPausedAt !== null) return;
+  const progress = getProgress();
+  const map = getActiveMap(progress);
+  const snapshot = OfflinePartyPolicy.capture({ fighting, members: battle.partyMembers || [],
+    combat: battle,
+    chapterOneBase: map.chapter === 1,
+    monsters: getOfflineCombatMonsters(map, progress.level), mapId: map.id, map, now,
+    runId: `${getActiveCharacter()?.id || 'preview'}:${now}` });
+  sessionStorage.setItem('stardust-offline-party-preview', JSON.stringify(snapshot));
+  offlinePartyPreviewWasFighting = fighting;
+  offlinePartyPreviewPausedAt = now;
+  if (fighting) persistPartyRuntimeState();
+  fighting = false;
+  clearInterval(battleTimer); clearInterval(skillTimer); clearInterval(enemyAttackTimer);
+}
+function resumeOfflinePartyPreview(now = Date.now()) {
+  if (!isOfflinePartyFoundationPreview()) return null;
+  const raw = sessionStorage.getItem('stardust-offline-party-preview');
+  const snapshot = raw ? JSON.parse(raw) : null;
+  if (!snapshot) return null;
+  const report = OfflinePartyPolicy.simulate({ snapshot, now, skills: true,
+    survival: new URLSearchParams(window.location.search || '').get('offlinePartyBatch3') === '1' });
+  sessionStorage.setItem('stardust-offline-party-preview-result', JSON.stringify(report));
+  sessionStorage.removeItem('stardust-offline-party-preview');
+  // Preview results never award loot or overwrite HP. Freeze online deadlines during absence.
+  if (offlinePartyPreviewPausedAt !== null) {
+    const gap = Math.max(0, now - offlinePartyPreviewPausedAt), seen = new WeakSet();
+    function shift(value, parentKey = '') {
+      if (!value || typeof value !== 'object' || seen.has(value)) return;
+      seen.add(value);
+      Object.keys(value).forEach(key => {
+        if (['progress', 'character', 'stats', 'equipment'].includes(key) || /Telemetry$/.test(key)) return;
+        const item = value[key];
+        if (typeof item === 'number' && Number.isFinite(item) && item > 0
+          && (/(At|Until)$/.test(key) || ['skillCooldowns', 'enemyNextAttackAt', 'enemySpawnedAt'].includes(parentKey))) value[key] += gap;
+        else shift(item, key);
+      });
+    }
+    shift(battle);
+    fighting = offlinePartyPreviewWasFighting;
+    if (fighting) {
+      skillTimer = setInterval(autoSkillTick, 100);
+      battleTimer = setInterval(battleTick, 100);
+      enemyAttackTimer = setInterval(enemyAttackTick, 100);
+    }
+    offlinePartyPreviewPausedAt = null;
+    for (const member of battle.partyMembers || []) for (const event of member.pendingClassHeals || []) {
+      const target = (battle.partyMembers || []).find(ally => ally.id === event.targetId);
+      if (target) queueClassHealAfterglow(member, target, event);
+    }
+  }
+  return report;
+}
+
 function markPlayerActive() {
   const character = getGameStorage().getItem('stardust-character');
   if (!character) return;
@@ -2346,6 +2408,7 @@ async function claimPermanentSingleOffline() {
 
 function claimOfflineRewards() {
  const runtime=getPermanentPartyRuntime();if(runtime)return runtime.singleOfflineEnabled?claimPermanentSingleOffline():null;
+ if(isOfflinePartyFoundationPreview())return resumeOfflinePartyPreview();
  const character=getActiveCharacter();if(!character)return null;const calculated=calculateLegacyOfflineRewards(character,getProgress(),Date.now());saveProgress(calculated.progress);return presentLegacyOfflineReport(calculated.report);
 }
 
@@ -2434,6 +2497,9 @@ function randomEliteId(level = getProgress().level) { const pool = getMonsterPoo
 function randomBossId(level = getProgress().level) { const pool = getMonsterPool(level).boss; return pool[Math.floor(Math.random() * pool.length)]; }
 
 function createEnemyTypes(playerLevel = 1) {
+  if (isMonsterRotationPreview()) {
+    return [...(getMonsterRotationPreviewGroups(getActiveMap(getProgress()).id)[0] || [])];
+  }
   if (
     getActiveMap(getProgress()).id === 'black-forest-depths'
     && ChapterTwoBalancePlaytestPolicy?.getScenario() === 'purified-heart-pressure'
@@ -5588,15 +5654,12 @@ function rewardVictory(index) {
   logBattle(`✦ 擊敗${enemy.name}！獲得 ${earnedXp} EXP、${earnedGold} 金幣`, 'reward');
   if (loot) logBattle(`🎁 掉落【${loot.name}】${loot.quantity ? ` ×${loot.quantity}` : ''}`);
   materialDrops.forEach((material) => {
-    showToast(`獲得材料：${material.name}`);
     logBattle(`◆ 材料掉落【${material.name} ×${material.quantity}】`, 'loot');
   });
   if (purificationDrop) {
-    showToast(`獲得淨化道具：${purificationDrop.name}`);
     logBattle(`◇ 淨化道具掉落【${purificationDrop.name} ×1】`, 'loot');
   }
   skillMaterialDrops.forEach((material) => {
-    showToast(`獲得技能材料：${material.name}`);
     logBattle(`📜 技能材料掉落【${material.name} ×${material.quantity}】`, 'loot');
   });
   recipeDrops.forEach((recipe) => {
@@ -6260,6 +6323,7 @@ function queueClassHealAfterglow(member, healTarget, event) {
     const pending = member.pendingClassHeals || [];
     const index = pending.findIndex(entry => entry.id === event.id);
     if (index < 0) return;
+    if (offlinePartyPreviewPausedAt !== null) return;
     if (Date.now() < event.dueAt) { queueClassHealAfterglow(member, healTarget, event); return; }
     pending.splice(index, 1);
     if (!healTarget.alive) return;
@@ -6783,7 +6847,7 @@ function useAutoSkillForMember(member, now = Date.now()) {
 function autoSkillTick() {
   if (getPermanentPartyRuntime()?.busy || getPermanentPartyRuntime()?.failure) return;
   if (!fighting) return;
-  if (isTimedChapterThreeVisualShowcase()) return;
+  if (isTimedChapterThreeVisualShowcase() || isMonsterRotationPreview()) return;
   const now = Date.now();
   let casted = false;
   (battle.partyMembers || []).forEach((member) => {
@@ -7099,7 +7163,7 @@ function processHunterCompanionAttacks(now = Date.now()) {
 function processBlackForestCorruption(now = Date.now()) {
   const previousTick = Number(battle.lastCorruptionTickAt) || now;
   battle.lastCorruptionTickAt = now;
-  if (isTimedChapterThreeVisualShowcase()) return;
+  if (isTimedChapterThreeVisualShowcase() || isMonsterRotationPreview()) return;
   const progress = getProgress();
   if (getActiveMap(progress).chapter !== 2) return;
   const elapsedSeconds = Math.max(0, now - previousTick) / 1000;
@@ -7207,6 +7271,33 @@ function isTimedChapterThreeVisualShowcase() {
     : ['skullcrusher-war-camp', 'ancient-altar', 'redrock-temple'].includes(requestedMapId);
   return supportedMap
     && new URLSearchParams(window.location.search).has('showcase');
+}
+
+function isMonsterRotationPreview() {
+  const params = new URLSearchParams(window.location.search || '');
+  return ['localhost', '127.0.0.1'].includes(window.location.hostname)
+    && params.has('playtest')
+    && params.get('monster-preview') === 'rotation';
+}
+
+function getMonsterRotationPreviewGroups(mapId = getActiveMap(getProgress()).id) {
+  if (mapId === 'goblin-camp') {
+    return Array.from({ length: 7 }, (_, index) => DungeonTicketCycle.getGoblinCampWaveTypes(index + 1));
+  }
+  const pool = dropLookupMapPools[mapId] || getMonsterPool();
+  const groups = [pool.normal, pool.rare, pool.elite, pool.boss]
+    .map((types) => [...new Set(types || [])])
+    .filter((types) => types.length);
+  return groups.length ? groups : [[]];
+}
+
+function rotateMonsterPreview(now = Date.now()) {
+  if (now < (battle.showcaseNextRoundAt || 0)) return false;
+  const mapId = getActiveMap(getProgress()).id;
+  const groups = getMonsterRotationPreviewGroups(mapId);
+  battle.showcaseRoundIndex = ((battle.showcaseRoundIndex || 0) + 1) % groups.length;
+  replaceVisualShowcaseEnemies([...groups[battle.showcaseRoundIndex]], mapId, now);
+  return true;
 }
 
 const chapterOne14ShowcaseGroups = Object.freeze(
@@ -7400,6 +7491,7 @@ function rotateChapterTwo26Showcase(now = Date.now()) {
 
 function createBattleTickRuntime() {
   const timedVisualShowcase = isTimedChapterThreeVisualShowcase();
+  const monsterRotationPreview = isMonsterRotationPreview();
   const rotatingChapterOne14Showcase = isChapterOne14RotatingShowcase();
   const rotatingChapterOne15Showcase = isChapterOne15RotatingShowcase();
   const rotatingChapterTwo21Showcase = isChapterTwo21RotatingShowcase();
@@ -7415,7 +7507,9 @@ function createBattleTickRuntime() {
     environment: (now) => {
       processBlackForestCorruption(now);
       processOnlineFacilityDrain(now);
-      if (rotatingChapterOne14Showcase) {
+      if (monsterRotationPreview) {
+        rotateMonsterPreview(now);
+      } else if (rotatingChapterOne14Showcase) {
         rotateChapterOne14Showcase(now);
       } else if (rotatingChapterOne15Showcase) {
         rotateChapterOne15Showcase(now);
@@ -7448,6 +7542,10 @@ function createBattleTickRuntime() {
     syncLegacy: syncLegacyBattleStateFromMain,
     render: updateBattleUI
   };
+  if (monsterRotationPreview) {
+    const idle = () => false;
+    Object.assign(runtime, {enemyRespawns: idle, enemyDots: idle, outpost: idle, revive: idle, resources: idle, healthRegen: idle, partyAttacks: idle, companions: idle, queueDefeated: idle});
+  }
   if (isFacilityVisualPreview()) {
     const idle = () => false;
     Object.assign(runtime, {environment: rotateFacilityPreview, enemyRespawns: idle, enemyDots: idle, outpost: idle, revive: idle, resources: idle, healthRegen: idle, partyAttacks: idle, companions: idle, queueDefeated: idle});
@@ -8143,7 +8241,7 @@ function resolveBlackForestLeafStorm(enemy, enemyCurrentHp, now = Date.now()) {
 
 function enemyAttackTick() {
   if (!fighting || battleScreen.classList.contains('hidden') || battle.dungeonComplete) return;
-  if (isTimedChapterThreeVisualShowcase()) return;
+  if (isTimedChapterThreeVisualShowcase() || isMonsterRotationPreview()) return;
   if (!battle.partyMembers?.length) rebuildBattlePartyMembers();
   const progress = getProgress();
   const now = Date.now();
@@ -8798,7 +8896,7 @@ function openBattle() {
   }
   const dungeonDefinition = isDungeon ? getDungeonDefinition(currentMap.id) : null;
   let enemyTypes = isDungeon ? createDungeonWaveTypes(1, currentMap.id) : createEnemyTypes(progress.level);
-  if (!isDungeon) enemyTypes = ChapterThreeFacilityPolicy.opening(enemyTypes, progress, currentMap.id, type => getMonsterDefinitionForMap(type, currentMap.id));
+  if (!isDungeon && !isMonsterRotationPreview()) enemyTypes = ChapterThreeFacilityPolicy.opening(enemyTypes, progress, currentMap.id, type => getMonsterDefinitionForMap(type, currentMap.id));
   const requestedFacility = ChapterTwoBalancePlaytestPolicy?.isChapterThreeActive() ? new URLSearchParams(window.location.search).get('facility') : null;
   if (ChapterThreeFacilityPolicy.TYPES.includes(requestedFacility) && ChapterThreeFacilityPolicy.supported(currentMap.id)) {
     enemyTypes = enemyTypes.map(type => ChapterThreeFacilityPolicy.facilityId(type) ? randomEnemyId(progress.level) : type);
@@ -8903,11 +9001,11 @@ async function suspendPermanentBattle() {
 }
 window.addEventListener('beforeunload', event => {
  const r=getPermanentPartyRuntime();if(r?.singleOfflineEnabled){if(r.busy){event.preventDefault();event.returnValue='';}return;}
- markPlayerActive();
+ if(isOfflinePartyFoundationPreview())suspendOfflinePartyPreview();else markPlayerActive();
 });
 document.addEventListener('visibilitychange',()=>{
  const r=getPermanentPartyRuntime();if(r?.coordinator&&window.permanentFarmingVisibility){window.permanentFarmingVisibility().catch(e=>showToast('掛機恢復未完成：'+e.message));return;}if(r?.singleOfflineEnabled){if(document.visibilityState==='hidden')suspendPermanentBattle().catch(()=>showToast('儲存未完成，請重新整理。'));else if(document.visibilityState==='visible')(async()=>{await r.flush();await claimPermanentSingleOffline();if(permanentResumeBattle&&!getProgress().requiresMapSelectionAfterDefeat)openBattle();})().catch(e=>showToast('離線結算未完成：'+e.message));return;}
- if(document.visibilityState==='hidden'){markPlayerActive();}else if(document.visibilityState==='visible')claimOfflineRewards();
+ if(document.visibilityState==='hidden'){if(isOfflinePartyFoundationPreview())suspendOfflinePartyPreview();else markPlayerActive();}else if(document.visibilityState==='visible')claimOfflineRewards();
 });
 setInterval(() => {
   if (document.visibilityState === 'visible') markPlayerActive();

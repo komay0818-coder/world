@@ -26,7 +26,7 @@ assert.match(script, /requestedRank === 'all'\) return \['skullcrusher-great-chi
 assert.match(script, /requestedRank === 'all'\) return \['fallen-high-priest', 'awakened-guard', 'ancient-stoneguard', 'rune-guard'\]/);
 assert.match(script, /requestedRank === 'all'\) return \['redrock-ancient-god', 'temple-guardian', 'temple-stoneguard', 'rune-golem'\]/);
 assert.match(script, /isTimedChapterThreeVisualShowcase[\s\S]*?\['skullcrusher-war-camp', 'ancient-altar', 'redrock-temple'\]\.includes[\s\S]*?has\('showcase'\)/);
-assert.match(script, /function autoSkillTick\(\)[\s\S]*?if \(isTimedChapterThreeVisualShowcase\(\)\) return;/);
+assert.match(script, /function autoSkillTick\(\)[\s\S]*?if \(isTimedChapterThreeVisualShowcase\(\) \|\| isMonsterRotationPreview\(\)\) return;/);
 assert.match(script, /now - \(battle\.enemySpawnedAt\[index\] \|\| now\) >= 6000/);
 assert.match(script, /ChapterThreeProgressionPolicy\.recordBossKill\(progress, currentMap\.id, enemy\)/);
 

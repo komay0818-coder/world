@@ -20,6 +20,9 @@ for(const [map,c] of Object.entries(F.CONFIG)){
  assert.ok(rows.innerHTML.includes('value="'+c.required+'"'));assert.ok(rows.innerHTML.includes('已解除'));
  g.context.panelProgress={};g.evaluate('renderChapterThreeSuppression(panelProgress,panelMap)');assert.ok(rows.innerHTML.includes('0 / '+c.required),'switching to independent progress resets display');
 }
+assert.doesNotMatch(source,/showToast\(`獲得材料：\$\{material\.name\}`\)/,'ordinary material drops do not create battlefield toast captions');
+assert.doesNotMatch(source,/showToast\(`獲得淨化道具：\$\{purificationDrop\.name\}`\)/,'ordinary purification drops do not create battlefield toast captions');
+assert.doesNotMatch(source,/showToast\(`獲得技能材料：\$\{material\.name\}`\)/,'ordinary skill-material drops do not create battlefield toast captions');
 assert.match(source,/showToast\(`特殊紫裝掉落：\$\{specialEquipmentDrop\.name\}`\)/,'rare equipment notices remain unchanged');
 assert.match(suppressionCss,/#chapter-three-suppression \.suppression-rows \{[^}]*background: #07151d/,'expanded rows retain the dark panel background');
 assert.match(suppressionCss,/#chapter-three-suppression \.suppression-row \{[^}]*grid-template-columns: minmax\(0,1fr\)/,'facilities use a compact vertical layout');

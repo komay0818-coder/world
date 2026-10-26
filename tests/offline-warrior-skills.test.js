@@ -1,0 +1,17 @@
+const assert=require('node:assert/strict');
+const {member,run,isolate,activeMatrix}=require('./offline-skill-fixture');
+const count=activeMatrix('warrior');
+const m=isolate('warrior','heavy-strike');
+const r=run([m],100,{random:()=>.5});
+assert.equal(r.members[0].resourceCurrent,86,'18 rage spent, 4 gained by basic hit');
+assert.equal(r.members[0].skillCooldowns['heavy-strike'],5000);
+const empty=run([member('warrior',{resource:0})],100,{random:()=>.5});
+assert.deepEqual(empty.members[0].combatTelemetry.skillCasts,{});
+assert.equal(empty.members[0].resourceCurrent,4);
+const rage=isolate('warrior','blood-rage',{advancedClass:'berserker',currentHp:10000});
+assert.equal(run([rage],100).members[0].currentHp,9000,'blood rage HP paid once');
+const counter=member('warrior',{tier:6,stats:{parry:1},resource:0});
+counter.nextAttackAt=1000000;
+const cr=run([counter],1000,{random:()=>0},{attack:20});
+assert.equal(cr.members[0].combatTelemetry.damageBySource.counter>0,true);
+console.log(`offline warrior: ${count} active level cases and resource/counter checks passed`);
