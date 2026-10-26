@@ -1,0 +1,136 @@
+{
+  "canvas": [
+    1200,
+    1536
+  ],
+  "target_visible_height": 1320,
+  "target_center_x": 600,
+  "target_bottom_y": 1500,
+  "duration_ms": 2000,
+  "frame_duration_ms": 400,
+  "order": [
+    1,
+    2,
+    3,
+    4,
+    5
+  ],
+  "loop": false,
+  "frames": [
+    {
+      "frame": 1,
+      "source": "C:\\Users\\User\\.codex\\generated_images\\01a0de46-a553-7953-8ee2-63440819c66e\\exec-5c68d228-64bd-47b2-b020-f060568cfd66.png",
+      "source_bounds": [
+        130,
+        60,
+        1037,
+        1392
+      ],
+      "source_visible_size": [
+        907,
+        1332
+      ],
+      "scale": 0.990991,
+      "output_visible_size": [
+        899,
+        1320
+      ],
+      "placement": [
+        150,
+        180
+      ]
+    },
+    {
+      "frame": 2,
+      "source": "C:\\Users\\User\\.codex\\generated_images\\01a0de46-a553-7953-8ee2-63440819c66e\\exec-629782ef-9c4f-44a8-9fbe-4769efa3914c.png",
+      "source_bounds": [
+        198,
+        59,
+        1056,
+        1280
+      ],
+      "source_visible_size": [
+        858,
+        1221
+      ],
+      "scale": 1.081081,
+      "output_visible_size": [
+        928,
+        1320
+      ],
+      "placement": [
+        136,
+        180
+      ]
+    },
+    {
+      "frame": 3,
+      "source": "C:\\Users\\User\\.codex\\generated_images\\01a0de46-a553-7953-8ee2-63440819c66e\\exec-8b24a28d-1bd6-4a0d-99d9-71ce46e3eeea.png",
+      "source_bounds": [
+        140,
+        83,
+        1040,
+        1410
+      ],
+      "source_visible_size": [
+        900,
+        1327
+      ],
+      "scale": 0.994725,
+      "output_visible_size": [
+        895,
+        1320
+      ],
+      "placement": [
+        152,
+        180
+      ]
+    },
+    {
+      "frame": 4,
+      "source": "C:\\Users\\User\\.codex\\generated_images\\01a0de46-a553-7953-8ee2-63440819c66e\\exec-baa9acab-6000-4ccf-9b0c-edc57d8c8b46.png",
+      "source_bounds": [
+        219,
+        60,
+        1030,
+        1308
+      ],
+      "source_visible_size": [
+        811,
+        1248
+      ],
+      "scale": 1.057692,
+      "output_visible_size": [
+        858,
+        1320
+      ],
+      "placement": [
+        171,
+        180
+      ]
+    },
+    {
+      "frame": 5,
+      "source": "C:\\Users\\User\\.codex\\generated_images\\01a0de46-a553-7953-8ee2-63440819c66e\\exec-2529c4c6-4048-4ede-b06b-3dfada3d37a6.png",
+      "source_bounds": [
+        179,
+        40,
+        1049,
+        1369
+      ],
+      "source_visible_size": [
+        870,
+        1329
+      ],
+      "scale": 0.993228,
+      "output_visible_size": [
+        864,
+        1320
+      ],
+      "placement": [
+        168,
+        180
+      ]
+    }
+  ]
+}

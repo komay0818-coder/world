@@ -1,0 +1,15 @@
+const assert=require('node:assert/strict');
+const {member,run,isolate,activeMatrix}=require('./offline-skill-fixture');
+const count=activeMatrix('hunter');
+const m=isolate('hunter','multi-shot');m.nextAttackAt=1000000;
+const r=run([m],100,{random:()=>.5});
+assert.equal(r.members[0].resourceCurrent,5,'three arrows spent once');
+assert.equal(run([m],1000,{random:()=>.5}).members[0].resourceCurrent,6);
+const base=run([member('hunter')],2100,{random:()=>.5});
+assert.equal(base.members[0].companions.length,1);
+assert.equal(base.members[0].combatTelemetry.petAttacks,3,'pet has its own attack clock');
+const beasts=run([member('hunter',{advancedClass:'beastmaster',tier:6})],5000,{random:()=>0});
+assert.equal(beasts.members[0].companions.length,3);
+assert.ok(beasts.members[0].combatTelemetry.petAttacks>3);
+assert.ok(beasts.members[0].combatTelemetry.damageBySource['pet-bite']>0);
+console.log(`offline hunter: ${count} active level cases and arrow/pet checks passed`);

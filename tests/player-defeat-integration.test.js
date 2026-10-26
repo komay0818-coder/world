@@ -19,7 +19,8 @@ assert.match(script, /progress\.requiresMapSelectionAfterDefeat = false;[\s\S]*s
 assert.match(script, /selectingCurrentMapAfterDefeat[\s\S]*progress\.requiresMapSelectionAfterDefeat[\s\S]*!selectingCurrentMapAfterDefeat/, 'the defeated player may re-enter the same map selected by the recovery screen');
 
 const game = loadGame();
-const reentry = JSON.parse(game.evaluate(`
+(async () => {
+game.evaluate(`
   var reentryProgress = {
     level: 1,
     xp: 0,
@@ -39,7 +40,9 @@ const reentry = JSON.parse(game.evaluate(`
   openBattle = () => { globalThis.reentryOpened = true; };
   renderMapTravelPanel = () => {};
   showToast = () => {};
-  selectAdventureMap('plains-entrance');
+`);
+await game.evaluate(`selectAdventureMap('plains-entrance')`);
+const reentry = JSON.parse(game.evaluate(`
   JSON.stringify({
     opened: globalThis.reentryOpened === true,
     gate: reentryProgress.requiresMapSelectionAfterDefeat,
@@ -47,3 +50,5 @@ const reentry = JSON.parse(game.evaluate(`
   });
 `));
 assert.deepEqual(reentry, { opened: true, gate: false, mapId: 'plains-entrance' }, 're-entering the same map after defeat closes the gate and starts battle');
+console.log('player-defeat-integration: assertions passed');
+})().catch((error) => { console.error(error); process.exitCode = 1; });

@@ -54,6 +54,7 @@ for (const showcase of [false, true]) {
   let attackCalls = 0;
   const context = {
     isTimedChapterThreeVisualShowcase: () => showcase,
+    isMonsterRotationPreview: () => false,
     fighting: true,
     isFacilityVisualPreview: () => false,
     processPartyMemberAttacks: now => { attackCalls++; assert.equal(now, 1234); return true; },

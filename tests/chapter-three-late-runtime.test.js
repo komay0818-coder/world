@@ -16,15 +16,19 @@ const originalDateNow = Date.now;
 Date.now = () => lateTestNow;
 Math.random = () => .5;
 `);
+(async () => {
 try {
-  assert.equal(game.evaluate(`selectAdventureMap('ancient-altar'); getActiveMap(getProgress()).id`), 'skullcrusher-war-camp', 'locked 3-5 cannot be selected');
+  await game.evaluate(`selectAdventureMap('ancient-altar')`);
+  assert.equal(game.evaluate(`getActiveMap(getProgress()).id`), 'skullcrusher-war-camp', 'locked 3-5 cannot be selected');
   for (const mapId of ['skullcrusher-war-camp', 'ancient-altar', 'redrock-temple']) {
-    const result = JSON.parse(game.evaluate(`
+    await game.evaluate(`
       Math.random = () => 0;
       // The fixture does not run UI timers. Complete the prior 350 ms travel
       // animation before the next entry, and explicitly open an already selected map.
       mapTravelInProgress = false;
       selectAdventureMap('${mapId}');
+    `);
+    const result = JSON.parse(game.evaluate(`
       if (!fighting) openBattle();
       Math.random = () => .5;
       const liveBossIndex${mapId.replaceAll('-', '')} = battle.enemyTypes.findIndex((type, index) => type && getEnemyDefinition(index).isBoss);
@@ -77,3 +81,4 @@ try {
   assert.equal(game.evaluate(`ChapterThreeProgressionPolicy.canEnter(getProgress(), 'bloodwar-wastes', true)`), true, '3-1 through 3-3 progression survives');
 } finally { game.evaluate('Date.now = originalDateNow;'); }
 console.log('chapter-three-late-runtime: assertions passed');
+})().catch(error => { console.error(error); process.exitCode = 1; });

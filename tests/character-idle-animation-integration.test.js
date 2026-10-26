@@ -41,7 +41,7 @@ for (let frame = 1; frame <= 4; frame += 1) {
   assert.ok(fs.existsSync(path.join(root, 'assets', 'character-portraits', 'calibration-tests', 'elf-warrior-selection-four-frame-v1', `frame-${String(frame).padStart(2, '0')}.png`)), `elf warrior selection frame ${frame} exists`);
 }
 for (let frame = 1; frame <= 5; frame += 1) {
-  assert.ok(fs.existsSync(path.join(root, 'assets', 'character-portraits', 'calibration-tests', 'elf-assassin-selection-five-frame-v6-aligned', `frame-${String(frame).padStart(2, '0')}.png`)), `elf assassin selection frame ${frame} exists`);
+  assert.ok(fs.existsSync(path.join(root, 'assets', 'character-portraits', 'calibration-tests', 'elf-assassin-selection-five-frame-v4', `frame-${String(frame).padStart(2, '0')}.png`)), `elf assassin selection frame ${frame} exists`);
 }
 assert.ok(fs.existsSync(path.join(root, 'assets', 'character-portraits', 'calibration-tests', 'elf-hunter-five-frame-v1', 'frame-04-05-transition.png')), 'elf hunter transition frame exists');
 for (let frame = 1; frame <= 5; frame += 1) {
@@ -74,7 +74,7 @@ assert.match(script, /'orc:mage':\s*\{[\s\S]*?orc-mage-red-cast-five-frame-v1\/h
 assert.match(script, /'elf:warrior':\s*\{[\s\S]*?elf-warrior-selection-four-frame-v1[\s\S]*?order: \[0, 1, 2, 3\],[\s\S]*?frameDurationMs: 1800 \/ 4/, 'elf warrior uses the approved 1.8-second four-frame selection sequence');
 assert.match(script, /'elf:mage':\s*\{[\s\S]*?order: \[0, 1, 2, 3, 4, 3, 2, 1\],[\s\S]*?frameDurationMs: 180/, 'elf mage uses the five-frame ping-pong sequence');
 assert.match(script, /'elf:hunter':\s*\{[\s\S]*?frame-04-05-transition\.png[\s\S]*?order: \[0, 1, 2, 3, 4, 5, 4, 3, 2, 1\],[\s\S]*?frameDurationMs: 320/, 'only elf hunter uses the 3.2-second six-frame ping-pong sequence');
-assert.match(script, /'elf:assassin':\s*\{[\s\S]*?elf-assassin-selection-five-frame-v6-aligned[\s\S]*?order: \[0, 1, 2, 3, 4\],[\s\S]*?frameDurationMs: 2000 \/ 5/, 'elf assassin uses the approved two-second five-frame selection sequence');
+assert.match(script, /'elf:assassin':\s*\{[\s\S]*?elf-assassin-selection-five-frame-v4[\s\S]*?order: \[0, 1, 2, 3, 4\],[\s\S]*?frameDurationMs: 2000 \/ 5/, 'elf assassin uses the approved calibrated two-second five-frame selection sequence');
 assert.match(script, /'undead:warrior':\s*\{[\s\S]*?undead-warrior-five-frame[\s\S]*?order: \[0, 1, 2, 3, 4\],[\s\S]*?frameDurationMs: 500/, 'undead warrior uses the approved 2.5-second five-frame sequence');
 assert.match(script, /'undead:assassin':\s*\{[\s\S]*?undead-rise-five-frame-v2[\s\S]*?order: \[0, 1, 2, 4, 3, 4, 2, 1\],[\s\S]*?frameDurationMs: 2500 \/ 8/, 'undead assassin uses the approved 2.5-second rise sequence');
 assert.match(script, /'undead:mage':\s*\{[\s\S]*?undead-mage-cast-four-frame-aligned-v1[\s\S]*?order: \[0, 1, 2, 3, 2, 1\],[\s\S]*?frameDurationMs: 2500 \/ 6/, 'undead mage uses the approved 2.5-second four-frame cast sequence');
@@ -89,8 +89,8 @@ assert.match(script, /characterIdleAnimations\[animationKey\]/, 'race and class 
 assert.match(script, /stopCharacterIdleAnimation\(\)/, 'animation has an explicit stop path');
 assert.match(script, /'human:assassin': \{ scale: \.92, offsetX: -10, offsetY: 5 \}/, 'human assassin matches the human hunter body height without copying its numeric scale');
 assert.match(script, /'human:mage': \{ scale: 1\.30815, offsetX: -5, offsetY: 41 \}/, 'human mage keeps its scale and horizontal position while aligning its feet to the human warrior baseline');
-assert.match(script, /'elf:warrior': \{ scale: 1\.14, offsetX: 0, offsetY: 7 \}/, 'elf warrior is enlarged to match the shared selection visual height and shoe baseline');
-assert.match(script, /'elf:assassin': \{ scale: 1\.12, offsetX: 0, offsetY: 35 \}/, 'elf assassin keeps the approved aligned sequence on the shared visual height and shoe baseline');
+assert.match(script, /'elf:warrior': \{ scale: 1\.1, offsetX: 0, offsetY: 5 \}/, 'elf warrior is enlarged and keeps its shoes on the shared selection baseline');
+assert.match(script, /'elf:assassin': \{ scale: 1\.02, offsetX: 0, offsetY: -5 \}/, 'elf assassin calibrated frames match the shared visual height and shoe baseline');
 assert.match(script, /'elf:hunter': \{ scale: 1\.242, offsetX: 3, offsetY: -3 \}/, 'elf hunter keeps its offsets and receives the second-round scale');
 assert.match(script, /'orc:warrior': \{ scale: 1\.1648, offsetX: -6, offsetY: 4 \}/, 'orc warrior matches the orc hunter scale and foot baseline');
 assert.match(script, /'orc:assassin': \{ scale: 1\.07, offsetX: 22, offsetY: 1 \}/, 'orc assassin aligns its feet to the orc hunter baseline');
