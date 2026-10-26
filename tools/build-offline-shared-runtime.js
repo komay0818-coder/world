@@ -24,6 +24,7 @@ const names = ['getSkillKey', 'getSkillUpgradeLevel', 'getSkillEffect', 'getHunt
   'processPartyMemberAttacks', 'ensureHunterCompanions', 'processHunterCompanionAttacks',
   'resolveEnemyDirectHitRecovery'];
 const read = file => fs.readFileSync(path.join(root, file), 'utf8').replace(/\r\n/g, '\n');
+const normalizeGenerated = value => value.replace(/[ \t]+$/gm, '');
 const script = read('script.js');
 function extract(name) {
   const start = script.indexOf(`function ${name}(`);
@@ -75,8 +76,8 @@ if(typeof module==='object'&&module.exports)module.exports=api;else root.Offline
 })(typeof globalThis!=='undefined'?globalThis:this);\n`;
 new vm.Script(survivalOutput);
 const survivalTarget=path.join(root,'offline-enemy-runtime.generated.js');
-if(process.argv.includes('--check')){if(!fs.existsSync(survivalTarget)||read('offline-enemy-runtime.generated.js')!==survivalOutput)throw new Error('Offline enemy runtime differs from online sources');}
-else if(!process.argv.includes('--reference'))fs.writeFileSync(survivalTarget,survivalOutput);
+if(process.argv.includes('--check')){if(!fs.existsSync(survivalTarget)||read('offline-enemy-runtime.generated.js')!==normalizeGenerated(survivalOutput))throw new Error('Offline enemy runtime differs from online sources');}
+else if(!process.argv.includes('--reference'))fs.writeFileSync(survivalTarget,normalizeGenerated(survivalOutput));
 // Selection depends only on the frozen departure level/route. Preserve the
 // original lookup and ordering policies, but avoid rebuilding the same lists.
 const originalSelection = "getKnownSkills(member.job, member.level, progress).filter((skill) => skill.type === 'active' && skill.level <= member.level)";
@@ -166,6 +167,7 @@ if(reference){
 }
 new vm.Script(output);
 const target = path.join(root, reference?'tmp/offline-shared-runtime-before.js':'offline-shared-runtime.generated.js');
+output=normalizeGenerated(output);
 if (process.argv.includes('--check')) {
   if (!fs.existsSync(target) || read('offline-shared-runtime.generated.js') !== output) {
     console.error('Offline runtime differs from online sources; regenerate before testing.'); process.exit(1);

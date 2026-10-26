@@ -3720,8 +3720,8 @@ function renderRedrockWastesRegions() {
   modal.classList.remove('hidden');
 }
 
-function selectAdventureMap(mapId) {
-  const progress = getProgress();
+async function selectAdventureMap(mapId) {
+  let progress = getProgress();
   const map = mapProgression.find((item) => item.id === mapId && item.implemented);
   if (!map) return;
   const unrestrictedPlaytestTravel = isMapTravelPlaytestMode();
@@ -3736,50 +3736,62 @@ function selectAdventureMap(mapId) {
   }
   if (!unrestrictedPlaytestTravel && map.chapter === 2 && (!ChapterOneProgressionPolicy.isUnlocked(progress, 'black-forest') || progress.level < map.min || !ChapterTwoProgressionPolicy.canEnter(progress, map.id, map.implemented))) return;
   if (!unrestrictedPlaytestTravel && map.chapter === 3 && !ChapterThreeProgressionPolicy.canEnter(progress, map.id, map.implemented)) return;
-  if (!unrestrictedPlaytestTravel && map.chapter === 2) BlackForestCorruptionPolicy.enterChapter(progress);
-  if (map.dungeon) {
-    if (map.ticketItemId) {
-      if (!unrestrictedPlaytestTravel && getInventoryItemQuantity(progress, map.ticketItemId) < 1) { showToast('需要哥布林營地地圖才能進入。'); return; }
-    } else if (map.id !== 'blackstone-stronghold') {
-      const resources = getAccountResources();
-      const keys = resources.dungeonKeys?.blackForestAltar || 0;
-      if (!unrestrictedPlaytestTravel && keys < 1) { showToast('需要黑森林祭壇鑰匙才能進入。'); return; }
-      if (!unrestrictedPlaytestTravel) {
-        resources.dungeonKeys.blackForestAltar = keys - 1;
-        saveAccountResources(resources);
-      }
-    }
-    const activeMap = getActiveMap(progress);
-    if (!activeMap.dungeon) progress.dungeonReturnMapId = activeMap.id;
-    progress.dungeonAdmission = true;
-  }
   mapTravelInProgress = true;
   updateMapTravelButton(progress);
+  const wasFighting = fighting;
   syncMainBattleMemberFromLegacy();
-  persistPartyRuntimeState();
   clearInterval(battleTimer);
   clearInterval(skillTimer);
   clearInterval(enemyAttackTimer);
   fighting = false;
-  progress.selectedMapId = map.id;
-  progress.requiresMapSelectionAfterDefeat = false;
-  if (!unrestrictedPlaytestTravel) progress.unlockedChapter = Math.max(getUnlockedChapter(progress), Number(map.chapter) || 1);
-  saveProgress(progress);
-  if (!document.querySelector('#drop-lookup-modal')?.classList.contains('hidden')) renderDropLookup();
-  document.querySelector('#inventory-modal').classList.add('hidden');
-  showToast(map.dungeon && !map.ticketItemId && map.id === 'blackstone-stronghold'
-    ? `進入副本：${map.name}`
-    : map.dungeon
-      ? map.ticketItemId ? `持有地圖，進入：${map.name}` : `已消耗 1 把鑰匙，進入：${map.name}`
-      : `已前往：${map.name}`);
-  openBattle();
-  pendingAdventureAreaId = getAdventureAreaForMap(map).id;
-  pendingAdventureMapId = map.id;
-  renderMapTravelPanel(getProgress(), true);
-  window.setTimeout(() => {
-    mapTravelInProgress = false;
-    updateMapTravelButton(getProgress());
-  }, 350);
+  try {
+    const runtime = getPermanentPartyRuntime();
+    if (runtime) await runtime.flush();
+    await Promise.resolve(persistPartyRuntimeState());
+    progress = getProgress();
+    const availability = getAdventureMapAvailability(map, progress);
+    if (!availability.unlocked && !unrestrictedPlaytestTravel) throw Error(availability.reason || '地圖尚未解鎖');
+    if (!unrestrictedPlaytestTravel && map.chapter === 2) BlackForestCorruptionPolicy.enterChapter(progress);
+    if (map.dungeon) {
+      if (map.ticketItemId) {
+        if (!unrestrictedPlaytestTravel && getInventoryItemQuantity(progress, map.ticketItemId) < 1) throw Error('需要哥布林營地地圖才能進入。');
+      } else if (map.id !== 'blackstone-stronghold') {
+        const resources = getAccountResources();
+        const keys = resources.dungeonKeys?.blackForestAltar || 0;
+        if (!unrestrictedPlaytestTravel && keys < 1) throw Error('需要黑森林祭壇鑰匙才能進入。');
+        if (!unrestrictedPlaytestTravel) {
+          resources.dungeonKeys.blackForestAltar = keys - 1;
+          await Promise.resolve(saveAccountResources(resources));
+        }
+      }
+      const activeMap = getActiveMap(progress);
+      if (!activeMap.dungeon) progress.dungeonReturnMapId = activeMap.id;
+      progress.dungeonAdmission = true;
+    }
+    progress.selectedMapId = map.id;
+    progress.requiresMapSelectionAfterDefeat = false;
+    if (!unrestrictedPlaytestTravel) progress.unlockedChapter = Math.max(getUnlockedChapter(progress), Number(map.chapter) || 1);
+    await Promise.resolve(saveProgress(progress));
+    if (!document.querySelector('#drop-lookup-modal')?.classList.contains('hidden')) renderDropLookup();
+    document.querySelector('#inventory-modal').classList.add('hidden');
+    showToast(map.dungeon && !map.ticketItemId && map.id === 'blackstone-stronghold'
+      ? `進入副本：${map.name}`
+      : map.dungeon
+        ? map.ticketItemId ? `持有地圖，進入：${map.name}` : `已消耗 1 把鑰匙，進入：${map.name}`
+        : `已前往：${map.name}`);
+    openBattle();
+    pendingAdventureAreaId = getAdventureAreaForMap(map).id;
+    pendingAdventureMapId = map.id;
+    renderMapTravelPanel(getProgress(), true);
+  } catch (error) {
+    showToast(`無法前往地圖：${error?.message || '存檔未完成，請重試。'}`);
+    if (wasFighting && isPermanentGameplayReady()) openBattle();
+  } finally {
+    window.setTimeout(() => {
+      mapTravelInProgress = false;
+      updateMapTravelButton(getProgress());
+    }, 350);
+  }
 }
 
 function equipItem(itemId, preferredSlot = null) {
@@ -4975,7 +4987,7 @@ function persistPartyRuntimeState() {
   });
   if (ChapterTwoBalancePlaytestPolicy?.isActive()) sessionStorage.setItem(ChapterTwoBalancePlaytestPolicy.getSlotKey(), JSON.stringify(slots));
   else if (!getLocalPlaytestProgressKey()) getGameStorage().setItem('stardust-character-slots', JSON.stringify(slots));
-  saveProgress(mainProgress);
+  return saveProgress(mainProgress);
 }
 
 function rebuildBattlePartyMembers() {
