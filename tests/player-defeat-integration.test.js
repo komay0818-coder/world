@@ -1,6 +1,7 @@
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
+const { loadGame } = require('../tools/headless-game-runtime');
 const script = fs.readFileSync(path.join(__dirname, '..', 'script.js'), 'utf8');
 
 const defeatFlow = script.match(/function endBattleAfterPlayerDefeat\([\s\S]*?\r?\n}\r?\n\r?\nfunction defeatPartyMember/)?.[0] || '';
@@ -15,3 +16,39 @@ assert.match(script, /if \(!member\.isMain && member\.character\.race === 'undea
 assert.match(script, /if \(member\.isMain\) endBattleAfterPlayerDefeat\(now\)/, 'main-character death enters the shared defeat flow');
 assert.match(script, /adventure-button[\s\S]*requiresMapSelectionAfterDefeat[\s\S]*renderMapSelector\(\)/, 'adventure opens map selection after a defeat');
 assert.match(script, /progress\.requiresMapSelectionAfterDefeat = false;[\s\S]*saveProgress\(progress\)/, 'choosing a map clears the defeat gate');
+assert.match(script, /selectingCurrentMapAfterDefeat[\s\S]*progress\.requiresMapSelectionAfterDefeat[\s\S]*!selectingCurrentMapAfterDefeat/, 'the defeated player may re-enter the same map selected by the recovery screen');
+
+const game = loadGame();
+(async () => {
+game.evaluate(`
+  var reentryProgress = {
+    level: 1,
+    xp: 0,
+    gold: 0,
+    potions: 0,
+    manaPotions: 0,
+    selectedMapId: 'plains-entrance',
+    mapUnlocked: { 'plains-entrance': true },
+    inventory: [],
+    equipment: {},
+    requiresMapSelectionAfterDefeat: true
+  };
+  getProgress = () => reentryProgress;
+  saveProgress = value => { reentryProgress = value; };
+  syncMainBattleMemberFromLegacy = () => {};
+  persistPartyRuntimeState = () => {};
+  openBattle = () => { globalThis.reentryOpened = true; };
+  renderMapTravelPanel = () => {};
+  showToast = () => {};
+`);
+await game.evaluate(`selectAdventureMap('plains-entrance')`);
+const reentry = JSON.parse(game.evaluate(`
+  JSON.stringify({
+    opened: globalThis.reentryOpened === true,
+    gate: reentryProgress.requiresMapSelectionAfterDefeat,
+    mapId: reentryProgress.selectedMapId
+  });
+`));
+assert.deepEqual(reentry, { opened: true, gate: false, mapId: 'plains-entrance' }, 're-entering the same map after defeat closes the gate and starts battle');
+console.log('player-defeat-integration: assertions passed');
+})().catch((error) => { console.error(error); process.exitCode = 1; });

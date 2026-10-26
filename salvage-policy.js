@@ -82,17 +82,38 @@
     return (Array.isArray(inventory) ? inventory : []).filter((item) => item?.id === materialId && item.kind !== 'equipment').reduce((sum, item) => sum + Math.max(0, Number(item.quantity) || 0), 0);
   }
   function salvage(progress, itemId, options = {}) {
-    const validation = validate(progress, itemId);
-    if (!validation.ok) return validation;
-    const random = typeof options.random === 'function' ? options.random : Math.random;
-    const chance = getChance(validation.item, options.furnaceLevel);
-    const roll = Math.min(.999999, Math.max(0, Number(random()) || 0));
-    const success = roll < chance;
-    let nextInventory = progress.inventory.filter((item) => item !== validation.item);
-    if (success) nextInventory = addMaterialStack(nextInventory, validation.rule.materialId, validation.rule.amount);
-    progress.inventory = nextInventory;
-    return { ok: true, item: validation.item, consumedId: validation.itemId, success, chance, roll, material: getMaterial(validation.rule.materialId), amount: success ? validation.rule.amount : 0 };
+    const batch = salvageBatch(progress, [itemId], options);
+    if (!batch.ok) return batch;
+    return { ...batch.results[0], ok: true, total: batch.total, successCount: batch.successCount, failureCount: batch.failureCount, materials: batch.materials, results: batch.results };
   }
 
-  return Object.freeze({ MATERIALS, FURNACE_CONFIG, LEGACY_ESSENCE_IDS, getItemId, normalizeQuality, getRule, getMaterial, isProtected, isEquipped, getChance, validate, getEligibleEquipment, addMaterialStack, normalizeInventory, getMaterialQuantity, salvage });
+  function salvageBatch(progress, itemIds, options = {}) {
+    const ids = Array.isArray(itemIds) ? itemIds.map((id) => String(id || '')) : [];
+    if (!ids.length) return { ok: false, code: 'empty-selection', reason: '請先選擇要分解的裝備。' };
+    if (ids.length > 500) return { ok: false, code: 'selection-limit', reason: '單次分解裝備數量過多。' };
+    if (new Set(ids).size !== ids.length) return { ok: false, code: 'duplicate-selection', reason: '分解清單包含重複裝備，請重新選擇。' };
+    const validations = ids.map((id) => validate(progress, id));
+    const invalid = validations.find((entry) => !entry.ok);
+    if (invalid) return invalid;
+    const random = typeof options.random === 'function' ? options.random : Math.random;
+    const results = validations.map((validation) => {
+      const chance = getChance(validation.item, options.furnaceLevel);
+      const roll = Math.min(.999999, Math.max(0, Number(random()) || 0));
+      const success = roll < chance;
+      return { item: validation.item, consumedId: validation.itemId, success, chance, roll, material: getMaterial(validation.rule.materialId), amount: success ? validation.rule.amount : 0 };
+    });
+    const consumed = new Set(ids);
+    let nextInventory = progress.inventory.filter((item) => !(item?.kind === 'equipment' && consumed.has(getItemId(item))));
+    const materials = {};
+    results.forEach((entry) => {
+      if (!entry.success || !entry.material) return;
+      materials[entry.material.id] = (materials[entry.material.id] || 0) + entry.amount;
+    });
+    Object.entries(materials).forEach(([materialId, amount]) => { nextInventory = addMaterialStack(nextInventory, materialId, amount); });
+    progress.inventory = nextInventory;
+    const successCount = results.filter((entry) => entry.success).length;
+    return { ok: true, total: results.length, successCount, failureCount: results.length - successCount, materials, results };
+  }
+
+  return Object.freeze({ MATERIALS, FURNACE_CONFIG, LEGACY_ESSENCE_IDS, getItemId, normalizeQuality, getRule, getMaterial, isProtected, isEquipped, getChance, validate, getEligibleEquipment, addMaterialStack, normalizeInventory, getMaterialQuantity, salvage, salvageBatch });
 }));

@@ -1,11 +1,159 @@
-(function(root,factory){const node=typeof module==='object'&&module.exports;const api=factory(node?require('./permanent-party-policy'):root.PermanentPartyPolicy,node?require('./offline-settlement-store'):root.OfflineSettlementStore,node?require('./permanent-farming-policy'):root.PermanentFarmingPolicy,node?require('./permanent-cutover-policy'):root.PermanentCutoverPolicy);if(node)module.exports=api;else root.PermanentPartyStore=api;})(typeof globalThis!=='undefined'?globalThis:this,function(Policy,Legacy,Farming,Cutover){
+(function(root,factory){const node=typeof module==='object'&&module.exports;const api=factory(node?require('./permanent-party-policy'):root.PermanentPartyPolicy,node?require('./offline-settlement-store'):root.OfflineSettlementStore,node?require('./permanent-farming-policy'):root.PermanentFarmingPolicy,node?require('./permanent-cutover-policy'):root.PermanentCutoverPolicy,node?require('./inventory-sale-policy'):root.InventorySalePolicy);if(node)module.exports=api;else root.PermanentPartyStore=api;})(typeof globalThis!=='undefined'?globalThis:this,function(Policy,Legacy,Farming,Cutover,Sales){
 'use strict';const copy=x=>JSON.parse(JSON.stringify(x));
+const SUPABASE_ACCOUNT=/^supabase:[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/;
+function assertSupabaseAccountId(id){if(typeof id!=='string'||!SUPABASE_ACCOUNT.test(id))throw Error('Valid Supabase account identity required');return id;}
+function assertGoldTransactionId(id){if(typeof id!=='string'||!/^[A-Za-z0-9][A-Za-z0-9:_-]{7,127}$/.test(id))throw Error('Valid unique gold transaction identity required');return id;}
+function assertDiscardTransactionId(id){if(typeof id!=='string'||!/^[A-Za-z0-9][A-Za-z0-9:_-]{7,127}$/.test(id))throw Error('Valid unique discard transaction identity required');return id;}
+function assertCloudOwner(accountId,authUserId){assertSupabaseAccountId(accountId);const expected=accountId.slice('supabase:'.length);if(typeof authUserId!=='string'||authUserId.toLowerCase()!==expected)throw Error('Cloud save identity mismatch');return expected;}
+function cloudRecoveryRuns(runs){return (runs||[]).filter(record=>record?.status==='prepared').map(copy);}
+function emptySupabaseAccount(account,preferences,runs=[]){
+ const model=account?.permanent,farming=account?.farming;if(!model||account.revision!==0)return false;
+ return preferences?.revision===0&&Object.keys(preferences?.values||{}).length===0&&Object.keys(model.characters||{}).length===0&&model.slotOrder?.every(id=>id===null)&&!model.activeMainId&&Object.keys(model.parties||{}).length===0&&(model.bag?.items||[]).length===0&&Object.keys(model.equipmentOwners||{}).length===0&&Object.keys(account.commands||{}).length===0&&Object.keys(farming?.owners||{}).length===0&&Object.keys(farming?.sessions||{}).length===0&&Object.keys(farming?.legacyDebts||{}).length===0&&Object.keys(farming?.teamOffline||{}).length===0&&runs.length===0;
+}
+function validateInitializedAccount(account,preferences,id){
+ if(!account||account.id!==id||!Number.isInteger(account.revision)||account.revision<0||'slots'in account)throw Error('Incomplete permanent account requires review');
+ Policy.validate(account.permanent);
+ if(account.cutover?.version!==1||account.cutover?.status!=='active'||Number(account.cutover.minimumClientVersion||0)<2)throw Error('Incomplete permanent account requires review');
+ if(!account.farming||account.farming.version!==1||!account.farming.owners||!account.farming.sessions||!account.farming.eligibility||!account.farming.legacyDebts||!account.farming.teamOffline)throw Error('Incomplete permanent account requires review');
+ Farming.validateTeams(account.permanent);
+ if(!preferences||preferences.id!=='preferences:'+id||preferences.kind!=='preferences'||preferences.ownerId!==id||!Number.isInteger(preferences.revision)||preferences.revision<0||!preferences.values||typeof preferences.values!=='object'||Array.isArray(preferences.values))throw Error('Incomplete permanent account preferences require review');
+ return true;
+}
+function assertSharedGoldMigrationPreconditions(account,runs=[]){
+ if(!account?.permanent)throw Error('Permanent authority required');Policy.validate(account.permanent);
+ const state=Policy.sharedGoldState(account.permanent);if(state.status==='invalid')throw Error('Invalid shared gold requires review');
+ if(state.status==='ready')return {state,projection:null};
+ const farming=account.farming||{},online=Object.values(farming.sessions||{}).some(session=>session?.status==='online');
+ if(Object.keys(farming.owners||{}).length||online)throw Error('Stop active farming before shared gold migration');
+ if(Object.keys(farming.legacyDebts||{}).length||Object.keys(farming.teamOffline||{}).length)throw Error('Settle preserved offline income before shared gold migration');
+ if(runs.some(run=>run.status==='prepared'))throw Error('Settle pending offline income before shared gold migration');
+ return {state,projection:Policy.migrateSharedGold(account.permanent)};
+}
 async function open(options){const store=await Legacy.open({...options,version:2});return wrap(store);}
 function wrap(store){
  if(store.schemaVersion!==2)throw Error('Permanent authority requires schema 2');
  const transact=(...args)=>{args[5]={...args[5],clientVersion:2};return store.transactAccount(...args);};
  return {
  close:()=>store.close(),async read(id){const a=await store.read(id);if(!a)return a;const prefs=await store.readPreferences(id);return {...a,settings:prefs?.values||a.settings||{},settingsRevision:prefs?.revision||0};},recover:id=>store.recover(id),compactHistory:(id,options)=>store.compactHistory(id,options),storageStats:id=>store.storageStats(id),
+ async exportCloudSnapshot(accountId,authUserId){
+  const owner=assertCloudOwner(accountId,authUserId),bundle=await store.exportCloudBundle(accountId);validateInitializedAccount(bundle.account,bundle.preferences,accountId);for(const run of bundle.runs)if(run.job?.accountId!==accountId)throw Error('Cloud offline work ownership mismatch');
+  const snapshot={...copy(bundle.account),cloudEnvelopeVersion:1,owner:{kind:'supabase-user',accountId,authUserId:owner},preferences:copy(bundle.preferences),offlineRuns:cloudRecoveryRuns(bundle.runs)};return {snapshot,localRevision:bundle.account.revision,localPreferencesRevision:bundle.preferences.revision};
+ },
+ cloudSyncState:accountId=>{assertSupabaseAccountId(accountId);return store.readCloudSyncState(accountId);},
+ prepareCloudUpload(accountId,details){assertSupabaseAccountId(accountId);return store.prepareCloudUpload(accountId,details);},
+ completeCloudUpload(accountId,details){assertSupabaseAccountId(accountId);return store.completeCloudUpload(accountId,details);},
+ acknowledgeCloudSnapshot(accountId,details){assertSupabaseAccountId(accountId);return store.acknowledgeCloudSnapshot(accountId,details);},
+ async restoreCloudSnapshot(accountId,authUserId,snapshot,cloud,{failAt,expectedLocal}={}){
+  const owner=assertCloudOwner(accountId,authUserId);if(!snapshot||snapshot.cloudEnvelopeVersion!==1||snapshot.owner?.kind!=='supabase-user'||snapshot.owner.accountId!==accountId||snapshot.owner.authUserId!==owner||snapshot.id!==accountId)throw Error('Cloud save ownership mismatch');
+  const {cloudEnvelopeVersion,owner:ignoredOwner,preferences,offlineRuns,...account}=copy(snapshot);void cloudEnvelopeVersion;void ignoredOwner;
+  if(!preferences||preferences.id!=='preferences:'+accountId||preferences.ownerId!==accountId||!Array.isArray(offlineRuns))throw Error('Cloud save bundle is incomplete');
+  validateInitializedAccount(account,preferences,accountId);for(const run of offlineRuns)if(run.job?.accountId!==accountId)throw Error('Cloud offline work ownership mismatch');
+  const recoveryRuns=cloudRecoveryRuns(offlineRuns);
+  if(!Number.isInteger(cloud?.revision)||cloud.revision<1||typeof cloud.contentHash!=='string'||!/^[0-9a-f]{64}$/.test(cloud.contentHash))throw Error('Cloud save checkpoint is invalid');
+  const checkpoint={id:'cloud-sync:'+accountId,kind:'cloud-sync',ownerId:accountId,cloudRevision:cloud.revision,cloudContentHash:cloud.contentHash,localRevision:account.revision,localPreferencesRevision:preferences.revision,snapshotHash:cloud.contentHash,updatedAt:cloud.updatedAt,pending:null};
+  return store.restoreCloudBundle(accountId,{account,preferences,runs:recoveryRuns},checkpoint,{failAt,canReplace:(existing,existingPreferences,runs,state)=>{
+   if(state?.cloudRevision===cloud.revision&&state.cloudContentHash===cloud.contentHash&&existing?.revision===account.revision)return true;
+   if(expectedLocal&&existing?.revision===expectedLocal.localRevision&&existingPreferences?.revision===expectedLocal.localPreferencesRevision&&!state?.pending&&state?.cloudRevision===expectedLocal.cloudRevision&&state?.cloudContentHash===expectedLocal.cloudContentHash&&state?.snapshotHash===expectedLocal.snapshotHash)return true;
+   if(existing&&!existingPreferences)return false;return !existing||emptySupabaseAccount(existing,existingPreferences,runs);
+  }});
+ },
+ async initializeSupabaseAccount(accountId,{failAt,now=Date.now()}={}){
+  assertSupabaseAccountId(accountId);if(!Number.isFinite(now))throw Error('Invalid initialization time');
+  const permanent=Policy.createEmptyModel();Policy.validate(permanent);
+  const account={id:accountId,revision:0,permanent,cutover:{version:1,minimumClientVersion:2,status:'active',source:'supabase-new-account'},commands:{},receiptFloorRevision:0,receiptVersion:2};
+  Farming.initialize(account,now);
+  const preferences={id:'preferences:'+accountId,kind:'preferences',ownerId:accountId,revision:0,values:{}};
+  const result=await store.initializePermanentAccount(account,preferences,{failAt});
+  validateInitializedAccount(result.account,result.preferences,accountId);
+  return {account:{...copy(result.account),settings:copy(result.preferences.values),settingsRevision:result.preferences.revision},created:result.created,duplicate:!result.created};
+ },
+ async prepareSharedGoldMigration(accountId,revision,{failAt,now=Date.now(),guard=()=>{}}={}){
+  assertSupabaseAccountId(accountId);if(!Number.isInteger(revision)||revision<0)throw Error('Valid source revision required');if(!Number.isFinite(now))throw Error('Invalid backup time');guard();
+  const current=await this.read(accountId);guard();if(!current||current.revision!==revision)throw Error('Concurrent save conflict');
+  const runs=await store.pendingForAccount(accountId);guard();const checked=assertSharedGoldMigrationPreconditions(current,runs);
+  if(checked.state.status==='ready')return {account:current,status:'ready',duplicate:true,preview:null,backup:null};
+  const source={accountId,revision,permanent:copy(current.permanent)},fingerprint=await Legacy.receiptPolicy.fingerprint(source);guard();
+  const preview={characters:Object.entries(checked.projection.audit.before.characterGold).map(([characterId,gold])=>({characterId,name:String(current.permanent.characters[characterId]?.character?.name||'未命名角色'),gold})),total:checked.projection.audit.after.accountGold,sourceRevision:revision};
+  const commandId='shared-gold-backup-v1:'+fingerprint;
+  const result=await transact(accountId,revision,commandId,{fingerprint,sourceRevision:revision},a=>{
+   guard();const valid=assertSharedGoldMigrationPreconditions(a,runs);if(valid.state.status!=='legacy')throw Error('Shared gold source changed before backup');
+   a.sharedGoldMigrationBackup={version:1,status:'verified',accountId,sourceRevision:revision,fingerprint,createdAt:now,source:copy(a.permanent),audit:copy(valid.projection.audit)};return a;
+  },{failAt,metadataOnly:true,maintenance:true,allowPrepared:false,validateRuns:(a,currentRuns)=>assertSharedGoldMigrationPreconditions(a,currentRuns)});
+  guard();const account=await this.read(accountId),backup=account?.sharedGoldMigrationBackup;if(!backup||backup.status!=='verified'||backup.fingerprint!==fingerprint||backup.sourceRevision!==revision)throw Error('Shared gold backup verification failed');
+  const verifiedFingerprint=await Legacy.receiptPolicy.fingerprint({accountId,revision,permanent:backup.source});if(verifiedFingerprint!==fingerprint)throw Error('Shared gold backup fingerprint mismatch');guard();
+  return {account,status:'legacy',duplicate:result.duplicate,preview,backup:{version:backup.version,status:backup.status,sourceRevision:backup.sourceRevision,fingerprint:backup.fingerprint,createdAt:backup.createdAt}};
+ },
+ async migrateSharedGold(accountId,revision,{failAt,backupFingerprint,guard=()=>{}}={}){
+  assertSupabaseAccountId(accountId);if(!Number.isInteger(revision)||revision<0)throw Error('Valid source revision required');
+  guard();const current=await this.read(accountId);guard();if(!current)throw Error('Unknown account');Policy.validate(current.permanent);
+  const currentState=Policy.sharedGoldState(current.permanent);
+  if(currentState.status==='ready')return {account:current,migrated:false,duplicate:true,audit:copy(current.permanent.accountResources.goldMigrationAudit||null)};
+  const backup=current.sharedGoldMigrationBackup;
+  if(!backupFingerprint||!backup||backup.status!=='verified'||backup.accountId!==accountId||backup.sourceRevision!==revision||backup.fingerprint!==backupFingerprint)throw Error('Verified shared gold backup required');
+  const fingerprint=await Legacy.receiptPolicy.fingerprint({accountId,revision,permanent:backup.source});if(fingerprint!==backupFingerprint||JSON.stringify(backup.source)!==JSON.stringify(current.permanent))throw Error('Shared gold source no longer matches verified backup');guard();
+  const result=await transact(accountId,revision,'shared-gold-migration-v1',{goldVersion:Policy.SHARED_GOLD_VERSION},a=>{
+   guard();const checked=assertSharedGoldMigrationPreconditions(a);if(checked.state.status!=='legacy')throw Error('Shared gold migration already completed');
+   if(JSON.stringify(a.permanent)!==JSON.stringify(backup.source))throw Error('Shared gold source changed after backup');
+   a.permanent=checked.projection.model;a.sharedGoldMigrationBackup={...a.sharedGoldMigrationBackup,status:'committed',committedRevision:a.revision+1};return a;
+  },{failAt,validateRuns:(a,runs)=>assertSharedGoldMigrationPreconditions(a,runs)});
+  guard();const account=await this.read(accountId),state=Policy.sharedGoldState(account.permanent),audit=copy(account.permanent.accountResources.goldMigrationAudit||null);if(state.status!=='ready'||account.permanent.accountResources.goldVersion!==Policy.SHARED_GOLD_VERSION||audit?.after?.accountGold!==state.gold)throw Error('Shared gold migration verification failed');
+  return {account,migrated:!result.duplicate,duplicate:result.duplicate,audit};
+ },
+ async transactSharedGold(accountId,revision,transactionId,operation,{failAt,maxAttempts=4}={}){
+  assertSupabaseAccountId(accountId);assertGoldTransactionId(transactionId);if(!Number.isInteger(revision)||revision<0)throw Error('Valid source revision required');
+  if(!Number.isInteger(maxAttempts)||maxAttempts<1||maxAttempts>8)throw Error('Invalid gold transaction retry limit');
+  const payload=Policy.validateSharedGoldOperation(operation);
+  let sourceRevision=revision,lastConflict=null;
+  for(let attempt=0;attempt<maxAttempts;attempt++){
+   try{
+    const result=await transact(accountId,sourceRevision,'shared-gold:'+transactionId,payload,a=>{
+     if(!a.permanent)throw Error('Permanent authority required');const changed=Policy.applySharedGoldTransaction(a.permanent,payload);a.permanent=changed.model;return a;
+    },{failAt});
+    const account=await this.read(accountId),balance=Policy.getSharedGold(account.permanent);return {account,balance,duplicate:result.duplicate,transactionId};
+   }catch(error){
+    if(!/Concurrent save conflict/.test(String(error?.message))||attempt+1>=maxAttempts)throw error;
+    lastConflict=error;const current=await this.read(accountId);if(!current)throw Error('Unknown account');Policy.getSharedGold(current.permanent);sourceRevision=current.revision;
+   }
+  }
+  throw lastConflict||Error('Shared gold transaction conflict');
+ },
+ async sellItems(accountId,revision,transactionId,selections,{failAt,maxAttempts=4}={}){
+  assertSupabaseAccountId(accountId);assertGoldTransactionId(transactionId);if(!Number.isInteger(revision)||revision<0)throw Error('Valid source revision required');
+  if(!Number.isInteger(maxAttempts)||maxAttempts<1||maxAttempts>8)throw Error('Invalid sale transaction retry limit');
+  const payload={selections:Sales.normalizeSaleSelections(selections)};
+  let sourceRevision=revision,lastConflict=null,summary=null;
+  for(let attempt=0;attempt<maxAttempts;attempt++){
+   try{
+    const result=await transact(accountId,sourceRevision,'sell-items:'+transactionId,payload,a=>{
+     if(!a.permanent)throw Error('Permanent authority required');const changed=Sales.applyAccountSale(a.permanent,payload.selections,Policy);a.permanent=changed.model;summary=copy({...changed,model:undefined});delete summary.model;return a;
+    },{failAt});
+    const account=await this.read(accountId),balance=Policy.getSharedGold(account.permanent);
+    return {account,balance,duplicate:result.duplicate,transactionId,summary:result.duplicate?null:summary};
+   }catch(error){
+    if(!/Concurrent save conflict/.test(String(error?.message))||attempt+1>=maxAttempts)throw error;
+    lastConflict=error;const current=await this.read(accountId);if(!current)throw Error('Unknown account');Policy.getSharedGold(current.permanent);sourceRevision=current.revision;
+   }
+  }
+  throw lastConflict||Error('Sale transaction conflict');
+ },
+  async discardStarterEquipment(accountId,revision,transactionId,instanceId,{failAt,maxAttempts=4}={}){
+   assertSupabaseAccountId(accountId);assertDiscardTransactionId(transactionId);if(!Number.isInteger(revision)||revision<0)throw Error('Valid source revision required');
+   if(!Number.isInteger(maxAttempts)||maxAttempts<1||maxAttempts>8)throw Error('Invalid discard transaction retry limit');
+   const payload={instanceId:Sales.normalizeDiscardInstanceId(instanceId)};
+   let sourceRevision=revision,lastConflict=null,summary=null;
+   for(let attempt=0;attempt<maxAttempts;attempt++){
+    try{
+     const result=await transact(accountId,sourceRevision,'discard-starter:'+transactionId,payload,a=>{
+      if(!a.permanent)throw Error('Permanent authority required');const changed=Sales.applyStarterGiftDiscard(a.permanent,payload.instanceId,Policy);a.permanent=changed.model;summary=copy(changed.discarded);return a;
+     },{failAt});
+     const account=await this.read(accountId);return {account,duplicate:result.duplicate,transactionId,summary:result.duplicate?null:summary};
+    }catch(error){
+     if(!/Concurrent save conflict/.test(String(error?.message))||attempt+1>=maxAttempts)throw error;
+     lastConflict=error;const current=await this.read(accountId);if(!current)throw Error('Unknown account');sourceRevision=current.revision;
+    }
+   }
+   throw lastConflict||Error('Discard transaction conflict');
+  },
  auditLegacy:raw=>Cutover.legacyAudit(raw),
  async recoveryReport(id){const bundle=await store.recoveryBundle(id);return {report:Cutover.inspect(bundle),bundle};},
  async beginRecovery(id,revision,token,{failAt}={}){
@@ -39,7 +187,7 @@ function wrap(store){
  },
  async saveSettings(id,revision,values,options){const r=await store.savePreferences(id,revision,values,options);return {settings:r.account.values,settingsRevision:r.account.revision};},
  prepareSingleOffline:job=>{Policy.validate(job.model);return store.prepareSingleOffline(job,{clientVersion:2,guard:a=>{if(a.farming)Farming.guardOffline(a,job);}});},pendingForAccount:id=>store.pendingForAccount(id),
- async commitSingleOffline(job,result,options){try{Policy.validate(result.model);return await store.commitSingleOffline(job,result,{...options,clientVersion:2,finish:(a,j)=>{if(a.farming)Farming.finishOffline(a,j);}});}catch(error){await store.recordFailure(job.accountId,'offline:'+job.id,{revision:job.revision,runId:job.id},error);throw error;}},
+ async commitSingleOffline(job,result,options){try{const reconciled=Policy.reconcileProgressGold(result.model,job.model,job.characterId);result={...copy(result),model:reconciled.model};Policy.validate(result.model);return await store.commitSingleOffline(job,result,{...options,clientVersion:2,finish:(a,j)=>{if(a.farming)Farming.finishOffline(a,j);}});}catch(error){await store.recordFailure(job.accountId,'offline:'+job.id,{revision:job.revision,runId:job.id},error);throw error;}},
  // Import is explicitly called by the migration coordinator, never on page load.
  async migrate(accountId,raw,{generate,failAt,prepareModel=model=>model}={}){
   if(!raw||!Array.isArray(raw.slots))throw new Policy.MigrationConflict([{code:'invalid-slots'}]);

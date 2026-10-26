@@ -3,6 +3,7 @@ const fs = require('node:fs');
 const path = require('node:path');
 
 const script = fs.readFileSync(path.join(__dirname, '..', 'script.js'), 'utf8');
+const farmingBridge = fs.readFileSync(path.join(__dirname, '..', 'permanent-farming-bridge.js'), 'utf8');
 const combatCore = fs.readFileSync(path.join(__dirname, '..', 'combat-core-policy.js'), 'utf8');
 const html = fs.readFileSync(path.join(__dirname, '..', 'index.html'), 'utf8');
 const layoutCss = fs.readFileSync(path.join(__dirname, '..', 'styles', 'mmorpg-layout.css'), 'utf8');
@@ -14,6 +15,9 @@ assert.match(html, /mmorpg-layout\.css\?v=20260822-combat-motion-v43/, 'battle l
 assert.match(layoutCss, /\.battle-header \.party-mini-track[\s\S]*max-height: 4px !important/, 'party tracks cannot stretch beyond their compact row');
 assert.match(layoutCss, /\.battle-header \.party-mini-track > i[\s\S]*position: absolute[\s\S]*max-height: 4px !important/, 'party bar fills remain constrained to the track');
 assert.match(script, /PartyPolicy\.normalizeParty/, 'old saves receive normalized party data');
+const renderPartyBody = script.match(/function renderParty\(\) \{([\s\S]*?)\n\}/)?.[1] || '';
+assert.doesNotMatch(renderPartyBody, /saveProgress\(/, 'opening the party interface remains read-only during an active save');
+assert.match(farmingBridge, /let partyTransitionBusy=false[\s\S]*?if\(partyTransitionBusy\)[\s\S]*?finally\{partyTransitionBusy=false;\}/, 'party changes reject repeated clicks until the coordinated transition completes');
 assert.match(script, /activeMemberIds/, 'active party member ids are persisted');
 assert.match(script, /function createBattlePartyMember/, 'each active character receives an independent runtime record');
 assert.match(script, /skillCooldowns: \{\}/, 'each member owns skill cooldowns');

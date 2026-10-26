@@ -16,9 +16,11 @@ assert.match(html, /data-menu-action="村莊"/);
 assert.equal((html.match(/id="village-building-modal"/g) || []).length, 1, 'all buildings share one modal');
 assert.match(script, /Object\.values\(VillagePolicy\.BUILDING_DEFINITIONS\)/, 'building cards render from centralized data');
 assert.match(html, /village-upgrade-policy\.js[\s\S]*script\.js/, 'building upgrade policy loads before the main game script');
+assert.match(html, /src="village-policy\.js\?v=20261023-five-active-buildings-v1"/, 'the entry loads the current local five-building village policy');
+assert.doesNotMatch(html, /raw\.githack\.com[^\"]*village-policy\.js/, 'the removed village entries cannot return through the stale remote policy');
 assert.match(html, /village-upgrade-policy\.js\?v=20260830-chapter-two-material-art-v1/, 'building materials load the current local artwork definition');
 assert.match(script, /VillageUpgradePolicy\.grantMapDrops\(progress, map\.id\)/, 'shared battle rewards include map-based building materials');
-assert.match(script, /VillageUpgradePolicy\.upgrade\(progress, villageData, buildingId\)/, 'the village action uses the centralized upgrade policy');
+assert.match(script, /VillageUpgradePolicy\.upgrade\(current, nextVillage, buildingId\)/, 'the village action uses the centralized upgrade policy inside the saved transaction');
 assert.match(script, /升級至 Lv2/, 'the village shows the chapter-one upgrade action');
 assert.match(script, /village: VillagePolicy\.normalizeVillageData\(saved\.village\)/, 'legacy progress is normalized on load');
 assert.match(script, /progress\.village = VillagePolicy\.normalizeVillageData\(progress\.village\)/, 'village state is normalized on save');
@@ -30,5 +32,12 @@ assert.doesNotMatch(script.match(/function closeVillage\(\) \{[\s\S]*?\n\}/)?.[0
 assert.match(css, /grid-template-columns:repeat\(auto-fit,minmax\(230px,1fr\)\)/, 'building cards use a responsive grid');
 assert.match(css, /\.app-shell\.village-open\{width:100%;max-width:none;padding:0\}/, 'the village can use the desktop viewport width');
 assert.match(css, /grid-template-columns:repeat\(6,minmax\(0,1fr\)\)!important/, 'the battle menu accommodates the village entry');
+assert.match(script, /data-village-upgrade-toggle[\s\S]*aria-expanded="false"[\s\S]*village-upgrade-panel/, 'each building renders an independent collapsed material control');
+assert.match(script, /panel\.classList\.toggle\('is-expanded'\)/, 'material controls toggle their own panel without changing upgrade rules');
+assert.match(css, /@media\(max-width:700px\) and \(orientation:portrait\)[\s\S]*\.village-building-card\{[\s\S]*min-height:0/, 'portrait village cards use the compact layout');
+assert.match(css, /\.village-upgrade-panel\{display:none\}[\s\S]*\.village-upgrade-panel\.is-expanded\{display:block\}/, 'upgrade materials are collapsed by default on portrait phones');
+assert.match(css, /village-upgrade-cost li:not\(\.village-upgrade-insufficient\)[\s\S]*color:#79dda0/, 'sufficient mobile upgrade requirements are green');
+assert.match(css, /furnace-material-grid\{display:grid;grid-template-columns:repeat\(auto-fit,minmax\(96px,1fr\)\)/, 'mobile essence materials use an extensible wrapping grid');
+assert.match(css, /furnace-equipment-column[\s\S]*border-bottom:0[\s\S]*furnace-selection-column[\s\S]*border-top:0/, 'mobile equipment list and selected salvage details form one compact block');
 
 console.log('village-integration: assertions passed');

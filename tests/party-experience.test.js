@@ -11,7 +11,7 @@ equal(E.distribute(1,members.map(x=>({...x,level:45})),map).map(x=>x.actualExp),
 equal(E.distribute(90,members.map(x=>({...x,alive:false})),map),[],'no alive recipients');
 equal(E.distribute(0,members,map).map(x=>x.actualExp),[0,0,0],'no invented experience');
 assert.throws(()=>E.distribute(90,[members[0],members[0]],map));checks++;
-function setup(){const raw=Fixture.create(),model=O.compactModel(P.migrate(raw));const ids=model.slotOrder;
+function setup(sharedGold=false){const raw=Fixture.create();let model=O.compactModel(P.migrate(raw));if(sharedGold)model=P.migrateSharedGold(model).model;const ids=model.slotOrder;
  for(const id of ids){model.characters[id].progress.level=20;model.characters[id].progress.xp=Exp.requiredXp(20)-1;}
  const fourth='character-fourth-experience';const next=P.apply(model,{type:'create',id:fourth,slotIndex:3,character:{...raw.slots[0].character,id:fourth},progress:{...O.copy(model.characters[ids[0]].progress),equipment:{}}});
  let saved={id:'experience-test',revision:0,permanent:next},writes=0,fail=false;
@@ -36,10 +36,11 @@ function reward(a,session='battle',spawnedAt=100,overrides={}){const event={sess
  const game=loadGame();game.context.PermanentPartyRuntime={current:a.rt};game.context.liveProgress=a.rt.getProgress(a.ids[1]);game.context.liveCharacter=a.rt.model.characters[a.ids[1]].character;
  game.evaluate("battle.partyMembers=[createBattlePartyMember({character:liveCharacter,progress:liveProgress},1,'other',0)];battle.partyMembers[0].shield=17;battle.partyMembers[0].skillCooldowns={test:12345};battle.partyMembers[0].currentHp=40;syncMainBattleMemberProgression(liveCharacter,liveProgress,battle.partyMembers[0]);");
  equal(game.evaluate('battle.partyMembers[0].level'),21,'teammate live level updated');equal(game.evaluate('battle.partyMembers[0].shield'),17,'leveling preserves shield');equal(game.evaluate('battle.partyMembers[0].currentHp'),40,'leveling no free heal');equal(game.evaluate('battle.partyMembers[0].skillCooldowns.test'),12345,'leveling preserves cooldown');
- const live=setup(),combat=loadGame();combat.context.PermanentPartyRuntime={current:live.rt};live.rt.beginExperienceBattle('actual-kill');await live.rt.flush();
+ const live=setup(true),combat=loadGame(),goldBefore=live.rt.getSharedGold();combat.context.PermanentPartyRuntime={current:live.rt};live.rt.beginExperienceBattle('actual-kill');await live.rt.flush();
  combat.evaluate("fighting=true;battle={experienceSessionId:'actual-kill',sessionId:123,enemyTypes:['plainsRabbit'],enemyHps:[0],enemyLevels:[1],enemyAffixes:[[]],enemySpawnedAt:[100],partyMembers:buildBattlePartyMembers(0),roundLoot:{}};getEnemyDefinition=()=>({id:'plainsRabbit',name:'驗收怪物',mapId:'plains-entrance',xp:90,gold:10});");
  combat.evaluate('rewardVictory(0)');await live.rt.flush();
  for(const id of live.ids)equal(live.rt.getProgress(id).xp,.5,'real reward entry gives personal experience '+id);
+ equal(live.rt.getSharedGold(),goldBefore+5,'real reward entry credits authoritative shared gold with loot and experience');
  const awarded=live.saved();combat.evaluate('battle.rewardedEnemyIndexes=new Set();rewardVictory(0)');await live.rt.flush();equal(live.saved(),awarded,'real callback replay blocked even if memory reward set lost');
  console.log('Party experience: '+checks+' checks passed');
 })().catch(error=>{console.error(error);process.exitCode=1;});
