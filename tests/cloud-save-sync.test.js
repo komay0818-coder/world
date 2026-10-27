@@ -29,6 +29,11 @@ async function seed(store,accountId,name='雲端角色'){let created=await store
 
  const scheduled=[];const automatic=retrySync.startAutomatic({initialDelay:1,interval:1000,schedule:fn=>{scheduled.push(fn);return fn;},cancel:fn=>{const index=scheduled.indexOf(fn);if(index>=0)scheduled.splice(index,1);}});check(scheduled.length===1,'automatic cloud save schedules background synchronization');await scheduled.shift()();await new Promise(resolve=>setImmediate(resolve));check(server.saves.get(retryUser).revision===2,'automatic retry does not duplicate an unchanged save');await automatic.stop();
 
+ let clock=0,currentRetry=await retryStore.read(retryAccount),continuousModel=structuredClone(currentRetry.permanent);continuousModel.characters['character-重試角色'].progress.xp=130;await retryStore.commitOnline(retryAccount,currentRetry.revision,'online-v2:'+currentRetry.revision+':continuous-checkpoint',continuousModel,{}, {coordinated:true});
+ const deadlines=[];const schedule=(fn,delay)=>{const task={fn,due:clock+delay};deadlines.push(task);return task;},cancel=task=>{const index=deadlines.indexOf(task);if(index>=0)deadlines.splice(index,1);};const bounded=retrySync.startAutomatic({initialDelay:1500,maxWait:5000,interval:10000,now:()=>clock,schedule,cancel});
+ for(const at of [1000,2000,3000,4000,4900]){clock=at;bounded.notify();check(deadlines.length===1&&deadlines[0].due<=5000,'continuous checkpoint debounce remains bounded by five seconds');}
+ clock=5000;const due=deadlines.shift();check(due.due===5000,'maximum-wait deadline is not postponed by the latest checkpoint');await due.fn();check(server.saves.get(retryUser).revision===3&&server.saves.get(retryUser).snapshot.permanent.characters['character-重試角色'].progress.xp===130,'bounded automatic sync commits the latest continuous progress');await bounded.stop();
+
  sessionA.invalidate();await assert.rejects(()=>refreshed.getRemote(),error=>error.code==='SESSION_INVALID');checks++;
  for(const store of [deviceA,deviceB,deviceC,isolated,rollback,retryStore])store.close();console.log('Cloud save sync: '+checks+' checks passed');
 })().catch(error=>{console.error(error);process.exitCode=1;});

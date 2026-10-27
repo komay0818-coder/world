@@ -16,13 +16,21 @@ const active=()=>modal.dataset.view==='party-inventory';
 const runtime=()=>getPermanentPartyRuntime();
 const formatGold=value=>Number(value).toLocaleString('en-US');
 function sharedGold(){try{return {ready:true,value:runtime().getSharedGold()};}catch(error){return {ready:false,value:null,error};}}
+function inventorySnapshot(service=runtime()){return typeof service.getInventorySnapshot==='function'?service.getInventorySnapshot():{items:service.model.bag.items,equipmentOwners:service.model.equipmentOwners};}
 function saleKey(value){return value.kind==='equipment'?'equipment:'+value.instanceId:'material:'+value.itemId;}
-function saleEligibility(entry){
- const service=runtime(),bag=service.model.bag.items;
+function saleBagIndex(snapshot=inventorySnapshot()){
+ const equipment=new Map(),materials=new Map();
+ for(const item of snapshot.items){
+  if(item?.kind==='equipment')equipment.set(item.instanceId,item);
+  else if(item?.kind==='material'){const id=ItemRarityPolicy.canonicalId(item),items=materials.get(id)||[];items.push(item);materials.set(id,items);}
+ }
+ return {equipment,materials,owners:snapshot.equipmentOwners};
+}
+function saleEligibility(entry,index=saleBagIndex()){
  if(entry?.item?.kind==='equipment'){
-  const items=(entry.stackIds||[entry.item.instanceId||entry.item.id]).map(id=>bag.find(item=>item?.kind==='equipment'&&item.instanceId===id)).filter(Boolean);
+  const items=(entry.stackIds||[entry.item.instanceId||entry.item.id]).map(id=>index.equipment.get(id)).filter(Boolean);
   if(!items.length||items.length!==(entry.stackIds||[entry.item.instanceId||entry.item.id]).length)return {ok:false,reason:'裝備資料已變更'};
-  if(items.some(item=>service.model.equipmentOwners[item.instanceId]?.kind!=='bag'))return {ok:false,reason:'已穿戴'};
+  if(items.some(item=>index.owners[item.instanceId]?.kind!=='bag'))return {ok:false,reason:'已穿戴'};
   if(items.some(InventorySalePolicy.isProtected))return {ok:false,reason:'已保護'};
   if(items.some(item=>!ItemRarityPolicy.normalizeRarity(item.rarity||item.quality)))return {ok:false,reason:'品質未確認'};
   return {ok:true,kind:'equipment',items};
@@ -30,31 +38,31 @@ function saleEligibility(entry){
  if(entry?.item?.kind!=='material')return {ok:false,reason:'不可販賣'};
  const classification=ItemRarityPolicy.classifyForSale(entry.item);
  if(!classification.sellable||classification.saleGroup!=='material')return {ok:false,reason:'不可販賣'};
- const items=bag.filter(item=>item?.kind==='material'&&ItemRarityPolicy.canonicalId(item)===classification.id);
+ const items=index.materials.get(classification.id)||[];
  if(items.some(InventorySalePolicy.isProtected))return {ok:false,reason:'已保護'};
  const quantity=items.reduce((sum,item)=>sum+(Number(item.quantity)||0),0);
  return quantity>0?{ok:true,kind:'material',itemId:classification.id,quantity,rarity:classification.rarity}:{ok:false,reason:'數量不足'};
 }
-function discardEligibility(entry){
- const service=runtime(),instanceId=entry?.item?.instanceId||entry?.item?.id,item=service.model.bag.items.find(value=>value?.kind==='equipment'&&value.instanceId===instanceId);
- if(!item||service.model.equipmentOwners[item.instanceId]?.kind!=='bag')return {ok:false,reason:'已穿戴或不在背包'};
+function discardEligibility(entry,snapshot=inventorySnapshot()){
+ const instanceId=entry?.item?.instanceId||entry?.item?.id,item=snapshot.items.find(value=>value?.kind==='equipment'&&value.instanceId===instanceId);
+ if(!item||snapshot.equipmentOwners[item.instanceId]?.kind!=='bag')return {ok:false,reason:'已穿戴或不在背包'};
  if(InventorySalePolicy.isProtected(item))return {ok:false,reason:'已保護'};
  if(!InventorySalePolicy.isStarterGiftEquipment(item))return {ok:false,reason:'僅初始贈送裝備可丟棄'};
  return {ok:true,item};
 }
-function pruneSaleSelections(){
- const service=runtime(),bag=service.model.bag.items;
+function pruneSaleSelections(snapshot=inventorySnapshot()){
+ const bag=snapshot.items;
  for(const [key,selection]of saleSelections){
-  if(selection.kind==='equipment'){const item=bag.find(entry=>entry?.kind==='equipment'&&entry.instanceId===selection.instanceId);if(!item||InventorySalePolicy.isProtected(item)||service.model.equipmentOwners[selection.instanceId]?.kind!=='bag')saleSelections.delete(key);}
+  if(selection.kind==='equipment'){const item=bag.find(entry=>entry?.kind==='equipment'&&entry.instanceId===selection.instanceId);if(!item||InventorySalePolicy.isProtected(item)||snapshot.equipmentOwners[selection.instanceId]?.kind!=='bag')saleSelections.delete(key);}
   else{const classification=ItemRarityPolicy.classifyForSale(selection.itemId),available=bag.filter(item=>item?.kind==='material'&&ItemRarityPolicy.canonicalId(item)===selection.itemId&&!InventorySalePolicy.isProtected(item)).reduce((sum,item)=>sum+(Number(item.quantity)||0),0);if(!classification.sellable||classification.saleGroup!=='material'||available<selection.quantity)saleSelections.delete(key);}
  }
 }
 function saleSummary(){
- pruneSaleSelections();const bag=runtime().model.bag.items;let proceeds=0,equipment=0,materials=0;
+ const snapshot=inventorySnapshot();pruneSaleSelections(snapshot);const bag=snapshot.items;let proceeds=0,equipment=0,materials=0;
  for(const selection of saleSelections.values())if(selection.kind==='equipment'){const item=bag.find(entry=>entry?.kind==='equipment'&&entry.instanceId===selection.instanceId);if(item){proceeds+=InventorySalePolicy.QUALITY_SELL_PRICES[ItemRarityPolicy.normalizeRarity(item.rarity||item.quality)];equipment++;}}else{const classification=ItemRarityPolicy.classifyForSale(selection.itemId);proceeds+=InventorySalePolicy.MATERIAL_SELL_PRICES[classification.rarity]*selection.quantity;materials+=selection.quantity;}
  return {proceeds,equipment,materials,units:equipment+materials,selections:[...saleSelections.values()].map(value=>({...value}))};
 }
-function selected(){const service=runtime(),ids=service.model.parties[service.mainId].memberIds;if(!ids.includes(viewedCharacterId))viewedCharacterId=ids[0];return service.view(viewedCharacterId);}
+function selected(){const service=runtime(),ids=service.getPartyMemberIds(service.mainId);if(!ids.includes(viewedCharacterId))viewedCharacterId=ids[0];return service.view(viewedCharacterId);}
 function restriction(item,role,slot){
  if(item?.kind!=='equipment')return '這不是可穿戴裝備。';
  if(item.durability!==undefined&&Number(item.durability)<=0)return '裝備耐久為 0，無法穿戴。';
@@ -108,7 +116,7 @@ function buildMobileBagCategories(right){
 function queueOperation(action){pendingOperation=pendingOperation.then(action,action);return pendingOperation;}
 function operate(command,label){
  return queueOperation(async()=>{const service=runtime();try{
-   await service.flush();const role=service.view(viewedCharacterId),item=command.type==='equip'?service.model.bag.items.find(entry=>entry.instanceId===command.instanceId):role.progress.equipment?.[command.slot];
+   await service.flush();const role=service.view(viewedCharacterId),item=command.type==='equip'?inventorySnapshot(service).items.find(entry=>entry.instanceId===command.instanceId):role.progress.equipment?.[command.slot];
    if(command.characterId!==viewedCharacterId)throw Error('查看角色已變更，請重新操作。');
    if(!item)throw Error(command.type==='equip'?'裝備已不在共用背包中。':'該欄位目前沒有裝備。');
    const blocked=command.type==='equip'?restriction(item,role,command.slot):'';if(blocked)throw Error(blocked);
@@ -129,13 +137,19 @@ function socketViewedRune(slot,instanceId,runeId){
 function menu(){const bag=document.querySelector('[data-menu-action="背包"]'),equipment=document.querySelector('[data-menu-action="裝備"]');if(!bag||!equipment)return;equipment.hidden=desktop.matches;bag.querySelector('b').textContent=desktop.matches?'角色與背包':'背包';bag.querySelector('small').textContent=desktop.matches?'角色・道具':'道具';}
 function updateGoldDisplay(){const node=content.querySelector('[data-shared-gold]'),button=content.querySelector('[data-toggle-party-sale]'),gold=sharedGold();if(node){node.classList.toggle('unready',!gold.ready);node.innerHTML=gold.ready?`<span aria-hidden="true">●</span><b>${formatGold(gold.value)}</b>`:'<b>金幣未就緒</b>';}if(button)button.disabled=!gold.ready||saleBusy;}
 function decorateSaleCards(){
- content.querySelectorAll('[data-inventory-item-id]').forEach(card=>{const entry=inventoryTooltipEntries.get(card.dataset.inventoryItemId),eligible=saleEligibility(entry);card.classList.toggle('party-sale-disabled',saleMode&&!eligible.ok);card.toggleAttribute('aria-disabled',saleMode&&!eligible.ok);card.dataset.partySaleEligible=eligible.ok?'true':'false';card.querySelector('.party-sale-badge')?.remove();if(!saleMode)return;
+ const index=saleMode?saleBagIndex():null;
+ content.querySelectorAll('[data-inventory-item-id]').forEach(card=>{const previous=card.querySelector('.party-sale-badge');if(!saleMode){card.classList.remove('party-sale-disabled','party-sale-selected');card.removeAttribute('aria-disabled');delete card.dataset.partySaleEligible;previous?.remove();return;}const entry=inventoryTooltipEntries.get(card.dataset.inventoryItemId),eligible=saleEligibility(entry,index);card.classList.toggle('party-sale-disabled',!eligible.ok);card.toggleAttribute('aria-disabled',!eligible.ok);card.dataset.partySaleEligible=eligible.ok?'true':'false';
   let selected=0;if(eligible.kind==='equipment')selected=eligible.items.filter(item=>saleSelections.has('equipment:'+item.instanceId)).length;else if(eligible.kind==='material')selected=saleSelections.get('material:'+eligible.itemId)?.quantity||0;
-  card.classList.toggle('party-sale-selected',selected>0);const badge=document.createElement('span');badge.className='party-sale-badge';badge.textContent=eligible.ok?(selected?`✓ ${selected}`:'可販賣'):eligible.reason;card.appendChild(badge);
+  card.classList.toggle('party-sale-selected',selected>0);const badge=previous||document.createElement('span'),label=eligible.ok?(selected?`✓ ${selected}`:'可販賣'):eligible.reason;badge.className='party-sale-badge';if(badge.textContent!==label)badge.textContent=label;if(!previous)card.appendChild(badge);
  });
 }
 function saleToolbar(){const summary=saleSummary();return `<section class="party-sale-toolbar" ${saleMode?'':'hidden'}><div><b>販賣模式</b><small>已選 ${summary.units} 件物品・預計獲得 <strong>${formatGold(summary.proceeds)}</strong> 金幣</small></div><div><button type="button" data-confirm-party-sale ${summary.units&&!saleBusy?'':'disabled'}>${saleBusy?'處理中…':'確認販賣'}</button><button type="button" data-cancel-party-sale ${saleBusy?'disabled':''}>取消</button></div></section>`;}
-function toggleSaleMode(enabled){if(saleBusy)return;saleMode=Boolean(enabled);if(!saleMode)saleSelections.clear();hideInventoryTooltip(true);renderInventory('inventory');}
+function refreshSaleUi(){
+ const current=content.querySelector('.party-sale-toolbar');if(current){const template=document.createElement('template');template.innerHTML=saleToolbar();current.replaceWith(template.content.firstElementChild);}
+ const toggle=content.querySelector('[data-toggle-party-sale]');if(toggle){toggle.textContent=saleMode?'結束販賣':'販賣物品';toggle.disabled=!sharedGold().ready||saleBusy;}
+ modal.classList.toggle('party-sale-mode',saleMode);decorateSaleCards();
+}
+function toggleSaleMode(enabled){if(saleBusy)return;saleMode=Boolean(enabled);if(!saleMode)saleSelections.clear();hideInventoryTooltip(true);refreshSaleUi();}
 function selectSaleEntry(entry){
  const eligible=saleEligibility(entry);if(!eligible.ok){showToast(`不可販賣：${eligible.reason}`);return;}
  if(eligible.kind==='equipment'){
@@ -143,27 +157,27 @@ function selectSaleEntry(entry){
  }else{
   const key='material:'+eligible.itemId,current=saleSelections.get(key)?.quantity||eligible.quantity,text=window.prompt(`請輸入販賣數量（1～${eligible.quantity}；輸入 0 可取消選取）`,String(current));if(text===null)return;const quantity=Number(text);if(!Number.isSafeInteger(quantity)||quantity<0||quantity>eligible.quantity){showToast('販賣數量不正確。');return;}if(quantity===0)saleSelections.delete(key);else saleSelections.set(key,{kind:'material',itemId:eligible.itemId,quantity});
  }
- renderInventory('inventory');
+ refreshSaleUi();
 }
 function confirmSale(){
- return queueOperation(async()=>{if(saleBusy)return {ok:false,busy:true};const summary=saleSummary();if(!summary.units)return {ok:false,empty:true};if(!window.confirm(`確定販賣 ${summary.units} 件物品，取得 ${formatGold(summary.proceeds)} 金幣嗎？`))return {ok:false,cancelled:true};saleBusy=true;renderInventory('inventory');const service=runtime();try{const transactionId='inventory-sale:'+crypto.randomUUID();const result=await service.sellItems(transactionId,summary.selections);saleSelections.clear();saleMode=false;showToast(`販賣完成，獲得 ${formatGold(result.summary?.proceeds||summary.proceeds)} 金幣。`);return {ok:true,result};}catch(error){showToast(`販賣失敗：${error.message}`);return {ok:false,error};}finally{saleBusy=false;if(active())renderInventory('inventory');}});
+ return queueOperation(async()=>{if(saleBusy)return {ok:false,busy:true};const summary=saleSummary();if(!summary.units)return {ok:false,empty:true};if(!window.confirm(`確定販賣 ${summary.units} 件物品，取得 ${formatGold(summary.proceeds)} 金幣嗎？`))return {ok:false,cancelled:true};saleBusy=true;refreshSaleUi();const service=runtime();try{const transactionId='inventory-sale:'+crypto.randomUUID();const result=await service.sellItems(transactionId,summary.selections);saleSelections.clear();saleMode=false;showToast(`販賣完成，獲得 ${formatGold(result.summary?.proceeds||summary.proceeds)} 金幣。`);return {ok:true,result};}catch(error){showToast(`販賣失敗：${error.message}`);return {ok:false,error};}finally{saleBusy=false;if(active())renderInventory('inventory');}});
 }
 function discardStarter(instanceId){
  if(discardBusy)return Promise.resolve({ok:false,busy:true});discardBusy=true;
  return queueOperation(async()=>{const service=runtime();try{
-   await service.flush();const item=service.model.bag.items.find(entry=>entry?.kind==='equipment'&&entry.instanceId===instanceId),eligible=discardEligibility({item});
+   await service.flush();const snapshot=inventorySnapshot(service),item=snapshot.items.find(entry=>entry?.kind==='equipment'&&entry.instanceId===instanceId),eligible=discardEligibility({item},snapshot);
    if(!eligible.ok)throw Error(eligible.reason);
    if(!window.confirm(`確定要永久丟棄「${item.name}」嗎？此操作不會獲得金幣或材料。`))return {ok:false,cancelled:true};
    const transactionId='inventory-discard:'+crypto.randomUUID(),result=await service.discardStarterEquipment(transactionId,instanceId);hideInventoryTooltip(true);showToast(`已丟棄：${item.name}`);return {ok:true,result};
   }catch(error){showToast(`丟棄失敗：${error.message}`);return {ok:false,error};}finally{discardBusy=false;if(active())renderInventory('inventory');}});
 }
 function left(){
- const service=runtime(),model=service.model,ids=model.parties[service.mainId].memberIds;
+ const service=runtime(),ids=service.getPartyMemberIds(service.mainId);
  if(!ids.includes(viewedCharacterId))viewedCharacterId=ids[0];
- const tabs=content.querySelector('.party-character-tabs'),tabHtml=Array.from({length:3},(_,i)=>{const id=ids[i],role=model.characters[id];return `<button type="button" role="tab" aria-selected="${id===viewedCharacterId}" data-view-character="${escape(id||'')}" ${role?'':'disabled'}><small>隊伍 ${i+1}</small><b>${role?escape(role.character.name):'空位'}</b></button>`;}).join('');if(tabs.dataset.signature!==tabHtml){tabs.dataset.signature=tabHtml;tabs.innerHTML=tabHtml;}
+ const tabs=content.querySelector('.party-character-tabs'),tabHtml=Array.from({length:3},(_,i)=>{const id=ids[i],character=id?service.getCharacter(id):null;return `<button type="button" role="tab" aria-selected="${id===viewedCharacterId}" data-view-character="${escape(id||'')}" ${character?'':'disabled'}><small>隊伍 ${i+1}</small><b>${character?escape(character.name):'空位'}</b></button>`;}).join('');if(tabs.dataset.signature!==tabHtml){tabs.dataset.signature=tabHtml;tabs.innerHTML=tabHtml;}
  const role=service.view(viewedCharacterId),character=role.character,progress=role.progress,stats=getCharacterStats(progress.level,progress,character);
  const race=Object.values(factions).flat().find(r=>r.id===character.race),policies=[WarriorAdvancementPolicy,RogueAdvancementPolicy,HunterAdvancementPolicy,MageAdvancementPolicy,PriestAdvancementPolicy],advanced=policies.flatMap(p=>Object.values(p.ADVANCED_CLASSES)).find(c=>c.id===progress.advancedClass),job=advanced?.name||classes.find(c=>c.id===character.job)?.name||character.job;
- const target=content.querySelector('.party-character-scroll'),scroll=target.scrollTop,expanded=target.querySelector('details')?.open||false,signature=JSON.stringify([viewedCharacterId,character,progress,stats]);if(target.dataset.signature===signature)return;target.dataset.signature=signature;
+ const target=content.querySelector('.party-character-scroll'),scroll=target.scrollTop,expanded=target.querySelector('details')?.open||false,signature=JSON.stringify([viewedCharacterId,character,progress.level,progress.advancedClass,progress.equipment,stats]);if(target.dataset.signature===signature)return;target.dataset.signature=signature;
  const equipment=document.createElement('div');renderEquipment(progress,{classList:{remove(){}},dataset:{}},{textContent:''},equipment);
  equipment.querySelectorAll('.equipment-frame').forEach(frame=>{const slot=Object.keys(equipmentSlots).find(s=>frame.classList.contains('slot-'+s));if(progress.equipment[slot]){frame.dataset.viewEquippedSlot=slot;frame.tabIndex=0;}});
  const fields=[['攻擊／法攻',stats.attack],['防禦',stats.defense],['暴擊率',(stats.crit*100).toFixed(1)+'%'],['閃避率',(stats.dodge*100).toFixed(1)+'%'],['命中能力',Math.round(stats.accuracy*100)+'%'],['招架率',(stats.parry*100).toFixed(1)+'%'],['攻擊速度',stats.attackSpeed.toFixed(2)],['技能冷卻速度',Math.round(stats.cooldownSpeed*100)+'%'],['生命恢復',stats.hpRegeneration??0],['額外回魔',Number(stats.manaRegenFlat||0).toFixed(1)]];
@@ -172,7 +186,7 @@ function left(){
 }
 renderInventory=function(view='inventory'){
  if(!['inventory','equipment','party-inventory'].includes(view)||(view==='equipment'&&!desktop.matches)){document.querySelector('#inventory-close').setAttribute('aria-label','關閉背包');return originalInventory(view==='party-inventory'?'inventory':view);}
- selected();renderViewedBag();const right=document.createElement('section');right.className='party-bag-column';right.innerHTML='<header><h3>帳號共用背包</h3><small>裝備操作套用至左側目前查看的角色</small></header>'+content.innerHTML;
+ selected();renderViewedBag();const right=document.createElement('section');right.className='party-bag-column';right.innerHTML='<header><h3>帳號共用背包</h3><small>裝備操作套用至左側目前查看的角色</small></header>';while(content.firstChild)right.appendChild(content.firstChild);
  right.querySelector('.scrap-tools')?.remove();right.querySelector('[data-inventory-section="wearable"] h3').textContent='目前角色可裝備';
  const header=right.querySelector(':scope>header');header.innerHTML='<div><h3>帳號共用背包</h3><small>裝備操作套用至左側目前查看的角色</small></div><div class="party-bag-actions"><span class="party-shared-gold" data-shared-gold aria-live="polite"></span><button type="button" data-toggle-party-sale>'+ (saleMode?'結束販賣':'販賣物品') +'</button></div>';
  right.querySelector('.inventory-scroll-area')?.insertAdjacentHTML('beforebegin',saleToolbar());
@@ -183,7 +197,7 @@ renderInventory=function(view='inventory'){
 renderInventoryTooltip=function(...args){if(active()&&args[2]!==true)return;originalTooltip(...args);if(!active())return;const tooltip=document.querySelector('#inventory-shared-tooltip'),entry=inventoryTooltipEntries.get(args[0]);tooltip?.querySelector('.inventory-tooltip-equipped')?.remove();tooltip?.classList.remove('has-comparison');tooltip?.classList.add('single-column');const footer=tooltip?.querySelector('footer');if(!footer)return;footer.querySelectorAll('[data-socket-item]').forEach(node=>node.remove());footer.querySelector('[data-select-scrap-stack]')?.closest('label')?.remove();if(entry?.viewedEquippedSlot){const item=entry.item,socketed=item.socketedRunes||[],capacity=Number(item.sockets)||0,runes=[...entry.availableRuneIds].map(id=>RunePolicy.RUNE_BY_ID.get(id)).filter(Boolean),buttons=socketed.length<capacity?runes.map(rune=>`<button type="button" data-party-socket-rune="${escape(rune.id)}" data-party-socket-slot="${escape(entry.viewedEquippedSlot)}" data-party-socket-item="${escape(item.instanceId||item.id)}">鑲嵌${escape(rune.name)}</button>`).join(''):'';footer.innerHTML=`<button type="button" data-unequip-slot="${escape(entry.viewedEquippedSlot)}">卸下裝備</button><section class="party-rune-actions"><b>符文插槽 ${socketed.length}/${capacity}</b>${buttons||`<small>${capacity===0?'此裝備沒有符文插槽。':socketed.length>=capacity?'符文插槽已滿。':'共用背包沒有可用符文。'}</small>`}${socketed.length?'<button type="button" disabled>拆卸符文尚未開放（費用待定）</button><button type="button" disabled>更換符文尚未開放（費用待定）</button>':''}</section>`;}else if(entry?.item?.kind==='equipment'&&!entry.wearable)footer.innerHTML=`<span class="equip-blocked">${escape(restriction(entry.item,selected()))}</span>`;const discard=discardEligibility(entry);if(discard.ok)footer.insertAdjacentHTML('beforeend',`<button type="button" data-party-discard="${escape(discard.item.instanceId)}" ${discardBusy?'disabled':''}>丟棄裝備</button>`);};
 const blockedMutations='[data-socket-item],[data-select-scrap-stack],[data-select-all-scrap],[data-open-sell-confirm],[data-select-common-equipment]';
 modal.addEventListener('click',event=>{if(!active())return;const equipmentCategory=event.target.closest('[data-party-equipment-category]');if(equipmentCategory){event.preventDefault();event.stopImmediatePropagation();mobileEquipmentCategory=equipmentCategory.dataset.partyEquipmentCategory;hideInventoryTooltip(true);applyMobileBagCategory();return;}const category=event.target.closest('[data-party-bag-category]');if(category){event.preventDefault();event.stopImmediatePropagation();mobileBagCategory=category.dataset.partyBagCategory;hideInventoryTooltip(true);applyMobileBagCategory();return;}const toggle=event.target.closest('[data-toggle-party-sale]');if(toggle){event.preventDefault();event.stopImmediatePropagation();toggleSaleMode(!saleMode);return;}const cancel=event.target.closest('[data-cancel-party-sale]');if(cancel){event.preventDefault();event.stopImmediatePropagation();toggleSaleMode(false);return;}const confirm=event.target.closest('[data-confirm-party-sale]');if(confirm){event.preventDefault();event.stopImmediatePropagation();confirmSale();return;}const card=saleMode&&event.target.closest('[data-inventory-item-id]');if(card){event.preventDefault();event.stopImmediatePropagation();if(!saleBusy)selectSaleEntry(inventoryTooltipEntries.get(card.dataset.inventoryItemId));}},true);
- for(const type of ['click','change'])modal.addEventListener(type,event=>{if(!active())return;const blocked=event.target.closest(blockedMutations);if(blocked){event.preventDefault();event.stopImmediatePropagation();return;}const tab=event.target.closest('[data-view-character]');if(tab){event.preventDefault();event.stopImmediatePropagation();if(tab.dataset.viewCharacter){viewedCharacterId=tab.dataset.viewCharacter;hideInventoryTooltip(true);renderInventory('inventory');}return;}const discard=event.target.closest('[data-party-discard]');if(discard){event.preventDefault();event.stopImmediatePropagation();discardStarter(discard.dataset.partyDiscard);return;}const rune=event.target.closest('[data-party-socket-rune]');if(rune){event.preventDefault();event.stopImmediatePropagation();socketViewedRune(rune.dataset.partySocketSlot,rune.dataset.partySocketItem,rune.dataset.partySocketRune);return;}const equip=event.target.closest('[data-equip-id]');if(equip){event.preventDefault();event.stopImmediatePropagation();const entry=inventoryTooltipEntries.get(equip.dataset.equipId),instanceId=entry?.stackIds?.find(id=>runtime().model.equipmentOwners[id]?.kind==='bag')||entry?.item?.instanceId||equip.dataset.equipId;operate({type:'equip',characterId:viewedCharacterId,slot:equip.dataset.equipSlot,instanceId},'已穿戴');return;}const unequip=event.target.closest('[data-unequip-slot]');if(unequip){event.preventDefault();event.stopImmediatePropagation();operate({type:'unequip',characterId:viewedCharacterId,slot:unequip.dataset.unequipSlot},'已卸下');return;}const equipped=event.target.closest('[data-view-equipped-slot]');if(equipped){event.preventDefault();event.stopImmediatePropagation();const slot=equipped.dataset.viewEquippedSlot,item=runtime().view(viewedCharacterId).progress.equipment[slot],id=item.instanceId||item.id,available=new Set(runtime().model.bag.items.filter(entry=>entry.kind==='rune'&&Number(entry.quantity)>0).map(entry=>entry.id));inventoryTooltipEntries.set(id,{item,stackIds:[id],stackQuantity:1,wearable:false,equipSlots:[],availableRuneIds:available,viewedEquippedSlot:slot});renderInventoryTooltip(id,equipped,true);}},true);
+ for(const type of ['click','change'])modal.addEventListener(type,event=>{if(!active())return;const blocked=event.target.closest(blockedMutations);if(blocked){event.preventDefault();event.stopImmediatePropagation();return;}const tab=event.target.closest('[data-view-character]');if(tab){event.preventDefault();event.stopImmediatePropagation();if(tab.dataset.viewCharacter){viewedCharacterId=tab.dataset.viewCharacter;hideInventoryTooltip(true);renderInventory('inventory');}return;}const discard=event.target.closest('[data-party-discard]');if(discard){event.preventDefault();event.stopImmediatePropagation();discardStarter(discard.dataset.partyDiscard);return;}const rune=event.target.closest('[data-party-socket-rune]');if(rune){event.preventDefault();event.stopImmediatePropagation();socketViewedRune(rune.dataset.partySocketSlot,rune.dataset.partySocketItem,rune.dataset.partySocketRune);return;}const equip=event.target.closest('[data-equip-id]');if(equip){event.preventDefault();event.stopImmediatePropagation();const entry=inventoryTooltipEntries.get(equip.dataset.equipId),instanceId=entry?.stackIds?.find(id=>inventorySnapshot().equipmentOwners[id]?.kind==='bag')||entry?.item?.instanceId||equip.dataset.equipId;operate({type:'equip',characterId:viewedCharacterId,slot:equip.dataset.equipSlot,instanceId},'已穿戴');return;}const unequip=event.target.closest('[data-unequip-slot]');if(unequip){event.preventDefault();event.stopImmediatePropagation();operate({type:'unequip',characterId:viewedCharacterId,slot:unequip.dataset.unequipSlot},'已卸下');return;}const equipped=event.target.closest('[data-view-equipped-slot]');if(equipped){event.preventDefault();event.stopImmediatePropagation();const slot=equipped.dataset.viewEquippedSlot,item=runtime().view(viewedCharacterId).progress.equipment[slot],id=item.instanceId||item.id,available=new Set(inventorySnapshot().items.filter(entry=>entry.kind==='rune'&&Number(entry.quantity)>0).map(entry=>entry.id));inventoryTooltipEntries.set(id,{item,stackIds:[id],stackQuantity:1,wearable:false,equipSlots:[],availableRuneIds:available,viewedEquippedSlot:slot});renderInventoryTooltip(id,equipped,true);}},true);
 desktop.addEventListener('change',()=>{menu();if(!modal.classList.contains('hidden')&&['party-inventory','inventory','equipment'].includes(modal.dataset.view))renderInventory('inventory');});
  window.PartyInventoryView={get viewedCharacterId(){return viewedCharacterId;},get saleMode(){return saleMode;},get saleSummary(){return saleSummary();},get mobileBagCategory(){return mobileBagCategory;},get mobileEquipmentCategory(){return mobileEquipmentCategory;},select(id){viewedCharacterId=id;renderInventory('inventory');},selectMobileCategory(id){if(mobileBagCategories.some(category=>category.id===id)){mobileBagCategory=id;applyMobileBagCategory();}},selectMobileEquipmentCategory(id){if(['wearable','other-equipment'].includes(id)){mobileEquipmentCategory=id;applyMobileBagCategory();}},equip(instanceId,slot){return operate({type:'equip',characterId:viewedCharacterId,slot,instanceId},'已穿戴');},unequip(slot){return operate({type:'unequip',characterId:viewedCharacterId,slot},'已卸下');},socket(slot,instanceId,runeId){return socketViewedRune(slot,instanceId,runeId);},discard:discardStarter,startSale(){toggleSaleMode(true);},cancelSale(){toggleSaleMode(false);},confirmSale,whenIdle:()=>pendingOperation};
 goldUnsubscribe=runtime().onSharedGoldChanged(()=>{if(active())updateGoldDisplay();});

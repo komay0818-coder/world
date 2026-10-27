@@ -119,9 +119,9 @@
     });
   }
 
-  function applyAccountSale(model, selections, PermanentPolicy) {
+  function applyAccountSaleOwned(model, selections, PermanentPolicy) {
     if (!model || !PermanentPolicy) throw Error('Permanent sale policy unavailable');
-    const requested = normalizeSaleSelections(selections), next = copy(model), sold = [];
+    const requested = normalizeSaleSelections(selections), next = model, sold = [];
     let proceeds = 0, equipmentCount = 0, materialQuantity = 0;
     for (const selection of requested) {
       if (selection.kind === 'equipment') {
@@ -157,10 +157,14 @@
       sold.push({ kind: 'material', itemId: selection.itemId, quantity: selection.quantity, rarity: classification.rarity, unitPrice: price, subtotal });materialQuantity += selection.quantity;
     }
     if (!proceeds) throw Error('Sale has no eligible proceeds');
-    const gold = PermanentPolicy.applySharedGoldTransaction(next, { type: 'credit', amount: proceeds });
+    const gold = PermanentPolicy.applySharedGoldTransactionOwned(next, { type: 'credit', amount: proceeds }, { validateModel: false });
     PermanentPolicy.validate(gold.model);
     return { model: gold.model, sold, proceeds, before: gold.before, after: gold.after, selectionCount: sold.length, equipmentCount, materialQuantity };
   }
 
-  return Object.freeze({ QUALITY_SELL_PRICES, MATERIAL_SELL_PRICES, normalizeQuality, isProtected, isStarterGiftEquipment, normalizeDiscardInstanceId, applyStarterGiftDiscard, getJunkReasons, isJunkCandidate, isCommonEquipment, getSellPrice, summarizeSelection, sellSelection, normalizeSaleSelections, applyAccountSale });
+  function applyAccountSale(model, selections, PermanentPolicy) {
+    return applyAccountSaleOwned(copy(model), selections, PermanentPolicy);
+  }
+
+  return Object.freeze({ QUALITY_SELL_PRICES, MATERIAL_SELL_PRICES, normalizeQuality, isProtected, isStarterGiftEquipment, normalizeDiscardInstanceId, applyStarterGiftDiscard, getJunkReasons, isJunkCandidate, isCommonEquipment, getSellPrice, summarizeSelection, sellSelection, normalizeSaleSelections, applyAccountSale, applyAccountSaleOwned });
 }));

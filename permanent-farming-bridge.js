@@ -3,7 +3,7 @@
 window.permanentFarmingEventIdentity=()=>({mainId:r.mainId,battle});
 const originalOpenBattle=openBattle,originalVillage=openVillage,originalAddPartyMember=addPartyMember,originalRemovePartyMember=removePartyMember;
 function timers(){clearInterval(battleTimer);clearInterval(skillTimer);clearInterval(enemyAttackTimer);skillTimer=setInterval(autoSkillTick,100);battleTimer=setInterval(battleTick,100);enemyAttackTimer=setInterval(enemyAttackTick,100);}
-function restoreSavedPlayers(){const prior=new Map((battle.partyMembers||[]).map(member=>[member.id,member]));battle.partyMembers=buildBattlePartyMembers(Date.now()).map(fresh=>{const member=PermanentOnlinePolicy.refreshMember(prior.get(fresh.id),fresh);PermanentOnlinePolicy.restoreMember(member,r.getProgress(fresh.id).partyMemberState);return member;});syncLegacyBattleStateFromMain();}
+function restoreSavedPlayers(){const prior=new Map((battle.partyMembers||[]).map(member=>[member.id,member]));battle.partyMembers=buildBattlePartyMembers(Date.now()).map(fresh=>{const member=PermanentOnlinePolicy.refreshMember(prior.get(fresh.id),fresh);PermanentOnlinePolicy.restoreMember(member,(r.getBattleProgress?.(fresh.id)||r.getProgress(fresh.id)).partyMemberState);return member;});syncLegacyBattleStateFromMain();}
 function mode(){
  const mainId=r.mainId;
  if(!mainId){if(r.hasCharacters)throw Error('Active character party missing');return null;}
@@ -11,8 +11,9 @@ function mode(){
  if(!party||!Array.isArray(party.memberIds)||party.memberIds[0]!==mainId)throw Error('Active character party invalid');
  return party.memberIds.length>1?'party':'solo';
 }
+const CHECKPOINT_INTERVAL_MS=1000;
 let checkpointQueued=false,lastCheckpoint=0,checkpointTimer=null;
-function queueCheckpoint(){if(disposed||!fighting||r.busy||r.failure||checkpointQueued||Date.now()-lastCheckpoint<250)return;const identity=window.permanentFarmingEventIdentity(),token=c.tokens()[r.mainId];if(!token)return;checkpointQueued=true;checkpointTimer=permanentFarmingNativeTimeout(()=>{checkpointTimer=null;checkpointQueued=false;if(disposed)return;const current=window.permanentFarmingEventIdentity();if(!fighting||r.busy||r.failure||current.mainId!==identity.mainId||current.battle!==identity.battle||c.tokens()[r.mainId]!==token)return;try{persistPartyRuntimeState();lastCheckpoint=Date.now();r.flush().catch(error=>showToast('戰鬥保存未完成：'+error.message));}catch(error){showToast('戰鬥保存未完成：'+error.message);}},5);}
+function queueCheckpoint(){if(disposed||!fighting||r.busy||r.failure||checkpointQueued||Date.now()-lastCheckpoint<CHECKPOINT_INTERVAL_MS)return;const identity=window.permanentFarmingEventIdentity(),token=c.tokens()[r.mainId];if(!token)return;checkpointQueued=true;checkpointTimer=permanentFarmingNativeTimeout(()=>{checkpointTimer=null;checkpointQueued=false;if(disposed)return;const current=window.permanentFarmingEventIdentity();if(!fighting||r.busy||r.failure||current.mainId!==identity.mainId||current.battle!==identity.battle||c.tokens()[r.mainId]!==token)return;try{const saved=persistPartyRuntimeState();lastCheckpoint=Date.now();Promise.resolve(saved).catch(error=>showToast('戰鬥保存未完成：'+error.message));}catch(error){showToast('戰鬥保存未完成：'+error.message);}},5);}
 window.queuePermanentFarmingCheckpoint=queueCheckpoint;
 const originalBattleTick=battleTick,originalEnemyTick=enemyAttackTick,originalSkillTick=autoSkillTick;
 battleTick=function(...args){const result=originalBattleTick(...args);queueCheckpoint();return result;};enemyAttackTick=function(...args){const result=originalEnemyTick(...args);queueCheckpoint();return result;};autoSkillTick=function(...args){const result=originalSkillTick(...args);queueCheckpoint();return result;};

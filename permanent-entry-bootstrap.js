@@ -122,7 +122,7 @@ async function prepareFarmingRecovery(options={}){
    const gold=deps.Policy.sharedGoldState(account.permanent);if(gold.status!=='legacy')throw Error(gold.status==='ready'?'金幣資料已完成轉換':'共用金幣資料異常，需要人工檢查');
    root.permanentEntryMaintenance=true;root.permanentFarmingBooting=true;
    const runtime=Runtime.activate(Runtime.create({store:runtimeStore,account,legacyOffline:true,onFailure:error=>{root.permanentEntryFailure=error;}}));activeRuntime=runtime;createdRuntime=true;installSchedulingGuards(runtime);ensureCurrent();
-   if(typeof root.calculatePermanentSingleJob!=='function')await scriptLoader(document,'script.js?v=20261021-farming-recovery-v1',ensureCurrent);ensureCurrent();
+   if(typeof root.calculatePermanentSingleJob!=='function')await scriptLoader(document,'script.js?v=20261027-copy-v1',ensureCurrent);ensureCurrent();
    if(typeof root.calculatePermanentSingleJob!=='function')throw Error('既有單人離線結算政策尚未載入');
    const coordinator=Coordinator.create({runtime,store:runtimeStore,calculate:job=>root.calculatePermanentSingleJob(job),context:(now,id)=>{const progress=runtime.getProgress(id||runtime.mainId),member={...(progress?.partyMemberState?.runtime||{}),progress};return {defenseMultiplier:root.ChapterThreeSpecialEquipmentPolicy?.getDefenseMultiplier?.(member,now)??1};},pause:async()=>{await runtime.flush();}});
    root.permanentFarmingCoordinator=coordinator;runtime.bindCoordinator(coordinator);await coordinator.initialize();ensureCurrent();
@@ -221,17 +221,17 @@ async function finishRuntime({store,account,document,accountId,guard,scriptLoade
  const runtime=Runtime.activate(Runtime.create({store,account,legacyOffline:true,onFailure:error=>{const node=statusNode(document);node.textContent='永久存檔已停止寫入，請重新整理：'+error.message;node.dataset.state='error';},onCommitted:(before,after)=>{notifyCloud();if(typeof root.rebuildBattlePartyMembers!=='function'||!root.fighting)return;const fields=['level','equipment','skillLevels','advancedClass'];if(JSON.stringify(before.permanent.slotOrder)!==JSON.stringify(after.permanent.slotOrder)||JSON.stringify(before.permanent.parties)!==JSON.stringify(after.permanent.parties)||Object.keys(after.permanent.characters).some(id=>fields.some(key=>JSON.stringify(before.permanent.characters[id]?.progress[key])!==JSON.stringify(after.permanent.characters[id]?.progress[key]))))root.rebuildBattlePartyMembers();}}));
  activeRuntime=runtime;installSchedulingGuards(runtime);guard();
  if(!cloudSync?.startAutomatic)throw Error('自動雲端存檔模組尚未載入');
- automaticCloudSave=cloudSync.startAutomatic({onState:event=>{
+ automaticCloudSave=cloudSync.startAutomatic({initialDelay:1500,maxWait:5000,onState:event=>{
   if(event.type==='lease-lost'){const node=statusNode(document);node.textContent='此裝置已失去遊玩權限，遊戲已停止產生新進度。請重新整理後再試。';node.dataset.state='error';Promise.resolve(stop({reason:'lease-lost'})).catch(()=>{});return;}
   if(event.type!=='conflict')return;const node=statusNode(document);node.textContent='雲端存檔版本衝突；本機進度已保留，請停止在其他裝置遊玩後重新登入。';node.dataset.state='error';
  }});runtime.onDeactivate(()=>automaticCloudSave?.stop());
  playLease.start(error=>{const node=statusNode(document);node.textContent='此裝置的遊玩權限已失效，遊戲已安全停止：'+(error?.message||'請重新整理後再試');node.dataset.state='error';Promise.resolve(stop({reason:'lease-lost'})).catch(()=>{});});
- await scriptLoader(document,'script.js?v=20261021-farming-recovery-v1',guard);guard();
+ await scriptLoader(document,'script.js?v=20261027-copy-v1',guard);guard();
  const coordinator=Coordinator.create({runtime,store,calculate:job=>root.calculatePermanentSingleJob(job),context:(now,id)=>{const progress=runtime.getProgress(id||runtime.mainId),member={...(progress.partyMemberState?.runtime||{}),progress};return {defenseMultiplier:root.ChapterThreeSpecialEquipmentPolicy.getDefenseMultiplier(member,now)};},pause:async()=>{if(root.fighting&&root.battle?.partyMembers?.length)root.persistPartyRuntimeState();root.fighting=false;root.clearInterval(root.battleTimer);root.clearInterval(root.skillTimer);root.clearInterval(root.enemyAttackTimer);await runtime.flush();},changed:async()=>notifyCloud()});
  root.permanentFarmingCoordinator=coordinator;runtime.bindCoordinator(coordinator);await coordinator.initialize();guard();await coordinator.recover();guard();
- await scriptLoader(document,'permanent-farming-bridge.js?v=20261014-permanent-entry-v1',guard);guard();
+ await scriptLoader(document,'permanent-farming-bridge.js?v=20261027-checkpoint-v1',guard);guard();
  await root.claimPermanentSingleOffline();guard();
- await scriptLoader(document,'party-inventory-view.js?v=20261023-mobile-equipment-tabs-v1',guard);guard();
+ await scriptLoader(document,'party-inventory-view.js?v=20261027-copy-v1',guard);guard();
  await scriptLoader(document,'monster-audit.js?v=20261014-permanent-entry-v1',guard);guard();
  root.permanentFarmingBooting=false;root.permanentEntryReady=true;root.permanentEntryFailure=null;
  const node=statusNode(document);node.textContent='永久角色存檔已啟用';node.dataset.state='ready';

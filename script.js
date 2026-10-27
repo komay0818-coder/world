@@ -1336,7 +1336,7 @@ const TAB_ACTIVE_CHARACTER_SLOT_KEY = 'stardust-tab-active-character-slot';
 
 function getActiveCharacterSlotIndex() {
   const permanent = getPermanentPartyRuntime();
-  if (permanent) return permanent.model.slotOrder.indexOf(permanent.mainId);
+  if (permanent) return typeof permanent.getSlotIndex === 'function' ? permanent.getSlotIndex() : permanent.model.slotOrder.indexOf(permanent.mainId);
   if (isSupabaseEntryMode(permanent)) return 0;
   if (ChapterTwoBalancePlaytestPolicy?.isActive()) return ChapterTwoBalancePlaytestPolicy.getActiveSlotIndex();
   const slots = JSON.parse(getGameStorage().getItem('stardust-character-slots') || '[]');
@@ -1356,7 +1356,7 @@ function setActiveCharacterSlotIndex(index) {
 
 function getActiveCharacter() {
   const permanent = getPermanentPartyRuntime();
-  if (permanent) return permanent.model.characters[permanent.mainId]?.character || null;
+  if (permanent) return typeof permanent.getCharacter === 'function' ? permanent.getCharacter() : permanent.model.characters[permanent.mainId]?.character || null;
   if (ChapterTwoBalancePlaytestPolicy?.isActive()) return getCharacterSlots()[getActiveCharacterSlotIndex()]?.character || null;
   const slots = JSON.parse(getGameStorage().getItem('stardust-character-slots') || '[]');
   return slots[getActiveCharacterSlotIndex()]?.character
@@ -1685,6 +1685,12 @@ function getProgress(activeCharacterOverride = null) {
     if (partySlots[activeSlotIndex]?.character) getGameStorage().setItem('stardust-character-slots', JSON.stringify(partySlots));
   }
   return normalizedProgress;
+}
+
+function getBattleProgress(activeCharacterOverride = null) {
+  const permanent = getPermanentPartyRuntime();
+  if (permanent?.getBattleProgress) return normalizePermanentRead(permanent.getBattleProgress(activeCharacterOverride?.id || permanent.mainId));
+  return getProgress(activeCharacterOverride);
 }
 
 function getCharacterSlots() {
@@ -5292,6 +5298,12 @@ function createBattlePartyMember(slot, slotIndex, mainId, now = Date.now()) {
 }
 
 function buildBattlePartyMembers(now = Date.now()) {
+  const permanent = getPermanentPartyRuntime();
+  if (permanent?.getBattleSnapshot) {
+    const snapshot = permanent.getBattleSnapshot();
+    const members = snapshot.members.map(slot => createBattlePartyMember({ character: slot.character, progress: normalizePermanentRead(slot.progress) }, slot.slotIndex, snapshot.mainId, now));
+    return applyBattlePlaytestMembers(members);
+  }
   const progress = getProgress();
   const party = normalizeCurrentParty(progress);
   const slots = getCharacterSlots();
@@ -5307,6 +5319,10 @@ function buildBattlePartyMembers(now = Date.now()) {
       : PartyPolicy.createSlotFromInvitationSnapshot(snapshot, liveSlot?.progress?.partyMemberState, progress);
     return createBattlePartyMember(slot, slotIndex, mainId, now);
   }).filter(Boolean);
+  return applyBattlePlaytestMembers(members);
+}
+
+function applyBattlePlaytestMembers(members) {
   const playtestConfig = getBlackForestDepthsPlaytestConfig().active
     ? getBlackForestDepthsPlaytestConfig()
     : getForestAltarPlaytestConfig().active
@@ -5391,6 +5407,17 @@ function syncMainBattleMemberProgression(character, progress, member = null) {
 
 function persistPartyRuntimeState() {
   if (!battle.partyMembers?.length) return;
+  const permanent = getPermanentPartyRuntime();
+  if (permanent?.saveBattleCheckpoint) {
+    const sharedCooldowns = { sacredGuardianReadyAt: battle.sacredGuardianReadyAt || 0 };
+    const entries = battle.partyMembers.map((member) => {
+      const state = permanent.captureMember(member);
+      state.partySharedCooldowns = sharedCooldowns;
+      member.progress.partyMemberState = state;
+      return { id: member.id, state };
+    });
+    return permanent.saveBattleCheckpoint(entries, { lastActiveAt: Date.now() });
+  }
   const slots = getCharacterSlots();
   const activeIndex = getActiveCharacterSlotIndex();
   const mainProgress = getProgress();
@@ -5403,10 +5430,10 @@ function persistPartyRuntimeState() {
       defense: member.defense,
       attackSpeed: member.attackSpeed
     };
-    if (getPermanentPartyRuntime()) { Object.assign(state, getPermanentPartyRuntime().captureMember(member)); state.partySharedCooldowns = { sacredGuardianReadyAt: battle.sacredGuardianReadyAt || 0 }; }
+    if (permanent) { Object.assign(state, permanent.captureMember(member)); state.partySharedCooldowns = { sacredGuardianReadyAt: battle.sacredGuardianReadyAt || 0 }; }
     member.progress.partyMemberState = state;
-    const memberSlotIndex = getPermanentPartyRuntime() ? slots.findIndex(slot => slot?.character?.id === member.id) : member.slotIndex;
-    if (getPermanentPartyRuntime() ? member.id === getPermanentPartyRuntime().mainId : memberSlotIndex === activeIndex) mainProgress.partyMemberState = state;
+    const memberSlotIndex = permanent ? slots.findIndex(slot => slot?.character?.id === member.id) : member.slotIndex;
+    if (permanent ? member.id === permanent.mainId : memberSlotIndex === activeIndex) mainProgress.partyMemberState = state;
     if (slots[memberSlotIndex]) slots[memberSlotIndex].progress = { ...slots[memberSlotIndex].progress, partyMemberState: state };
   });
   if (ChapterTwoBalancePlaytestPolicy?.isActive()) sessionStorage.setItem(ChapterTwoBalancePlaytestPolicy.getSlotKey(), JSON.stringify(slots));
@@ -5758,7 +5785,7 @@ function updateBattleUI() {
   if (mapSelectInteractionActive) return;
   syncLegacyBattleStateFromMain();
   const character = getActiveCharacter();
-  const progress = getProgress();
+  const progress = getBattleProgress();
   const maxHp = getMaxHp(progress.level, progress);
   const maxMana = getMaxCombatResource(character.job, progress.level);
   const usesRage = WarriorResourcePolicy.isWarrior(character.job);
@@ -5977,7 +6004,7 @@ function rewardVictory(index) {
   const baseXp = enemy.mapId ? enemy.xp : enemy.isBoss ? currentMap.bossXp : enemy.isElite ? currentMap.eliteXp : currentMap.normalXp;
   const experienceEvent = experienceRuntime ? {sessionId: battle.experienceSessionId, index, spawnedAt: battle.enemySpawnedAt[index], baseXp, map: currentMap, members: battle.partyMembers.map(member => ({id: member.id, alive: member.alive, currentHp: member.currentHp}))} : null;
   const expReward = experienceRuntime
-    ? PartyExperiencePolicy.distribute(baseXp, experienceEvent.members.map(member => ({...member, level: experienceRuntime.model.characters[member.id]?.progress.level})), currentMap).find(award => award.id === experienceRuntime.mainId)
+    ? PartyExperiencePolicy.distribute(baseXp, experienceEvent.members.map(member => ({...member, level: experienceRuntime.getBattleProgress(member.id)?.level})), currentMap).find(award => award.id === experienceRuntime.mainId)
     : MapExpPolicy.calculate(baseXp, progress.level, currentMap);
   if (!expReward) return;
   const earnedXp = expReward.actualExp;
@@ -6200,19 +6227,20 @@ function getMonsterRespawnTicks() {
 
 function processEnemyRespawns() {
   if (battle.isDungeon) return;
-  const playerLevel = getProgress().level;
+  const progress = getBattleProgress();
+  const playerLevel = progress.level;
   battle.enemyRespawns.forEach((timer, index) => {
     if (timer === null || timer === -1) return;
     const nextTimer = timer - 1;
     if (nextTimer <= 0) {
-    const currentMapId = getActiveMap(getProgress()).id;
+    const currentMapId = getActiveMap(progress).id;
     const specialRoll = Math.random();
     const bossAllowed = currentMapId !== 'plains-entrance' && !hasAliveBoss(index);
     battle.enemyTypes[index] = currentMapId === 'plains-entrance'
       ? randomEnemyId(playerLevel)
       : bossAllowed && specialRoll < bossSpawnChance ? randomBossId(playerLevel) : specialRoll < bossSpawnChance + eliteSpawnChance ? randomEliteId(playerLevel) : randomEnemyId(playerLevel);
       battle.facilityWave = battle.facilityWave || ChapterThreeFacilityPolicy.wave();
-      battle.enemyTypes[index] = ChapterThreeFacilityPolicy.replacement(battle.enemyTypes[index], getProgress(), currentMapId, battle.facilityWave,
+      battle.enemyTypes[index] = ChapterThreeFacilityPolicy.replacement(battle.enemyTypes[index], progress, currentMapId, battle.facilityWave,
         battle.enemyTypes.some((type, candidate) => candidate !== index && battle.enemyHps[candidate] > 0 && ChapterThreeFacilityPolicy.facilityId(type)),
         type => getMonsterDefinitionForMap(type, currentMapId));
       battle.enemyRespawns[index] = null;
@@ -6367,7 +6395,7 @@ function getPlayerAttackProfile(character, skill = null) {
 
 function getOnlineFacilityEffects() {
   if (!fighting) return { drain: 0, damage: 1, defense: 1 };
-  const progress = getProgress();
+  const progress = getBattleProgress();
   return ChapterThreeFacilityPolicy.effects(progress, battle.dungeonId || getActiveMap(progress).id);
 }
 
@@ -6393,7 +6421,7 @@ function processOnlineFacilityDrain(now) {
   if (!fighting) return;
   const previous = battle.lastFacilityDrainAt ?? now;
   battle.lastFacilityDrainAt = now;
-  const mapId = battle.dungeonId || getActiveMap(getProgress()).id;
+  const mapId = battle.dungeonId || getActiveMap(getBattleProgress()).id;
   if (!ChapterThreeFacilityPolicy.supported(mapId)) return;
   battle.enemyHps.forEach((hp, index) => {
     if (hp <= 0 && getEnemyDefinition(index).isFacility) rewardVictory(index);
@@ -6408,7 +6436,7 @@ function processOnlineFacilityDrain(now) {
 }
 
 function getLateChapterUnits(now = Date.now()) {
-  const mapId = battle.dungeonId || getActiveMap(getProgress()).id;
+  const mapId = battle.dungeonId || getActiveMap(getBattleProgress()).id;
   if (!ChapterThreeLateCombatPolicy.isSupported(mapId)) return [];
   return battle.enemyTypes.map((type, index) => {
     const definition = getEnemyDefinition(index);
@@ -7631,7 +7659,7 @@ function processBlackForestCorruption(now = Date.now()) {
   const previousTick = Number(battle.lastCorruptionTickAt) || now;
   battle.lastCorruptionTickAt = now;
   if (isTimedChapterThreeVisualShowcase() || isMonsterRotationPreview()) return;
-  const progress = getProgress();
+  const progress = getBattleProgress();
   if (getActiveMap(progress).chapter !== 2) return;
   const elapsedSeconds = Math.max(0, now - previousTick) / 1000;
   (battle.partyMembers || []).forEach((member) => {
@@ -7668,7 +7696,7 @@ function spawnStrongholdWarlord(now = Date.now()) {
 
 function processStrongholdOutpost(now = Date.now()) {
   if (isChapterTwo24RotatingShowcase()) return false;
-  if (getActiveMap(getProgress()).id !== 'blackstone-stronghold') return false;
+  if (getActiveMap(getBattleProgress()).id !== 'blackstone-stronghold') return false;
   const state = battle.blackstoneStrongholdState;
   if (!state?.outpostActive || now - (battle.lastStrongholdOutpostAttackAt || 0) < 1000) return false;
   battle.lastStrongholdOutpostAttackAt = now;
@@ -8587,10 +8615,11 @@ function defeatPartyMember(member, now = Date.now()) {
 }
 
 function reviveDefeatedTeammates(now = Date.now()) {
+  const candidates = (battle.partyMembers || []).filter(member => !member.isMain && !member.alive && Number.isFinite(member.reviveAt) && now >= member.reviveAt);
+  if (!candidates.length) return 0;
   const progress = getProgress();
   let revived = 0;
-  for (const member of battle.partyMembers || []) {
-    if (member.isMain || member.alive || !Number.isFinite(member.reviveAt) || now < member.reviveAt) continue;
+  for (const member of candidates) {
     if ((progress.potions || 0) <= 0) continue;
     progress.potions -= 1;
     removePotionItem(progress);
@@ -8654,7 +8683,7 @@ function resetPartyAfterDefeat(now = Date.now()) {
 }
 
 function resolveBlackForestLeafStorm(enemy, enemyCurrentHp, now = Date.now()) {
-  const progress = getProgress();
+  const progress = getBattleProgress();
   const targets = (battle.partyMembers || []).filter((member) => member.alive && member.currentHp > 0);
   if (!targets.length) return [];
   const results = [];
@@ -8710,7 +8739,7 @@ function enemyAttackTick() {
   if (!fighting || battleScreen.classList.contains('hidden') || battle.dungeonComplete) return;
   if (isTimedChapterThreeVisualShowcase() || isMonsterRotationPreview()) return;
   if (!battle.partyMembers?.length) rebuildBattlePartyMembers();
-  const progress = getProgress();
+  const progress = getBattleProgress();
   const now = Date.now();
   let attackOccurred = false;
 

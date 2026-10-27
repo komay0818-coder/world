@@ -24,12 +24,13 @@ function getSharedGold(model){const state=sharedGoldState(model);if(state.status
 function setSharedGold(model,value){if(!isSafeGold(value))throw Error('Invalid shared gold');const state=sharedGoldState(model);if(state.status!=='ready')throw Error(state.status==='legacy'?'Shared gold migration required':'Invalid shared gold');const next=clone(model);next.accountResources.gold=value;validate(next);return next;}
 function adjustSharedGold(model,delta){if(!Number.isSafeInteger(delta))throw Error('Invalid shared gold delta');const current=getSharedGold(model),next=current+delta;if(!isSafeGold(next))throw Error('Invalid shared gold');return setSharedGold(model,next);}
 function validateSharedGoldOperation(operation){const type=operation?.type,amount=operation?.amount;if(!['credit','debit'].includes(type)||!Number.isSafeInteger(amount)||amount<=0)throw Error('Invalid shared gold transaction');return {type,amount};}
-function applySharedGoldTransaction(model,operation){
+function applySharedGoldTransactionOwned(model,operation,{validateModel=true}={}){
  const {type,amount}=validateSharedGoldOperation(operation);
  const before=getSharedGold(model);if(type==='debit'&&before<amount)throw Error('Insufficient shared gold');
  const after=type==='credit'?before+amount:before-amount;if(!isSafeGold(after))throw Error('Invalid shared gold');
- return {model:setSharedGold(model,after),type,amount,before,after};
+ model.accountResources.gold=after;if(validateModel)validate(model);return {model,type,amount,before,after};
 }
+function applySharedGoldTransaction(model,operation){return applySharedGoldTransactionOwned(clone(model),operation);}
 function reconcileProgressGold(model,sourceModel,characterId){
  const next=clone(model),source=clone(sourceModel);validate(next);validate(source);
  const sourceState=sharedGoldState(source),nextState=sharedGoldState(next);
@@ -177,5 +178,5 @@ function apply(model,command){const next=clone(model),c=next.characters[command.
 }
 function battleSnapshot(model,mainId){const p=model.parties[mainId];if(!p)throw Error('Unknown party');return p.memberIds.map(id=>clone(model.characters[id]));}
 function selectedCharacter(model,{mainId,viewedId=mainId}){if(!model.parties[mainId]?.memberIds.includes(viewedId))throw Error('Character not in viewed party');return clone(model.characters[viewedId]);}
-return{SHARED_GOLD_VERSION,createEmptyModel,migrate,migrateSharedGold,validate,apply,battleSnapshot,selectedCharacter,sharedGoldState,getSharedGold,setSharedGold,adjustSharedGold,validateSharedGoldOperation,applySharedGoldTransaction,reconcileProgressGold,MigrationConflict,createCharacterId:()=> 'character-'+uuid()};
+return{SHARED_GOLD_VERSION,createEmptyModel,migrate,migrateSharedGold,validate,apply,battleSnapshot,selectedCharacter,sharedGoldState,getSharedGold,setSharedGold,adjustSharedGold,validateSharedGoldOperation,applySharedGoldTransaction,applySharedGoldTransactionOwned,reconcileProgressGold,MigrationConflict,createCharacterId:()=> 'character-'+uuid()};
 });
