@@ -22,7 +22,7 @@ function validateConfig(input,{expectedApiBaseUrl}={}){
 async function responseJson(response,label){try{return await response.json();}catch{throw userError(label+'回傳格式不正確。');}}
 function create(options){
  const auth=options.supabaseClient?.auth,fetcher=options.fetcher||fetch,view=options.view,schedule=options.schedule||((fn)=>setTimeout(fn,0));if(!auth||!view)throw Error('帳號 Session 控制器缺少必要依賴');let controllerApi;
- const apiBaseUrl=options.apiBaseUrl,emailConfirmationRedirectTo=options.emailConfirmationRedirectTo,passwordResetRedirectTo=options.passwordResetRedirectTo,passwordRecoveryRequested=Boolean(options.passwordRecoveryRequested),lifecycleListeners=new Set();let generation=0,inFlight=null,lastVerified=null,activeVerification=null,subscription=null,recoverySession=null;
+ const apiBaseUrl=options.apiBaseUrl,emailConfirmationRedirectTo=options.emailConfirmationRedirectTo,passwordResetRedirectTo=options.passwordResetRedirectTo,passwordRecoveryRequested=Boolean(options.passwordRecoveryRequested),lifecycleListeners=new Set();let generation=0,inFlight=null,refreshInFlight=null,lastVerified=null,activeVerification=null,subscription=null,recoverySession=null;
  const setViewState=(state,message,messageState='info')=>{
   if(typeof view.setAuthState==='function')view.setAuthState(state,{message,messageState});
   else if(message!==undefined)view.announce(message,messageState);
@@ -41,13 +41,34 @@ function create(options){
  async function requestApi(verification,path,{method='GET',body}={}){
   if(!isCurrent(verification)||lastVerified?.result!==verification||!lastVerified.token)throw userError('登入驗證已失效，雲端存檔操作已停止。','invalid-session');
   contract.assertAllowed(path,method);
-  const attempt=generation,token=lastVerified.token;let response;
-  try{response=await fetcher(apiBaseUrl+path,{method,headers:{authorization:'Bearer '+token,...(body===undefined?{}:{'content-type':'application/json'})},...(body===undefined?{}:{body:JSON.stringify(body)}),redirect:'error',signal:AbortSignal.timeout(20000)});}catch{throw userError('目前無法連接雲端存檔伺服器。','cloud-unavailable');}
-  ensureCurrent(attempt);if(!isCurrent(verification))throw userError('登入驗證已失效，雲端存檔操作已停止。','invalid-session');
-  const payload=await responseJson(response,'雲端存檔伺服器');ensureCurrent(attempt);return {status:response.status,ok:response.ok,body:payload};
+  const expected={userId:verification.userId,accountId:verification.account?.id},initialToken=lastVerified.token;
+  const sameIdentity=value=>Boolean(value&&isCurrent(value)&&value.userId===expected.userId&&value.account?.id===expected.accountId);
+  const send=async token=>{try{return await fetcher(apiBaseUrl+path,{method,headers:{authorization:'Bearer '+token,...(body===undefined?{}:{'content-type':'application/json'})},...(body===undefined?{}:{body:JSON.stringify(body)}),redirect:'error',signal:AbortSignal.timeout(20000)});}catch{throw userError('目前無法連接雲端存檔伺服器。','cloud-unavailable');}};
+  let response=await send(initialToken);
+  if(response.status===401){
+   let current=activeVerification;
+   if(!sameIdentity(current)||lastVerified?.token===initialToken){
+    if(!refreshInFlight){
+     if(typeof auth.refreshSession!=='function')throw userError('登入狀態已失效，請重新登入。','invalid-session');
+     const task=(async()=>{
+      const refreshed=await auth.refreshSession();
+      if(refreshed?.error){const status=Number(refreshed.error.status||0),description=String(refreshed.error.name||'')+' '+String(refreshed.error.message||''),temporary=status>=500||/retryable|fetch|network|timeout|offline/i.test(description);if(temporary)throw userError('登入憑證暫時無法更新，將保留本機進度並稍後重試。','cloud-unavailable');throw userError('登入狀態已失效，請重新登入。','invalid-session');}
+      if(!refreshed?.data?.session?.access_token)throw userError('登入狀態已失效，請重新登入。','invalid-session');
+      return verifySession(refreshed.data.session);
+     })();
+     refreshInFlight=task;task.finally(()=>{if(refreshInFlight===task)refreshInFlight=null;}).catch(()=>{});
+    }
+    try{current=await refreshInFlight;}catch(error){if(error?.code==='invalid-session'){if(activeVerification)invalidate('invalid-session');setViewState('anonymous',error.userMessage||'登入狀態已失效，請重新登入。','error');}throw error;}
+   }
+   if(!sameIdentity(current)||!lastVerified?.token||lastVerified.token===initialToken){const error=userError('登入狀態已失效，請重新登入。','invalid-session');if(activeVerification)invalidate('invalid-session');setViewState('anonymous',error.userMessage,'error');throw error;}
+   response=await send(lastVerified.token);
+   if(response.status===401){const error=userError('登入狀態已失效，請重新登入。','invalid-session');invalidate('invalid-session');setViewState('anonymous',error.userMessage,'error');throw error;}
+  }
+  if(!sameIdentity(activeVerification))throw userError('登入驗證已失效，雲端存檔操作已停止。','invalid-session');
+  const payload=await responseJson(response,'雲端存檔伺服器');if(!sameIdentity(activeVerification))throw userError('登入驗證已失效，雲端存檔操作已停止。','invalid-session');return {status:response.status,ok:response.ok,body:payload};
  }
  function invalidate(reason='invalidated'){
-  const previous=activeVerification;generation++;inFlight=null;lastVerified=null;activeVerification=null;
+  const previous=activeVerification;generation++;inFlight=null;refreshInFlight=null;lastVerified=null;activeVerification=null;
   if(previous)emitLifecycle('invalidated',{reason,verification:previous});
  }
  async function verifySession(session){
