@@ -18,6 +18,8 @@ assert.match(script, /PartyPolicy\.normalizeParty/, 'old saves receive normalize
 const renderPartyBody = script.match(/function renderParty\(\) \{([\s\S]*?)\n\}/)?.[1] || '';
 assert.doesNotMatch(renderPartyBody, /saveProgress\(/, 'opening the party interface remains read-only during an active save');
 assert.match(farmingBridge, /let partyTransitionBusy=false[\s\S]*?if\(partyTransitionBusy\)[\s\S]*?finally\{partyTransitionBusy=false;\}/, 'party changes reject repeated clicks until the coordinated transition completes');
+assert.match(farmingBridge, /const CHECKPOINT_INTERVAL_MS=1000/, 'live battle checkpoints are batched to avoid saturating the main thread with full account saves');
+assert.match(farmingBridge, /Date\.now\(\)-lastCheckpoint<CHECKPOINT_INTERVAL_MS/, 'checkpoint batching uses the named persistence interval');
 assert.match(script, /activeMemberIds/, 'active party member ids are persisted');
 assert.match(script, /function createBattlePartyMember/, 'each active character receives an independent runtime record');
 assert.match(script, /skillCooldowns: \{\}/, 'each member owns skill cooldowns');

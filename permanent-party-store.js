@@ -107,9 +107,9 @@ function wrap(store){
   for(let attempt=0;attempt<maxAttempts;attempt++){
    try{
     const result=await transact(accountId,sourceRevision,'shared-gold:'+transactionId,payload,a=>{
-     if(!a.permanent)throw Error('Permanent authority required');const changed=Policy.applySharedGoldTransaction(a.permanent,payload);a.permanent=changed.model;return a;
+     if(!a.permanent)throw Error('Permanent authority required');const changed=Policy.applySharedGoldTransactionOwned(a.permanent,payload);a.permanent=changed.model;return a;
     },{failAt});
-    const account=await this.read(accountId),balance=Policy.getSharedGold(account.permanent);return {account,balance,duplicate:result.duplicate,transactionId};
+    const account=result.account,balance=Policy.getSharedGold(account.permanent);return {account,balance,duplicate:result.duplicate,transactionId};
    }catch(error){
     if(!/Concurrent save conflict/.test(String(error?.message))||attempt+1>=maxAttempts)throw error;
     lastConflict=error;const current=await this.read(accountId);if(!current)throw Error('Unknown account');Policy.getSharedGold(current.permanent);sourceRevision=current.revision;
@@ -125,9 +125,9 @@ function wrap(store){
   for(let attempt=0;attempt<maxAttempts;attempt++){
    try{
     const result=await transact(accountId,sourceRevision,'sell-items:'+transactionId,payload,a=>{
-     if(!a.permanent)throw Error('Permanent authority required');const changed=Sales.applyAccountSale(a.permanent,payload.selections,Policy);a.permanent=changed.model;summary=copy({...changed,model:undefined});delete summary.model;return a;
+     if(!a.permanent)throw Error('Permanent authority required');const changed=Sales.applyAccountSaleOwned(a.permanent,payload.selections,Policy);a.permanent=changed.model;summary=copy({...changed,model:undefined});delete summary.model;return a;
     },{failAt});
-    const account=await this.read(accountId),balance=Policy.getSharedGold(account.permanent);
+    const account=result.account,balance=Policy.getSharedGold(account.permanent);
     return {account,balance,duplicate:result.duplicate,transactionId,summary:result.duplicate?null:summary};
    }catch(error){
     if(!/Concurrent save conflict/.test(String(error?.message))||attempt+1>=maxAttempts)throw error;
@@ -146,7 +146,7 @@ function wrap(store){
      const result=await transact(accountId,sourceRevision,'discard-starter:'+transactionId,payload,a=>{
       if(!a.permanent)throw Error('Permanent authority required');const changed=Sales.applyStarterGiftDiscard(a.permanent,payload.instanceId,Policy);a.permanent=changed.model;summary=copy(changed.discarded);return a;
      },{failAt});
-     const account=await this.read(accountId);return {account,duplicate:result.duplicate,transactionId,summary:result.duplicate?null:summary};
+     const account=result.account;return {account,duplicate:result.duplicate,transactionId,summary:result.duplicate?null:summary};
     }catch(error){
      if(!/Concurrent save conflict/.test(String(error?.message))||attempt+1>=maxAttempts)throw error;
      lastConflict=error;const current=await this.read(accountId);if(!current)throw Error('Unknown account');sourceRevision=current.revision;

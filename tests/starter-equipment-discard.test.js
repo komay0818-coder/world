@@ -112,7 +112,7 @@ async function seed(store,accountId){
  check(view.includes("data-party-discard"),'eligible starter equipment exposes a discard action');
  check(view.includes('if(discardBusy)return')&&view.includes('discardBusy=true'),'repeated discard clicks are guarded');
  let persistentCalls=0;
- const cancelContext={discardBusy:false,queueOperation:action=>action(),runtime:()=>({flush:async()=>{},model:{bag:{items:[starter('equipment-cancel','starter-warrior-armor-1','armor')]}},discardStarterEquipment:async()=>{persistentCalls++;}}),discardEligibility:()=>({ok:true}),window:{confirm:()=>false},crypto:{randomUUID:()=>{throw Error('cancelled discard must not allocate a transaction');}},hideInventoryTooltip(){},showToast(){},active:()=>false,renderInventory(){},cancelResult:null};
+ const cancelItem=starter('equipment-cancel','starter-warrior-armor-1','armor'),cancelContext={discardBusy:false,queueOperation:action=>action(),runtime:()=>({flush:async()=>{},discardStarterEquipment:async()=>{persistentCalls++;}}),inventorySnapshot:()=>({items:[cancelItem],equipmentOwners:{[cancelItem.instanceId]:{kind:'bag'}}}),discardEligibility:()=>({ok:true}),window:{confirm:()=>false},crypto:{randomUUID:()=>{throw Error('cancelled discard must not allocate a transaction');}},hideInventoryTooltip(){},showToast(){},active:()=>false,renderInventory(){},cancelResult:null};
  vm.createContext(cancelContext);await vm.runInContext(discardSource+';discardStarter("equipment-cancel").then(value=>cancelResult=value)',cancelContext);await new Promise(resolve=>setImmediate(resolve));
  check(cancelContext.cancelResult?.cancelled===true&&persistentCalls===0,'cancelling the confirmation performs no persistent transaction');
 

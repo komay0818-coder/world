@@ -14,7 +14,7 @@ assert.match(html, /id="battle-player-art" class="battle-player-art hidden"/, 'm
 assert.match(html, /styles\/monster-slots\.css\?v=20261011-enemy-frame-v1/, 'battlefield loads the current local portrait styles');
 assert.doesNotMatch(html, />敵方戰場<\//, 'the visible enemy battlefield capsule label is removed');
 assert.match(css, /\.battle-field::before\s*\{[\s\S]*?top:\s*max\(0px, calc\(2% - 16px\)\) !important;[\s\S]*?bottom:\s*calc\(64% - 24px\) !important;/, 'the enemy frame extends about 40px upward without clipping and preserves its bottom edge');
-assert.match(html, /script\.js\?v=20261026-map-travel-await-v1/, 'battlefield loads the current local combat logic');
+assert.match(html, /script\.js\?v=20261027-copy-v1/, 'battlefield loads the current local combat logic');
 assert.match(script, /return battleCharacterArt\[`\$\{character\.race\}:\$\{character\.job\}`\] \|\| '';/, 'battle uses stable front character artwork');
 const selectableAvatarKeys = [
   'human:warrior', 'human:assassin', 'human:hunter', 'human:mage', 'human:priest',

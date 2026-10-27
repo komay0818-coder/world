@@ -12,6 +12,7 @@ resolveEnemyDirectHitRecovery,applyPendingRoguePlagueSpread,CombatCorePolicy,Mon
 ControlEffectPolicy,RunePolicy,ChapterThreeCraftedEpicAbilityPolicy,ChapterThreeSpecialEquipmentPolicy,
 ChapterThreeEpicWeaponPolicy,ChapterTwoSpecialEquipmentPolicy,WarriorAdvancementPolicy,RogueAdvancementPolicy,
 HunterAdvancementPolicy,MageAdvancementPolicy,PriestAdvancementPolicy,WarriorResourcePolicy}=env;
+const getBattleProgress=getProgress;
 const PARTY_REVIVE_DELAY_MS=10000,PARTY_REVIVE_HEALTH_RATIO=.30,PARTY_AUTO_POTION_HEALTH_RATIO=.35;
 (function attachWolfDenPolicy(root, factory) {
   const api = factory();
@@ -1808,10 +1809,11 @@ function defeatPartyMember(member, now = Date.now()) {
 }
 
 function reviveDefeatedTeammates(now = Date.now()) {
+  const candidates = (battle.partyMembers || []).filter(member => !member.isMain && !member.alive && Number.isFinite(member.reviveAt) && now >= member.reviveAt);
+  if (!candidates.length) return 0;
   const progress = getProgress();
   let revived = 0;
-  for (const member of battle.partyMembers || []) {
-    if (member.isMain || member.alive || !Number.isFinite(member.reviveAt) || now < member.reviveAt) continue;
+  for (const member of candidates) {
     if ((progress.potions || 0) <= 0) continue;
     progress.potions -= 1;
     removePotionItem(progress);
@@ -2105,7 +2107,7 @@ function getBloodwarEnemyStateById(enemyId, currentHp, maxHp) {
 }
 
 function getLateChapterUnits(now = Date.now()) {
-  const mapId = battle.dungeonId || getActiveMap(getProgress()).id;
+  const mapId = battle.dungeonId || getActiveMap(getBattleProgress()).id;
   if (!ChapterThreeLateCombatPolicy.isSupported(mapId)) return [];
   return battle.enemyTypes.map((type, index) => {
     const definition = getEnemyDefinition(index);
@@ -2254,7 +2256,7 @@ function enemyAttackTick() {
   if (!env.fighting || battleScreen.classList.contains('hidden') || battle.dungeonComplete) return;
   if (isTimedChapterThreeVisualShowcase() || isMonsterRotationPreview()) return;
   if (!battle.partyMembers?.length) rebuildBattlePartyMembers();
-  const progress = getProgress();
+  const progress = getBattleProgress();
   const now = Date.now();
   let attackOccurred = false;
 

@@ -66,6 +66,7 @@ resolveEnemyDirectHitRecovery,applyPendingRoguePlagueSpread,CombatCorePolicy,Mon
 ControlEffectPolicy,RunePolicy,ChapterThreeCraftedEpicAbilityPolicy,ChapterThreeSpecialEquipmentPolicy,
 ChapterThreeEpicWeaponPolicy,ChapterTwoSpecialEquipmentPolicy,WarriorAdvancementPolicy,RogueAdvancementPolicy,
 HunterAdvancementPolicy,MageAdvancementPolicy,PriestAdvancementPolicy,WarriorResourcePolicy}=env;
+const getBattleProgress=getProgress;
 const PARTY_REVIVE_DELAY_MS=10000,PARTY_REVIVE_HEALTH_RATIO=.30,PARTY_AUTO_POTION_HEALTH_RATIO=.35;\n`+
   enemyPolicies.map(file=>read(file+'.js')).join('\n')+`\nconst {WolfDenPolicy,BoarWoodsPolicy,PlainsDepthsPolicy,GoblinCampPolicy,
 BlackForestEntrancePolicy,BlackForestTrailPolicy,SpiderNestPolicy,BlackstoneStrongholdPolicy,ForestAltarPolicy,

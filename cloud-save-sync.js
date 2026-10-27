@@ -27,7 +27,6 @@ function create({controller,store,authUserId,lease,cryptoApi=root.crypto}){
    if(!sameBase||pending.snapshotHash!==measured.hash||pending.localRevision!==exported.localRevision)throw syncError('CLOUD_CONFLICT','待確認的上傳與目前本機或雲端版本不一致');
   }
   if(skipEmpty&&!remote&&emptySnapshot(exported.snapshot))return {status:'empty',duplicate:true,save:null};
-  if(Object.keys(exported.snapshot.farming?.owners||{}).length||Object.values(exported.snapshot.farming?.sessions||{}).some(session=>session?.status==='online'))throw syncError('ACTIVE_FARMING','角色仍有進行中的掛機工作，延後雲端同步');
   if(remote){
    if(state&&!state.pending&&(state.cloudRevision!==remote.revision||state.cloudContentHash!==remote.contentHash))throw syncError('CLOUD_CONFLICT','雲端版本已由其他裝置更新，停止上傳');
    if(!state&&remote.contentHash!==measured.hash)throw syncError('CLOUD_CONFLICT','雲端已有存檔，本機尚未建立同步關聯，請先安全下載');
@@ -59,12 +58,16 @@ function create({controller,store,authUserId,lease,cryptoApi=root.crypto}){
   if(localMatchesCheckpoint){const result=await download({expectedLocal:{localRevision:state.localRevision,localPreferencesRevision:state.localPreferencesRevision,cloudRevision:state.cloudRevision,cloudContentHash:state.cloudContentHash,snapshotHash:state.snapshotHash}});return {status:result.status,needsUpload:false,reloadRequired:result.reloadRequired};}
   throw syncError('CLOUD_CONFLICT','本機與雲端都已有新進度，已停止自動覆蓋');
  }
- function startAutomatic({initialDelay=500,interval=10000,retryDelay=3000,onState=()=>{},schedule=root.setTimeout?.bind(root),cancel=root.clearTimeout?.bind(root)}={}){
-  if(typeof schedule!=='function'||typeof cancel!=='function')throw Error('Automatic cloud save scheduler unavailable');let timer=null,stopped=false,running=null,paused=false;
-  const arm=delay=>{if(stopped||paused||timer!==null)return;timer=schedule(()=>{timer=null;run();},delay);};
-  const run=()=>{if(stopped||paused)return Promise.resolve(null);if(running)return running;running=upload({skipEmpty:true}).then(result=>{onState({type:result?.status==='empty'?'waiting':'synced',result});arm(interval);return result;}).catch(error=>{if(['CLOUD_CONFLICT','REVISION_CONFLICT','COMMAND_ID_REUSED','OWNER_MISMATCH','INVALID_CLOUD_SAVE','SAVE_TOO_LARGE','PLAY_LEASE_LOST','PLAY_LEASE_EXPIRED','LEASE_REVISION_MISMATCH'].includes(error?.code)){paused=true;onState({type:String(error?.code).startsWith('PLAY_LEASE_')||error?.code==='LEASE_REVISION_MISMATCH'?'lease-lost':'conflict',error});return null;}onState({type:error?.code==='ACTIVE_FARMING'?'deferred':'retrying',error});arm(error?.code==='ACTIVE_FARMING'?interval:retryDelay);return null;}).finally(()=>{running=null;});return running;};
-  const online=()=>{if(!paused){if(timer!==null){cancel(timer);timer=null;}arm(0);}};root.addEventListener?.('online',online);arm(initialDelay);
-  return Object.freeze({notify(){if(!paused){if(timer!==null){cancel(timer);timer=null;}arm(initialDelay);}},runNow:run,get paused(){return paused;},get busy(){return !!running;},async stop(){stopped=true;if(timer!==null){cancel(timer);timer=null;}root.removeEventListener?.('online',online);if(running)await running;return {stopped:true};}});
+ function startAutomatic({initialDelay=500,interval=10000,retryDelay=3000,maxWait=5000,onState=()=>{},schedule=root.setTimeout?.bind(root),cancel=root.clearTimeout?.bind(root),now=()=>Date.now()}={}){
+  if(typeof schedule!=='function'||typeof cancel!=='function'||typeof now!=='function')throw Error('Automatic cloud save scheduler unavailable');if(!Number.isFinite(maxWait)||maxWait<initialDelay)throw Error('Automatic cloud save maximum wait is invalid');
+  let timer=null,stopped=false,running=null,paused=false,dirtySince=now(),generation=1;
+  const clearTimer=()=>{if(timer!==null){cancel(timer);timer=null;}};
+  const arm=delay=>{if(stopped||paused||running)return;clearTimer();timer=schedule(()=>{timer=null;return run();},Math.max(0,delay));};
+  const armDirty=()=>arm(Math.min(initialDelay,Math.max(0,maxWait-Math.max(0,now()-dirtySince))));
+  const run=()=>{if(stopped||paused)return Promise.resolve(null);if(running)return running;clearTimer();const startedAt=now(),startedGeneration=generation;dirtySince=null;
+   running=upload({skipEmpty:true}).then(result=>{onState({type:result?.status==='empty'?'waiting':'synced',result});return result;}).catch(error=>{if(['CLOUD_CONFLICT','REVISION_CONFLICT','COMMAND_ID_REUSED','OWNER_MISMATCH','INVALID_CLOUD_SAVE','SAVE_TOO_LARGE','PLAY_LEASE_LOST','PLAY_LEASE_EXPIRED','LEASE_REVISION_MISMATCH'].includes(error?.code)){paused=true;onState({type:String(error?.code).startsWith('PLAY_LEASE_')||error?.code==='LEASE_REVISION_MISMATCH'?'lease-lost':'conflict',error});return null;}if(dirtySince===null)dirtySince=startedAt;onState({type:'retrying',error});return null;}).finally(()=>{running=null;if(stopped||paused)return;if(generation!==startedGeneration){armDirty();return;}if(dirtySince!==null){arm(retryDelay);return;}arm(interval);});return running;};
+  const online=()=>{if(!paused){if(dirtySince===null)dirtySince=now();generation++;arm(0);}};root.addEventListener?.('online',online);armDirty();
+  return Object.freeze({notify(){if(stopped||paused)return;generation++;if(dirtySince===null)dirtySince=now();if(!running)armDirty();},runNow:run,get paused(){return paused;},get busy(){return !!running;},async stop(){stopped=true;clearTimer();root.removeEventListener?.('online',online);if(running)await running;return {stopped:true};}});
  }
  return Object.freeze({accountId,upload,download,reconcile,startAutomatic,getRemote:()=>once(remoteSave),get busy(){return !!operation;}});
 }

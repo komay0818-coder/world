@@ -61,12 +61,13 @@ async function seeded(store){
 
  let chromeAccount=await chrome.read(accountId);
  chromeAccount=(await chrome.farmingAction(accountId,chromeAccount.revision,'farming-test-active-session',{type:'start',leaderId:'character-cloud-owner',mode:'solo',token:'isolated-active-session',now:2000})).account;
- await assert.rejects(()=>chromeSync.upload(),error=>error.code==='ACTIVE_FARMING');checks++;
- check(remote.save.revision===1&&Object.keys(remote.save.snapshot.farming.owners).length===0,'active farming defers cloud upload instead of publishing partial ownership state');
- check(chromeAccount.farming.owners['character-cloud-owner']==='isolated-active-session'&&chromeAccount.farming.sessions['isolated-active-session'].status==='online','deferred upload does not stop or settle the local farming session');
+ const activeUpload=await chromeSync.upload();
+ check(activeUpload.save.revision===2&&remote.save.snapshot.farming.owners['character-cloud-owner']==='isolated-active-session','active farming checkpoint uploads its complete ownership state under the play lease');
+ check(chromeAccount.farming.owners['character-cloud-owner']==='isolated-active-session'&&chromeAccount.farming.sessions['isolated-active-session'].status==='online','checkpoint upload does not stop or settle the local farming session');
+ const activeCheckpointStore=await open(memoryIndexedDB(),'edge-active-checkpoint'),activeCheckpointSync=Cloud.create({controller:remote.controller,store:activeCheckpointStore,authUserId:user,lease:lease()});await activeCheckpointSync.download();const restoredActive=await activeCheckpointStore.read(accountId);check(Policy.validate(restoredActive.permanent)&&restoredActive.farming.owners['character-cloud-owner']==='isolated-active-session'&&restoredActive.farming.sessions['isolated-active-session'].status==='online','another browser restores a complete active checkpoint without losing owner/session fencing');activeCheckpointStore.close();
  chromeAccount=(await chrome.farmingAction(accountId,chromeAccount.revision,'farming-test-stop-session',{type:'stop',token:'isolated-active-session',now:2100,offline:false})).account;
  const stoppedUpload=await chromeSync.upload();
- check(stoppedUpload.save.revision===2&&Object.keys(remote.save.snapshot.farming.owners).length===0&&remote.save.snapshot.farming.sessions['isolated-active-session'].status==='stopped','stopped farming metadata uploads only after ownership is safely released');
+ check(stoppedUpload.save.revision===3&&Object.keys(remote.save.snapshot.farming.owners).length===0&&remote.save.snapshot.farming.sessions['isolated-active-session'].status==='stopped','stopped farming metadata replaces the active checkpoint after ownership is safely released');
  const edgeAfterFarming=await open(memoryIndexedDB(),'edge-after-farming'),edgeAfterSync=Cloud.create({controller:remote.controller,store:edgeAfterFarming,authUserId:user,lease:lease()});await edgeAfterSync.download();const restoredAfterFarming=await edgeAfterFarming.read(accountId);
  check(Policy.validate(restoredAfterFarming.permanent)&&restoredAfterFarming.farming.sessions['isolated-active-session'].status==='stopped'&&!Object.keys(restoredAfterFarming.farming.owners).length,'another browser restores the stopped session without inventing occupation or rewards');
 
