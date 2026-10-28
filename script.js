@@ -5779,10 +5779,9 @@ function renderStrongholdObjective(currentMap = getActiveMap(getProgress())) {
 }
 
 function updateBattleUI() {
-  // Native select menus share the browser main thread with combat rendering.
-  // Keep combat simulation running, but avoid rebuilding the large battlefield
-  // DOM while either map selector is being opened or changed.
-  if (mapSelectInteractionActive) return;
+  // The map controls are custom in-page listboxes. Combat must keep rendering
+  // while one is open; otherwise rewards continue in the background while the
+  // visible monsters remain frozen on an old spawn.
   syncLegacyBattleStateFromMain();
   const character = getActiveCharacter();
   const progress = getBattleProgress();
