@@ -35,9 +35,11 @@ assert.deepEqual(policy.getEquipSlots(offhands.roughQuiver, 'hunter'), ['offhand
 assert.deepEqual(policy.getEquipSlots(offhands.beginnerSpellbook, 'mage'), ['offhand'], 'mages can equip beginner spellbooks');
 assert.deepEqual(policy.getEquipSlots(offhands.beginnerSpellbook, 'priest'), ['offhand'], 'priests can equip beginner spellbooks');
 assert.deepEqual(policy.getEquipSlots(offhands.beginnerSpellbook, 'warrior'), [], 'warriors cannot equip beginner spellbooks');
-assert.equal(policy.getPlainsDepthsOffhandDropRate({}), .03, 'normal plains-depths monsters have a 3% offhand drop rate');
-assert.equal(policy.getPlainsDepthsOffhandDropRate({ isElite: true }), .08, 'elite plains-depths monsters have an 8% offhand drop rate');
-assert.equal(policy.getPlainsDepthsOffhandDropRate({ isBoss: true }), .15, 'boss plains-depths monsters have a 15% offhand drop rate');
+assert.equal(policy.getChapterOneOffhandDropRate({}), .03, 'normal chapter-one monsters have a 3% offhand drop rate');
+assert.equal(policy.getChapterOneOffhandDropRate({ isElite: true }), .08, 'elite chapter-one monsters have an 8% offhand drop rate');
+assert.equal(policy.getChapterOneOffhandDropRate({ isBoss: true }), .15, 'boss chapter-one monsters have a 15% offhand drop rate');
+assert.equal(policy.getChapterOneOffhandRarity('wolf-den'), 'uncommon', 'ordinary chapter-one maps drop green offhands');
+assert.equal(policy.getChapterOneOffhandRarity('plains-depths'), 'rare', 'plains depths drops blue offhands');
 assert.equal(policy.OFFHAND_AFFIXES, undefined, 'legacy offhand-only affix choices are removed');
 assert.equal(policy.createRandomOffhandDrop, undefined, 'legacy offhand drop generator is removed');
 assert.deepEqual(offhands.woodenRoundShield.fixedAffixIds, ['max_hp_flat']);

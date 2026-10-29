@@ -16,7 +16,8 @@ assert.match(script, /HunterArrowPolicy\.spendArrows\(member\.resourceCurrent/, 
 assert.match(script, /const displayedResource = usesArrows \? battle\.playerArrows : battle\.playerMana;/, 'the hunter resource bar reads arrows');
 assert.match(script, /member\.resourceType === 'arrows'[\s\S]*HunterArrowPolicy\.recoverArrows/, 'battle ticks recover each hunter arrows');
 assert.doesNotMatch(script, /battle\.playerArrows\s*[-+]=[\s\S]{0,100}playerAttackCharge/, 'ordinary attack flow does not spend arrows');
-assert.match(script, /currentMap\.id === 'plains-depths'[\s\S]*getPlainsDepthsOffhandDropRate/, 'plains-depths victories roll the new offhand drop rates');
+assert.match(script, /currentMap\.chapter === 1[\s\S]*getChapterOneOffhandDropRate/, 'all chapter-one victories roll the shared offhand drop rates');
+assert.match(script, /getChapterOneOffhandRarity\(currentMap\.id\)/, 'plains-depths can select the blue offhand quality');
 assert.match(script, /applyMagicDamageBonus\(baseDamage, magicDamageBonus\)/, 'magic damage offhands increase resolved magic damage');
 
 console.log('hunter-arrow-integration: assertions passed');

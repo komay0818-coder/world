@@ -6051,8 +6051,8 @@ function rewardVictory(index) {
     console.warn('[SpecialEquipmentDrop] 第三章專屬紫裝掉落處理發生未預期錯誤，其他戰鬥獎勵將繼續結算。', error);
   }
   let offhandDrop = null;
-  if (currentMap.id === 'plains-depths' && Math.random() < EquipmentPolicy.getPlainsDepthsOffhandDropRate(enemy)) {
-    offhandDrop = EquipmentDropPolicy.createChapterOneOffhandDrop({ random: Math.random, instanceId: `${Date.now()}-${Math.floor(Math.random() * 1000000)}`, jobId: getActiveCharacter()?.job, obtainedFrom: enemy.id });
+  if (currentMap.chapter === 1 && Math.random() < EquipmentPolicy.getChapterOneOffhandDropRate(enemy)) {
+    offhandDrop = EquipmentDropPolicy.createChapterOneOffhandDrop({ random: Math.random, rarity: EquipmentPolicy.getChapterOneOffhandRarity(currentMap.id), instanceId: `${Date.now()}-${Math.floor(Math.random() * 1000000)}`, jobId: getActiveCharacter()?.job, obtainedFrom: enemy.id });
     progress.inventory.push(offhandDrop);
   }
   let goblinCampMapDropped = false;

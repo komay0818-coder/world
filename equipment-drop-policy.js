@@ -273,13 +273,14 @@
     if (!templates.length) return null;
     const template = templates[Math.floor(clampRoll(random()) * templates.length)];
     const instanceId = String(options.instanceId || createInstanceId(options.obtainedAt, random()));
+    const rarity = options.rarity === 'rare' ? 'rare' : 'uncommon';
     return createEquipmentDropInstance(template, {
-      rarity: 'uncommon',
+      rarity,
       instanceId,
       affixRandom,
       chapter: 1,
       jobId: options.jobId,
-      obtainedFrom: options.obtainedFrom || 'plains-depths',
+      obtainedFrom: options.obtainedFrom || 'chapter-one',
       obtainedAt: options.obtainedAt || Date.now()
     });
 

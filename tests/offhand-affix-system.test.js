@@ -15,6 +15,8 @@ for (const [key, templateRoll] of [['woodenRoundShield', 0], ['roughQuiver', .4]
   assert.ok(item.affixes.every((affix) => template.allowedAffixIds.includes(affix.id)), `${key} only rolls allowed formal affixes`);
   assert.equal(new Set(item.affixes.map((affix) => affix.id)).size, 3, `${key} does not roll duplicate affixes`);
 }
+const chapterOneBlueOffhand = DropPolicy.createChapterOneOffhandDrop({ random: sequence([0, 0, .2, .4, .6, .8]), rarity: 'rare', instanceId: 'chapter-one-blue-offhand' });
+assert.equal(chapterOneBlueOffhand.quality, 'rare', 'plains-depths can request a blue chapter-one offhand');
 
 const chapterTwoOffhands = DropPolicy.CHAPTER_TWO_TEMPLATES.filter((template) => template.slot === 'offhand');
 assert.deepEqual(chapterTwoOffhands.map((template) => template.name), ['黑鐵守衛圓盾', '深林獵手箭筒', '靈森魔導書']);

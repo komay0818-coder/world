@@ -20,9 +20,9 @@ assert.match(script, /'mercenary-greatsword': 'assets\/mercenary-greatsword\.png
 assert.match(script, /'giant-iron-sword': 'assets\/giant-iron-sword\.png'/, 'giant iron sword artwork migrates into existing items');
 assert.match(index, /script\.js\?v=[a-zA-Z0-9-]+"/, 'the live page has a nonempty game cache version');
 assert.match(index, /skill-upgrade-policy\.js\?v=20260816-divine-tome-v1/, 'skill material policy uses the current cache key');
-assert.match(index, /equipment-policy\.js\?v=20260907-unified-offhand-affixes-v1/, 'the live page loads the unified local offhand catalog');
+assert.match(index, /equipment-policy\.js\?v=20261029-chapter-one-offhand-drops-v1/, 'the live page loads the chapter-one offhand rules without stale cache');
 assert.match(index, /equipment-policy\.js[\s\S]*equipment-affix-policy\.js[\s\S]*equipment-drop-policy\.js/, 'the offhand templates load before the shared affix and drop systems');
-assert.match(script, /createChapterOneOffhandDrop/, 'plains depths uses the shared formal affix generator for offhands');
+assert.match(script, /createChapterOneOffhandDrop/, 'chapter one uses the shared formal affix generator for offhands');
 assert.match(script, /'forest-guard-longsword': 'assets\/forest-guard-longsword\.png'/, 'forest guard sword artwork migrates into existing items');
 assert.match(script, /'mercenary-broadsword': 'assets\/mercenary-broadsword\.png'/, 'mercenary broadsword artwork migrates into existing items');
 assert.match(script, /'woodcutter-greatsword': 'assets\/woodcutter-greatsword\.png'/, 'woodcutter greatsword artwork migrates into existing items');

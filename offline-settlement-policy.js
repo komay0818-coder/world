@@ -82,7 +82,7 @@
       P.ChapterTwoRuneDropPolicy.grantRuneDrop(progress,job.map.id,enemy,options);
       P.SkillUpgradePolicy.grantChapterDrops(progress,job.map.chapter,enemy,options);
       P.BlackForestCorruptionPolicy.grantMapDrop(progress,job.map.id,enemy,options);
-      if(job.map.id==='plains-depths'&&rng()<P.EquipmentPolicy.getPlainsDepthsOffhandDropRate(enemy)){progress.inventory.push(P.EquipmentDropPolicy.createChapterOneOffhandDrop({...options,instanceId:job.id+':'+kill.sequence+':offhand',obtainedFrom:enemy.id}));report.equipmentFound++;}
+      if(job.map.chapter===1&&rng()<P.EquipmentPolicy.getChapterOneOffhandDropRate(enemy)){progress.inventory.push(P.EquipmentDropPolicy.createChapterOneOffhandDrop({...options,rarity:P.EquipmentPolicy.getChapterOneOffhandRarity(job.map.id),instanceId:job.id+':'+kill.sequence+':offhand',obtainedFrom:enemy.id}));report.equipmentFound++;}
       if(P.ChapterTwoSpecialEquipmentPolicy.grantSpecialDrop(progress,enemy,job.map.id,options))report.equipmentFound++;
       if(P.EquipmentDropPolicy.grantEquipmentDrop(progress,enemy,{...options,chapter:job.map.chapter,mapId:job.map.id}))report.equipmentFound++;
       if(P.ChapterThreeSpecialEquipmentPolicy.grantSpecialDrop(progress,enemy,job.map.id,options))report.equipmentFound++;
