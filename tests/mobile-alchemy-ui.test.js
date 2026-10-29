@@ -9,7 +9,7 @@ const css = fs.readFileSync(path.join(root, 'styles', 'village.css'), 'utf8');
 const html = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
 
 assert.match(html, /styles\/village\.css\?v=20261025-mobile-village-fixed-window-v3/);
-assert.match(html, /script\.js\?v=20261029-monster-refresh-v1/);
+assert.match(html, /script\.js\?v=20261029-dungeon-map-progression-v1/);
 assert.match(script, /function isMobileAlchemyLayout\(\)/);
 assert.match(script, /function openAlchemyItemDetail\(itemId, slotIndex = null\)/);
 assert.match(script, /equipmentDetailsHtml\(previewItem\)/, 'mobile detail reuses the canonical equipment detail renderer');

@@ -1,11 +1,13 @@
 const assert = require('node:assert/strict');
 const policy = require('../chapter-one-progression-policy.js');
 
-assert.deepEqual(policy.MAP_ORDER, ['plains-entrance', 'wolf-den', 'boar-woods', 'goblin-camp', 'plains-depths']);
+assert.deepEqual(policy.MAIN_MAP_ORDER, ['plains-entrance', 'wolf-den', 'boar-woods', 'plains-depths']);
+assert.deepEqual(policy.DUNGEON_IDS, ['goblin-camp']);
 assert.deepEqual(Object.values(policy.REQUIREMENTS).map(({ level, normalKills }) => [level, normalKills]), [[5, 100], [8, 150], [11, 200], [13, 250], [15, 300]]);
 
 const progress = policy.normalize({ level: 1 });
 assert.equal(policy.isUnlocked(progress, 'plains-entrance'), true, 'the first map is always available');
+assert.equal(policy.isUnlocked(progress, 'goblin-camp'), true, 'the dungeon does not require normal-map kill progression');
 assert.equal(policy.isUnlocked(progress, 'wolf-den'), false, 'later maps start locked');
 
 policy.recordNormalKill(progress, 'plains-entrance', 100);
@@ -26,6 +28,12 @@ policy.recordBossKill(progress, 'wolf-den', { id: 'boarKing' });
 assert.equal(policy.isUnlocked(progress, 'boar-woods'), false, 'a boss from another map cannot clear this map');
 policy.recordBossKill(progress, 'wolf-den', { id: 'greatfangWolf' });
 assert.equal(policy.isUnlocked(progress, 'boar-woods'), true, 'the designated boss unlocks the next map');
+
+progress.mapUnlocked['plains-depths'] = false;
+progress.mapKillProgress['boar-woods'] = 200;
+progress.mapBossCleared['boar-woods'] = true;
+policy.evaluateUnlocks(progress);
+assert.equal(policy.isUnlocked(progress, 'plains-depths'), true, 'the fourth normal map replaces the dungeon in the chapter sequence');
 
 progress.mapKillProgress['plains-entrance'] = 0;
 progress.mapBossCleared['plains-entrance'] = false;

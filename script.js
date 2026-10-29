@@ -126,11 +126,11 @@ const raceTalents = {
 };
 const mapProgression = [
   { id: 'beginner-plains', chapter: 1, min: 1, max: 5, chapterLevelRange: [1, 15], name: '初心者平原', background: 'assets/beginner-plains-background.png', implemented: true, normalXp: 4, eliteXp: 18, bossXp: 70, recommended: { attack: 14, defense: 3, hp: 100 } },
-  { id: 'plains-entrance', chapter: 1, regionOf: 'beginner-plains', min: 1, max: 2, monsterMin: 1, monsterMax: 4, name: '平原入口', background: 'assets/plains-entrance-background.png', implemented: true, normalXp: 4, eliteXp: 10, bossXp: 0, recommended: { attack: 10, defense: 1, hp: 80 } },
-  { id: 'wolf-den', chapter: 1, regionOf: 'beginner-plains', min: 2, max: 5, monsterMin: 3, monsterMax: 7, name: '狼穴', background: 'assets/wolf-den-background.png', implemented: true, normalXp: 6, eliteXp: 16, bossXp: 80, recommended: { attack: 16, defense: 4, hp: 110 } },
-  { id: 'boar-woods', chapter: 1, regionOf: 'beginner-plains', min: 3, max: 5, monsterMin: 6, monsterMax: 10, name: '野豬林', background: 'assets/boar-woods-background.png', implemented: true, normalXp: 8, eliteXp: 20, bossXp: 95, recommended: { attack: 19, defense: 6, hp: 135 } },
-  { id: 'plains-depths', chapter: 1, regionOf: 'beginner-plains', min: 4, max: 5, monsterMin: 12, monsterMax: 15, name: '平原深處', background: 'assets/plains-depths-background.png?v=20260728-user-image-v1', implemented: true, normalXp: 10, eliteXp: 26, bossXp: 110, recommended: { attack: 22, defense: 8, hp: 155 } },
-  { id: 'goblin-camp', chapter: 1, regionOf: 'beginner-plains', min: 2, max: 5, monsterMin: 8, monsterMax: 12, name: '哥布林營地', background: 'assets/goblin-camp-background.png', implemented: true, dungeon: true, ticketItemId: 'goblin-camp-map', normalXp: 10, eliteXp: 28, bossXp: 120, recommended: { attack: 18, defense: 5, hp: 120 } },
+  { id: 'plains-entrance', chapter: 1, order: 1, regionOf: 'beginner-plains', min: 1, max: 2, monsterMin: 1, monsterMax: 4, name: '平原入口', background: 'assets/plains-entrance-background.png', implemented: true, normalXp: 4, eliteXp: 10, bossXp: 0, recommended: { attack: 10, defense: 1, hp: 80 } },
+  { id: 'wolf-den', chapter: 1, order: 2, regionOf: 'beginner-plains', min: 2, max: 5, monsterMin: 3, monsterMax: 7, name: '狼穴', background: 'assets/wolf-den-background.png', implemented: true, normalXp: 6, eliteXp: 16, bossXp: 80, recommended: { attack: 16, defense: 4, hp: 110 } },
+  { id: 'boar-woods', chapter: 1, order: 3, regionOf: 'beginner-plains', min: 3, max: 5, monsterMin: 6, monsterMax: 10, name: '野豬林', background: 'assets/boar-woods-background.png', implemented: true, normalXp: 8, eliteXp: 20, bossXp: 95, recommended: { attack: 19, defense: 6, hp: 135 } },
+  { id: 'plains-depths', chapter: 1, order: 4, regionOf: 'beginner-plains', min: 4, max: 5, monsterMin: 12, monsterMax: 15, name: '平原深處', background: 'assets/plains-depths-background.png?v=20260728-user-image-v1', implemented: true, normalXp: 10, eliteXp: 26, bossXp: 110, recommended: { attack: 22, defense: 8, hp: 155 } },
+  { id: 'goblin-camp', chapter: 1, order: null, regionOf: 'beginner-plains', min: 2, max: 5, monsterMin: 8, monsterMax: 12, name: '哥布林營地', background: 'assets/goblin-camp-background.png', implemented: true, dungeon: true, ticketItemId: 'goblin-camp-map', normalXp: 10, eliteXp: 28, bossXp: 120, recommended: { attack: 18, defense: 5, hp: 120 } },
   { id: ChapterTwoMapPolicy.CHAPTER.id, chapter: 2, min: 15, max: 30, chapterLevelRange: [15, 30], name: ChapterTwoMapPolicy.CHAPTER.name, background: ChapterTwoMapPolicy.CHAPTER.background, implemented: true, regionHub: true, contentStatus: 'planned', previousMapId: 'plains-depths', recommended: { attack: 0, defense: 0, hp: 0 } },
   ...ChapterTwoMapPolicy.MAPS,
   { id: ChapterThreeMapPolicy.CHAPTER.id, chapter: 3, min: 30, max: 45, name: ChapterThreeMapPolicy.CHAPTER.name, background: '', implemented: true, regionHub: true, contentStatus: 'combat-ready', previousMapId: ChapterThreeMapPolicy.CHAPTER.previousMapId, recommended: { attack: 0, defense: 0, hp: 0 } },
@@ -152,8 +152,8 @@ const beginnerPlainsRegions = [
   { id: 'plains-entrance', name: '平原入口' },
   { id: 'wolf-den', name: '狼穴' },
   { id: 'boar-woods', name: '野豬林' },
-  { id: 'goblin-camp', name: '哥布林營地' },
-  { id: 'plains-depths', name: '平原深處' }
+  { id: 'plains-depths', name: '平原深處' },
+  { id: 'goblin-camp', name: '哥布林營地' }
 ];
 const blackForestRegions = ChapterTwoMapPolicy.MAPS;
 const skillCooldownMultiplier = 1.0;
@@ -3300,6 +3300,11 @@ function getAdventureAreaForMap(map) {
   return adventureAreaDefinitions.find((entry) => entry.chapter === map?.chapter) || adventureAreaDefinitions[0];
 }
 
+function getAdventureMapLabel(map) {
+  if (map?.dungeon) return `副本・${map.name}`;
+  return Number.isFinite(Number(map?.order)) ? `${map.chapter}-${map.order} ${map.name}` : map?.name || '';
+}
+
 function getAdventureMapAvailability(map, progress = getProgress()) {
   if (!map?.implemented) return { unlocked: false, reason: '尚未開放' };
   if (isMapTravelPlaytestMode()) return { unlocked: true, reason: '' };
@@ -3330,7 +3335,7 @@ function renderAdventureMapOptions(progress = getProgress(), preserveMap = true)
   const previous = preserveMap ? pendingAdventureMapId : '';
   select.innerHTML = maps.map((map) => {
     const availability = getAdventureMapAvailability(map, progress);
-    return `<option value="${map.id}" ${availability.unlocked ? '' : 'disabled'}>${availability.unlocked ? '' : '🔒 '}${map.name}${availability.reason ? `（${availability.reason}）` : ''}</option>`;
+    return `<option value="${map.id}" ${availability.unlocked ? '' : 'disabled'}>${availability.unlocked ? '' : '🔒 '}${getAdventureMapLabel(map)}${availability.reason ? `（${availability.reason}）` : ''}</option>`;
   }).join('');
   const preferred = maps.find((map) => map.id === previous)
     || maps.find((map) => map.id === activeMap.id)
@@ -4082,7 +4087,7 @@ function renderBeginnerPlainsRegions() {
         ? !unlocked ? '<em>完成前一區域三項條件後解鎖</em>' : current ? '<em class="current-region">目前區域</em>' : `<button type="button" data-select-map="${region.id}" ${isGoblinCamp && goblinMaps < 1 ? 'disabled' : ''}>${isGoblinCamp ? goblinMaps > 0 ? '使用地圖進入副本' : '需要哥布林營地地圖' : progress.requiresMapSelectionAfterDefeat ? '重新進入區域' : '進入區域'}</button>`
         : '<em>準備中</em>';
       return renderMapRegionCard({
-        number: index + 1,
+        number: regionMap?.dungeon ? '副本' : `${regionMap?.chapter || 1}-${regionMap?.order || index + 1}`,
         region: regionMap || region,
         stateClass: `${available ? 'available' : 'pending'} ${unlocked ? '' : 'locked'} ${activeMap.id === region.id ? 'selected' : ''}`,
         statusLabel: !available ? '準備中' : current ? '目前地圖' : unlocked ? '已解鎖' : '未解鎖',
@@ -4326,10 +4331,11 @@ function renderBlackForestRegions() {
           : current
             ? `<em class="current-region">目前區域${status.cleared ? '・已通關' : ''}</em>`
             : `<button type="button" data-select-map="${region.id}">${progress.requiresMapSelectionAfterDefeat ? '重新進入區域' : status.cleared ? '再次進入' : '進入區域'}</button>`;
-      const previousRegion = index ? blackForestRegions[index - 1] : null;
+      const previousMapId = ChapterTwoProgressionPolicy.MAIN_MAP_ORDER[ChapterTwoProgressionPolicy.MAIN_MAP_ORDER.indexOf(region.id) - 1];
+      const previousRegion = previousMapId ? blackForestRegions.find((entry) => entry.id === previousMapId) : null;
       const previousBoss = previousRegion ? getMapRegionBossName(previousRegion.id) : '';
       return renderMapRegionCard({
-        number: index + 1,
+        number: region.dungeon ? '副本' : `${region.chapter}-${region.order}`,
         region,
         stateClass: `${stateClass} ${region.dungeon ? 'dungeon-card' : ''}`,
         statusLabel: !status.implemented ? '尚未開放' : current ? '目前地圖' : status.cleared ? '已通關' : status.unlocked ? '已解鎖' : '未解鎖',
@@ -6051,8 +6057,8 @@ function rewardVictory(index) {
     console.warn('[SpecialEquipmentDrop] 第三章專屬紫裝掉落處理發生未預期錯誤，其他戰鬥獎勵將繼續結算。', error);
   }
   let offhandDrop = null;
-  if (currentMap.id === 'plains-depths' && Math.random() < EquipmentPolicy.getPlainsDepthsOffhandDropRate(enemy)) {
-    offhandDrop = EquipmentDropPolicy.createChapterOneOffhandDrop({ random: Math.random, instanceId: `${Date.now()}-${Math.floor(Math.random() * 1000000)}`, jobId: getActiveCharacter()?.job, obtainedFrom: enemy.id });
+  if (currentMap.chapter === 1 && Math.random() < EquipmentPolicy.getChapterOneOffhandDropRate(enemy)) {
+    offhandDrop = EquipmentDropPolicy.createChapterOneOffhandDrop({ random: Math.random, rarity: EquipmentPolicy.getChapterOneOffhandRarity(currentMap.id), instanceId: `${Date.now()}-${Math.floor(Math.random() * 1000000)}`, jobId: getActiveCharacter()?.job, obtainedFrom: enemy.id });
     progress.inventory.push(offhandDrop);
   }
   let goblinCampMapDropped = false;

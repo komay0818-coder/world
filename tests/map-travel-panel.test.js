@@ -8,11 +8,12 @@ const source = fs.readFileSync(path.join(root, 'script.js'), 'utf8');
 const css = fs.readFileSync(path.join(root, 'styles', 'map-travel-panel.css'), 'utf8');
 
 assert.match(html, /id="adventure-region-select"[\s\S]*id="adventure-map-select"[\s\S]*id="battle-title"[\s\S]*id="map-travel-button"/, 'the left rail exposes area, map, current location, and travel controls in order');
-assert.match(html, /script\.js\?v=20261029-monster-refresh-v1/, 'the interactive map controls load the monster-refresh fix with a fresh cache key');
+assert.match(html, /script\.js\?v=20261029-dungeon-map-progression-v1/, 'the interactive map controls load current combat fixes with a fresh cache key');
 assert.match(html, /map-travel-panel\.css\?v=20261011-map-list-visibility-v1/, 'the custom map selector styles use a fresh cache key');
 assert.match(source, /adventureAreaDefinitions[\s\S]*name: '平原'[\s\S]*name: '黑森林'[\s\S]*name: '赤岩荒原'/, 'the three requested adventure areas are available');
 assert.match(source, /function getAdventureAreaMaps[\s\S]*mapProgression\.filter/, 'the second selector derives its maps from the existing map progression data');
 assert.match(source, /id: 'goblin-camp',[^\n]*regionOf: 'beginner-plains'[^\n]*name: '哥布林營地'/, 'the plains map list includes Goblin Camp');
+assert.match(source, /function getAdventureMapLabel[\s\S]*map\?\.dungeon[\s\S]*副本・\$\{map\.name\}[\s\S]*\$\{map\.chapter\}-\$\{map\.order\}/, 'the left selector labels dungeons separately and preserves normal map numbering');
 assert.match(source, /function getAdventureMapAvailability[\s\S]*ChapterOneProgressionPolicy\.isUnlocked[\s\S]*ChapterTwoProgressionPolicy\.canEnter[\s\S]*ChapterThreeProgressionPolicy\.canEnter/, 'existing unlock policies remain authoritative');
 assert.match(source, /function isMapTravelPlaytestMode\(\)[\s\S]*has\('playtest'\)/, 'unrestricted travel is explicitly scoped to playtest URLs');
 assert.doesNotMatch(source, /function updateBattleUI\(\) \{[\s\S]{0,400}if \(mapSelectInteractionActive\) return;/, 'an open map listbox cannot freeze monster rendering while combat and rewards continue');

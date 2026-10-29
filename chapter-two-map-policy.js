@@ -87,31 +87,20 @@
         premise: '黑石勢力在森林深處建立蜘蛛培育巢穴，利用毒液、蛛絲與圈養蜘蛛擴張軍備。',
         discoveries: Object.freeze(['blackstone-spider-breeding', 'venom-weapon-production', 'spider-silk-harvesting']),
         previousMapId: 'black-forest-trail',
-        nextMapId: 'blackstone-stronghold',
+        nextMapId: 'forest-altar',
         completionObjectiveId: 'defeat-giant-spider'
       })
     }),
-    map('blackstone-stronghold', 4, '黑石據點', {
-      implemented: true,
-      dungeon: true,
-      gameplayType: 'outpost-siege',
-      objectiveCount: 5,
-      background: 'assets/blackstone-stronghold-background.png',
-      enemyPoolId: 'blackstone-stronghold-enemies',
-      bossId: 'blackstone-warlord',
-      enemyFactionIds: Object.freeze(['blackstone-bandits', 'goblins']),
-      story: Object.freeze({ previousMapId: 'spider-nest', nextMapId: 'forest-altar', objectiveId: null })
-    }),
-    map('forest-altar', 5, '森林祭壇', {
+    map('forest-altar', 4, '森林祭壇', {
       implemented: true,
       contentStatus: 'combat-ready',
       background: 'assets/forest-altar-background.png',
       enemyPoolId: 'forest-altar-enemies',
       bossId: 'corrupted-altar-guardian',
       primaryFaction: 'corrupted-forest',
-      story: Object.freeze({ previousMapId: 'blackstone-stronghold', nextMapId: 'black-forest-depths', objectiveId: null })
+      story: Object.freeze({ previousMapId: 'spider-nest', nextMapId: 'black-forest-depths', objectiveId: null })
     }),
-    map('black-forest-depths', 6, '黑森林深處', {
+    map('black-forest-depths', 5, '黑森林深處', {
       implemented: true,
       isFinalMap: true,
       min: 25,
@@ -123,6 +112,17 @@
       environmentEffects: Object.freeze(['dense-fog']),
       bossAuraPolicyId: 'black-forest-depths-boss-aura',
       story: Object.freeze({ previousMapId: 'forest-altar', nextMapId: null, objectiveId: null })
+    }),
+    map('blackstone-stronghold', null, '黑石據點', {
+      implemented: true,
+      dungeon: true,
+      gameplayType: 'outpost-siege',
+      objectiveCount: 5,
+      background: 'assets/blackstone-stronghold-background.png',
+      enemyPoolId: 'blackstone-stronghold-enemies',
+      bossId: 'blackstone-warlord',
+      enemyFactionIds: Object.freeze(['blackstone-bandits', 'goblins']),
+      story: Object.freeze({ previousMapId: null, nextMapId: null, objectiveId: null })
     })
   ]);
 

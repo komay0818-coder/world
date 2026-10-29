@@ -677,8 +677,12 @@
     );
   }
 
-  function getPlainsDepthsOffhandDropRate(enemy) {
+  function getChapterOneOffhandDropRate(enemy) {
     return enemy?.isBoss ? .15 : enemy?.isElite ? .08 : .03;
+  }
+
+  function getChapterOneOffhandRarity(mapId) {
+    return String(mapId || '') === 'plains-depths' ? 'rare' : 'uncommon';
   }
 
   function applyMagicDamageBonus(baseDamage, bonus) {
@@ -730,7 +734,9 @@
     isRecruitEquipment,
     isPreservedEquipment,
     removeLegacyEquipmentFromInventory,
-    getPlainsDepthsOffhandDropRate,
+    getChapterOneOffhandDropRate,
+    getChapterOneOffhandRarity,
+    getPlainsDepthsOffhandDropRate: getChapterOneOffhandDropRate,
     applyMagicDamageBonus,
     rollWeaponAttack,
     getAttacksPerSecond,

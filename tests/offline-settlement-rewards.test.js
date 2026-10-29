@@ -77,7 +77,8 @@ for(const [mapId,chapter,itemId] of [['wolf-den',1,'wolf-fur'],['black-forest-en
 }
 {
  const j=fixture(1,600000);j.map={id:'plains-depths',chapter:1,min:1,max:15,normalXp:10};j.snapshot.mapId=j.map.id;j.snapshot.map={...j.map};j.snapshot.monsters[0].id='blackstoneScout';j.snapshot.members[0].stats.attack=1e6;
- const a=P.calculate(j);assert.deepEqual(a,P.calculate(j));assert.ok(a.slots[0].progress.inventory.some(i=>i.slot==='offhand'),'existing normal offhand policy');cases++;
+ const a=P.calculate(j);assert.deepEqual(a,P.calculate(j));assert.ok(a.slots[0].progress.inventory.some(i=>i.slot==='offhand'&&i.quality==='rare'),'plains depths offline rewards use blue offhands');cases++;
+ const early=fixture(1,600000);early.snapshot.members[0].stats.attack=1e6;const earlyResult=P.calculate(early);assert.ok(earlyResult.slots[0].progress.inventory.some(i=>i.slot==='offhand'&&i.quality==='uncommon'),'early chapter-one offline rewards include green offhands');cases++;
 }
 console.log('Offline settlement reward cases passed:',cases);
 module.exports={fixture};
