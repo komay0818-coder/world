@@ -5,12 +5,13 @@
 })(typeof globalThis !== 'undefined' ? globalThis : this, function () {
   'use strict';
 
-  const MAP_ORDER = Object.freeze(['plains-entrance', 'wolf-den', 'boar-woods', 'goblin-camp', 'plains-depths']);
+  const MAIN_MAP_ORDER = Object.freeze(['plains-entrance', 'wolf-den', 'boar-woods', 'plains-depths']);
+  const DUNGEON_IDS = Object.freeze(['goblin-camp']);
+  const MAP_ORDER = Object.freeze([...MAIN_MAP_ORDER, ...DUNGEON_IDS]);
   const NEXT_MAP = Object.freeze({
     'plains-entrance': 'wolf-den',
     'wolf-den': 'boar-woods',
-    'boar-woods': 'goblin-camp',
-    'goblin-camp': 'plains-depths',
+    'boar-woods': 'plains-depths',
     'plains-depths': 'black-forest'
   });
   const REQUIREMENTS = Object.freeze({
@@ -32,6 +33,7 @@
       progress.mapUnlocked[mapId] = Boolean(progress.mapUnlocked[mapId]);
     });
     progress.mapUnlocked['plains-entrance'] = true;
+    DUNGEON_IDS.forEach((mapId) => { progress.mapUnlocked[mapId] = true; });
     evaluateUnlocks(progress);
     return progress;
   }
@@ -62,7 +64,8 @@
   function evaluateUnlocks(progress) {
     progress.mapUnlocked = progress.mapUnlocked && typeof progress.mapUnlocked === 'object' ? progress.mapUnlocked : {};
     progress.mapUnlocked['plains-entrance'] = true;
-    MAP_ORDER.forEach((mapId) => {
+    DUNGEON_IDS.forEach((mapId) => { progress.mapUnlocked[mapId] = true; });
+    MAIN_MAP_ORDER.forEach((mapId) => {
       if (progress.mapUnlocked[mapId] && isComplete(progress, mapId)) progress.mapUnlocked[NEXT_MAP[mapId]] = true;
     });
     return progress.mapUnlocked;
@@ -99,5 +102,5 @@
     return Object.keys(progress.mapUnlocked).filter((mapId) => progress.mapUnlocked[mapId] && !before[mapId]);
   }
 
-  return Object.freeze({ MAP_ORDER, NEXT_MAP, REQUIREMENTS, normalize, getCompletion, isComplete, evaluateUnlocks, isUnlocked, getUnlockStatus, recordNormalKill, recordBossKill });
+  return Object.freeze({ MAP_ORDER, MAIN_MAP_ORDER, DUNGEON_IDS, NEXT_MAP, REQUIREMENTS, normalize, getCompletion, isComplete, evaluateUnlocks, isUnlocked, getUnlockStatus, recordNormalKill, recordBossKill });
 });

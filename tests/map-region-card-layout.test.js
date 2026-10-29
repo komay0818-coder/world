@@ -26,7 +26,7 @@ assert.match(script, /怪物數量[\s\S]*稀有機率[\s\S]*需求等級[\s\S]*�
 assert.match(css, /\.map-region-grid\{display:grid;grid-template-columns:repeat\(2,minmax\(0,1fr\)\)/, 'desktop cards use an aligned two-column grid');
 assert.match(css, /@media\(max-width:760px\)[\s\S]*\.map-region-grid\{grid-template-columns:1fr\}/, 'narrow screens safely collapse to one column');
 assert.match(css, /\.map-region-name\{[^}]*text-wrap:balance;word-break:keep-all;overflow-wrap:anywhere/, 'long map names remain whole when possible and wrap safely when required');
-assert.match(html, /dungeon\.css\?v=20261018-shared-map-cards-v1/, 'the browser receives the shared card stylesheet without a stale cache');
+assert.match(html, /dungeon\.css\?v=20261029-dungeon-map-labels-v1/, 'the browser receives the shared card stylesheet without a stale cache');
 
 const game = loadGame(root);
 const card = game.evaluate(`renderMapRegionCard({

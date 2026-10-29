@@ -36,33 +36,33 @@ assert.deepEqual(policy.MAPS.map((map) => map.name), [
   '黑森林入口',
   '黑森林小徑',
   '蜘蛛巢穴',
-  '黑石據點',
   '森林祭壇',
-  '黑森林深處'
+  '黑森林深處',
+  '黑石據點'
 ]);
-assert.deepEqual(policy.MAPS.map((map) => map.order), [1, 2, 3, 4, 5, 6]);
+assert.deepEqual(policy.MAPS.map((map) => map.order), [1, 2, 3, 4, 5, null]);
 assert.deepEqual(policy.MAPS.map((map) => map.id), [
   'black-forest-entrance',
   'black-forest-trail',
   'spider-nest',
-  'blackstone-stronghold',
   'forest-altar',
-  'black-forest-depths'
+  'black-forest-depths',
+  'blackstone-stronghold'
 ]);
 assert.deepEqual(policy.MAPS.map((map) => map.story.previousMapId), [
   'plains-depths',
   'black-forest-entrance',
   'black-forest-trail',
   'spider-nest',
-  'blackstone-stronghold',
-  'forest-altar'
+  'forest-altar',
+  null
 ]);
 assert.deepEqual(policy.MAPS.map((map) => map.story.nextMapId), [
   'black-forest-trail',
   'spider-nest',
-  'blackstone-stronghold',
   'forest-altar',
   'black-forest-depths',
+  null,
   null
 ]);
 assert.ok(policy.MAPS.every((map) => map.chapter === 2 && map.regionOf === 'black-forest'));

@@ -23,7 +23,7 @@
     premise: '黑石勢力在森林深處建立蜘蛛培育巢穴，利用毒液、蛛絲與圈養蜘蛛擴張軍備。',
     discoveries: Object.freeze(['blackstone-spider-breeding', 'venom-weapon-production', 'spider-silk-harvesting']),
     previousMapId: 'black-forest-trail',
-    nextMapId: 'blackstone-stronghold',
+    nextMapId: 'forest-altar',
     completionObjectiveId: 'defeat-giant-spider'
   });
 

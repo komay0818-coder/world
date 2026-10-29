@@ -1,7 +1,8 @@
 const assert = require('node:assert/strict');
 const policy = require('../chapter-two-progression-policy.js');
 
-assert.deepEqual(policy.MAP_ORDER, ['black-forest-entrance', 'black-forest-trail', 'spider-nest', 'blackstone-stronghold', 'forest-altar', 'black-forest-depths']);
+assert.deepEqual(policy.MAIN_MAP_ORDER, ['black-forest-entrance', 'black-forest-trail', 'spider-nest', 'forest-altar', 'black-forest-depths']);
+assert.deepEqual(policy.DUNGEON_IDS, ['blackstone-stronghold']);
 
 const newCharacter = { unlockedChapter: 1, mapUnlocked: {} };
 policy.normalize(newCharacter);
@@ -13,6 +14,7 @@ policy.normalize(progress);
 assert.equal(policy.canEnter(progress, 'black-forest-entrance', true), true);
 assert.equal(policy.canEnter(progress, 'black-forest-trail', true), false);
 assert.equal(policy.canEnter(progress, 'spider-nest', true), false);
+assert.equal(policy.canEnter(progress, 'blackstone-stronghold', true), true, 'the dungeon does not require normal-map boss progression');
 assert.equal(policy.canEnter(progress, 'black-forest-entrance', false), false, 'implementation status still gates entry');
 
 assert.equal(policy.recordBossKill(progress, 'black-forest-entrance', { id: 'blackstoneCenturion' }).firstClear, false);
@@ -50,24 +52,24 @@ policy.normalize(oldOrderSave);
 assert.equal(oldOrderSave.chapterTwoProgress.cleared['black-forest-trail'], true, 'old cleared maps remain cleared');
 assert.equal(oldOrderSave.chapterTwoProgress.bossFirstKills['spider-nest'], true, 'old first-clear flags remain intact');
 assert.equal(oldOrderSave.chapterTwoProgress.unlocked['black-forest-entrance'], true, 'the corrected first map remains available');
-assert.equal(oldOrderSave.chapterTwoProgress.unlocked['blackstone-stronghold'], false, 'an old-order save cannot skip the corrected entrance requirement');
+assert.equal(oldOrderSave.chapterTwoProgress.unlocked['forest-altar'], false, 'an old-order save cannot skip the corrected entrance requirement');
 policy.recordBossKill(oldOrderSave, 'black-forest-entrance', { id: 'forestGuardianV2' });
 policy.normalize(oldOrderSave);
-assert.equal(oldOrderSave.chapterTwoProgress.unlocked['blackstone-stronghold'], true, 'finishing the missing prerequisite resumes the preserved progress chain');
+assert.equal(oldOrderSave.chapterTwoProgress.unlocked['forest-altar'], true, 'finishing the missing prerequisite resumes the preserved progress chain');
 
 const partiallyAdvancedOldSave = { unlockedChapter: 2, chapterTwoProgress: policy.createDefaultState() };
 partiallyAdvancedOldSave.chapterTwoProgress.unlocked['spider-nest'] = true;
 const outOfOrderClear = policy.recordBossKill(partiallyAdvancedOldSave, 'spider-nest', { id: 'giantSpider' });
 assert.equal(outOfOrderClear.firstClear, true, 'an earned old-save boss clear is preserved');
 assert.equal(outOfOrderClear.nextMapId, null, 'an out-of-order old save cannot unlock a later map before corrected prerequisites');
-assert.equal(partiallyAdvancedOldSave.chapterTwoProgress.unlocked['blackstone-stronghold'], false);
+assert.equal(partiallyAdvancedOldSave.chapterTwoProgress.unlocked['forest-altar'], false);
 
 const reset = { unlockedChapter: 1 };
 assert.deepEqual(policy.normalize(reset), policy.createDefaultState());
 
 const finale = { unlockedChapter: 2, mapUnlocked: { 'black-forest': true } };
 policy.normalize(finale);
-policy.MAP_ORDER.slice(0, -1).forEach((mapId) => {
+policy.MAIN_MAP_ORDER.slice(0, -1).forEach((mapId) => {
   policy.recordBossKill(finale, mapId, { id: policy.BOSS_IDS[mapId] });
 });
 const chapterClear = policy.recordBossKill(finale, 'black-forest-depths', { id: 'heartOfTheBlackForest' });

@@ -30,7 +30,7 @@ assert.ok(policy.MONSTERS.every((monster) => monster.level === 19 && monster.sta
   && monster.dropTableId === 'spider-nest-pending' && monster.aiProfileId && monster.skillIds.length > 0 && monster.implemented === true));
 assert.ok(policy.MONSTERS.every((monster) => typeof monster.image === 'string' && monster.image.startsWith('assets/')));
 assert.equal(policy.STORY.previousMapId, 'black-forest-trail');
-assert.equal(policy.STORY.nextMapId, 'blackstone-stronghold');
+assert.equal(policy.STORY.nextMapId, 'forest-altar');
 assert.equal(policy.STORY.completionObjectiveId, 'defeat-giant-spider');
 assert.equal(policy.getMonster('unknown'), null);
 assert.deepEqual(policy.getMonster('spider-nest-blackstone-poison-spider').stats, { maxHp: 300, attack: 39, defense: 21, evasion: 12, parry: 0, damageReduction: 4, attackSpeed: 1.2, xp: 36, gold: 18 });
