@@ -1,12 +1,32 @@
 (function attachEquipmentAffixPolicy(root, factory) {
-  const api = factory();
+  const api = factory(typeof module === 'object' && module.exports ? require('./skullcrusher-accessory-policy') : root.SkullcrusherAccessoryPolicy);
   if (typeof module === 'object' && module.exports) module.exports = api;
   else root.EquipmentAffixPolicy = api;
-}(typeof globalThis !== 'undefined' ? globalThis : this, function createEquipmentAffixPolicy() {
-  const SCHEMA_VERSION = 4;
+}(typeof globalThis !== 'undefined' ? globalThis : this, function createEquipmentAffixPolicy(DungeonAccessories) {
+  const SCHEMA_VERSION = 5;
+  const GENERATED_SCHEMA_VERSION = 5;
+  const REFORGE_STATE_VERSION = 1;
+  const MIN_REFORGE_GRADE = 1;
+  const MAX_REFORGE_GRADE = 7;
   const GENERAL_AFFIX_TIER_MULTIPLIERS = Object.freeze({ 1: 1, 2: 1.5 });
   const QUALITY = Object.freeze({ common: 'common', uncommon: 'uncommon', rare: 'rare', epic: 'epic', legendary: 'legendary' });
   const QUALITY_LABELS = Object.freeze({ common: '白色', uncommon: '綠色', rare: '藍色', epic: '紫色', legendary: '傳奇' });
+  const AFFIX_GRADE_COLORS = Object.freeze({ 1: 'white', 2: 'green', 3: 'blue', 4: 'purple', 5: 'red', 6: 'gold', 7: 'pink' });
+  const AFFIX_GRADE_WEIGHTS_BY_CHAPTER = Object.freeze({
+    1: Object.freeze({ 1: .55, 2: .35, 3: .10 }),
+    2: Object.freeze({ 1: .45, 2: .35, 3: .17, 4: .03 }),
+    3: Object.freeze({ 1: .40, 2: .35, 3: .20, 4: .05 })
+  });
+  const AFFIX_GRADE_BY_ID = Object.freeze({
+    max_hp_flat: 1, hp_regeneration_flat: 1,
+    attack_flat: 2, defense_percent: 2, max_hp_percent: 2, mana_regeneration_percent: 2,
+    accuracy_percent: 3, dodge_percent: 3, attack_speed_percent: 3, critical_chance: 3, basic_attack_damage_percent: 3,
+    skill_damage_percent: 4, critical_damage_percent: 4, cooldown_speed_percent: 4,
+    elite_damage_percent: 4, boss_damage_percent: 4, kill_health_recovery_percent: 4,
+    kill_resource_recovery_percent: 4, armor_penetration_percent: 4, last_stand_damage_percent: 4,
+    first_strike_damage_percent: 4, critical_resource_recovery_percent: 4,
+    direct_hit_health_recovery_percent: 4, chapter2_berserker: 4, mage_fireball_damage: 4
+  });
   const QUALITY_AFFIX_RULES = Object.freeze({
     common: Object.freeze({ fixedCount: 0, randomCount: 0, specialChance: 0 }),
     uncommon: Object.freeze({ fixedCount: 1, randomCount: 2, specialChance: 0 }),
@@ -61,6 +81,13 @@
     chapter3_berserker_master: affix('chapter3_berserker_master', '狂戰大師', null, null, '', 2, ['weapon'], { type: AFFIX_TYPES.COMPOSITE, unlockChapter: 3, qualities: ['epic', 'legendary'], isComposite: true, components: [{ stat: 'attackFlat', value: 4, unit: '' }, { stat: 'attackSpeedPercent', value: 5, unit: '%' }, { stat: 'criticalChance', value: 3, unit: '%' }], rollable: false, combatStatus: 'reserved', disabledReason: '不在第三章正式一般詞綴池', mutuallyExclusiveWith: ['chapter2_berserker', 'attack_flat', 'attack_speed_percent', 'critical_chance'] }),
     mage_fireball_damage: affix('mage_fireball_damage', '技能強化', 'skillDamagePercent', 5, '%', 3, ['weapon', 'accessory'], { type: AFFIX_TYPES.SKILL, unlockChapter: 2, qualities: ['uncommon', 'rare', 'epic'], valuesByChapter: { 2: 5, 3: 7 } })
   });
+  // A separate whitelist: these definitions never enter the shared accessory pool.
+  const DUNGEON_AFFIXES = Object.freeze(Object.fromEntries(DungeonAccessories.AFFIXES.map(entry => [entry.id,
+    affix(entry.id, entry.name, entry.stat, entry.value, entry.unit, 1, ['accessory'], {unlockChapter:3,allowedSlots:['ring','necklace'],valuesByChapter:{3:entry.value}})])));
+  const affixDefinition = id => EQUIPMENT_AFFIXES[id] || DUNGEON_AFFIXES[id];
+  const dungeonTemplate = item => DungeonAccessories.getTemplate(item);
+  const isJewelry = item => ['ring','ring1','ring2','necklace'].includes(item?.slot);
+  function canReforgeEquipment(item) { return Boolean(item?.kind === 'equipment' && !isJewelry(item) && !dungeonTemplate(item) && item.reforgeAllowed !== false); }
   const CHAPTER_TWO_AFFIXES = Object.freeze({
     skill_damage_percent: affix('skill_damage_percent', '技能傷害', 'skillDamagePercent', 8, '%', 6, ['weapon', 'armor'], { unlockChapter: 2, valuesByChapter: { 2: 8, 3: 10 } }),
     cooldown_speed_percent: affix('cooldown_speed_percent', '技能冷卻恢復速度', 'cooldownSpeedPercent', 8, '%', 5, ['armor', 'accessory'], { unlockChapter: 2, valuesByChapter: { 2: 8, 3: 10 }, exclusionGroups: ['speed'] }),
@@ -127,6 +154,14 @@
   }
   function getQualityLabel(itemOrQuality) { return QUALITY_LABELS[normalizeQuality(typeof itemOrQuality === 'object' ? itemOrQuality?.quality || itemOrQuality?.rarity : itemOrQuality)]; }
   function getEquipmentGroup(item) { return item?.kind === 'equipment' ? SLOT_GROUPS[item.slot] || null : null; }
+  function getAffixGrade(definitionOrId) {
+    const definition = typeof definitionOrId === 'string' ? affixDefinition(definitionOrId) : definitionOrId;
+    if (!definition) return null;
+    if (DUNGEON_AFFIXES[definition.id]) return ({maxHp:1,hpRegeneration:1,attackFlat:2,criticalChance:3})[definition.stat] || 4;
+    if (/_resistance(?:_|$)/.test(definition.id) || /Resistance/.test(String(definition.stat || '')) || definition.components.some((component) => /Resistance/.test(String(component.stat || '')))) return 2;
+    return AFFIX_GRADE_BY_ID[definition.id] || null;
+  }
+  function getAffixGradeWeights(chapter) { return AFFIX_GRADE_WEIGHTS_BY_CHAPTER[Math.min(3, normalizeChapter(chapter))]; }
   function getRuleCount(value, random = Math.random) {
     if (!Array.isArray(value)) return Math.max(0, Number(value) || 0);
     const min = Math.max(0, Number(value[0]) || 0); const max = Math.max(min, Number(value[1]) || min);
@@ -162,7 +197,7 @@
     return entries.length ? entries[0][1] : fallback;
   }
   function materializeAffix(id, source = 'random', chapter = 1) {
-    const definition = EQUIPMENT_AFFIXES[id];
+    const definition = affixDefinition(id);
     if (!definition?.enabled) return null;
     const normalizedChapter = normalizeChapter(chapter);
     const valueTier = normalizedChapter;
@@ -171,34 +206,101 @@
     return { id, name: definition.name, type: definition.type, stat: definition.stat, value: components.length === 1 ? components[0].value : definition.value, unit: definition.unit, components, isComposite: definition.isComposite, jobId: definition.jobId, skillId: definition.skillId, source, valueTier };
   }
   function normalizeAffix(raw, source = raw?.source || 'random', chapter = 1) {
-    const definition = EQUIPMENT_AFFIXES[raw?.id];
+    const definition = affixDefinition(raw?.id);
     if (!definition?.enabled) return Array.isArray(raw?.components) && raw?.customFixed
       ? { ...raw, source, components: raw.components.map((entry) => ({ ...entry })) }
       : null;
     return materializeAffix(definition.id, source, chapter);
   }
+  function assertReforgeGrade(value, field) {
+    if (!Number.isInteger(value) || value < MIN_REFORGE_GRADE || value > MAX_REFORGE_GRADE) throw Error(`Invalid ${field}`);
+    return value;
+  }
+  function assertRolledComponentValue(value, unit = '') {
+    if (!Number.isFinite(value) || value < 0) throw Error('Invalid reforged affix value');
+    if (String(unit || '') === '%') {
+      if (!Number.isSafeInteger(Math.round(value * 10)) || Math.abs(value * 10 - Math.round(value * 10)) > 1e-9) throw Error('Invalid reforged affix value');
+    } else if (!Number.isSafeInteger(value)) throw Error('Invalid reforged affix value');
+    return value;
+  }
+  function normalizeVersionedRandomAffix(raw, item, index, selected, context) {
+    if (!raw || typeof raw !== 'object' || Array.isArray(raw)) throw Error('Invalid versioned random affix');
+    const expectedSlotKey = `random-${index}`;
+    if (raw.slotKey !== expectedSlotKey) throw Error('Invalid random affix slot key');
+    const definition = affixDefinition(raw.id);
+    if (DUNGEON_AFFIXES[raw.id] && !dungeonTemplate(item)) throw Error('Dungeon affix on another equipment');
+    if (!definition?.enabled || !definition.rollable || !isDefinitionUnlocked(definition, item, context)) throw Error('Invalid versioned random affix definition');
+    if (conflicts(definition, selected)) throw Error('Conflicting versioned random affix');
+    if (raw.affixGrade !== getAffixGrade(definition)) throw Error('Invalid affix grade for definition');
+    const canonical = materializeAffix(definition.id, 'random', context.chapter);
+    if (dungeonTemplate(item) && (raw.valueQuality !== 1 || raw.value !== canonical.value || JSON.stringify(raw.components?.map(c=>c.value)) !== JSON.stringify(canonical.components.map(c=>c.value)))) throw Error('Dungeon accessory values are fixed');
+    if (raw.source !== 'random' || raw.valueTier !== context.chapter || raw.type !== canonical.type || raw.stat !== canonical.stat || String(raw.unit || '') !== String(canonical.unit || '')) throw Error('Invalid versioned random affix metadata');
+    if (!Array.isArray(raw.components) || raw.components.length !== canonical.components.length) throw Error('Invalid reforged affix components');
+    const components = canonical.components.map((component, componentIndex) => {
+      const stored = raw.components[componentIndex];
+      if (!stored || stored.stat !== component.stat || String(stored.unit || '') !== String(component.unit || '')) throw Error('Invalid reforged affix component');
+      return { ...component, value: assertRolledComponentValue(stored.value, component.unit) };
+    });
+    const value = components.length === 1 ? components[0].value : canonical.value;
+    if (components.length === 1 && raw.value !== value) throw Error('Reforged affix value mismatch');
+    return {
+      ...canonical,
+      slotKey: expectedSlotKey,
+      affixGrade: assertReforgeGrade(raw.affixGrade, 'affix grade'),
+      valueQuality: assertReforgeGrade(raw.valueQuality, 'value quality'),
+      value,
+      components
+    };
+  }
+  function normalizeReforgeState(raw, randomAffixes) {
+    if (!raw || typeof raw !== 'object' || Array.isArray(raw) || raw.version !== REFORGE_STATE_VERSION) throw Error('Invalid equipment reforge state');
+    const lockedTypeSlotKey = raw.lockedTypeSlotKey;
+    if (lockedTypeSlotKey !== null && (typeof lockedTypeSlotKey !== 'string' || !randomAffixes.some((entry) => entry.slotKey === lockedTypeSlotKey))) throw Error('Invalid locked reforge slot');
+    return { version: REFORGE_STATE_VERSION, lockedTypeSlotKey };
+  }
+  function affixDataSignature(entry) {
+    return JSON.stringify({
+      id: entry?.id,
+      source: entry?.source,
+      valueTier: entry?.valueTier,
+      slotKey: entry?.slotKey,
+      affixGrade: entry?.affixGrade,
+      valueQuality: entry?.valueQuality,
+      value: entry?.value,
+      components: Array.isArray(entry?.components) ? entry.components.map((component) => ({ stat: component?.stat, value: component?.value, unit: component?.unit || '' })) : null
+    });
+  }
   function conflicts(candidate, selected) {
     const candidateStats = candidate.components.map((entry) => entry.stat);
     if (selected.some((entry) => entry.id === candidate.id || (entry.components || EQUIPMENT_AFFIXES[entry.id]?.components || []).some((component) => candidateStats.includes(component.stat)))) return true;
+    if (DUNGEON_AFFIXES[candidate.id]) return false;
     if (candidate.exclusionGroups.some((group) => selected.some((entry) => EQUIPMENT_AFFIXES[entry.id]?.exclusionGroups.includes(group)))) return true;
     if (candidate.mutuallyExclusiveWith.some((id) => selected.some((entry) => entry.id === id))) return true;
     if (selected.some((entry) => EQUIPMENT_AFFIXES[entry.id]?.mutuallyExclusiveWith.includes(candidate.id))) return true;
     return MUTUAL_EXCLUSIONS.some((pair) => pair.includes(candidate.id) && selected.some((entry) => pair.includes(entry.id)));
   }
   function getAvailableAffixes(item, selected = [], context = {}) {
-    return Object.values(EQUIPMENT_AFFIXES).filter((entry) => entry.rollable && isDefinitionUnlocked(entry, item, context) && !conflicts(entry, selected));
+    return Object.values(dungeonTemplate(item) ? DUNGEON_AFFIXES : EQUIPMENT_AFFIXES).filter((entry) => entry.rollable && isDefinitionUnlocked(entry, item, context) && !conflicts(entry, selected));
   }
   function weightedPick(candidates, random) {
     const total = candidates.reduce((sum, entry) => sum + Math.max(0, Number(entry.weight) || 0), 0);
     let cursor = clampRoll(random()) * total;
     return candidates.find((entry) => ((cursor -= entry.weight) < 0)) || candidates[candidates.length - 1] || null;
   }
+  function weightedGradePick(candidates, chapter, random) {
+    const weights = getAffixGradeWeights(chapter);
+    const available = Object.entries(weights).map(([grade, weight]) => ({ grade: Number(grade), weight, candidates: candidates.filter((entry) => getAffixGrade(entry) === Number(grade)) })).filter((entry) => entry.candidates.length);
+    const selectedGrade = weightedPick(available, random);
+    return selectedGrade ? weightedPick(selectedGrade.candidates, random) : null;
+  }
   function rollEquipmentAffixes(item, count, random = Math.random, _legacyMultiplier = 1, selected = [], context = {}) {
     const result = [];
     while (result.length < count) {
-      const candidate = weightedPick(getAvailableAffixes(item, [...selected, ...result], context), random);
+      const available = getAvailableAffixes(item, [...selected, ...result], context);
+      const candidate = dungeonTemplate(item) ? weightedPick(available, random) : weightedGradePick(available, context.chapter, random);
       if (!candidate) break;
-      result.push(materializeAffix(candidate.id, 'random', context.chapter));
+      const materialized = materializeAffix(candidate.id, 'random', context.chapter);
+      result.push({ ...materialized, slotKey: `random-${result.length}`, affixGrade: getAffixGrade(candidate), valueQuality: 1, components: materialized.components.map((component) => ({ ...component })) });
     }
     return result;
   }
@@ -228,12 +330,37 @@
     const context = { chapter: normalizeChapter(options.chapter || template.affixChapter), quality, jobId: options.jobId || null };
     const fixedAffixes = getFixedAffixes(template, getRuleCount(rule.fixedCount, random), context, random);
     const randomAffixes = rollEquipmentAffixes(template, getRuleCount(rule.randomCount, random), random, 1, fixedAffixes, context);
-    const item = { ...template, id: options.uniqueId === undefined ? template.id : `${template.id}-${options.uniqueId}`, baseItemId: template.baseItemId || template.id, affixSchemaVersion: SCHEMA_VERSION, affixChapter: context.chapter, quality, rarity: quality, fixedAffixes, randomAffixes, affixes: [...fixedAffixes, ...randomAffixes], specialAbility: rollSpecialAbility(template, quality, random, Number(options.specialChance ?? rule.specialChance) || 0, context) };
+    const item = { ...template, id: options.uniqueId === undefined ? template.id : `${template.id}-${options.uniqueId}`, baseItemId: template.baseItemId || template.id, affixSchemaVersion: GENERATED_SCHEMA_VERSION, affixChapter: context.chapter, quality, rarity: quality, fixedAffixes, randomAffixes, affixes: [...fixedAffixes, ...randomAffixes], reforgeState: { version: REFORGE_STATE_VERSION, lockedTypeSlotKey: null }, specialAbility: rollSpecialAbility(template, quality, random, Number(options.specialChance ?? rule.specialChance) || 0, context) };
     if (quality === QUALITY.legendary) item.legendaryAbility = template.legendaryAbility ? { ...template.legendaryAbility } : null;
     return item;
   }
   function normalizeEquipment(item) {
     if (!item || item.kind !== 'equipment') return item;
+    const scopedTemplate = dungeonTemplate(item);
+    if (scopedTemplate) {
+      if (item.slot !== scopedTemplate.slot || item.quality !== 'rare' || item.rarity !== 'rare' || item.affixChapter !== 3 || item.affixSchemaVersion !== SCHEMA_VERSION) throw Error('Invalid dungeon accessory metadata');
+      const expected = getFixedAffixes(scopedTemplate,2,{chapter:3},()=>0);
+      if (!Array.isArray(item.fixedAffixes) || item.fixedAffixes.length !== 2 || item.fixedAffixes.some((a,i)=>a.id !== expected[i].id || a.stat !== expected[i].stat || a.value !== expected[i].value || JSON.stringify(a.components) !== JSON.stringify(expected[i].components)) || item.randomAffixes?.length !== 3) throw Error('Invalid dungeon accessory affix structure');
+      if (item.randomAffixes.some(a=>!DUNGEON_AFFIXES[a.id])) throw Error('Invalid dungeon accessory whitelist');
+    }
+    if (Number(item.affixSchemaVersion) === SCHEMA_VERSION) {
+      if (!Array.isArray(item.fixedAffixes) || !Array.isArray(item.randomAffixes)) throw Error('Incomplete versioned equipment affixes');
+      if (!Number.isSafeInteger(item.affixChapter) || item.affixChapter < 1) throw Error('Invalid versioned equipment chapter');
+      if (!Object.values(QUALITY).includes(item.quality) || item.rarity !== item.quality) throw Error('Invalid versioned equipment quality');
+      const chapter = normalizeChapter(item.affixChapter);
+      const quality = normalizeQuality(item.quality || item.rarity);
+      const context = { chapter, quality };
+      const fixedAffixes = item.fixedAffixes.map((entry) => normalizeAffix(entry, 'fixed', chapter)).filter(Boolean);
+      const randomAffixes = [];
+      item.randomAffixes.forEach((entry, index) => {
+        randomAffixes.push(normalizeVersionedRandomAffix(entry, item, index, [...fixedAffixes, ...randomAffixes], context));
+      });
+      const reforgeState = normalizeReforgeState(item.reforgeState, randomAffixes);
+      const affixes = [...fixedAffixes, ...randomAffixes];
+      if (!Array.isArray(item.affixes) || item.affixes.length !== affixes.length || item.affixes.some((entry, index) => affixDataSignature(entry) !== affixDataSignature(affixes[index]))) throw Error('Equipment affix arrays are inconsistent');
+      return { ...item, affixSchemaVersion: SCHEMA_VERSION, affixChapter: chapter, quality, rarity: quality, fixedAffixes, randomAffixes, affixes, reforgeState };
+    }
+    if (Number(item.affixSchemaVersion) > SCHEMA_VERSION) throw Error('Unsupported equipment affix schema');
     if (Array.isArray(item.fixedAffixes) || Array.isArray(item.randomAffixes)) {
       const chapter = normalizeChapter(item.affixChapter);
       const fixedAffixes = (item.fixedAffixes || []).map((entry) => normalizeAffix(entry, 'fixed', chapter)).filter(Boolean);
@@ -243,10 +370,36 @@
     const legacyAffixes = (item.affixes || []).map((entry) => normalizeAffix(entry, entry.source || 'random')).filter(Boolean);
     return { ...item, quality: normalizeQuality(item.quality || item.rarity), rarity: normalizeQuality(item.rarity || item.quality), affixes: legacyAffixes };
   }
+  function convertEquipmentForReforge(item, metadata = null) {
+    if (!item || item.kind !== 'equipment') throw Error('Equipment required for reforge conversion');
+    if (!canReforgeEquipment(item)) throw Error('Rings and necklaces cannot be reforged');
+    if (Number(item.affixSchemaVersion) >= SCHEMA_VERSION) throw Error('Equipment is already versioned for reforge');
+    const normalized = normalizeEquipment(item);
+    if (!Array.isArray(normalized.randomAffixes) || !normalized.randomAffixes.length) throw Error('Equipment has no random affix slots');
+    if (metadata !== null && (!Array.isArray(metadata) || metadata.length !== normalized.randomAffixes.length)) throw Error('Invalid reforge conversion metadata');
+    const randomAffixes = normalized.randomAffixes.map((entry, index) => {
+      const affixGrade = getAffixGrade(entry.id), requestedGrade = metadata?.[index]?.affixGrade;
+      if (!affixGrade || requestedGrade !== undefined && requestedGrade !== affixGrade) throw Error('Invalid legacy affix grade conversion');
+      const valueQuality = assertReforgeGrade(metadata?.[index]?.valueQuality ?? 1, 'value quality');
+      return { ...entry, slotKey: `random-${index}`, affixGrade, valueQuality, components: entry.components.map((component) => ({ ...component })) };
+    });
+    const converted = {
+      ...normalized,
+      affixSchemaVersion: SCHEMA_VERSION,
+      randomAffixes,
+      affixes: [...normalized.fixedAffixes, ...randomAffixes],
+      reforgeState: { version: REFORGE_STATE_VERSION, lockedTypeSlotKey: null }
+    };
+    return normalizeEquipment(converted);
+  }
+  function getCanonicalAffix(id, chapter = 1, source = 'random') {
+    const entry = materializeAffix(id, source, chapter);
+    return entry ? { ...entry, components: entry.components.map((component) => ({ ...component })) } : null;
+  }
   function rollEquipmentAffix(item, randomValue = Math.random(), context = {}) { return rollEquipmentAffixes(item, 1, () => randomValue, 1, [], context)[0] || null; }
   function getDefinitionComponents(entry) { return Array.isArray(entry?.components) ? entry.components : EQUIPMENT_AFFIXES[entry?.id]?.components || []; }
   function getAffixValue(item, stat) { return (item?.affixes || []).reduce((sum, entry) => sum + getDefinitionComponents(entry).filter((component) => component.stat === stat).reduce((subtotal, component) => subtotal + (Number(component.value) || 0), 0), 0); }
   function getEquippedAffixStats(equipmentBySlot) { return Object.values(equipmentBySlot || {}).filter(Boolean).reduce((totals, item) => { (item.affixes || []).forEach((entry) => getDefinitionComponents(entry).forEach((component) => { totals[component.stat] = (totals[component.stat] || 0) + (Number(component.value) || 0); })); return totals; }, {}); }
-  function formatAffix(entry) { const definition = EQUIPMENT_AFFIXES[entry?.id]; if (!definition?.enabled) return entry?.customFixed ? `${entry.name} +${entry.value}${entry.unit || ''}` : ''; const storedComponents = Array.isArray(entry?.components) && entry.components.length ? entry.components : null; const components = storedComponents || (definition.components.length === 1 && Number.isFinite(Number(entry?.value)) ? [{ ...definition.components[0], value: Number(entry.value), unit: entry.unit ?? definition.components[0].unit }] : definition.components); const name = definition.name; if (definition.description && components.length === 1) return `${name}｜${definition.description.replace('{value}', components[0].value)}`; if (components.length === 1) return `${name} +${components[0].value}${components[0].unit || ''}`; return `${name}（${components.map((component) => `${component.stat} +${component.value}${component.unit || ''}`).join('、')}）`; }
-  return Object.freeze({ SCHEMA_VERSION, QUALITY, QUALITY_LABELS, QUALITY_AFFIX_RULES, SLOT_GROUPS, AFFIX_TYPES, ROLLABLE_QUALITIES, EQUIPMENT_AFFIXES, SPECIAL_ABILITIES, MUTUAL_EXCLUSIONS, DEFAULT_FIXED_AFFIXES, normalizeQuality, normalizeChapter, getQualityLabel, getEquipmentGroup, getRuleCount, isJobCompatible, isDefinitionUnlocked, normalizeAffix, normalizeEquipment, getAvailableAffixes, rollEquipmentAffix, rollEquipmentAffixes, rollSpecialAbility, createEquipmentInstance, getAffixValue, getEquippedAffixStats, formatAffix });
+  function formatAffix(entry) { const definition = affixDefinition(entry?.id); if (!definition?.enabled) return entry?.customFixed ? `${entry.name} +${entry.value}${entry.unit || ''}` : ''; const storedComponents = Array.isArray(entry?.components) && entry.components.length ? entry.components : null; const components = storedComponents || (definition.components.length === 1 && Number.isFinite(Number(entry?.value)) ? [{ ...definition.components[0], value: Number(entry.value), unit: entry.unit ?? definition.components[0].unit }] : definition.components); const name = definition.name; if (definition.description && components.length === 1) return `${name}｜${definition.description.replace('{value}', components[0].value)}`; if (components.length === 1) return `${name} +${components[0].value}${components[0].unit || ''}`; return `${name}（${components.map((component) => `${component.stat} +${component.value}${component.unit || ''}`).join('、')}）`; }
+  return Object.freeze({ SCHEMA_VERSION, GENERATED_SCHEMA_VERSION, REFORGE_STATE_VERSION, MIN_REFORGE_GRADE, MAX_REFORGE_GRADE, AFFIX_GRADE_COLORS, AFFIX_GRADE_WEIGHTS_BY_CHAPTER, AFFIX_GRADE_BY_ID, QUALITY, QUALITY_LABELS, QUALITY_AFFIX_RULES, SLOT_GROUPS, AFFIX_TYPES, ROLLABLE_QUALITIES, EQUIPMENT_AFFIXES, SPECIAL_ABILITIES, MUTUAL_EXCLUSIONS, DEFAULT_FIXED_AFFIXES, normalizeQuality, normalizeChapter, getQualityLabel, getEquipmentGroup, getAffixGrade, getAffixGradeWeights, getRuleCount, isJobCompatible, isDefinitionUnlocked, normalizeAffix, normalizeEquipment, canReforgeEquipment, convertEquipmentForReforge, getCanonicalAffix, getAvailableAffixes, rollEquipmentAffix, rollEquipmentAffixes, rollSpecialAbility, createEquipmentInstance, getAffixValue, getEquippedAffixStats, formatAffix });
 }));

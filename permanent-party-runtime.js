@@ -3,7 +3,7 @@
 function create({store,account,onFailure=()=>{},onCommitted=()=>{},generate=()=>crypto.randomUUID(),legacyOffline=false}){
  if(!store||!account||typeof account.id!=='string'||!account.id||!account.permanent)throw Error('Complete permanent runtime account required');
  Policy.validate(account.permanent);
- let coordinator=null,state='active',deactivatePromise=null;
+ let coordinator=null,state='active',deactivatePromise=null,dungeonQueue=Promise.resolve();
  let committed=Online.copy(account),draft=Online.compactModel(account.permanent),settings=Online.copy(account.settings||{}),pending=false,inFlight=false,error=null,scheduled=null,modelDirty=false,settingsDirty=false,waiters=[],externalBusy=false,externalWaiters=[],reads=new Map(),readSequence=0,cleanupHooks=new Set(),goldListeners=new Set();
  function releaseExternal(failure){externalBusy=false;for(const w of externalWaiters.splice(0))failure?w.reject(failure):w.resolve(Online.copy(committed));}
  function acceptAccount(value){if(!value||value.id!==committed.id||!value.permanent)throw Error('Permanent runtime account identity mismatch');Policy.validate(value.permanent);return Online.copy(value);}
@@ -49,6 +49,17 @@ function create({store,account,onFailure=()=>{},onCommitted=()=>{},generate=()=>
    const main=characters[mainId],boundary=Number(lastActiveAt);if(Number.isFinite(boundary)&&boundary>0)characters[mainId]={...main,progress:{...main.progress,lastActiveAt:boundary}};
    draft={...draft,characters};schedule({model:true});return api.flush();
   },
+  skullcrusherAction(command,options){
+   const task=dungeonQueue.then(async()=>{
+    if(command.type==='enter')ensure();else if(state==='stopped')throw Error('Account stopped');
+    await drain();if(command.type==='enter')ensure();
+    if(externalBusy)throw Error('Account transaction busy');externalBusy=true;let failure;
+    try{const previous=committed,result=await store.skullcrusherAction(committed.id,committed.revision,command,options),loaded=acceptAccount(result.account);
+     committed={...loaded,settings:Online.copy(loaded.settings||committed.settings||{}),settingsRevision:loaded.settingsRevision??committed.settingsRevision??0};draft=Online.copy(loaded.permanent);reads.clear();
+     if(state==='active')onCommitted(previous,committed);return result;
+    }catch(e){failure=e;throw e;}finally{releaseExternal(failure);}
+   });dungeonQueue=task.catch(()=>{});return task;
+  },
   getSharedGold(){ensure();return Policy.getSharedGold(draft);},
   onSharedGoldChanged(callback){ensure();if(typeof callback!=='function')throw Error('Shared gold listener required');goldListeners.add(callback);return ()=>goldListeners.delete(callback);},
   async transactSharedGold(transactionId,operation,options){
@@ -60,6 +71,10 @@ function create({store,account,onFailure=()=>{},onCommitted=()=>{},generate=()=>
   async sellItems(transactionId,selections,options){
    ensure();await api.flush();ensure();if(externalBusy)throw Error('Item sale transaction busy');externalBusy=true;let failure;
    try{const previous=committed,before=Policy.getSharedGold(committed.permanent),result=await store.sellItems(committed.id,committed.revision,transactionId,selections,options),loaded=acceptAccount(result.account);ensure();committed={...loaded,settings:Online.copy(loaded.settings||committed.settings||{}),settingsRevision:loaded.settingsRevision??committed.settingsRevision??0};draft=Online.copy(loaded.permanent);settings=Online.copy(committed.settings||{});reads.clear();const event=Object.freeze({transactionId,type:'sale',amount:result.summary?.proceeds||0,before,balance:result.balance,duplicate:result.duplicate,summary:result.summary?Online.copy(result.summary):null});if(!result.duplicate){for(const callback of goldListeners)try{callback(event);}catch(e){onFailure(e);}onCommitted(previous,committed);}return {...result,event};}catch(e){failure=e;throw e;}finally{releaseExternal(failure);}
+  },
+  async reforgeEquipment(transactionId,operation,options){
+   ensure();await api.flush();ensure();if(externalBusy)throw Error('Equipment reforge transaction busy');externalBusy=true;let failure;
+   try{const previous=committed,before=Policy.getSharedGold(committed.permanent),result=await store.reforgeEquipment(committed.id,committed.revision,transactionId,operation,options),loaded=acceptAccount(result.account);ensure();committed={...loaded,settings:Online.copy(loaded.settings||committed.settings||{}),settingsRevision:loaded.settingsRevision??committed.settingsRevision??0};draft=Online.copy(loaded.permanent);settings=Online.copy(committed.settings||{});reads.clear();const event=Object.freeze({transactionId,type:'reforge',mode:operation.type,amount:result.summary?.cost?.gold||0,before,balance:result.balance,duplicate:result.duplicate,summary:result.summary?Online.copy(result.summary):null});if(!result.duplicate){for(const callback of goldListeners)try{callback(event);}catch(e){onFailure(e);}onCommitted(previous,committed);}return {...result,event};}catch(e){failure=e;throw e;}finally{releaseExternal(failure);}
   },
   async discardStarterEquipment(transactionId,instanceId,options){
    ensure();await api.flush();ensure();if(externalBusy)throw Error('Equipment discard transaction busy');externalBusy=true;let failure;
@@ -83,7 +98,7 @@ function create({store,account,onFailure=()=>{},onCommitted=()=>{},generate=()=>
    });const saved=api.flush();saved.catch(()=>{});return {duplicate:false,awards,saved};
   },
   get coordinator(){return coordinator;},bindCoordinator(value){ensure();if(coordinator)throw Error('Coordinator already bound');coordinator=value;},
-  command:command=>{ensure();if(coordinator&&['recruit','leave','delete','switch-main','move-slot'].includes(command.type))throw Error('Use asynchronous farming coordinator');return change(m=>Policy.apply(m,command));},
+  command:command=>{ensure();if(committed.skullcrusherDungeon?.activeRunId)throw Error('End dungeon before character/party changes');if(coordinator&&['recruit','leave','delete','switch-main','move-slot'].includes(command.type))throw Error('Use asynchronous farming coordinator');return change(m=>Policy.apply(m,command));},
   buildCharacter(m,character,value,slotIndex){ensure();
    const clean=Online.copy(value);clean.equipment={};delete clean.inventory;delete clean.party;delete clean.potions;delete clean.manaPotions;
    m=Policy.apply(m,{type:'create',id:character.id,character,progress:clean,slotIndex});

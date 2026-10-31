@@ -217,6 +217,11 @@ async function finishRuntime({store,account,document,accountId,guard,scriptLoade
  guard();root.permanentFarmingBooting=true;root.permanentCharacterInventoryEnabled=true;
  const Runtime=runtimeModule||root.PermanentPartyRuntime,Coordinator=coordinatorModule||root.PermanentFarmingCoordinator;
  if(!Runtime?.create||!Runtime?.activate||!Coordinator?.create)throw Error('永久角色 Runtime 依賴尚未載入');
+ if(account.skullcrusherDungeon?.activeRunId){
+  const runId=account.skullcrusherDungeon.activeRunId;
+  const recovered=await store.skullcrusherAction(accountId,account.revision,{type:'end',runId,status:'aborted',reason:'page-reload',now:Date.now()});
+  account=recovered.account;guard();
+ }
  const notifyCloud=()=>automaticCloudSave?.notify();
  const runtime=Runtime.activate(Runtime.create({store,account,legacyOffline:true,onFailure:error=>{const node=statusNode(document);node.textContent='永久存檔已停止寫入，請重新整理：'+error.message;node.dataset.state='error';},onCommitted:(before,after)=>{notifyCloud();if(typeof root.rebuildBattlePartyMembers!=='function'||!root.fighting)return;const fields=['level','equipment','skillLevels','advancedClass'];if(JSON.stringify(before.permanent.slotOrder)!==JSON.stringify(after.permanent.slotOrder)||JSON.stringify(before.permanent.parties)!==JSON.stringify(after.permanent.parties)||Object.keys(after.permanent.characters).some(id=>fields.some(key=>JSON.stringify(before.permanent.characters[id]?.progress[key])!==JSON.stringify(after.permanent.characters[id]?.progress[key]))))root.rebuildBattlePartyMembers();}}));
  activeRuntime=runtime;installSchedulingGuards(runtime);guard();

@@ -14,6 +14,8 @@ assert.deepEqual(policy.MAGIC_ORB_BASE_TEMPLATE, {}, '魔珠沿用目前沒有�
 assert.deepEqual(policy.WAND_BASE_TEMPLATE, { attackMin: 26, attackMax: 35, attackSpeed: 1 }, '魔杖只保留既有攻擊與攻速模板');
 
 const minimum = policy.createSpecialEquipmentInstance('blackstone-warlord-warhelm', { uniqueId: 'min', random: () => 0 });
+assert.equal(minimum.affixSchemaVersion, 5, 'chapter-two special drops use the shared version-five generator');
+assert.ok(minimum.randomAffixes.every((entry, index) => entry.slotKey === `random-${index}` && entry.valueQuality === 1));
 assert.equal(minimum.defense, 32);
 assert.deepEqual(minimum.fixedAffixes.map((entry) => [entry.stat, entry.value]), [['maxHp', 100], ['defensePercent', 6]]);
 assert.equal(minimum.randomAffixes.length, 2);
@@ -42,7 +44,7 @@ assert.equal(wand.randomAffixes.length, 2);
 assert.equal(wand.specialAbility.id, 'thorn_corrosion');
 const restoredWand = affixPolicy.normalizeEquipment(JSON.parse(JSON.stringify(wand)));
 assert.deepEqual(restoredWand.fixedAffixes.map((entry) => entry.value), [6, 50], '特殊固定詞綴通過存檔正規化後仍保留原始擲值');
-assert.deepEqual(affixPolicy.getEquippedAffixStats({ weapon: restoredWand }), { magicDamageBonus: 6, mana: 50, attackFlat: 6, maxHp: 30 }, '特殊固定與隨機詞綴都進入裝備能力統計');
+assert.deepEqual(affixPolicy.getEquippedAffixStats({ weapon: restoredWand }), { magicDamageBonus: 6, mana: 50, maxHp: 30, hpRegeneration: 5 }, '特殊固定與新版階級抽取的隨機詞綴都進入裝備能力統計');
 
 assert.equal(policy.getIncomingDamageReduction({ head: minimum }, .29), .15);
 assert.equal(policy.getIncomingDamageReduction({ head: minimum }, .30), 0);

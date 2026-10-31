@@ -31,7 +31,8 @@ const fiveOutposts = destroyOutposts(5);
 assert.equal(fiveOutposts.bossSpawned, true, 'the fifth outpost spawns the Blackstone Warlord');
 assert.equal(progression.getMapState(bossAliveProgress, 'blackstone-stronghold', true).bossFirstKilled, false);
 assert.equal(progression.getMapState(bossAliveProgress, 'blackstone-stronghold', true).cleared, false);
-assert.equal(progression.canEnter(bossAliveProgress, 'forest-altar', true), false, 'a living boss does not unlock 2-5');
+assert.equal(progression.canEnter(bossAliveProgress, 'forest-altar', true), true,
+  'the optional stronghold dungeon no longer blocks the fourth main chapter-two map');
 assert.match(completionBranch, /strongholdProgress\.bossFirstKilled[\s\S]*completeDungeon\(\)/,
   'the dungeon completion call is guarded by formal boss-kill progress');
 assert.match(completionBranch, /if \(battle\.blackstoneStrongholdState\?\.bossSpawned\) \{[\s\S]*battle\.waveTransitioning = false;[\s\S]*return;/,
@@ -41,12 +42,14 @@ const bossKill = progression.recordBossKill(bossAliveProgress, 'blackstone-stron
 assert.equal(bossKill.firstClear, true, 'the actual Blackstone Warlord death records the first clear');
 assert.equal(progression.getMapState(bossAliveProgress, 'blackstone-stronghold', true).bossFirstKilled, true);
 assert.equal(progression.getMapState(bossAliveProgress, 'blackstone-stronghold', true).cleared, true);
-assert.equal(progression.canEnter(bossAliveProgress, 'forest-altar', true), true, 'the actual boss death unlocks 2-5');
+assert.equal(progression.canEnter(bossAliveProgress, 'forest-altar', true), true,
+  'clearing the optional stronghold preserves independently unlocked main-map progress');
 
 const fourOutpostsProgress = createStrongholdProgress();
 const fourOutposts = destroyOutposts(4);
 assert.equal(fourOutposts.bossSpawned, false, 'four outposts do not spawn the boss');
 assert.equal(progression.getMapState(fourOutpostsProgress, 'blackstone-stronghold', true).cleared, false);
-assert.equal(progression.canEnter(fourOutpostsProgress, 'forest-altar', true), false);
+assert.equal(progression.canEnter(fourOutpostsProgress, 'forest-altar', true), true,
+  'an incomplete optional stronghold does not relock main-map progress');
 
 console.log('blackstone-stronghold-completion-integration: assertions passed');

@@ -2,7 +2,7 @@
 // Run with --check to reject drift after online changes. No minifier or external dependency.
 const fs = require('node:fs'), path = require('node:path'), vm = require('node:vm');
 const root = path.join(__dirname, '..');
-const policies = ['monster-defense', 'chapter-one-level-policy', 'party-policy', 'equipment-policy', 'equipment-affix-policy',
+const policies = ['monster-defense', 'chapter-one-level-policy', 'party-policy', 'skullcrusher-accessory-policy', 'equipment-policy', 'equipment-affix-policy',
   'armor-penetration-policy', 'conditional-damage-policy', 'critical-resource-recovery-policy',
   'direct-hit-health-recovery-policy', 'control-effect-policy', 'rune-policy',
   'chapter-three-crafted-epic-ability-policy', 'chapter-three-epic-weapon-policy',
@@ -102,7 +102,7 @@ const rawDamage=enemy.attack*(now<state.attackDownUntil?1-state.attackDown:1);
 const armorBreakMultiplier=1, spiderNestArmorMultiplier=1, piercingMultiplier=1;
 ${section('const parried =', 'const armorBreakMultiplier =')}
 ${section('const runeIronWallReduction =', 'const directDamageLeech =')}
-${section("if (target.currentHp > 0 && target.currentHp / target.maxHp < .3 && target.job === 'mage'", "if (!dodged && damage > 0 && getActiveMap(progress).id === 'wolf-den'")}
+${section("if (target.currentHp > 0 && target.currentHp / target.maxHp < .3 && target.job === 'mage'", "if (!dodged && damage > 0 && (battle.dungeonId || getActiveMap(progress).id) === 'wolf-den'")}
 defeatPartyMember(target,now);
 return { damage, dodged, parried };
 }`;

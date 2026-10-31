@@ -3093,6 +3093,7 @@ function hasAliveBoss(excludeIndex = -1) {
 }
 
 function getEnemyDefinition(index) {
+  if (battle.skullcrusherRunId && battle.skullcrusherEnemies?.[index]) return { ...battle.skullcrusherEnemies[index], combatIndex:index };
   const enemy = getMonsterDefinitionForMap(battle.enemyTypes[index], battle.dungeonId || getActiveMap(getProgress()).id, battle.enemyLevels?.[index]);
   if (enemy.isFacility) return { ...enemy, combatIndex: index };
   const summonProfile = battle.enemySummonProfiles?.[index];
@@ -3234,7 +3235,9 @@ function getEquipmentStats(progress = getProgress(), activeCharacter = getActive
   const runes = RunePolicy.getBonuses(progress.equipment);
   return {
     ...fixed,
+    defense: fixed.defense + (affixes.defenseFlat || 0),
     mana: fixed.mana + (affixes.mana || 0),
+    damageReduction: fixed.damageReduction + (affixes.damageReductionPercent || 0) / 100,
     magicDamageBonus: fixed.magicDamageBonus + (affixes.magicDamageBonus || 0) / 100,
     attackFlat: affixes.attackFlat || 0,
     maxHp: affixes.maxHp || 0,
@@ -3578,6 +3581,8 @@ function itemStatsText(item) {
   if (Number.isFinite(Number(item.attackMin)) && Number.isFinite(Number(item.attackMax))) parts.push(`攻擊 ${item.attackMin}～${item.attackMax}`);
   else if (item.attack) parts.push(`攻擊 +${effectiveEquipmentStat(item, 'attack')}`);
   if (Number(item.attackSpeed) > 0) parts.push(`攻速 ${Number(item.attackSpeed).toFixed(2)} 次／秒`);
+  if (item.criticalChance) parts.push(`暴擊率 +${Math.round(effectiveEquipmentStat(item, 'criticalChance') * 100)}%`);
+  if (item.criticalDamageBonus) parts.push(`暴擊傷害 +${Math.round(effectiveEquipmentStat(item, 'criticalDamageBonus') * 100)}%`);
   if (item.defense) parts.push(`防禦 +${effectiveEquipmentStat(item, 'defense')}`);
   if (item.hp) parts.push(`生命 +${effectiveEquipmentStat(item, 'hp')}`);
   if (item.mana) parts.push(`最大魔力 +${effectiveEquipmentStat(item, 'mana')}`);
@@ -3825,13 +3830,13 @@ function renderInventoryTooltip(itemId, anchor = null, pin = false) {
   const { item, stackIds, stackQuantity, wearable, equipSlots, availableRuneIds } = entry;
   const progress = inventoryTooltipProgress || getProgress();
   const quality = itemQualityLabel(item);
-  const slotLabel = item.kind === 'equipment' ? equipmentSlots[item.slot]?.label || item.slot : '';
+  const slotLabel = item.kind === 'equipment' ? item.slot === 'ring' ? '戒指' : equipmentSlots[item.slot]?.label || item.slot : '';
   const details = item.kind === 'equipment' ? equipmentDetailsHtml(item) : itemStatsText(item);
   const visual = item.image || item.kind === 'recipe'
     ? `<img src="${itemImagePath(item)}" alt="" class="inventory-item-image">`
     : item.icon || '◈';
   const equipControls = item.kind === 'equipment' && wearable
-    ? equipSlots.map((targetSlot) => `<button type="button" data-equip-id="${item.id}" data-equip-slot="${targetSlot}">${equipSlots.length > 1 ? targetSlot === 'weapon' ? '裝主手' : '裝副手' : '穿戴'}</button>`).join('')
+    ? equipSlots.map((targetSlot) => `<button type="button" data-equip-id="${item.id}" data-equip-slot="${targetSlot}">${item.slot === 'ring' ? `裝${equipmentSlots[targetSlot]?.label || targetSlot}` : equipSlots.length > 1 ? targetSlot === 'weapon' ? '裝主手' : '裝副手' : '穿戴'}</button>`).join('')
     : item.kind === 'equipment' ? '<span class="equip-blocked">目前角色無法穿戴</span>' : '';
   const runeButtons = item.kind === 'equipment' && (item.socketedRunes || []).length < (Number(item.sockets) || 0)
     ? Object.values(RunePolicy.RUNES).filter((rune) => availableRuneIds.has(rune.id)).map((rune) => `<button type="button" data-socket-item="${item.id}" data-socket-rune="${rune.id}">鑲嵌${rune.name}</button>`).join('') : '';
@@ -4228,7 +4233,7 @@ function equipItem(itemId, preferredSlot = null) {
   if (itemIndex < 0) return;
   const item = progress.inventory[itemIndex];
   const character = getActiveCharacter();
-  const targetSlot = preferredSlot || item.slot;
+  const targetSlot = preferredSlot || getCompatibleEquipSlots(item, character, progress)[0] || item.slot;
   if (!character || !isItemWearableByCharacter(item, character, progress.level) || !getCompatibleEquipSlots(item, character, progress).includes(targetSlot)) {
     showToast('這件裝備不適合目前職業。');
     return;
@@ -4423,12 +4428,17 @@ function getMonsterStatusDisplays(index, now = Date.now()) {
 }
 
 function renderEnemySquad() {
+  document.querySelector('#battle-screen')?.classList.toggle('skullcrusher-combat', Boolean(battle.skullcrusherRunId));
   const squad = document.querySelector('#enemy-squad');
   const now = Date.now();
-  const visibleIndexes = aliveEnemyIndexesByAge().slice(0, 4);
+  const displayLimit = battle.skullcrusherRunId ? Math.max(1,Math.min(5,aliveEnemyIndexesByAge().length)) : 4;
+  const visibleIndexes = aliveEnemyIndexesByAge().slice(0, displayLimit);
+  squad.style.setProperty('--skull-columns', displayLimit);
+  squad.style.setProperty('--skull-mobile-columns', Math.min(3,displayLimit));
+  squad.style.setProperty('--skull-mobile-rows', Math.ceil(displayLimit / 3));
   const focusIndex = visibleIndexes[0] ?? -1;
   const reserveCount = Math.max(0, battle.enemyHps.filter((hp) => hp > 0).length - visibleIndexes.length);
-  const visibleEnemies = Array.from({ length: 4 }, (_, displaySlot) => {
+  const visibleEnemies = Array.from({ length: displayLimit }, (_, displaySlot) => {
     const index = visibleIndexes[displaySlot];
     if (index === undefined) {
       return `<div class="monster-battle-slot empty-slot" data-display-slot="${displaySlot}" role="gridcell"><div class="monster-empty-slot">等待怪物</div></div>`;
@@ -4906,62 +4916,62 @@ function playBattleSkillEffect(skillId, targetAnchor, options = {}) {
     requestAnimationFrame(followTarget);
   };
   requestAnimationFrame(followTarget);
-  if (skillId === 'heavy-strike') setTimeout(() => {
+  if (skillId === 'heavy-strike') scheduleBattleVisualEvent(() => {
     const target = document.querySelector(`#enemy-${targetAnchor.index}`);
     target?.classList.add('heavy-strike-hit');
-    setTimeout(() => target?.classList.remove('heavy-strike-hit'), 220);
+    scheduleBattleVisualEvent(() => target?.classList.remove('heavy-strike-hit'), 220);
   }, preset.impactAt);
-  if (skillId === 'charge') setTimeout(() => {
+  if (skillId === 'charge') scheduleBattleVisualEvent(() => {
     const target = document.querySelector(`#enemy-${targetAnchor.index}`);
     target?.classList.add('charge-hit');
     field.classList.add('charge-impact');
-    setTimeout(() => { target?.classList.remove('charge-hit'); field.classList.remove('charge-impact'); }, 170);
+    scheduleBattleVisualEvent(() => { target?.classList.remove('charge-hit'); field.classList.remove('charge-impact'); }, 170);
   }, preset.impactAt);
-  if (skillId === 'power-shot') setTimeout(() => {
+  if (skillId === 'power-shot') scheduleBattleVisualEvent(() => {
     const target = document.querySelector(`#enemy-${targetAnchor.index}`);
     target?.classList.add('power-shot-hit');
-    setTimeout(() => target?.classList.remove('power-shot-hit'), 170);
+    scheduleBattleVisualEvent(() => target?.classList.remove('power-shot-hit'), 170);
   }, preset.impactAt);
-  if (skillId === 'fireball') setTimeout(() => {
+  if (skillId === 'fireball') scheduleBattleVisualEvent(() => {
     const target = document.querySelector(`#enemy-${targetAnchor.index}`);
     target?.classList.add('fireball-hit');
-    setTimeout(() => target?.classList.remove('fireball-hit'), 170);
+    scheduleBattleVisualEvent(() => target?.classList.remove('fireball-hit'), 170);
   }, preset.impactAt);
-  if (skillId === 'blizzard') setTimeout(() => {
+  if (skillId === 'blizzard') scheduleBattleVisualEvent(() => {
     (options.targets || []).forEach((visualTarget) => {
       const target = document.querySelector(`#enemy-${visualTarget.index}`);
       target?.classList.add('blizzard-hit');
-      setTimeout(() => target?.classList.remove('blizzard-hit'), 180);
+      scheduleBattleVisualEvent(() => target?.classList.remove('blizzard-hit'), 180);
     });
   }, preset.impactAt);
   if (skillId === 'chain-lightning') (options.targets || []).forEach((visualTarget, order) => {
-    setTimeout(() => {
+    scheduleBattleVisualEvent(() => {
       const target = document.querySelector(`#enemy-${visualTarget.index}`);
       target?.classList.add('chain-lightning-hit');
-      setTimeout(() => target?.classList.remove('chain-lightning-hit'), 150);
+      scheduleBattleVisualEvent(() => target?.classList.remove('chain-lightning-hit'), 150);
     }, preset.impactAt + order * 100);
   });
-  if (skillId === 'holy-light') setTimeout(() => {
+  if (skillId === 'holy-light') scheduleBattleVisualEvent(() => {
     const target = document.querySelector(`#enemy-${targetAnchor.index}`);
     target?.classList.add('holy-light-hit');
-    setTimeout(() => target?.classList.remove('holy-light-hit'), 170);
+    scheduleBattleVisualEvent(() => target?.classList.remove('holy-light-hit'), 170);
   }, preset.impactAt);
   if (skillId === 'holy-nova') (options.targets || []).forEach((visualTarget) => {
-    setTimeout(() => {
+    scheduleBattleVisualEvent(() => {
       const target = document.querySelector(`#enemy-${visualTarget.index}`);
       target?.classList.add('holy-nova-hit');
-      setTimeout(() => target?.classList.remove('holy-nova-hit'), 160);
+      scheduleBattleVisualEvent(() => target?.classList.remove('holy-nova-hit'), 160);
     }, visualTarget.delay);
   });
   if (skillId === 'shadow-dance') (options.targets || []).forEach((visualTarget, order, visualTargets) => {
     const delay = preset.impactAt + order * (visualTargets.length > 1 ? 85 : 0);
-    setTimeout(() => {
+    scheduleBattleVisualEvent(() => {
       const target = document.querySelector(`#enemy-${visualTarget.index}`);
       target?.classList.add('shadow-dance-hit');
-      setTimeout(() => target?.classList.remove('shadow-dance-hit'), 130);
+      scheduleBattleVisualEvent(() => target?.classList.remove('shadow-dance-hit'), 130);
     }, delay);
   });
-  setTimeout(() => {
+  scheduleBattleVisualEvent(() => {
     effect.remove();
     if (!layer.childElementCount) layer.remove();
   }, preset.duration);
@@ -4976,12 +4986,23 @@ function playCompanionAttackAnimation(targetIndexes = []) {
   setTimeout(() => companionIcon.classList.remove('attacking'), 520);
 }
 
+function scheduleBattleVisualEvent(callback, delay) {
+  if (!battle.skullcrusherRunId) return setTimeout(callback,delay);
+  const owner = battle, sessionId = battle.sessionId;
+  const timer = setTimeout(()=>{
+    if (battle !== owner || battle.sessionId !== sessionId || !fighting || battle.dungeonComplete) return;
+    callback();
+  },delay);
+  (owner.damageTimers ||= []).push(timer);
+  return timer;
+}
+
 function showEnemyDamage(indexes, damage, type = 'normal') {
   if (type === 'normal') battle.targetIndexes = indexes;
   indexes.forEach((index) => {
     const event = { id: `${Date.now()}-${Math.random()}`, damage, type };
     battle.enemyDamages[index] = [...(battle.enemyDamages[index] || []), event];
-    setTimeout(() => {
+    scheduleBattleVisualEvent(() => {
       battle.enemyDamages[index] = (battle.enemyDamages[index] || []).filter((entry) => entry.id !== event.id);
       if (type === 'normal') battle.targetIndexes = battle.targetIndexes.filter((target) => target !== index);
       if (fighting) updateBattleUI();
@@ -5820,7 +5841,7 @@ function updateBattleUI() {
     const experience = getPlayerExperienceDisplay(progress);
     playerStageInfo.innerHTML = `<b>${character.name}</b><span class="player-stage-meter-copy"><em>HP</em><strong>${Math.max(0, Math.round(battle.playerHp))} / ${Math.round(maxHp)}</strong></span><span class="player-stage-hp"><i style="width:${hpPercent}%"></i></span><span class="player-stage-meter-copy"><em>${resourceLabel}</em><strong>${Math.max(0, Math.round(resourceCurrent))} / ${Math.round(maxMana)}</strong></span><span class="player-stage-resource"><i style="width:${resourcePercent}%"></i></span><span class="player-stage-experience-copy"><em>Lv${experience.level}</em><strong>${experience.percent}%</strong></span><span class="player-stage-experience" role="progressbar" aria-label="${character.name}經驗值" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${experience.percent}"><i style="width:${experience.percent}%"></i></span><span class="player-status-row" aria-label="增益與減益狀態">${renderPlayerStatusIcons(mainMember)}</span>`;
   }
-  const currentMap = getActiveMap(progress);
+  const currentMap = battle.skullcrusherRunId ? { ...getActiveMap(progress), id:SkullcrusherDungeonLifecycle.ID, name:SkullcrusherDungeonLifecycle.NAME, dungeon:true, min:40, max:43, monsterMin:40, monsterMax:43 } : getActiveMap(progress);
   const mapName = document.querySelector('#battle-title');
   if (mapName) mapName.textContent = currentMap.dungeon ? `${currentMap.name}・第 ${battle.dungeonWave || 1} 波` : currentMap.name;
   const battleField = document.querySelector('.battle-field');
@@ -5973,6 +5994,7 @@ function floatDamage(value) {
 }
 
 function rewardVictory(index) {
+  if (battle.skullcrusherRunId) return; // Lifecycle preview has no per-kill rewards.
   const experienceRuntime = getPermanentPartyRuntime();
   if (experienceRuntime && (!fighting || battle.enemyHps[index] > 0 || !experienceRuntime.canRewardExperience(battle.experienceSessionId, index, battle.enemySpawnedAt?.[index]))) return;
   if (!battle.rewardedEnemyIndexes) battle.rewardedEnemyIndexes = new Set();
@@ -6202,7 +6224,7 @@ function rewardVictory(index) {
 }
 
 function useSharedHealingPotionForMember(member) {
-  if (!member?.alive || member.isMain || member.currentHp <= 0 || member.currentHp >= member.maxHp) return false;
+  if (!member?.alive || (member.isMain && !battle.skullcrusherRunId) || member.currentHp <= 0 || member.currentHp >= member.maxHp) return false;
   const progress = getProgress();
   if ((progress.potions || 0) <= 0) return false;
   progress.potions -= 1;
@@ -6300,6 +6322,7 @@ function completeChapterTwoFinalBattle() {
 }
 
 function queueDefeatedEnemies() {
+  if (battle.skullcrusherRunId) { processSkullcrusherEncounter(); return; }
   if (battle.isDungeon) {
     battle.enemyHps.forEach((hp, index) => {
       if (hp > 0 || battle.enemyRespawns[index] !== null) return;
@@ -6446,7 +6469,7 @@ function getLateChapterUnits(now = Date.now()) {
   return battle.enemyTypes.map((type, index) => {
     const definition = getEnemyDefinition(index);
     const skillState = getEnemySkillState(index);
-    skillState.lateChapter = skillState.lateChapter || ChapterThreeLateCombatPolicy.createState(mapId, battle.enemySpawnedAt[index] || now);
+    skillState.lateChapter = skillState.lateChapter || ChapterThreeLateCombatPolicy.createState(definition.skillMapId || mapId, battle.enemySpawnedAt[index] || now);
     return { ...definition, key: `${battle.sessionId}:${index}:${battle.enemySpawnedAt[index]}`, state: skillState.lateChapter,
       controlled: now < skillState.stunnedUntil || now < skillState.frozenUntil,
       get currentHp() { return battle.enemyHps[index]; },
@@ -6461,6 +6484,7 @@ function emitLateChapterSkill(unit, skill) {
 function updateLateChapterThresholds(index, now = Date.now()) {
   const units = getLateChapterUnits(now);
   if (units[index]) ChapterThreeLateCombatPolicy.thresholds(units[index].mapId, units[index], now, emitLateChapterSkill);
+  if (battle.skullcrusherRunId) processSkullcrusherBoss();
 }
 
 function recordLateChapterEnemyDeath(index, now = Date.now()) {
@@ -6590,6 +6614,7 @@ function extendElementalCollapseStatuses(index, member, now = Date.now()) {
 }
 
 function applyDamageToMonster(index, baseDamage, profile, options = {}) {
+  if (battle.skullcrusherRunId && (battle.dungeonComplete || !fighting || !(battle.enemyHps[index] > 0))) return {finalDamage:0};
   const enemy = getEnemyDefinition(index);
   const attacker = options.attacker || null;
   const progress = attacker?.progress || getProgress();
@@ -6763,6 +6788,7 @@ function applyDamageToMonster(index, baseDamage, profile, options = {}) {
     const explosion = applyDamageToMonster(index, arcaneMarkExplosion.power, { damageType: 'magic', attackRange: 'ranged', element: 'arcane' }, { attacker, attackKind: 'skill-followup', sourceSkill: 'arcane-mark-explosion', canEvade: false, canParry: false });
     MageAdvancementPolicy.recordArcaneMarkDamage(attacker, explosion.finalDamage);
   }
+  if (battle.skullcrusherRunId) processSkullcrusherBoss();
   if (options.showDamage !== false) showEnemyDamage([index], result.finalDamage, options.effectType || 'normal');
   return result;
 }
@@ -6817,8 +6843,13 @@ function resolveFinishedMageResonance(member, now) {
 }
 
 function queueClassHealAfterglow(member, healTarget, event) {
+  const dungeonBattle = battle.skullcrusherRunId ? battle : null;
   const farmingIdentity=typeof getPermanentPartyRuntime==='function'&&getPermanentPartyRuntime()?.coordinator?{mainId:getPermanentPartyRuntime().mainId,battle}:null;
-  setTimeout(() => {
+  const timer = setTimeout(() => {
+    if (dungeonBattle) {
+      dungeonBattle.skullcrusherPlayerTimers?.delete(timer);
+      if (battle !== dungeonBattle || !fighting || dungeonBattle.dungeonComplete) return;
+    }
     if(farmingIdentity&&(farmingIdentity.mainId!==getPermanentPartyRuntime()?.mainId||farmingIdentity.battle!==battle))return;
     const pending = member.pendingClassHeals || [];
     const index = pending.findIndex(entry => entry.id === event.id);
@@ -6831,6 +6862,7 @@ function queueClassHealAfterglow(member, healTarget, event) {
     else healTarget.currentHp = Math.min(healTarget.maxHp, healTarget.currentHp + event.amount);
     if (fighting) updateBattleUI();
   }, Math.max(0, event.dueAt - Date.now()));
+  if (dungeonBattle) (dungeonBattle.skullcrusherPlayerTimers ||= new Set()).add(timer);
 }
 
 function scheduleClassHealAfterglow(member, healTarget, amount, now = Date.now()) {
@@ -6843,6 +6875,7 @@ function scheduleClassHealAfterglow(member, healTarget, amount, now = Date.now()
 }
 
 function useAutoSkillForMember(member, now = Date.now()) {
+  if (battle.skullcrusherRunId && (!fighting || !member?.alive || member.currentHp <= 0)) return false;
   if (member?.job === 'mage') resolveFinishedMageResonance(member, now);
   if (!member?.alive || now < member.stunnedUntil || now < member.globalSkillReadyAt) return false;
   const { character, progress, stats } = member;
@@ -8005,7 +8038,7 @@ function createBattleTickRuntime() {
     enemyRespawns: processEnemyRespawns,
     enemyDots: processEnemyDots,
     environment: (now) => {
-      processBlackForestCorruption(now);
+      if (!battle.skullcrusherRunId) processBlackForestCorruption(now);
       processOnlineFacilityDrain(now);
       if (monsterRotationPreview) {
         rotateMonsterPreview(now);
@@ -8613,13 +8646,16 @@ function defeatPartyMember(member, now = Date.now()) {
   member.blackstoneAttackSpeedPenalty = 0;
   member.nextAttackAt = Number.POSITIVE_INFINITY;
   member.reviveAt = member.isMain ? null : now + PARTY_REVIVE_DELAY_MS;
+  if (battle.skullcrusherRunId) member.reviveAt = null;
   logPartyDebug('死亡事件', { memberId: member.id, memberName: member.name, at: now });
   logBattle(`${member.name} 已倒下。`, 'system');
-  if (member.isMain) endBattleAfterPlayerDefeat(now);
+  if (!battle.skullcrusherRunId) { if (member.isMain) endBattleAfterPlayerDefeat(now); }
+  if (battle.skullcrusherRunId) window.skullcrusherLifecyclePreview?.checkDefeat().catch(reportSkullcrusherLifecycleError);
   return true;
 }
 
 function reviveDefeatedTeammates(now = Date.now()) {
+  if (battle.skullcrusherRunId) return 0;
   const candidates = (battle.partyMembers || []).filter(member => !member.isMain && !member.alive && Number.isFinite(member.reviveAt) && now >= member.reviveAt);
   if (!candidates.length) return 0;
   const progress = getProgress();
@@ -8650,6 +8686,11 @@ function reviveDefeatedTeammates(now = Date.now()) {
 }
 
 function resetPartyAfterDefeat(now = Date.now()) {
+  if (battle.skullcrusherRunId) {
+    const defeated = PartyPolicy.isPartyDefeated(battle.partyMembers);
+    if (defeated) window.skullcrusherLifecyclePreview?.checkDefeat().catch(reportSkullcrusherLifecycleError);
+    return defeated;
+  }
   if (!PartyPolicy.isPartyDefeated(battle.partyMembers)) return false;
   logPartyDebug('戰鬥失敗事件', {
     members: battle.partyMembers.map((member) => `${member.id}:${member.name}:dead`).join(',')
@@ -8763,7 +8804,7 @@ function enemyAttackTick() {
     }
   });
 
-  if (getActiveMap(progress).id === 'blackstone-stronghold' && now - (battle.lastStrongholdRegenAt || 0) >= 1000) {
+  if ((battle.dungeonId || getActiveMap(progress).id) === 'blackstone-stronghold' && now - (battle.lastStrongholdRegenAt || 0) >= 1000) {
     battle.lastStrongholdRegenAt = now;
     battle.enemyHps.forEach((hp, index) => {
       if (hp <= 0) return;
@@ -8809,7 +8850,7 @@ function enemyAttackTick() {
     battle.enemyNextAttackAt[enemyIndex] = now + getMonsterAttackInterval(enemy, enemyCurrentHp);
     attackOccurred = true;
 
-    const plainsAction = getActiveMap(progress).id === 'plains-depths'
+    const plainsAction = (battle.dungeonId || getActiveMap(progress).id) === 'plains-depths'
       ? PlainsDepthsPolicy.resolveActiveSkill(enemy.id, Math.random(), enemyCurrentHp < enemy.maxHp)
       : 'attack';
     if (plainsAction === 'heal') {
@@ -8886,13 +8927,13 @@ function enemyAttackTick() {
         logBattle(`💨 ${target.name}觸發【閃現】，完全避開攻擊！`, 'system');
       }
     }
-    const redrockState = getActiveMap(progress).id === 'redrock-wastes-entrance'
+    const redrockState = (battle.dungeonId || getActiveMap(progress).id) === 'redrock-wastes-entrance'
       ? getRedrockEnemyState(enemyIndex, enemyCurrentHp, enemy.maxHp) : null;
     const redrockAction = redrockState
       ? (RedrockWastesPolicy.resolveScheduledAction(enemy.id, redrockState, now)
         || (enemy.id === 'wasteland-hyena' ? RedrockWastesPolicy.resolveHyenaBasicHit(redrockState, Math.random()) : null))
       : null;
-    const brokenrockState = getActiveMap(progress).id === 'brokenrock-canyon'
+    const brokenrockState = (battle.dungeonId || getActiveMap(progress).id) === 'brokenrock-canyon'
       ? getBrokenrockEnemyState(enemyIndex, enemyCurrentHp, enemy.maxHp) : null;
     const brokenrockActions = brokenrockState
       ? [...(brokenrockState.pendingActions || []), ...BrokenrockCanyonPolicy.resolveScheduledActions(enemy.id, brokenrockState, now, { otherAliveEnemies: Math.max(0, aliveMonsterIndexesByAge().length - 1) })]
@@ -8924,7 +8965,7 @@ function enemyAttackTick() {
     if (brokenrockAction?.target === 'lowest-hp-ratio-alive') {
       target = aliveMembers.sort((first, second) => first.currentHp / first.maxHp - second.currentHp / second.maxHp)[0];
     }
-    const bloodwarState = getActiveMap(progress).id === 'bloodwar-wastes'
+    const bloodwarState = (battle.dungeonId || getActiveMap(progress).id) === 'bloodwar-wastes'
       ? getBloodwarEnemyState(enemyIndex, enemyCurrentHp, enemy.maxHp, now) : null;
     const bloodwarActions = bloodwarState
       ? [...(bloodwarState.pendingActions || []), ...BloodwarWastesPolicy.resolveScheduledActions(enemy.id, bloodwarState, now, { otherAliveEnemies: Math.max(0, aliveMonsterIndexesByAge().length - 1) })]
@@ -8971,7 +9012,7 @@ function enemyAttackTick() {
     }
     const bloodwarAction = bloodwarActions.find((action) => action.damageMultiplier) || null;
     const critical = !dodged && Math.random() < ((enemy.criticalChance ?? (enemy.isBoss ? .15 : enemy.isElite ? .10 : .05)) + (redrockAction?.criticalBonus || 0));
-    const blackForestAction = getActiveMap(progress).id === 'black-forest-entrance'
+    const blackForestAction = (battle.dungeonId || getActiveMap(progress).id) === 'black-forest-entrance'
       ? BlackForestEntrancePolicy.resolveAction(enemy.id, Math.random(), target.currentHp / target.maxHp, enemyCurrentHp, enemy.maxHp)
       : 'attack';
     if (blackForestAction === 'leaf-storm') {
@@ -8985,10 +9026,10 @@ function enemyAttackTick() {
       }
       continue;
     }
-    let blackForestTrailAction = getActiveMap(progress).id === 'black-forest-trail'
+    let blackForestTrailAction = (battle.dungeonId || getActiveMap(progress).id) === 'black-forest-trail'
       ? BlackForestTrailPolicy.resolveAction(enemy.id, Math.random(), target.currentHp / target.maxHp, enemyCurrentHp, enemy.maxHp)
       : 'attack';
-    const spiderNestActive = getActiveMap(progress).id === 'spider-nest';
+    const spiderNestActive = (battle.dungeonId || getActiveMap(progress).id) === 'spider-nest';
     const poisonStacks = getSpiderNestPoisonStacks(target);
     const currentBossPhase = SpiderNestPolicy.getBossPhase(enemy.id, enemyCurrentHp, enemy.maxHp);
     if (spiderNestActive && enemy.id === 'giantSpider') {
@@ -9006,7 +9047,7 @@ function enemyAttackTick() {
           ? countAliveSpiderNestSummons('venomSpitterSpider') < SpiderNestPolicy.BEASTMASTER.summonLimit
           : countAliveSpiderNestSummons('spiderNestBlackstonePoisonSpider') < SpiderNestPolicy.BOSS.summonLimit)
       : 'attack';
-    const blackForestDepthsActive = getActiveMap(progress).id === 'black-forest-depths';
+    const blackForestDepthsActive = (battle.dungeonId || getActiveMap(progress).id) === 'black-forest-depths';
     if (blackForestDepthsActive && enemy.id === 'heartOfTheBlackForest') {
       if (!battle.enemyDepthsPhase) battle.enemyDepthsPhase = battle.enemyTypes.map(() => 1);
       const depthsPhase = BlackForestDepthsPolicy.getBossPhase(enemy.id, enemyCurrentHp, enemy.maxHp);
@@ -9021,13 +9062,13 @@ function enemyAttackTick() {
         summonBlackForestDepthsRoot(enemyIndex, now);
       }
     }
-    const strongholdAction = getActiveMap(progress).id === 'blackstone-stronghold'
+    const strongholdAction = (battle.dungeonId || getActiveMap(progress).id) === 'blackstone-stronghold'
       ? BlackstoneStrongholdPolicy.resolveAction(enemy.id, Math.random(), target.currentHp / target.maxHp, enemyCurrentHp, enemy.maxHp)
       : 'attack';
-    const forestAltarAction = getActiveMap(progress).id === 'forest-altar'
+    const forestAltarAction = (battle.dungeonId || getActiveMap(progress).id) === 'forest-altar'
       ? ForestAltarPolicy.resolveAction(enemy.id, Math.random())
       : 'attack';
-    const blackForestDepthsAction = getActiveMap(progress).id === 'black-forest-depths'
+    const blackForestDepthsAction = (battle.dungeonId || getActiveMap(progress).id) === 'black-forest-depths'
       ? BlackForestDepthsPolicy.resolveAction(enemy.id, Math.random(), getWoundedEnemyIndexes().length > 0, {
         canUseNatureEcho: now >= (getEnemySkillState(enemyIndex).natureEchoReadyAt || 0)
       })
@@ -9210,7 +9251,7 @@ function enemyAttackTick() {
     if (!dodged && WarriorResourcePolicy.isWarrior(target.character.job)) {
       target.resourceCurrent = WarriorResourcePolicy.gainFromHitTaken(target.resourceCurrent);
     }
-    if (!dodged && damage > 0 && getActiveMap(progress).id === 'wolf-den'
+    if (!dodged && damage > 0 && (battle.dungeonId || getActiveMap(progress).id) === 'wolf-den'
       && WolfDenPolicy.shouldInflictBleed(enemy.id, Math.random())) {
       inflictPartyMemberBleed(target, enemy, now);
       battle.enemyNextAttackAt[enemyIndex] = now + getMonsterAttackInterval(enemy);
@@ -9219,7 +9260,7 @@ function enemyAttackTick() {
       && GoblinCampPolicy.shouldStun(battle.enemyTypes[enemyIndex], Math.random())) {
       applyControlEffectToPlayer(target, { type: 'stun', baseDurationMs: 1500, source: '投石暈眩' }, now);
     }
-    if (!dodged && damage > 0 && getActiveMap(progress).id === 'boar-woods'
+    if (!dodged && damage > 0 && (battle.dungeonId || getActiveMap(progress).id) === 'boar-woods'
       && BoarWoodsPolicy.shouldCharge(enemy.id, Math.random())) {
       applyControlEffectToPlayer(target, { type: 'stun', baseDurationMs: BoarWoodsPolicy.BOSS_CHARGE_STUN_MS, source: '衝撞' }, now);
     }
@@ -9361,6 +9402,7 @@ function enemyAttackTick() {
 }
 
 function openBattle() {
+  if (window.skullcrusherLifecyclePreview?.scene) { showToast('請先退出副本測試場次。'); return; }
   if (!isPermanentGameplayReady()) { showToast('角色資料尚未準備完成，暫時無法開始戰鬥。'); return; }
   const character = getActiveCharacter();
   if (!character) { openCreation(); return; }
@@ -9573,6 +9615,7 @@ document.querySelector('#leave-battle').addEventListener('click', () => {
     showToast('調整版面中：返回箭頭只會移動，不會離開戰鬥。');
     return;
   }
+  if (battle.skullcrusherRunId) { window.skullcrusherLifecyclePreview.end().catch(reportSkullcrusherLifecycleError); return; }
   const leavingCharacter = getActiveCharacter();
   if (AssassinEnergyPolicy.isAssassin(leavingCharacter?.job)) {
     const energyNow = Date.now();
@@ -9598,6 +9641,7 @@ document.querySelector('#leave-battle').addEventListener('click', () => {
   menuScreen.classList.remove('hidden');
 });
 document.querySelector('#battle-toggle').addEventListener('click', () => {
+  if (battle.skullcrusherRunId) { showToast('請使用副本測試面板操作場次。'); return; }
   if (battle.dungeonComplete) return;
   const character = getActiveCharacter();
   const now = Date.now();
@@ -10095,3 +10139,181 @@ document.querySelector('.combat-log')?.addEventListener('click', (event) => {
   renderBattleLog();
 });
 document.querySelectorAll('.menu-card:not(#adventure-button)').forEach((card) => card.addEventListener('click', () => showToast(card.dataset.message)));
+
+// Batch 1 only: localhost lifecycle harness, with no enemies, loot or free passes.
+function appendSkullcrusherEnemies(enemies, now = Date.now()) {
+  for (const enemy of enemies) {
+    const index = battle.enemyTypes.length;
+    battle.skullcrusherEnemies.push(enemy);
+    battle.enemyTypes.push(enemy.id); battle.enemyLevels.push(enemy.level);
+    battle.enemyHps.push(enemy.maxHp); battle.enemyRespawns.push(null);
+    battle.enemySpawnedAt.push(now + index); battle.enemySkillStates.push(null);
+    battle.enemyDots.push([]); battle.enemyDamages.push([]); battle.enemyAffixes.push([]);
+    battle.enemySummonProfiles.push(null); battle.enemyBoarEnraged.push(false);
+    battle.enemyNextAttackAt.push(now + 1000 / enemy.attackSpeed);
+  }
+}
+
+function loadSkullcrusherEncounter(scene, now = Date.now()) {
+  if (!scene || battle.skullcrusherRunId !== scene.run.runId || battle.dungeonComplete) return;
+  // Invalidate old enemy events without replacing player objects or their cooldowns.
+  battle.sessionId = ++battleSessionSequence;
+  for (const timer of battle.damageTimers || []) clearTimeout(timer);
+  battle.damageTimers = [];
+  document.querySelectorAll('.battle-skill-effect, .skill-effect, .damage-number').forEach(node=>node.remove());
+  document.querySelector('.battle-field')?.classList.remove('charge-impact','impact');
+  for (const key of ['enemyTypes','enemyLevels','enemyHps','enemyRespawns','enemySpawnedAt','enemySkillStates','enemyDots','enemyDamages','enemyAffixes','enemySummonProfiles','enemyBoarEnraged','enemyNextAttackAt','skullcrusherEnemies']) battle[key] = [];
+  battle.targetIndexes = []; battle.rewardedEnemyIndexes = new Set();
+  battle.enemyAffixRegenAt = []; battle.waveTransitioning = false;
+  battle.dungeonWave = scene.step + 1;
+  battle.skullcrusherCombat ||= {thresholds:{},ended:null};
+  appendSkullcrusherEnemies(SkullcrusherDungeonCombat.wave(scene.step), now);
+  logBattle(`◆ 副本・碎顱禁地：第 ${scene.phase} 階段，第 ${scene.step + 1} 場戰鬥。`, 'system');
+  updateBattleUI();
+}
+
+function finishSkullcrusherCombat(status) {
+  if (!battle.skullcrusherRunId || battle.dungeonComplete) return;
+  window.skullcrusherLifecyclePreview?.claimOutcome?.(status, status === 'succeeded' ? 'boss-defeated' : 'party-defeated');
+  battle.dungeonComplete = true; fighting = false;
+  battle.enemyNextAttackAt = battle.enemyNextAttackAt.map(()=>null);
+  clearInterval(battleTimer); clearInterval(skillTimer); clearInterval(enemyAttackTimer);
+  const runId = battle.skullcrusherRunId;
+  // Finish the current synchronous hit before clearing its arrays. The latch above
+  // prevents a counter/death in that hit from producing another terminal result.
+  Promise.resolve().then(()=>{
+    if (battle.skullcrusherRunId === runId) return window.skullcrusherLifecyclePreview?.end(status, status === 'succeeded' ? 'boss-defeated' : 'party-defeated');
+  }).catch(reportSkullcrusherLifecycleError);
+}
+
+function processSkullcrusherBoss() {
+  if (!battle.skullcrusherRunId || battle.dungeonComplete || !battle.skullcrusherCombat) return;
+  const enemies = battle.skullcrusherEnemies;
+  const result = SkullcrusherDungeonCombat.outcome(battle.skullcrusherCombat,enemies,battle.enemyHps,battle.partyMembers);
+  if (result) { finishSkullcrusherCombat(result); return; }
+  const bossIndex = enemies.findIndex(enemy=>enemy.isBoss);
+  if (bossIndex < 0) return;
+  const livingGuards = enemies.filter((enemy,index)=>enemy.isDungeonGuard && battle.enemyHps[index]>0);
+  const summoned = SkullcrusherDungeonCombat.summons(battle.skullcrusherCombat,battle.enemyHps[bossIndex],enemies[bossIndex].maxHp,livingGuards.length,livingGuards.map(enemy=>enemy.id));
+  appendSkullcrusherEnemies(summoned);
+  if (summoned.length) logBattle(`◆ 碎顱大酋長召喚 ${summoned.length} 名護衛！`, 'system');
+}
+
+function processSkullcrusherEncounter() {
+  if (!battle.skullcrusherCombat || battle.dungeonComplete || !fighting) return;
+  processSkullcrusherBoss();
+  if (battle.dungeonComplete) return;
+  battle.enemyHps.forEach((hp,index)=>{if(hp<=0){battle.enemyRespawns[index]=-1;battle.enemyNextAttackAt[index]=null;}});
+  if (!battle.enemyHps.length || !battle.enemyHps.every(hp=>hp<=0) || battle.waveTransitioning) return;
+  const controller = window.skullcrusherLifecyclePreview;
+  if (!controller?.scene || controller.scene.step >= 5) return;
+  battle.waveTransitioning = true;
+  const sessionId = battle.sessionId, runId = battle.skullcrusherRunId;
+  const timer = setTimeout(()=>{
+    if (!fighting || battle.dungeonComplete || battle.sessionId!==sessionId || controller.scene?.run.runId!==runId) return;
+    const scene = controller.advance(); loadSkullcrusherEncounter(scene);
+  }, 300);
+  battle.damageTimers.push(timer);
+}
+
+function reportSkullcrusherLifecycleError(error) {
+  const panel = document.querySelector('#skullcrusher-lifecycle-status');
+  if (panel) panel.textContent = error.message;
+}
+function installSkullcrusherLifecyclePreview() {
+  if (!/^https?:\/\/(localhost|127\.0\.0\.1|\[::1\])(?::\d+)?\//.test(window.location.href || '')
+      || !new URLSearchParams(window.location.search || '').has('skullcrusher-lifecycle')) return;
+  const runtime = getPermanentPartyRuntime();
+  if (!runtime?.active || !window.SkullcrusherDungeonLifecycle) return;
+  let timer = null, generation = 0;
+  const panel = document.createElement('section');
+  panel.id = 'skullcrusher-lifecycle-preview';
+  panel.style.cssText = 'position:fixed;right:12px;bottom:12px;z-index:10000;max-width:min(520px,94vw);max-height:65vh;overflow:auto;padding:12px;background:#171c28;color:#eee;border:1px solid #86734b;border-radius:8px;font-size:14px';
+  panel.innerHTML = '<b>副本・碎顱禁地｜第二批戰鬥測試（無獎勵）</b><button data-dungeon-test="enter">使用憑證入場</button><button data-dungeon-test="exit">退出</button><button data-dungeon-test="defeat-0">擊倒角色1</button><button data-dungeon-test="defeat-1">擊倒角色2</button><button data-dungeon-test="defeat-2">擊倒角色3</button><button data-dungeon-test="potion">存活角色使用治療藥水</button><pre id="skullcrusher-lifecycle-status"></pre>';
+  document.body.appendChild(panel);
+  const render = () => {
+    const scene = controller.scene;
+    panel.querySelector('pre').textContent = scene ? JSON.stringify({runId:scene.run.runId,phase:scene.phase,testStep:scene.step,members:scene.members.map(m=>({id:m.id,hp:m.currentHp,resource:m.resourceCurrent,alive:m.alive}))},null,2) : '尚未入場／場次已結束；返回原地圖並停止戰鬥。';
+  };
+  const controller = SkullcrusherDungeonLifecycle.create({runtime,
+    prepareMembers: () => {
+      if (fighting || runtime.coordinator?.busy) throw Error('請先停止其他戰鬥或副本。');
+      const snapshot = runtime.getBattleSnapshot();
+      return snapshot.members.map(slot => {
+        const progress = {...slot.progress,currentHpRatio:1}; delete progress.partyMemberState;
+        return createBattlePartyMember({character:slot.character,progress},slot.slotIndex,snapshot.mainId);
+      });
+    },
+    activate: scene => {
+      clearInterval(battleTimer); clearInterval(skillTimer); clearInterval(enemyAttackTimer);
+      const key = ++generation;
+      battle = {sessionId:++battleSessionSequence,skullcrusherRunId:scene.run.runId,isDungeon:true,dungeonId:SkullcrusherDungeonLifecycle.ID,
+        partyMembers:scene.members,enemyTypes:[],enemyHps:[],enemyRespawns:[],enemySpawnedAt:[],enemySkillStates:[],enemyDots:[],enemyDamages:[],
+        enemyNextAttackAt:[],enemyAffixes:[],enemySummonProfiles:[],damageTimers:[],rewardedEnemyIndexes:new Set(),roundLoot:{},targetIndexes:[],dungeonComplete:false,
+        skullcrusherEnemies:[],enemyLevels:[],enemyBoarEnraged:[],playerShield:0,monsterMoveSpeed:200,skillCooldowns:{},skullcrusherCombat:{thresholds:{},ended:null}};
+      fighting = true;
+      battleScreen.classList.remove('hidden');
+      syncLegacyBattleStateFromMain();
+      loadSkullcrusherEncounter(scene);
+      battleTimer=setInterval(battleTick,100); skillTimer=setInterval(autoSkillTick,100); enemyAttackTimer=setInterval(enemyAttackTick,100);
+      timer = setInterval(() => {
+        if(key!==generation || !controller.scene || !runtime.active)return;
+        render();
+      },250);
+      render();
+    },
+    stop: () => {
+      ++generation; clearInterval(timer);timer=null;
+      if(!battle.skullcrusherRunId)return;
+      fighting=false;clearInterval(battleTimer);clearInterval(skillTimer);clearInterval(enemyAttackTimer);
+      for(const id of battle.damageTimers||[])clearTimeout(id);
+      for(const id of battle.skullcrusherPlayerTimers||[])clearTimeout(id);
+      document.querySelectorAll('.battle-skill-effect, .skill-effect, .damage-number').forEach(node=>node.remove());
+      document.querySelector('.battle-field')?.classList.remove('charge-impact','impact');
+      battleScreen.classList.remove('skullcrusher-combat');
+      battle.sessionId=++battleSessionSequence;
+      battle={sessionId:battle.sessionId,partyMembers:[],enemyTypes:[],enemyHps:[],enemyRespawns:[],enemyDots:[],enemySkillStates:[],enemySummonProfiles:[],targetIndexes:[],dungeonComplete:true};
+    }
+  });
+  window.skullcrusherLifecyclePreview=controller;
+  runtime.onDeactivate(()=>controller.dispose());
+  panel.addEventListener('click',async event=>{
+    const action=event.target.closest('[data-dungeon-test]')?.dataset.dungeonTest;
+    if(!action)return;
+    try{if(action==='enter')await controller.enter();else if(action==='advance')controller.advance();else if(action.startsWith('defeat-')){const member=controller.scene?.members[Number(action.slice(-1))];if(member){member.currentHp=0;defeatPartyMember(member);await controller.checkDefeat();}}else if(action==='potion'){const member=controller.scene?.members.find(m=>m.alive&&m.currentHp<m.maxHp);if(member){await runtime.flush();useSharedHealingPotionForMember(member);await runtime.flush();}}else await controller.end();render();}catch(error){reportSkullcrusherLifecycleError(error);}
+  });
+  render();
+}
+installSkullcrusherLifecyclePreview();
+
+function isSkullcrusherAccessoryPreview() {
+  return /^https?:\/\/(localhost|127\.0\.0\.1|\[::1\])(?::\d+)?\//.test(window.location.href || '')
+    && new URLSearchParams(window.location.search || '').has('skullcrusher-accessories');
+}
+async function generateSkullcrusherAccessoryPreviewItems() {
+  // Gate the execution path too: a hidden button alone is insufficient.
+  if (!isSkullcrusherAccessoryPreview() || !getPermanentPartyRuntime()?.active) throw Error('Development accessory preview required');
+  return commitEconomyProgress('開發飾品測試', progress=>{
+    const items=Object.values(SkullcrusherAccessoryPolicy.TEMPLATES).map(template=>SkullcrusherAccessoryPolicy.createEquipment(template.id));
+    progress.inventory.push(...items);
+    return {ok:true,items};
+  });
+}
+function installSkullcrusherAccessoryPreview() {
+  if (!isSkullcrusherAccessoryPreview() || !getPermanentPartyRuntime()?.active) return;
+  const panel=document.createElement('section');
+  panel.id='skullcrusher-accessory-preview';
+  panel.style.cssText='position:fixed;right:12px;bottom:12px;z-index:10000;max-width:94vw;padding:10px;background:#171c28;color:#eee;border:1px solid #86734b;border-radius:8px';
+  panel.innerHTML='<b>碎顱禁地・藍色飾品開發測試</b><button type="button">生成四件測試飾品</button><output></output>';
+  panel.querySelector('button').addEventListener('click',async()=>{
+    const button=panel.querySelector('button');button.disabled=true;
+    try {
+      const result=await generateSkullcrusherAccessoryPreviewItems();
+      await getPermanentPartyRuntime().flush();
+      panel.querySelector('output').textContent=result.ok?'已放入共用背包，請從背包選擇戒指1／戒指2穿戴。':'生成未完成，請重試。';
+    } catch(error) { panel.querySelector('output').textContent=error.message; }
+    finally {button.disabled=false;}
+  });
+  document.body.appendChild(panel);
+}
+installSkullcrusherAccessoryPreview();

@@ -109,7 +109,8 @@ assert.match(script, /if \(!unrestrictedPlaytestTravel && map\.chapter === 2\) B
 assert.match(script, /BlackForestCorruptionPolicy\.applyCombatStats\(stats, progress\.blackForestCorruption, activeMap\.chapter === 2\)/);
 assert.match(script, /BlackForestDepthsPolicy\.applyDenseFogAccuracy\(corruptedStats\.accuracy, activeMap\.id\)/);
 assert.match(script, /function processBlackForestCorruption\(now = Date\.now\(\)\)[\s\S]*BlackForestCorruptionPolicy\.getHpLoss/);
-assert.match(script, /environment: \(now\) => \{\s*processBlackForestCorruption\(now\);/);
+assert.match(script, /environment: \(now\) => \{\s*(?:if \(!battle\.skullcrusherRunId\) )?processBlackForestCorruption\(now\);/,
+  'the normal chapter-two environment still processes corruption while isolated dungeon runs may suppress it');
 assert.match(combatCore, /runtime\.environment\(now\)/);
 assert.match(script, /previousMapId: 'plains-depths'/, 'chapter two connects from the first chapter finale');
 assert.match(script, /function renderBlackForestRegions\(/, 'black forest has a chapter region view');
