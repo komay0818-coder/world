@@ -1,8 +1,8 @@
 const assert = require('node:assert/strict');
 const VillagePolicy = require('../village-policy.js');
 
-const buildingIds = ['furnace', 'alchemy', 'workshop', 'blacksmith', 'rune'];
-assert.deepEqual(Object.keys(VillagePolicy.BUILDING_DEFINITIONS), buildingIds, 'the village exposes exactly the five active buildings');
+const buildingIds = ['furnace', 'alchemy', 'workshop', 'blacksmith', 'rune', 'reforge'];
+assert.deepEqual(Object.keys(VillagePolicy.BUILDING_DEFINITIONS), buildingIds, 'the village exposes the five existing buildings and the independent reforge workshop');
 
 const defaults = VillagePolicy.createDefaultVillageData();
 assert.equal(defaults.version, 1);
@@ -42,6 +42,12 @@ assert.equal(furnace.feature, 'salvage');
 const magicTower = VillagePolicy.getVillageBuildingData(repaired, 'rune');
 assert.equal(magicTower.name, '魔法塔');
 assert.equal(magicTower.feature, 'magic-synthesis');
+const reforgeWorkshop = VillagePolicy.getVillageBuildingData(repaired, 'reforge');
+assert.equal(reforgeWorkshop.name, '重鑄工坊');
+assert.equal(reforgeWorkshop.feature, 'reforge');
+assert.equal(reforgeWorkshop.unlockLevel, 8);
+assert.equal(reforgeWorkshop.maxLevel, 1);
+assert.equal(reforgeWorkshop.noUpgrade, true);
 assert.equal(VillagePolicy.getVillageBuildingData(repaired, 'missing'), null);
 
 console.log('village-policy: assertions passed');

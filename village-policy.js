@@ -9,7 +9,8 @@
     alchemy: { id: 'alchemy', name: '煉金房', icon: '⚗', maxLevel: 10, description: '合成裝備並重新產生詞綴', unlocked: true, feature: 'alchemy' },
     workshop: { id: 'workshop', name: '工坊', icon: '⚙', maxLevel: 10, description: '使用配方與材料製作裝備', unlocked: true, feature: 'crafting' },
     blacksmith: { id: 'blacksmith', name: '鐵匠', icon: '⚒', maxLevel: 10, description: '替裝備開啟符文插槽', unlocked: true, feature: 'socketing' },
-    rune: { id: 'rune', name: '魔法塔', icon: '◇', maxLevel: 10, description: '將技能殘頁合成為同階技能書', unlocked: true, feature: 'magic-synthesis' }
+    rune: { id: 'rune', name: '魔法塔', icon: '◇', maxLevel: 10, description: '將技能殘頁合成為同階技能書', unlocked: true, feature: 'magic-synthesis' },
+    reforge: { id: 'reforge', name: '重鑄工坊', icon: '⟳', maxLevel: 1, description: '重新鑄造裝備的隨機詞綴種類與數值', unlocked: true, feature: 'reforge', unlockLevel: 8, noUpgrade: true }
   });
 
   function clampLevel(value, maxLevel = VILLAGE_MAX_LEVEL) {

@@ -408,6 +408,13 @@ let furnaceResult = null;
 let furnaceBusy = false;
 let magicSynthesisBusy = false;
 let magicPreviewRecipeId = null;
+let reforgeMode = 'type';
+let reforgeSelectedItemId = null;
+let reforgeSelectedSlotKey = null;
+let reforgeResult = null;
+let reforgeBusy = false;
+let reforgeConfirmationOpen = false;
+const reforgePendingTransactions = new Map();
 let weaponRecipeAssemblyBusy = false;
 let alchemyInputItemIds = [null, null];
 let alchemyCandidates = [];
@@ -1902,6 +1909,16 @@ function renderVillage() {
   document.querySelector('#village-level').textContent = `Lv${villageData.level}`;
   document.querySelector('#village-building-grid').innerHTML = Object.values(VillagePolicy.BUILDING_DEFINITIONS).map((definition) => {
     const building = getVillageBuildingData(definition.id);
+    if (building.noUpgrade) {
+      const requiredLevel = Number(building.unlockLevel) || 1;
+      const unlocked = (Number(progress.level) || 1) >= requiredLevel;
+      return `<article class="village-building-card village-building-no-upgrade ${unlocked ? '' : 'is-locked'}" data-village-building="${building.id}">
+        <div class="village-building-icon" aria-hidden="true">${building.icon}</div>
+        <div class="village-building-copy"><h3><span>${building.name}</span><small class="village-building-level">${unlocked ? `Lv${requiredLevel} 已解鎖` : `Lv${requiredLevel} 解鎖`}</small></h3><p>${building.description}</p></div>
+        <p class="village-building-static-status">${unlocked ? '無需升級，可直接使用。' : `角色達到 Lv${requiredLevel} 後自動解鎖。`}</p>
+        <div class="village-building-actions single-action"><button class="village-enter" type="button" data-open-village-building="${building.id}" ${unlocked ? '' : 'disabled'}>${unlocked ? '進入' : '尚未解鎖'}</button></div>
+      </article>`;
+    }
     const requirement = VillageUpgradePolicy.getRequirement(building.id, building.level);
     const validation = VillageUpgradePolicy.canUpgrade(progress, villageData, building.id);
     const supportsUpgrade = Object.prototype.hasOwnProperty.call(VillageUpgradePolicy.LEVEL_TWO_COSTS, building.id);
@@ -1952,14 +1969,212 @@ function closeVillage() {
 function openVillageBuilding(buildingId) {
   const building = getVillageBuildingData(buildingId);
   if (!building || !building.unlocked) return;
+  if (building.noUpgrade && (Number(getProgress().level) || 1) < (Number(building.unlockLevel) || 1)) {
+    showToast(`角色達到 Lv${building.unlockLevel} 後才能進入${building.name}。`);
+    return;
+  }
+  document.querySelector('#village-building-modal-icon').textContent = building.icon;
   document.querySelector('#village-building-title').textContent = building.name;
   if (buildingId === 'furnace') renderFurnace(building);
   else if (buildingId === 'workshop') { workshopPreview = null; renderWorkshop(building); }
   else if (buildingId === 'alchemy') renderAlchemy(building);
   else if (buildingId === 'rune') renderMagicTower(building);
   else if (buildingId === 'blacksmith') { blacksmithPreviewItemId = null; renderBlacksmith(building); }
-  else document.querySelector('#village-building-content').innerHTML = `<div class="village-building-icon" aria-hidden="true">${building.icon}</div><h3>${building.name}</h3><small>建築等級 Lv${building.level} / ${building.maxLevel}</small><p>${building.description}</p><p class="village-placeholder">${building.name}功能尚未完成，將於後續版本加入。</p>`;
+  else if (buildingId === 'reforge') { resetReforgeWorkshopState(); renderReforgeWorkshop(building, true); }
+  else document.querySelector('#village-building-content').innerHTML = `<p class="village-building-meta">建築等級 Lv${building.level} / ${building.maxLevel}</p><p>${building.description}</p><p class="village-placeholder">${building.name}功能尚未完成，將於後續版本加入。</p>`;
   document.querySelector('#village-building-modal').classList.remove('hidden');
+}
+
+function resetReforgeWorkshopState() {
+  reforgeMode = 'type';
+  reforgeSelectedItemId = null;
+  reforgeSelectedSlotKey = null;
+  reforgeResult = null;
+  reforgeBusy = false;
+  reforgeConfirmationOpen = false;
+}
+
+function reforgeEscapeHtml(value) {
+  return String(value ?? '').replace(/[&<>"']/g, (character) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[character]);
+}
+
+function getReforgeWorkshopSnapshot() {
+  const runtime = getPermanentPartyRuntime();
+  if (!runtime?.readyForGameplay || typeof runtime.getInventorySnapshot !== 'function') return { runtime: null, items: [], owners: {}, gold: 0 };
+  const snapshot = runtime.getInventorySnapshot();
+  return { runtime, items: Array.isArray(snapshot?.items) ? snapshot.items : [], owners: snapshot?.equipmentOwners || {}, gold: Number(runtime.getSharedGold?.()) || 0 };
+}
+
+function getReforgeEligibleEquipment(snapshot = getReforgeWorkshopSnapshot()) {
+  return snapshot.items.filter((item) => {
+    const instanceId = String(item?.instanceId || '');
+    const owner = snapshot.owners?.[instanceId];
+    const quality = EquipmentAffixPolicy.normalizeQuality(item?.quality);
+    return item?.kind === 'equipment'
+      && instanceId
+      && owner?.kind === 'bag'
+      && Object.keys(owner).length === 1
+      && ['uncommon', 'rare'].includes(quality)
+      && Array.isArray(item.randomAffixes)
+      && item.randomAffixes.length > 0
+      && !EquipmentReforgePolicy.isProtected(item)
+      && EquipmentAffixPolicy.canReforgeEquipment(item);
+  });
+}
+
+function getReforgeSlots(item) {
+  return (Array.isArray(item?.randomAffixes) ? item.randomAffixes : []).map((affix, index) => ({
+    ...affix,
+    slotKey: affix.slotKey || `random-${index}`,
+    affixGrade: Number(affix.affixGrade) || EquipmentAffixPolicy.getAffixGrade(affix),
+    valueQuality: Number(affix.valueQuality) || 1
+  }));
+}
+
+function getReforgeCostState(item, snapshot = getReforgeWorkshopSnapshot()) {
+  if (!item) return null;
+  try {
+    const cost = EquipmentReforgePolicy.getCost(reforgeMode, Number(item.affixChapter), item.quality);
+    const material = SalvagePolicy.getMaterial(cost.materialId);
+    const ownedMaterial = SalvagePolicy.getMaterialQuantity(snapshot.items, cost.materialId);
+    return { cost, material, ownedMaterial, ownedGold: snapshot.gold, enough: ownedMaterial >= cost.material && snapshot.gold >= cost.gold };
+  } catch (error) {
+    return { error: error.message, enough: false };
+  }
+}
+
+function reforgeAffixHtml(affix) {
+  const text = EquipmentAffixPolicy.formatAffix(affix) || affix?.name || affix?.id || '未知詞綴';
+  const match = text.match(/^(.*?)(\s+[+\-]?\d.*)$/);
+  const name = match ? match[1] : text;
+  const value = match ? match[2].trim() : '';
+  const grade = Math.min(7, Math.max(1, Number(affix?.affixGrade) || EquipmentAffixPolicy.getAffixGrade(affix) || 1));
+  const quality = Math.min(7, Math.max(1, Number(affix?.valueQuality) || 1));
+  return `<span class="reforge-affix-name reforge-grade-${grade}">${reforgeEscapeHtml(name)}</span>${value ? `<strong class="reforge-affix-value reforge-value-${quality}">${reforgeEscapeHtml(value)}</strong>` : ''}`;
+}
+
+function reforgeAffixScore(affix) {
+  return (Array.isArray(affix?.components) ? affix.components : []).reduce((sum, component) => sum + (Number(component.value) || 0), 0);
+}
+
+function reforgeErrorMessage(error) {
+  const message = String(error?.message || error || '重鑄失敗，請稍後重試。');
+  if (/level 10/i.test(message)) return '角色達到 Lv10 後才能進行數值重鑄。';
+  if (/level 8/i.test(message)) return '角色達到 Lv8 後才能進行詞綴重鑄。';
+  if (/Insufficient shared gold/i.test(message)) return '共用金幣不足，無法進行重鑄。';
+  if (/Insufficient essence/i.test(message)) return '精華石不足，無法進行重鑄。';
+  if (/protected/i.test(message)) return '鎖定、保護或收藏中的裝備不可重鑄。';
+  if (/permanently locked/i.test(message)) return '此裝備的種類重鑄欄位已永久指定，不能改選其他詞綴。';
+  if (/not eligible|quality or chapter/i.test(message)) return '此裝備目前不符合重鑄資格。';
+  if (/shared bag|ownership mismatch/i.test(message)) return '裝備必須位於目前帳號的共用背包內。';
+  if (/Concurrent|revision/i.test(message)) return '存檔版本已更新，請重新確認裝備後再試。';
+  return message;
+}
+
+function renderReforgeWorkshop(building = getVillageBuildingData('reforge'), rebuildGrid = false) {
+  const content = document.querySelector('#village-building-content');
+  const preservedEquipmentGrid = !rebuildGrid ? content.querySelector('.reforge-equipment-grid') : null;
+  if (preservedEquipmentGrid) preservedEquipmentGrid.remove();
+  const snapshot = getReforgeWorkshopSnapshot();
+  const progress = getProgress();
+  const level = Number(progress.level) || 1;
+  const equipment = getReforgeEligibleEquipment(snapshot);
+  if (!equipment.some((item) => item.instanceId === reforgeSelectedItemId)) {
+    reforgeSelectedItemId = equipment[0]?.instanceId || null;
+    reforgeSelectedSlotKey = null;
+    reforgeResult = null;
+  }
+  const selected = equipment.find((item) => item.instanceId === reforgeSelectedItemId) || null;
+  const slots = getReforgeSlots(selected);
+  if (!slots.some((entry) => entry.slotKey === reforgeSelectedSlotKey)) reforgeSelectedSlotKey = slots[0]?.slotKey || null;
+  const lockedTypeSlotKey = selected?.reforgeState?.lockedTypeSlotKey || null;
+  const costState = getReforgeCostState(selected, snapshot);
+  const modeUnlocked = reforgeMode === 'type' ? level >= 8 : level >= 10;
+  const lockedToOther = reforgeMode === 'type' && lockedTypeSlotKey && lockedTypeSlotKey !== reforgeSelectedSlotKey;
+  const canSubmit = Boolean(snapshot.runtime && selected && reforgeSelectedSlotKey && modeUnlocked && !lockedToOther && costState?.enough && !reforgeBusy);
+  const grid = equipment.length ? equipment.map((item) => `<button class="reforge-item ${itemQualityClass(item)} ${item.instanceId === reforgeSelectedItemId ? 'selected' : ''}" type="button" data-select-reforge-item="${reforgeEscapeHtml(item.instanceId)}">
+    <img src="${reforgeEscapeHtml(itemImagePath(item))}" alt=""><b>${reforgeEscapeHtml(item.name)}</b><small>${reforgeEscapeHtml(itemQualityLabel(item))}</small>
+  </button>`).join('') : '<p class="village-placeholder">目前背包沒有符合資格的綠色或藍色裝備。</p>';
+  const slotRows = slots.map((affix) => {
+    const selectedSlot = affix.slotKey === reforgeSelectedSlotKey;
+    const slotLocked = reforgeMode === 'type' && lockedTypeSlotKey && lockedTypeSlotKey !== affix.slotKey;
+    const permanent = lockedTypeSlotKey === affix.slotKey;
+    return `<button class="reforge-affix-row ${selectedSlot ? 'selected' : ''} ${slotLocked ? 'disabled' : ''}" type="button" data-select-reforge-affix="${reforgeEscapeHtml(affix.slotKey)}" ${slotLocked ? 'disabled' : ''}>
+      <span>${reforgeAffixHtml(affix)}</span><small>${permanent ? '🔒 已永久指定為種類重鑄欄位' : slotLocked ? '種類重鑄已鎖定其他欄位' : reforgeMode === 'type' ? '可進行詞綴種類重鑄' : '可進行詞綴數值重鑄'}</small>
+    </button>`;
+  }).join('');
+  const fixedAffixes = (Array.isArray(selected?.fixedAffixes) ? selected.fixedAffixes : []).map((affix) => `<div class="reforge-readonly-affix"><span>固定詞綴</span><b>${reforgeEscapeHtml(EquipmentAffixPolicy.formatAffix(affix) || affix.name || affix.id)}</b></div>`).join('');
+  const specialAbility = selected?.specialAbility || selected?.legendaryAbility;
+  const readOnlyHtml = fixedAffixes || specialAbility ? `<section class="reforge-readonly"><h5>固定能力與特殊能力</h5>${fixedAffixes}${specialAbility ? `<div class="reforge-readonly-affix is-special"><span>特殊能力</span><b>【${reforgeEscapeHtml(specialAbility.name || '專屬能力')}】${reforgeEscapeHtml(specialAbility.description || '')}</b></div>` : ''}</section>` : '';
+  const materialName = costState?.material?.name || costState?.cost?.materialId || '精華石';
+  const costHtml = costState?.error ? `<p class="reforge-error">${reforgeEscapeHtml(costState.error)}</p>` : costState ? `<div class="reforge-costs">
+    <span class="${costState.ownedMaterial < costState.cost.material ? 'insufficient' : ''}">${reforgeEscapeHtml(materialName)} <b>${costState.ownedMaterial} / ${costState.cost.material}</b></span>
+    <span class="${costState.ownedGold < costState.cost.gold ? 'insufficient' : ''}">共用金幣 <b>${costState.ownedGold} / ${costState.cost.gold}</b></span>
+  </div>` : '';
+  let resultHtml = '';
+  if (reforgeResult) {
+    const previous = reforgeResult.previousAffix;
+    const next = reforgeResult.affix;
+    const delta = reforgeAffixScore(next) - reforgeAffixScore(previous);
+    const comparison = reforgeResult.type === 'type' ? '詞綴已更換' : delta > 0 ? '數值提升' : delta < 0 ? '數值下降' : '數值不變';
+    const resultMaterial = SalvagePolicy.getMaterial(reforgeResult.cost?.materialId)?.name || reforgeResult.cost?.materialId || '精華石';
+    resultHtml = `<section class="reforge-result"><h4>重鑄完成・${comparison}</h4><div class="reforge-result-compare"><p><small>原本</small>${reforgeAffixHtml(previous)}</p><b aria-hidden="true">→</b><p><small>現在</small>${reforgeAffixHtml(next)}</p></div><p>本次消耗：${reforgeEscapeHtml(resultMaterial)} ×${reforgeResult.cost.material}、共用金幣 ×${reforgeResult.cost.gold}</p><div class="reforge-result-actions"><button type="button" data-reforge-other-affix>選擇其他詞綴</button></div></section>`;
+  }
+  const selectedHtml = selected ? `<section class="reforge-selected"><header><img src="${reforgeEscapeHtml(itemImagePath(selected))}" alt=""><div><h4 class="${itemQualityClass(selected)}">${reforgeEscapeHtml(selected.name)}</h4><small>${reforgeEscapeHtml(itemQualityLabel(selected))}・第${Number(selected.affixChapter) || 1}章裝備${Number(selected.affixSchemaVersion) < 5 ? '・舊版裝備將於成功重鑄時安全轉換' : ''}</small></div></header>${readOnlyHtml}<div class="reforge-affix-list">${slotRows}</div>${costHtml}<button class="reforge-submit" type="button" data-open-reforge-confirm ${canSubmit ? '' : 'disabled'}>${reforgeBusy ? '交易處理中…' : reforgeMode === 'type' ? '確認詞綴重鑄' : '確認數值重鑄'}</button>${!modeUnlocked ? `<p class="reforge-hint">角色達到 Lv${EquipmentReforgePolicy.REQUIRED_LEVEL[reforgeMode]} 後解鎖。</p>` : lockedToOther ? '<p class="reforge-hint">此裝備只能對鎖定的欄位進行種類重鑄。</p>' : ''}</section>` : '<section class="reforge-selected empty"><p>請先準備一件位於共用背包、未穿戴且未受保護的綠色或藍色裝備。</p></section>';
+  const confirmation = reforgeConfirmationOpen && selected ? `<div class="reforge-confirm-backdrop"><section class="reforge-confirm" role="alertdialog" aria-modal="true"><h4>確認${reforgeMode === 'type' ? '詞綴' : '數值'}重鑄</h4><p>${reforgeMode === 'type' && !lockedTypeSlotKey ? '確定要永久指定這條詞綴作為種類重鑄欄位嗎？確認成功後，這件裝備將無法改選其他詞綴進行種類重鑄，但所有隨機詞綴仍然可以進行數值重鑄。' : '新結果將直接覆蓋目前詞綴，可能提升、下降或不變，且不保留舊結果。'}</p>${costHtml}<footer><button type="button" data-confirm-reforge ${canSubmit ? '' : 'disabled'}>確定重鑄</button><button type="button" data-cancel-reforge-confirm>取消</button></footer></section></div>` : '';
+  content.innerHTML = `<section class="reforge-workshop" data-reforge-mode-current="${reforgeMode}"><p class="village-building-meta">Lv8 詞綴重鑄・Lv10 數值重鑄，建築無需升級。</p><div class="reforge-mode-grid"><button class="${reforgeMode === 'type' ? 'active' : ''}" type="button" data-reforge-mode="type"><b>⟳ 詞綴重鑄</b><small>重新抽取詞綴種類</small></button><button class="${reforgeMode === 'value' ? 'active' : ''} ${level < 10 ? 'locked' : ''}" type="button" data-reforge-mode="value" ${level < 10 ? 'disabled' : ''}><b>✦ 數值重鑄</b><small>${level < 10 ? 'Lv10 解鎖' : '保留種類並重抽數值'}</small></button></div><div class="reforge-main"><section class="reforge-inventory"><h4>選擇可重鑄裝備 <small>${equipment.length} 件</small></h4><div class="reforge-equipment-grid">${grid}</div></section>${selectedHtml}</div>${resultHtml}${confirmation}</section>`;
+  if (preservedEquipmentGrid) {
+    const replacement = content.querySelector('.reforge-equipment-grid');
+    replacement?.replaceWith(preservedEquipmentGrid);
+    preservedEquipmentGrid.querySelectorAll('[data-select-reforge-item]').forEach((node) => node.classList.toggle('selected', node.dataset.selectReforgeItem === reforgeSelectedItemId));
+  }
+}
+
+function selectReforgeItem(instanceId) {
+  if (reforgeBusy) return;
+  reforgeSelectedItemId = instanceId;
+  reforgeSelectedSlotKey = null;
+  reforgeResult = null;
+  reforgeConfirmationOpen = false;
+  renderReforgeWorkshop();
+}
+
+function selectReforgeAffix(slotKey) {
+  if (reforgeBusy) return;
+  reforgeSelectedSlotKey = slotKey;
+  reforgeResult = null;
+  reforgeConfirmationOpen = false;
+  renderReforgeWorkshop();
+}
+
+function getReforgeOperationKey(operation) {
+  return `${operation.type}:${operation.instanceId}:${operation.slotKey}:${operation.characterId}`;
+}
+
+async function executeReforge() {
+  if (reforgeBusy) return;
+  const snapshot = getReforgeWorkshopSnapshot();
+  const runtime = snapshot.runtime;
+  const item = getReforgeEligibleEquipment(snapshot).find((entry) => entry.instanceId === reforgeSelectedItemId);
+  if (!runtime || !item || !reforgeSelectedSlotKey) { showToast('重鑄資料已變更，請重新選擇裝備。'); renderReforgeWorkshop(); return; }
+  const operation = { type: reforgeMode, instanceId: item.instanceId, slotKey: reforgeSelectedSlotKey, characterId: runtime.mainId };
+  const key = getReforgeOperationKey(operation);
+  const transactionId = reforgePendingTransactions.get(key) || `reforge-ui-${crypto.randomUUID()}`;
+  reforgePendingTransactions.set(key, transactionId);
+  reforgeBusy = true;
+  reforgeConfirmationOpen = false;
+  renderReforgeWorkshop();
+  try {
+    const result = await runtime.reforgeEquipment(transactionId, operation);
+    reforgePendingTransactions.delete(key);
+    reforgeResult = { ...result.summary };
+    showToast(reforgeMode === 'type' ? '詞綴重鑄完成。' : '數值重鑄完成。');
+  } catch (error) {
+    showToast(reforgeErrorMessage(error));
+  } finally {
+    reforgeBusy = false;
+    renderReforgeWorkshop();
+  }
 }
 
 function isMobileBlacksmithLayout() {
@@ -1985,7 +2200,7 @@ function renderBlacksmith(building = getVillageBuildingData('blacksmith')) {
     return `<article class="furnace-slot filled"><h4>${item.name}</h4><p>目前插槽：${current} / ${max}</p><button type="button" data-add-rune-socket="${item.id}" ${current >= max ? 'disabled' : ''}>${current >= max ? '已達上限' : '增加 1 個插槽（價格待定）'}</button></article>`;
   }).join('');
   if (!isMobileBlacksmithLayout()) {
-    document.querySelector('#village-building-content').innerHTML = `<div class="workshop-title"><div class="village-building-icon">${building.icon}</div><div><h3>${building.name}</h3><small>武器最多 3 孔・防具最多 2 孔</small></div></div><p>打洞價格仍待第二章經濟平衡確認，目前保留完整功能入口但不會扣除金幣或改動裝備。</p><section class="furnace-layout blacksmith-desktop-grid">${cards || '<p class="village-placeholder">背包內沒有裝備。</p>'}</section>`;
+    document.querySelector('#village-building-content').innerHTML = `<p class="village-building-meta">武器最多 3 孔・防具最多 2 孔</p><p>打洞價格仍待第二章經濟平衡確認，目前保留完整功能入口但不會扣除金幣或改動裝備。</p><section class="furnace-layout blacksmith-desktop-grid">${cards || '<p class="village-placeholder">背包內沒有裝備。</p>'}</section>`;
     return;
   }
   const grid = equipment.map((item) => {
@@ -1999,7 +2214,7 @@ function renderBlacksmith(building = getVillageBuildingData('blacksmith')) {
     const eligibility = blacksmithEligibilityText(validation);
     return `<section class="blacksmith-detail-backdrop" role="dialog" aria-modal="true" aria-label="裝備打洞詳細資料"><article class="blacksmith-detail ${itemQualityClass(previewItem)}"><header><span class="item-icon"><img src="${itemImagePath(previewItem)}" alt=""></span><div><h4>${previewItem.name}</h4><small>${equipmentSlots[previewItem.slot]?.label || previewItem.slot}・${itemQualityLabel(previewItem)}</small></div></header><section class="inventory-tooltip-details">${equipmentDetailsHtml(previewItem) || '<span>沒有其他詳細資訊。</span>'}</section><section class="blacksmith-socket-state"><b>符文插槽</b><span>${current} / ${max}</span><small>${eligibility}</small></section><section class="blacksmith-socket-cost"><b>打洞費用</b><span>材料與金幣尚未設定</span></section><footer><button type="button" data-confirm-blacksmith-socket="${previewItem.instanceId || previewItem.id}" ${validation.ok ? '' : 'disabled'}>確認打洞</button><button type="button" data-cancel-blacksmith-detail>取消</button></footer></article></section>`;
   })() : '';
-  document.querySelector('#village-building-content').innerHTML = `<div class="workshop-title"><div class="village-building-icon">${building.icon}</div><div><h3>${building.name}</h3><small>武器最多 3 孔・防具最多 2 孔</small></div></div><p>選擇裝備可查看能力與插槽狀態。打洞費用尚未設定，目前不會扣除資源或增加插槽。</p><section class="blacksmith-equipment-grid">${grid || '<p class="village-placeholder">背包內沒有裝備。</p>'}</section>${detail}`;
+  document.querySelector('#village-building-content').innerHTML = `<p class="village-building-meta">武器最多 3 孔・防具最多 2 孔</p><p>選擇裝備可查看能力與插槽狀態。打洞費用尚未設定，目前不會扣除資源或增加插槽。</p><section class="blacksmith-equipment-grid">${grid || '<p class="village-placeholder">背包內沒有裝備。</p>'}</section>${detail}`;
 }
 
 function renderMagicTower(building = getVillageBuildingData('rune'), message = '') {
@@ -2035,7 +2250,7 @@ function renderMagicTower(building = getVillageBuildingData('rune'), message = '
         : `技能殘頁不足，尚缺 ${Math.max(0, MagicTowerPolicy.CONFIG.pageCost - owned)} 個。`;
     return `<section class="magic-detail-backdrop" role="dialog" aria-modal="true" aria-label="技能殘頁合成詳細資料"><article class="magic-detail"><header><img src="${page.image}" alt=""><div><h4>${page.name}</h4><small>${page.rank}技能殘頁</small></div></header><dl><div><dt>目前持有</dt><dd>${owned}</dd></div><div><dt>合成需要</dt><dd>${MagicTowerPolicy.CONFIG.pageCost}</dd></div><div><dt>可能取得</dt><dd><img src="${book.image}" alt="">${book.name} ×${MagicTowerPolicy.CONFIG.rewardAmount}</dd></div><div><dt>魔法塔</dt><dd>Lv${building.level} / 需要 Lv${previewRecipe.requiredTowerLevel}</dd></div><div><dt>成功率</dt><dd>${Math.round(MagicTowerPolicy.CONFIG.successChance * 100)}%</dd></div></dl><p class="magic-detail-eligibility ${validation.ok ? 'ready' : 'blocked'}">${eligibility}</p><footer><button type="button" data-synthesize-magic="${previewRecipe.id}" ${magicSynthesisBusy || !validation.ok ? 'disabled' : ''}>${magicSynthesisBusy ? '合成處理中…' : '確認合成'}</button><button type="button" data-cancel-magic-detail ${magicSynthesisBusy ? 'disabled' : ''}>取消</button></footer></article></section>`;
   })() : '';
-  document.querySelector('#village-building-content').innerHTML = `<div class="workshop-title"><div class="village-building-icon" aria-hidden="true">${building.icon}</div><div><h3>${building.name}</h3><small>建築 Lv${building.level}・成功率 40%</small></div></div>
+  document.querySelector('#village-building-content').innerHTML = `<p class="village-building-meta">建築 Lv${building.level}・成功率 40%</p>
     <p>每次消耗 10 個技能殘頁，成功時獲得 1 本同階技能書。合成失敗仍會消耗技能殘頁；魔法塔 Lv2 解鎖中級合成。</p>
     ${message ? `<p class="alchemy-message">${message}</p>` : ''}
     <section class="${isMobile ? 'magic-recipe-grid' : 'furnace-layout'}">${recipeCards || '<p class="village-placeholder">目前沒有已開放的技能殘頁。</p>'}</section>${detail}`;
@@ -2094,7 +2309,7 @@ function renderFurnace(building = getVillageBuildingData('furnace'), message = '
   const materialSummary = materialEntries.map((entry) => `${entry.icon} ${entry.name} ${entry.owned}`).join('　');
   const materialCards = materialEntries.map((entry) => `<article class="furnace-material-card quality-${entry.quality}"><span class="furnace-material-icon" aria-hidden="true">${entry.icon}</span><span><b>${entry.name}</b><small>持有 ${entry.owned}</small></span></article>`).join('');
   const batchToolbar = `<div class="furnace-batch-toolbar"><strong>已選 ${selectedIds.length} 件</strong><button type="button" data-furnace-select-all ${furnaceBusy || !equipment.length ? 'disabled' : ''}>全選可分解裝備</button><button type="button" data-furnace-clear-all ${furnaceBusy || !selectedIds.length ? 'disabled' : ''}>取消全選</button><button type="button" class="primary" data-confirm-furnace ${furnaceBusy || !selectedIds.length ? 'disabled' : ''}>${furnaceBusy ? '分解處理中…' : '批次分解'}</button></div>`;
-  document.querySelector('#village-building-content').innerHTML = `<div class="workshop-title"><div class="village-building-icon" aria-hidden="true">${building.icon}</div><div><h3>${building.name}</h3><small>建築 Lv${building.level}・可分解裝備 ${equipment.length} 件</small></div></div><p>綠色與藍色裝備分解後必定消失，並依熔爐等級機率取得對應精華石。白色、紫色以上、已穿戴與鎖定裝備不會列出。</p><p class="furnace-material-summary">${materialSummary}</p><div class="furnace-material-grid" aria-label="精華石持有數量">${materialCards}</div>${message ? `<p class="alchemy-message">${message}</p>` : ''}<section class="furnace-layout"><section class="furnace-column furnace-equipment-column"><div class="furnace-equipment-heading"><h4>可分解裝備</h4><span>${selectedIds.length} / ${equipment.length}</span></div>${batchToolbar}<div class="furnace-items">${cards || '<p class="village-placeholder">目前沒有符合條件的裝備。</p>'}</div></section><section class="furnace-column furnace-selection-column"><h4>分解槽</h4>${selectedPanel}</section><section class="furnace-column furnace-result-column"><h4>結果</h4>${resultPanel}</section></section>`;
+  document.querySelector('#village-building-content').innerHTML = `<p class="village-building-meta">建築 Lv${building.level}・可分解裝備 ${equipment.length} 件</p><p>綠色與藍色裝備分解後必定消失，並依熔爐等級機率取得對應精華石。白色、紫色以上、已穿戴與鎖定裝備不會列出。</p><p class="furnace-material-summary">${materialSummary}</p><div class="furnace-material-grid" aria-label="精華石持有數量">${materialCards}</div>${message ? `<p class="alchemy-message">${message}</p>` : ''}<section class="furnace-layout"><section class="furnace-column furnace-equipment-column"><div class="furnace-equipment-heading"><h4>可分解裝備</h4><span>${selectedIds.length} / ${equipment.length}</span></div>${batchToolbar}<div class="furnace-items">${cards || '<p class="village-placeholder">目前沒有符合條件的裝備。</p>'}</div></section><section class="furnace-column furnace-selection-column"><h4>分解槽</h4>${selectedPanel}</section><section class="furnace-column furnace-result-column"><h4>結果</h4>${resultPanel}</section></section>`;
 }
 
 function selectFurnaceItem(itemId) {
@@ -2245,7 +2460,7 @@ function renderAlchemy(building = getVillageBuildingData('alchemy'), message = '
   const previewItem = isMobileAlchemyLayout() ? getAlchemyItem(progress, alchemyPreviewItemId) : null;
   const previewSelectedIndex = previewItem ? alchemyInputItemIds.indexOf(AlchemyPolicy.getItemId(previewItem)) : -1;
   const preview = previewItem ? `<section class="alchemy-item-detail-backdrop" role="dialog" aria-modal="true" aria-label="裝備詳細資料"><article class="alchemy-item-detail ${itemQualityClass(previewItem)}"><header><span class="item-icon"><img src="${itemImagePath(previewItem)}" alt=""></span><div><h4>${previewItem.name}</h4><small>${equipmentSlots[previewItem.slot]?.label || previewItem.slot}・${itemQualityLabel(previewItem)}</small></div></header><section class="inventory-tooltip-details">${equipmentDetailsHtml(previewItem) || '<span>沒有其他詳細資訊。</span>'}</section><footer><button type="button" data-confirm-alchemy-input>確認放入材料 ${Number(alchemyPendingSlotIndex) + 1}</button>${previewSelectedIndex >= 0 ? `<button type="button" data-clear-alchemy-input="${previewSelectedIndex}">移除材料</button>` : ''}<button type="button" data-cancel-alchemy-input>取消</button></footer></article></section>` : '';
-  document.querySelector('#village-building-content').innerHTML = `<div class="workshop-title"><div class="village-building-icon" aria-hidden="true">${building.icon}</div><div><h3>${building.name}</h3><small>建築 Lv${building.level}・產生 ${AlchemyPolicy.getCandidateCount(building.level)} 件候選裝備</small></div></div>
+  document.querySelector('#village-building-content').innerHTML = `<p class="village-building-meta">建築 Lv${building.level}・產生 ${AlchemyPolicy.getCandidateCount(building.level)} 件候選裝備</p>
     <p>消耗兩件相同部位的綠色裝備，重新產生一件相同部位的綠色裝備。詞綴、數值與插槽不會繼承。</p>
     <p class="alchemy-gold-cost">煉金費用：<b>${AlchemyPolicy.ALCHEMY_RULES.goldCost} 金幣</b>・目前持有 ${Number(progress.gold) || 0} 金幣</p>
     <section class="alchemy-inputs">${slots}</section><p class="alchemy-message ${validation.ok || alchemyCandidates.length ? 'ok' : ''}">${helper}</p>
@@ -2393,7 +2608,7 @@ function renderWorkshop(building = getVillageBuildingData('workshop'), craftedIt
   const recipeList = isMobileWorkshopLayout() ? `${mobileWeaponCards}${mobileCards}` : `${desktopWeaponCards}${desktopCards}`;
   const emptyRecipeMessage = isMobileWorkshopLayout() ? '目前沒有符合條件的配方。' : '此分類目前沒有可製作配方。';
   const detail = renderWorkshopRecipeDetail(progress, building, materialName, quantity);
-  document.querySelector('#village-building-content').innerHTML = `<div class="workshop-title"><div class="village-building-icon" aria-hidden="true">${building.icon}</div><div><h3>${building.name}</h3><small>第一至三章裝備製作・背包 ${inventory.length} / ${CraftingPolicy.INVENTORY_CAPACITY}</small></div></div><p>製作前只顯示可能能力；實際能力與數值會在製作成功時生成並永久保存。</p>
+  document.querySelector('#village-building-content').innerHTML = `<p class="village-building-meta">第一至三章裝備製作・背包 ${inventory.length} / ${CraftingPolicy.INVENTORY_CAPACITY}</p><p>製作前只顯示可能能力；實際能力與數值會在製作成功時生成並永久保存。</p>
     <div class="workshop-filters"><div><b>品質</b><button type="button" data-workshop-quality="uncommon" class="${workshopQuality === 'uncommon' ? 'selected' : ''}">綠色</button><button type="button" data-workshop-quality="rare" class="${workshopQuality === 'rare' ? 'selected' : ''}">藍色</button><button type="button" data-workshop-quality="epic" class="${workshopQuality === 'epic' ? 'selected' : ''}">紫色</button></div><div><b>部位</b><button type="button" data-workshop-slot="all" class="${workshopSlot === 'all' ? 'selected' : ''}">全部</button><button type="button" data-workshop-slot="wrist" class="${workshopSlot === 'wrist' ? 'selected' : ''}">護腕</button><button type="button" data-workshop-slot="cloak" class="${workshopSlot === 'cloak' ? 'selected' : ''}">斗篷</button><button type="button" data-workshop-slot="shoulders" class="${workshopSlot === 'shoulders' ? 'selected' : ''}">肩甲</button></div></div>
     ${weaponFragmentPanel}${result}<section class="workshop-recipes">${recipeList || `<p class="village-placeholder">${emptyRecipeMessage}</p>`}</section>${detail}`;
 }
@@ -2443,6 +2658,7 @@ function closeVillageBuilding() {
   workshopPreview = null;
   blacksmithPreviewItemId = null;
   magicPreviewRecipeId = null;
+  resetReforgeWorkshopState();
   resetFurnaceState();
   resetAlchemyState();
   document.querySelector('#village-building-modal')?.classList.add('hidden');
@@ -9767,6 +9983,17 @@ document.querySelector('#village-building-grid').addEventListener('click', (even
 document.querySelector('#village-building-close').addEventListener('click', closeVillageBuilding);
 document.querySelector('#village-building-modal').addEventListener('click', (event) => {
   if (event.target === event.currentTarget) closeVillageBuilding();
+  if (event.target.classList.contains('reforge-confirm-backdrop')) { reforgeConfirmationOpen = false; renderReforgeWorkshop(); return; }
+  const reforgeModeButton = event.target.closest('[data-reforge-mode]');
+  if (reforgeModeButton) { reforgeMode = reforgeModeButton.dataset.reforgeMode; reforgeResult = null; reforgeConfirmationOpen = false; renderReforgeWorkshop(); return; }
+  const reforgeItem = event.target.closest('[data-select-reforge-item]');
+  if (reforgeItem) { selectReforgeItem(reforgeItem.dataset.selectReforgeItem); return; }
+  const reforgeAffix = event.target.closest('[data-select-reforge-affix]');
+  if (reforgeAffix) { selectReforgeAffix(reforgeAffix.dataset.selectReforgeAffix); return; }
+  if (event.target.closest('[data-open-reforge-confirm]')) { reforgeConfirmationOpen = true; renderReforgeWorkshop(); return; }
+  if (event.target.closest('[data-cancel-reforge-confirm]')) { reforgeConfirmationOpen = false; renderReforgeWorkshop(); return; }
+  if (event.target.closest('[data-confirm-reforge]')) { executeReforge(); return; }
+  if (event.target.closest('[data-reforge-other-affix]')) { reforgeResult = null; reforgeSelectedSlotKey = null; renderReforgeWorkshop(); return; }
   if (event.target.classList.contains('workshop-detail-backdrop')) { workshopPreview = null; renderWorkshop(); return; }
   if (event.target.classList.contains('blacksmith-detail-backdrop')) { blacksmithPreviewItemId = null; renderBlacksmith(); return; }
   if (event.target.classList.contains('magic-detail-backdrop')) { magicPreviewRecipeId = null; renderMagicTower(); return; }
