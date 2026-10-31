@@ -7,8 +7,8 @@ const script = fs.readFileSync(path.join(root, 'script.js'), 'utf8');
 const css = fs.readFileSync(path.join(root, 'styles', 'village.css'), 'utf8');
 const html = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
 
-assert.match(html, /styles\/village\.css\?v=20261025-mobile-village-fixed-window-v3/);
-assert.match(html, /script\.js\?v=20261029-dungeon-map-progression-v1/);
+assert.match(html, /styles\/village\.css\?v=20261101-reforge-workshop-v1/);
+assert.match(html, /script\.js\?v=20261101-reforge-workshop-v1/);
 assert.match(script, /Object\.values\(MagicTowerPolicy\.RECIPES\)\.filter/, 'mobile recipes derive from the centralized recipe registry');
 assert.match(script, /page\?\.implemented !== false && book\?\.implemented !== false/, 'unimplemented ranks remain hidden');
 assert.match(script, /data-view-magic-recipe="\$\{recipe\.id\}"/, 'tapping a tile only opens its details');

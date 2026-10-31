@@ -31,9 +31,10 @@
     'temple-guardian': [4750,164,145,.76,2,20,29],
     'redrock-ancient-god': [26000,198,165,.78,2,18,31]
   });
-  function isSupported(mapId) { return Boolean(POLICIES[mapId]); }
+  const DUNGEON_ID = 'skullcrusher-forbidden-dungeon';
+  function isSupported(mapId) { return mapId === DUNGEON_ID || Boolean(POLICIES[mapId]); }
   function getMonster(mapId, definition) {
-    if (!isSupported(mapId) || !definition || !POLICIES[mapId].getEnemySkills(definition.id).length) return null;
+    if (!POLICIES[mapId] || !definition || !POLICIES[mapId].getEnemySkills(definition.id).length) return null;
     const values = BASES[definition.id];
     if (!values) return null;
     const [maxHp, attack, defense, attackSpeed, evasion, parry, damageReduction] = values;
@@ -57,6 +58,7 @@
     Altar.applySourceShield(unit.state, source, unit.maxHp * skill.shieldMaxHpRatio, now, skill.durationMs);
   }
   function thresholds(mapId, unit, now, emit = () => {}) {
+    if (mapId === DUNGEON_ID) mapId = unit.skillMapId;
     if (unit.isFacility || unit.currentHp <= 0) return;
     const policy = POLICIES[mapId];
     for (const skill of policy.updateThresholds(unit.id, unit.state, unit.currentHp, unit.maxHp, now)) {
@@ -68,6 +70,7 @@
     }
   }
   function death(mapId, unit, units, now, emit = () => {}) {
+    if (mapId === DUNGEON_ID) { unit.state.deathHandled = true; return; }
     if (unit.isFacility || unit.state.deathHandled) return;
     unit.state.deathHandled = true;
     const others = living(units).filter(other => other.key !== unit.key);
@@ -82,13 +85,15 @@
     }
   }
   function tick(mapId, units, players, now, emit = () => {}, random = Math.random) {
-    const policy = POLICIES[mapId];
-    if (!policy) return;
+    if (!isSupported(mapId)) return;
+    const dungeon = mapId === DUNGEON_ID;
     units.forEach(unit => {
+      const sourceMapId = dungeon ? unit.skillMapId : mapId;
+      const policy = POLICIES[sourceMapId];
       if (unit.isFacility) return;
       if (unit.currentHp <= 0) { death(mapId, unit, units, now, emit); return; }
       Altar.expireShields(unit.state, now);
-      thresholds(mapId, unit, now, emit);
+      thresholds(sourceMapId, unit, now, emit);
       const totem = unit.state.warbloodBuff;
       if (totem && totem.ticks > 0 && now >= totem.nextTickAt) {
         const ticks = Math.min(totem.ticks, Math.floor((now - totem.nextTickAt) / totem.tickMs) + 1);
@@ -97,7 +102,7 @@
       }
       if (unit.controlled) return;
       let actions = policy.resolveScheduledActions(unit.id, unit.state, now, { otherAliveEnemies: living(units).length - 1 });
-      if (mapId === Camp.MAP_ID && unit.id === 'skullcrusher-shaman') {
+      if (sourceMapId === Camp.MAP_ID && unit.id === 'skullcrusher-shaman') {
         actions = Bloodwar.resolveScheduledActions(unit.id, unit.state.inherited, now);
       }
       for (const skill of actions) {
@@ -133,6 +138,7 @@
     });
   }
   function modifiers(mapId, unit, units, now) {
+    if (mapId === DUNGEON_ID) mapId = unit.skillMapId;
     const policy = POLICIES[mapId];
     if (!policy || unit.isFacility) return { attack: 1, defense: 1, attackSpeed: 1, damage: 1, damageReduction: 0, dotDamage: 1 };
     const values = { attack: 1, defense: 1, attackSpeed: 1, damage: 1, damageReduction: 0, dotDamage: 1,
@@ -147,6 +153,7 @@
     return values;
   }
   function absorb(mapId, unit, damage, now) {
+    if (mapId === DUNGEON_ID) mapId = unit.skillMapId;
     let remaining = Math.max(0, damage);
     for (const source of Object.keys(unit.state.shields || {})) {
       const result = Altar.absorbSourceShield(unit.state, source, remaining, now);
@@ -161,6 +168,7 @@
     return remaining;
   }
   function selectTarget(mapId, unit, skill, players, primary, random = Math.random) {
+    if (mapId === DUNGEON_ID) mapId = unit.skillMapId;
     const alive = players.filter(player => player.alive && player.currentHp > 0);
     if (!skill) return primary;
     if (skill.id === 'warwolf-assault') return Camp.chooseWarwolfTarget(alive, primary, random(), player => player.job === 'warrior');
@@ -181,6 +189,7 @@
     return weakened * playerMultiplier(player, 'attack-down', now);
   }
   function hit(mapId, unit, skill, target, units, now) {
+    if (mapId === DUNGEON_ID) mapId = unit.skillMapId;
     if (!skill) return;
     for (const debuff of [...(skill.debuffs || []), ...(skill.debuff ? [skill.debuff] : [])]) applyDebuff(target, debuff, now);
     if (skill.dot) {

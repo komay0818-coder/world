@@ -408,6 +408,13 @@ let furnaceResult = null;
 let furnaceBusy = false;
 let magicSynthesisBusy = false;
 let magicPreviewRecipeId = null;
+let reforgeMode = 'type';
+let reforgeSelectedItemId = null;
+let reforgeSelectedSlotKey = null;
+let reforgeResult = null;
+let reforgeBusy = false;
+let reforgeConfirmationOpen = false;
+const reforgePendingTransactions = new Map();
 let weaponRecipeAssemblyBusy = false;
 let alchemyInputItemIds = [null, null];
 let alchemyCandidates = [];
@@ -1902,6 +1909,16 @@ function renderVillage() {
   document.querySelector('#village-level').textContent = `Lv${villageData.level}`;
   document.querySelector('#village-building-grid').innerHTML = Object.values(VillagePolicy.BUILDING_DEFINITIONS).map((definition) => {
     const building = getVillageBuildingData(definition.id);
+    if (building.noUpgrade) {
+      const requiredLevel = Number(building.unlockLevel) || 1;
+      const unlocked = (Number(progress.level) || 1) >= requiredLevel;
+      return `<article class="village-building-card village-building-no-upgrade ${unlocked ? '' : 'is-locked'}" data-village-building="${building.id}">
+        <div class="village-building-icon" aria-hidden="true">${building.icon}</div>
+        <div class="village-building-copy"><h3><span>${building.name}</span><small class="village-building-level">${unlocked ? `Lv${requiredLevel} 已解鎖` : `Lv${requiredLevel} 解鎖`}</small></h3><p>${building.description}</p></div>
+        <p class="village-building-static-status">${unlocked ? '無需升級，可直接使用。' : `角色達到 Lv${requiredLevel} 後自動解鎖。`}</p>
+        <div class="village-building-actions single-action"><button class="village-enter" type="button" data-open-village-building="${building.id}" ${unlocked ? '' : 'disabled'}>${unlocked ? '進入' : '尚未解鎖'}</button></div>
+      </article>`;
+    }
     const requirement = VillageUpgradePolicy.getRequirement(building.id, building.level);
     const validation = VillageUpgradePolicy.canUpgrade(progress, villageData, building.id);
     const supportsUpgrade = Object.prototype.hasOwnProperty.call(VillageUpgradePolicy.LEVEL_TWO_COSTS, building.id);
@@ -1952,14 +1969,212 @@ function closeVillage() {
 function openVillageBuilding(buildingId) {
   const building = getVillageBuildingData(buildingId);
   if (!building || !building.unlocked) return;
+  if (building.noUpgrade && (Number(getProgress().level) || 1) < (Number(building.unlockLevel) || 1)) {
+    showToast(`角色達到 Lv${building.unlockLevel} 後才能進入${building.name}。`);
+    return;
+  }
+  document.querySelector('#village-building-modal-icon').textContent = building.icon;
   document.querySelector('#village-building-title').textContent = building.name;
   if (buildingId === 'furnace') renderFurnace(building);
   else if (buildingId === 'workshop') { workshopPreview = null; renderWorkshop(building); }
   else if (buildingId === 'alchemy') renderAlchemy(building);
   else if (buildingId === 'rune') renderMagicTower(building);
   else if (buildingId === 'blacksmith') { blacksmithPreviewItemId = null; renderBlacksmith(building); }
-  else document.querySelector('#village-building-content').innerHTML = `<div class="village-building-icon" aria-hidden="true">${building.icon}</div><h3>${building.name}</h3><small>建築等級 Lv${building.level} / ${building.maxLevel}</small><p>${building.description}</p><p class="village-placeholder">${building.name}功能尚未完成，將於後續版本加入。</p>`;
+  else if (buildingId === 'reforge') { resetReforgeWorkshopState(); renderReforgeWorkshop(building, true); }
+  else document.querySelector('#village-building-content').innerHTML = `<p class="village-building-meta">建築等級 Lv${building.level} / ${building.maxLevel}</p><p>${building.description}</p><p class="village-placeholder">${building.name}功能尚未完成，將於後續版本加入。</p>`;
   document.querySelector('#village-building-modal').classList.remove('hidden');
+}
+
+function resetReforgeWorkshopState() {
+  reforgeMode = 'type';
+  reforgeSelectedItemId = null;
+  reforgeSelectedSlotKey = null;
+  reforgeResult = null;
+  reforgeBusy = false;
+  reforgeConfirmationOpen = false;
+}
+
+function reforgeEscapeHtml(value) {
+  return String(value ?? '').replace(/[&<>"']/g, (character) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[character]);
+}
+
+function getReforgeWorkshopSnapshot() {
+  const runtime = getPermanentPartyRuntime();
+  if (!runtime?.readyForGameplay || typeof runtime.getInventorySnapshot !== 'function') return { runtime: null, items: [], owners: {}, gold: 0 };
+  const snapshot = runtime.getInventorySnapshot();
+  return { runtime, items: Array.isArray(snapshot?.items) ? snapshot.items : [], owners: snapshot?.equipmentOwners || {}, gold: Number(runtime.getSharedGold?.()) || 0 };
+}
+
+function getReforgeEligibleEquipment(snapshot = getReforgeWorkshopSnapshot()) {
+  return snapshot.items.filter((item) => {
+    const instanceId = String(item?.instanceId || '');
+    const owner = snapshot.owners?.[instanceId];
+    const quality = EquipmentAffixPolicy.normalizeQuality(item?.quality);
+    return item?.kind === 'equipment'
+      && instanceId
+      && owner?.kind === 'bag'
+      && Object.keys(owner).length === 1
+      && ['uncommon', 'rare'].includes(quality)
+      && Array.isArray(item.randomAffixes)
+      && item.randomAffixes.length > 0
+      && !EquipmentReforgePolicy.isProtected(item)
+      && EquipmentAffixPolicy.canReforgeEquipment(item);
+  });
+}
+
+function getReforgeSlots(item) {
+  return (Array.isArray(item?.randomAffixes) ? item.randomAffixes : []).map((affix, index) => ({
+    ...affix,
+    slotKey: affix.slotKey || `random-${index}`,
+    affixGrade: Number(affix.affixGrade) || EquipmentAffixPolicy.getAffixGrade(affix),
+    valueQuality: Number(affix.valueQuality) || 1
+  }));
+}
+
+function getReforgeCostState(item, snapshot = getReforgeWorkshopSnapshot()) {
+  if (!item) return null;
+  try {
+    const cost = EquipmentReforgePolicy.getCost(reforgeMode, Number(item.affixChapter), item.quality);
+    const material = SalvagePolicy.getMaterial(cost.materialId);
+    const ownedMaterial = SalvagePolicy.getMaterialQuantity(snapshot.items, cost.materialId);
+    return { cost, material, ownedMaterial, ownedGold: snapshot.gold, enough: ownedMaterial >= cost.material && snapshot.gold >= cost.gold };
+  } catch (error) {
+    return { error: error.message, enough: false };
+  }
+}
+
+function reforgeAffixHtml(affix) {
+  const text = EquipmentAffixPolicy.formatAffix(affix) || affix?.name || affix?.id || '未知詞綴';
+  const match = text.match(/^(.*?)(\s+[+\-]?\d.*)$/);
+  const name = match ? match[1] : text;
+  const value = match ? match[2].trim() : '';
+  const grade = Math.min(7, Math.max(1, Number(affix?.affixGrade) || EquipmentAffixPolicy.getAffixGrade(affix) || 1));
+  const quality = Math.min(7, Math.max(1, Number(affix?.valueQuality) || 1));
+  return `<span class="reforge-affix-name reforge-grade-${grade}">${reforgeEscapeHtml(name)}</span>${value ? `<strong class="reforge-affix-value reforge-value-${quality}">${reforgeEscapeHtml(value)}</strong>` : ''}`;
+}
+
+function reforgeAffixScore(affix) {
+  return (Array.isArray(affix?.components) ? affix.components : []).reduce((sum, component) => sum + (Number(component.value) || 0), 0);
+}
+
+function reforgeErrorMessage(error) {
+  const message = String(error?.message || error || '重鑄失敗，請稍後重試。');
+  if (/level 10/i.test(message)) return '角色達到 Lv10 後才能進行數值重鑄。';
+  if (/level 8/i.test(message)) return '角色達到 Lv8 後才能進行詞綴重鑄。';
+  if (/Insufficient shared gold/i.test(message)) return '共用金幣不足，無法進行重鑄。';
+  if (/Insufficient essence/i.test(message)) return '精華石不足，無法進行重鑄。';
+  if (/protected/i.test(message)) return '鎖定、保護或收藏中的裝備不可重鑄。';
+  if (/permanently locked/i.test(message)) return '此裝備的種類重鑄欄位已永久指定，不能改選其他詞綴。';
+  if (/not eligible|quality or chapter/i.test(message)) return '此裝備目前不符合重鑄資格。';
+  if (/shared bag|ownership mismatch/i.test(message)) return '裝備必須位於目前帳號的共用背包內。';
+  if (/Concurrent|revision/i.test(message)) return '存檔版本已更新，請重新確認裝備後再試。';
+  return message;
+}
+
+function renderReforgeWorkshop(building = getVillageBuildingData('reforge'), rebuildGrid = false) {
+  const content = document.querySelector('#village-building-content');
+  const preservedEquipmentGrid = !rebuildGrid ? content.querySelector('.reforge-equipment-grid') : null;
+  if (preservedEquipmentGrid) preservedEquipmentGrid.remove();
+  const snapshot = getReforgeWorkshopSnapshot();
+  const progress = getProgress();
+  const level = Number(progress.level) || 1;
+  const equipment = getReforgeEligibleEquipment(snapshot);
+  if (!equipment.some((item) => item.instanceId === reforgeSelectedItemId)) {
+    reforgeSelectedItemId = equipment[0]?.instanceId || null;
+    reforgeSelectedSlotKey = null;
+    reforgeResult = null;
+  }
+  const selected = equipment.find((item) => item.instanceId === reforgeSelectedItemId) || null;
+  const slots = getReforgeSlots(selected);
+  if (!slots.some((entry) => entry.slotKey === reforgeSelectedSlotKey)) reforgeSelectedSlotKey = slots[0]?.slotKey || null;
+  const lockedTypeSlotKey = selected?.reforgeState?.lockedTypeSlotKey || null;
+  const costState = getReforgeCostState(selected, snapshot);
+  const modeUnlocked = reforgeMode === 'type' ? level >= 8 : level >= 10;
+  const lockedToOther = reforgeMode === 'type' && lockedTypeSlotKey && lockedTypeSlotKey !== reforgeSelectedSlotKey;
+  const canSubmit = Boolean(snapshot.runtime && selected && reforgeSelectedSlotKey && modeUnlocked && !lockedToOther && costState?.enough && !reforgeBusy);
+  const grid = equipment.length ? equipment.map((item) => `<button class="reforge-item ${itemQualityClass(item)} ${item.instanceId === reforgeSelectedItemId ? 'selected' : ''}" type="button" data-select-reforge-item="${reforgeEscapeHtml(item.instanceId)}">
+    <img src="${reforgeEscapeHtml(itemImagePath(item))}" alt=""><b>${reforgeEscapeHtml(item.name)}</b><small>${reforgeEscapeHtml(itemQualityLabel(item))}</small>
+  </button>`).join('') : '<p class="village-placeholder">目前背包沒有符合資格的綠色或藍色裝備。</p>';
+  const slotRows = slots.map((affix) => {
+    const selectedSlot = affix.slotKey === reforgeSelectedSlotKey;
+    const slotLocked = reforgeMode === 'type' && lockedTypeSlotKey && lockedTypeSlotKey !== affix.slotKey;
+    const permanent = lockedTypeSlotKey === affix.slotKey;
+    return `<button class="reforge-affix-row ${selectedSlot ? 'selected' : ''} ${slotLocked ? 'disabled' : ''}" type="button" data-select-reforge-affix="${reforgeEscapeHtml(affix.slotKey)}" ${slotLocked ? 'disabled' : ''}>
+      <span>${reforgeAffixHtml(affix)}</span><small>${permanent ? '🔒 已永久指定為種類重鑄欄位' : slotLocked ? '種類重鑄已鎖定其他欄位' : reforgeMode === 'type' ? '可進行詞綴種類重鑄' : '可進行詞綴數值重鑄'}</small>
+    </button>`;
+  }).join('');
+  const fixedAffixes = (Array.isArray(selected?.fixedAffixes) ? selected.fixedAffixes : []).map((affix) => `<div class="reforge-readonly-affix"><span>固定詞綴</span><b>${reforgeEscapeHtml(EquipmentAffixPolicy.formatAffix(affix) || affix.name || affix.id)}</b></div>`).join('');
+  const specialAbility = selected?.specialAbility || selected?.legendaryAbility;
+  const readOnlyHtml = fixedAffixes || specialAbility ? `<section class="reforge-readonly"><h5>固定能力與特殊能力</h5>${fixedAffixes}${specialAbility ? `<div class="reforge-readonly-affix is-special"><span>特殊能力</span><b>【${reforgeEscapeHtml(specialAbility.name || '專屬能力')}】${reforgeEscapeHtml(specialAbility.description || '')}</b></div>` : ''}</section>` : '';
+  const materialName = costState?.material?.name || costState?.cost?.materialId || '精華石';
+  const costHtml = costState?.error ? `<p class="reforge-error">${reforgeEscapeHtml(costState.error)}</p>` : costState ? `<div class="reforge-costs">
+    <span class="${costState.ownedMaterial < costState.cost.material ? 'insufficient' : ''}">${reforgeEscapeHtml(materialName)} <b>${costState.ownedMaterial} / ${costState.cost.material}</b></span>
+    <span class="${costState.ownedGold < costState.cost.gold ? 'insufficient' : ''}">共用金幣 <b>${costState.ownedGold} / ${costState.cost.gold}</b></span>
+  </div>` : '';
+  let resultHtml = '';
+  if (reforgeResult) {
+    const previous = reforgeResult.previousAffix;
+    const next = reforgeResult.affix;
+    const delta = reforgeAffixScore(next) - reforgeAffixScore(previous);
+    const comparison = reforgeResult.type === 'type' ? '詞綴已更換' : delta > 0 ? '數值提升' : delta < 0 ? '數值下降' : '數值不變';
+    const resultMaterial = SalvagePolicy.getMaterial(reforgeResult.cost?.materialId)?.name || reforgeResult.cost?.materialId || '精華石';
+    resultHtml = `<section class="reforge-result"><h4>重鑄完成・${comparison}</h4><div class="reforge-result-compare"><p><small>原本</small>${reforgeAffixHtml(previous)}</p><b aria-hidden="true">→</b><p><small>現在</small>${reforgeAffixHtml(next)}</p></div><p>本次消耗：${reforgeEscapeHtml(resultMaterial)} ×${reforgeResult.cost.material}、共用金幣 ×${reforgeResult.cost.gold}</p><div class="reforge-result-actions"><button type="button" data-reforge-other-affix>選擇其他詞綴</button></div></section>`;
+  }
+  const selectedHtml = selected ? `<section class="reforge-selected"><header><img src="${reforgeEscapeHtml(itemImagePath(selected))}" alt=""><div><h4 class="${itemQualityClass(selected)}">${reforgeEscapeHtml(selected.name)}</h4><small>${reforgeEscapeHtml(itemQualityLabel(selected))}・第${Number(selected.affixChapter) || 1}章裝備${Number(selected.affixSchemaVersion) < 5 ? '・舊版裝備將於成功重鑄時安全轉換' : ''}</small></div></header>${readOnlyHtml}<div class="reforge-affix-list">${slotRows}</div>${costHtml}<button class="reforge-submit" type="button" data-open-reforge-confirm ${canSubmit ? '' : 'disabled'}>${reforgeBusy ? '交易處理中…' : reforgeMode === 'type' ? '確認詞綴重鑄' : '確認數值重鑄'}</button>${!modeUnlocked ? `<p class="reforge-hint">角色達到 Lv${EquipmentReforgePolicy.REQUIRED_LEVEL[reforgeMode]} 後解鎖。</p>` : lockedToOther ? '<p class="reforge-hint">此裝備只能對鎖定的欄位進行種類重鑄。</p>' : ''}</section>` : '<section class="reforge-selected empty"><p>請先準備一件位於共用背包、未穿戴且未受保護的綠色或藍色裝備。</p></section>';
+  const confirmation = reforgeConfirmationOpen && selected ? `<div class="reforge-confirm-backdrop"><section class="reforge-confirm" role="alertdialog" aria-modal="true"><h4>確認${reforgeMode === 'type' ? '詞綴' : '數值'}重鑄</h4><p>${reforgeMode === 'type' && !lockedTypeSlotKey ? '確定要永久指定這條詞綴作為種類重鑄欄位嗎？確認成功後，這件裝備將無法改選其他詞綴進行種類重鑄，但所有隨機詞綴仍然可以進行數值重鑄。' : '新結果將直接覆蓋目前詞綴，可能提升、下降或不變，且不保留舊結果。'}</p>${costHtml}<footer><button type="button" data-confirm-reforge ${canSubmit ? '' : 'disabled'}>確定重鑄</button><button type="button" data-cancel-reforge-confirm>取消</button></footer></section></div>` : '';
+  content.innerHTML = `<section class="reforge-workshop" data-reforge-mode-current="${reforgeMode}"><p class="village-building-meta">Lv8 詞綴重鑄・Lv10 數值重鑄，建築無需升級。</p><div class="reforge-mode-grid"><button class="${reforgeMode === 'type' ? 'active' : ''}" type="button" data-reforge-mode="type"><b>⟳ 詞綴重鑄</b><small>重新抽取詞綴種類</small></button><button class="${reforgeMode === 'value' ? 'active' : ''} ${level < 10 ? 'locked' : ''}" type="button" data-reforge-mode="value" ${level < 10 ? 'disabled' : ''}><b>✦ 數值重鑄</b><small>${level < 10 ? 'Lv10 解鎖' : '保留種類並重抽數值'}</small></button></div><div class="reforge-main"><section class="reforge-inventory"><h4>選擇可重鑄裝備 <small>${equipment.length} 件</small></h4><div class="reforge-equipment-grid">${grid}</div></section>${selectedHtml}</div>${resultHtml}${confirmation}</section>`;
+  if (preservedEquipmentGrid) {
+    const replacement = content.querySelector('.reforge-equipment-grid');
+    replacement?.replaceWith(preservedEquipmentGrid);
+    preservedEquipmentGrid.querySelectorAll('[data-select-reforge-item]').forEach((node) => node.classList.toggle('selected', node.dataset.selectReforgeItem === reforgeSelectedItemId));
+  }
+}
+
+function selectReforgeItem(instanceId) {
+  if (reforgeBusy) return;
+  reforgeSelectedItemId = instanceId;
+  reforgeSelectedSlotKey = null;
+  reforgeResult = null;
+  reforgeConfirmationOpen = false;
+  renderReforgeWorkshop();
+}
+
+function selectReforgeAffix(slotKey) {
+  if (reforgeBusy) return;
+  reforgeSelectedSlotKey = slotKey;
+  reforgeResult = null;
+  reforgeConfirmationOpen = false;
+  renderReforgeWorkshop();
+}
+
+function getReforgeOperationKey(operation) {
+  return `${operation.type}:${operation.instanceId}:${operation.slotKey}:${operation.characterId}`;
+}
+
+async function executeReforge() {
+  if (reforgeBusy) return;
+  const snapshot = getReforgeWorkshopSnapshot();
+  const runtime = snapshot.runtime;
+  const item = getReforgeEligibleEquipment(snapshot).find((entry) => entry.instanceId === reforgeSelectedItemId);
+  if (!runtime || !item || !reforgeSelectedSlotKey) { showToast('重鑄資料已變更，請重新選擇裝備。'); renderReforgeWorkshop(); return; }
+  const operation = { type: reforgeMode, instanceId: item.instanceId, slotKey: reforgeSelectedSlotKey, characterId: runtime.mainId };
+  const key = getReforgeOperationKey(operation);
+  const transactionId = reforgePendingTransactions.get(key) || `reforge-ui-${crypto.randomUUID()}`;
+  reforgePendingTransactions.set(key, transactionId);
+  reforgeBusy = true;
+  reforgeConfirmationOpen = false;
+  renderReforgeWorkshop();
+  try {
+    const result = await runtime.reforgeEquipment(transactionId, operation);
+    reforgePendingTransactions.delete(key);
+    reforgeResult = { ...result.summary };
+    showToast(reforgeMode === 'type' ? '詞綴重鑄完成。' : '數值重鑄完成。');
+  } catch (error) {
+    showToast(reforgeErrorMessage(error));
+  } finally {
+    reforgeBusy = false;
+    renderReforgeWorkshop();
+  }
 }
 
 function isMobileBlacksmithLayout() {
@@ -1985,7 +2200,7 @@ function renderBlacksmith(building = getVillageBuildingData('blacksmith')) {
     return `<article class="furnace-slot filled"><h4>${item.name}</h4><p>目前插槽：${current} / ${max}</p><button type="button" data-add-rune-socket="${item.id}" ${current >= max ? 'disabled' : ''}>${current >= max ? '已達上限' : '增加 1 個插槽（價格待定）'}</button></article>`;
   }).join('');
   if (!isMobileBlacksmithLayout()) {
-    document.querySelector('#village-building-content').innerHTML = `<div class="workshop-title"><div class="village-building-icon">${building.icon}</div><div><h3>${building.name}</h3><small>武器最多 3 孔・防具最多 2 孔</small></div></div><p>打洞價格仍待第二章經濟平衡確認，目前保留完整功能入口但不會扣除金幣或改動裝備。</p><section class="furnace-layout blacksmith-desktop-grid">${cards || '<p class="village-placeholder">背包內沒有裝備。</p>'}</section>`;
+    document.querySelector('#village-building-content').innerHTML = `<p class="village-building-meta">武器最多 3 孔・防具最多 2 孔</p><p>打洞價格仍待第二章經濟平衡確認，目前保留完整功能入口但不會扣除金幣或改動裝備。</p><section class="furnace-layout blacksmith-desktop-grid">${cards || '<p class="village-placeholder">背包內沒有裝備。</p>'}</section>`;
     return;
   }
   const grid = equipment.map((item) => {
@@ -1999,7 +2214,7 @@ function renderBlacksmith(building = getVillageBuildingData('blacksmith')) {
     const eligibility = blacksmithEligibilityText(validation);
     return `<section class="blacksmith-detail-backdrop" role="dialog" aria-modal="true" aria-label="裝備打洞詳細資料"><article class="blacksmith-detail ${itemQualityClass(previewItem)}"><header><span class="item-icon"><img src="${itemImagePath(previewItem)}" alt=""></span><div><h4>${previewItem.name}</h4><small>${equipmentSlots[previewItem.slot]?.label || previewItem.slot}・${itemQualityLabel(previewItem)}</small></div></header><section class="inventory-tooltip-details">${equipmentDetailsHtml(previewItem) || '<span>沒有其他詳細資訊。</span>'}</section><section class="blacksmith-socket-state"><b>符文插槽</b><span>${current} / ${max}</span><small>${eligibility}</small></section><section class="blacksmith-socket-cost"><b>打洞費用</b><span>材料與金幣尚未設定</span></section><footer><button type="button" data-confirm-blacksmith-socket="${previewItem.instanceId || previewItem.id}" ${validation.ok ? '' : 'disabled'}>確認打洞</button><button type="button" data-cancel-blacksmith-detail>取消</button></footer></article></section>`;
   })() : '';
-  document.querySelector('#village-building-content').innerHTML = `<div class="workshop-title"><div class="village-building-icon">${building.icon}</div><div><h3>${building.name}</h3><small>武器最多 3 孔・防具最多 2 孔</small></div></div><p>選擇裝備可查看能力與插槽狀態。打洞費用尚未設定，目前不會扣除資源或增加插槽。</p><section class="blacksmith-equipment-grid">${grid || '<p class="village-placeholder">背包內沒有裝備。</p>'}</section>${detail}`;
+  document.querySelector('#village-building-content').innerHTML = `<p class="village-building-meta">武器最多 3 孔・防具最多 2 孔</p><p>選擇裝備可查看能力與插槽狀態。打洞費用尚未設定，目前不會扣除資源或增加插槽。</p><section class="blacksmith-equipment-grid">${grid || '<p class="village-placeholder">背包內沒有裝備。</p>'}</section>${detail}`;
 }
 
 function renderMagicTower(building = getVillageBuildingData('rune'), message = '') {
@@ -2035,7 +2250,7 @@ function renderMagicTower(building = getVillageBuildingData('rune'), message = '
         : `技能殘頁不足，尚缺 ${Math.max(0, MagicTowerPolicy.CONFIG.pageCost - owned)} 個。`;
     return `<section class="magic-detail-backdrop" role="dialog" aria-modal="true" aria-label="技能殘頁合成詳細資料"><article class="magic-detail"><header><img src="${page.image}" alt=""><div><h4>${page.name}</h4><small>${page.rank}技能殘頁</small></div></header><dl><div><dt>目前持有</dt><dd>${owned}</dd></div><div><dt>合成需要</dt><dd>${MagicTowerPolicy.CONFIG.pageCost}</dd></div><div><dt>可能取得</dt><dd><img src="${book.image}" alt="">${book.name} ×${MagicTowerPolicy.CONFIG.rewardAmount}</dd></div><div><dt>魔法塔</dt><dd>Lv${building.level} / 需要 Lv${previewRecipe.requiredTowerLevel}</dd></div><div><dt>成功率</dt><dd>${Math.round(MagicTowerPolicy.CONFIG.successChance * 100)}%</dd></div></dl><p class="magic-detail-eligibility ${validation.ok ? 'ready' : 'blocked'}">${eligibility}</p><footer><button type="button" data-synthesize-magic="${previewRecipe.id}" ${magicSynthesisBusy || !validation.ok ? 'disabled' : ''}>${magicSynthesisBusy ? '合成處理中…' : '確認合成'}</button><button type="button" data-cancel-magic-detail ${magicSynthesisBusy ? 'disabled' : ''}>取消</button></footer></article></section>`;
   })() : '';
-  document.querySelector('#village-building-content').innerHTML = `<div class="workshop-title"><div class="village-building-icon" aria-hidden="true">${building.icon}</div><div><h3>${building.name}</h3><small>建築 Lv${building.level}・成功率 40%</small></div></div>
+  document.querySelector('#village-building-content').innerHTML = `<p class="village-building-meta">建築 Lv${building.level}・成功率 40%</p>
     <p>每次消耗 10 個技能殘頁，成功時獲得 1 本同階技能書。合成失敗仍會消耗技能殘頁；魔法塔 Lv2 解鎖中級合成。</p>
     ${message ? `<p class="alchemy-message">${message}</p>` : ''}
     <section class="${isMobile ? 'magic-recipe-grid' : 'furnace-layout'}">${recipeCards || '<p class="village-placeholder">目前沒有已開放的技能殘頁。</p>'}</section>${detail}`;
@@ -2094,7 +2309,7 @@ function renderFurnace(building = getVillageBuildingData('furnace'), message = '
   const materialSummary = materialEntries.map((entry) => `${entry.icon} ${entry.name} ${entry.owned}`).join('　');
   const materialCards = materialEntries.map((entry) => `<article class="furnace-material-card quality-${entry.quality}"><span class="furnace-material-icon" aria-hidden="true">${entry.icon}</span><span><b>${entry.name}</b><small>持有 ${entry.owned}</small></span></article>`).join('');
   const batchToolbar = `<div class="furnace-batch-toolbar"><strong>已選 ${selectedIds.length} 件</strong><button type="button" data-furnace-select-all ${furnaceBusy || !equipment.length ? 'disabled' : ''}>全選可分解裝備</button><button type="button" data-furnace-clear-all ${furnaceBusy || !selectedIds.length ? 'disabled' : ''}>取消全選</button><button type="button" class="primary" data-confirm-furnace ${furnaceBusy || !selectedIds.length ? 'disabled' : ''}>${furnaceBusy ? '分解處理中…' : '批次分解'}</button></div>`;
-  document.querySelector('#village-building-content').innerHTML = `<div class="workshop-title"><div class="village-building-icon" aria-hidden="true">${building.icon}</div><div><h3>${building.name}</h3><small>建築 Lv${building.level}・可分解裝備 ${equipment.length} 件</small></div></div><p>綠色與藍色裝備分解後必定消失，並依熔爐等級機率取得對應精華石。白色、紫色以上、已穿戴與鎖定裝備不會列出。</p><p class="furnace-material-summary">${materialSummary}</p><div class="furnace-material-grid" aria-label="精華石持有數量">${materialCards}</div>${message ? `<p class="alchemy-message">${message}</p>` : ''}<section class="furnace-layout"><section class="furnace-column furnace-equipment-column"><div class="furnace-equipment-heading"><h4>可分解裝備</h4><span>${selectedIds.length} / ${equipment.length}</span></div>${batchToolbar}<div class="furnace-items">${cards || '<p class="village-placeholder">目前沒有符合條件的裝備。</p>'}</div></section><section class="furnace-column furnace-selection-column"><h4>分解槽</h4>${selectedPanel}</section><section class="furnace-column furnace-result-column"><h4>結果</h4>${resultPanel}</section></section>`;
+  document.querySelector('#village-building-content').innerHTML = `<p class="village-building-meta">建築 Lv${building.level}・可分解裝備 ${equipment.length} 件</p><p>綠色與藍色裝備分解後必定消失，並依熔爐等級機率取得對應精華石。白色、紫色以上、已穿戴與鎖定裝備不會列出。</p><p class="furnace-material-summary">${materialSummary}</p><div class="furnace-material-grid" aria-label="精華石持有數量">${materialCards}</div>${message ? `<p class="alchemy-message">${message}</p>` : ''}<section class="furnace-layout"><section class="furnace-column furnace-equipment-column"><div class="furnace-equipment-heading"><h4>可分解裝備</h4><span>${selectedIds.length} / ${equipment.length}</span></div>${batchToolbar}<div class="furnace-items">${cards || '<p class="village-placeholder">目前沒有符合條件的裝備。</p>'}</div></section><section class="furnace-column furnace-selection-column"><h4>分解槽</h4>${selectedPanel}</section><section class="furnace-column furnace-result-column"><h4>結果</h4>${resultPanel}</section></section>`;
 }
 
 function selectFurnaceItem(itemId) {
@@ -2245,7 +2460,7 @@ function renderAlchemy(building = getVillageBuildingData('alchemy'), message = '
   const previewItem = isMobileAlchemyLayout() ? getAlchemyItem(progress, alchemyPreviewItemId) : null;
   const previewSelectedIndex = previewItem ? alchemyInputItemIds.indexOf(AlchemyPolicy.getItemId(previewItem)) : -1;
   const preview = previewItem ? `<section class="alchemy-item-detail-backdrop" role="dialog" aria-modal="true" aria-label="裝備詳細資料"><article class="alchemy-item-detail ${itemQualityClass(previewItem)}"><header><span class="item-icon"><img src="${itemImagePath(previewItem)}" alt=""></span><div><h4>${previewItem.name}</h4><small>${equipmentSlots[previewItem.slot]?.label || previewItem.slot}・${itemQualityLabel(previewItem)}</small></div></header><section class="inventory-tooltip-details">${equipmentDetailsHtml(previewItem) || '<span>沒有其他詳細資訊。</span>'}</section><footer><button type="button" data-confirm-alchemy-input>確認放入材料 ${Number(alchemyPendingSlotIndex) + 1}</button>${previewSelectedIndex >= 0 ? `<button type="button" data-clear-alchemy-input="${previewSelectedIndex}">移除材料</button>` : ''}<button type="button" data-cancel-alchemy-input>取消</button></footer></article></section>` : '';
-  document.querySelector('#village-building-content').innerHTML = `<div class="workshop-title"><div class="village-building-icon" aria-hidden="true">${building.icon}</div><div><h3>${building.name}</h3><small>建築 Lv${building.level}・產生 ${AlchemyPolicy.getCandidateCount(building.level)} 件候選裝備</small></div></div>
+  document.querySelector('#village-building-content').innerHTML = `<p class="village-building-meta">建築 Lv${building.level}・產生 ${AlchemyPolicy.getCandidateCount(building.level)} 件候選裝備</p>
     <p>消耗兩件相同部位的綠色裝備，重新產生一件相同部位的綠色裝備。詞綴、數值與插槽不會繼承。</p>
     <p class="alchemy-gold-cost">煉金費用：<b>${AlchemyPolicy.ALCHEMY_RULES.goldCost} 金幣</b>・目前持有 ${Number(progress.gold) || 0} 金幣</p>
     <section class="alchemy-inputs">${slots}</section><p class="alchemy-message ${validation.ok || alchemyCandidates.length ? 'ok' : ''}">${helper}</p>
@@ -2393,7 +2608,7 @@ function renderWorkshop(building = getVillageBuildingData('workshop'), craftedIt
   const recipeList = isMobileWorkshopLayout() ? `${mobileWeaponCards}${mobileCards}` : `${desktopWeaponCards}${desktopCards}`;
   const emptyRecipeMessage = isMobileWorkshopLayout() ? '目前沒有符合條件的配方。' : '此分類目前沒有可製作配方。';
   const detail = renderWorkshopRecipeDetail(progress, building, materialName, quantity);
-  document.querySelector('#village-building-content').innerHTML = `<div class="workshop-title"><div class="village-building-icon" aria-hidden="true">${building.icon}</div><div><h3>${building.name}</h3><small>第一至三章裝備製作・背包 ${inventory.length} / ${CraftingPolicy.INVENTORY_CAPACITY}</small></div></div><p>製作前只顯示可能能力；實際能力與數值會在製作成功時生成並永久保存。</p>
+  document.querySelector('#village-building-content').innerHTML = `<p class="village-building-meta">第一至三章裝備製作・背包 ${inventory.length} / ${CraftingPolicy.INVENTORY_CAPACITY}</p><p>製作前只顯示可能能力；實際能力與數值會在製作成功時生成並永久保存。</p>
     <div class="workshop-filters"><div><b>品質</b><button type="button" data-workshop-quality="uncommon" class="${workshopQuality === 'uncommon' ? 'selected' : ''}">綠色</button><button type="button" data-workshop-quality="rare" class="${workshopQuality === 'rare' ? 'selected' : ''}">藍色</button><button type="button" data-workshop-quality="epic" class="${workshopQuality === 'epic' ? 'selected' : ''}">紫色</button></div><div><b>部位</b><button type="button" data-workshop-slot="all" class="${workshopSlot === 'all' ? 'selected' : ''}">全部</button><button type="button" data-workshop-slot="wrist" class="${workshopSlot === 'wrist' ? 'selected' : ''}">護腕</button><button type="button" data-workshop-slot="cloak" class="${workshopSlot === 'cloak' ? 'selected' : ''}">斗篷</button><button type="button" data-workshop-slot="shoulders" class="${workshopSlot === 'shoulders' ? 'selected' : ''}">肩甲</button></div></div>
     ${weaponFragmentPanel}${result}<section class="workshop-recipes">${recipeList || `<p class="village-placeholder">${emptyRecipeMessage}</p>`}</section>${detail}`;
 }
@@ -2443,6 +2658,7 @@ function closeVillageBuilding() {
   workshopPreview = null;
   blacksmithPreviewItemId = null;
   magicPreviewRecipeId = null;
+  resetReforgeWorkshopState();
   resetFurnaceState();
   resetAlchemyState();
   document.querySelector('#village-building-modal')?.classList.add('hidden');
@@ -3093,6 +3309,7 @@ function hasAliveBoss(excludeIndex = -1) {
 }
 
 function getEnemyDefinition(index) {
+  if (battle.skullcrusherRunId && battle.skullcrusherEnemies?.[index]) return { ...battle.skullcrusherEnemies[index], combatIndex:index };
   const enemy = getMonsterDefinitionForMap(battle.enemyTypes[index], battle.dungeonId || getActiveMap(getProgress()).id, battle.enemyLevels?.[index]);
   if (enemy.isFacility) return { ...enemy, combatIndex: index };
   const summonProfile = battle.enemySummonProfiles?.[index];
@@ -3234,7 +3451,9 @@ function getEquipmentStats(progress = getProgress(), activeCharacter = getActive
   const runes = RunePolicy.getBonuses(progress.equipment);
   return {
     ...fixed,
+    defense: fixed.defense + (affixes.defenseFlat || 0),
     mana: fixed.mana + (affixes.mana || 0),
+    damageReduction: fixed.damageReduction + (affixes.damageReductionPercent || 0) / 100,
     magicDamageBonus: fixed.magicDamageBonus + (affixes.magicDamageBonus || 0) / 100,
     attackFlat: affixes.attackFlat || 0,
     maxHp: affixes.maxHp || 0,
@@ -3578,6 +3797,8 @@ function itemStatsText(item) {
   if (Number.isFinite(Number(item.attackMin)) && Number.isFinite(Number(item.attackMax))) parts.push(`攻擊 ${item.attackMin}～${item.attackMax}`);
   else if (item.attack) parts.push(`攻擊 +${effectiveEquipmentStat(item, 'attack')}`);
   if (Number(item.attackSpeed) > 0) parts.push(`攻速 ${Number(item.attackSpeed).toFixed(2)} 次／秒`);
+  if (item.criticalChance) parts.push(`暴擊率 +${Math.round(effectiveEquipmentStat(item, 'criticalChance') * 100)}%`);
+  if (item.criticalDamageBonus) parts.push(`暴擊傷害 +${Math.round(effectiveEquipmentStat(item, 'criticalDamageBonus') * 100)}%`);
   if (item.defense) parts.push(`防禦 +${effectiveEquipmentStat(item, 'defense')}`);
   if (item.hp) parts.push(`生命 +${effectiveEquipmentStat(item, 'hp')}`);
   if (item.mana) parts.push(`最大魔力 +${effectiveEquipmentStat(item, 'mana')}`);
@@ -3825,13 +4046,13 @@ function renderInventoryTooltip(itemId, anchor = null, pin = false) {
   const { item, stackIds, stackQuantity, wearable, equipSlots, availableRuneIds } = entry;
   const progress = inventoryTooltipProgress || getProgress();
   const quality = itemQualityLabel(item);
-  const slotLabel = item.kind === 'equipment' ? equipmentSlots[item.slot]?.label || item.slot : '';
+  const slotLabel = item.kind === 'equipment' ? item.slot === 'ring' ? '戒指' : equipmentSlots[item.slot]?.label || item.slot : '';
   const details = item.kind === 'equipment' ? equipmentDetailsHtml(item) : itemStatsText(item);
   const visual = item.image || item.kind === 'recipe'
     ? `<img src="${itemImagePath(item)}" alt="" class="inventory-item-image">`
     : item.icon || '◈';
   const equipControls = item.kind === 'equipment' && wearable
-    ? equipSlots.map((targetSlot) => `<button type="button" data-equip-id="${item.id}" data-equip-slot="${targetSlot}">${equipSlots.length > 1 ? targetSlot === 'weapon' ? '裝主手' : '裝副手' : '穿戴'}</button>`).join('')
+    ? equipSlots.map((targetSlot) => `<button type="button" data-equip-id="${item.id}" data-equip-slot="${targetSlot}">${item.slot === 'ring' ? `裝${equipmentSlots[targetSlot]?.label || targetSlot}` : equipSlots.length > 1 ? targetSlot === 'weapon' ? '裝主手' : '裝副手' : '穿戴'}</button>`).join('')
     : item.kind === 'equipment' ? '<span class="equip-blocked">目前角色無法穿戴</span>' : '';
   const runeButtons = item.kind === 'equipment' && (item.socketedRunes || []).length < (Number(item.sockets) || 0)
     ? Object.values(RunePolicy.RUNES).filter((rune) => availableRuneIds.has(rune.id)).map((rune) => `<button type="button" data-socket-item="${item.id}" data-socket-rune="${rune.id}">鑲嵌${rune.name}</button>`).join('') : '';
@@ -4228,7 +4449,7 @@ function equipItem(itemId, preferredSlot = null) {
   if (itemIndex < 0) return;
   const item = progress.inventory[itemIndex];
   const character = getActiveCharacter();
-  const targetSlot = preferredSlot || item.slot;
+  const targetSlot = preferredSlot || getCompatibleEquipSlots(item, character, progress)[0] || item.slot;
   if (!character || !isItemWearableByCharacter(item, character, progress.level) || !getCompatibleEquipSlots(item, character, progress).includes(targetSlot)) {
     showToast('這件裝備不適合目前職業。');
     return;
@@ -4423,12 +4644,17 @@ function getMonsterStatusDisplays(index, now = Date.now()) {
 }
 
 function renderEnemySquad() {
+  document.querySelector('#battle-screen')?.classList.toggle('skullcrusher-combat', Boolean(battle.skullcrusherRunId));
   const squad = document.querySelector('#enemy-squad');
   const now = Date.now();
-  const visibleIndexes = aliveEnemyIndexesByAge().slice(0, 4);
+  const displayLimit = battle.skullcrusherRunId ? Math.max(1,Math.min(5,aliveEnemyIndexesByAge().length)) : 4;
+  const visibleIndexes = aliveEnemyIndexesByAge().slice(0, displayLimit);
+  squad.style.setProperty('--skull-columns', displayLimit);
+  squad.style.setProperty('--skull-mobile-columns', Math.min(3,displayLimit));
+  squad.style.setProperty('--skull-mobile-rows', Math.ceil(displayLimit / 3));
   const focusIndex = visibleIndexes[0] ?? -1;
   const reserveCount = Math.max(0, battle.enemyHps.filter((hp) => hp > 0).length - visibleIndexes.length);
-  const visibleEnemies = Array.from({ length: 4 }, (_, displaySlot) => {
+  const visibleEnemies = Array.from({ length: displayLimit }, (_, displaySlot) => {
     const index = visibleIndexes[displaySlot];
     if (index === undefined) {
       return `<div class="monster-battle-slot empty-slot" data-display-slot="${displaySlot}" role="gridcell"><div class="monster-empty-slot">等待怪物</div></div>`;
@@ -4906,62 +5132,62 @@ function playBattleSkillEffect(skillId, targetAnchor, options = {}) {
     requestAnimationFrame(followTarget);
   };
   requestAnimationFrame(followTarget);
-  if (skillId === 'heavy-strike') setTimeout(() => {
+  if (skillId === 'heavy-strike') scheduleBattleVisualEvent(() => {
     const target = document.querySelector(`#enemy-${targetAnchor.index}`);
     target?.classList.add('heavy-strike-hit');
-    setTimeout(() => target?.classList.remove('heavy-strike-hit'), 220);
+    scheduleBattleVisualEvent(() => target?.classList.remove('heavy-strike-hit'), 220);
   }, preset.impactAt);
-  if (skillId === 'charge') setTimeout(() => {
+  if (skillId === 'charge') scheduleBattleVisualEvent(() => {
     const target = document.querySelector(`#enemy-${targetAnchor.index}`);
     target?.classList.add('charge-hit');
     field.classList.add('charge-impact');
-    setTimeout(() => { target?.classList.remove('charge-hit'); field.classList.remove('charge-impact'); }, 170);
+    scheduleBattleVisualEvent(() => { target?.classList.remove('charge-hit'); field.classList.remove('charge-impact'); }, 170);
   }, preset.impactAt);
-  if (skillId === 'power-shot') setTimeout(() => {
+  if (skillId === 'power-shot') scheduleBattleVisualEvent(() => {
     const target = document.querySelector(`#enemy-${targetAnchor.index}`);
     target?.classList.add('power-shot-hit');
-    setTimeout(() => target?.classList.remove('power-shot-hit'), 170);
+    scheduleBattleVisualEvent(() => target?.classList.remove('power-shot-hit'), 170);
   }, preset.impactAt);
-  if (skillId === 'fireball') setTimeout(() => {
+  if (skillId === 'fireball') scheduleBattleVisualEvent(() => {
     const target = document.querySelector(`#enemy-${targetAnchor.index}`);
     target?.classList.add('fireball-hit');
-    setTimeout(() => target?.classList.remove('fireball-hit'), 170);
+    scheduleBattleVisualEvent(() => target?.classList.remove('fireball-hit'), 170);
   }, preset.impactAt);
-  if (skillId === 'blizzard') setTimeout(() => {
+  if (skillId === 'blizzard') scheduleBattleVisualEvent(() => {
     (options.targets || []).forEach((visualTarget) => {
       const target = document.querySelector(`#enemy-${visualTarget.index}`);
       target?.classList.add('blizzard-hit');
-      setTimeout(() => target?.classList.remove('blizzard-hit'), 180);
+      scheduleBattleVisualEvent(() => target?.classList.remove('blizzard-hit'), 180);
     });
   }, preset.impactAt);
   if (skillId === 'chain-lightning') (options.targets || []).forEach((visualTarget, order) => {
-    setTimeout(() => {
+    scheduleBattleVisualEvent(() => {
       const target = document.querySelector(`#enemy-${visualTarget.index}`);
       target?.classList.add('chain-lightning-hit');
-      setTimeout(() => target?.classList.remove('chain-lightning-hit'), 150);
+      scheduleBattleVisualEvent(() => target?.classList.remove('chain-lightning-hit'), 150);
     }, preset.impactAt + order * 100);
   });
-  if (skillId === 'holy-light') setTimeout(() => {
+  if (skillId === 'holy-light') scheduleBattleVisualEvent(() => {
     const target = document.querySelector(`#enemy-${targetAnchor.index}`);
     target?.classList.add('holy-light-hit');
-    setTimeout(() => target?.classList.remove('holy-light-hit'), 170);
+    scheduleBattleVisualEvent(() => target?.classList.remove('holy-light-hit'), 170);
   }, preset.impactAt);
   if (skillId === 'holy-nova') (options.targets || []).forEach((visualTarget) => {
-    setTimeout(() => {
+    scheduleBattleVisualEvent(() => {
       const target = document.querySelector(`#enemy-${visualTarget.index}`);
       target?.classList.add('holy-nova-hit');
-      setTimeout(() => target?.classList.remove('holy-nova-hit'), 160);
+      scheduleBattleVisualEvent(() => target?.classList.remove('holy-nova-hit'), 160);
     }, visualTarget.delay);
   });
   if (skillId === 'shadow-dance') (options.targets || []).forEach((visualTarget, order, visualTargets) => {
     const delay = preset.impactAt + order * (visualTargets.length > 1 ? 85 : 0);
-    setTimeout(() => {
+    scheduleBattleVisualEvent(() => {
       const target = document.querySelector(`#enemy-${visualTarget.index}`);
       target?.classList.add('shadow-dance-hit');
-      setTimeout(() => target?.classList.remove('shadow-dance-hit'), 130);
+      scheduleBattleVisualEvent(() => target?.classList.remove('shadow-dance-hit'), 130);
     }, delay);
   });
-  setTimeout(() => {
+  scheduleBattleVisualEvent(() => {
     effect.remove();
     if (!layer.childElementCount) layer.remove();
   }, preset.duration);
@@ -4976,12 +5202,23 @@ function playCompanionAttackAnimation(targetIndexes = []) {
   setTimeout(() => companionIcon.classList.remove('attacking'), 520);
 }
 
+function scheduleBattleVisualEvent(callback, delay) {
+  if (!battle.skullcrusherRunId) return setTimeout(callback,delay);
+  const owner = battle, sessionId = battle.sessionId;
+  const timer = setTimeout(()=>{
+    if (battle !== owner || battle.sessionId !== sessionId || !fighting || battle.dungeonComplete) return;
+    callback();
+  },delay);
+  (owner.damageTimers ||= []).push(timer);
+  return timer;
+}
+
 function showEnemyDamage(indexes, damage, type = 'normal') {
   if (type === 'normal') battle.targetIndexes = indexes;
   indexes.forEach((index) => {
     const event = { id: `${Date.now()}-${Math.random()}`, damage, type };
     battle.enemyDamages[index] = [...(battle.enemyDamages[index] || []), event];
-    setTimeout(() => {
+    scheduleBattleVisualEvent(() => {
       battle.enemyDamages[index] = (battle.enemyDamages[index] || []).filter((entry) => entry.id !== event.id);
       if (type === 'normal') battle.targetIndexes = battle.targetIndexes.filter((target) => target !== index);
       if (fighting) updateBattleUI();
@@ -5820,7 +6057,7 @@ function updateBattleUI() {
     const experience = getPlayerExperienceDisplay(progress);
     playerStageInfo.innerHTML = `<b>${character.name}</b><span class="player-stage-meter-copy"><em>HP</em><strong>${Math.max(0, Math.round(battle.playerHp))} / ${Math.round(maxHp)}</strong></span><span class="player-stage-hp"><i style="width:${hpPercent}%"></i></span><span class="player-stage-meter-copy"><em>${resourceLabel}</em><strong>${Math.max(0, Math.round(resourceCurrent))} / ${Math.round(maxMana)}</strong></span><span class="player-stage-resource"><i style="width:${resourcePercent}%"></i></span><span class="player-stage-experience-copy"><em>Lv${experience.level}</em><strong>${experience.percent}%</strong></span><span class="player-stage-experience" role="progressbar" aria-label="${character.name}經驗值" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${experience.percent}"><i style="width:${experience.percent}%"></i></span><span class="player-status-row" aria-label="增益與減益狀態">${renderPlayerStatusIcons(mainMember)}</span>`;
   }
-  const currentMap = getActiveMap(progress);
+  const currentMap = battle.skullcrusherRunId ? { ...getActiveMap(progress), id:SkullcrusherDungeonLifecycle.ID, name:SkullcrusherDungeonLifecycle.NAME, dungeon:true, min:40, max:43, monsterMin:40, monsterMax:43 } : getActiveMap(progress);
   const mapName = document.querySelector('#battle-title');
   if (mapName) mapName.textContent = currentMap.dungeon ? `${currentMap.name}・第 ${battle.dungeonWave || 1} 波` : currentMap.name;
   const battleField = document.querySelector('.battle-field');
@@ -5973,6 +6210,7 @@ function floatDamage(value) {
 }
 
 function rewardVictory(index) {
+  if (battle.skullcrusherRunId) return; // Lifecycle preview has no per-kill rewards.
   const experienceRuntime = getPermanentPartyRuntime();
   if (experienceRuntime && (!fighting || battle.enemyHps[index] > 0 || !experienceRuntime.canRewardExperience(battle.experienceSessionId, index, battle.enemySpawnedAt?.[index]))) return;
   if (!battle.rewardedEnemyIndexes) battle.rewardedEnemyIndexes = new Set();
@@ -6202,7 +6440,7 @@ function rewardVictory(index) {
 }
 
 function useSharedHealingPotionForMember(member) {
-  if (!member?.alive || member.isMain || member.currentHp <= 0 || member.currentHp >= member.maxHp) return false;
+  if (!member?.alive || (member.isMain && !battle.skullcrusherRunId) || member.currentHp <= 0 || member.currentHp >= member.maxHp) return false;
   const progress = getProgress();
   if ((progress.potions || 0) <= 0) return false;
   progress.potions -= 1;
@@ -6300,6 +6538,7 @@ function completeChapterTwoFinalBattle() {
 }
 
 function queueDefeatedEnemies() {
+  if (battle.skullcrusherRunId) { processSkullcrusherEncounter(); return; }
   if (battle.isDungeon) {
     battle.enemyHps.forEach((hp, index) => {
       if (hp > 0 || battle.enemyRespawns[index] !== null) return;
@@ -6446,7 +6685,7 @@ function getLateChapterUnits(now = Date.now()) {
   return battle.enemyTypes.map((type, index) => {
     const definition = getEnemyDefinition(index);
     const skillState = getEnemySkillState(index);
-    skillState.lateChapter = skillState.lateChapter || ChapterThreeLateCombatPolicy.createState(mapId, battle.enemySpawnedAt[index] || now);
+    skillState.lateChapter = skillState.lateChapter || ChapterThreeLateCombatPolicy.createState(definition.skillMapId || mapId, battle.enemySpawnedAt[index] || now);
     return { ...definition, key: `${battle.sessionId}:${index}:${battle.enemySpawnedAt[index]}`, state: skillState.lateChapter,
       controlled: now < skillState.stunnedUntil || now < skillState.frozenUntil,
       get currentHp() { return battle.enemyHps[index]; },
@@ -6461,6 +6700,7 @@ function emitLateChapterSkill(unit, skill) {
 function updateLateChapterThresholds(index, now = Date.now()) {
   const units = getLateChapterUnits(now);
   if (units[index]) ChapterThreeLateCombatPolicy.thresholds(units[index].mapId, units[index], now, emitLateChapterSkill);
+  if (battle.skullcrusherRunId) processSkullcrusherBoss();
 }
 
 function recordLateChapterEnemyDeath(index, now = Date.now()) {
@@ -6590,6 +6830,7 @@ function extendElementalCollapseStatuses(index, member, now = Date.now()) {
 }
 
 function applyDamageToMonster(index, baseDamage, profile, options = {}) {
+  if (battle.skullcrusherRunId && (battle.dungeonComplete || !fighting || !(battle.enemyHps[index] > 0))) return {finalDamage:0};
   const enemy = getEnemyDefinition(index);
   const attacker = options.attacker || null;
   const progress = attacker?.progress || getProgress();
@@ -6763,6 +7004,7 @@ function applyDamageToMonster(index, baseDamage, profile, options = {}) {
     const explosion = applyDamageToMonster(index, arcaneMarkExplosion.power, { damageType: 'magic', attackRange: 'ranged', element: 'arcane' }, { attacker, attackKind: 'skill-followup', sourceSkill: 'arcane-mark-explosion', canEvade: false, canParry: false });
     MageAdvancementPolicy.recordArcaneMarkDamage(attacker, explosion.finalDamage);
   }
+  if (battle.skullcrusherRunId) processSkullcrusherBoss();
   if (options.showDamage !== false) showEnemyDamage([index], result.finalDamage, options.effectType || 'normal');
   return result;
 }
@@ -6817,8 +7059,13 @@ function resolveFinishedMageResonance(member, now) {
 }
 
 function queueClassHealAfterglow(member, healTarget, event) {
+  const dungeonBattle = battle.skullcrusherRunId ? battle : null;
   const farmingIdentity=typeof getPermanentPartyRuntime==='function'&&getPermanentPartyRuntime()?.coordinator?{mainId:getPermanentPartyRuntime().mainId,battle}:null;
-  setTimeout(() => {
+  const timer = setTimeout(() => {
+    if (dungeonBattle) {
+      dungeonBattle.skullcrusherPlayerTimers?.delete(timer);
+      if (battle !== dungeonBattle || !fighting || dungeonBattle.dungeonComplete) return;
+    }
     if(farmingIdentity&&(farmingIdentity.mainId!==getPermanentPartyRuntime()?.mainId||farmingIdentity.battle!==battle))return;
     const pending = member.pendingClassHeals || [];
     const index = pending.findIndex(entry => entry.id === event.id);
@@ -6831,6 +7078,7 @@ function queueClassHealAfterglow(member, healTarget, event) {
     else healTarget.currentHp = Math.min(healTarget.maxHp, healTarget.currentHp + event.amount);
     if (fighting) updateBattleUI();
   }, Math.max(0, event.dueAt - Date.now()));
+  if (dungeonBattle) (dungeonBattle.skullcrusherPlayerTimers ||= new Set()).add(timer);
 }
 
 function scheduleClassHealAfterglow(member, healTarget, amount, now = Date.now()) {
@@ -6843,6 +7091,7 @@ function scheduleClassHealAfterglow(member, healTarget, amount, now = Date.now()
 }
 
 function useAutoSkillForMember(member, now = Date.now()) {
+  if (battle.skullcrusherRunId && (!fighting || !member?.alive || member.currentHp <= 0)) return false;
   if (member?.job === 'mage') resolveFinishedMageResonance(member, now);
   if (!member?.alive || now < member.stunnedUntil || now < member.globalSkillReadyAt) return false;
   const { character, progress, stats } = member;
@@ -8005,7 +8254,7 @@ function createBattleTickRuntime() {
     enemyRespawns: processEnemyRespawns,
     enemyDots: processEnemyDots,
     environment: (now) => {
-      processBlackForestCorruption(now);
+      if (!battle.skullcrusherRunId) processBlackForestCorruption(now);
       processOnlineFacilityDrain(now);
       if (monsterRotationPreview) {
         rotateMonsterPreview(now);
@@ -8613,13 +8862,16 @@ function defeatPartyMember(member, now = Date.now()) {
   member.blackstoneAttackSpeedPenalty = 0;
   member.nextAttackAt = Number.POSITIVE_INFINITY;
   member.reviveAt = member.isMain ? null : now + PARTY_REVIVE_DELAY_MS;
+  if (battle.skullcrusherRunId) member.reviveAt = null;
   logPartyDebug('死亡事件', { memberId: member.id, memberName: member.name, at: now });
   logBattle(`${member.name} 已倒下。`, 'system');
-  if (member.isMain) endBattleAfterPlayerDefeat(now);
+  if (!battle.skullcrusherRunId) { if (member.isMain) endBattleAfterPlayerDefeat(now); }
+  if (battle.skullcrusherRunId) window.skullcrusherLifecyclePreview?.checkDefeat().catch(reportSkullcrusherLifecycleError);
   return true;
 }
 
 function reviveDefeatedTeammates(now = Date.now()) {
+  if (battle.skullcrusherRunId) return 0;
   const candidates = (battle.partyMembers || []).filter(member => !member.isMain && !member.alive && Number.isFinite(member.reviveAt) && now >= member.reviveAt);
   if (!candidates.length) return 0;
   const progress = getProgress();
@@ -8650,6 +8902,11 @@ function reviveDefeatedTeammates(now = Date.now()) {
 }
 
 function resetPartyAfterDefeat(now = Date.now()) {
+  if (battle.skullcrusherRunId) {
+    const defeated = PartyPolicy.isPartyDefeated(battle.partyMembers);
+    if (defeated) window.skullcrusherLifecyclePreview?.checkDefeat().catch(reportSkullcrusherLifecycleError);
+    return defeated;
+  }
   if (!PartyPolicy.isPartyDefeated(battle.partyMembers)) return false;
   logPartyDebug('戰鬥失敗事件', {
     members: battle.partyMembers.map((member) => `${member.id}:${member.name}:dead`).join(',')
@@ -8763,7 +9020,7 @@ function enemyAttackTick() {
     }
   });
 
-  if (getActiveMap(progress).id === 'blackstone-stronghold' && now - (battle.lastStrongholdRegenAt || 0) >= 1000) {
+  if ((battle.dungeonId || getActiveMap(progress).id) === 'blackstone-stronghold' && now - (battle.lastStrongholdRegenAt || 0) >= 1000) {
     battle.lastStrongholdRegenAt = now;
     battle.enemyHps.forEach((hp, index) => {
       if (hp <= 0) return;
@@ -8809,7 +9066,7 @@ function enemyAttackTick() {
     battle.enemyNextAttackAt[enemyIndex] = now + getMonsterAttackInterval(enemy, enemyCurrentHp);
     attackOccurred = true;
 
-    const plainsAction = getActiveMap(progress).id === 'plains-depths'
+    const plainsAction = (battle.dungeonId || getActiveMap(progress).id) === 'plains-depths'
       ? PlainsDepthsPolicy.resolveActiveSkill(enemy.id, Math.random(), enemyCurrentHp < enemy.maxHp)
       : 'attack';
     if (plainsAction === 'heal') {
@@ -8886,13 +9143,13 @@ function enemyAttackTick() {
         logBattle(`💨 ${target.name}觸發【閃現】，完全避開攻擊！`, 'system');
       }
     }
-    const redrockState = getActiveMap(progress).id === 'redrock-wastes-entrance'
+    const redrockState = (battle.dungeonId || getActiveMap(progress).id) === 'redrock-wastes-entrance'
       ? getRedrockEnemyState(enemyIndex, enemyCurrentHp, enemy.maxHp) : null;
     const redrockAction = redrockState
       ? (RedrockWastesPolicy.resolveScheduledAction(enemy.id, redrockState, now)
         || (enemy.id === 'wasteland-hyena' ? RedrockWastesPolicy.resolveHyenaBasicHit(redrockState, Math.random()) : null))
       : null;
-    const brokenrockState = getActiveMap(progress).id === 'brokenrock-canyon'
+    const brokenrockState = (battle.dungeonId || getActiveMap(progress).id) === 'brokenrock-canyon'
       ? getBrokenrockEnemyState(enemyIndex, enemyCurrentHp, enemy.maxHp) : null;
     const brokenrockActions = brokenrockState
       ? [...(brokenrockState.pendingActions || []), ...BrokenrockCanyonPolicy.resolveScheduledActions(enemy.id, brokenrockState, now, { otherAliveEnemies: Math.max(0, aliveMonsterIndexesByAge().length - 1) })]
@@ -8924,7 +9181,7 @@ function enemyAttackTick() {
     if (brokenrockAction?.target === 'lowest-hp-ratio-alive') {
       target = aliveMembers.sort((first, second) => first.currentHp / first.maxHp - second.currentHp / second.maxHp)[0];
     }
-    const bloodwarState = getActiveMap(progress).id === 'bloodwar-wastes'
+    const bloodwarState = (battle.dungeonId || getActiveMap(progress).id) === 'bloodwar-wastes'
       ? getBloodwarEnemyState(enemyIndex, enemyCurrentHp, enemy.maxHp, now) : null;
     const bloodwarActions = bloodwarState
       ? [...(bloodwarState.pendingActions || []), ...BloodwarWastesPolicy.resolveScheduledActions(enemy.id, bloodwarState, now, { otherAliveEnemies: Math.max(0, aliveMonsterIndexesByAge().length - 1) })]
@@ -8971,7 +9228,7 @@ function enemyAttackTick() {
     }
     const bloodwarAction = bloodwarActions.find((action) => action.damageMultiplier) || null;
     const critical = !dodged && Math.random() < ((enemy.criticalChance ?? (enemy.isBoss ? .15 : enemy.isElite ? .10 : .05)) + (redrockAction?.criticalBonus || 0));
-    const blackForestAction = getActiveMap(progress).id === 'black-forest-entrance'
+    const blackForestAction = (battle.dungeonId || getActiveMap(progress).id) === 'black-forest-entrance'
       ? BlackForestEntrancePolicy.resolveAction(enemy.id, Math.random(), target.currentHp / target.maxHp, enemyCurrentHp, enemy.maxHp)
       : 'attack';
     if (blackForestAction === 'leaf-storm') {
@@ -8985,10 +9242,10 @@ function enemyAttackTick() {
       }
       continue;
     }
-    let blackForestTrailAction = getActiveMap(progress).id === 'black-forest-trail'
+    let blackForestTrailAction = (battle.dungeonId || getActiveMap(progress).id) === 'black-forest-trail'
       ? BlackForestTrailPolicy.resolveAction(enemy.id, Math.random(), target.currentHp / target.maxHp, enemyCurrentHp, enemy.maxHp)
       : 'attack';
-    const spiderNestActive = getActiveMap(progress).id === 'spider-nest';
+    const spiderNestActive = (battle.dungeonId || getActiveMap(progress).id) === 'spider-nest';
     const poisonStacks = getSpiderNestPoisonStacks(target);
     const currentBossPhase = SpiderNestPolicy.getBossPhase(enemy.id, enemyCurrentHp, enemy.maxHp);
     if (spiderNestActive && enemy.id === 'giantSpider') {
@@ -9006,7 +9263,7 @@ function enemyAttackTick() {
           ? countAliveSpiderNestSummons('venomSpitterSpider') < SpiderNestPolicy.BEASTMASTER.summonLimit
           : countAliveSpiderNestSummons('spiderNestBlackstonePoisonSpider') < SpiderNestPolicy.BOSS.summonLimit)
       : 'attack';
-    const blackForestDepthsActive = getActiveMap(progress).id === 'black-forest-depths';
+    const blackForestDepthsActive = (battle.dungeonId || getActiveMap(progress).id) === 'black-forest-depths';
     if (blackForestDepthsActive && enemy.id === 'heartOfTheBlackForest') {
       if (!battle.enemyDepthsPhase) battle.enemyDepthsPhase = battle.enemyTypes.map(() => 1);
       const depthsPhase = BlackForestDepthsPolicy.getBossPhase(enemy.id, enemyCurrentHp, enemy.maxHp);
@@ -9021,13 +9278,13 @@ function enemyAttackTick() {
         summonBlackForestDepthsRoot(enemyIndex, now);
       }
     }
-    const strongholdAction = getActiveMap(progress).id === 'blackstone-stronghold'
+    const strongholdAction = (battle.dungeonId || getActiveMap(progress).id) === 'blackstone-stronghold'
       ? BlackstoneStrongholdPolicy.resolveAction(enemy.id, Math.random(), target.currentHp / target.maxHp, enemyCurrentHp, enemy.maxHp)
       : 'attack';
-    const forestAltarAction = getActiveMap(progress).id === 'forest-altar'
+    const forestAltarAction = (battle.dungeonId || getActiveMap(progress).id) === 'forest-altar'
       ? ForestAltarPolicy.resolveAction(enemy.id, Math.random())
       : 'attack';
-    const blackForestDepthsAction = getActiveMap(progress).id === 'black-forest-depths'
+    const blackForestDepthsAction = (battle.dungeonId || getActiveMap(progress).id) === 'black-forest-depths'
       ? BlackForestDepthsPolicy.resolveAction(enemy.id, Math.random(), getWoundedEnemyIndexes().length > 0, {
         canUseNatureEcho: now >= (getEnemySkillState(enemyIndex).natureEchoReadyAt || 0)
       })
@@ -9210,7 +9467,7 @@ function enemyAttackTick() {
     if (!dodged && WarriorResourcePolicy.isWarrior(target.character.job)) {
       target.resourceCurrent = WarriorResourcePolicy.gainFromHitTaken(target.resourceCurrent);
     }
-    if (!dodged && damage > 0 && getActiveMap(progress).id === 'wolf-den'
+    if (!dodged && damage > 0 && (battle.dungeonId || getActiveMap(progress).id) === 'wolf-den'
       && WolfDenPolicy.shouldInflictBleed(enemy.id, Math.random())) {
       inflictPartyMemberBleed(target, enemy, now);
       battle.enemyNextAttackAt[enemyIndex] = now + getMonsterAttackInterval(enemy);
@@ -9219,7 +9476,7 @@ function enemyAttackTick() {
       && GoblinCampPolicy.shouldStun(battle.enemyTypes[enemyIndex], Math.random())) {
       applyControlEffectToPlayer(target, { type: 'stun', baseDurationMs: 1500, source: '投石暈眩' }, now);
     }
-    if (!dodged && damage > 0 && getActiveMap(progress).id === 'boar-woods'
+    if (!dodged && damage > 0 && (battle.dungeonId || getActiveMap(progress).id) === 'boar-woods'
       && BoarWoodsPolicy.shouldCharge(enemy.id, Math.random())) {
       applyControlEffectToPlayer(target, { type: 'stun', baseDurationMs: BoarWoodsPolicy.BOSS_CHARGE_STUN_MS, source: '衝撞' }, now);
     }
@@ -9361,6 +9618,7 @@ function enemyAttackTick() {
 }
 
 function openBattle() {
+  if (window.skullcrusherLifecyclePreview?.scene) { showToast('請先退出副本測試場次。'); return; }
   if (!isPermanentGameplayReady()) { showToast('角色資料尚未準備完成，暫時無法開始戰鬥。'); return; }
   const character = getActiveCharacter();
   if (!character) { openCreation(); return; }
@@ -9573,6 +9831,7 @@ document.querySelector('#leave-battle').addEventListener('click', () => {
     showToast('調整版面中：返回箭頭只會移動，不會離開戰鬥。');
     return;
   }
+  if (battle.skullcrusherRunId) { window.skullcrusherLifecyclePreview.end().catch(reportSkullcrusherLifecycleError); return; }
   const leavingCharacter = getActiveCharacter();
   if (AssassinEnergyPolicy.isAssassin(leavingCharacter?.job)) {
     const energyNow = Date.now();
@@ -9598,6 +9857,7 @@ document.querySelector('#leave-battle').addEventListener('click', () => {
   menuScreen.classList.remove('hidden');
 });
 document.querySelector('#battle-toggle').addEventListener('click', () => {
+  if (battle.skullcrusherRunId) { showToast('請使用副本測試面板操作場次。'); return; }
   if (battle.dungeonComplete) return;
   const character = getActiveCharacter();
   const now = Date.now();
@@ -9723,6 +9983,17 @@ document.querySelector('#village-building-grid').addEventListener('click', (even
 document.querySelector('#village-building-close').addEventListener('click', closeVillageBuilding);
 document.querySelector('#village-building-modal').addEventListener('click', (event) => {
   if (event.target === event.currentTarget) closeVillageBuilding();
+  if (event.target.classList.contains('reforge-confirm-backdrop')) { reforgeConfirmationOpen = false; renderReforgeWorkshop(); return; }
+  const reforgeModeButton = event.target.closest('[data-reforge-mode]');
+  if (reforgeModeButton) { reforgeMode = reforgeModeButton.dataset.reforgeMode; reforgeResult = null; reforgeConfirmationOpen = false; renderReforgeWorkshop(); return; }
+  const reforgeItem = event.target.closest('[data-select-reforge-item]');
+  if (reforgeItem) { selectReforgeItem(reforgeItem.dataset.selectReforgeItem); return; }
+  const reforgeAffix = event.target.closest('[data-select-reforge-affix]');
+  if (reforgeAffix) { selectReforgeAffix(reforgeAffix.dataset.selectReforgeAffix); return; }
+  if (event.target.closest('[data-open-reforge-confirm]')) { reforgeConfirmationOpen = true; renderReforgeWorkshop(); return; }
+  if (event.target.closest('[data-cancel-reforge-confirm]')) { reforgeConfirmationOpen = false; renderReforgeWorkshop(); return; }
+  if (event.target.closest('[data-confirm-reforge]')) { executeReforge(); return; }
+  if (event.target.closest('[data-reforge-other-affix]')) { reforgeResult = null; reforgeSelectedSlotKey = null; renderReforgeWorkshop(); return; }
   if (event.target.classList.contains('workshop-detail-backdrop')) { workshopPreview = null; renderWorkshop(); return; }
   if (event.target.classList.contains('blacksmith-detail-backdrop')) { blacksmithPreviewItemId = null; renderBlacksmith(); return; }
   if (event.target.classList.contains('magic-detail-backdrop')) { magicPreviewRecipeId = null; renderMagicTower(); return; }
@@ -10095,3 +10366,181 @@ document.querySelector('.combat-log')?.addEventListener('click', (event) => {
   renderBattleLog();
 });
 document.querySelectorAll('.menu-card:not(#adventure-button)').forEach((card) => card.addEventListener('click', () => showToast(card.dataset.message)));
+
+// Batch 1 only: localhost lifecycle harness, with no enemies, loot or free passes.
+function appendSkullcrusherEnemies(enemies, now = Date.now()) {
+  for (const enemy of enemies) {
+    const index = battle.enemyTypes.length;
+    battle.skullcrusherEnemies.push(enemy);
+    battle.enemyTypes.push(enemy.id); battle.enemyLevels.push(enemy.level);
+    battle.enemyHps.push(enemy.maxHp); battle.enemyRespawns.push(null);
+    battle.enemySpawnedAt.push(now + index); battle.enemySkillStates.push(null);
+    battle.enemyDots.push([]); battle.enemyDamages.push([]); battle.enemyAffixes.push([]);
+    battle.enemySummonProfiles.push(null); battle.enemyBoarEnraged.push(false);
+    battle.enemyNextAttackAt.push(now + 1000 / enemy.attackSpeed);
+  }
+}
+
+function loadSkullcrusherEncounter(scene, now = Date.now()) {
+  if (!scene || battle.skullcrusherRunId !== scene.run.runId || battle.dungeonComplete) return;
+  // Invalidate old enemy events without replacing player objects or their cooldowns.
+  battle.sessionId = ++battleSessionSequence;
+  for (const timer of battle.damageTimers || []) clearTimeout(timer);
+  battle.damageTimers = [];
+  document.querySelectorAll('.battle-skill-effect, .skill-effect, .damage-number').forEach(node=>node.remove());
+  document.querySelector('.battle-field')?.classList.remove('charge-impact','impact');
+  for (const key of ['enemyTypes','enemyLevels','enemyHps','enemyRespawns','enemySpawnedAt','enemySkillStates','enemyDots','enemyDamages','enemyAffixes','enemySummonProfiles','enemyBoarEnraged','enemyNextAttackAt','skullcrusherEnemies']) battle[key] = [];
+  battle.targetIndexes = []; battle.rewardedEnemyIndexes = new Set();
+  battle.enemyAffixRegenAt = []; battle.waveTransitioning = false;
+  battle.dungeonWave = scene.step + 1;
+  battle.skullcrusherCombat ||= {thresholds:{},ended:null};
+  appendSkullcrusherEnemies(SkullcrusherDungeonCombat.wave(scene.step), now);
+  logBattle(`◆ 副本・碎顱禁地：第 ${scene.phase} 階段，第 ${scene.step + 1} 場戰鬥。`, 'system');
+  updateBattleUI();
+}
+
+function finishSkullcrusherCombat(status) {
+  if (!battle.skullcrusherRunId || battle.dungeonComplete) return;
+  window.skullcrusherLifecyclePreview?.claimOutcome?.(status, status === 'succeeded' ? 'boss-defeated' : 'party-defeated');
+  battle.dungeonComplete = true; fighting = false;
+  battle.enemyNextAttackAt = battle.enemyNextAttackAt.map(()=>null);
+  clearInterval(battleTimer); clearInterval(skillTimer); clearInterval(enemyAttackTimer);
+  const runId = battle.skullcrusherRunId;
+  // Finish the current synchronous hit before clearing its arrays. The latch above
+  // prevents a counter/death in that hit from producing another terminal result.
+  Promise.resolve().then(()=>{
+    if (battle.skullcrusherRunId === runId) return window.skullcrusherLifecyclePreview?.end(status, status === 'succeeded' ? 'boss-defeated' : 'party-defeated');
+  }).catch(reportSkullcrusherLifecycleError);
+}
+
+function processSkullcrusherBoss() {
+  if (!battle.skullcrusherRunId || battle.dungeonComplete || !battle.skullcrusherCombat) return;
+  const enemies = battle.skullcrusherEnemies;
+  const result = SkullcrusherDungeonCombat.outcome(battle.skullcrusherCombat,enemies,battle.enemyHps,battle.partyMembers);
+  if (result) { finishSkullcrusherCombat(result); return; }
+  const bossIndex = enemies.findIndex(enemy=>enemy.isBoss);
+  if (bossIndex < 0) return;
+  const livingGuards = enemies.filter((enemy,index)=>enemy.isDungeonGuard && battle.enemyHps[index]>0);
+  const summoned = SkullcrusherDungeonCombat.summons(battle.skullcrusherCombat,battle.enemyHps[bossIndex],enemies[bossIndex].maxHp,livingGuards.length,livingGuards.map(enemy=>enemy.id));
+  appendSkullcrusherEnemies(summoned);
+  if (summoned.length) logBattle(`◆ 碎顱大酋長召喚 ${summoned.length} 名護衛！`, 'system');
+}
+
+function processSkullcrusherEncounter() {
+  if (!battle.skullcrusherCombat || battle.dungeonComplete || !fighting) return;
+  processSkullcrusherBoss();
+  if (battle.dungeonComplete) return;
+  battle.enemyHps.forEach((hp,index)=>{if(hp<=0){battle.enemyRespawns[index]=-1;battle.enemyNextAttackAt[index]=null;}});
+  if (!battle.enemyHps.length || !battle.enemyHps.every(hp=>hp<=0) || battle.waveTransitioning) return;
+  const controller = window.skullcrusherLifecyclePreview;
+  if (!controller?.scene || controller.scene.step >= 5) return;
+  battle.waveTransitioning = true;
+  const sessionId = battle.sessionId, runId = battle.skullcrusherRunId;
+  const timer = setTimeout(()=>{
+    if (!fighting || battle.dungeonComplete || battle.sessionId!==sessionId || controller.scene?.run.runId!==runId) return;
+    const scene = controller.advance(); loadSkullcrusherEncounter(scene);
+  }, 300);
+  battle.damageTimers.push(timer);
+}
+
+function reportSkullcrusherLifecycleError(error) {
+  const panel = document.querySelector('#skullcrusher-lifecycle-status');
+  if (panel) panel.textContent = error.message;
+}
+function installSkullcrusherLifecyclePreview() {
+  if (!/^https?:\/\/(localhost|127\.0\.0\.1|\[::1\])(?::\d+)?\//.test(window.location.href || '')
+      || !new URLSearchParams(window.location.search || '').has('skullcrusher-lifecycle')) return;
+  const runtime = getPermanentPartyRuntime();
+  if (!runtime?.active || !window.SkullcrusherDungeonLifecycle) return;
+  let timer = null, generation = 0;
+  const panel = document.createElement('section');
+  panel.id = 'skullcrusher-lifecycle-preview';
+  panel.style.cssText = 'position:fixed;right:12px;bottom:12px;z-index:10000;max-width:min(520px,94vw);max-height:65vh;overflow:auto;padding:12px;background:#171c28;color:#eee;border:1px solid #86734b;border-radius:8px;font-size:14px';
+  panel.innerHTML = '<b>副本・碎顱禁地｜第二批戰鬥測試（無獎勵）</b><button data-dungeon-test="enter">使用憑證入場</button><button data-dungeon-test="exit">退出</button><button data-dungeon-test="defeat-0">擊倒角色1</button><button data-dungeon-test="defeat-1">擊倒角色2</button><button data-dungeon-test="defeat-2">擊倒角色3</button><button data-dungeon-test="potion">存活角色使用治療藥水</button><pre id="skullcrusher-lifecycle-status"></pre>';
+  document.body.appendChild(panel);
+  const render = () => {
+    const scene = controller.scene;
+    panel.querySelector('pre').textContent = scene ? JSON.stringify({runId:scene.run.runId,phase:scene.phase,testStep:scene.step,members:scene.members.map(m=>({id:m.id,hp:m.currentHp,resource:m.resourceCurrent,alive:m.alive}))},null,2) : '尚未入場／場次已結束；返回原地圖並停止戰鬥。';
+  };
+  const controller = SkullcrusherDungeonLifecycle.create({runtime,
+    prepareMembers: () => {
+      if (fighting || runtime.coordinator?.busy) throw Error('請先停止其他戰鬥或副本。');
+      const snapshot = runtime.getBattleSnapshot();
+      return snapshot.members.map(slot => {
+        const progress = {...slot.progress,currentHpRatio:1}; delete progress.partyMemberState;
+        return createBattlePartyMember({character:slot.character,progress},slot.slotIndex,snapshot.mainId);
+      });
+    },
+    activate: scene => {
+      clearInterval(battleTimer); clearInterval(skillTimer); clearInterval(enemyAttackTimer);
+      const key = ++generation;
+      battle = {sessionId:++battleSessionSequence,skullcrusherRunId:scene.run.runId,isDungeon:true,dungeonId:SkullcrusherDungeonLifecycle.ID,
+        partyMembers:scene.members,enemyTypes:[],enemyHps:[],enemyRespawns:[],enemySpawnedAt:[],enemySkillStates:[],enemyDots:[],enemyDamages:[],
+        enemyNextAttackAt:[],enemyAffixes:[],enemySummonProfiles:[],damageTimers:[],rewardedEnemyIndexes:new Set(),roundLoot:{},targetIndexes:[],dungeonComplete:false,
+        skullcrusherEnemies:[],enemyLevels:[],enemyBoarEnraged:[],playerShield:0,monsterMoveSpeed:200,skillCooldowns:{},skullcrusherCombat:{thresholds:{},ended:null}};
+      fighting = true;
+      battleScreen.classList.remove('hidden');
+      syncLegacyBattleStateFromMain();
+      loadSkullcrusherEncounter(scene);
+      battleTimer=setInterval(battleTick,100); skillTimer=setInterval(autoSkillTick,100); enemyAttackTimer=setInterval(enemyAttackTick,100);
+      timer = setInterval(() => {
+        if(key!==generation || !controller.scene || !runtime.active)return;
+        render();
+      },250);
+      render();
+    },
+    stop: () => {
+      ++generation; clearInterval(timer);timer=null;
+      if(!battle.skullcrusherRunId)return;
+      fighting=false;clearInterval(battleTimer);clearInterval(skillTimer);clearInterval(enemyAttackTimer);
+      for(const id of battle.damageTimers||[])clearTimeout(id);
+      for(const id of battle.skullcrusherPlayerTimers||[])clearTimeout(id);
+      document.querySelectorAll('.battle-skill-effect, .skill-effect, .damage-number').forEach(node=>node.remove());
+      document.querySelector('.battle-field')?.classList.remove('charge-impact','impact');
+      battleScreen.classList.remove('skullcrusher-combat');
+      battle.sessionId=++battleSessionSequence;
+      battle={sessionId:battle.sessionId,partyMembers:[],enemyTypes:[],enemyHps:[],enemyRespawns:[],enemyDots:[],enemySkillStates:[],enemySummonProfiles:[],targetIndexes:[],dungeonComplete:true};
+    }
+  });
+  window.skullcrusherLifecyclePreview=controller;
+  runtime.onDeactivate(()=>controller.dispose());
+  panel.addEventListener('click',async event=>{
+    const action=event.target.closest('[data-dungeon-test]')?.dataset.dungeonTest;
+    if(!action)return;
+    try{if(action==='enter')await controller.enter();else if(action==='advance')controller.advance();else if(action.startsWith('defeat-')){const member=controller.scene?.members[Number(action.slice(-1))];if(member){member.currentHp=0;defeatPartyMember(member);await controller.checkDefeat();}}else if(action==='potion'){const member=controller.scene?.members.find(m=>m.alive&&m.currentHp<m.maxHp);if(member){await runtime.flush();useSharedHealingPotionForMember(member);await runtime.flush();}}else await controller.end();render();}catch(error){reportSkullcrusherLifecycleError(error);}
+  });
+  render();
+}
+installSkullcrusherLifecyclePreview();
+
+function isSkullcrusherAccessoryPreview() {
+  return /^https?:\/\/(localhost|127\.0\.0\.1|\[::1\])(?::\d+)?\//.test(window.location.href || '')
+    && new URLSearchParams(window.location.search || '').has('skullcrusher-accessories');
+}
+async function generateSkullcrusherAccessoryPreviewItems() {
+  // Gate the execution path too: a hidden button alone is insufficient.
+  if (!isSkullcrusherAccessoryPreview() || !getPermanentPartyRuntime()?.active) throw Error('Development accessory preview required');
+  return commitEconomyProgress('開發飾品測試', progress=>{
+    const items=Object.values(SkullcrusherAccessoryPolicy.TEMPLATES).map(template=>SkullcrusherAccessoryPolicy.createEquipment(template.id));
+    progress.inventory.push(...items);
+    return {ok:true,items};
+  });
+}
+function installSkullcrusherAccessoryPreview() {
+  if (!isSkullcrusherAccessoryPreview() || !getPermanentPartyRuntime()?.active) return;
+  const panel=document.createElement('section');
+  panel.id='skullcrusher-accessory-preview';
+  panel.style.cssText='position:fixed;right:12px;bottom:12px;z-index:10000;max-width:94vw;padding:10px;background:#171c28;color:#eee;border:1px solid #86734b;border-radius:8px';
+  panel.innerHTML='<b>碎顱禁地・藍色飾品開發測試</b><button type="button">生成四件測試飾品</button><output></output>';
+  panel.querySelector('button').addEventListener('click',async()=>{
+    const button=panel.querySelector('button');button.disabled=true;
+    try {
+      const result=await generateSkullcrusherAccessoryPreviewItems();
+      await getPermanentPartyRuntime().flush();
+      panel.querySelector('output').textContent=result.ok?'已放入共用背包，請從背包選擇戒指1／戒指2穿戴。':'生成未完成，請重試。';
+    } catch(error) { panel.querySelector('output').textContent=error.message; }
+    finally {button.disabled=false;}
+  });
+  document.body.appendChild(panel);
+}
+installSkullcrusherAccessoryPreview();

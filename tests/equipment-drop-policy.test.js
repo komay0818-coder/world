@@ -96,6 +96,9 @@ assert.equal(green.fixedAffixes.length, 1, 'green drops receive one fixed affix'
 assert.equal(green.randomAffixes.length, 2, 'green drops receive two random affix types');
 assert.equal(green.affixes.length, 3);
 assert.equal(green.affixChapter, 1, 'drops default to chapter one affix unlocks');
+assert.equal(green.affixSchemaVersion, 5, 'monster drops use the shared version-five generator');
+assert.deepEqual(green.reforgeState, { version: 1, lockedTypeSlotKey: null });
+assert.ok(green.randomAffixes.every((entry, index) => entry.slotKey === `random-${index}` && entry.valueQuality === 1));
 assert.ok(['weapon', 'armor', 'accessory'].includes(require('../equipment-affix-policy.js').getEquipmentGroup(green)));
 
 const firstCopyProgress = { inventory: [] };

@@ -610,7 +610,7 @@ const PARTY_REVIVE_DELAY_MS=10000,PARTY_REVIVE_HEALTH_RATIO=.30,PARTY_AUTO_POTIO
     premise: '黑石勢力在森林深處建立蜘蛛培育巢穴，利用毒液、蛛絲與圈養蜘蛛擴張軍備。',
     discoveries: Object.freeze(['blackstone-spider-breeding', 'venom-weapon-production', 'spider-silk-harvesting']),
     previousMapId: 'black-forest-trail',
-    nextMapId: 'blackstone-stronghold',
+    nextMapId: 'forest-altar',
     completionObjectiveId: 'defeat-giant-spider'
   });
 
@@ -1568,9 +1568,10 @@ const PARTY_REVIVE_DELAY_MS=10000,PARTY_REVIVE_HEALTH_RATIO=.30,PARTY_AUTO_POTIO
     'temple-guardian': [4750,164,145,.76,2,20,29],
     'redrock-ancient-god': [26000,198,165,.78,2,18,31]
   });
-  function isSupported(mapId) { return Boolean(POLICIES[mapId]); }
+  const DUNGEON_ID = 'skullcrusher-forbidden-dungeon';
+  function isSupported(mapId) { return mapId === DUNGEON_ID || Boolean(POLICIES[mapId]); }
   function getMonster(mapId, definition) {
-    if (!isSupported(mapId) || !definition || !POLICIES[mapId].getEnemySkills(definition.id).length) return null;
+    if (!POLICIES[mapId] || !definition || !POLICIES[mapId].getEnemySkills(definition.id).length) return null;
     const values = BASES[definition.id];
     if (!values) return null;
     const [maxHp, attack, defense, attackSpeed, evasion, parry, damageReduction] = values;
@@ -1594,6 +1595,7 @@ const PARTY_REVIVE_DELAY_MS=10000,PARTY_REVIVE_HEALTH_RATIO=.30,PARTY_AUTO_POTIO
     Altar.applySourceShield(unit.state, source, unit.maxHp * skill.shieldMaxHpRatio, now, skill.durationMs);
   }
   function thresholds(mapId, unit, now, emit = () => {}) {
+    if (mapId === DUNGEON_ID) mapId = unit.skillMapId;
     if (unit.isFacility || unit.currentHp <= 0) return;
     const policy = POLICIES[mapId];
     for (const skill of policy.updateThresholds(unit.id, unit.state, unit.currentHp, unit.maxHp, now)) {
@@ -1605,6 +1607,7 @@ const PARTY_REVIVE_DELAY_MS=10000,PARTY_REVIVE_HEALTH_RATIO=.30,PARTY_AUTO_POTIO
     }
   }
   function death(mapId, unit, units, now, emit = () => {}) {
+    if (mapId === DUNGEON_ID) { unit.state.deathHandled = true; return; }
     if (unit.isFacility || unit.state.deathHandled) return;
     unit.state.deathHandled = true;
     const others = living(units).filter(other => other.key !== unit.key);
@@ -1619,13 +1622,15 @@ const PARTY_REVIVE_DELAY_MS=10000,PARTY_REVIVE_HEALTH_RATIO=.30,PARTY_AUTO_POTIO
     }
   }
   function tick(mapId, units, players, now, emit = () => {}, random = Math.random) {
-    const policy = POLICIES[mapId];
-    if (!policy) return;
+    if (!isSupported(mapId)) return;
+    const dungeon = mapId === DUNGEON_ID;
     units.forEach(unit => {
+      const sourceMapId = dungeon ? unit.skillMapId : mapId;
+      const policy = POLICIES[sourceMapId];
       if (unit.isFacility) return;
       if (unit.currentHp <= 0) { death(mapId, unit, units, now, emit); return; }
       Altar.expireShields(unit.state, now);
-      thresholds(mapId, unit, now, emit);
+      thresholds(sourceMapId, unit, now, emit);
       const totem = unit.state.warbloodBuff;
       if (totem && totem.ticks > 0 && now >= totem.nextTickAt) {
         const ticks = Math.min(totem.ticks, Math.floor((now - totem.nextTickAt) / totem.tickMs) + 1);
@@ -1634,7 +1639,7 @@ const PARTY_REVIVE_DELAY_MS=10000,PARTY_REVIVE_HEALTH_RATIO=.30,PARTY_AUTO_POTIO
       }
       if (unit.controlled) return;
       let actions = policy.resolveScheduledActions(unit.id, unit.state, now, { otherAliveEnemies: living(units).length - 1 });
-      if (mapId === Camp.MAP_ID && unit.id === 'skullcrusher-shaman') {
+      if (sourceMapId === Camp.MAP_ID && unit.id === 'skullcrusher-shaman') {
         actions = Bloodwar.resolveScheduledActions(unit.id, unit.state.inherited, now);
       }
       for (const skill of actions) {
@@ -1670,6 +1675,7 @@ const PARTY_REVIVE_DELAY_MS=10000,PARTY_REVIVE_HEALTH_RATIO=.30,PARTY_AUTO_POTIO
     });
   }
   function modifiers(mapId, unit, units, now) {
+    if (mapId === DUNGEON_ID) mapId = unit.skillMapId;
     const policy = POLICIES[mapId];
     if (!policy || unit.isFacility) return { attack: 1, defense: 1, attackSpeed: 1, damage: 1, damageReduction: 0, dotDamage: 1 };
     const values = { attack: 1, defense: 1, attackSpeed: 1, damage: 1, damageReduction: 0, dotDamage: 1,
@@ -1684,6 +1690,7 @@ const PARTY_REVIVE_DELAY_MS=10000,PARTY_REVIVE_HEALTH_RATIO=.30,PARTY_AUTO_POTIO
     return values;
   }
   function absorb(mapId, unit, damage, now) {
+    if (mapId === DUNGEON_ID) mapId = unit.skillMapId;
     let remaining = Math.max(0, damage);
     for (const source of Object.keys(unit.state.shields || {})) {
       const result = Altar.absorbSourceShield(unit.state, source, remaining, now);
@@ -1698,6 +1705,7 @@ const PARTY_REVIVE_DELAY_MS=10000,PARTY_REVIVE_HEALTH_RATIO=.30,PARTY_AUTO_POTIO
     return remaining;
   }
   function selectTarget(mapId, unit, skill, players, primary, random = Math.random) {
+    if (mapId === DUNGEON_ID) mapId = unit.skillMapId;
     const alive = players.filter(player => player.alive && player.currentHp > 0);
     if (!skill) return primary;
     if (skill.id === 'warwolf-assault') return Camp.chooseWarwolfTarget(alive, primary, random(), player => player.job === 'warrior');
@@ -1718,6 +1726,7 @@ const PARTY_REVIVE_DELAY_MS=10000,PARTY_REVIVE_HEALTH_RATIO=.30,PARTY_AUTO_POTIO
     return weakened * playerMultiplier(player, 'attack-down', now);
   }
   function hit(mapId, unit, skill, target, units, now) {
+    if (mapId === DUNGEON_ID) mapId = unit.skillMapId;
     if (!skill) return;
     for (const debuff of [...(skill.debuffs || []), ...(skill.debuff ? [skill.debuff] : [])]) applyDebuff(target, debuff, now);
     if (skill.dot) {
@@ -1843,13 +1852,16 @@ function defeatPartyMember(member, now = Date.now()) {
   member.blackstoneAttackSpeedPenalty = 0;
   member.nextAttackAt = Number.POSITIVE_INFINITY;
   member.reviveAt = member.isMain ? null : now + PARTY_REVIVE_DELAY_MS;
+  if (battle.skullcrusherRunId) member.reviveAt = null;
   logPartyDebug('死亡事件', { memberId: member.id, memberName: member.name, at: now });
   logBattle(`${member.name} 已倒下。`, 'system');
-  if (member.isMain) endBattleAfterPlayerDefeat(now);
+  if (!battle.skullcrusherRunId) { if (member.isMain) endBattleAfterPlayerDefeat(now); }
+  if (battle.skullcrusherRunId) window.skullcrusherLifecyclePreview?.checkDefeat().catch(reportSkullcrusherLifecycleError);
   return true;
 }
 
 function reviveDefeatedTeammates(now = Date.now()) {
+  if (battle.skullcrusherRunId) return 0;
   const candidates = (battle.partyMembers || []).filter(member => !member.isMain && !member.alive && Number.isFinite(member.reviveAt) && now >= member.reviveAt);
   if (!candidates.length) return 0;
   const progress = getProgress();
@@ -2153,7 +2165,7 @@ function getLateChapterUnits(now = Date.now()) {
   return battle.enemyTypes.map((type, index) => {
     const definition = getEnemyDefinition(index);
     const skillState = getEnemySkillState(index);
-    skillState.lateChapter = skillState.lateChapter || ChapterThreeLateCombatPolicy.createState(mapId, battle.enemySpawnedAt[index] || now);
+    skillState.lateChapter = skillState.lateChapter || ChapterThreeLateCombatPolicy.createState(definition.skillMapId || mapId, battle.enemySpawnedAt[index] || now);
     return { ...definition, key: `${battle.sessionId}:${index}:${battle.enemySpawnedAt[index]}`, state: skillState.lateChapter,
       controlled: now < skillState.stunnedUntil || now < skillState.frozenUntil,
       get currentHp() { return battle.enemyHps[index]; },
@@ -2170,6 +2182,7 @@ function getLateChapterMonsterMultiplier(enemy, stat, now = Date.now()) {
 function updateLateChapterThresholds(index, now = Date.now()) {
   const units = getLateChapterUnits(now);
   if (units[index]) ChapterThreeLateCombatPolicy.thresholds(units[index].mapId, units[index], now, emitLateChapterSkill);
+  if (battle.skullcrusherRunId) processSkullcrusherBoss();
 }
 
 function processLateChapterCombat(now = Date.now()) {
@@ -2316,7 +2329,7 @@ function enemyAttackTick() {
     }
   });
 
-  if (getActiveMap(progress).id === 'blackstone-stronghold' && now - (battle.lastStrongholdRegenAt || 0) >= 1000) {
+  if ((battle.dungeonId || getActiveMap(progress).id) === 'blackstone-stronghold' && now - (battle.lastStrongholdRegenAt || 0) >= 1000) {
     battle.lastStrongholdRegenAt = now;
     battle.enemyHps.forEach((hp, index) => {
       if (hp <= 0) return;
@@ -2362,7 +2375,7 @@ function enemyAttackTick() {
     battle.enemyNextAttackAt[enemyIndex] = now + getMonsterAttackInterval(enemy, enemyCurrentHp);
     attackOccurred = true;
 
-    const plainsAction = getActiveMap(progress).id === 'plains-depths'
+    const plainsAction = (battle.dungeonId || getActiveMap(progress).id) === 'plains-depths'
       ? PlainsDepthsPolicy.resolveActiveSkill(enemy.id, Math.random(), enemyCurrentHp < enemy.maxHp)
       : 'attack';
     if (plainsAction === 'heal') {
@@ -2439,13 +2452,13 @@ function enemyAttackTick() {
         logBattle(`💨 ${target.name}觸發【閃現】，完全避開攻擊！`, 'system');
       }
     }
-    const redrockState = getActiveMap(progress).id === 'redrock-wastes-entrance'
+    const redrockState = (battle.dungeonId || getActiveMap(progress).id) === 'redrock-wastes-entrance'
       ? getRedrockEnemyState(enemyIndex, enemyCurrentHp, enemy.maxHp) : null;
     const redrockAction = redrockState
       ? (RedrockWastesPolicy.resolveScheduledAction(enemy.id, redrockState, now)
         || (enemy.id === 'wasteland-hyena' ? RedrockWastesPolicy.resolveHyenaBasicHit(redrockState, Math.random()) : null))
       : null;
-    const brokenrockState = getActiveMap(progress).id === 'brokenrock-canyon'
+    const brokenrockState = (battle.dungeonId || getActiveMap(progress).id) === 'brokenrock-canyon'
       ? getBrokenrockEnemyState(enemyIndex, enemyCurrentHp, enemy.maxHp) : null;
     const brokenrockActions = brokenrockState
       ? [...(brokenrockState.pendingActions || []), ...BrokenrockCanyonPolicy.resolveScheduledActions(enemy.id, brokenrockState, now, { otherAliveEnemies: Math.max(0, aliveMonsterIndexesByAge().length - 1) })]
@@ -2477,7 +2490,7 @@ function enemyAttackTick() {
     if (brokenrockAction?.target === 'lowest-hp-ratio-alive') {
       target = aliveMembers.sort((first, second) => first.currentHp / first.maxHp - second.currentHp / second.maxHp)[0];
     }
-    const bloodwarState = getActiveMap(progress).id === 'bloodwar-wastes'
+    const bloodwarState = (battle.dungeonId || getActiveMap(progress).id) === 'bloodwar-wastes'
       ? getBloodwarEnemyState(enemyIndex, enemyCurrentHp, enemy.maxHp, now) : null;
     const bloodwarActions = bloodwarState
       ? [...(bloodwarState.pendingActions || []), ...BloodwarWastesPolicy.resolveScheduledActions(enemy.id, bloodwarState, now, { otherAliveEnemies: Math.max(0, aliveMonsterIndexesByAge().length - 1) })]
@@ -2524,7 +2537,7 @@ function enemyAttackTick() {
     }
     const bloodwarAction = bloodwarActions.find((action) => action.damageMultiplier) || null;
     const critical = !dodged && Math.random() < ((enemy.criticalChance ?? (enemy.isBoss ? .15 : enemy.isElite ? .10 : .05)) + (redrockAction?.criticalBonus || 0));
-    const blackForestAction = getActiveMap(progress).id === 'black-forest-entrance'
+    const blackForestAction = (battle.dungeonId || getActiveMap(progress).id) === 'black-forest-entrance'
       ? BlackForestEntrancePolicy.resolveAction(enemy.id, Math.random(), target.currentHp / target.maxHp, enemyCurrentHp, enemy.maxHp)
       : 'attack';
     if (blackForestAction === 'leaf-storm') {
@@ -2538,10 +2551,10 @@ function enemyAttackTick() {
       }
       continue;
     }
-    let blackForestTrailAction = getActiveMap(progress).id === 'black-forest-trail'
+    let blackForestTrailAction = (battle.dungeonId || getActiveMap(progress).id) === 'black-forest-trail'
       ? BlackForestTrailPolicy.resolveAction(enemy.id, Math.random(), target.currentHp / target.maxHp, enemyCurrentHp, enemy.maxHp)
       : 'attack';
-    const spiderNestActive = getActiveMap(progress).id === 'spider-nest';
+    const spiderNestActive = (battle.dungeonId || getActiveMap(progress).id) === 'spider-nest';
     const poisonStacks = getSpiderNestPoisonStacks(target);
     const currentBossPhase = SpiderNestPolicy.getBossPhase(enemy.id, enemyCurrentHp, enemy.maxHp);
     if (spiderNestActive && enemy.id === 'giantSpider') {
@@ -2559,7 +2572,7 @@ function enemyAttackTick() {
           ? countAliveSpiderNestSummons('venomSpitterSpider') < SpiderNestPolicy.BEASTMASTER.summonLimit
           : countAliveSpiderNestSummons('spiderNestBlackstonePoisonSpider') < SpiderNestPolicy.BOSS.summonLimit)
       : 'attack';
-    const blackForestDepthsActive = getActiveMap(progress).id === 'black-forest-depths';
+    const blackForestDepthsActive = (battle.dungeonId || getActiveMap(progress).id) === 'black-forest-depths';
     if (blackForestDepthsActive && enemy.id === 'heartOfTheBlackForest') {
       if (!battle.enemyDepthsPhase) battle.enemyDepthsPhase = battle.enemyTypes.map(() => 1);
       const depthsPhase = BlackForestDepthsPolicy.getBossPhase(enemy.id, enemyCurrentHp, enemy.maxHp);
@@ -2574,13 +2587,13 @@ function enemyAttackTick() {
         summonBlackForestDepthsRoot(enemyIndex, now);
       }
     }
-    const strongholdAction = getActiveMap(progress).id === 'blackstone-stronghold'
+    const strongholdAction = (battle.dungeonId || getActiveMap(progress).id) === 'blackstone-stronghold'
       ? BlackstoneStrongholdPolicy.resolveAction(enemy.id, Math.random(), target.currentHp / target.maxHp, enemyCurrentHp, enemy.maxHp)
       : 'attack';
-    const forestAltarAction = getActiveMap(progress).id === 'forest-altar'
+    const forestAltarAction = (battle.dungeonId || getActiveMap(progress).id) === 'forest-altar'
       ? ForestAltarPolicy.resolveAction(enemy.id, Math.random())
       : 'attack';
-    const blackForestDepthsAction = getActiveMap(progress).id === 'black-forest-depths'
+    const blackForestDepthsAction = (battle.dungeonId || getActiveMap(progress).id) === 'black-forest-depths'
       ? BlackForestDepthsPolicy.resolveAction(enemy.id, Math.random(), getWoundedEnemyIndexes().length > 0, {
         canUseNatureEcho: now >= (getEnemySkillState(enemyIndex).natureEchoReadyAt || 0)
       })
@@ -2763,7 +2776,7 @@ function enemyAttackTick() {
     if (!dodged && WarriorResourcePolicy.isWarrior(target.character.job)) {
       target.resourceCurrent = WarriorResourcePolicy.gainFromHitTaken(target.resourceCurrent);
     }
-    if (!dodged && damage > 0 && getActiveMap(progress).id === 'wolf-den'
+    if (!dodged && damage > 0 && (battle.dungeonId || getActiveMap(progress).id) === 'wolf-den'
       && WolfDenPolicy.shouldInflictBleed(enemy.id, Math.random())) {
       inflictPartyMemberBleed(target, enemy, now);
       battle.enemyNextAttackAt[enemyIndex] = now + getMonsterAttackInterval(enemy);
@@ -2772,7 +2785,7 @@ function enemyAttackTick() {
       && GoblinCampPolicy.shouldStun(battle.enemyTypes[enemyIndex], Math.random())) {
       applyControlEffectToPlayer(target, { type: 'stun', baseDurationMs: 1500, source: '投石暈眩' }, now);
     }
-    if (!dodged && damage > 0 && getActiveMap(progress).id === 'boar-woods'
+    if (!dodged && damage > 0 && (battle.dungeonId || getActiveMap(progress).id) === 'boar-woods'
       && BoarWoodsPolicy.shouldCharge(enemy.id, Math.random())) {
       applyControlEffectToPlayer(target, { type: 'stun', baseDurationMs: BoarWoodsPolicy.BOSS_CHARGE_STUN_MS, source: '衝撞' }, now);
     }

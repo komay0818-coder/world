@@ -4,7 +4,8 @@ const policy = require('../equipment-affix-policy.js');
 const weapon = { id: 'test-sword', kind: 'equipment', slot: 'weapon', name: '測試劍' };
 const armor = { id: 'test-armor', kind: 'equipment', slot: 'armor', name: '測試甲' };
 const accessory = { id: 'test-ring', kind: 'equipment', slot: 'ring1', name: '測試戒指' };
-assert.equal(policy.SCHEMA_VERSION, 4);
+assert.equal(policy.SCHEMA_VERSION, 5);
+assert.equal(policy.GENERATED_SCHEMA_VERSION, 5, 'formal equipment generation uses the reforge-safe schema');
 assert.equal(policy.getEquipmentGroup(weapon), 'weapon');
 assert.equal(policy.getEquipmentGroup(armor), 'armor');
 assert.equal(policy.getEquipmentGroup(accessory), 'accessory');
@@ -16,7 +17,10 @@ assert.ok(policy.MUTUAL_EXCLUSIONS.some((pair) => pair.includes('attack_flat') &
 
 const common = policy.createEquipmentInstance(armor, { quality: 'common', uniqueId: 'common' });
 assert.deepEqual(common.affixes, []);
+assert.deepEqual(common.reforgeState, { version: 1, lockedTypeSlotKey: null });
 const green = policy.createEquipmentInstance(armor, { quality: 'uncommon', uniqueId: 'green', random: () => .25 });
+assert.equal(green.affixSchemaVersion, 5);
+assert.ok(green.randomAffixes.every((entry, index) => entry.slotKey === `random-${index}` && entry.valueQuality === 1));
 assert.equal(green.fixedAffixes.length, 1);
 assert.equal(green.randomAffixes.length, 2);
 assert.equal(green.affixes.length, 3);
@@ -38,13 +42,73 @@ assert.ok(legendary.fixedAffixes.length >= 2 && legendary.fixedAffixes.length <=
 assert.ok(legendary.randomAffixes.length >= 1 && legendary.randomAffixes.length <= 2);
 
 purple.affixes.forEach((entry) => assert.equal(entry.value, policy.EQUIPMENT_AFFIXES[entry.id].value, 'rolled values always equal the definition'));
-const tampered = JSON.parse(JSON.stringify(green));
+const legacyGreen = JSON.parse(JSON.stringify(green));
+legacyGreen.affixSchemaVersion = 4;
+delete legacyGreen.reforgeState;
+legacyGreen.randomAffixes = legacyGreen.randomAffixes.map(({ slotKey, affixGrade, valueQuality, ...entry }) => entry);
+legacyGreen.affixes = [...legacyGreen.fixedAffixes, ...legacyGreen.randomAffixes];
+const tampered = JSON.parse(JSON.stringify(legacyGreen));
 tampered.affixes.forEach((entry) => { entry.value = 999; });
 tampered.fixedAffixes.forEach((entry) => { entry.value = 999; });
 tampered.randomAffixes.forEach((entry) => { entry.value = 999; });
 const normalized = policy.normalizeEquipment(tampered);
 normalized.affixes.forEach((entry) => assert.equal(entry.value, policy.EQUIPMENT_AFFIXES[entry.id].value, 'loading repairs floating/tampered values'));
-assert.deepEqual(policy.normalizeEquipment(JSON.parse(JSON.stringify(green))), green, 'V3 save/load is stable');
+assert.deepEqual(policy.normalizeEquipment(JSON.parse(JSON.stringify(legacyGreen))), legacyGreen, 'legacy versioned save/load is stable');
+assert.equal('reforgeState' in policy.normalizeEquipment(legacyGreen), false, 'legacy equipment is not converted or assigned reforge metadata during ordinary loading');
+assert.equal('valueQuality' in policy.normalizeEquipment(legacyGreen).randomAffixes[0], false, 'legacy equipment is not assigned a random value quality');
+
+const converted = policy.convertEquipmentForReforge(legacyGreen);
+assert.equal(converted.affixSchemaVersion, 5);
+assert.deepEqual(converted.randomAffixes.map((entry) => entry.slotKey), ['random-0', 'random-1']);
+assert.deepEqual(converted.randomAffixes.map((entry) => entry.components), legacyGreen.randomAffixes.map((entry) => entry.components), 'conversion preserves every legacy combat value');
+assert.deepEqual(converted.randomAffixes.map((entry) => entry.id), legacyGreen.randomAffixes.map((entry) => entry.id), 'conversion preserves affix identity and order');
+assert.ok(converted.randomAffixes.every((entry) => entry.affixGrade === policy.getAffixGrade(entry.id) && entry.valueQuality === 1));
+assert.deepEqual(converted.reforgeState, { version: 1, lockedTypeSlotKey: null });
+assert.deepEqual(policy.getEquippedAffixStats({ armor: converted }), policy.getEquippedAffixStats({ armor: legacyGreen }), 'conversion does not change combat stats');
+
+const rerolledValue = JSON.parse(JSON.stringify(converted));
+const changedValue = rerolledValue.randomAffixes[0].components[0].value + 3;
+rerolledValue.randomAffixes[0].components[0].value = changedValue;
+rerolledValue.randomAffixes[0].value = changedValue;
+const mergedIndex = rerolledValue.fixedAffixes.length;
+rerolledValue.affixes[mergedIndex].components[0].value = changedValue;
+rerolledValue.affixes[mergedIndex].value = changedValue;
+rerolledValue.reforgeState.lockedTypeSlotKey = 'random-0';
+const rerolledRoundTrip = policy.normalizeEquipment(JSON.parse(JSON.stringify(rerolledValue)));
+assert.equal(rerolledRoundTrip.randomAffixes[0].value, changedValue, 'schema 5 preserves the authoritative rolled value');
+assert.equal(rerolledRoundTrip.randomAffixes[0].components[0].value, changedValue);
+assert.equal(rerolledRoundTrip.randomAffixes[0].slotKey, 'random-0');
+assert.equal(rerolledRoundTrip.reforgeState.lockedTypeSlotKey, 'random-0');
+assert.deepEqual(rerolledRoundTrip.affixes, [...rerolledRoundTrip.fixedAffixes, ...rerolledRoundTrip.randomAffixes], 'merged affixes stay identical to fixed plus random affixes');
+
+const compositeLegacy = policy.normalizeEquipment({ ...weapon, quality: 'rare', rarity: 'rare', affixChapter: 2, affixSchemaVersion: 4, fixedAffixes: [], randomAffixes: [{ id: 'chapter2_berserker' }], affixes: [{ id: 'chapter2_berserker' }] });
+const compositeConverted = policy.convertEquipmentForReforge(compositeLegacy, [{ affixGrade: 4, valueQuality: 2 }]);
+assert.equal(compositeConverted.randomAffixes[0].components.length, 2);
+assert.deepEqual(policy.normalizeEquipment(JSON.parse(JSON.stringify(compositeConverted))).randomAffixes[0].components, compositeConverted.randomAffixes[0].components, 'composite component values survive serialization and normalization');
+assert.equal(compositeConverted.randomAffixes[0].valueQuality, 2, 'one value quality is shared by the whole composite affix');
+
+for (const mutate of [
+  item => { item.randomAffixes[0].slotKey = 'random-9'; },
+  item => { item.randomAffixes[0].source = 'fixed'; },
+  item => { item.randomAffixes[0].valueTier++; },
+  item => { item.randomAffixes[0].affixGrade = 0; },
+  item => { item.randomAffixes[0].valueQuality = 8; },
+  item => { item.randomAffixes[0].components[0].value = -1; item.randomAffixes[0].value = -1; },
+  item => { item.randomAffixes[0].components[0].value = NaN; item.randomAffixes[0].value = NaN; },
+  item => { item.randomAffixes[0].components[0].value = Infinity; item.randomAffixes[0].value = Infinity; },
+  item => { item.randomAffixes[0].components[0].value = Number.MAX_SAFE_INTEGER + 1; item.randomAffixes[0].value = Number.MAX_SAFE_INTEGER + 1; },
+  item => { item.randomAffixes[0].value++; },
+  item => { item.reforgeState.lockedTypeSlotKey = 'random-99'; },
+  item => { item.affixes.pop(); }
+]) {
+  const invalid = JSON.parse(JSON.stringify(converted));
+  mutate(invalid);
+  assert.throws(() => policy.normalizeEquipment(invalid));
+}
+assert.throws(() => policy.normalizeEquipment({ ...converted, affixChapter: 0 }));
+assert.throws(() => policy.normalizeEquipment({ ...converted, quality: '綠色' }));
+assert.throws(() => policy.normalizeEquipment({ ...converted, affixSchemaVersion: 6 }), /Unsupported/);
+assert.throws(() => policy.convertEquipmentForReforge(green), /already versioned/);
 
 const legacy = policy.normalizeEquipment({ ...armor, quality: 'uncommon', affixes: [{ id: 'max_hp_percent', value: 7 }] });
 assert.equal(legacy.affixSchemaVersion, undefined, 'legacy saves remain readable without being silently rerolled');

@@ -1,8 +1,8 @@
 (function attachEquipmentPolicy(root, factory) {
-  const api = factory();
+  const api = factory(typeof module === 'object' && module.exports ? require('./skullcrusher-accessory-policy') : root.SkullcrusherAccessoryPolicy);
   if (typeof module === 'object' && module.exports) module.exports = api;
   else root.EquipmentPolicy = api;
-}(typeof globalThis !== 'undefined' ? globalThis : this, function createEquipmentPolicy() {
+}(typeof globalThis !== 'undefined' ? globalThis : this, function createEquipmentPolicy(DungeonAccessories) {
   const WEAPON_CATALOG = Object.freeze({
     shortIronSword: Object.freeze({
       id: 'short-iron-sword',
@@ -664,7 +664,8 @@
   const PRESERVED_EQUIPMENT_IDS = new Set([
     ...Object.values(WEAPON_CATALOG),
     ...Object.values(ARMOR_CATALOG),
-    ...Object.values(OFFHAND_CATALOG)
+    ...Object.values(OFFHAND_CATALOG),
+    ...Object.values(DungeonAccessories.TEMPLATES)
   ].map((item) => item.id));
 
   function isPreservedEquipment(item) {
@@ -715,7 +716,7 @@
     const armorCategory = getArmorCategory(item);
     if (armorCategory && !isArmorCompatible(item, job)) return [];
     if (!armorCategory && item.allowedJobs?.length && !item.allowedJobs.includes(job)) return [];
-    const slots = [item.slot];
+    const slots = item.slot === 'ring' ? ['ring1','ring2'] : [item.slot];
     if (job === 'assassin' && item.slot === 'weapon' && isOneHandedWeapon(item)) slots.push('offhand');
     return [...new Set(slots)];
   }

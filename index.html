@@ -19,7 +19,7 @@
   <link rel="stylesheet" href="styles/mobile.css?v=20260728-mobile-log-flow-v6" />
   <link rel="stylesheet" href="styles/mmorpg-layout.css?v=20260822-combat-motion-v43" />
   <link rel="stylesheet" href="styles/monster-slots.css?v=20261011-enemy-frame-v1" />
-  <link rel="stylesheet" href="styles/village.css?v=20261025-mobile-village-fixed-window-v3" />
+  <link rel="stylesheet" href="styles/village.css?v=20261101-reforge-workshop-v1" />
   <link rel="stylesheet" href="styles/adventure-info.css?v=20261010-suppression-panel-v4" />
   <link rel="stylesheet" href="styles/battle-phase-two.css?v=20261014-player-status-layout-v3" />
   <link rel="stylesheet" href="styles/monster-audit.css?v=20260920-monster-audit-v1" />
@@ -29,6 +29,7 @@
   <link rel="stylesheet" href="styles/party-inventory-preview.css?v=20261023-mobile-equipment-tabs-v1" />
   <link rel="stylesheet" href="styles/account-auth.css?v=20261017-account-ui-v1" />
   <link rel="stylesheet" href="styles/mobile-battle-portrait.css?v=20261023-mobile-loot-toast-v1" />
+  <link rel="stylesheet" href="styles/skullcrusher-dungeon.css?v=20261031-batch2" />
 </head>
 <body>
   <div class="sky" aria-hidden="true"></div>
@@ -345,7 +346,7 @@
     </section>
   </div>
   <div id="village-building-modal" class="inventory-modal hidden" role="dialog" aria-modal="true" aria-labelledby="village-building-title">
-    <section class="inventory-window village-building-window"><header><div><p class="eyebrow">VILLAGE BUILDING</p><h2 id="village-building-title">村莊建築</h2></div><button id="village-building-close" class="village-building-close" type="button" aria-label="關閉建築面板">×</button></header><div id="village-building-content" class="village-building-content"></div></section>
+    <section class="inventory-window village-building-window"><header><div class="village-building-modal-title"><span id="village-building-modal-icon" aria-hidden="true"></span><h2 id="village-building-title">村莊建築</h2></div><button id="village-building-close" class="village-building-close" type="button" aria-label="關閉建築面板">×</button></header><div id="village-building-content" class="village-building-content"></div></section>
   </div>
   <script src="monster-defense.js?v=20260729-defense-balance-v2"></script>
   <script src="offline-combat-policy.js?v=20260822-offline-survival-v2"></script>
@@ -376,8 +377,10 @@
   <script src="boar-woods-policy.js?v=20260802-thick-hide-v2"></script>
   <script src="plains-depths-policy.js?v=20260802-monster-skills-v8"></script>
   <script src="goblin-camp-policy.js?v=20261030-solo-final-stats-v1"></script>
+  <script src="skullcrusher-accessory-policy.js?v=20261031-batch3"></script>
   <script src="equipment-policy.js?v=20261029-chapter-one-offhand-drops-v1"></script>
   <script src="equipment-affix-policy.js?v=20260904-kill-heal-v2"></script>
+  <script src="equipment-reforge-policy.js?v=20261031-core-v1"></script>
   <script src="chapter-three-offhand-policy.js?v=20260907-chapter3-offhand-templates-v1"></script>
   <script src="armor-penetration-policy.js?v=20260903-armor-penetration-v1"></script>
   <script src="conditional-damage-policy.js?v=20260903-conditional-damage-v1"></script>
@@ -425,7 +428,7 @@
   <script src="offline-survival-events.js?v=20261011-stage-a-batch-3"></script>
   <script src="offline-skill-events.js?v=20261011-stage-a-batch-3"></script>
   <script src="chapter-two-balance-playtest-policy.js?v=20261009-36-rare-runes-v1"></script>
-  <script src="village-policy.js?v=20261023-five-active-buildings-v1"></script>
+  <script src="village-policy.js?v=20261101-reforge-workshop-v1"></script>
   <script src="https://raw.githack.com/komay0818-coder/world/0ecf19b/magic-tower-policy.js"></script>
   <script src="village-upgrade-policy.js?v=20260830-chapter-two-material-art-v1"></script>
   <script src="skill-upgrade-policy.js?v=20260816-divine-tome-v1"></script>
@@ -439,9 +442,11 @@
   <script src="permanent-party-policy.js?v=20261027-copy-v1"></script>
   <script src="permanent-cutover-policy.js?v=20261014-d4-complete"></script>
   <script src="permanent-farming-policy.js?v=20261014-d4-complete"></script>
-  <script src="permanent-party-store.js?v=20261027-copy-v1"></script>
+  <script src="skullcrusher-dungeon-combat.js?v=20261031-batch2"></script>
+  <script src="skullcrusher-dungeon-lifecycle.js?v=20261031-lifecycle-v1"></script>
+  <script src="permanent-party-store.js?v=20261031-reforge-v1"></script>
   <script src="permanent-online-policy.js?v=20261027-copy-v1"></script>
-  <script src="permanent-party-runtime.js?v=20261027-copy-v1"></script>
+  <script src="permanent-party-runtime.js?v=20261031-reforge-v1"></script>
   <script src="permanent-farming-coordinator.js?v=20261021-farming-recovery-v1"></script>
   <script src="account-auth-view.js?v=20261025-production-account-v1"></script>
   <script src="account-api-contract.js?v=20261022-account-api-v2"></script>
@@ -451,7 +456,7 @@
   <script src="permanent-entry-bootstrap.js?v=20261027-copy-v1"></script>
   <script src="mobile-battle-ui.js?v=20261023-mobile-loot-toast-v1"></script>
   <script src="account-auth-entry.js?v=20261025-production-account-v1"></script>
-  <script type="application/x-stardust-deferred" data-loaded-by="permanent-entry-bootstrap" src="script.js?v=20261029-dungeon-map-progression-v1"></script>
+  <script type="application/x-stardust-deferred" data-loaded-by="permanent-entry-bootstrap" src="script.js?v=20261101-reforge-workshop-v1"></script>
   <script src="legacy-entry-loader.js?v=20261025-production-entry-v1"></script>
 </body>
 </html>

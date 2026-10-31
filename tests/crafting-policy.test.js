@@ -19,7 +19,9 @@ function assertValidBatch(recipeId, expectedFixed, expectedRandom, seed) {
     return result.item;
   });
   items.forEach((item) => {
-    assert.equal(item.affixSchemaVersion, 4);
+    assert.equal(item.affixSchemaVersion, 5);
+    assert.deepEqual(item.reforgeState, { version: 1, lockedTypeSlotKey: null });
+    assert.ok(item.randomAffixes.every((entry, index) => entry.slotKey === `random-${index}` && entry.valueQuality === 1));
     assert.equal(item.affixChapter, 1);
     assert.equal(item.primaryStat, undefined, 'V3 crafting no longer rolls a separate floating primary stat');
     assert.equal(item.fixedAffixes.length, expectedFixed);

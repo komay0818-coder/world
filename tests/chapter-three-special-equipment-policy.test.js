@@ -19,6 +19,9 @@ sources.forEach(([monsterId, mapId, templateId, dropRate, baseStats, abilityId],
   const item = policy.grantSpecialDrop(success, { id: monsterId }, mapId, { random: () => 0, obtainedAt: 1, uniqueIdFactory: () => `unique-${index}` });
   assert.equal(item.templateId, templateId);
   assert.equal(item.quality, 'epic');
+  assert.equal(item.affixSchemaVersion, 5, 'chapter-three special drops use the shared version-five generator');
+  assert.deepEqual(item.reforgeState, { version: 1, lockedTypeSlotKey: null });
+  assert.ok(item.randomAffixes.every((entry, slotIndex) => entry.slotKey === `random-${slotIndex}` && entry.valueQuality === 1));
   assert.deepEqual(item.baseStats, baseStats);
   Object.entries(baseStats).forEach(([stat, value]) => assert.equal(item[stat], value));
   assert.equal(item.fixedAffixes.length, 2);

@@ -1,4 +1,4 @@
-(function(root,factory){const node=typeof module==='object'&&module.exports;const api=factory(node?require('./permanent-party-policy'):root.PermanentPartyPolicy,node?require('./offline-settlement-store'):root.OfflineSettlementStore,node?require('./permanent-farming-policy'):root.PermanentFarmingPolicy,node?require('./permanent-cutover-policy'):root.PermanentCutoverPolicy,node?require('./inventory-sale-policy'):root.InventorySalePolicy);if(node)module.exports=api;else root.PermanentPartyStore=api;})(typeof globalThis!=='undefined'?globalThis:this,function(Policy,Legacy,Farming,Cutover,Sales){
+(function(root,factory){const node=typeof module==='object'&&module.exports;const api=factory(node?require('./permanent-party-policy'):root.PermanentPartyPolicy,node?require('./offline-settlement-store'):root.OfflineSettlementStore,node?require('./permanent-farming-policy'):root.PermanentFarmingPolicy,node?require('./permanent-cutover-policy'):root.PermanentCutoverPolicy,node?require('./inventory-sale-policy'):root.InventorySalePolicy,node?require('./skullcrusher-dungeon-lifecycle'):root.SkullcrusherDungeonLifecycle,node?require('./equipment-reforge-policy'):root.EquipmentReforgePolicy);if(node)module.exports=api;else root.PermanentPartyStore=api;})(typeof globalThis!=='undefined'?globalThis:this,function(Policy,Legacy,Farming,Cutover,Sales,Dungeon,Reforge){
 'use strict';const copy=x=>JSON.parse(JSON.stringify(x));
 const SUPABASE_ACCOUNT=/^supabase:[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/;
 function assertSupabaseAccountId(id){if(typeof id!=='string'||!SUPABASE_ACCOUNT.test(id))throw Error('Valid Supabase account identity required');return id;}
@@ -35,6 +35,20 @@ function wrap(store){
  const transact=(...args)=>{args[5]={...args[5],clientVersion:2};return store.transactAccount(...args);};
  return {
  close:()=>store.close(),async read(id){const a=await store.read(id);if(!a)return a;const prefs=await store.readPreferences(id);return {...a,settings:prefs?.values||a.settings||{},settingsRevision:prefs?.revision||0};},recover:id=>store.recover(id),compactHistory:(id,options)=>store.compactHistory(id,options),storageStats:id=>store.storageStats(id),
+ async skullcrusherAction(accountId, revision, command, options = {}) {
+  assertSupabaseAccountId(accountId);
+  const payload = copy(command); delete payload.now;
+  for (let attempt = 0; attempt < 4; attempt++) {
+   const current = await this.read(accountId);
+   const previous = current?.skullcrusherDungeon?.runs?.[command.runId];
+   if (previous && ((command.type === 'enter' && previous.leaderId === command.leaderId) || (command.type === 'end' && previous.status !== 'active'))) return {account:current,duplicate:true};
+   try {
+    return await transact(accountId, current.revision, 'skullcrusher:' + command.type + ':' + command.runId, payload, a => {
+     Dungeon.apply(a, command); Policy.validate(a.permanent); return a;
+    }, {...options, validateRuns:(_a,runs)=>{if(command.type==='enter'&&runs.some(run=>run.status==='prepared'))throw Error('Pending offline settlement conflict');}});
+   } catch(error) { if(!/revision|conflict/i.test(error.message)||attempt===3)throw error; }
+  }
+ },
  async exportCloudSnapshot(accountId,authUserId){
   const owner=assertCloudOwner(accountId,authUserId),bundle=await store.exportCloudBundle(accountId);validateInitializedAccount(bundle.account,bundle.preferences,accountId);for(const run of bundle.runs)if(run.job?.accountId!==accountId)throw Error('Cloud offline work ownership mismatch');
   const snapshot={...copy(bundle.account),cloudEnvelopeVersion:1,owner:{kind:'supabase-user',accountId,authUserId:owner},preferences:copy(bundle.preferences),offlineRuns:cloudRecoveryRuns(bundle.runs)};return {snapshot,localRevision:bundle.account.revision,localPreferencesRevision:bundle.preferences.revision};
@@ -135,6 +149,28 @@ function wrap(store){
    }
   }
   throw lastConflict||Error('Sale transaction conflict');
+ },
+ async reforgeEquipment(accountId,revision,transactionId,operation,{failAt,maxAttempts=4,random}={}){
+  assertSupabaseAccountId(accountId);assertGoldTransactionId(transactionId);if(!Number.isInteger(revision)||revision<0)throw Error('Valid source revision required');
+  if(!Number.isInteger(maxAttempts)||maxAttempts<1||maxAttempts>8)throw Error('Invalid reforge transaction retry limit');
+  if(!Reforge)throw Error('Equipment reforge policy unavailable');
+  const payload=Reforge.normalizeOperation(operation);
+  let sourceRevision=revision,lastConflict=null,summary=null;
+  for(let attempt=0;attempt<maxAttempts;attempt++){
+   try{
+    const result=await transact(accountId,sourceRevision,'reforge-equipment:'+transactionId,payload,a=>{
+     if(!a.permanent)throw Error('Permanent authority required');
+     const transactionRandom=typeof random==='function'?random:Reforge.createDeterministicRandom(accountId+':'+transactionId+':'+JSON.stringify(payload));
+     const changed=Reforge.applyAccountReforgeOwned(a.permanent,payload,Policy,{random:transactionRandom});a.permanent=changed.model;summary=copy({...changed,model:undefined});delete summary.model;return a;
+    },{failAt});
+    const account=result.account,balance=Policy.getSharedGold(account.permanent);
+    return {account,balance,duplicate:result.duplicate,transactionId,summary:result.duplicate?null:summary};
+   }catch(error){
+    if(!/Concurrent save conflict/.test(String(error?.message))||attempt+1>=maxAttempts)throw error;
+    lastConflict=error;const current=await this.read(accountId);if(!current)throw Error('Unknown account');Policy.getSharedGold(current.permanent);sourceRevision=current.revision;
+   }
+  }
+  throw lastConflict||Error('Reforge transaction conflict');
  },
   async discardStarterEquipment(accountId,revision,transactionId,instanceId,{failAt,maxAttempts=4}={}){
    assertSupabaseAccountId(accountId);assertDiscardTransactionId(transactionId);if(!Number.isInteger(revision)||revision<0)throw Error('Valid source revision required');

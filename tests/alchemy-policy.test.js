@@ -31,7 +31,9 @@ assert.equal(levelOne.session.candidates.length, 1, 'level 1 creates one candida
 assert.equal(levelOne.session.candidates[0].slot, 'wrist');
 assert.equal(levelOne.session.candidates[0].quality, 'uncommon');
 assert.equal(levelOne.session.candidates[0].sockets, 0, 'sockets are not inherited');
-assert.equal(levelOne.session.candidates[0].affixSchemaVersion, 4);
+assert.equal(levelOne.session.candidates[0].affixSchemaVersion, 5);
+assert.deepEqual(levelOne.session.candidates[0].reforgeState, { version: 1, lockedTypeSlotKey: null });
+assert.ok(levelOne.session.candidates[0].randomAffixes.every((entry, index) => entry.slotKey === `random-${index}` && entry.valueQuality === 1));
 assert.equal(levelOne.session.candidates[0].affixChapter, 1);
 assert.equal(levelOne.session.candidates[0].primaryStat, undefined, 'alchemy migrates crafted results to V3');
 assert.equal(levelOne.session.candidates[0].fixedAffixes.length, 1);

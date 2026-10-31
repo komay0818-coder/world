@@ -1,0 +1,35 @@
+/* Only the isolated development dungeon can render five simultaneous monsters. */
+#battle-screen.skullcrusher-combat .battle-field #enemy-squad.monster-slot-grid {
+  display: grid !important;
+  grid-template-columns: repeat(var(--skull-columns, 5), minmax(0, 1fr)) !important;
+  grid-template-rows: minmax(0, 1fr) !important;
+  gap: 12px !important;
+}
+#battle-screen.skullcrusher-combat #enemy-squad .monster-battle-slot {
+  grid-column: auto !important;
+  grid-row: auto !important;
+  position: relative !important;
+  inset: auto !important;
+  width: 100% !important;
+  height: 100% !important;
+  min-height: 0 !important;
+  transform: none !important;
+}
+@media (max-width: 700px) {
+  #battle-screen.skullcrusher-combat .battle-field #enemy-squad.monster-slot-grid {
+    top: 7% !important;
+    right: 3% !important;
+    left: 3% !important;
+    width: 94% !important;
+    height: 55% !important;
+    grid-template-columns: repeat(var(--skull-mobile-columns, 3), minmax(0, 1fr)) !important;
+    grid-template-rows: repeat(var(--skull-mobile-rows, 2), minmax(0, 1fr)) !important;
+    column-gap: 6px !important;
+    row-gap: 38px !important;
+  }
+  #battle-screen.skullcrusher-combat #enemy-squad .monster-slot-name {
+    font-size: 10px;
+    white-space: normal;
+    line-height: 16px;
+  }
+}
