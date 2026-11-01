@@ -1,6 +1,6 @@
 @media(min-width:1200px){
  .battle-menu-button[hidden]{display:none!important}
- .battle-screen:not(.hidden) .battle-menu{grid-template-columns:repeat(6,minmax(0,1fr))!important}
+ .battle-screen:not(.hidden) .battle-menu{grid-template-columns:repeat(7,minmax(0,1fr))!important}
  #inventory-modal[data-view="party-inventory"] .inventory-window{box-sizing:border-box;width:min(1360px,calc(100vw - 64px));height:min(860px,calc(100vh - 64px));max-height:none;padding:24px;overflow:hidden;display:flex;flex-direction:column}
  #inventory-modal[data-view="party-inventory"] .inventory-window>header{flex:none;margin-bottom:16px}
  #inventory-modal[data-view="party-inventory"] #inventory-content{flex:1;min-height:0;display:grid;grid-template-columns:500px minmax(0,1fr);gap:24px;overflow:hidden}

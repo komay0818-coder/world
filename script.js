@@ -1846,17 +1846,70 @@ function effectiveEquipmentStat(item, stat) {
   return baseValue + affixValue;
 }
 
+let characterRosterMode = 'manage';
+let characterChangeBusy = false;
+function accountCharacterChangeOptions() {
+  const controller = window.LornAccountSession;
+  return controller?.verification ? { sessionController: controller, verification: controller.verification } : null;
+}
+async function prepareAccountCharacterChange() {
+  const options = accountCharacterChangeOptions();
+  if (!options) return null;
+  if (!window.PermanentEntryBootstrap?.prepareCharacterChange) throw Error('安全角色切換尚未準備完成');
+  return window.PermanentEntryBootstrap.prepareCharacterChange(options);
+}
+async function cancelCharacterChange() {
+  if (characterChangeBusy) return;
+  characterChangeBusy = true;
+  try {
+    await window.cancelPermanentCharacterChange?.();
+    characterRosterMode = 'manage';
+    document.querySelector('#character-roster-modal').classList.add('hidden');
+  } catch (error) { showToast('取消角色切換未完成：' + error.message); }
+  finally { characterChangeBusy = false; }
+}
+async function openCharacterChange() {
+  if (characterChangeBusy) return;
+  const button = document.querySelector('#change-character-button');
+  characterChangeBusy = true; button.disabled = true; button.setAttribute('aria-busy', 'true');
+  try {
+    await prepareAccountCharacterChange();
+    characterRosterMode = 'switch';
+    renderCharacterRoster('switch');
+  } catch (error) {
+    try { await window.cancelPermanentCharacterChange?.(); } catch {}
+    showToast('變更角色未完成：' + error.message);
+  } finally {
+    characterChangeBusy = false; button.disabled = false; button.removeAttribute('aria-busy');
+  }
+}
+
 async function activateCharacterSlot(index) {
   const permanent = getPermanentPartyRuntime();
   if (permanent) {
     const requestedId = permanent.model.slotOrder[index];
     if (!requestedId) return;
-    if (fighting) persistPartyRuntimeState();
-    fighting = false; clearInterval(battleTimer); clearInterval(skillTimer); clearInterval(enemyAttackTimer);
-    await permanent.flush(); const id = requestedId;
-    if (!id) return; await permanent.switchMain(id);
-    document.querySelector('#character-roster-modal').classList.add('hidden');
-    showToast('已切換角色：' + getActiveCharacter().name); return;
+    if (characterChangeBusy) return;
+    characterChangeBusy = true;
+    const previousId = permanent.mainId;
+    try {
+      await prepareAccountCharacterChange();
+      if (fighting) persistPartyRuntimeState();
+      fighting = false; clearInterval(battleTimer); clearInterval(skillTimer); clearInterval(enemyAttackTimer);
+      await permanent.flush(); await permanent.switchMain(requestedId);
+      const options = accountCharacterChangeOptions();
+      if (options) await window.PermanentEntryBootstrap.completeCharacterChange(options);
+      else window.completePermanentCharacterChange?.();
+      characterRosterMode = 'manage';
+      document.querySelector('#character-roster-modal').classList.add('hidden');
+      const active = getActiveCharacter(); enterMenu(active?.name || displayName.textContent);
+      showToast('已切換角色：' + active.name);
+    } catch (error) {
+      if (permanent.active && previousId && permanent.mainId !== previousId) try { await permanent.switchMain(previousId); } catch {}
+      try { await window.cancelPermanentCharacterChange?.(); } catch {}
+      showToast('角色切換未完成：' + error.message);
+    } finally { characterChangeBusy = false; }
+    return;
   }
   syncActiveCharacterSlot();
   const slot = getCharacterSlots()[index];
@@ -1869,14 +1922,15 @@ async function activateCharacterSlot(index) {
   showToast(`已切換角色：${slot.character.name}`);
 }
 
-function renderCharacterRoster() {
+function renderCharacterRoster(mode = 'manage') {
+  characterRosterMode = mode;
   syncActiveCharacterSlot();
   const slots = getCharacterSlots();
   const activeIndex = getActiveCharacterSlotIndex();
   const content = document.querySelector('#character-roster-content');
   content.innerHTML = [0, 1, 2, 3].map((index) => {
     const slot = slots[index];
-    if (!slot) return `<article class="character-slot empty"><div><b>角色欄位 ${index + 1}</b><small>尚未建立角色</small></div><button type="button" data-create-character-slot="${index}">＋ 建立角色</button></article>`;
+    if (!slot) return `<article class="character-slot empty"><div><b>角色欄位 ${index + 1}</b><small>尚未建立角色</small></div>${mode === 'switch' ? '' : `<button type="button" data-create-character-slot="${index}">＋ 建立角色</button>`}</article>`;
     const raceName = Object.values(factions).flat().find((race) => race.id === slot.character.race)?.name || slot.character.race;
     const jobName = classes.find((job) => job.id === slot.character.job)?.name || slot.character.job;
     return `<article class="character-slot ${index === activeIndex ? 'active' : ''}"><span class="creation-race-icon race-${slot.character.race}" aria-hidden="true"></span><div><b>${slot.character.name}${index === activeIndex ? '　目前使用' : ''}</b><small>${raceName}・${jobName}・Lv. ${slot.progress.level || 1}</small></div>${index === activeIndex ? '<em>使用中</em>' : `<button type="button" data-activate-character-slot="${index}">切換角色</button>`}</article>`;
@@ -9813,10 +9867,11 @@ document.querySelector('#create-character').addEventListener('click', (event) =>
   showToast(getRaceJobRestrictionMessage(selection.race, selection.job));
 }, true);
 document.querySelector('#create-character').addEventListener('click', async () => { const runtime = getPermanentPartyRuntime(); if (isSupabaseEntryMode(runtime) && !runtime) { showToast('帳號資料尚未準備完成，角色未建立。'); return; } if (runtime && creationSlotIndex > 3) { showToast('永久角色最多支援四個角色欄位。'); return; } const name = characterName.value.trim(); if (!name) { showToast('請先為角色取名。'); characterName.focus(); return; } const lockedFaction = getLockedFactionForCreation(); if (lockedFaction && selection.faction !== lockedFaction) { selection.faction = lockedFaction; selection.race = factions[lockedFaction][0].id; renderCreation(); showToast('帳號角色必須選擇相同陣營。'); return; } const race = factions[selection.faction].find((item) => item.id === selection.race); const job = classes.find((item) => item.id === selection.job)?.name || selection.job; const character = { ...selection, id: `character-${crypto.randomUUID()}`, name }; const progress = { level: 1, xp: 0, gold: 0, potions: 5, manaPotions: 0, selectedMapId: 'beginner-plains', inventory: [], equipment: selection.job === 'hunter' ? createStarterEquipment('hunter') : emptyEquipment(), lastActiveAt: Date.now(), ...(selection.job === 'assassin' ? { energy: 100, maxEnergy: 100, energyUpdatedAt: Date.now() } : {}) }; const slots = getCharacterSlots(); if (runtime) { const starter = createStarterEquipment(selection.job); for (const slot of ['weapon', 'armor']) if (!progress.equipment[slot]) progress.equipment[slot] = starter[slot]; try{await runtime.createCharacter(character, progress, creationSlotIndex);if(runtime.mainId!==character.id)await runtime.switchMain(character.id);}catch(error){showToast('角色未建立：'+error.message);return;} } else { slots[creationSlotIndex] = { character, progress }; progress.party = PartyPolicy.normalizeParty(null, { slots, mainSlotIndex: creationSlotIndex, mainCharacter: character, mainProgress: progress }); getGameStorage().setItem('stardust-character-slots', JSON.stringify(slots)); setActiveCharacterSlotIndex(creationSlotIndex); getGameStorage().setItem('stardust-character', JSON.stringify(character)); getGameStorage().setItem('stardust-progress', JSON.stringify(progress)); } if (runtime) { if (!runtime.readyForGameplay) { showToast('角色資料尚未準備完成，遊戲已停止啟動。'); return; } if (displayName) displayName.textContent = character.name; } characterScreen.classList.add('hidden'); menuScreen.classList.remove('hidden'); stopCharacterIdleAnimation(); document.querySelector('#character-title').textContent = '建立你的角色'; showToast(`${race.name}${job}「${name}」已儲存至角色欄位 ${creationSlotIndex + 1}！`); });
-document.querySelector('#character-roster-button').addEventListener('click', renderCharacterRoster);
-document.querySelector('#character-roster-close').addEventListener('click', () => document.querySelector('#character-roster-modal').classList.add('hidden'));
+document.querySelector('#change-character-button')?.addEventListener('click', openCharacterChange);
+document.querySelector('#character-roster-button').addEventListener('click', () => renderCharacterRoster('manage'));
+document.querySelector('#character-roster-close').addEventListener('click', () => characterRosterMode === 'switch' ? cancelCharacterChange() : document.querySelector('#character-roster-modal').classList.add('hidden'));
 document.querySelector('#character-roster-modal').addEventListener('click', (event) => {
-  if (event.target === event.currentTarget) event.currentTarget.classList.add('hidden');
+  if (event.target === event.currentTarget) { if (characterRosterMode === 'switch') cancelCharacterChange(); else event.currentTarget.classList.add('hidden'); return; }
   const createButton = event.target.closest('[data-create-character-slot]');
   if (createButton) {
     document.querySelector('#character-roster-modal').classList.add('hidden');

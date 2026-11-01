@@ -8,7 +8,7 @@ const source = fs.readFileSync(path.join(root, 'script.js'), 'utf8');
 const css = fs.readFileSync(path.join(root, 'styles', 'map-travel-panel.css'), 'utf8');
 
 assert.match(html, /id="adventure-region-select"[\s\S]*id="adventure-map-select"[\s\S]*id="battle-title"[\s\S]*id="map-travel-button"/, 'the left rail exposes area, map, current location, and travel controls in order');
-assert.match(html, /script\.js\?v=20261101-reforge-workshop-v1/, 'the interactive map controls load current combat fixes with a fresh cache key');
+assert.match(html, /script\.js\?v=20261101-character-switch-v1/, 'the interactive map controls load current combat fixes with a fresh cache key');
 assert.match(html, /map-travel-panel\.css\?v=20261011-map-list-visibility-v1/, 'the custom map selector styles use a fresh cache key');
 assert.match(source, /adventureAreaDefinitions[\s\S]*name: '平原'[\s\S]*name: '黑森林'[\s\S]*name: '赤岩荒原'/, 'the three requested adventure areas are available');
 assert.match(source, /function getAdventureAreaMaps[\s\S]*mapProgression\.filter/, 'the second selector derives its maps from the existing map progression data');

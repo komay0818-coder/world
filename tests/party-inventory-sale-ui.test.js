@@ -40,6 +40,6 @@ assert.match(css,/#inventory-modal\[data-view="party-inventory"\] \.inventory-li
 assert.match(css,/height:88px;min-height:88px/,'mobile item cards keep equal height');
 assert.match(css,/\.inventory-window header \.party-bag-actions button/,'sale controls override the legacy fixed-size close-button rule');
 assert.match(bootstrap,/party-inventory-view\.js\?v=20261027-copy-v1/,'shared inventory view loads the performance-safe version on every supported viewport');
-assert.match(html,/party-inventory-preview\.css\?v=20261023-mobile-equipment-tabs-v1/,'formal entry loads the matching mobile category stylesheet');
+assert.match(html,/party-inventory-preview\.css\?v=20261101-character-switch-v1/,'formal entry loads the matching mobile category stylesheet');
 assert.doesNotMatch(bootstrap,/matchMedia\('\(min-width:1200px\)'\)\.matches\)\{await scriptLoader\(document,'party-inventory-view/,'mobile loading is not skipped');
 console.log('Party inventory sale UI: 43 checks passed');

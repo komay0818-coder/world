@@ -18,7 +18,7 @@ const UUID_PATTERN=/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-
 const copy=value=>JSON.parse(JSON.stringify(value));
 let preparedAccountId=null,preparingAccountId=null,preparationPromise=null,preparationAuthorization=null;
 let startupAccountId=null,startupPromise=null,startupAuthorization=null,startupEpoch=0;
-let runtimeStore=null,activeRuntime=null,activeCloudSync=null,automaticCloudSave=null,activePlayLease=null,stopPromise=null;
+let runtimeStore=null,activeRuntime=null,activeCloudSync=null,automaticCloudSave=null,activePlayLease=null,stopPromise=null,characterChangePromise=null;
 let goldPreparation=null,goldPreparationPromise=null,goldConfirmationPromise=null,goldAuthorization=null;
 let farmingRecoveryPreparation=null,farmingRecoveryPromise=null,farmingRecoveryConfirmationPromise=null,farmingRecoveryAuthorization=null;
 function parse(storage,key,fallback){const text=storage.getItem(key);if(text===null)return copy(fallback);try{return JSON.parse(text);}catch(error){throw Error('舊存檔格式無法讀取：'+key);}}
@@ -122,7 +122,7 @@ async function prepareFarmingRecovery(options={}){
    const gold=deps.Policy.sharedGoldState(account.permanent);if(gold.status!=='legacy')throw Error(gold.status==='ready'?'金幣資料已完成轉換':'共用金幣資料異常，需要人工檢查');
    root.permanentEntryMaintenance=true;root.permanentFarmingBooting=true;
    const runtime=Runtime.activate(Runtime.create({store:runtimeStore,account,legacyOffline:true,onFailure:error=>{root.permanentEntryFailure=error;}}));activeRuntime=runtime;createdRuntime=true;installSchedulingGuards(runtime);ensureCurrent();
-   if(typeof root.calculatePermanentSingleJob!=='function')await scriptLoader(document,'script.js?v=20261027-copy-v1',ensureCurrent);ensureCurrent();
+   if(typeof root.calculatePermanentSingleJob!=='function')await scriptLoader(document,'script.js?v=20261101-character-switch-v1',ensureCurrent);ensureCurrent();
    if(typeof root.calculatePermanentSingleJob!=='function')throw Error('既有單人離線結算政策尚未載入');
    const coordinator=Coordinator.create({runtime,store:runtimeStore,calculate:job=>root.calculatePermanentSingleJob(job),context:(now,id)=>{const progress=runtime.getProgress(id||runtime.mainId),member={...(progress?.partyMemberState?.runtime||{}),progress};return {defenseMultiplier:root.ChapterThreeSpecialEquipmentPolicy?.getDefenseMultiplier?.(member,now)??1};},pause:async()=>{await runtime.flush();}});
    root.permanentFarmingCoordinator=coordinator;runtime.bindCoordinator(coordinator);await coordinator.initialize();ensureCurrent();
@@ -231,10 +231,10 @@ async function finishRuntime({store,account,document,accountId,guard,scriptLoade
   if(event.type!=='conflict')return;const node=statusNode(document);node.textContent='雲端存檔版本衝突；本機進度已保留，請停止在其他裝置遊玩後重新登入。';node.dataset.state='error';
  }});runtime.onDeactivate(()=>automaticCloudSave?.stop());
  playLease.start(error=>{const node=statusNode(document);node.textContent='此裝置的遊玩權限已失效，遊戲已安全停止：'+(error?.message||'請重新整理後再試');node.dataset.state='error';Promise.resolve(stop({reason:'lease-lost'})).catch(()=>{});});
- await scriptLoader(document,'script.js?v=20261027-copy-v1',guard);guard();
+ await scriptLoader(document,'script.js?v=20261101-character-switch-v1',guard);guard();
  const coordinator=Coordinator.create({runtime,store,calculate:job=>root.calculatePermanentSingleJob(job),context:(now,id)=>{const progress=runtime.getProgress(id||runtime.mainId),member={...(progress.partyMemberState?.runtime||{}),progress};return {defenseMultiplier:root.ChapterThreeSpecialEquipmentPolicy.getDefenseMultiplier(member,now)};},pause:async()=>{if(root.fighting&&root.battle?.partyMembers?.length)root.persistPartyRuntimeState();root.fighting=false;root.clearInterval(root.battleTimer);root.clearInterval(root.skillTimer);root.clearInterval(root.enemyAttackTimer);await runtime.flush();},changed:async()=>notifyCloud()});
  root.permanentFarmingCoordinator=coordinator;runtime.bindCoordinator(coordinator);await coordinator.initialize();guard();await coordinator.recover();guard();
- await scriptLoader(document,'permanent-farming-bridge.js?v=20261027-checkpoint-v1',guard);guard();
+ await scriptLoader(document,'permanent-farming-bridge.js?v=20261101-character-switch-v1',guard);guard();
  await root.claimPermanentSingleOffline();guard();
  await scriptLoader(document,'party-inventory-view.js?v=20261027-copy-v1',guard);guard();
  await scriptLoader(document,'monster-audit.js?v=20261014-permanent-entry-v1',guard);guard();
@@ -302,15 +302,26 @@ function prepareLogout(options={}){
   return {prepared:true,active:true,cloudRevision};
  }).catch(error=>{root.permanentEntryMaintenance=true;const node=root.document&&statusNode(root.document);if(node){node.textContent='登出前存檔同步未完成，遊戲已停止操作；請保持此頁並安全重試：'+error.message;node.dataset.state='error';}throw error;});
 }
+function characterChangeAuthorization(options){const authorization=authorize(options);authorization.ensureCurrent();if(!activeRuntime?.active||!activeCloudSync||!activePlayLease?.active)throw Error('永久角色系統尚未準備完成');if(startupAccountId!==authorization.accountId)throw Error('目前遊戲帳號與登入帳號不一致，已停止變更角色');activePlayLease.assertValid();return authorization;}
+function prepareCharacterChange(options={}){
+ let authorization;try{authorization=characterChangeAuthorization(options);}catch(error){return Promise.reject(error);}
+ if(characterChangePromise)return characterChangePromise;
+ const task=Promise.resolve().then(async()=>{authorization.ensureCurrent();activePlayLease.assertValid();if(typeof root.preparePermanentCharacterChange!=='function')throw Error('角色掛機切換介面尚未準備完成');const farming=await root.preparePermanentCharacterChange();authorization.ensureCurrent();activePlayLease.assertValid();const uploaded=await activeCloudSync.upload({skipEmpty:true});authorization.ensureCurrent();activePlayLease.assertValid();return {prepared:true,accountId:authorization.accountId,farming,cloudRevision:uploaded?.save?.revision||0};});
+ characterChangePromise=task.finally(()=>{characterChangePromise=null;});return characterChangePromise;
+}
+function completeCharacterChange(options={}){
+ let authorization;try{authorization=characterChangeAuthorization(options);}catch(error){return Promise.reject(error);}
+ return Promise.resolve().then(async()=>{authorization.ensureCurrent();activePlayLease.assertValid();await activeRuntime.flush();const uploaded=await activeCloudSync.upload({skipEmpty:true});authorization.ensureCurrent();activePlayLease.assertValid();root.completePermanentCharacterChange?.();return {completed:true,accountId:authorization.accountId,cloudRevision:uploaded?.save?.revision||0};});
+}
 function stop(options={}){
  if(stopPromise)return stopPromise;
  const hadStarted=Boolean(startupPromise||activeRuntime||root.PermanentPartyRuntime?.current||root.permanentEntryBooting);
- ++startupEpoch;startupAuthorization=null;preparationAuthorization=null;goldAuthorization=null;goldPreparation=null;goldPreparationPromise=null;farmingRecoveryAuthorization=null;farmingRecoveryPreparation=null;root.permanentEntryBooting=false;root.permanentEntryReady=false;root.permanentEntryMaintenance=false;
+ ++startupEpoch;startupAuthorization=null;characterChangePromise=null;preparationAuthorization=null;goldAuthorization=null;goldPreparation=null;goldPreparationPromise=null;farmingRecoveryAuthorization=null;farmingRecoveryPreparation=null;root.permanentEntryBooting=false;root.permanentEntryReady=false;root.permanentEntryMaintenance=false;
  stopPromise=(async()=>{let failure=null;try{await cleanupRuntime();}catch(error){failure=error;}if(startupPromise){try{await startupPromise;}catch{}}
   try{await cleanupRuntime();}catch(error){failure||=error;}if(failure)throw failure;return {stopped:true,hadStarted,reason:options.reason||'invalidated'};
  })();return stopPromise;
 }
 function state(){return Object.freeze({accountId:startupAccountId||farmingRecoveryPreparation?.accountId||farmingRecoveryAuthorization?.accountId||null,starting:Boolean((startupPromise&&!root.permanentEntryReady)||farmingRecoveryPromise||farmingRecoveryPreparation),active:Boolean(root.permanentEntryReady&&activeRuntime?.active),cloudSyncActive:Boolean(automaticCloudSave&&!automaticCloudSave.paused),leaseActive:Boolean(activePlayLease?.active),maintenance:Boolean(root.permanentEntryMaintenance&&activeRuntime?.active),stopping:Boolean(stopPromise),preparedAccountId});}
 const boot=start;
-return {readLegacy,readSettings,identity,markerKey,verifiedAccount,initializeAccount,prepareFarmingRecovery,confirmFarmingRecovery,prepareSharedGoldMigration,confirmSharedGoldMigration,prepareLogout,boot,start,stop,state,AUTHORITY_KEYS,MARKER_PREFIX,PRODUCTION_ACCOUNT,PRODUCTION_DATABASE,AUTHENTICATED_ACCOUNT_PREFIX};
+return {readLegacy,readSettings,identity,markerKey,verifiedAccount,initializeAccount,prepareFarmingRecovery,confirmFarmingRecovery,prepareSharedGoldMigration,confirmSharedGoldMigration,prepareCharacterChange,completeCharacterChange,prepareLogout,boot,start,stop,state,AUTHORITY_KEYS,MARKER_PREFIX,PRODUCTION_ACCOUNT,PRODUCTION_DATABASE,AUTHENTICATED_ACCOUNT_PREFIX};
 });
