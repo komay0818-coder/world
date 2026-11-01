@@ -233,7 +233,7 @@ async function finishRuntime({store,account,document,accountId,guard,scriptLoade
  playLease.start(error=>{const node=statusNode(document);node.textContent='此裝置的遊玩權限已失效，遊戲已安全停止：'+(error?.message||'請重新整理後再試');node.dataset.state='error';Promise.resolve(stop({reason:'lease-lost'})).catch(()=>{});});
  await scriptLoader(document,'script.js?v=20261101-character-switch-v1',guard);guard();
  const coordinator=Coordinator.create({runtime,store,calculate:job=>root.calculatePermanentSingleJob(job),context:(now,id)=>{const progress=runtime.getProgress(id||runtime.mainId),member={...(progress.partyMemberState?.runtime||{}),progress};return {defenseMultiplier:root.ChapterThreeSpecialEquipmentPolicy.getDefenseMultiplier(member,now)};},pause:async()=>{if(root.fighting&&root.battle?.partyMembers?.length)root.persistPartyRuntimeState();root.fighting=false;root.clearInterval(root.battleTimer);root.clearInterval(root.skillTimer);root.clearInterval(root.enemyAttackTimer);await runtime.flush();},changed:async()=>notifyCloud()});
- root.permanentFarmingCoordinator=coordinator;runtime.bindCoordinator(coordinator);await coordinator.initialize();guard();await coordinator.recover();guard();
+ root.permanentFarmingCoordinator=coordinator;runtime.bindCoordinator(coordinator);await coordinator.initialize();guard();await coordinator.recover();guard();if(runtime.mainId)await coordinator.settle();guard();
  await scriptLoader(document,'permanent-farming-bridge.js?v=20261101-character-switch-v1',guard);guard();
  await root.claimPermanentSingleOffline();guard();
  await scriptLoader(document,'party-inventory-view.js?v=20261027-copy-v1',guard);guard();
