@@ -26,9 +26,9 @@
   <link rel="stylesheet" href="styles/inventory-grid.css?v=20260921-inventory-compare-v2" />
   <link rel="stylesheet" href="styles/battle-typography.css?v=20261010-left-rail-v3" />
   <link rel="stylesheet" href="styles/map-travel-panel.css?v=20261011-map-list-visibility-v1" />
-  <link rel="stylesheet" href="styles/party-inventory-preview.css?v=20261023-mobile-equipment-tabs-v1" />
+  <link rel="stylesheet" href="styles/party-inventory-preview.css?v=20261101-character-switch-v1" />
   <link rel="stylesheet" href="styles/account-auth.css?v=20261017-account-ui-v1" />
-  <link rel="stylesheet" href="styles/mobile-battle-portrait.css?v=20261023-mobile-loot-toast-v1" />
+  <link rel="stylesheet" href="styles/mobile-battle-portrait.css?v=20261101-character-switch-v1" />
   <link rel="stylesheet" href="styles/skullcrusher-dungeon.css?v=20261031-batch2" />
 </head>
 <body>
@@ -293,11 +293,14 @@
           <button class="battle-menu-button" type="button" data-menu-action="裝備" data-mobile-menu-page="1"><span>⚔</span><b>裝備</b><small>角色</small></button>
           <button class="battle-menu-button" type="button" data-menu-action="隊伍" data-mobile-menu-page="1"><span>👥</span><b>隊伍</b><small>編組</small></button>
           <button class="battle-menu-button mobile-menu-switch" type="button" data-mobile-menu-page="1" data-mobile-menu-target="2" aria-label="下一頁"><span>→</span><b>下一頁</b><small>更多</small></button>
+          <button class="battle-menu-button mobile-menu-switch" type="button" data-mobile-menu-page="2" data-mobile-menu-target="1" aria-label="上一頁"><span>←</span><b>上一頁</b><small>返回</small></button>
           <button class="battle-menu-button mobile-skill-button" type="button" data-mobile-menu-page="2"><span>✦</span><b>技能</b><small>資訊</small></button>
           <button class="battle-menu-button village-button" type="button" data-menu-action="村莊" data-mobile-menu-page="2"><span>⌂</span><b>村莊</b><small>建築</small></button>
           <button class="battle-menu-button drop-lookup-button" type="button" data-menu-action="掉落" data-mobile-menu-page="2"><span>⌕</span><b>掉落</b><small>來源</small></button>
-          <button id="profile-button" class="battle-menu-button logout-button" type="button" data-mobile-menu-page="2"><span>↪</span><b>登出</b><small>帳號</small></button>
-          <button class="battle-menu-button mobile-menu-switch" type="button" data-mobile-menu-page="2" data-mobile-menu-target="1" aria-label="上一頁"><span>←</span><b>上一頁</b><small>返回</small></button>
+          <button class="battle-menu-button mobile-menu-switch" type="button" data-mobile-menu-page="2" data-mobile-menu-target="3" aria-label="下一頁"><span>→</span><b>下一頁</b><small>帳號</small></button>
+          <button id="change-character-button" class="battle-menu-button change-character-button" type="button" data-mobile-menu-page="3"><span>⇄</span><b>變更角色</b><small>角色</small></button>
+          <button id="profile-button" class="battle-menu-button logout-button" type="button" data-mobile-menu-page="3"><span>↪</span><b>登出</b><small>帳號</small></button>
+          <button class="battle-menu-button mobile-menu-switch" type="button" data-mobile-menu-page="3" data-mobile-menu-target="2" aria-label="上一頁"><span>←</span><b>上一頁</b><small>返回</small></button>
         </nav>
       </div>
     </section>
@@ -453,10 +456,10 @@
   <script src="account-session-controller.js?v=20261027-token-refresh-recovery-v1"></script>
   <script src="play-lease-client.js?v=20261022-cross-device-lease-v1"></script>
   <script src="cloud-save-sync.js?v=20261027-bounded-autosave-v1"></script>
-  <script src="permanent-entry-bootstrap.js?v=20261027-copy-v1"></script>
-  <script src="mobile-battle-ui.js?v=20261023-mobile-loot-toast-v1"></script>
+  <script src="permanent-entry-bootstrap.js?v=20261101-character-switch-v1"></script>
+  <script src="mobile-battle-ui.js?v=20261101-character-switch-v1"></script>
   <script src="account-auth-entry.js?v=20261025-production-account-v1"></script>
-  <script type="application/x-stardust-deferred" data-loaded-by="permanent-entry-bootstrap" src="script.js?v=20261101-reforge-workshop-v1"></script>
+  <script type="application/x-stardust-deferred" data-loaded-by="permanent-entry-bootstrap" src="script.js?v=20261101-character-switch-v1"></script>
   <script src="legacy-entry-loader.js?v=20261025-production-entry-v1"></script>
 </body>
 </html>

@@ -56,7 +56,8 @@
 
   function setMenuPage(page) {
     const elements = getElements();
-    const nextPage = page === '2' ? '2' : '1';
+    const requested = String(page || '1');
+    const nextPage = ['1', '2', '3'].includes(requested) ? requested : '1';
     state.menuPage = nextPage;
     if (elements.battleMenu) {
       elements.battleMenu.dataset.mobilePage = nextPage;

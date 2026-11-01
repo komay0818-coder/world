@@ -581,9 +581,17 @@
   }
 
   #battle-screen .battle-menu[data-mobile-page="1"] [data-mobile-menu-page="2"],
-  #battle-screen .battle-menu[data-mobile-page="2"] [data-mobile-menu-page="1"] {
+  #battle-screen .battle-menu[data-mobile-page="1"] [data-mobile-menu-page="3"],
+  #battle-screen .battle-menu[data-mobile-page="2"] [data-mobile-menu-page="1"],
+  #battle-screen .battle-menu[data-mobile-page="2"] [data-mobile-menu-page="3"],
+  #battle-screen .battle-menu[data-mobile-page="3"] [data-mobile-menu-page="1"],
+  #battle-screen .battle-menu[data-mobile-page="3"] [data-mobile-menu-page="2"] {
     display: none !important;
   }
+
+  #battle-screen .battle-menu[data-mobile-page="3"] .change-character-button { grid-column: 2; }
+  #battle-screen .battle-menu[data-mobile-page="3"] .logout-button { grid-column: 3; }
+  #battle-screen .battle-menu[data-mobile-page="3"] .mobile-menu-switch { grid-column: 4; }
 
   #battle-screen .battle-menu .mobile-menu-switch,
   #battle-screen .battle-menu .mobile-skill-button {

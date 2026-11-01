@@ -17,7 +17,7 @@ assert.equal(reforge.REQUIRED_LEVEL.value, 10);
 assert.match(html, /equipment-reforge-policy\.js[\s\S]*village-policy\.js[\s\S]*script\.js/, 'core reforge policy loads before the village UI');
 assert.match(html, /styles\/village\.css\?v=20261101-reforge-workshop-v1/);
 assert.match(html, /village-policy\.js\?v=20261101-reforge-workshop-v1/);
-assert.match(html, /script\.js\?v=20261101-reforge-workshop-v1/);
+assert.match(html, /script\.js\?v=20261101-character-switch-v1/);
 
 assert.match(script, /function renderReforgeWorkshop\(/);
 assert.match(script, /EquipmentReforgePolicy\.getCost\(reforgeMode/, 'fees come from the core policy');
